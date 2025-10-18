@@ -22,7 +22,7 @@ public class UpdateChecker implements Listener {
 
     private static void getVersion(Consumer<String> consumer) {
         try {
-            URL url = new URL("https://api.modrinth.com/v3/project/Skonic/version");
+            URL url = new URL("https://api.modrinth.com/v3/project/Alkatraz/version");
             BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
             JsonArray jsonArray = new Gson().fromJson(reader, JsonArray.class);
             JsonObject jsonObject = jsonArray.get(0).getAsJsonObject();
