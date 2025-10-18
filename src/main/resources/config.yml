@@ -1,0 +1,5 @@
+# Update Checker
+check_updates: true
+
+# Additional Debugging messages
+debug: true

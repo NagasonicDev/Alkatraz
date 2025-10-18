@@ -1,0 +1,129 @@
+package me.nagasonic.alkatraz.util;
+
+import net.md_5.bungee.api.ChatColor;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.TreeMap;
+import java.util.regex.Pattern;
+
+public class StringUtils {
+
+    public static String toPascalCase(String s){
+        if (s == null) return null;
+        if (s.isEmpty()) return s;
+        String allLowercase = s.toLowerCase(java.util.Locale.US);
+        char c = allLowercase.charAt(0);
+        return allLowercase.replaceFirst("" + c, "" + Character.toUpperCase(c));
+    }
+
+    private final static TreeMap<Integer, String> romanNumeralsMap = new TreeMap<>();
+
+    static {
+        romanNumeralsMap.put(1000, "M");
+        romanNumeralsMap.put(900, "CM");
+        romanNumeralsMap.put(500, "D");
+        romanNumeralsMap.put(400, "CD");
+        romanNumeralsMap.put(100, "C");
+        romanNumeralsMap.put(90, "XC");
+        romanNumeralsMap.put(50, "L");
+        romanNumeralsMap.put(40, "XL");
+        romanNumeralsMap.put(10, "X");
+        romanNumeralsMap.put(9, "IX");
+        romanNumeralsMap.put(5, "V");
+        romanNumeralsMap.put(4, "IV");
+        romanNumeralsMap.put(1, "I");
+    }
+
+    public static String toRoman(int number) {
+        if (number < 0) return "-" + toRoman(-number);
+        if (number == 0) return "0";
+        if (number == 1) return "I";
+        int l = romanNumeralsMap.floorKey(number);
+        if (number == l) return romanNumeralsMap.get(number);
+        return romanNumeralsMap.get(l) + toRoman(number - l);
+    }
+
+    public static Double parseDouble(String s) throws NumberFormatException {
+        return Double.parseDouble(s.replace(",", "."));
+    }
+
+    public static Float parseFloat(String s) throws NumberFormatException {
+        return Float.parseFloat(s.replace(",", "."));
+    }
+
+    /**
+     * returns a timestamp based on the base amount of x in a second
+     * @param ticks ticks
+     * @param base base to represent a second (example, if 20 is 1 second give a base of 20, if 1 is 1 second give 1.)
+     * @return a timestamp in a hh:mm:ss format (or mm:ss if not enough ticks for an hour are given), or ∞ if ticks is < 0
+     */
+    public static String toTimeStamp(long ticks, long base){
+        if (ticks == 0) return "0:00";
+        if (ticks < 0) return "∞";
+        int hours = (int) Math.floor(ticks / (3600D * base));
+        String hrs = "" + hours;
+        ticks %= (base * 3600);
+        int minutes = (int) Math.floor(ticks / (60D * base));
+        String mins = (hours > 0 ? "0" : "") + minutes;
+        ticks %= (base * 60);
+        int seconds = (int) Math.floor(ticks / (double) base);
+        String secs = (seconds > 9 ? "" : "0") + seconds;
+
+        return hours > 0 ? String.format("%s:%s:%s", hrs, mins, secs) : String.format("%s:%s", mins, secs);
+    }
+
+    public static String toTimeStamp2(long ticks, long base){
+        return toTimeStamp2(ticks, base, true);
+    }
+
+    public static String toTimeStamp2(long ticks, long base, boolean decimal){
+        if (ticks < 0) return "∞";
+        int days = (int) Math.floor(ticks / (3600D * 24 * base));
+        ticks %= (base * (3600 * 24));
+        int hours = (int) Math.floor(ticks / (3600D * base));
+        ticks %= (base * 3600);
+        int minutes = (int) Math.floor(ticks / (60D * base));
+        ticks %= (base * 60);
+        double seconds = decimal ? ticks / (double)base : (int) Math.floor(ticks / (double) base);
+
+        String format = days > 0 ? "%days%d, %hours%d" : hours > 0 ?
+                "%hours%h, %minutes%m" : minutes > 0 ?
+                "%minutes%m, %seconds%s" :
+                "%seconds%s";
+        return format.replace("%days%", "" + days)
+                .replace("%hours%", "" + hours)
+                .replace("%minutes%", "" + minutes)
+                .replace("%seconds%", String.format("%." + (decimal ? 1 : 0) + "f", seconds));
+    }
+
+    static final Pattern hexPattern = Pattern.compile("&#([A-Fa-f0-9]{6})");
+    public static List<String> separateStringIntoLines(String string, int maxLength){
+        List<String> lines = new ArrayList<>();
+        String[] byNewLines = string.split("/n");
+        for (String line : byNewLines){
+            String[] words = line.split(" ");
+            StringBuilder sentence = new StringBuilder(words[0]);
+            for (String word : Arrays.copyOfRange(words, 1, words.length)){
+                String rawWord = ChatColor.stripColor(Utils.chat(word.replaceAll(hexPattern.pattern(), "")));
+                String rawSentence = ChatColor.stripColor(Utils.chat(sentence.toString().replaceAll(hexPattern.pattern(), "")));
+                if (rawSentence.length() + rawWord.length() > maxLength){
+                    lines.add(sentence.toString());
+                    String previousSentence = sentence.toString();
+                    sentence = new StringBuilder(Utils.vanillaChat(org.bukkit.ChatColor.getLastColors(Utils.vanillaChat(previousSentence)))).append(word);
+                } else sentence.append(" ").append(word);
+            }
+            lines.add(sentence.toString());
+        }
+        return lines;
+    }
+
+    public static boolean isEmpty(String str){
+        return str == null || str.isEmpty();
+    }
+
+    public static String trimTrailingZeroes(String s){
+        return !s.contains(".") ? s : s.replaceAll("0*$", "").replaceAll("\\.$", "");
+    }
+}
