@@ -65,7 +65,7 @@ public class WaterSphere extends Spell implements Listener {
 
                         }
                         for (Entity entity : a.getNearbyEntities(1, 1, 1)){
-                            if (!entity.isDead() && entity != p){
+                            if (!entity.isDead() && entity != p && entity instanceof LivingEntity){
                                 LivingEntity le = (LivingEntity) entity;
                                 double wandPower = NBT.get(wand, nbt -> (Double) nbt.getDouble("power"));
                                 le.damage(wandPower * baseDamage);

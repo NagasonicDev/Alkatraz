@@ -299,4 +299,23 @@ public class Utils {
     public static String oldOrNew(String o, String n){
         return hasNewMappings() ? n : o;
     }
+
+    /**
+     * @return the amount of experience gained per spell based on circle level
+     */
+    public static double getExp(int circle){
+        return switch (circle) {
+            case 0 -> 1;
+            case 1 -> 2;
+            case 2 -> 4;
+            case 3 -> 7;
+            case 4 -> 14;
+            case 5 -> 26;
+            case 6 -> 50;
+            case 7 -> 94;
+            case 8 -> 179;
+            case 9 -> 340;
+            default -> 0;
+        };
+    }
 }

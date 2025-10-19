@@ -50,6 +50,7 @@ public abstract class Spell {
             if (!p.isDead()){
                 data.setCasting(true);
                 DataManager.subMana(p, getCost());
+                DataManager.addExperience(p, Utils.getExp(getLevel()));
                 Utils.sendActionBar(p, "Casted: " + getDisplayName());
                 circleAction(p);
                 Long finalCastTime = castTime.longValue();

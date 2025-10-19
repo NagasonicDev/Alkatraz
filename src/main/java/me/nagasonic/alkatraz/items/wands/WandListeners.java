@@ -2,6 +2,7 @@ package me.nagasonic.alkatraz.items.wands;
 
 import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.dom.Permission;
 import me.nagasonic.alkatraz.playerdata.DataManager;
 import me.nagasonic.alkatraz.playerdata.PlayerData;
 import me.nagasonic.alkatraz.spells.Spell;
@@ -50,7 +51,7 @@ public class WandListeners implements Listener {
                         if (code2.length() >= 5){
                             Spell spell = SpellRegistry.getSpell(code2);
                             if (spell != null) {
-                                if (DataManager.getPlayerData(e.getPlayer()).hasDiscovered(spell) || e.getPlayer().hasPermission("alkatraz.allspells")){
+                                if (DataManager.getPlayerData(e.getPlayer()).hasDiscovered(spell) || Permission.hasPermission(e.getPlayer(), Permission.ALL_SPELLS)){
                                     spell.cast(e.getPlayer(), e.getItem());
                                 }
                             }
@@ -84,7 +85,7 @@ public class WandListeners implements Listener {
                             Alkatraz.logFine(code2);
                             Spell spell = SpellRegistry.getSpell(code2);
                             if (spell != null) {
-                                if (DataManager.getPlayerData(p).hasDiscovered(spell) || p.hasPermission("alkatraz.allspells")){
+                                if (DataManager.getPlayerData(p).hasDiscovered(spell) || Permission.hasPermission(p, Permission.ALL_SPELLS)){
                                     spell.cast(p, wand);
                                 }
                             }
@@ -118,7 +119,7 @@ public class WandListeners implements Listener {
                     if (code2.length() >= 5){
                         Spell spell = SpellRegistry.getSpell(code2);
                         if (spell != null) {
-                            if (DataManager.getPlayerData(p).hasDiscovered(spell) || p.hasPermission("alkatraz.allspells")){
+                            if (DataManager.getPlayerData(p).hasDiscovered(spell) || Permission.hasPermission(p, Permission.ALL_SPELLS)){
                                 spell.cast(p, wand);
                             }
                         }
@@ -152,7 +153,7 @@ public class WandListeners implements Listener {
                         if (code2.length() >= 5){
                             Spell spell = SpellRegistry.getSpell(code2);
                             if (spell != null) {
-                                if (DataManager.getPlayerData(p).hasDiscovered(spell) || p.hasPermission("alkatraz.allspells")){
+                                if (DataManager.getPlayerData(p).hasDiscovered(spell) || Permission.hasPermission(p, Permission.ALL_SPELLS)){
                                     spell.cast(p, wand);
 
                                 }

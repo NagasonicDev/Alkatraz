@@ -5,10 +5,11 @@ import me.nagasonic.alkatraz.items.wands.Wand;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
 import me.nagasonic.alkatraz.spells.implementation.MagicMissile;
-import me.nagasonic.alkatraz.util.ColorFormat;
+import me.nagasonic.alkatraz.util.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -24,6 +25,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
+import static me.nagasonic.alkatraz.util.ColorFormat.format;
 
 public class DataManager implements Listener {
     private static Map<String, PlayerData> playerData = new HashMap<>();
@@ -46,7 +49,7 @@ public class DataManager implements Listener {
             data.setMaxMana(cfg.getDouble("stats.max_mana"));
             data.setMana(cfg.getDouble("stats.mana"));
             data.setCircle(cfg.getInt("stats.circle"));
-            data.setMagicLevel(cfg.getDouble("stats.magic_level"));
+            data.setExperience(cfg.getDouble("stats.experience"));
             data.setMagicDamage(cfg.getDouble("stats.magic_damage"));
             data.setMagicResistance(cfg.getDouble("stats.magic_resistance"));
             data.setFireAffinity(cfg.getDouble("stats.fire_affinity"));
@@ -66,12 +69,12 @@ public class DataManager implements Listener {
                     data.setDiscovered(spell, true);
                 }
             }
-            data.setDiscovered(SpellRegistry.getSpell(MagicMissile.class), true);
+            data.setExperience(0);
         }else {
             data.setMaxMana(100);
             data.setMana(100);
             data.setCircle(0);
-            data.setMagicLevel(1);
+            data.setExperience(0);
             data.setMagicDamage(1);
             data.setMagicResistance(0);
             data.setFireAffinity(0);
@@ -117,7 +120,7 @@ public class DataManager implements Listener {
 
     @EventHandler
     private void onQuit(PlayerQuitEvent e) {
-        savePlayerData(e.getPlayer());
+        savePlayerData(e.getPlayer(), getPlayerData(e.getPlayer()));
         setPlayerData(e.getPlayer(), null);
     }
 
@@ -134,6 +137,13 @@ public class DataManager implements Listener {
                 p.setExp(Float.parseFloat(String.valueOf((data.getMana() / data.getMaxMana())-0.01)));
             }
         }
+    }
+
+    public static Long requiredExperience(int circle){
+        long casts = Math.round(150.0 * Math.pow(Math.pow(800 / 150, 1.0 / (9 - 1)), circle - 1));
+        long xpPerCast = Math.round(2.0 * Math.pow(1.9, circle - 1));
+        long deltaXP = casts * xpPerCast;
+        return deltaXP;
     }
 
     public static void subMana(Player p, double amount) {
@@ -160,48 +170,125 @@ public class DataManager implements Listener {
         }, 0L, 20L);
     }
 
-    public static void addSpellMastery(Player p, Spell spell, int mastery){
-        PlayerData data = getPlayerData(p);
+    public static void addSpellMastery(OfflinePlayer p, Spell spell, int mastery){
+        PlayerData data = p.isOnline() ? DataManager.getPlayerData(p) : DataManager.getConfigData(p);
         if (data.getSpellMastery(spell) == -1 && mastery > 0){
             data.setSpellMastery(spell, 0);
         }
-        data.setSpellMastery(spell, data.getSpellMastery(spell) + mastery);
-        Map<Spell, BossBar> masteryBars = data.getMasteryBars();
-        if (masteryBars.containsKey(spell)){
-            BossBar bar = masteryBars.get(spell);
-            bar.removePlayer(p);
-            bar.setTitle(ColorFormat.format(spell.getDisplayName() + ": " + data.getSpellMastery(spell) + "/" + spell.getMaxMastery()));
-            bar.setProgress((double) data.getSpellMastery(spell) / spell.getMaxMastery());
-            bar.addPlayer(p);
-            masteryBars.replace(spell, bar);
-            data.setMasteryBars(masteryBars);
-            Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(Alkatraz.getInstance(), () -> {
-                if (bar.getProgress() == data.getMasteryBars().get(spell).getProgress()){
-                    bar.removePlayer(p);
-                }
-            }, 100L);
-        }else{
-            BossBar bar = Bukkit.createBossBar(ColorFormat.format(spell.getDisplayName() + ": " + data.getSpellMastery(spell) + "/" + spell.getMaxMastery()), spell.getMasteryBarColor(), BarStyle.SOLID);
-            bar.setProgress((double) data.getSpellMastery(spell) / spell.getMaxMastery());
-            bar.addPlayer(p);
-            masteryBars.put(spell, bar);
-            data.setMasteryBars(masteryBars);
-            Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(Alkatraz.getInstance(), () -> {
-                if (bar.getProgress() == data.getMasteryBars().get(spell).getProgress()){
-                    bar.removePlayer(p);
-                }
-            }, 100L);
+        if (data.getSpellMastery(spell) + mastery < 0){
+            data.setSpellMastery(spell, 0);
+        }else if (data.getSpellMastery(spell) + mastery < spell.getMaxMastery()){
+            data.setSpellMastery(spell, spell.getMaxMastery());
+        }else { data.setSpellMastery(spell, data.getSpellMastery(spell) + mastery); }
+        if (p.isOnline()){
+            Map<Spell, BossBar> masteryBars = data.getMasteryBars();
+            if (masteryBars.containsKey(spell)){
+                BossBar bar = masteryBars.get(spell);
+                bar.removePlayer(p.getPlayer());
+                bar.setTitle(format(spell.getDisplayName() + " Mastery: " + data.getSpellMastery(spell) + "/" + spell.getMaxMastery()));
+                if (data.getSpellMastery(spell) / spell.getMaxMastery() > 1){
+                    bar.setProgress(1);
+                }else if (data.getSpellMastery(spell) / spell.getMaxMastery() < 0){
+                    bar.setProgress(0);
+                }else {bar.setProgress((double) data.getSpellMastery(spell) / spell.getMaxMastery()); }
+                bar.addPlayer(p.getPlayer());
+                masteryBars.replace(spell, bar);
+                data.setMasteryBars(masteryBars);
+                Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(Alkatraz.getInstance(), () -> {
+                    if (bar.getProgress() == data.getMasteryBars().get(spell).getProgress()){
+                        bar.removePlayer(p.getPlayer());
+                    }
+                }, 100L);
+            }else{
+                BossBar bar = Bukkit.createBossBar(format(spell.getDisplayName() + ": " + data.getSpellMastery(spell) + "/" + spell.getMaxMastery()), spell.getMasteryBarColor(), BarStyle.SOLID);
+                if (data.getSpellMastery(spell) / spell.getMaxMastery() > 1){
+                    bar.setProgress(1);
+                }else if (data.getSpellMastery(spell) / spell.getMaxMastery() < 0){
+                    bar.setProgress(0);
+                }else {bar.setProgress((double) data.getSpellMastery(spell) / spell.getMaxMastery()); }
+                bar.addPlayer(p.getPlayer());
+                masteryBars.put(spell, bar);
+                data.setMasteryBars(masteryBars);
+                Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(Alkatraz.getInstance(), () -> {
+                    if (bar.getProgress() == data.getMasteryBars().get(spell).getProgress()){
+                        bar.removePlayer(p.getPlayer());
+                    }
+                }, 100L);
+            }
+        }
+        if (!p.isOnline()){
+            DataManager.savePlayerData(p, data);
         }
     }
 
-    public static void savePlayerData(Player p){
-        PlayerData data = getPlayerData(p);
+    public static void addExperience(OfflinePlayer p, double exp){
+        PlayerData data = p.isOnline() ? DataManager.getPlayerData(p) : DataManager.getConfigData(p);
+        data.setExperience(data.getExperience() + exp);
+        if (p.isOnline()){
+            BossBar bar = data.getExpBar();
+            String max = data.getCircle() < 9 ? String.valueOf(requiredExperience(data.getCircle() + 1)) : "MAX";
+            if (bar == null){
+                BossBar newbar = Bukkit.createBossBar(format("&bMagic Experience: " + data.getExperience() + "/" + max), BarColor.WHITE, BarStyle.SOLID);
+                if (data.getCircle() < 9){
+                    if (data.getExperience() / requiredExperience(data.getCircle() + 1) > 1){
+                        newbar.setProgress(1);
+                    }else if (data.getExperience() / requiredExperience(data.getCircle() + 1) < 0){
+                        newbar.setProgress(0);
+                    }else {newbar.setProgress(data.getExperience() / requiredExperience(data.getCircle() + 1)); }
+                }else{
+                    newbar.setProgress(1);
+                }
+                newbar.addPlayer(p.getPlayer());
+                data.setExpBar(newbar);
+                Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(Alkatraz.getInstance(), () -> {
+                    if (newbar.getProgress() == data.getExpBar().getProgress()){
+                        newbar.removePlayer(p.getPlayer());
+                    }
+                }, 100L);
+            }else{
+                bar.removePlayer(p.getPlayer());
+                bar.setTitle(format("&bMagic Experience: " + data.getExperience() + "/" + max));
+                if (data.getCircle() < 9){
+                    if (data.getExperience() / requiredExperience(data.getCircle() + 1) > 1){
+                        bar.setProgress(1);
+                    }else if (data.getExperience() / requiredExperience(data.getCircle() + 1) < 0){
+                        bar.setProgress(0);
+                    }else {bar.setProgress(data.getExperience() / requiredExperience(data.getCircle() + 1)); }
+                }else{
+                    bar.setProgress(1);
+                }
+                bar.addPlayer(p.getPlayer());
+                data.setExpBar(bar);
+                Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(Alkatraz.getInstance(), () -> {
+                    if (bar.getProgress() == data.getExpBar().getProgress()){
+                        bar.removePlayer(p.getPlayer());
+                    }
+                }, 100L);
+            }
+        }
+        if (data.getCircle() < 9){
+            if (data.getExperience() >= requiredExperience(data.getCircle() + 1)){
+                double experience = data.getExperience();
+                data.setExperience(0);
+                data.setCircle(data.getCircle() + 1);
+                addExperience(p, (experience - requiredExperience(data.getCircle())));
+                if (p.isOnline()){
+                    p.getPlayer().sendMessage(format("&e&lCIRCLE UP!"), format("&bReached the " + StringUtils.toOrdinal(data.getCircle()) + " circle."), format("&bYou are now able to use spells up to the " + StringUtils.toOrdinal(data.getCircle()) + " rank."));
+                }
+            }
+        }
+        if (!p.isOnline()){
+            DataManager.savePlayerData(p, data);
+        }
+    }
+
+    public static void savePlayerData(OfflinePlayer p, PlayerData data){
         File general = new File(getFolderPath(p) + "/general.yml");
         FileConfiguration gcfg = YamlConfiguration.loadConfiguration(general);
         gcfg.set("stats.max_mana", data.getMaxMana());
         gcfg.set("stats.mana", data.getMana());
         gcfg.set("stats.circle", data.getCircle());
-        gcfg.set("stats.magic_level", data.getMagicLevel());
+        gcfg.set("stats.experience", data.getCircle());
         gcfg.set("stats.magic_damage", data.getMagicDamage());
         gcfg.set("stats.magic_resistance", data.getMagicResistance());
         gcfg.set("stats.fire_affinity", data.getFireAffinity());
@@ -240,7 +327,7 @@ public class DataManager implements Listener {
 
     public static void saveAll(){
         for (Player p : Bukkit.getOnlinePlayers()){
-            savePlayerData(p);
+            savePlayerData(p, getPlayerData(p));
         }
     }
 }
