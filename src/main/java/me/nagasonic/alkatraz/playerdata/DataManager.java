@@ -177,7 +177,7 @@ public class DataManager implements Listener {
         }
         if (data.getSpellMastery(spell) + mastery < 0){
             data.setSpellMastery(spell, 0);
-        }else if (data.getSpellMastery(spell) + mastery < spell.getMaxMastery()){
+        }else if (data.getSpellMastery(spell) + mastery > spell.getMaxMastery()){
             data.setSpellMastery(spell, spell.getMaxMastery());
         }else { data.setSpellMastery(spell, data.getSpellMastery(spell) + mastery); }
         if (p.isOnline()){
