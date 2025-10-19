@@ -21,6 +21,7 @@ import java.util.List;
 @SuppressWarnings("unused")
 public abstract class Spell {
     protected final String type;
+    protected String id;
     protected String displayName;
     protected String description;
     protected String element;
@@ -70,6 +71,7 @@ public abstract class Spell {
     }
 
     public void loadCommonConfig(YamlConfiguration spellConfig) {
+        this.id = spellConfig.getString("id");
         this.displayName = spellConfig.getString("display_name");
         this.description = spellConfig.getString("description");
         this.element = spellConfig.getString("element");
@@ -85,6 +87,10 @@ public abstract class Spell {
 
     public String getType() {
         return type;
+    }
+
+    public String getId() {
+        return id;
     }
 
     public String getElement() { return element; }

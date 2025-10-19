@@ -9,6 +9,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class SpellRegistry {
     private static Map<Class<?>, Spell> allSpells = Collections.unmodifiableMap(new HashMap<>());
@@ -44,7 +45,7 @@ public class SpellRegistry {
 
     public static Spell getSpellFromName(String name) {
         for (Spell spell : allSpells.values()){
-            if (spell.getDisplayName().toLowerCase().replace(" ", "_").equals(name)){
+            if (Objects.equals(spell.getId(), name)){
                 return spell;
             }
         }

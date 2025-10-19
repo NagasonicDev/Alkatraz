@@ -241,13 +241,13 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
             if (args[0].equals("discoverspell") && Permission.hasPermission(sender, Permission.COMMAND_DISCOVER)){
                 List<String> list = new ArrayList<>();
                 for (Spell spell : SpellRegistry.getAllSpells().values()){
-                    list.add(format(spell.getDisplayName().toLowerCase().replace(" ", "_")));
+                    list.add(spell.getId());
                 }
                 return list;
             } else if (args[0].equals("undiscoverspell") && Permission.hasPermission(sender, Permission.COMMAND_UNDISCOVER)) {
                 List<String> list = new ArrayList<>();
                 for (Spell spell : SpellRegistry.getAllSpells().values()){
-                    list.add(format(spell.getDisplayName().toLowerCase().replace(" ", "_")));
+                    list.add(spell.getId());
                 }
                 return list;
             } else if (args[0].equals("give") && Permission.hasPermission(sender, Permission.COMMAND_GIVE)) {
@@ -263,7 +263,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
             } else if (args[0].equals("mastery") && Permission.hasPermission(sender, Permission.COMMAND_MASTERY)) {
                 List<String> list = new ArrayList<>();
                 for (Spell spell : SpellRegistry.getAllSpells().values()){
-                    list.add(format(spell.getDisplayName().toLowerCase().replace(" ", "_")));
+                    list.add(spell.getId());
                 }
                 return list;
             }
