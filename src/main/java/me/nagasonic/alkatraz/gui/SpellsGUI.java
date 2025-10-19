@@ -1,7 +1,6 @@
 package me.nagasonic.alkatraz.gui;
 
 import de.tr7zw.nbtapi.NBT;
-import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.playerdata.DataManager;
 import me.nagasonic.alkatraz.playerdata.PlayerData;
 import me.nagasonic.alkatraz.spells.Spell;

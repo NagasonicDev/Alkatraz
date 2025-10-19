@@ -126,4 +126,26 @@ public class StringUtils {
     public static String trimTrailingZeroes(String s){
         return !s.contains(".") ? s : s.replaceAll("0*$", "").replaceAll("\\.$", "");
     }
+
+    /**
+     * Returns a string with the appropriate English ordinal suffix
+     * (e.g., 1 -> "1st", 2 -> "2nd", 3 -> "3rd", 4 -> "4th").
+     */
+    public static String toOrdinal(int number) {
+        int abs = Math.abs(number);
+        int mod100 = abs % 100;
+
+        // Special case: 11th, 12th, 13th
+        if (mod100 >= 11 && mod100 <= 13) {
+            return number + "th";
+        }
+
+        // Otherwise, choose based on last digit
+        switch (abs % 10) {
+            case 1:  return number + "st";
+            case 2:  return number + "nd";
+            case 3:  return number + "rd";
+            default: return number + "th";
+        }
+    }
 }

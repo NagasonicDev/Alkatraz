@@ -9,13 +9,19 @@ import java.util.List;
 import java.util.Map;
 
 public class PlayerData {
+    // Max Mana Formula = Math.round(100 + (1500 / 9) * circle)
+    // Spell XP Gain Formula: XPgain(C) = Math.round(2 * 1.9^(circle - 1))
+    // r = (800 / 150)^1/8
+    // Target Casts between circles: casts(C) = Math.round(150 * r^(circle - 1))
+    // Circle XP Gap (XP from circle - 1 to circle) XP(C) = casts(c) * XPgain(C)
     private Map<Spell, Integer> spellMasteries = new HashMap<>();
     private List<Spell> discoveredSpells = new ArrayList<>();
     private Map<Spell, BossBar> masteryBars = new HashMap<>();
+    private BossBar expBar = null;
     private double mana;
     private double maxMana;
     private int circle;
-    private double magicLevel;
+    private double experience;
     private double magicDamage;
     private double magicResistance;
 
@@ -59,16 +65,12 @@ public class PlayerData {
         return circle;
     }
 
+    public double getExperience() {
+        return experience;
+    }
+
     public void setCircle(int circle) {
         this.circle = circle;
-    }
-
-    public double getMagicLevel() {
-        return magicLevel;
-    }
-
-    public void setMagicLevel(double magicLevel) {
-        this.magicLevel = magicLevel;
     }
 
     public double getMagicDamage() {
@@ -224,6 +226,10 @@ public class PlayerData {
         }
     }
 
+    public void setExperience(double experience) {
+        this.experience = experience;
+    }
+
     public List<Spell> getAllDiscoveredSpells() {
         return discoveredSpells;
     }
@@ -234,5 +240,13 @@ public class PlayerData {
 
     public void setMasteryBars(Map<Spell, BossBar> masteryBars) {
         this.masteryBars = masteryBars;
+    }
+
+    public BossBar getExpBar() {
+        return expBar;
+    }
+
+    public void setExpBar(BossBar expBar) {
+        this.expBar = expBar;
     }
 }
