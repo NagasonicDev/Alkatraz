@@ -60,6 +60,7 @@ public abstract class Spell {
                     finalCastTime = (long) (castTime * 1.25);
                 }
                 Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(Alkatraz.getInstance(), () -> {
+                    data.setCasting(false);
                     castAction(p, wand);
                 }, finalCastTime);
                 if (data.getSpellMastery(this) < getMaxMastery()){
