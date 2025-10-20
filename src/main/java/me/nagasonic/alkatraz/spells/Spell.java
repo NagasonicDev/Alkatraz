@@ -4,6 +4,7 @@ import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.playerdata.DataManager;
 import me.nagasonic.alkatraz.playerdata.PlayerData;
+import me.nagasonic.alkatraz.util.ColorFormat;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
@@ -52,7 +53,7 @@ public abstract class Spell {
                 data.setCasting(true);
                 DataManager.subMana(p, getCost());
                 DataManager.addExperience(p, Utils.getExp(getLevel()));
-                Utils.sendActionBar(p, "Casted: " + getDisplayName());
+                Utils.sendActionBar(p, ColorFormat.format("Casted: " + getDisplayName()));
                 circleAction(p);
                 Long finalCastTime = castTime.longValue();
                 if (data.getSpellMastery(this) >= getMaxMastery()){

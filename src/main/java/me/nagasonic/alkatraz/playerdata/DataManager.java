@@ -288,7 +288,7 @@ public class DataManager implements Listener {
         gcfg.set("stats.max_mana", data.getMaxMana());
         gcfg.set("stats.mana", data.getMana());
         gcfg.set("stats.circle", data.getCircle());
-        gcfg.set("stats.experience", data.getCircle());
+        gcfg.set("stats.experience", data.getExperience());
         gcfg.set("stats.magic_damage", data.getMagicDamage());
         gcfg.set("stats.magic_resistance", data.getMagicResistance());
         gcfg.set("stats.fire_affinity", data.getFireAffinity());

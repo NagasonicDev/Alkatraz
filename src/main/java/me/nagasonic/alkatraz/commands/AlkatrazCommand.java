@@ -220,6 +220,14 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                 }
             }
 
+        } else if (args[0].equals("cast")) {
+            Player p = (Player) sender;
+            PlayerData data = DataManager.getPlayerData(p);
+            if (data.isCasting()){
+                data.setCasting(false);
+            }else{
+                data.setCasting(true);
+            }
         }
 
         return true;

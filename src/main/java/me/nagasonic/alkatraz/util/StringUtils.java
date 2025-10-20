@@ -1,11 +1,13 @@
 package me.nagasonic.alkatraz.util;
 
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.Color;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.TreeMap;
+import java.util.*;
+import java.util.function.Function;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class StringUtils {
@@ -141,11 +143,11 @@ public class StringUtils {
         }
 
         // Otherwise, choose based on last digit
-        switch (abs % 10) {
-            case 1:  return number + "st";
-            case 2:  return number + "nd";
-            case 3:  return number + "rd";
-            default: return number + "th";
-        }
+        return switch (abs % 10) {
+            case 1 -> number + "st";
+            case 2 -> number + "nd";
+            case 3 -> number + "rd";
+            default -> number + "th";
+        };
     }
 }

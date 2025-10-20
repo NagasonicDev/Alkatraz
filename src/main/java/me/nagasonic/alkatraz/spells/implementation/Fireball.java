@@ -5,23 +5,19 @@ import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.playerdata.DataManager;
 import me.nagasonic.alkatraz.spells.Spell;
-import me.nagasonic.alkatraz.util.LocationUtils;
 import me.nagasonic.alkatraz.util.ParticleUtils;
-import me.nagasonic.alkatraz.util.Utils;
-import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
 import java.util.List;
 
-public class Fireball extends Spell implements Listener {
+public class Fireball extends Spell {
     public Fireball(String type) {
         super(type);
     }
