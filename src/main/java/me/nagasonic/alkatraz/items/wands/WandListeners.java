@@ -155,7 +155,6 @@ public class WandListeners implements Listener {
                             if (spell != null) {
                                 if (DataManager.getPlayerData(p).hasDiscovered(spell) || Permission.hasPermission(p, Permission.ALL_SPELLS)){
                                     spell.cast(p, wand);
-
                                 }
                             }
                             NBT.modify(wand, nbt -> {

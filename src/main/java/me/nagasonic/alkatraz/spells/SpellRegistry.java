@@ -1,9 +1,7 @@
 package me.nagasonic.alkatraz.spells;
 
 import me.nagasonic.alkatraz.config.ConfigManager;
-import me.nagasonic.alkatraz.spells.implementation.Fireball;
-import me.nagasonic.alkatraz.spells.implementation.MagicMissile;
-import me.nagasonic.alkatraz.spells.implementation.WaterSphere;
+import me.nagasonic.alkatraz.spells.implementation.*;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.util.Collections;
@@ -19,6 +17,8 @@ public class SpellRegistry {
         registerIfEnabled("magic_missile", new MagicMissile("MAGIC_MISSILE"));
         registerIfEnabled("fireball", new Fireball("FIREBALL"));
         registerIfEnabled("water_sphere", new WaterSphere("WATER_SPHERE"));
+        registerIfEnabled("air_burst", new AirBurst("AIR_BURST"));
+        registerIfEnabled("earth_throw", new EarthThrow("EARTH_THROW"));
     }
 
     private static void registerIfEnabled(String key, Spell spell){

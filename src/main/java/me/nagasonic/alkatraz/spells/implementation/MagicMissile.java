@@ -2,7 +2,6 @@ package me.nagasonic.alkatraz.spells.implementation;
 
 import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
-import me.nagasonic.alkatraz.commands.AlkatrazCommand;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.playerdata.DataManager;
 import me.nagasonic.alkatraz.spells.Spell;
@@ -15,14 +14,13 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
 import java.util.List;
 
 
-public class MagicMissile extends Spell implements Listener {
+public class MagicMissile extends Spell {
     public MagicMissile(String type) {
         super(type);
     }
