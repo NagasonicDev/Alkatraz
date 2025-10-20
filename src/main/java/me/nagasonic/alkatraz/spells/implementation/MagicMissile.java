@@ -61,7 +61,6 @@ public class MagicMissile extends Spell {
                     }
                 }
             }
-            DataManager.getPlayerData(p).setCasting(false);
         }
     }
 

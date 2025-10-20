@@ -39,7 +39,6 @@ public class WaterSphere extends Spell {
     @Override
     public void castAction(Player p, ItemStack wand) {
         if (!p.isDead()){
-            DataManager.getPlayerData(p).setCasting(false);
             AtomicInteger l = new AtomicInteger(0);
             List<Location> lineLocs = ParticleUtils.line(2, p.getEyeLocation(), p.getEyeLocation().add(p.getEyeLocation().getDirection().multiply(40)));
             taskID = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
