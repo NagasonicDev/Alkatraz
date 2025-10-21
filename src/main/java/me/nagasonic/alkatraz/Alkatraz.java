@@ -56,6 +56,7 @@ public final class Alkatraz extends JavaPlugin {
     public void onEnable() {
         // Plugin startup logic
         if (pluginConfig.getBoolean("check_updates")) UpdateChecker.checkUpdate();
+        Metrics metrics = new Metrics(this, 27657);
         WandRegistry.registerWands();
         SpellRegistry.registerSpells();
         registerListener(new WandListeners());

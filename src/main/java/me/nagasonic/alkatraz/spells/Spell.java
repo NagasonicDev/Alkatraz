@@ -1,6 +1,7 @@
 package me.nagasonic.alkatraz.spells;
 
 import de.tr7zw.nbtapi.NBT;
+import jdk.jshell.execution.Util;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.playerdata.DataManager;
 import me.nagasonic.alkatraz.playerdata.PlayerData;
@@ -48,27 +49,31 @@ public abstract class Spell {
     public void cast(Player p, ItemStack wand){
         Float castTime = getFullCastTime(wand, getCastTime());
         PlayerData data = DataManager.getPlayerData(p);
-        if (data.getMana() >= getCost()){
-            if (!p.isDead()){
-                data.setCasting(true);
-                DataManager.subMana(p, getCost());
-                DataManager.addExperience(p, Utils.getExp(getLevel()));
-                Utils.sendActionBar(p, ColorFormat.format("Casted: " + getDisplayName()));
-                circleAction(p);
-                Long finalCastTime = castTime.longValue();
-                if (data.getSpellMastery(this) >= getMaxMastery()){
-                    finalCastTime = (long) (castTime * 1.25);
+        if (data.getCircle() >= getLevel()){
+            if (data.getMana() >= getCost()){
+                if (!p.isDead()){
+                    data.setCasting(true);
+                    DataManager.subMana(p, getCost());
+                    DataManager.addExperience(p, Utils.getExp(getLevel()));
+                    Utils.sendActionBar(p, ColorFormat.format("Casted: " + getDisplayName()));
+                    circleAction(p);
+                    Long finalCastTime = castTime.longValue();
+                    if (data.getSpellMastery(this) >= getMaxMastery()){
+                        finalCastTime = (long) (castTime * 1.25);
+                    }
+                    Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(Alkatraz.getInstance(), () -> {
+                        data.setCasting(false);
+                        castAction(p, wand);
+                    }, finalCastTime);
+                    if (data.getSpellMastery(this) < getMaxMastery()){
+                        DataManager.addSpellMastery(p, this, 1);
+                    }
                 }
-                Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(Alkatraz.getInstance(), () -> {
-                    data.setCasting(false);
-                    castAction(p, wand);
-                }, finalCastTime);
-                if (data.getSpellMastery(this) < getMaxMastery()){
-                    DataManager.addSpellMastery(p, this, 1);
-                }
+            }else{
+                Utils.sendActionBar(p, "&cNot Enough Mana");
             }
         }else{
-            Utils.sendActionBar(p, "&cNot Enough Mana");
+            Utils.sendActionBar(p, "&cToo low Magic Circle");
         }
     }
 

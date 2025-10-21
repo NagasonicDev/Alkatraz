@@ -16,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
+import org.bukkit.event.entity.EntityDropItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
@@ -49,10 +50,9 @@ public class EarthThrow extends Spell implements Listener {
             if (p.isOnGround()){
                 BlockData data = Bukkit.createBlockData(Ground.getGround(p.getLocation().getBlock().getBiome()));
                 FallingBlock b = loc.getWorld().spawnFallingBlock(loc, data);
-                b.setDropItem(false);
                 b.setHurtEntities(true);
                 b.setMaxDamage((int) baseDamage);
-                b.setVelocity(direction.multiply(1));
+                b.setVelocity(direction.multiply(1).setY(0.3));
                 this.block = b;
                 this.power = NBT.get(wand, nbt2 -> (Double) nbt2.getDouble("power"));
             }
@@ -87,6 +87,29 @@ public class EarthThrow extends Spell implements Listener {
             if (b.equals(block)){
                 e.getBlock().setType(Material.AIR);
                 Location loc = e.getBlock().getLocation();
+                List<Location> locs = ParticleUtils.circle(loc, 3, 1, 0, 0);
+                for (Location l : locs){
+                    l.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, l, 5);
+                }
+                for (LivingEntity le : loc.getNearbyLivingEntities(3)){
+                    le.damage(baseDamage * this.power);
+                    Vector direction = le.getLocation().toVector().subtract(loc.toVector());
+                    direction.normalize().multiply(1);
+                    direction.setY(1.25);
+                    le.setVelocity(direction);
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    private void onDrop(EntityDropItemEvent e){
+        if (e.getEntity() instanceof FallingBlock){
+            FallingBlock b = (FallingBlock) e.getEntity();
+            if (b.equals(block)){
+                e.setCancelled(true);
+                Location loc = b.getLocation();
+                b.remove();
                 List<Location> locs = ParticleUtils.circle(loc, 3, 1, 0, 0);
                 for (Location l : locs){
                     l.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, l, 5);
