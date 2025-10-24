@@ -6,6 +6,7 @@ import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.playerdata.DataManager;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.util.ParticleUtils;
+import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -81,7 +82,7 @@ public class MagicMissile extends Spell {
         // Spawn particles at all calculated points
         for (int i = 0; i < magicCirclePoints.size(); i++){
             for (Location loc1 : magicCirclePoints) {
-                loc1.getWorld().spawnParticle(Particle.REDSTONE, loc1, 0, new Particle.DustOptions(Color.AQUA, 0.4F));
+                loc1.getWorld().spawnParticle(Utils.DUST, loc1, 0, new Particle.DustOptions(Color.AQUA, 0.4F));
             }
         }
     }

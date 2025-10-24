@@ -46,6 +46,7 @@ public final class Alkatraz extends JavaPlugin {
         saveConfig("spells/water_sphere.yml");
         saveConfig("spells/air_burst.yml");
         saveConfig("spells/earth_throw.yml");
+        saveConfig("spells/lesser_heal.yml");
         saveConfig("wands/wooden_wand.yml");
 
 

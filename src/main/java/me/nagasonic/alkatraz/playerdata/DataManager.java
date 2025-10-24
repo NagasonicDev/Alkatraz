@@ -20,6 +20,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -49,6 +50,7 @@ public class DataManager implements Listener {
             data.setMaxMana(cfg.getDouble("stats.max_mana"));
             data.setMana(cfg.getDouble("stats.mana"));
             data.setCircle(cfg.getInt("stats.circle"));
+            data.setManaRegeneration(cfg.getDouble("stats.mana_regeneration"));
             data.setExperience(cfg.getDouble("stats.experience"));
             data.setMagicDamage(cfg.getDouble("stats.magic_damage"));
             data.setMagicResistance(cfg.getDouble("stats.magic_resistance"));
@@ -69,11 +71,11 @@ public class DataManager implements Listener {
                     data.setDiscovered(spell, true);
                 }
             }
-            data.setExperience(0);
         }else {
             data.setMaxMana(100);
             data.setMana(100);
             data.setCircle(0);
+            data.setManaRegeneration(1);
             data.setExperience(0);
             data.setMagicDamage(1);
             data.setMagicResistance(0);
@@ -164,7 +166,7 @@ public class DataManager implements Listener {
             for (Player p : Bukkit.getOnlinePlayers()){
                 PlayerData data = getPlayerData(p);
                 if (data.getMana() < data.getMaxMana()){
-                    addMana(p, 1);
+                    addMana(p, data.getManaRegeneration());
                 }
             }
         }, 0L, 20L);
@@ -270,16 +272,49 @@ public class DataManager implements Listener {
             if (data.getExperience() >= requiredExperience(data.getCircle() + 1)){
                 double experience = data.getExperience();
                 data.setExperience(0);
-                data.setCircle(data.getCircle() + 1);
-                addExperience(p, (experience - requiredExperience(data.getCircle())));
+                addCircle(p.getPlayer(), 1);
                 if (p.isOnline()){
                     p.getPlayer().sendMessage(format("&e&lCIRCLE UP!"), format("&bReached the " + StringUtils.toOrdinal(data.getCircle()) + " circle."), format("&bYou are now able to use spells up to the " + StringUtils.toOrdinal(data.getCircle()) + " rank."));
                 }
+                addExperience(p, (experience - requiredExperience(data.getCircle())));
             }
         }
         if (!p.isOnline()){
             DataManager.savePlayerData(p, data);
         }
+    }
+
+    public static void addCircle(@NotNull Player p, int circle){
+        PlayerData data = p.isOnline() ? getPlayerData(p) : getConfigData(p);
+        int pcircle = data.getCircle();
+        data.setMaxMana(data.getMaxMana() + (getMaxMana(circle + data.getCircle()) - getMaxMana(pcircle)));
+        data.setManaRegeneration(data.getManaRegeneration() + (getManaRegen(circle) - getManaRegen(data.getCircle())));
+        data.setCircle(pcircle + circle);
+        if (!p.isOnline()){
+            savePlayerData(p, data);
+        }
+    }
+
+    private static double getManaRegen(int circle){
+        int mana = getMaxMana(circle);
+        double t = 100 + (mana - 100) * ((double) 8 / 150);
+        return mana / t;
+    }
+
+    private static int getMaxMana(int circle){
+        return switch (circle){
+            case 0 -> 100;
+            case 1 -> 267;
+            case 2 -> 433;
+            case 3 -> 600;
+            case 4 -> 767;
+            case 5 -> 933;
+            case 6 -> 1100;
+            case 7 -> 1267;
+            case 8 -> 1433;
+            case 9 -> 1600;
+            default -> 0;
+        };
     }
 
     public static void savePlayerData(OfflinePlayer p, PlayerData data){
@@ -288,6 +323,7 @@ public class DataManager implements Listener {
         gcfg.set("stats.max_mana", data.getMaxMana());
         gcfg.set("stats.mana", data.getMana());
         gcfg.set("stats.circle", data.getCircle());
+        gcfg.set("stats.mana_regeneration", data.getManaRegeneration());
         gcfg.set("stats.experience", data.getExperience());
         gcfg.set("stats.magic_damage", data.getMagicDamage());
         gcfg.set("stats.magic_resistance", data.getMagicResistance());
