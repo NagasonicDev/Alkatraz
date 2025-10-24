@@ -1,5 +1,6 @@
 package me.nagasonic.alkatraz.commands;
 
+import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.dom.Permission;
 import me.nagasonic.alkatraz.items.wands.Wand;
 import me.nagasonic.alkatraz.items.wands.WandRegistry;
@@ -147,7 +148,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                         sender.sendMessage("&cCannot set beyond the circle threshold (0-9).");
                         return true;
                     }
-                    data.setCircle(Integer.parseInt(args[2]));
+                    DataManager.addCircle(p.getPlayer(), data.getCircle() - Integer.parseInt(args[2]));
                     sender.sendMessage(format("&aSet circle level of " + p.getName() + " to " + args[2]));
                     if (!p.isOnline()) {
                         DataManager.savePlayerData(p, data);
@@ -160,7 +161,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                         sender.sendMessage("&cCannot add beyond the circle threshold. (0-9)");
                         return true;
                     }
-                    data.setCircle(data.getCircle() + Integer.parseInt(args[2]));
+                    DataManager.addCircle(p.getPlayer(), Integer.parseInt(args[2]));
                     sender.sendMessage(format("&aAdded " + args[2] + " to circle level of " + p.getName() + ". (New: " + data.getCircle() + ")"));
                     if (!p.isOnline()) {
                         DataManager.savePlayerData(p, data);
@@ -220,14 +221,10 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                 }
             }
 
-        } else if (args[0].equals("cast")) {
+        } else if (args[0].equals("stats")) {
             Player p = (Player) sender;
             PlayerData data = DataManager.getPlayerData(p);
-            if (data.isCasting()){
-                data.setCasting(false);
-            }else{
-                data.setCasting(true);
-            }
+            Alkatraz.logFine(data.toString());
         }
 
         return true;

@@ -19,6 +19,7 @@ public class SpellRegistry {
         registerIfEnabled("water_sphere", new WaterSphere("WATER_SPHERE"));
         registerIfEnabled("air_burst", new AirBurst("AIR_BURST"));
         registerIfEnabled("earth_throw", new EarthThrow("EARTH_THROW"));
+        registerIfEnabled("lesser_heal", new LesserHeal("LESSER_HEAL"));
     }
 
     private static void registerIfEnabled(String key, Spell spell){

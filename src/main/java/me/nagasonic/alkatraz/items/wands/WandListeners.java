@@ -82,7 +82,6 @@ public class WandListeners implements Listener {
                         message = message.replace("S", "❖");
                         Utils.sendActionBar(p, message);
                         if (code2.length() >= 5){
-                            Alkatraz.logFine(code2);
                             Spell spell = SpellRegistry.getSpell(code2);
                             if (spell != null) {
                                 if (DataManager.getPlayerData(p).hasDiscovered(spell) || Permission.hasPermission(p, Permission.ALL_SPELLS)){
@@ -218,7 +217,6 @@ public class WandListeners implements Listener {
     private void onInventoryClick(InventoryClickEvent e) throws InterruptedException {
         if (e.getClickedInventory() == e.getWhoClicked().getInventory()){
             Player p = (Player) e.getWhoClicked();
-            Alkatraz.logFine(e.getAction().toString());
             if (e.getAction() == InventoryAction.SWAP_WITH_CURSOR){
                 if (e.getSlot() == p.getInventory().getHeldItemSlot()){
                     ItemStack cursor = e.getCursor();

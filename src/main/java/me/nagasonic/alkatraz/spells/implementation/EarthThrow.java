@@ -7,6 +7,7 @@ import me.nagasonic.alkatraz.dom.Ground;
 import me.nagasonic.alkatraz.playerdata.DataManager;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.util.ParticleUtils;
+import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -74,7 +75,7 @@ public class EarthThrow extends Spell implements Listener {
         // Spawn particles at all calculated points
         for (int i = 0; i < 100; i++){
             for (Location loc : magicCirclePoints) {
-                loc.getWorld().spawnParticle(Particle.REDSTONE, loc, 0, new Particle.DustOptions(Color.fromRGB(78, 47, 0), 0.4F));
+                loc.getWorld().spawnParticle(Utils.DUST, loc, 0, new Particle.DustOptions(Color.fromRGB(78, 47, 0), 0.4F));
             }
         }
         DataManager.getPlayerData(p).setCasting(false);

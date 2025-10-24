@@ -20,6 +20,7 @@ public class PlayerData {
     private BossBar expBar = null;
     private double mana;
     private double maxMana;
+    private double manaRegeneration;
     private int circle;
     private double experience;
     private double magicDamage;
@@ -63,6 +64,14 @@ public class PlayerData {
 
     public int getCircle() {
         return circle;
+    }
+
+    public double getManaRegeneration() {
+        return manaRegeneration;
+    }
+
+    public void setManaRegeneration(double manaRegeneration) {
+        this.manaRegeneration = manaRegeneration;
     }
 
     public double getExperience() {

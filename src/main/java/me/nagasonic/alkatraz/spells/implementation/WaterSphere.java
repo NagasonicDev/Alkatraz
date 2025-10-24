@@ -6,6 +6,7 @@ import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.playerdata.DataManager;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.util.ParticleUtils;
+import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.type.Farmland;
@@ -97,7 +98,7 @@ public class WaterSphere extends Spell {
         // Spawn particles at all calculated points
         for (int i = 0; i < 100; i++){
             for (Location loc : magicCirclePoints) {
-                loc.getWorld().spawnParticle(Particle.REDSTONE, loc, 0, new Particle.DustOptions(Color.BLUE, 0.4F));
+                loc.getWorld().spawnParticle(Utils.DUST, loc, 0, new Particle.DustOptions(Color.BLUE, 0.4F));
             }
         }
     }
