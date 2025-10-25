@@ -75,14 +75,16 @@ public class MagicMissile extends Spell {
 
             // Calculate offset vector pointing forward relative to player orientation
             Vector forward = playerLoc.getDirection().normalize().multiply(1.5); // 1.5 blocks in front
+            Location loc = playerLoc.clone().add(forward);
 
             // Call magicCircle with proper center, yaw, pitch and offset
-            List<Location> magicCirclePoints = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 2, 0);
+            List<Location> magicCirclePoints = ParticleUtils.circle(loc, 1, 20, yaw, -pitch + 90);
+            magicCirclePoints.add(loc);
 
             // Spawn particles at all calculated points
-            for (int i = 0; i < 100; i++){
-                for (Location loc : magicCirclePoints) {
-                    loc.getWorld().spawnParticle(Utils.DUST, loc, 0, new Particle.DustOptions(Color.WHITE, 0.4F));
+            for (int i = 0; i < magicCirclePoints.size(); i++){
+                for (Location loc1 : magicCirclePoints) {
+                    loc1.getWorld().spawnParticle(Utils.DUST, loc1, 0, new Particle.DustOptions(Color.AQUA, 0.4F));
                 }
             }
         }, 0L, 2L);
