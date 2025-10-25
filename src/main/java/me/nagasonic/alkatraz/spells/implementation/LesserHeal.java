@@ -3,9 +3,12 @@ package me.nagasonic.alkatraz.spells.implementation;
 import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
+import me.nagasonic.alkatraz.playerdata.DataManager;
+import me.nagasonic.alkatraz.playerdata.PlayerData;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -58,45 +61,44 @@ public class LesserHeal extends Spell {
     }
 
     @Override
-    public void circleAction(Player p) {
-        if (p.isSneaking() || p.getTargetEntity(20) == null || !(p.getTargetEntity(20) instanceof Player)){
-            Location playerLoc = p.getLocation().add(0, -0.5, 0); // Player eye location
-            float yaw = playerLoc.getYaw();
-            float pitch = 0;
+    public int circleAction(Player p) {
+        int d = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
+            if (p.isSneaking() || p.getTargetEntity(20) == null || !(p.getTargetEntity(20) instanceof Player)){
+                Location playerLoc = p.getLocation().add(0, -0.5, 0); // Player eye location
+                float yaw = playerLoc.getYaw();
+                float pitch = 0;
 
-            // Calculate offset vector pointing forward relative to player orientation
-            Vector forward = playerLoc.getDirection().normalize().multiply(1.5); // 1.5 blocks in front
-            Location loc = playerLoc.clone().add(forward);
+                // Call magicCircle with proper center, yaw, pitch and offset
+                List<Location> magicCirclePoints = ParticleUtils.circle(playerLoc, 1, 20, yaw, pitch);
+                magicCirclePoints.add(playerLoc);
 
-            // Call magicCircle with proper center, yaw, pitch and offset
-            List<Location> magicCirclePoints = ParticleUtils.circle(loc, 1, 20, yaw, -pitch + 90);
-            magicCirclePoints.add(loc);
+                // Spawn particles at all calculated points
+                for (int i = 0; i < magicCirclePoints.size(); i++){
+                    for (Location loc1 : magicCirclePoints) {
+                        loc1.getWorld().spawnParticle(Utils.DUST, loc1, 0, new Particle.DustOptions(Color.AQUA, 0.4F));
+                    }
+                }
+            }else{
+                Location playerLoc = p.getTargetEntity(20).getLocation().add(0, -0.5, 0); // Player eye location
+                float yaw = playerLoc.getYaw();
+                float pitch = 0;
 
-            // Spawn particles at all calculated points
-            for (int i = 0; i < magicCirclePoints.size(); i++){
-                for (Location loc1 : magicCirclePoints) {
-                    loc1.getWorld().spawnParticle(Utils.DUST, loc1, 0, new Particle.DustOptions(Color.AQUA, 0.4F));
+                // Calculate offset vector pointing forward relative to player orientation
+                Vector forward = playerLoc.getDirection().normalize().multiply(1.5); // 1.5 blocks in front
+                Location loc = playerLoc.clone().add(forward);
+
+                // Call magicCircle with proper center, yaw, pitch and offset
+                List<Location> magicCirclePoints = ParticleUtils.circle(loc, 1, 20, yaw, -pitch + 90);
+                magicCirclePoints.add(loc);
+
+                // Spawn particles at all calculated points
+                for (int i = 0; i < magicCirclePoints.size(); i++){
+                    for (Location loc1 : magicCirclePoints) {
+                        loc1.getWorld().spawnParticle(Utils.DUST, loc1, 0, new Particle.DustOptions(Color.AQUA, 0.4F));
+                    }
                 }
             }
-        }else{
-            Location playerLoc = p.getTargetEntity(20).getLocation().add(0, -0.5, 0); // Player eye location
-            float yaw = playerLoc.getYaw();
-            float pitch = 0;
-
-            // Calculate offset vector pointing forward relative to player orientation
-            Vector forward = playerLoc.getDirection().normalize().multiply(1.5); // 1.5 blocks in front
-            Location loc = playerLoc.clone().add(forward);
-
-            // Call magicCircle with proper center, yaw, pitch and offset
-            List<Location> magicCirclePoints = ParticleUtils.circle(loc, 1, 20, yaw, -pitch + 90);
-            magicCirclePoints.add(loc);
-
-            // Spawn particles at all calculated points
-            for (int i = 0; i < magicCirclePoints.size(); i++){
-                for (Location loc1 : magicCirclePoints) {
-                    loc1.getWorld().spawnParticle(Utils.DUST, loc1, 0, new Particle.DustOptions(Color.AQUA, 0.4F));
-                }
-            }
-        }
+        }, 0L, 2L);
+        return d;
     }
 }

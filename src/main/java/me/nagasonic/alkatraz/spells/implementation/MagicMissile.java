@@ -7,6 +7,7 @@ import me.nagasonic.alkatraz.playerdata.DataManager;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -66,25 +67,26 @@ public class MagicMissile extends Spell {
     }
 
     @Override
-    public void circleAction(Player p) {
-        Location playerLoc = p.getEyeLocation(); // Player eye location
-        float yaw = playerLoc.getYaw();
-        float pitch = playerLoc.getPitch();
+    public int circleAction(Player p) {
+        int d = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
+            Location playerLoc = p.getEyeLocation(); // Player eye location
+            float yaw = playerLoc.getYaw();
+            float pitch = playerLoc.getPitch();
 
-        // Calculate offset vector pointing forward relative to player orientation
-        Vector forward = playerLoc.getDirection().normalize().multiply(1.5); // 1.5 blocks in front
-        Location loc = playerLoc.clone().add(forward);
+            // Calculate offset vector pointing forward relative to player orientation
+            Vector forward = playerLoc.getDirection().normalize().multiply(1.5); // 1.5 blocks in front
 
-        // Call magicCircle with proper center, yaw, pitch and offset
-        List<Location> magicCirclePoints = ParticleUtils.circle(loc, 1, 20, yaw, -pitch + 90);
-        magicCirclePoints.add(loc);
+            // Call magicCircle with proper center, yaw, pitch and offset
+            List<Location> magicCirclePoints = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 2, 0);
 
-        // Spawn particles at all calculated points
-        for (int i = 0; i < magicCirclePoints.size(); i++){
-            for (Location loc1 : magicCirclePoints) {
-                loc1.getWorld().spawnParticle(Utils.DUST, loc1, 0, new Particle.DustOptions(Color.AQUA, 0.4F));
+            // Spawn particles at all calculated points
+            for (int i = 0; i < 100; i++){
+                for (Location loc : magicCirclePoints) {
+                    loc.getWorld().spawnParticle(Utils.DUST, loc, 0, new Particle.DustOptions(Color.WHITE, 0.4F));
+                }
             }
-        }
+        }, 0L, 2L);
+        return d;
     }
 
     public double getBaseDamage() {
