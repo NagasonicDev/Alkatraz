@@ -87,7 +87,6 @@ public class WaterSphere extends Spell {
 
     @Override
     public int circleAction(Player p) {
-        PlayerData data = DataManager.getPlayerData(p);
         int d = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
             Location playerLoc = p.getEyeLocation(); // Player eye location
             float yaw = playerLoc.getYaw();

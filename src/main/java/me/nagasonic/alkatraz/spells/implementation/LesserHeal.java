@@ -13,11 +13,14 @@ import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class LesserHeal extends Spell {
 
@@ -25,6 +28,7 @@ public class LesserHeal extends Spell {
         super(type);
     }
     private double baseHeal;
+    private int taskID;
 
     @Override
     public void loadConfiguration() {
@@ -43,28 +47,54 @@ public class LesserHeal extends Spell {
                 double wandPower = NBT.get(wand, nbt -> (Double) nbt.getDouble("power"));
                 double heal = baseHeal * wandPower;
                 p.setHealth(p.getHealth() + heal);
-                List<Location> locs = ParticleUtils.createHelix(p.getLocation().add(0, -1, 0), 5, 0.5, 2, 10);
-                for (Location loc : locs){
-                    loc.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, loc, 1);
-                }
+                AtomicInteger l = new AtomicInteger(0);
+                List<Location> locs = ParticleUtils.createHelix(p.getLocation(), 2, 0.5, 2, 10);
+                taskID = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
+                    if (l.get() < locs.size()){
+                        Location a = null;
+                        try {
+                            a = locs.get(l.get());
+                        } catch (IndexOutOfBoundsException e) {
+                        }
+                        if (a != null){
+                            a.getWorld().spawnParticle(Particle.TOTEM, a, 1, 0, 0, 0, 0);
+                            l.addAndGet(1);
+                        }
+                    }else{ stopCast();}
+                }, 0L, 1L);
             }else{
                 Player target = (Player) p.getTargetEntity(20);
                 double wandPower = NBT.get(wand, nbt -> (Double) nbt.getDouble("power"));
                 double heal = baseHeal * wandPower;
                 target.setHealth(p.getHealth() + heal);
-                List<Location> locs = ParticleUtils.createHelix(p.getLocation().add(0, -1, 0), 5, 0.5, 2, 10);
-                for (Location loc : locs){
-                    loc.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, loc, 1);
-                }
+                AtomicInteger l = new AtomicInteger(0);
+                List<Location> locs = ParticleUtils.createHelix(p.getLocation(), 2, 0.5, 2, 10);
+                taskID = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
+                    if (l.get() < locs.size()){
+                        Location a = null;
+                        try {
+                            a = locs.get(l.get());
+                        } catch (IndexOutOfBoundsException e) {
+                        }
+                        if (a != null){
+                            a.getWorld().spawnParticle(Particle.TOTEM, a, 1, 0, 0, 0, 0);
+                            l.addAndGet(1);
+                        }
+                    }else{ stopCast();}
+                }, 0L, 1L);
             }
         }
+    }
+
+    private void stopCast(){
+        Bukkit.getServer().getScheduler().cancelTask(taskID);
     }
 
     @Override
     public int circleAction(Player p) {
         int d = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
             if (p.isSneaking() || p.getTargetEntity(20) == null || !(p.getTargetEntity(20) instanceof Player)){
-                Location playerLoc = p.getLocation().add(0, -0.5, 0); // Player eye location
+                Location playerLoc = p.getLocation();
                 float yaw = playerLoc.getYaw();
                 float pitch = 0;
 
@@ -75,11 +105,11 @@ public class LesserHeal extends Spell {
                 // Spawn particles at all calculated points
                 for (int i = 0; i < magicCirclePoints.size(); i++){
                     for (Location loc1 : magicCirclePoints) {
-                        loc1.getWorld().spawnParticle(Utils.DUST, loc1, 0, new Particle.DustOptions(Color.AQUA, 0.4F));
+                        loc1.getWorld().spawnParticle(Utils.DUST, loc1, 1, new Particle.DustOptions(Color.YELLOW, 0.4F));
                     }
                 }
             }else{
-                Location playerLoc = p.getTargetEntity(20).getLocation().add(0, -0.5, 0); // Player eye location
+                Location playerLoc = p.getTargetEntity(20).getLocation();
                 float yaw = playerLoc.getYaw();
                 float pitch = 0;
 
@@ -94,7 +124,7 @@ public class LesserHeal extends Spell {
                 // Spawn particles at all calculated points
                 for (int i = 0; i < magicCirclePoints.size(); i++){
                     for (Location loc1 : magicCirclePoints) {
-                        loc1.getWorld().spawnParticle(Utils.DUST, loc1, 0, new Particle.DustOptions(Color.AQUA, 0.4F));
+                        loc1.getWorld().spawnParticle(Utils.DUST, loc1, 1, new Particle.DustOptions(Color.YELLOW, 0.4F));
                     }
                 }
             }
