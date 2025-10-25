@@ -44,7 +44,7 @@ public abstract class Spell {
 
     public abstract void castAction(Player p, ItemStack wand);
 
-    public abstract void circleAction(Player p);
+    public abstract int circleAction(Player p);
 
     public void cast(Player p, ItemStack wand){
         Float castTime = getFullCastTime(wand, getCastTime());
@@ -56,13 +56,15 @@ public abstract class Spell {
                     DataManager.subMana(p, getCost());
                     DataManager.addExperience(p, Utils.getExp(getLevel()));
                     Utils.sendActionBar(p, ColorFormat.format("Casted: " + getDisplayName()));
-                    circleAction(p);
-                    Long finalCastTime = castTime.longValue();
+                    int d = circleAction(p);
+                    Float v = castTime * 20;
+                    Long finalCastTime = v.longValue();
                     if (data.getSpellMastery(this) >= getMaxMastery()){
                         finalCastTime = (long) (castTime * 1.25);
                     }
                     Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(Alkatraz.getInstance(), () -> {
                         data.setCasting(false);
+                        Bukkit.getServer().getScheduler().cancelTask(d);
                         castAction(p, wand);
                     }, finalCastTime);
                     if (data.getSpellMastery(this) < getMaxMastery()){
