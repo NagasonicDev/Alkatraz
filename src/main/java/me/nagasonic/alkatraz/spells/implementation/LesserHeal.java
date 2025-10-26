@@ -66,9 +66,9 @@ public class LesserHeal extends Spell {
                 Player target = (Player) p.getTargetEntity(20);
                 double wandPower = NBT.get(wand, nbt -> (Double) nbt.getDouble("power"));
                 double heal = baseHeal * wandPower;
-                target.setHealth(p.getHealth() + heal);
+                target.setHealth(target.getHealth() + heal);
                 AtomicInteger l = new AtomicInteger(0);
-                List<Location> locs = ParticleUtils.createHelix(p.getLocation(), 2, 0.5, 2, 10);
+                List<Location> locs = ParticleUtils.createHelix(target.getLocation(), 2, 0.5, 2, 10);
                 taskID = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
                     if (l.get() < locs.size()){
                         Location a = null;
