@@ -128,7 +128,7 @@ public class LesserHeal extends Spell {
                     }
                 }
             }
-        }, 0L, 2L);
+        }, 0L, 10L);
         return d;
     }
 }

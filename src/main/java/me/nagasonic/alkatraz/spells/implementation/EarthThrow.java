@@ -80,7 +80,7 @@ public class EarthThrow extends Spell implements Listener {
                     loc.getWorld().spawnParticle(Utils.DUST, loc, 0, new Particle.DustOptions(Color.fromRGB(78, 47, 0), 0.4F));
                 }
             }
-        }, 0L, 2L);
+        }, 0L, 10L);
         return d;
     }
 

@@ -87,7 +87,7 @@ public class MagicMissile extends Spell {
                     loc1.getWorld().spawnParticle(Utils.DUST, loc1, 0, new Particle.DustOptions(Color.AQUA, 0.4F));
                 }
             }
-        }, 0L, 2L);
+        }, 0L, 10L);
         return d;
     }
 
