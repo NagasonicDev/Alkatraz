@@ -66,7 +66,7 @@ public class Fireball extends Spell {
                     loc.getWorld().spawnParticle(Utils.DUST, loc, 0, new Particle.DustOptions(Color.ORANGE, 0.4F));
                 }
             }
-        }, 0L, 2L);
+        }, 0L, 10L);
         return d;
     }
 }
