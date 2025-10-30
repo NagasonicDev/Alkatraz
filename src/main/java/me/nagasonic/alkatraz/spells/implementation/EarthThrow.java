@@ -56,7 +56,7 @@ public class EarthThrow extends Spell implements Listener {
                 b.setMaxDamage((int) baseDamage);
                 b.setVelocity(direction.multiply(1).setY(0.3));
                 this.block = b;
-                this.power = NBT.get(wand, nbt2 -> (Double) nbt2.getDouble("power"));
+                this.power = NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
             }
         }
     }
@@ -96,7 +96,7 @@ public class EarthThrow extends Spell implements Listener {
                     l.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, l, 5);
                 }
                 for (LivingEntity le : loc.getNearbyLivingEntities(3)){
-                    le.damage(baseDamage * this.power);
+                    le.damage(calcDamage(baseDamage * this.power, le, caster));
                     Vector direction = le.getLocation().toVector().subtract(loc.toVector());
                     direction.normalize().multiply(1);
                     direction.setY(1.25);

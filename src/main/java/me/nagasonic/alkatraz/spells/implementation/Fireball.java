@@ -12,20 +12,27 @@ import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
+import org.bukkit.block.data.type.Fire;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
 import java.util.List;
 
-public class Fireball extends Spell {
+public class Fireball extends Spell implements Listener {
     public Fireball(String type) {
         super(type);
     }
+    private org.bukkit.entity.Fireball fireball;
     private double baseDamage;
+    private Player caster;
+    private double power;
 
     @Override
     public void loadConfiguration() {
@@ -35,17 +42,15 @@ public class Fireball extends Spell {
 
         loadCommonConfig(spellConfig);
         baseDamage = spellConfig.getDouble("base_damage");
+        Alkatraz.getInstance().getServer().getPluginManager().registerEvents(this, Alkatraz.getInstance());
     }
 
     @Override
     public void castAction(Player p, ItemStack wand){
         if (!p.isDead()){
-            EntityDamageEvent e = p.launchProjectile(org.bukkit.entity.Fireball.class, p.getLocation().getDirection().multiply(0.5)).getLastDamageCause();
-            double wandPower = NBT.get(wand, nbt -> (Double) nbt.getDouble("power"));
-            if (e != null){
-                e.setDamage(calcDamage(baseDamage*wandPower, (LivingEntity) e.getEntity(), p));
-                Alkatraz.logFine(calcDamage(baseDamage*wandPower, (LivingEntity) e.getEntity(), p) + "");
-            }
+            this.caster = p;
+            this.fireball = p.launchProjectile(org.bukkit.entity.Fireball.class, p.getLocation().getDirection().multiply(0.5));
+            this.power = NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
         }
     }
 
@@ -70,5 +75,14 @@ public class Fireball extends Spell {
             }
         }, 0L, 10L);
         return d;
+    }
+
+    @EventHandler
+    private void onDamage(EntityDamageByEntityEvent e){
+        if (e != null){
+            if (e.getDamager() == this.fireball){
+                e.setDamage(calcDamage(baseDamage*power, (LivingEntity) e.getEntity(), caster));
+            }
+        }
     }
 }
