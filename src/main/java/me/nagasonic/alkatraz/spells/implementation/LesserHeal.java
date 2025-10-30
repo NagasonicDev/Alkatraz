@@ -44,7 +44,7 @@ public class LesserHeal extends Spell {
     public void castAction(Player p, ItemStack wand) {
         if (!p.isDead()){
             if (p.isSneaking() || p.getTargetEntity(20) == null || !(p.getTargetEntity(20) instanceof Player)){
-                double wandPower = NBT.get(wand, nbt -> (Double) nbt.getDouble("power"));
+                double wandPower = NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
                 double heal = baseHeal * wandPower;
                 p.setHealth(p.getHealth() + heal);
                 AtomicInteger l = new AtomicInteger(0);
@@ -64,7 +64,7 @@ public class LesserHeal extends Spell {
                 }, 0L, 1L);
             }else{
                 Player target = (Player) p.getTargetEntity(20);
-                double wandPower = NBT.get(wand, nbt -> (Double) nbt.getDouble("power"));
+                double wandPower = NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
                 double heal = baseHeal * wandPower;
                 target.setHealth(target.getHealth() + heal);
                 AtomicInteger l = new AtomicInteger(0);

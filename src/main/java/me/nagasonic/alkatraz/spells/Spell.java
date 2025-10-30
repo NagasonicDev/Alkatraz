@@ -168,6 +168,6 @@ public abstract class Spell {
                 tres += Utils.getEntityResistance(Element.NULL, target);
             }
         }
-        return base * (1 + (caffinity - tres) / 100);
+        return base * (1 + ((caffinity - tres) / 100));
     }
 }

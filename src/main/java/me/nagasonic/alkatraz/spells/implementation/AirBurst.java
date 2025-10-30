@@ -23,6 +23,7 @@ public class AirBurst extends Spell {
     public AirBurst(String type){
         super(type);
     }
+    private double power;
     private int taskID;
 
     @Override
@@ -37,6 +38,7 @@ public class AirBurst extends Spell {
     @Override
     public void castAction(Player p, ItemStack wand) {
         if (!p.isDead()){
+            this.power = NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
             AtomicInteger l = new AtomicInteger(0);
             List<Location> lineLocs = ParticleUtils.line(2, p.getEyeLocation(), p.getEyeLocation().add(p.getEyeLocation().getDirection().multiply(40)));
             Vector v = p.getEyeLocation().getDirection();
