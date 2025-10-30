@@ -52,7 +52,7 @@ public class DataManager implements Listener {
             data.setCircle(cfg.getInt("stats.circle"));
             data.setManaRegeneration(cfg.getDouble("stats.mana_regeneration"));
             data.setExperience(cfg.getDouble("stats.experience"));
-            data.setMagicDamage(cfg.getDouble("stats.magic_damage"));
+            data.setMagicAffinity(cfg.getDouble("stats.magic_affinity"));
             data.setMagicResistance(cfg.getDouble("stats.magic_resistance"));
             data.setFireAffinity(cfg.getDouble("stats.fire_affinity"));
             data.setFireResistance(cfg.getDouble("stats.fire_resistance"));
@@ -77,7 +77,7 @@ public class DataManager implements Listener {
             data.setCircle(0);
             data.setManaRegeneration(1);
             data.setExperience(0);
-            data.setMagicDamage(1);
+            data.setMagicAffinity(1);
             data.setMagicResistance(0);
             data.setFireAffinity(0);
             data.setFireResistance(0);
@@ -101,6 +101,27 @@ public class DataManager implements Listener {
                     data.setSpellMastery(spell, mcfg.getInt("spell_mastery." + spell.getType().toLowerCase()));
                 }
             }
+        }
+        File stats = new File(getFolderPath(p) + "/stats.yml");
+        if (stats.exists()){
+            FileConfiguration scfg = YamlConfiguration.loadConfiguration(stats);
+            data.setStatPoints(scfg.getInt("stat_points"));
+            data.setStatResetTokens(scfg.getInt("reset_tokens"));
+            data.setFireStatPoints(scfg.getInt("fire_points"));
+            data.setWaterStatPoints(scfg.getInt("water_points"));
+            data.setAirStatPoints(scfg.getInt("air_points"));
+            data.setEarthStatPoints(scfg.getInt("earth_points"));
+            data.setLightStatPoints(scfg.getInt("light_points"));
+            data.setDarkStatPoints(scfg.getInt("dark_points"));
+        }else{
+            data.setStatPoints(Alkatraz.getPluginConfig().getInt("default_stat_points"));
+            data.setStatResetTokens(Alkatraz.getPluginConfig().getInt("default_reset_tokens"));
+            data.setFireStatPoints(0);
+            data.setWaterStatPoints(0);
+            data.setAirStatPoints(0);
+            data.setEarthStatPoints(0);
+            data.setLightStatPoints(0);
+            data.setDarkStatPoints(0);
         }
         return data;
     }
@@ -325,7 +346,7 @@ public class DataManager implements Listener {
         gcfg.set("stats.circle", data.getCircle());
         gcfg.set("stats.mana_regeneration", data.getManaRegeneration());
         gcfg.set("stats.experience", data.getExperience());
-        gcfg.set("stats.magic_damage", data.getMagicDamage());
+        gcfg.set("stats.magic_affinity", data.getMagicAffinity());
         gcfg.set("stats.magic_resistance", data.getMagicResistance());
         gcfg.set("stats.fire_affinity", data.getFireAffinity());
         gcfg.set("stats.fire_resistance", data.getFireResistance());
@@ -353,9 +374,21 @@ public class DataManager implements Listener {
             }
         }
 
+        File stats = new File(getFolderPath(p) + "/stats.yml");
+        FileConfiguration scfg = YamlConfiguration.loadConfiguration(stats);
+        scfg.set("stat_points", data.getStatPoints());
+        scfg.set("reset_tokens", data.getStatResetTokens());
+        scfg.set("fire_points", data.getFireStatPoints());
+        scfg.set("air_points", data.getAirStatPoints());
+        scfg.set("water_points", data.getWaterStatPoints());
+        scfg.set("earth_points", data.getEarthStatPoints());
+        scfg.set("light_points", data.getLightStatPoints());
+        scfg.set("dark_points", data.getDarkStatPoints());
+
         try {
             gcfg.save(general);
             mcfg.save(masteries);
+            scfg.save(stats);
         } catch (IOException ex) {
             ex.printStackTrace();
         }
