@@ -28,6 +28,7 @@ public class LesserHeal extends Spell {
         super(type);
     }
     private double baseHeal;
+    private double maxHeal;
     private int taskID;
 
     @Override
@@ -38,6 +39,7 @@ public class LesserHeal extends Spell {
 
         loadCommonConfig(spellConfig);
         baseHeal = spellConfig.getDouble("base_heal");
+        maxHeal = spellConfig.getDouble("max_heal");
     }
 
     @Override
@@ -45,7 +47,10 @@ public class LesserHeal extends Spell {
         if (!p.isDead()){
             if (p.isSneaking() || p.getTargetEntity(20) == null || !(p.getTargetEntity(20) instanceof Player)){
                 double wandPower = NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
-                double heal = baseHeal * wandPower;
+                double heal = (baseHeal * wandPower) * (1 + DataManager.getPlayerData(p).getLightAffinity() / 100);
+                if (heal > maxHeal){
+                    heal = maxHeal;
+                }
                 p.setHealth(p.getHealth() + heal);
                 AtomicInteger l = new AtomicInteger(0);
                 List<Location> locs = ParticleUtils.createHelix(p.getLocation(), 2, 0.5, 2, 10);
@@ -65,7 +70,10 @@ public class LesserHeal extends Spell {
             }else{
                 Player target = (Player) p.getTargetEntity(20);
                 double wandPower = NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
-                double heal = baseHeal * wandPower;
+                double heal = (baseHeal * wandPower) * (1 + DataManager.getPlayerData(p).getLightAffinity() / 100);
+                if (heal > maxHeal){
+                    heal = maxHeal;
+                }
                 target.setHealth(target.getHealth() + heal);
                 AtomicInteger l = new AtomicInteger(0);
                 List<Location> locs = ParticleUtils.createHelix(target.getLocation(), 2, 0.5, 2, 10);
