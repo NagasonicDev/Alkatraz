@@ -317,9 +317,17 @@ public class DataManager implements Listener {
     }
 
     private static double getManaRegen(int circle){
-        int mana = getMaxMana(circle);
-        double t = 100 + (mana - 100) * ((double) 8 / 150);
-        return mana / t;
+        return switch (circle){
+            case 0 -> 1;
+            case 1 -> 2;
+            case 3 -> 3;
+            case 4 -> 5;
+            case 6 -> 7.5;
+            case 7 -> 10;
+            case 8 -> 12.5;
+            case 9 -> 15;
+            default -> 0;
+        };
     }
 
     private static int getMaxMana(int circle){
