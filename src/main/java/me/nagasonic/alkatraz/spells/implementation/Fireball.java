@@ -13,6 +13,7 @@ import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
@@ -42,7 +43,8 @@ public class Fireball extends Spell {
             EntityDamageEvent e = p.launchProjectile(org.bukkit.entity.Fireball.class, p.getLocation().getDirection().multiply(0.5)).getLastDamageCause();
             double wandPower = NBT.get(wand, nbt -> (Double) nbt.getDouble("power"));
             if (e != null){
-                e.setDamage(baseDamage*wandPower);
+                e.setDamage(calcDamage(baseDamage*wandPower, (LivingEntity) e.getEntity(), p));
+                Alkatraz.logFine(calcDamage(baseDamage*wandPower, (LivingEntity) e.getEntity(), p) + "");
             }
         }
     }

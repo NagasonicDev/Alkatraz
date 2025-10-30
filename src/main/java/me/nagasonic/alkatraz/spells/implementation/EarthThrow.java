@@ -4,8 +4,6 @@ import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.dom.Ground;
-import me.nagasonic.alkatraz.playerdata.DataManager;
-import me.nagasonic.alkatraz.playerdata.PlayerData;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
@@ -32,6 +30,7 @@ public class EarthThrow extends Spell implements Listener {
 
     private FallingBlock block;
     private double power;
+    private Player caster;
 
     @Override
     public void loadConfiguration() {
@@ -47,6 +46,7 @@ public class EarthThrow extends Spell implements Listener {
     @Override
     public void castAction(Player p, ItemStack wand) {
         if (!p.isDead()){
+            this.caster = p;
             Location loc = p.getEyeLocation();
             Vector direction = loc.getDirection();
             if (p.isOnGround()){
@@ -119,7 +119,7 @@ public class EarthThrow extends Spell implements Listener {
                     l.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, l, 5);
                 }
                 for (LivingEntity le : loc.getNearbyLivingEntities(3)){
-                    le.damage(baseDamage * this.power);
+                    le.damage(calcDamage(baseDamage * this.power, le, this.caster));
                     Vector direction = le.getLocation().toVector().subtract(loc.toVector());
                     direction.normalize().multiply(1);
                     direction.setY(1.25);

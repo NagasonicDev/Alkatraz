@@ -68,7 +68,7 @@ public class WaterSphere extends Spell {
                             if (!entity.isDead() && entity != p && entity instanceof LivingEntity){
                                 LivingEntity le = (LivingEntity) entity;
                                 double wandPower = NBT.get(wand, nbt -> (Double) nbt.getDouble("power"));
-                                le.damage(wandPower * baseDamage);
+                                le.damage(calcDamage(wandPower * baseDamage, le, p));
                                 Vector unitVector = entity.getLocation().toVector().subtract(p.getLocation().toVector()).normalize();
                                 entity.setVelocity(unitVector.multiply(0.1));
                             }
