@@ -21,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static me.nagasonic.alkatraz.util.ColorFormat.format;
 
@@ -223,8 +224,14 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
             }
 
         } else if (args[0].equals("stats")) {
-            Player p = (Player) sender;
-            StatsGUI.createGUI(p, p);
+            if (args.length == 1 || args.length == 2){
+                Player p = (Player) sender;
+                if (args.length == 2){
+                    StatsGUI.createGUI(p, Objects.requireNonNull(Bukkit.getPlayer(args[1])));
+                }else{
+                    StatsGUI.createGUI(p, p);
+                }
+            }
         }
 
         return true;
@@ -240,6 +247,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
             if (Permission.hasPermission(sender, Permission.COMMAND_EXPERIENCE)){ list.add("experience"); }
             if (Permission.hasPermission(sender, Permission.COMMAND_CIRCLE)){ list.add("circle"); }
             if (Permission.hasPermission(sender, Permission.COMMAND_MASTERY)){ list.add("mastery"); }
+            list.add("stats");
 
             return list;
         }else if (args.length == 2){
@@ -269,6 +277,12 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                 List<String> list = new ArrayList<>();
                 for (Spell spell : SpellRegistry.getAllSpells().values()){
                     list.add(spell.getId());
+                }
+                return list;
+            } else if (args[0].equals("stats")) {
+                List<String> list = new ArrayList<>();
+                for (Player p : Bukkit.getOnlinePlayers()){
+                    list.add(p.getName());
                 }
                 return list;
             }
