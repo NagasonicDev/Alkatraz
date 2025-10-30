@@ -341,7 +341,7 @@ public class PlayerData {
             case FIRE -> getFireAffinity();
             case EARTH -> getEarthAffinity();
             case LIGHT -> getLightAffinity();
-            case NULL -> getMagicAffinity();
+            case NONE -> getMagicAffinity();
         };
     }
 
@@ -353,7 +353,7 @@ public class PlayerData {
             case FIRE -> getFireResistance();
             case EARTH -> getEarthResistance();
             case LIGHT -> getLightResistance();
-            case NULL -> getMagicResistance();
+            case NONE -> getMagicResistance();
         };
     }
 }

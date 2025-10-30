@@ -324,7 +324,7 @@ public class Utils {
 
     public static double getEntityAffinity(Element element, LivingEntity entity){
         String name;
-        if (element == Element.NULL){
+        if (element == Element.NONE){
             name = "magic";
         }else { name = element.name().toLowerCase(); }
         if (NBT.get(entity, nbt -> (Double) nbt.getDouble(name + "_affinity")) != null){
@@ -335,7 +335,7 @@ public class Utils {
 
     public static double getEntityResistance(Element element, LivingEntity entity){
         String name;
-        if (element == Element.NULL){
+        if (element == Element.NONE){
             name = "magic";
         }else { name = element.name().toLowerCase(); }
         if (NBT.get(entity, nbt -> (Double) nbt.getDouble(name + "_resistance")) != null){
