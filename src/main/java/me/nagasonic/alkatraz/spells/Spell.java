@@ -1,24 +1,17 @@
 package me.nagasonic.alkatraz.spells;
 
 import de.tr7zw.nbtapi.NBT;
-import jdk.jshell.execution.Util;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.playerdata.DataManager;
 import me.nagasonic.alkatraz.playerdata.PlayerData;
 import me.nagasonic.alkatraz.util.ColorFormat;
-import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
-import org.bukkit.block.Block;
 import org.bukkit.boss.BarColor;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.util.Vector;
-
-import java.util.List;
 
 @SuppressWarnings("unused")
 public abstract class Spell {
@@ -151,7 +144,7 @@ public abstract class Spell {
     public double calcDamage(double base, LivingEntity target, Player caster){
         PlayerData data = DataManager.getPlayerData(caster);
         double caffinity = data.getAffinity(getElement());
-        if (getElement() != Element.NULL){
+        if (getElement() != Element.NONE){
             caffinity += data.getMagicAffinity();
         }
         double tres = 0;
@@ -159,13 +152,13 @@ public abstract class Spell {
             Player t = (Player) target;
             PlayerData tdata = DataManager.getPlayerData(t);
             tres = tdata.getResistance(getElement());
-            if (getElement() != Element.NULL){
+            if (getElement() != Element.NONE){
                 tres += tdata.getMagicResistance();
             }
         }else {
             tres = Utils.getEntityResistance(getElement(), target);
-            if (getElement() != Element.NULL){
-                tres += Utils.getEntityResistance(Element.NULL, target);
+            if (getElement() != Element.NONE){
+                tres += Utils.getEntityResistance(Element.NONE, target);
             }
         }
         return base * (1 + ((caffinity - tres) / 100));

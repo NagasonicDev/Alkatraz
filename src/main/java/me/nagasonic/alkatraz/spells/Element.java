@@ -7,7 +7,7 @@ public enum Element {
     AIR("&fAir"),
     LIGHT("#ffff87Light"),
     DARK("&8Dark"),
-    NULL("&7Null");
+    NONE("&7None");
 
     private String name;
 
