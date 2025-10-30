@@ -3,3 +3,9 @@ check_updates: true
 
 # Additional Debugging messages
 debug: true
+
+# The amount of stat points a player starts with. DEFAULT: 5
+default_stat_points: 5
+
+# The amount of stat reset tokens a player starts with. DEFAULT: 1
+default_reset_tokens: 1

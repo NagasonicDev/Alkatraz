@@ -5,6 +5,7 @@ import me.nagasonic.alkatraz.playerdata.DataManager;
 import me.nagasonic.alkatraz.playerdata.PlayerData;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
+import me.nagasonic.alkatraz.spells.implementation.MagicMissile;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -29,7 +30,7 @@ public class SpellsGUI implements Listener {
         Collection<Spell> spells = SpellRegistry.getAllSpells().values();
         int i = 1;
         int p = 1;
-        int pageNumbers = (int) Math.ceil((double) spells.size() / 36);
+        int pageNumbers = (int) Math.ceil((double) spells.size() / 36) + 2;
         List<Spell> pageSpells = new ArrayList<>();
         for (Spell spell : spells){
             if (i < 36){
@@ -48,9 +49,9 @@ public class SpellsGUI implements Listener {
 
     private static void createGui(int page, Player p, OfflinePlayer target, int totalPages){
         PlayerData data;
-        if (p.isOnline()){
-            data = DataManager.getPlayerData(p);
-        }else{ data = DataManager.getConfigData(p); }
+        if (target.isOnline()){
+            data = DataManager.getPlayerData(target);
+        }else{ data = DataManager.getConfigData(target); }
         Inventory gui = Bukkit.createInventory(null, 54, "Spells");
         for (int i = 0; i < 9; i++){
             gui.setItem(i, Utils.getBlank());
@@ -106,7 +107,7 @@ public class SpellsGUI implements Listener {
                     lore.add(format("&bCode: " + spell.getCode()));
                     lore.add(format("&bMana Cost: " + spell.getCost()));
                     lore.add(format("&bCast Time: " + spell.getCastTime() + "s"));
-                    lore.add(format("&bElement: " + spell.getElement()));
+                    lore.add(format("&bElement: " + spell.getElement().getName()));
                     lore.add(format("&bMastery: " + data.getSpellMastery(spell) + "/" + spell.getMaxMastery()));
                     lore.add("");
                     lore.add(format("&eCircle: " + spell.getLevel()));
