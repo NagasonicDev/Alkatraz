@@ -56,7 +56,7 @@ public class AirBurst extends Spell {
                         }
                         for (Entity entity : a.getNearbyEntities(1, 1, 1)){
                             if (!entity.isDead() && entity != p && entity instanceof LivingEntity){
-                                entity.setVelocity(v.multiply(1.5));
+                                entity.setVelocity(v.multiply(calcDamage(1.5, (LivingEntity) entity, p)));
                             }
                         }
                         l.addAndGet(1);

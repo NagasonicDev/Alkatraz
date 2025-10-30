@@ -26,7 +26,7 @@ public abstract class Spell {
     protected String id;
     protected String displayName;
     protected String description;
-    protected String element;
+    protected Element element;
     protected String code;
     protected BarColor masteryBarColor;
     protected Material guiItem;
@@ -83,7 +83,7 @@ public abstract class Spell {
         this.id = spellConfig.getString("id");
         this.displayName = spellConfig.getString("display_name");
         this.description = spellConfig.getString("description");
-        this.element = spellConfig.getString("element");
+        this.element = Element.valueOf(spellConfig.getString("element"));
         this.code = spellConfig.getString("code");
         this.castTime = spellConfig.getDouble("cast_time");
         this.cost = spellConfig.getInt("mana_cost");
@@ -102,7 +102,7 @@ public abstract class Spell {
         return id;
     }
 
-    public String getElement() { return element; }
+    public Element getElement() { return element; }
 
     public String getDisplayName() {
         return displayName;
@@ -148,4 +148,26 @@ public abstract class Spell {
         return wCastTime * spellCastTime.floatValue();
     }
 
+    public double calcDamage(double base, LivingEntity target, Player caster){
+        PlayerData data = DataManager.getPlayerData(caster);
+        double caffinity = data.getAffinity(getElement());
+        if (getElement() != Element.NULL){
+            caffinity += data.getMagicAffinity();
+        }
+        double tres = 0;
+        if (target instanceof Player){
+            Player t = (Player) target;
+            PlayerData tdata = DataManager.getPlayerData(t);
+            tres = tdata.getResistance(getElement());
+            if (getElement() != Element.NULL){
+                tres += tdata.getMagicResistance();
+            }
+        }else {
+            tres = Utils.getEntityResistance(getElement(), target);
+            if (getElement() != Element.NULL){
+                tres += Utils.getEntityResistance(Element.NULL, target);
+            }
+        }
+        return base * (1 + (caffinity - tres) / 100);
+    }
 }

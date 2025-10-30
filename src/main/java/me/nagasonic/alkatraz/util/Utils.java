@@ -1,13 +1,16 @@
 package me.nagasonic.alkatraz.util;
 
+import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.dom.*;
+import me.nagasonic.alkatraz.spells.Element;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -317,5 +320,27 @@ public class Utils {
             case 9 -> 340;
             default -> 0;
         };
+    }
+
+    public static double getEntityAffinity(Element element, LivingEntity entity){
+        String name;
+        if (element == Element.NULL){
+            name = "magic";
+        }else { name = element.name().toLowerCase(); }
+        if (NBT.get(entity, nbt -> (Double) nbt.getDouble(name + "_affinity")) != null){
+            return NBT.get(entity, nbt -> (Double) nbt.getDouble(name + "_affinity"));
+        }
+        return 0;
+    }
+
+    public static double getEntityResistance(Element element, LivingEntity entity){
+        String name;
+        if (element == Element.NULL){
+            name = "magic";
+        }else { name = element.name().toLowerCase(); }
+        if (NBT.get(entity, nbt -> (Double) nbt.getDouble(name + "_resistance")) != null){
+            return NBT.get(entity, nbt -> (Double) nbt.getDouble(name + "_resistance"));
+        }
+        return 0;
     }
 }
