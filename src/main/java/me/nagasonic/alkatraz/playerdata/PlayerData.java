@@ -344,4 +344,16 @@ public class PlayerData {
             case NULL -> getMagicAffinity();
         };
     }
+
+    public double getResistance(Element element){
+        return switch (element){
+            case WATER -> getWaterResistance();
+            case AIR -> getAirResistance();
+            case DARK -> getDarkResistance();
+            case FIRE -> getFireResistance();
+            case EARTH -> getEarthResistance();
+            case LIGHT -> getLightResistance();
+            case NULL -> getMagicResistance();
+        };
+    }
 }
