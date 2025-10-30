@@ -8,7 +8,7 @@ When holding a wand, the experience bar will transform into a **Mana Bar**, whic
 
 ## Features:
 - 1 Wand
-- 3 Spells
+- 5 Spells
 - Mastery System
 - Advanced Casting System
 
@@ -16,11 +16,16 @@ When holding a wand, the experience bar will transform into a **Mana Bar**, whic
 - Magic Missile: The basic magic spell, which every player discovered on joining. Shoots a beam up to 20 blocks in front of the player, doing small damage to entities it collides with. Cannot pass through solid blocks.
 - Fireball: Shoots a fireball, exploding and dealing damaging to entities and blocks.
 - Water Sphere: Summons a slow-moving water ball that does damage to entities.
+- Air Burst: Shoots out a burst of air, pushing back all enemies.
+- Lesser Heal: Heals a target(look at a player) or yourself(shift) by a small amount of health. (1-2.5 hearts, depending on Light Affinity)
 
 ## Commands (Permissions):
 - `/alkatraz discoverspell <spell> <player> `(`alkatraz.command.discoverspell`): makes a player 'discover' a spell, meaning they can use it without permission.
 - `/alkatraz undiscoverspell <spell> <player>` (`alkatraz.command.undiscoverspell`): makes a player 'undiscover' a spell, meaning they cannot use it without permission.
 - `/alkatraz give <item> <player>` (`alkatraz.command.give`): Gives an Alkatraz item to a player, currently only `wooden_wand`
+- `/alkatraz mastery <spell> <add|set> <number> [<player>]` (`alkatraz.command.mastery`): Modifies a player's mastery of a spell.
+- `/alkatraz circle <add|set> <number> [<player>]` (`alkatraz.command.circle`): Modifies the circle level of a player. Automatically updates the max mana and mana recovery of the player.
+- `/alkatraz experience <add|set> <number> [<player>]` (`alkatraz.command.experience`): Changes the magic experience of the player, will automatically increase the circle level of the player if enough experience is given to level up.
 - `alkatraz.allspells`: allows a player to use all spells even if they have not discovered it.
 - `/spells <player>`: opens a gui that shows the current spells that the player can use. `<player>` argument is if you want to view a different player's spells.
 
