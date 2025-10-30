@@ -2,6 +2,7 @@ package me.nagasonic.alkatraz.commands;
 
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.dom.Permission;
+import me.nagasonic.alkatraz.gui.StatsGUI;
 import me.nagasonic.alkatraz.items.wands.Wand;
 import me.nagasonic.alkatraz.items.wands.WandRegistry;
 import me.nagasonic.alkatraz.playerdata.DataManager;
@@ -223,8 +224,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
 
         } else if (args[0].equals("stats")) {
             Player p = (Player) sender;
-            PlayerData data = DataManager.getPlayerData(p);
-            Alkatraz.logFine(data.toString());
+            StatsGUI.createGUI(p, p);
         }
 
         return true;

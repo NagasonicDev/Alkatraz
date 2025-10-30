@@ -5,7 +5,7 @@ description: '&7A short burst of mana that deals small damage to enemies.'
 enabled: true
 
 # NULL MEANS ITS DAMAGE DOES NOT SCALE WITH ELEMENTAL DAMAGE, ONLY MAGIC DAMAGE
-element: 'null'
+element: 'NULL'
 
 # THE CASTING CODE. 'R' FOR RIGHT CLICK, 'L' FOR LEFT CLICK, 'S' FOR HAND SWAP
 code: 'RRRRR'

@@ -5,6 +5,7 @@ import me.nagasonic.alkatraz.commands.SpellsCommand;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.ConfigUpdater;
 import me.nagasonic.alkatraz.gui.SpellsGUI;
+import me.nagasonic.alkatraz.gui.StatsGUI;
 import me.nagasonic.alkatraz.items.wands.Wand;
 import me.nagasonic.alkatraz.items.wands.WandListeners;
 import me.nagasonic.alkatraz.items.wands.WandRegistry;
@@ -63,6 +64,7 @@ public final class Alkatraz extends JavaPlugin {
         registerListener(new WandListeners());
         registerListener(new DataManager());
         registerListener(new SpellsGUI());
+        registerListener(new StatsGUI());
         getCommand("spells").setExecutor(new SpellsCommand());
         getCommand("alkatraz").setExecutor(new AlkatrazCommand());
         getCommand("alkatraz").setTabCompleter(new AlkatrazCommand());
