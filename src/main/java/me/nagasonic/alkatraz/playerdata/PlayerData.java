@@ -1,5 +1,6 @@
 package me.nagasonic.alkatraz.playerdata;
 
+import me.nagasonic.alkatraz.spells.Element;
 import me.nagasonic.alkatraz.spells.Spell;
 import org.bukkit.boss.BossBar;
 
@@ -23,7 +24,7 @@ public class PlayerData {
     private double manaRegeneration;
     private int circle;
     private double experience;
-    private double magicDamage;
+    private double magicAffinity;
     private double magicResistance;
 
     private double fireAffinity;
@@ -43,6 +44,15 @@ public class PlayerData {
 
     private double darkAffinity;
     private double darkResistance;
+
+    private int statPoints;
+    private int fireStatPoints;
+    private int waterStatPoints;
+    private int earthStatPoints;
+    private int airStatPoints;
+    private int lightStatPoints;
+    private int darkStatPoints;
+    private int statResetTokens;
 
     private boolean isCasting;
 
@@ -82,12 +92,12 @@ public class PlayerData {
         this.circle = circle;
     }
 
-    public double getMagicDamage() {
-        return magicDamage;
+    public double getMagicAffinity() {
+        return magicAffinity;
     }
 
-    public void setMagicDamage(double magicDamage) {
-        this.magicDamage = magicDamage;
+    public void setMagicAffinity(double magicAffinity) {
+        this.magicAffinity = magicAffinity;
     }
 
     public double getMagicResistance() {
@@ -257,5 +267,81 @@ public class PlayerData {
 
     public void setExpBar(BossBar expBar) {
         this.expBar = expBar;
+    }
+
+    public int getStatPoints() {
+        return statPoints;
+    }
+
+    public void setStatPoints(int statPoints) {
+        this.statPoints = statPoints;
+    }
+
+    public int getFireStatPoints() {
+        return fireStatPoints;
+    }
+
+    public void setFireStatPoints(int fireStatPoints) {
+        this.fireStatPoints = fireStatPoints;
+    }
+
+    public int getWaterStatPoints() {
+        return waterStatPoints;
+    }
+
+    public void setWaterStatPoints(int waterStatPoints) {
+        this.waterStatPoints = waterStatPoints;
+    }
+
+    public int getEarthStatPoints() {
+        return earthStatPoints;
+    }
+
+    public void setEarthStatPoints(int earthStatPoints) {
+        this.earthStatPoints = earthStatPoints;
+    }
+
+    public int getAirStatPoints() {
+        return airStatPoints;
+    }
+
+    public void setAirStatPoints(int airStatPoints) {
+        this.airStatPoints = airStatPoints;
+    }
+
+    public int getLightStatPoints() {
+        return lightStatPoints;
+    }
+
+    public void setLightStatPoints(int lightStatPoints) {
+        this.lightStatPoints = lightStatPoints;
+    }
+
+    public int getDarkStatPoints() {
+        return darkStatPoints;
+    }
+
+    public void setDarkStatPoints(int darkStatPoints) {
+        this.darkStatPoints = darkStatPoints;
+    }
+
+    public int getStatResetTokens() {
+        return statResetTokens;
+    }
+
+    public void setStatResetTokens(int statResetTokens) {
+        this.statResetTokens = statResetTokens;
+    }
+
+    public double getAffinity(Element element){
+        return switch (element){
+            case WATER -> getWaterAffinity();
+            case AIR -> getAirAffinity();
+            case DARK -> getDarkAffinity();
+            case FIRE -> getFireAffinity();
+            case EARTH -> getEarthAffinity();
+            case LIGHT -> getLightAffinity();
+            case NULL -> getMagicAffinity();
+        };
     }
 }
