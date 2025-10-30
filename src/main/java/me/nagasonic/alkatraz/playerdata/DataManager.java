@@ -325,15 +325,15 @@ public class DataManager implements Listener {
     private static int getMaxMana(int circle){
         return switch (circle){
             case 0 -> 100;
-            case 1 -> 267;
-            case 2 -> 433;
-            case 3 -> 600;
-            case 4 -> 767;
-            case 5 -> 933;
-            case 6 -> 1100;
-            case 7 -> 1267;
-            case 8 -> 1433;
-            case 9 -> 1600;
+            case 1 -> 200;
+            case 2 -> 400;
+            case 3 -> 800;
+            case 4 -> 1250;
+            case 5 -> 2000;
+            case 6 -> 2750;
+            case 7 -> 4000;
+            case 8 -> 7500;
+            case 9 -> 10000;
             default -> 0;
         };
     }

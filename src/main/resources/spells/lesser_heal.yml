@@ -17,7 +17,7 @@ level: 2
 cast_time: 1.5
 
 # MANA COST
-mana_cost: 66
+mana_cost: 75
 
 # MAXIMUM MASTERY ACHIEVABLE. NOT RECOMMENDED TO CHANGE
 maximum_mastery: 100
