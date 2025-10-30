@@ -150,7 +150,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                         sender.sendMessage("&cCannot set beyond the circle threshold (0-9).");
                         return true;
                     }
-                    DataManager.addCircle(p.getPlayer(), data.getCircle() - Integer.parseInt(args[2]));
+                    DataManager.addCircle(p.getPlayer(), Integer.parseInt(args[2]) - data.getCircle());
                     sender.sendMessage(format("&aSet circle level of " + p.getName() + " to " + args[2]));
                     if (!p.isOnline()) {
                         DataManager.savePlayerData(p, data);
