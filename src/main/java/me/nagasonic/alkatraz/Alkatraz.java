@@ -4,6 +4,7 @@ import me.nagasonic.alkatraz.commands.AlkatrazCommand;
 import me.nagasonic.alkatraz.commands.SpellsCommand;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.ConfigUpdater;
+import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.gui.SpellsGUI;
 import me.nagasonic.alkatraz.gui.StatsGUI;
 import me.nagasonic.alkatraz.items.wands.Wand;
@@ -57,7 +58,7 @@ public final class Alkatraz extends JavaPlugin {
     @Override
     public void onEnable() {
         // Plugin startup logic
-        if (pluginConfig.getBoolean("check_updates")) UpdateChecker.checkUpdate();
+        if ((boolean) Configs.CHECK_UPDATES.get()) UpdateChecker.checkUpdate();
         Metrics metrics = new Metrics(this, 27657);
         WandRegistry.registerWands();
         SpellRegistry.registerSpells();
