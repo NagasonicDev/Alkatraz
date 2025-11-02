@@ -43,12 +43,7 @@ public final class Alkatraz extends JavaPlugin {
 
         saveConfig("playerdata/playerdata.yml");
 
-        saveConfig("spells/magic_missile.yml");
-        saveConfig("spells/fireball.yml");
-        saveConfig("spells/water_sphere.yml");
-        saveConfig("spells/air_burst.yml");
-        saveConfig("spells/earth_throw.yml");
-        saveConfig("spells/lesser_heal.yml");
+        saveSpellConfigs();
         saveConfig("wands/wooden_wand.yml");
 
 
@@ -153,5 +148,15 @@ public final class Alkatraz extends JavaPlugin {
 
     public static YamlConfiguration getPluginConfig() {
         return pluginConfig;
+    }
+
+    private void saveSpellConfigs(){
+        saveConfig("spells/magic_missile.yml");
+        saveConfig("spells/fireball.yml");
+        saveConfig("spells/water_sphere.yml");
+        saveConfig("spells/air_burst.yml");
+        saveConfig("spells/earth_throw.yml");
+        saveConfig("spells/lesser_heal.yml");
+        saveConfig("spells/fire_blast.yml");
     }
 }

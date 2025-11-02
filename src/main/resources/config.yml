@@ -10,5 +10,11 @@ default_stat_points: 5
 # The amount of stat reset tokens a player starts with. DEFAULT: 1
 default_reset_tokens: 1
 
+# How much affinity you gain from investing 1 stat point. DEFAULT: 10
+affinity_per_point: 10
+
+# How much resistance you gain from investing 1 stat point. DEFAULT: 10
+resistance_per_point: 10
+
 # The delay (ticks) of spawning the magic circle particles. DEFAULT: 10
 circle_ticks: 10

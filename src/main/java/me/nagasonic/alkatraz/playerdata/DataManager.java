@@ -1,6 +1,7 @@
 package me.nagasonic.alkatraz.playerdata;
 
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.items.wands.Wand;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
@@ -114,8 +115,8 @@ public class DataManager implements Listener {
             data.setLightStatPoints(scfg.getInt("light_points"));
             data.setDarkStatPoints(scfg.getInt("dark_points"));
         }else{
-            data.setStatPoints(Alkatraz.getPluginConfig().getInt("default_stat_points"));
-            data.setStatResetTokens(Alkatraz.getPluginConfig().getInt("default_reset_tokens"));
+            data.setStatPoints((Integer) Configs.DEFAULT_STAT_POINTS.get());
+            data.setStatResetTokens((Integer) Configs.DEFAULT_RESET_TOKENS.get());
             data.setFireStatPoints(0);
             data.setWaterStatPoints(0);
             data.setAirStatPoints(0);

@@ -1,23 +1,27 @@
 package me.nagasonic.alkatraz.spells;
 
 public enum Element {
-    FIRE("#ff8c00Fire"),
-    WATER("&9Water"),
-    EARTH("#A0522DEarth"),
-    AIR("&fAir"),
-    LIGHT("#ffff87Light"),
-    DARK("&8Dark"),
-    NONE("&7None");
+    FIRE("Fire", "#ff8c00"),
+    WATER("Water", "&9"),
+    EARTH("Earth", "#A0522D"),
+    AIR("Air", "&f"),
+    LIGHT("Light", "#ffff87"),
+    DARK("Dark", "&8"),
+    NONE("None", "&7");
 
     private String name;
+    private String color;
 
-    Element(String name){
+    Element(String name, String color){
         this.name = name;
+        this.color = color;
     }
 
     public String getName() {
-        return name;
+        return color + name;
     }
 
-
+    public String getColor() {
+        return color;
+    }
 }

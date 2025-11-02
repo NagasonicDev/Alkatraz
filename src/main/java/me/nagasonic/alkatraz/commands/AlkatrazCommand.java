@@ -227,7 +227,11 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
             if (args.length == 1 || args.length == 2){
                 Player p = (Player) sender;
                 if (args.length == 2){
-                    StatsGUI.createGUI(p, Objects.requireNonNull(Bukkit.getPlayer(args[1])));
+                    if (Permission.hasPermission(p, Permission.COMMAND_STATS_OTHER)){
+                        StatsGUI.createGUI(p, Objects.requireNonNull(Bukkit.getPlayer(args[1])));
+                    }else{
+                        p.sendMessage(format("&cYou do not have permission to see another player's stats."));
+                    }
                 }else{
                     StatsGUI.createGUI(p, p);
                 }
@@ -279,7 +283,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                     list.add(spell.getId());
                 }
                 return list;
-            } else if (args[0].equals("stats")) {
+            } else if (args[0].equals("stats") && Permission.hasPermission(sender, Permission.COMMAND_STATS_OTHER)) {
                 List<String> list = new ArrayList<>();
                 for (Player p : Bukkit.getOnlinePlayers()){
                     list.add(p.getName());
