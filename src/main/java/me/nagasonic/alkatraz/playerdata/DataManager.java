@@ -321,6 +321,7 @@ public class DataManager implements Listener {
         return switch (circle){
             case 0 -> 1;
             case 1 -> 2;
+            case 2 -> 2.5;
             case 3 -> 3;
             case 4 -> 5;
             case 6 -> 7.5;
