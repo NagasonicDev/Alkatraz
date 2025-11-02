@@ -1,6 +1,7 @@
 package me.nagasonic.alkatraz.gui;
 
 import de.tr7zw.nbtapi.NBT;
+import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.playerdata.DataManager;
 import me.nagasonic.alkatraz.playerdata.PlayerData;
 import me.nagasonic.alkatraz.spells.Element;
@@ -19,10 +20,13 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static me.nagasonic.alkatraz.util.ColorFormat.format;
 
 public class StatsGUI implements Listener {
+    private final static int AFFINITY_INCREASE = (Integer) Configs.AFFINITY_PER_POINT.get();
+    private final static int RESISTANCE_INCREASE = (Integer) Configs.RESISTANCE_PER_POINT.get();
 
     public static void createGUI(Player p, OfflinePlayer target){
         PlayerData data;
@@ -36,6 +40,13 @@ public class StatsGUI implements Listener {
         for (int i = 27; i < 36; i++){
             gui.setItem(i, Utils.getBlank());
         }
+        gui.setItem(1, getLightStats(data));
+        gui.setItem(2, getEarthStats(data));
+        gui.setItem(3, getWaterStats(data));
+        gui.setItem(4, getPlayerStats(target.getPlayer()));
+        gui.setItem(5, getFireStats(data));
+        gui.setItem(6, getAirStats(data));
+        gui.setItem(7, getDarkStats(data));
         gui.setItem(12, getFire(data));
         gui.setItem(13, getWater(data));
         gui.setItem(14, getEarth(data));
@@ -48,10 +59,13 @@ public class StatsGUI implements Listener {
         List<String> lore = new ArrayList<>();
         lore.add(format("&dReset Tokens: &f" + data.getStatResetTokens()));
         lore.add("");
-        lore.add("&eClick to reset stats.");
-        lore.add("&cTHIS IS NOT UNDOABLE");
+        lore.add(format("&eClick to reset stats."));
+        lore.add(format("&cTHIS IS NOT UNDOABLE"));
         meta.setLore(lore);
         item.setItemMeta(meta);
+        NBT.modify(item, nbt -> {
+            nbt.setBoolean("reset_stats", true);
+        });
         gui.setItem(31, item);
         p.openInventory(gui);
     }
@@ -65,8 +79,8 @@ public class StatsGUI implements Listener {
         lore.add("");
         if (data.getFireStatPoints() > 0){
             lore.add(format("&eBonus:"));
-            lore.add(format("&7 - #ff8c00+" + (10 * data.getFireStatPoints()) + " Fire Affinity"));
-            lore.add(format("&7 - #ff8c00+" + (5 * data.getFireStatPoints()) + " Fire Resistance"));
+            lore.add(format("&7 - #ff8c00+" + (AFFINITY_INCREASE * data.getFireStatPoints()) + " Fire Affinity"));
+            lore.add(format("&7 - #ff8c00+" + (RESISTANCE_INCREASE * data.getFireStatPoints()) + " Fire Resistance"));
             lore.add("");
         }
         lore.add(format("&eClick to invest &61 &epoint."));
@@ -89,8 +103,8 @@ public class StatsGUI implements Listener {
         lore.add("");
         if (data.getWaterStatPoints() > 0){
             lore.add(format("&eBonus:"));
-            lore.add(format("&7 - &9+" + (10 * data.getWaterStatPoints()) + " Water Affinity"));
-            lore.add(format("&7 - &9+" + (5 * data.getWaterStatPoints()) + " Water Resistance"));
+            lore.add(format("&7 - &9+" + (AFFINITY_INCREASE * data.getWaterStatPoints()) + " Water Affinity"));
+            lore.add(format("&7 - &9+" + (RESISTANCE_INCREASE * data.getWaterStatPoints()) + " Water Resistance"));
             lore.add("");
         }
         lore.add(format("&eClick to invest &61 &epoint."));
@@ -113,8 +127,8 @@ public class StatsGUI implements Listener {
         lore.add("");
         if (data.getEarthStatPoints() > 0){
             lore.add(format("&eBonus:"));
-            lore.add(format("&7 - #A0522D+" + (10 * data.getEarthStatPoints()) + " Earth Affinity"));
-            lore.add(format("&7 - #A0522D+" + (5 * data.getEarthStatPoints()) + " Earth Resistance"));
+            lore.add(format("&7 - #A0522D+" + (AFFINITY_INCREASE * data.getEarthStatPoints()) + " Earth Affinity"));
+            lore.add(format("&7 - #A0522D+" + (RESISTANCE_INCREASE * data.getEarthStatPoints()) + " Earth Resistance"));
             lore.add("");
         }
         lore.add(format("&eClick to invest &61 &epoint."));
@@ -137,8 +151,8 @@ public class StatsGUI implements Listener {
         lore.add("");
         if (data.getAirStatPoints() > 0){
             lore.add(format("&eBonus:"));
-            lore.add(format("&7 - &f+" + (10 * data.getAirStatPoints()) + " Air Affinity"));
-            lore.add(format("&7 - &f+" + (5 * data.getAirStatPoints()) + " Air Resistance"));
+            lore.add(format("&7 - &f+" + (AFFINITY_INCREASE * data.getAirStatPoints()) + " Air Affinity"));
+            lore.add(format("&7 - &f+" + (RESISTANCE_INCREASE * data.getAirStatPoints()) + " Air Resistance"));
             lore.add("");
         }
         lore.add(format("&eClick to invest &61 &epoint."));
@@ -161,8 +175,8 @@ public class StatsGUI implements Listener {
         lore.add("");
         if (data.getLightStatPoints() > 0){
             lore.add(format("&eBonus:"));
-            lore.add(format("&7 - #ffff87+" + (10 * data.getLightStatPoints()) + " Light Affinity"));
-            lore.add(format("&7 - #ffff87+" + (5 * data.getLightStatPoints()) + " Light Resistance"));
+            lore.add(format("&7 - #ffff87+" + (AFFINITY_INCREASE * data.getLightStatPoints()) + " Light Affinity"));
+            lore.add(format("&7 - #ffff87+" + (RESISTANCE_INCREASE * data.getLightStatPoints()) + " Light Resistance"));
             lore.add("");
         }
         lore.add(format("&eClick to invest &61 &epoint."));
@@ -185,8 +199,8 @@ public class StatsGUI implements Listener {
         lore.add("");
         if (data.getDarkStatPoints() > 0){
             lore.add(format("&eBonus:"));
-            lore.add(format("&7 - &8+" + (10 * data.getDarkStatPoints()) + " Dark Affinity"));
-            lore.add(format("&7 - &8+" + (5 * data.getDarkStatPoints()) + " Dark Resistance"));
+            lore.add(format("&7 - &8+" + (AFFINITY_INCREASE * data.getDarkStatPoints()) + " Dark Affinity"));
+            lore.add(format("&7 - &8+" + (RESISTANCE_INCREASE * data.getDarkStatPoints()) + " Dark Resistance"));
             lore.add("");
         }
         lore.add(format("&eClick to invest &61 &epoint."));
@@ -200,6 +214,94 @@ public class StatsGUI implements Listener {
         return item;
     }
 
+    private static ItemStack getPlayerStats(Player player){
+        ItemStack item = ItemUtils.headFromUuid(player.getUniqueId().toString());
+        PlayerData data = DataManager.getPlayerData(player);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(format("&f" + player.getName()));
+        List<String> lore = new ArrayList<>();
+        lore.add(format("&6Stat Points: &e" + data.getStatPoints()));
+        lore.add(format("&6Reset Tokens: &e" + data.getStatResetTokens()));
+        lore.add("");
+        lore.add(format("&2Magic Affinity: &b" + data.getMagicAffinity()));
+        lore.add(format("&2Magic Resistance: &b" + data.getMagicResistance()));
+        meta.setLore(lore);
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    private static ItemStack getFireStats(PlayerData data){
+        ItemStack item = new ItemStack(Material.FIRE_CHARGE);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(format(Element.FIRE.getName()));
+        List<String> lore = new ArrayList<>();
+        lore.add(format(Element.FIRE.getColor() + "Affinity: " + data.getFireAffinity()));
+        lore.add(format(Element.FIRE.getColor() + "Resistance: " + data.getFireResistance()));
+        meta.setLore(lore);
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    private static ItemStack getWaterStats(PlayerData data){
+        ItemStack item = new ItemStack(Material.HEART_OF_THE_SEA);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(format(Element.WATER.getName()));
+        List<String> lore = new ArrayList<>();
+        lore.add(format(Element.WATER.getColor() + "Affinity: " + data.getWaterAffinity()));
+        lore.add(format(Element.WATER.getColor() + "Resistance: " + data.getWaterResistance()));
+        meta.setLore(lore);
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    private static ItemStack getEarthStats(PlayerData data){
+        ItemStack item = new ItemStack(Material.DIRT);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(format(Element.EARTH.getName()));
+        List<String> lore = new ArrayList<>();
+        lore.add(format(Element.EARTH.getColor() + "Affinity: " + data.getEarthAffinity()));
+        lore.add(format(Element.EARTH.getColor() + "Resistance: " + data.getEarthResistance()));
+        meta.setLore(lore);
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    private static ItemStack getAirStats(PlayerData data){
+        ItemStack item = ItemUtils.headFromBase64("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMWIyNGQ1NzhkYWYxZTg2MjRiNjJjZDY0Nzg2NDUyMmEyNmJmY2RjMDJiYWMxMTAyZjljMWQ5ZDgyZDdiMjVkMiJ9fX0");
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(format(Element.AIR.getName()));
+        List<String> lore = new ArrayList<>();
+        lore.add(format(Element.AIR.getColor() + "Affinity: " + data.getAirAffinity()));
+        lore.add(format(Element.AIR.getColor() + "Resistance: " + data.getAirResistance()));
+        meta.setLore(lore);
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    private static ItemStack getLightStats(PlayerData data){
+        ItemStack item = ItemUtils.headFromBase64("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTEzMzIzZjIwZTY0MjFlZjFjMWRjNGU2ZjcwYTdhOGEzODRlMWZjYTUyMjA5ZDY2ZTU1YTliNjg1MmYzMmExZCJ9fX0");
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(format(Element.LIGHT.getName()));
+        List<String> lore = new ArrayList<>();
+        lore.add(format(Element.LIGHT.getColor() + "Affinity: " + data.getLightAffinity()));
+        lore.add(format(Element.LIGHT.getColor() + "Resistance: " + data.getLightResistance()));
+        meta.setLore(lore);
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    private static ItemStack getDarkStats(PlayerData data){
+        ItemStack item = ItemUtils.headFromBase64("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTUzNzgyNjdiNzJhMzM2MThjOGM5ZDhmZjRiZTJkNDUyYTI2NTA5YTk5NjRiMDgwYjE5ZDdjMzA4ZWM3OTYwNSJ9fX0");
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(format(Element.DARK.getName()));
+        List<String> lore = new ArrayList<>();
+        lore.add(format(Element.DARK.getColor() + "Affinity: " + data.getDarkAffinity()));
+        lore.add(format(Element.DARK.getColor() + "Resistance: " + data.getDarkResistance()));
+        meta.setLore(lore);
+        item.setItemMeta(meta);
+        return item;
+    }
+
     @EventHandler
     private void onClick(InventoryClickEvent e){
         if (e.getView().getTitle().contains("Stats")){
@@ -210,44 +312,60 @@ public class StatsGUI implements Listener {
                 if (!item.getType().equals(Material.AIR) && item.getAmount() > 0){
                     Player p = (Player) e.getWhoClicked();
                     PlayerData data = DataManager.getPlayerData(p);
-                    if (NBT.get(item, nbt -> (String) nbt.getString("stat")) != null){
+                    if (!Objects.equals(NBT.get(item, nbt -> (String) nbt.getString("stat")), "")){
                         Element element = Element.valueOf(NBT.get(item, nbt -> (String) nbt.getString("stat")).toUpperCase());
                         if (data.getStatPoints() > 0){
                             if (element.equals(Element.FIRE)){
                                 data.setStatPoints(data.getStatPoints() - 1);
                                 data.setFireStatPoints(data.getFireStatPoints() + 1);
-                                data.setFireAffinity(data.getFireAffinity() + 10);
-                                data.setFireResistance(data.getFireResistance() + 5);
+                                data.setFireAffinity(data.getFireAffinity() + AFFINITY_INCREASE);
+                                data.setFireResistance(data.getFireResistance() + RESISTANCE_INCREASE);
                                 updateGUI(p, target);
                             } else if (element.equals(Element.WATER)) {
                                 data.setStatPoints(data.getStatPoints() - 1);
                                 data.setWaterStatPoints(data.getWaterStatPoints() + 1);
-                                data.setWaterAffinity(data.getWaterAffinity() + 10);
-                                data.setWaterResistance(data.getWaterResistance() + 5);
+                                data.setWaterAffinity(data.getWaterAffinity() + AFFINITY_INCREASE);
+                                data.setWaterResistance(data.getWaterResistance() + RESISTANCE_INCREASE);
                                 updateGUI(p, target);
                             } else if (element.equals(Element.EARTH)) {
                                 data.setStatPoints(data.getStatPoints() - 1);
                                 data.setEarthStatPoints(data.getEarthStatPoints() + 1);
-                                data.setEarthAffinity(data.getEarthAffinity() + 10);
-                                data.setEarthResistance(data.getEarthResistance() + 5);
+                                data.setEarthAffinity(data.getEarthAffinity() + AFFINITY_INCREASE);
+                                data.setEarthResistance(data.getEarthResistance() + RESISTANCE_INCREASE);
                                 updateGUI(p, target);
                             } else if (element.equals(Element.AIR)) {
                                 data.setStatPoints(data.getStatPoints() - 1);
                                 data.setAirStatPoints(data.getAirStatPoints() + 1);
-                                data.setAirAffinity(data.getAirAffinity() + 10);
-                                data.setAirResistance(data.getAirResistance() + 5);
+                                data.setAirAffinity(data.getAirAffinity() + AFFINITY_INCREASE);
+                                data.setAirResistance(data.getAirResistance() + RESISTANCE_INCREASE);
                                 updateGUI(p, target);
                             } else if (element.equals(Element.LIGHT)) {
                                 data.setStatPoints(data.getStatPoints() - 1);
                                 data.setLightStatPoints(data.getLightStatPoints() + 1);
-                                data.setLightAffinity(data.getLightAffinity() + 10);
-                                data.setLightResistance(data.getLightResistance() + 5);
+                                data.setLightAffinity(data.getLightAffinity() + AFFINITY_INCREASE);
+                                data.setLightResistance(data.getLightResistance() + RESISTANCE_INCREASE);
                                 updateGUI(p, target);
                             } else if (element.equals(Element.DARK)) {
                                 data.setStatPoints(data.getStatPoints() - 1);
                                 data.setDarkStatPoints(data.getDarkStatPoints() + 1);
-                                data.setDarkAffinity(data.getDarkAffinity() + 10);
-                                data.setDarkResistance(data.getDarkResistance() + 5);
+                                data.setDarkAffinity(data.getDarkAffinity() + AFFINITY_INCREASE);
+                                data.setDarkResistance(data.getDarkResistance() + RESISTANCE_INCREASE);
+                                updateGUI(p, target);
+                            }
+                        }
+                    } else if (NBT.get(item, nbt -> (Boolean) nbt.getBoolean("reset_stats"))) {
+                        if (data.getStatResetTokens() > 0){
+                            int totalPoints = 0;
+                            totalPoints += data.getFireStatPoints() + data.getDarkStatPoints() + data.getWaterStatPoints() + data.getEarthStatPoints() + data.getAirStatPoints() + data.getAirStatPoints();
+                            if (totalPoints > 0){
+                                data.setStatResetTokens(data.getStatResetTokens() - 1);
+                                data.setFireStatPoints(0);
+                                data.setWaterStatPoints(0);
+                                data.setEarthStatPoints(0);
+                                data.setAirStatPoints(0);
+                                data.setLightStatPoints(0);
+                                data.setDarkStatPoints(0);
+                                data.setStatPoints(data.getStatPoints() + totalPoints);
                                 updateGUI(p, target);
                             }
                         }
@@ -270,6 +388,13 @@ public class StatsGUI implements Listener {
             for (int i = 27; i < 36; i++){
                 gui.setItem(i, Utils.getBlank());
             }
+            gui.setItem(1, getLightStats(data));
+            gui.setItem(2, getEarthStats(data));
+            gui.setItem(3, getWaterStats(data));
+            gui.setItem(4, getPlayerStats(target.getPlayer()));
+            gui.setItem(5, getFireStats(data));
+            gui.setItem(6, getAirStats(data));
+            gui.setItem(7, getDarkStats(data));
             gui.setItem(12, getFire(data));
             gui.setItem(13, getWater(data));
             gui.setItem(14, getEarth(data));
@@ -286,6 +411,9 @@ public class StatsGUI implements Listener {
             lore.add(format("&c&lTHIS IS NOT UNDOABLE"));
             meta.setLore(lore);
             item.setItemMeta(meta);
+            NBT.modify(item, nbt -> {
+                nbt.setBoolean("reset_stats", true);
+            });
             gui.setItem(31, item);
         }
     }

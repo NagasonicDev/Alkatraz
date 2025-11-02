@@ -20,6 +20,7 @@ public class SpellRegistry {
         registerIfEnabled("air_burst", new AirBurst("AIR_BURST"));
         registerIfEnabled("earth_throw", new EarthThrow("EARTH_THROW"));
         registerIfEnabled("lesser_heal", new LesserHeal("LESSER_HEAL"));
+        registerIfEnabled("fire_blast", new FireBlast("FIRE_BLAST"));
     }
 
     private static void registerIfEnabled(String key, Spell spell){

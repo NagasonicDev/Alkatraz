@@ -8,6 +8,7 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -342,5 +343,19 @@ public class Utils {
             return NBT.get(entity, nbt -> (Double) nbt.getDouble(name + "_resistance"));
         }
         return 0;
+    }
+
+    public static List<Block> blocksInRadius(Location loc, double radius){
+        List<Block> blocks = new ArrayList<>();
+        for (double i = radius / 0.5; i > 0; i -= 0.5){
+            List<Location> locs= ParticleUtils.basicSphere(loc, radius, 10, 10);
+            for (Location l : locs){
+                if (!blocks.contains(l.getBlock())){
+                    blocks.add(l.getBlock());
+                }
+            }
+            radius -= 0.5;
+        }
+        return blocks;
     }
 }

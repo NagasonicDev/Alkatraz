@@ -3,6 +3,7 @@ package me.nagasonic.alkatraz.spells.implementation;
 import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
+import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.playerdata.DataManager;
 import me.nagasonic.alkatraz.playerdata.PlayerData;
 import me.nagasonic.alkatraz.spells.Spell;
@@ -91,7 +92,7 @@ public class AirBurst extends Spell {
                     loc.getWorld().spawnParticle(Utils.DUST, loc, 0, new Particle.DustOptions(Color.WHITE, 0.4F));
                 }
             }
-        }, 0L, 10L);
+        }, 0L, (Long) Configs.CIRCLE_TICKS.get());
         return d;
     }
 }

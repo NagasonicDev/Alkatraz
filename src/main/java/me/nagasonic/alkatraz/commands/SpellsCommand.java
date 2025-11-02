@@ -1,5 +1,6 @@
 package me.nagasonic.alkatraz.commands;
 
+import me.nagasonic.alkatraz.dom.Permission;
 import me.nagasonic.alkatraz.gui.SpellsGUI;
 import me.nagasonic.alkatraz.util.ColorFormat;
 import org.bukkit.Bukkit;
@@ -19,7 +20,12 @@ public class SpellsCommand implements CommandExecutor {
         Player p = (Player) sender;
         Player target;
         if (args.length == 1) {
-            target = Bukkit.getPlayer(args[0]);
+            if (Permission.hasPermission(p, Permission.COMMAND_SPELLS_OTHER)){
+                target = Bukkit.getPlayer(args[0]);
+            }else{
+                p.sendMessage(ColorFormat.format("&cYou do not have permission to see another player's spells."));
+                return true;
+            }
         }else if (args.length == 0){
             target = (Player) sender;
         }else{
