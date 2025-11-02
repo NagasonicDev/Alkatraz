@@ -324,6 +324,7 @@ public class DataManager implements Listener {
             case 2 -> 2.5;
             case 3 -> 3;
             case 4 -> 5;
+            case 5 -> 6.25;
             case 6 -> 7.5;
             case 7 -> 10;
             case 8 -> 12.5;
