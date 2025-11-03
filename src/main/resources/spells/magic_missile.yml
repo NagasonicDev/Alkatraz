@@ -1,6 +1,7 @@
 id: 'magic_missile'
 display_name: '&bMagic Missile'
-description: '&7A short burst of mana that deals small damage to enemies.'
+description:
+  - '&7A short burst of mana that deals small damage to enemies.'
 # WHETHER THE PLUGIN SHOULD LOAD THE SPELL. DEFAULT: TRUE
 enabled: true
 
