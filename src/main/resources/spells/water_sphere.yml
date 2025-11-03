@@ -1,6 +1,7 @@
 id: 'water_sphere'
 display_name: '&9Water Sphere'
-description: '&7A small ball of water that can be propelled in a direction.'
+description:
+  - '&7A small ball of water that can be propelled in a direction.'
 # WHETHER THE PLUGIN SHOULD LOAD THE SPELL. DEFAULT: TRUE
 enabled: true
 

@@ -1,6 +1,7 @@
 id: 'earth_throw'
 display_name: '#A0522DEarth Throw'
-description: '&7Throws a chunk of earth forward.'
+description:
+  - '&7Throws a chunk of earth forward.'
 # WHETHER THE PLUGIN SHOULD LOAD THE SPELL. DEFAULT: TRUE
 enabled: true
 

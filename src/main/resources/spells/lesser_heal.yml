@@ -1,6 +1,7 @@
 id: 'lesser_heal'
 display_name: '&eLesser Heal'
-description: '&7Heal yourself (&8Shift&7) or any target player in a 20 block radius.'
+description:
+  - '&7Heal yourself (&8Shift&7) or any target player in a 20 block radius.'
 # WHETHER THE PLUGIN SHOULD LOAD THE SPELL. DEFAULT: TRUE
 enabled: true
 

@@ -13,12 +13,14 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.List;
+
 @SuppressWarnings("unused")
 public abstract class Spell {
     protected final String type;
     protected String id;
     protected String displayName;
-    protected String description;
+    protected List<String> description;
     protected Element element;
     protected String code;
     protected BarColor masteryBarColor;
@@ -75,7 +77,7 @@ public abstract class Spell {
     public void loadCommonConfig(YamlConfiguration spellConfig) {
         this.id = spellConfig.getString("id");
         this.displayName = spellConfig.getString("display_name");
-        this.description = spellConfig.getString("description");
+        this.description = spellConfig.getStringList("description");
         this.element = Element.valueOf(spellConfig.getString("element"));
         this.code = spellConfig.getString("code");
         this.castTime = spellConfig.getDouble("cast_time");
@@ -101,7 +103,7 @@ public abstract class Spell {
         return displayName;
     }
 
-    public String getDescription() {
+    public List<String> getDescription() {
         return description;
     }
 

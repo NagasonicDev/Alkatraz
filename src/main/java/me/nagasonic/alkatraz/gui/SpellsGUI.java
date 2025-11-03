@@ -102,7 +102,9 @@ public class SpellsGUI implements Listener {
                     ItemMeta meta = item.getItemMeta();
                     meta.setDisplayName(format(spell.getDisplayName()));
                     List<String> lore = new ArrayList<>();
-                    lore.add(format(spell.getDescription()));
+                    for (String st : spell.getDescription()){
+                        lore.add(format(st));
+                    }
                     lore.add("");
                     lore.add(format("&bCode: " + spell.getCode()));
                     lore.add(format("&bMana Cost: " + spell.getCost()));

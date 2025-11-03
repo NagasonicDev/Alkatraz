@@ -1,6 +1,7 @@
 id: 'air_burst'
 display_name: '&7Air Burst'
-description: '&7A burst of air that launches enemies backward.'
+description:
+  - '&7A burst of air that launches enemies backward.'
 # WHETHER THE PLUGIN SHOULD LOAD THE SPELL. DEFAULT: TRUE
 enabled: true
 

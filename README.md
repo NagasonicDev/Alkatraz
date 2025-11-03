@@ -4,11 +4,11 @@ Alkatraz is a Magic plugin that allows players to use wands to cast spells using
 ## Using a wand
 When holding a wand, the experience bar will transform into a **Mana Bar**, which shows how much mana you have. Each spell uses a certain amount of mana to cast, which can be seen in the /spell command. 
 
-**WARNING: ALTHOUGH I HAVE THOUROUGHLY TESTED THE MANA BAR, THERE MAY BE GLITCHES THAT CAUSE THE EXPERIENCE BAR TO SAVE WRONG**
+**WARNING: ALTHOUGH I HAVE THOROUGHLY TESTED THE MANA BAR, THERE MAY BE GLITCHES THAT CAUSE THE EXPERIENCE BAR TO SAVE WRONG**
 
 ## Features:
 - 1 Wand
-- 6 Spells
+- 7 Spells
 - Mastery System
 - Advanced Casting System
 - Stat Points
@@ -18,6 +18,7 @@ When holding a wand, the experience bar will transform into a **Mana Bar**, whic
 - **Fireball**: Shoots a fireball, exploding and dealing damaging to entities and blocks.
 - **Water Sphere**: Summons a slow-moving water ball that does damage to entities.
 - **Air Burst**: Shoots out a burst of air, pushing back all enemies.
+- **Earth Throw**: Throws a chunk of the ground at enemies, launching them into the air. Caster must be touching the ground for the spell to activate.
 - **Lesser Heal**: Heals a target(look at a player) or yourself(shift) by a small amount of health. (1-2.5 hearts, depending on Light Affinity)
 - **Fire Blast**: Shoots a large fireball, harshly damaging entities, and igniting the surroundings.
 
