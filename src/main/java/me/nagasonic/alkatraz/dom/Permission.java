@@ -12,6 +12,7 @@ public enum Permission {
     COMMAND_DISCOVER("alkatraz.command.discoverspell"),
     COMMAND_UNDISCOVER("alkatraz.command.undiscoverspell"),
     COMMAND_STATS_OTHER("alkatraz.command.stats.other"),
+    COMMAND_RELOAD("alkatraz.command.reload"),
     ALL_SPELLS("alkatraz.allspells");
 
 

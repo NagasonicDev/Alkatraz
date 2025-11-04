@@ -236,6 +236,13 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                     StatsGUI.createGUI(p, p);
                 }
             }
+        } else if (args[0].equals("reload")) {
+            if (Permission.hasPermission(sender, Permission.COMMAND_RELOAD)){
+                if (args.length == 1){
+                    SpellRegistry.reload();
+                    sender.sendMessage(format("&aReloaded configs."));
+                }
+            }
         }
 
         return true;
