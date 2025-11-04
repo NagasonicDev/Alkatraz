@@ -21,6 +21,7 @@ public class SpellRegistry {
         registerIfEnabled("earth_throw", new EarthThrow("EARTH_THROW"));
         registerIfEnabled("lesser_heal", new LesserHeal("LESSER_HEAL"));
         registerIfEnabled("fire_blast", new FireBlast("FIRE_BLAST"));
+        registerIfEnabled("detect", new Detect("DETECT"));
     }
 
     private static void registerIfEnabled(String key, Spell spell){

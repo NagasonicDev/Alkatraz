@@ -1,5 +1,5 @@
 package me.nagasonic.alkatraz;
-
+import fr.skytasul.glowingentities.GlowingEntities;
 import me.nagasonic.alkatraz.commands.AlkatrazCommand;
 import me.nagasonic.alkatraz.commands.SpellsCommand;
 import me.nagasonic.alkatraz.config.ConfigManager;
@@ -31,6 +31,7 @@ import static me.nagasonic.alkatraz.items.wands.WandListeners.switchFrom;
 
 public final class Alkatraz extends JavaPlugin {
 
+    private static GlowingEntities glowingEntities;
     private static Alkatraz instance;
     private static YamlConfiguration pluginConfig;
     {
@@ -40,7 +41,6 @@ public final class Alkatraz extends JavaPlugin {
     @Override
     public void onLoad() {
         pluginConfig = saveAndUpdateConfig("config.yml");
-
         saveConfig("playerdata/playerdata.yml");
 
         saveSpellConfigs();
@@ -55,6 +55,7 @@ public final class Alkatraz extends JavaPlugin {
         // Plugin startup logic
         if ((boolean) Configs.CHECK_UPDATES.get()) UpdateChecker.checkUpdate();
         Metrics metrics = new Metrics(this, 27657);
+        glowingEntities = new GlowingEntities(instance);
         WandRegistry.registerWands();
         SpellRegistry.registerSpells();
         registerListener(new WandListeners());
@@ -158,5 +159,10 @@ public final class Alkatraz extends JavaPlugin {
         saveConfig("spells/earth_throw.yml");
         saveConfig("spells/lesser_heal.yml");
         saveConfig("spells/fire_blast.yml");
+        saveConfig("spells/detect.yml");
+    }
+
+    public static GlowingEntities getGlowingEntities() {
+        return glowingEntities;
     }
 }
