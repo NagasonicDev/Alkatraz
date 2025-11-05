@@ -1,7 +1,8 @@
 id: 'fire_blast'
 display_name: '&6Fire Blast'
 description:
-  - '&7A large ball of fire that can be shot at an enemy. Ignites their surroundings.'
+  - '&7A large ball of fire that can be shot at'
+  - '&7an enemy and ignites their surroundings.'
 # WHETHER THE PLUGIN SHOULD LOAD THE SPELL. DEFAULT: TRUE
 enabled: true
 
