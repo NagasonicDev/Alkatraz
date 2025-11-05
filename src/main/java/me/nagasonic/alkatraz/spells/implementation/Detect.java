@@ -14,6 +14,7 @@ import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
@@ -55,7 +56,7 @@ public class Detect extends Spell {
             int r = 20;
             taskID = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
                 if (l.get() < r){
-                    List<Location> locs = ParticleUtils.circle(a, l.get(), 1/l.get(), 0, 0);
+                    List<Location> locs = ParticleUtils.circle(a, l.get(), 4/l.get(), 0, 0);
                     for (Location loc : locs){
                         loc.getWorld().spawnParticle(Utils.DUST, loc, 0, new Particle.DustOptions(Color.WHITE, 0.4F));
                     }
@@ -64,7 +65,13 @@ public class Detect extends Spell {
                         for (Entity entity : a.getNearbyEntities(range, range, range)){
                             if (!entity.isDead() && entity != p && entity instanceof LivingEntity le){
                                 try {
-                                    ge.setGlowing(le, p, ChatColor.WHITE);
+                                    ChatColor color = ChatColor.WHITE;
+                                    if (le instanceof Monster){
+                                        color = ChatColor.RED;
+                                    } else if (le instanceof Player) {
+                                        color = ChatColor.YELLOW;
+                                    }
+                                    ge.setGlowing(le, p, color);
                                     if (!entities.contains(le)){
                                         entities.add(le);
                                     }
