@@ -1,7 +1,8 @@
 id: 'fireball'
 display_name: '&6Fireball'
 description:
-  - '&7A small ball of fire that can be shot at an enemy.'
+  - '&7A small ball of fire that can be shot'
+  - '&7at an enemy.'
 # WHETHER THE PLUGIN SHOULD LOAD THE SPELL. DEFAULT: TRUE
 enabled: true
 

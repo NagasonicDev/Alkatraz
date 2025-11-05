@@ -2,6 +2,7 @@ id: 'earth_throw'
 display_name: '#A0522DEarth Throw'
 description:
   - '&7Throws a chunk of earth forward.'
+  - '&7Launches enemies upwards when landing.'
 # WHETHER THE PLUGIN SHOULD LOAD THE SPELL. DEFAULT: TRUE
 enabled: true
 
