@@ -22,6 +22,8 @@ import org.bukkit.inventory.ItemStack;
 import java.util.HashMap;
 import java.util.Map;
 
+import static me.nagasonic.alkatraz.util.Utils.notAir;
+
 public class WandListeners implements Listener {
     private static final Map<String, Integer> level = new HashMap<>();
     private static final Map<String, Float> exp = new HashMap<>();
@@ -216,6 +218,7 @@ public class WandListeners implements Listener {
     @EventHandler
     private void onInventoryClick(InventoryClickEvent e) throws InterruptedException {
         if (e.getClickedInventory() == e.getWhoClicked().getInventory()){
+            Alkatraz.logInfo(e.getAction().toString());
             Player p = (Player) e.getWhoClicked();
             if (e.getAction() == InventoryAction.SWAP_WITH_CURSOR){
                 if (e.getSlot() == p.getInventory().getHeldItemSlot()){
@@ -238,38 +241,50 @@ public class WandListeners implements Listener {
                     }
                 }
             }else if (e.getAction() == InventoryAction.HOTBAR_SWAP){
-                if (e.getSlot() == p.getInventory().getHeldItemSlot()){
+                if (e.getHotbarButton() == p.getInventory().getHeldItemSlot()){
                     ItemStack swapped = e.getCurrentItem();
                     ItemStack swappedWith = p.getInventory().getItem(e.getHotbarButton());
-                    if (swapped != null){
-                        if (swapped.getType() != Material.AIR && swapped.getAmount() != 0){
-                            if (Wand.isWand(swapped)){
-                                if (swappedWith == null){
-                                    switchFrom(p);
-                                }else{
-                                    if (!Wand.isWand(swappedWith)){
-                                        switchFrom(p);
-                                    }
-                                }
-                            }else{
-                                if (swappedWith != null){
-                                    if (Wand.isWand(swappedWith)){
-                                        switchTo(p);
-                                    }
-                                }
-                            }
-                        }else{
-                            if (swappedWith != null){
-                                if (Wand.isWand(swappedWith)){
-                                    switchTo(p);
-                                }
-                            }
+                    if (notAir(swappedWith) && notAir(swapped)){
+                        boolean clickedIsWand = Wand.isWand(swapped);
+                        boolean hotbarIsWand = Wand.isWand(swappedWith);
+                        if (clickedIsWand && !hotbarIsWand) {
+                            switchTo(p);
                         }
-                    }else{
-                        if (swappedWith != null){
-                            if (Wand.isWand(swappedWith)){
-                                switchTo(p);
-                            }
+                        else if (!clickedIsWand && hotbarIsWand) {
+                            switchFrom(p);
+                        }
+                    } else if (notAir(swapped) && !notAir(swappedWith)) {
+                        boolean isWand = Wand.isWand(swapped);
+                        if (isWand){
+                            switchTo(p);
+                        }
+                    } else if (notAir(swappedWith) && !notAir(swapped)) {
+                        boolean isWand = Wand.isWand(swappedWith);
+                        if (isWand){
+                            switchFrom(p);
+                        }
+                    }
+                } else if (e.getSlot() == p.getInventory().getHeldItemSlot()) {
+                    ItemStack swapped = e.getCurrentItem();
+                    ItemStack swappedWith = p.getInventory().getItem(e.getHotbarButton());
+                    if (notAir(swappedWith) && notAir(swapped)){
+                        boolean clickedIsWand = Wand.isWand(swapped);
+                        boolean hotbarIsWand = Wand.isWand(swappedWith);
+                        if (clickedIsWand && !hotbarIsWand) {
+                            switchFrom(p);
+                        }
+                        else if (!clickedIsWand && hotbarIsWand) {
+                            switchTo(p);
+                        }
+                    } else if (notAir(swapped) && !notAir(swappedWith)) {
+                        boolean isWand = Wand.isWand(swapped);
+                        if (isWand){
+                            switchFrom(p);
+                        }
+                    } else if (notAir(swappedWith) && !notAir(swapped)) {
+                        boolean isWand = Wand.isWand(swappedWith);
+                        if (isWand){
+                            switchTo(p);
                         }
                     }
                 }
