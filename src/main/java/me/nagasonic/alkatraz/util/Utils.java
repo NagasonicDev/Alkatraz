@@ -358,4 +358,13 @@ public class Utils {
         }
         return blocks;
     }
+
+    public static boolean notAir(ItemStack item){
+        if (item != null){
+            if (item.getType() != Material.AIR && item.getAmount() != 0){
+                return true;
+            }
+        }
+        return false;
+    }
 }
