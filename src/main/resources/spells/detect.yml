@@ -42,5 +42,5 @@ range:
   circle_9: 65 # DEFAULT: 65
 
 # HOW LONG THE DETECTED ENTITIES STAY GLOWING (SECONDS). DEFAULT: 4
-detect_duration: 4
+detect_duration: 7.5
 
