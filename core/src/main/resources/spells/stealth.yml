@@ -1,0 +1,43 @@
+id: 'stealth'
+display_name: '&7Stealth'
+description:
+  - '&7Uses magic power to hide the player,'
+  - '&7costing mana every second.'
+  - '&7Mana cost varies with circle level.'
+# WHETHER THE PLUGIN SHOULD LOAD THE SPELL. DEFAULT: TRUE
+enabled: true
+
+# NONE MEANS ITS DAMAGE DOES NOT SCALE WITH ELEMENTAL DAMAGE, ONLY MAGIC DAMAGE
+element: 'NONE'
+
+# THE CASTING CODE. 'R' FOR RIGHT CLICK, 'L' FOR LEFT CLICK, 'S' FOR HAND SWAP
+code: 'SSLRS'
+
+# THE MAGIC CIRCLE REQUIRED TO CAST
+level: 2
+
+# BASE CAST TIME (SECONDS)
+cast_time: 1.5
+
+# MANA COST
+mana_cost: 75
+
+# MAXIMUM MASTERY ACHIEVABLE. NOT RECOMMENDED TO CHANGE
+maximum_mastery: 200
+
+#THE COLOR OF THE SPELL MASTERY BOSSBAR. OPTIONS ARE: RED, BLUE, YELLOW, PINK, PURPLE, WHITE AND GREEN
+mastery_bar_color: 'WHITE'
+
+#THE ITEM THAT APPEARS IN THE /SPELLS GUI
+gui_item: 'GUNPOWDER'
+
+# THE COST OVER TIME TO MAINTAIN STEALTH
+cost_over_time:
+  circle_2: 5 # DEFAULT: 10
+  circle_3: 10 # DEFAULT: 15
+  circle_4: 17.5 # DEFAULT: 20
+  circle_5: 25 # DEFAULT: 25
+  circle_6: 30 # DEFAULT: 30
+  circle_7: 40 # DEFAULT: 40
+  circle_8: 50 # DEFAULT: 50
+  circle_9: 65 # DEFAULT: 65
