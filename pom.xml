@@ -49,7 +49,7 @@
 
     <build>
         <defaultGoal>clean package</defaultGoal>
-        <finalName>Alkatraz.${revision}</finalName>
+        <finalName>Alkatraz_${revision}</finalName>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
