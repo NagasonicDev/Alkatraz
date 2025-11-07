@@ -26,7 +26,7 @@ public final class NMS_v1_19_R3 implements NMS {
         nmsEntity.setInvisible(invis);
         SynchedEntityData data = nmsEntity.getEntityData();
         ClientboundSetEntityDataPacket packet =
-                new ClientboundSetEntityDataPacket(nmsEntity.getId(), data, true);
+                new ClientboundSetEntityDataPacket(nmsEntity.getId(), data.packDirty());
         serverTarget.connection.send(packet);
         nmsEntity.setInvisible(wasInvisible);
     }
@@ -43,7 +43,7 @@ public final class NMS_v1_19_R3 implements NMS {
 
         List<Pair<EquipmentSlot, ItemStack>> equipmentList = new ArrayList<>();
         java.util.function.Function<org.bukkit.inventory.ItemStack, ItemStack> toNms =
-                (item) -> item != null ? org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack.asNMSCopy(item) : ItemStack.EMPTY;
+                (item) -> item != null ? org.bukkit.craftbukkit.v1_19_R3.inventory.CraftItemStack.asNMSCopy(item) : ItemStack.EMPTY;
         equipmentList.add(new Pair<>(EquipmentSlot.HEAD, toNms.apply(helmet)));
         equipmentList.add(new Pair<>(EquipmentSlot.CHEST, toNms.apply(chest)));
         equipmentList.add(new Pair<>(EquipmentSlot.LEGS, toNms.apply(legs)));
