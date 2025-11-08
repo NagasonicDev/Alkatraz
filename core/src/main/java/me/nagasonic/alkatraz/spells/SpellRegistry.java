@@ -1,5 +1,6 @@
 package me.nagasonic.alkatraz.spells;
 
+import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.spells.implementation.*;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -22,6 +23,7 @@ public class SpellRegistry {
         registerIfEnabled("lesser_heal", new LesserHeal("LESSER_HEAL"));
         registerIfEnabled("fire_blast", new FireBlast("FIRE_BLAST"));
         registerIfEnabled("detect", new Detect("DETECT"));
+        registerIfEnabled("stealth", new Stealth("STEALTH"));
     }
 
     private static void registerIfEnabled(String key, Spell spell){
@@ -63,6 +65,7 @@ public class SpellRegistry {
         Map<String, Spell> spellsByCode = new HashMap<>(allSpellsByCode);
         spellsByCode.put(spell.getCode(), spell);
         allSpellsByCode = Collections.unmodifiableMap(spellsByCode);
+        Alkatraz.logInfo("Registered spell: " + spell.getId());
     }
 
     public static boolean isRegistered(Class<? extends Spell> spell){
