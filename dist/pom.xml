@@ -100,24 +100,6 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>3.1.0</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals><goal>run</goal></goals>
-                        <configuration>
-                            <!-- Copy new Jar -->
-                            <target>
-                                <copy file="${project.build.directory}/${project.build.finalName}.jar"
-                                      todir="${testServerPath}" />
-                            </target>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>3.5.1</version>
                 <configuration>
@@ -132,8 +114,8 @@
                     <relocations>
                         <!-- NBT-API start -->
                         <relocation>
-                            <pattern>de.tr7zw.changeme.nbtapi</pattern>
-                            <shadedPattern>${shadedPackage}.de.tr7zw.changeme.nbtapi</shadedPattern>
+                            <pattern>de.tr7zw.alkatraz.nbtapi</pattern>
+                            <shadedPattern>${shadedPackage}.de.tr7zw.alkatraz.nbtapi</shadedPattern>
                         </relocation>
                         <!-- NBT-API end -->
                     </relocations>
