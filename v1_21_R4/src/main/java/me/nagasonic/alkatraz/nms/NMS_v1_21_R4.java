@@ -10,8 +10,13 @@ import net.minecraft.world.entity.EquipmentSlot;
 import org.bukkit.craftbukkit.v1_21_R4.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_21_R4.entity.CraftPlayer;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import net.minecraft.world.item.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,21 +24,42 @@ import java.util.List;
 public final class NMS_v1_21_R4 implements NMS {
 
     @Override
-    public void setInvisible(org.bukkit.entity.Entity e, Player target, boolean invis) {
-        Entity nmsEntity = ((CraftEntity) e).getHandle();
-        ServerPlayer serverTarget = ((CraftPlayer) target).getHandle();
-        boolean wasInvisible = nmsEntity.isInvisible();
-        nmsEntity.setInvisible(invis);
-        SynchedEntityData data = nmsEntity.getEntityData();
-        ClientboundSetEntityDataPacket packet =
-                new ClientboundSetEntityDataPacket(nmsEntity.getId(), data.packDirty());
-        serverTarget.connection.send(packet);
-        nmsEntity.setInvisible(wasInvisible);
+    public void setInvisible(org.bukkit.entity.Entity target, boolean invis) {
+        if (!(target instanceof LivingEntity livingTarget)) return;
+
+        if (invis) {
+            livingTarget.addPotionEffect(new PotionEffect(
+                    PotionEffectType.INVISIBILITY,
+                    Integer.MAX_VALUE, // very long duration
+                    1,
+                    false, // ambient
+                    false, // particles
+                    false  // icon
+            ));
+        } else {
+            livingTarget.removePotionEffect(PotionEffectType.INVISIBILITY);
+        }
     }
 
     @Override
     public void setTransparent(org.bukkit.entity.Entity e, Player target, boolean trans) {
+        if (!(e instanceof Player entityPlayer)) return;
 
+        Scoreboard scoreboard = target.getScoreboard();
+        Team team = scoreboard.getTeam(e.getUniqueId() + "_stealth");
+
+        if (team == null) {
+            team = scoreboard.registerNewTeam(e.getUniqueId() + "_stealth");
+            team.setCanSeeFriendlyInvisibles(true);
+        }
+
+        if (trans) {
+            team.addEntry(target.getName());
+            team.addEntry(entityPlayer.getName());
+        } else {
+            if (team.hasEntry(target.getName())) team.removeEntry(target.getName());
+            if (team.hasEntry(entityPlayer.getName())) team.removeEntry(entityPlayer.getName());
+        }
     }
 
     @Override

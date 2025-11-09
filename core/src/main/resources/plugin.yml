@@ -2,7 +2,6 @@ name: Alkatraz
 version: '${project.version}'
 main: me.nagasonic.alkatraz.Alkatraz
 api-version: '1.19'
-depend: []
 commands:
   spells:
     description: Opens Spells Gui

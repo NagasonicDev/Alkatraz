@@ -1,5 +1,6 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
+import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
@@ -14,6 +15,7 @@ import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
@@ -45,43 +47,66 @@ public class Stealth extends Spell implements Listener {
     public void castAction(Player p, ItemStack wand) {
         if (!p.isDead()){
             PlayerData data = DataManager.getPlayerData(p);
-            for (Player player : Bukkit.getOnlinePlayers()){
-                if (player != p){
-                    PlayerData td = DataManager.getPlayerData(player);
-                    if (td.getCircle() <= data.getCircle()){
-                        Alkatraz.getNms().setInvisible(p, player, true);
+            if (data.isStealth()){
+                data.setStealth(false);
+                DataManager.addMana(p, getCost()); //Give cost to reverse canceling
+                for (Player player : Bukkit.getOnlinePlayers()){
+                    Alkatraz.getNms().setInvisible(p, false);
+                    Alkatraz.getNms().fakeArmor(p, player, p.getInventory().getHelmet(), p.getInventory().getChestplate(), p.getInventory().getLeggings(), p.getInventory().getBoots());
+                    Alkatraz.getNms().setTransparent(p, player, false);
+                }
+            }else{
+                data.setStealth(true);
+                for (Player player : Bukkit.getOnlinePlayers()){
+                    if (player != p){
+                        PlayerData td = DataManager.getPlayerData(player);
+                        if (td.getCircle() <= data.getCircle()){
+                            Alkatraz.getNms().setInvisible(p, true);
+                            Alkatraz.getNms().fakeArmor(p, player, null, null, null, null);
+                        }else{
+                            Alkatraz.getNms().setTransparent(p, player, true);
+                        }
+                    }else {
+                        Alkatraz.getNms().setInvisible(p, true);
                         Alkatraz.getNms().fakeArmor(p, player, null, null, null, null);
                     }
                 }
-            }
-            taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
-                if (!p.isDead()){
-                    double cost = costs.get(data.getCircle());
-                    if (data.getMana() >= cost){
-                        DataManager.subMana(p, cost);
-                        for (Player player : Bukkit.getOnlinePlayers()){
-                            if (player != p){
-                                PlayerData td = DataManager.getPlayerData(player);
-                                if (td.getCircle() <= data.getCircle()){
-                                    player.spawnParticle(Particle.ASH, p.getLocation(), td.getCircle() - data.getCircle() + 11);
+                taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
+                    if (!data.isStealth()){
+                        stop();
+                    }
+                    if (!p.isDead()){
+                        double cost = costs.get(data.getCircle());
+                        if (data.getMana() >= cost){
+                            DataManager.subMana(p, cost);
+                            for (Player player : Bukkit.getOnlinePlayers()){
+                                if (player != p){
+                                    PlayerData td = DataManager.getPlayerData(player);
+                                    if (td.getCircle() <= data.getCircle()){
+                                        player.spawnParticle(Particle.ASH, p.getLocation(), td.getCircle() - data.getCircle() + 11);
+                                    }
                                 }
                             }
+                        }else{
+                            data.setStealth(false);
+                            for (Player player : Bukkit.getOnlinePlayers()){
+                                Alkatraz.getNms().setInvisible(p, false);
+                                Alkatraz.getNms().fakeArmor(p, player, p.getInventory().getHelmet(), p.getInventory().getChestplate(), p.getInventory().getLeggings(), p.getInventory().getBoots());
+                                Alkatraz.getNms().setTransparent(p, player, false);
+                            }
+                            stop();
                         }
-                    }else{
+                    }else {
+                        data.setStealth(false);
                         for (Player player : Bukkit.getOnlinePlayers()){
-                            Alkatraz.getNms().setInvisible(p, player, false);
+                            Alkatraz.getNms().setInvisible(p, false);
                             Alkatraz.getNms().fakeArmor(p, player, p.getInventory().getHelmet(), p.getInventory().getChestplate(), p.getInventory().getLeggings(), p.getInventory().getBoots());
+                            Alkatraz.getNms().setTransparent(p, player, false);
                         }
                         stop();
                     }
-                }else {
-                    for (Player player : Bukkit.getOnlinePlayers()){
-                        Alkatraz.getNms().setInvisible(p, player, false);
-                        Alkatraz.getNms().fakeArmor(p, player, p.getInventory().getHelmet(), p.getInventory().getChestplate(), p.getInventory().getLeggings(), p.getInventory().getBoots());
-                    }
-                    stop();
-                }
-            }, 0L, 20L);
+                }, 0L, 20L);
+            }
         }
     }
 
@@ -110,5 +135,16 @@ public class Stealth extends Spell implements Listener {
 
     private void stop(){
         Bukkit.getServer().getScheduler().cancelTask(taskID);
+    }
+
+    @EventHandler
+    private void onArmorEquip(PlayerArmorChangeEvent e){
+        Player p = e.getPlayer();
+        PlayerData data = DataManager.getPlayerData(p);
+        if (data.isStealth()){
+            for (Player player : Bukkit.getOnlinePlayers()){
+                Alkatraz.getNms().fakeArmor(p, player, null, null, null, null);
+            }
+        }
     }
 }
