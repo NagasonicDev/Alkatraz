@@ -426,26 +426,10 @@ public class WandListeners implements Listener {
 
     public static void switchTo(Player p) {
         PlayerData data = DataManager.getPlayerData(p);
-        if (!level.containsKey(p.getUniqueId().toString())){
-            level.put(p.getUniqueId().toString(), p.getLevel());
-        }else level.replace(p.getUniqueId().toString(), p.getLevel());
-        if (!exp.containsKey(p.getUniqueId().toString())){
-            exp.put(p.getUniqueId().toString(), p.getExp());
-        }else exp.replace(p.getUniqueId().toString(), p.getExp());
-        p.setLevel((int) data.getMana());
-        p.setExp(Float.parseFloat(String.valueOf((data.getMana() / data.getMaxMana())-0.01)));
+        Alkatraz.getNms().fakeExp(p, (float) (data.getMana() / data.getMaxMana()), (int) data.getMana(), 1);
     }
 
     public static void switchFrom(Player p){
-        if (level.containsKey(p.getUniqueId().toString())){
-            p.setLevel(level.get(p.getUniqueId().toString()));
-        }
-        if (exp.containsKey(p.getUniqueId().toString())){
-            p.setExp(exp.get(p.getUniqueId().toString()));
-        }
-        if (changedExp.containsKey(p.getUniqueId().toString())){
-            p.giveExp(changedExp.get(p.getUniqueId().toString()));
-            changedExp.remove(p.getUniqueId().toString());
-        }
+        Alkatraz.getNms().fakeExp(p, p.getExp(), p.getLevel(), p.getTotalExperience());
     }
 }

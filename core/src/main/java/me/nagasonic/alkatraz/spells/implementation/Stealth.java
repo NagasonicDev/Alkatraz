@@ -17,6 +17,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
@@ -140,6 +141,17 @@ public class Stealth extends Spell implements Listener {
     @EventHandler
     private void onArmorEquip(PlayerArmorChangeEvent e){
         Player p = e.getPlayer();
+        PlayerData data = DataManager.getPlayerData(p);
+        if (data.isStealth()){
+            for (Player player : Bukkit.getOnlinePlayers()){
+                Alkatraz.getNms().fakeArmor(p, player, null, null, null, null);
+            }
+        }
+    }
+
+    @EventHandler
+    private void onInventoryClick(InventoryClickEvent e){
+        Player p = (Player) e.getWhoClicked();
         PlayerData data = DataManager.getPlayerData(p);
         if (data.isStealth()){
             for (Player player : Bukkit.getOnlinePlayers()){

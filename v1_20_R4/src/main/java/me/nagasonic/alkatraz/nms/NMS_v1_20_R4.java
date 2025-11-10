@@ -2,6 +2,7 @@ package me.nagasonic.alkatraz.nms;
 
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
+import net.minecraft.network.protocol.game.ClientboundSetExperiencePacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import org.bukkit.craftbukkit.v1_20_R4.entity.CraftEntity;
@@ -76,6 +77,14 @@ public final class NMS_v1_20_R4 implements NMS {
                 new ClientboundSetEquipmentPacket(nmsEntity.getId(), equipmentList);
 
         viewer.connection.send(packet);
+    }
+
+    @Override
+    public void fakeExp(Player player, float progress, int level, int totalExp) {
+        ServerPlayer nmsPlayer = ((CraftPlayer) player).getHandle();
+
+        ClientboundSetExperiencePacket packet = new ClientboundSetExperiencePacket(progress, totalExp, level);
+        nmsPlayer.connection.send(packet);
     }
 
     @Override

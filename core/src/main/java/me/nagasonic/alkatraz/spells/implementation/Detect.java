@@ -71,9 +71,16 @@ public class Detect extends Spell {
                                     } else if (le instanceof Player) {
                                         color = ChatColor.YELLOW;
                                     }
-                                    ge.setGlowing(le, p, color);
-                                    if (!entities.contains(le)){
-                                        entities.add(le);
+                                    if (le instanceof Player target){
+                                        PlayerData tdata = DataManager.getPlayerData(target);
+                                        if (data.getCircle() < tdata.getCircle()){
+                                            ge.setGlowing(target, p, color);
+                                        }
+                                    }else{
+                                        ge.setGlowing(le, p, color);
+                                        if (!entities.contains(le)){
+                                            entities.add(le);
+                                        }
                                     }
                                 } catch (ReflectiveOperationException e) {
                                     throw new RuntimeException(e);

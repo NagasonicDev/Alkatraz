@@ -157,8 +157,7 @@ public class DataManager implements Listener {
         ItemStack item = p.getItemInHand();
         if (item.getType() != Material.AIR && item.getAmount() != 0){
             if (Wand.isWand(item)){
-                p.setLevel((int) data.getMana());
-                p.setExp(Float.parseFloat(String.valueOf((data.getMana() / data.getMaxMana())-0.01)));
+                Alkatraz.getNms().fakeExp(p, (float) (data.getMana() / data.getMaxMana()), (int) data.getMana(), 1);
             }
         }
     }
@@ -177,8 +176,7 @@ public class DataManager implements Listener {
         ItemStack item = p.getItemInHand();
         if (item.getType() != Material.AIR && item.getAmount() != 0){
             if (Wand.isWand(p.getItemInHand())){
-                p.setLevel((int) data.getMana());
-                p.setExp(Float.parseFloat(String.valueOf((data.getMana() / data.getMaxMana())-0.01)));
+                Alkatraz.getNms().fakeExp(p, (float) (data.getMana() / data.getMaxMana()), (int) data.getMana(), 1);
             }
         }
     }
