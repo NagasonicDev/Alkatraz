@@ -1,13 +1,21 @@
 package me.nagasonic.alkatraz.nms;
 
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
-import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
-import net.minecraft.network.protocol.game.ClientboundSetExperiencePacket;
+import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.util.Skin;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.*;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerEntity;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerPlayerConnection;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.RelativeMovement;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_21_R1.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_21_R1.entity.CraftPlayer;
 import org.bukkit.entity.HumanEntity;
@@ -19,8 +27,8 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.function.Consumer;
 
 public final class NMS_v1_21_R1 implements NMS {
 
@@ -89,6 +97,62 @@ public final class NMS_v1_21_R1 implements NMS {
         ClientboundSetExperiencePacket packet = new ClientboundSetExperiencePacket(progress, totalExp, level);
         nmsPlayer.connection.send(packet);
     }
+
+    @Override
+    public void changeSkin(Player player, List<Player> viewers, Skin skin) {
+        ServerPlayer nmsPlayer = ((CraftPlayer) player).getHandle();
+        GameProfile profile = nmsPlayer.getGameProfile();
+        profile.getProperties().removeAll("textures");
+        profile.getProperties().put("textures", new Property("textures", skin.getTexture(), skin.getSignature()));
+        for (Player other : viewers){
+            if (other != player){
+                hideAndShow(other, player);
+            }
+        }
+        refresh(player);
+    }
+
+    public void refresh(Player player){
+        ServerPlayer nmsPlayer = ((CraftPlayer) player).getHandle();
+        resendInfoPackets(player, player);
+        CommonPlayerSpawnInfo info = nmsPlayer.createCommonSpawnInfo(nmsPlayer.serverLevel());
+        nmsPlayer.connection.send(new ClientboundRespawnPacket(info, (byte) 0));
+        Location l = player.getLocation();
+        Set<RelativeMovement> relative = EnumSet.noneOf(RelativeMovement.class);
+        int teleportId = nmsPlayer.level().getServer().getTickCount();
+        ClientboundPlayerPositionPacket pos = new ClientboundPlayerPositionPacket(l.getX(), l.getY(), l.getZ(), l.getYaw(), l.getPitch(), relative, teleportId);
+        nmsPlayer.connection.send(pos);
+        nmsPlayer.connection.send(new ClientboundSetCarriedItemPacket(player.getInventory().getHeldItemSlot()));
+        ((CraftPlayer) player).updateScaledHealth();
+        player.updateInventory();
+    }
+
+    public void resendInfoPackets(Player toResend, Player toSendTo) {
+        ServerPlayer nmsPlayer = ((CraftPlayer) toResend).getHandle();
+        ServerPlayer nmsViewer = ((CraftPlayer) toSendTo).getHandle();
+        ClientboundPlayerInfoRemovePacket removePacket = new ClientboundPlayerInfoRemovePacket(Collections.singletonList(nmsPlayer.getUUID()));
+        ClientboundPlayerInfoUpdatePacket addPacket = new ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER, nmsPlayer);
+        nmsViewer.connection.send(removePacket);
+        nmsViewer.connection.send(addPacket);
+    }
+
+    @SuppressWarnings("deprecation")
+    private void hideAndShow(Player player, Player other) {
+        try {
+            player.hidePlayer(Alkatraz.getInstance(), other);
+        } catch (NoSuchMethodError ignored) {
+            // Backwards compatibility
+            player.hidePlayer(other);
+        }
+
+        try {
+            player.showPlayer(Alkatraz.getInstance(), other);
+        } catch (NoSuchMethodError ignored) {
+            // Backwards compatibility
+            player.showPlayer(other);
+        }
+    }
+
 
     @Override
     public void onEnable() {

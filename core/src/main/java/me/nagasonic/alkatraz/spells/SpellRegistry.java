@@ -24,6 +24,7 @@ public class SpellRegistry {
         registerIfEnabled("fire_blast", new FireBlast("FIRE_BLAST"));
         registerIfEnabled("detect", new Detect("DETECT"));
         registerIfEnabled("stealth", new Stealth("STEALTH"));
+        registerIfEnabled("disguise", new Disguise("DISGUISE"));
     }
 
     private static void registerIfEnabled(String key, Spell spell){
