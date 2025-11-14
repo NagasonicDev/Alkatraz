@@ -18,6 +18,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
@@ -155,6 +156,26 @@ public class Stealth extends Spell implements Listener {
         PlayerData data = DataManager.getPlayerData(p);
         if (data.isStealth()){
             for (Player player : Bukkit.getOnlinePlayers()){
+                Alkatraz.getNms().fakeArmor(p, player, null, null, null, null);
+            }
+        }
+    }
+
+    @EventHandler
+    private void onJoin(PlayerJoinEvent e){
+        Player player = e.getPlayer();
+        PlayerData td = DataManager.getPlayerData(player);
+        for (Player p : Bukkit.getOnlinePlayers()){
+            PlayerData data = DataManager.getPlayerData(p);
+            if (player != p){
+                if (td.getCircle() <= data.getCircle()){
+                    Alkatraz.getNms().setInvisible(p, true);
+                    Alkatraz.getNms().fakeArmor(p, player, null, null, null, null);
+                }else{
+                    Alkatraz.getNms().setTransparent(p, player, true);
+                }
+            }else {
+                Alkatraz.getNms().setInvisible(p, true);
                 Alkatraz.getNms().fakeArmor(p, player, null, null, null, null);
             }
         }
