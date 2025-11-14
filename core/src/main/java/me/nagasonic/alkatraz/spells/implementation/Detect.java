@@ -73,8 +73,15 @@ public class Detect extends Spell {
                                     }
                                     if (le instanceof Player target){
                                         PlayerData tdata = DataManager.getPlayerData(target);
-                                        if (data.getCircle() < tdata.getCircle()){
-                                            ge.setGlowing(target, p, color);
+                                        if (data.getCircle() >= tdata.getCircle()){
+                                            if (tdata.isStealth()){
+                                                ge.setGlowing(target, p, ChatColor.DARK_GRAY);
+                                            }else{
+                                                ge.setGlowing(target, p, color);
+                                            }
+                                            if (!entities.contains(le)){
+                                                entities.add(le);
+                                            }
                                         }
                                     }else{
                                         ge.setGlowing(le, p, color);
