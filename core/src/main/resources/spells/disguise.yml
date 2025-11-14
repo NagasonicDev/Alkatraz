@@ -1,8 +1,8 @@
 id: 'disguise'
 display_name: '&fDisguise'
 description:
-  - '&7Throws a chunk of earth forward.'
-  - '&7Launches enemies upwards when landing.'
+  - '&7Uses mana to change the appearance of the player'
+  - '&7to another player.'
 # WHETHER THE PLUGIN SHOULD LOAD THE SPELL. DEFAULT: TRUE
 enabled: true
 
