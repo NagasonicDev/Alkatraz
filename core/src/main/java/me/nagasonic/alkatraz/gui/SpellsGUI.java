@@ -30,7 +30,7 @@ public class SpellsGUI implements Listener {
         Collection<Spell> spells = SpellRegistry.getAllSpells().values();
         int i = 1;
         int p = 1;
-        int pageNumbers = (int) Math.ceil((double) spells.size() / 36) + 2;
+        int pageNumbers = (int) Math.ceil((double) spells.size() / 36);
         List<Spell> pageSpells = new ArrayList<>();
         for (Spell spell : spells){
             if (i < 36){
