@@ -2,13 +2,11 @@
 Alkatraz is a Magic plugin that allows players to use wands to cast spells using a combination of button clicks. Each spell uses a unique code to cast, for example, Magic Missile uses the code `RRRRR` to cast. 'R' is right click, 'L' is left click, and 'S' is hand swap. Codes can be viewed from the /spell menu.
 
 ## Using a wand
-When holding a wand, the experience bar will transform into a **Mana Bar**, which shows how much mana you have. Each spell uses a certain amount of mana to cast, which can be seen in the /spell command. 
-
-**WARNING: ALTHOUGH I HAVE THOROUGHLY TESTED THE MANA BAR, THERE MAY BE GLITCHES THAT CAUSE THE EXPERIENCE BAR TO SAVE WRONG**
+When holding a wand, the experience bar will transform into a **Mana Bar**, which shows how much mana you have. Each spell uses a certain amount of mana to cast, which can be seen in the /spell command.
 
 ## Features:
 - 1 Wand
-- 7 Spells
+- 10 Spells
 - Mastery System
 - Advanced Casting System
 - Stat Points
@@ -21,6 +19,9 @@ When holding a wand, the experience bar will transform into a **Mana Bar**, whic
 - **Earth Throw**: Throws a chunk of the ground at enemies, launching them into the air. Caster must be touching the ground for the spell to activate.
 - **Lesser Heal**: Heals a target(look at a player) or yourself(shift) by a small amount of health. (1-2.5 hearts, depending on Light Affinity)
 - **Fire Blast**: Shoots a large fireball, harshly damaging entities, and igniting the surroundings.
+- **Detect**: Scans the surroundings of the caster, making any nearby entities glow. Detect range varies depending on circle level, which can be seen in the `detect.yml`.
+- **Stealth**: Hides the player, including their armor, from other players. The player will appear transparent to player's if they have a greater circle level than the caster.
+- **Disguise**: Allows the player to disguise as a different player.
 
 ## Stat Points and Stats GUI
 Invest skill points into elements to boost their affinity and resistance. Stat points are currently only obtainable by modifying the player's data and the amount given when joining the server for the first time.
@@ -39,6 +40,7 @@ There is also a `Reset Stats` button, which, as in the name, allows them to reci
 - `/alkatraz circle <add|set> <number> [<player>]` (`alkatraz.command.circle`): Modifies the circle level of a player. Automatically updates the max mana and mana recovery of the player.
 - `/alkatraz experience <add|set> <number> [<player>]` (`alkatraz.command.experience`): Changes the magic experience of the player, will automatically increase the circle level of the player if enough experience is given to level up.
 - `/alkatraz stats [<player>]` (`alkatraz.command.stats.other`): Opens the target's Stats GUI to the sender.
+- `/alkatraz reload` (`alkatraz.command.reload`): Reloads spell config. Some changes may require a server restart.
 - `alkatraz.allspells`: allows a player to use all spells even if they have not discovered it.
 - `/spells <player>` (`alkatraz.command.spells.other`): opens a gui that shows the current spells that the player can use. `<player>` argument is if you want to view a different player's spells.
 
