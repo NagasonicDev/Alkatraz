@@ -11,7 +11,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <revision>0.4</revision>
+        <revision>0.4.5</revision>
         <javaVersion>17</javaVersion>
         <testServerPath>D:\NagaDevTestServer\1.20.6\plugins</testServerPath>
         <shadedPackage>me.nagasonic.alkatraz.shaded</shadedPackage>
