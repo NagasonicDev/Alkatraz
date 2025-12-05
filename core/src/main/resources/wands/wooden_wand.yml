@@ -14,3 +14,11 @@ water_damage: 0
 earth_damage: 0
 light_damage: 0
 dark_damage: 0
+recipe:
+  shape:
+    - '   '
+    - ' L '
+    - 'S  '
+  values:
+    - 'L:LAPIS_LAZULI'
+    - 'S:STICK'
