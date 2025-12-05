@@ -15,204 +15,38 @@ public class PlayerData {
     // r = (800 / 150)^1/8
     // Target Casts between circles: casts(C) = Math.round(150 * r^(circle - 1))
     // Circle XP Gap (XP from circle - 1 to circle) XP(C) = casts(c) * XPgain(C)
+    private Map<String, Double> doubleStats = new HashMap<>();
+    private Map<String, Integer> intStats = new HashMap<>();
+    private Map<String, Boolean> boolStats = new HashMap<>();
+
+    public Double getDouble(String key){
+        return doubleStats.get(key);
+    }
+
+    public void setDouble(String key, Double value){
+        doubleStats.put(key, value);
+    }
+
+    public Integer getInt(String key){
+        return intStats.get(key);
+    }
+
+    public void setInt(String key, Integer value){
+        intStats.put(key, value);
+    }
+
+    public Boolean getBoolean(String key){
+        return boolStats.get(key);
+    }
+
+    public void setBoolean(String key, Boolean value){
+        boolStats.put(key, value);
+    }
+
     private Map<Spell, Integer> spellMasteries = new HashMap<>();
     private List<Spell> discoveredSpells = new ArrayList<>();
     private Map<Spell, BossBar> masteryBars = new HashMap<>();
     private BossBar expBar = null;
-    private double mana;
-    private double maxMana;
-    private double manaRegeneration;
-    private int circle;
-    private double experience;
-    private double magicAffinity;
-    private double magicResistance;
-
-    private double fireAffinity;
-    private double fireResistance;
-
-    private double airAffinity;
-    private double airResistance;
-
-    private double earthAffinity;
-    private double earthResistance;
-
-    private double waterAffinity;
-    private double waterResistance;
-
-    private double lightAffinity;
-    private double lightResistance;
-
-    private double darkAffinity;
-    private double darkResistance;
-
-    private int statPoints;
-    private int fireStatPoints;
-    private int waterStatPoints;
-    private int earthStatPoints;
-    private int airStatPoints;
-    private int lightStatPoints;
-    private int darkStatPoints;
-    private int statResetTokens;
-
-    private boolean isCasting;
-
-    private boolean isStealth;
-
-    public double getMana() {
-        return mana;
-    }
-
-    public void setMana(double mana) {
-        this.mana = mana;
-    }
-
-    public double getMaxMana() {
-        return maxMana;
-    }
-
-    public void setMaxMana(double maxMana) {
-        this.maxMana = maxMana;
-    }
-
-    public int getCircle() {
-        return circle;
-    }
-
-    public double getManaRegeneration() {
-        return manaRegeneration;
-    }
-
-    public void setManaRegeneration(double manaRegeneration) {
-        this.manaRegeneration = manaRegeneration;
-    }
-
-    public double getExperience() {
-        return experience;
-    }
-
-    public void setCircle(int circle) {
-        this.circle = circle;
-    }
-
-    public double getMagicAffinity() {
-        return magicAffinity;
-    }
-
-    public void setMagicAffinity(double magicAffinity) {
-        this.magicAffinity = magicAffinity;
-    }
-
-    public double getMagicResistance() {
-        return magicResistance;
-    }
-
-    public void setMagicResistance(double magicResistance) {
-        this.magicResistance = magicResistance;
-    }
-
-    public double getFireAffinity() {
-        return fireAffinity;
-    }
-
-    public void setFireAffinity(double fireAffinity) {
-        this.fireAffinity = fireAffinity;
-    }
-
-    public double getFireResistance() {
-        return fireResistance;
-    }
-
-    public void setFireResistance(double fireResistance) {
-        this.fireResistance = fireResistance;
-    }
-
-    public double getAirAffinity() {
-        return airAffinity;
-    }
-
-    public void setAirAffinity(double airAffinity) {
-        this.airAffinity = airAffinity;
-    }
-
-    public double getAirResistance() {
-        return airResistance;
-    }
-
-    public void setAirResistance(double airResistance) {
-        this.airResistance = airResistance;
-    }
-
-    public double getEarthAffinity() {
-        return earthAffinity;
-    }
-
-    public void setEarthAffinity(double earthAffinity) {
-        this.earthAffinity = earthAffinity;
-    }
-
-    public double getEarthResistance() {
-        return earthResistance;
-    }
-
-    public void setEarthResistance(double earthResistance) {
-        this.earthResistance = earthResistance;
-    }
-
-    public double getWaterAffinity() {
-        return waterAffinity;
-    }
-
-    public void setWaterAffinity(double waterAffinity) {
-        this.waterAffinity = waterAffinity;
-    }
-
-    public double getWaterResistance() {
-        return waterResistance;
-    }
-
-    public void setWaterResistance(double waterResistance) {
-        this.waterResistance = waterResistance;
-    }
-
-    public double getLightAffinity() {
-        return lightAffinity;
-    }
-
-    public void setLightAffinity(double lightAffinity) {
-        this.lightAffinity = lightAffinity;
-    }
-
-    public double getLightResistance() {
-        return lightResistance;
-    }
-
-    public void setLightResistance(double lightResistance) {
-        this.lightResistance = lightResistance;
-    }
-
-    public double getDarkAffinity() {
-        return darkAffinity;
-    }
-
-    public void setDarkAffinity(double darkAffinity) {
-        this.darkAffinity = darkAffinity;
-    }
-
-    public double getDarkResistance() {
-        return darkResistance;
-    }
-
-    public void setDarkResistance(double darkResistance) {
-        this.darkResistance = darkResistance;
-    }
-
-    public boolean isCasting() {
-        return isCasting;
-    }
-
-    public void setCasting(boolean casting) {
-        isCasting = casting;
-    }
 
     public int getSpellMastery(Spell spell){
         return spellMasteries.getOrDefault(spell, -1);
@@ -247,10 +81,6 @@ public class PlayerData {
         }
     }
 
-    public void setExperience(double experience) {
-        this.experience = experience;
-    }
-
     public List<Spell> getAllDiscoveredSpells() {
         return discoveredSpells;
     }
@@ -267,103 +97,35 @@ public class PlayerData {
         return expBar;
     }
 
-    public boolean isStealth() {
-        return isStealth;
-    }
-
-    public void setStealth(boolean stealth) {
-        isStealth = stealth;
-    }
-
     public void setExpBar(BossBar expBar) {
         this.expBar = expBar;
     }
 
-    public int getStatPoints() {
-        return statPoints;
-    }
-
-    public void setStatPoints(int statPoints) {
-        this.statPoints = statPoints;
-    }
-
-    public int getFireStatPoints() {
-        return fireStatPoints;
-    }
-
-    public void setFireStatPoints(int fireStatPoints) {
-        this.fireStatPoints = fireStatPoints;
-    }
-
-    public int getWaterStatPoints() {
-        return waterStatPoints;
-    }
-
-    public void setWaterStatPoints(int waterStatPoints) {
-        this.waterStatPoints = waterStatPoints;
-    }
-
-    public int getEarthStatPoints() {
-        return earthStatPoints;
-    }
-
-    public void setEarthStatPoints(int earthStatPoints) {
-        this.earthStatPoints = earthStatPoints;
-    }
-
-    public int getAirStatPoints() {
-        return airStatPoints;
-    }
-
-    public void setAirStatPoints(int airStatPoints) {
-        this.airStatPoints = airStatPoints;
-    }
-
-    public int getLightStatPoints() {
-        return lightStatPoints;
-    }
-
-    public void setLightStatPoints(int lightStatPoints) {
-        this.lightStatPoints = lightStatPoints;
-    }
-
-    public int getDarkStatPoints() {
-        return darkStatPoints;
-    }
-
-    public void setDarkStatPoints(int darkStatPoints) {
-        this.darkStatPoints = darkStatPoints;
-    }
-
-    public int getStatResetTokens() {
-        return statResetTokens;
-    }
-
-    public void setStatResetTokens(int statResetTokens) {
-        this.statResetTokens = statResetTokens;
-    }
-
     public double getAffinity(Element element){
         return switch (element){
-            case WATER -> getWaterAffinity();
-            case AIR -> getAirAffinity();
-            case DARK -> getDarkAffinity();
-            case FIRE -> getFireAffinity();
-            case EARTH -> getEarthAffinity();
-            case LIGHT -> getLightAffinity();
-            case NONE -> getMagicAffinity();
+            case WATER -> getInt("water_affinity");
+            case AIR -> getInt("air_affinity");
+            case DARK -> getInt("dark_affinity");
+            case FIRE -> getInt("fire_affinity");
+            case EARTH -> getInt("earth_affinity");
+            case LIGHT -> getInt("light_affinity");
+            case NONE -> getInt("magic_affinity");
         };
     }
 
     public double getResistance(Element element){
         return switch (element){
-            case WATER -> getWaterResistance();
-            case AIR -> getAirResistance();
-            case DARK -> getDarkResistance();
-            case FIRE -> getFireResistance();
-            case EARTH -> getEarthResistance();
-            case LIGHT -> getLightResistance();
-            case NONE -> getMagicResistance();
+            case WATER -> getInt("water_resistance");
+            case AIR -> getInt("air_resistance");
+            case DARK -> getInt("dark_resistance");
+            case FIRE -> getInt("fire_resistance");
+            case EARTH -> getInt("earth_resistance");
+            case LIGHT -> getInt("light_resistance");
+            case NONE -> getInt("magic_resistance");
         };
+    }
+
+    public int getPoints(Element element){
+        return getInt(element.getName().toLowerCase() + "_points");
     }
 }

@@ -10,6 +10,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
@@ -21,6 +22,8 @@ public abstract class Wand implements Listener {
     protected Material material;
     protected String name;
     protected List<String> lore;
+    protected List<String> recipeShape;
+    protected List<String> recipeValues;
     protected double power;
     protected double castTime;
 
@@ -39,6 +42,8 @@ public abstract class Wand implements Listener {
 
     public abstract void loadConfiguration();
 
+    public abstract Recipe getRecipe();
+
     public void loadCommonConfig(YamlConfiguration wandConfig) {
         this.id = wandConfig.getString("id");
         this.name = wandConfig.getString("item_name");
@@ -52,6 +57,8 @@ public abstract class Wand implements Listener {
         this.waterDamage = wandConfig.getDouble("water_damage");
         this.lightDamage = wandConfig.getDouble("light_damage");
         this.darkDamage = wandConfig.getDouble("dark_damage");
+        this.recipeShape = wandConfig.getStringList("recipe.shape");
+        this.recipeValues = wandConfig.getStringList("recipe.values");
     }
 
     public ItemStack getItem() {
@@ -161,5 +168,13 @@ public abstract class Wand implements Listener {
 
     public static boolean isWand(ItemStack item) {
         return NBT.get(item, nbt -> (Boolean) nbt.getBoolean("wand"));
+    }
+
+    public List<String> getRecipeShape() {
+        return recipeShape;
+    }
+
+    public List<String> getRecipeValues() {
+        return recipeValues;
     }
 }

@@ -52,7 +52,7 @@ public class Detect extends Spell {
             Location a = p.getLocation();
             PlayerData data = DataManager.getPlayerData(p);
             GlowingEntities ge = Alkatraz.getGlowingEntities();
-            double range = ranges.get(data.getCircle());
+            double range = ranges.get(data.getInt("circle"));
             int r = 20;
             taskID = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
                 if (l.get() < r){
@@ -73,8 +73,8 @@ public class Detect extends Spell {
                                     }
                                     if (le instanceof Player target){
                                         PlayerData tdata = DataManager.getPlayerData(target);
-                                        if (data.getCircle() >= tdata.getCircle()){
-                                            if (tdata.isStealth()){
+                                        if (data.getInt("circle") >= tdata.getInt("circle")){
+                                            if (tdata.getBoolean("stealth")){
                                                 ge.setGlowing(target, p, ChatColor.DARK_GRAY);
                                             }else{
                                                 ge.setGlowing(target, p, color);

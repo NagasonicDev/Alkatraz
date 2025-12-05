@@ -49,8 +49,8 @@ public class Stealth extends Spell implements Listener {
     public void castAction(Player p, ItemStack wand) {
         if (!p.isDead()){
             PlayerData data = DataManager.getPlayerData(p);
-            if (data.isStealth()){
-                data.setStealth(false);
+            if (data.getBoolean("stealth")){
+                data.setBoolean("stealth", false);
                 DataManager.addMana(p, getCost()); //Give cost to reverse canceling
                 for (Player player : Bukkit.getOnlinePlayers()){
                     Alkatraz.getNms().setInvisible(p, false);
@@ -58,11 +58,11 @@ public class Stealth extends Spell implements Listener {
                     Alkatraz.getNms().setTransparent(p, player, false);
                 }
             }else{
-                data.setStealth(true);
+                data.setBoolean("stealth", true);
                 for (Player player : Bukkit.getOnlinePlayers()){
                     if (player != p){
                         PlayerData td = DataManager.getPlayerData(player);
-                        if (td.getCircle() <= data.getCircle()){
+                        if (td.getInt("circle") <= data.getInt("circle")){
                             Alkatraz.getNms().setInvisible(p, true);
                             Alkatraz.getNms().fakeArmor(p, player, null, null, null, null);
                         }else{
@@ -74,23 +74,23 @@ public class Stealth extends Spell implements Listener {
                     }
                 }
                 taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
-                    if (!data.isStealth()){
+                    if (!data.getBoolean("stealth")){
                         stop();
                     }
                     if (!p.isDead()){
-                        double cost = costs.get(data.getCircle());
-                        if (data.getMana() >= cost){
+                        double cost = costs.get(data.getInt("circle"));
+                        if (data.getDouble("mana") >= cost){
                             DataManager.subMana(p, cost);
                             for (Player player : Bukkit.getOnlinePlayers()){
                                 if (player != p){
                                     PlayerData td = DataManager.getPlayerData(player);
-                                    if (td.getCircle() <= data.getCircle()){
-                                        player.spawnParticle(Particle.ASH, p.getLocation(), td.getCircle() - data.getCircle() + 11);
+                                    if (td.getInt("circle") <= data.getInt("circle")){
+                                        player.spawnParticle(Particle.ASH, p.getLocation(), td.getInt("circle") - data.getInt("circle") + 11);
                                     }
                                 }
                             }
                         }else{
-                            data.setStealth(false);
+                            data.setBoolean("stealth", false);
                             for (Player player : Bukkit.getOnlinePlayers()){
                                 Alkatraz.getNms().setInvisible(p, false);
                                 Alkatraz.getNms().fakeArmor(p, player, p.getInventory().getHelmet(), p.getInventory().getChestplate(), p.getInventory().getLeggings(), p.getInventory().getBoots());
@@ -99,7 +99,7 @@ public class Stealth extends Spell implements Listener {
                             stop();
                         }
                     }else {
-                        data.setStealth(false);
+                        data.setBoolean("stealth", false);
                         for (Player player : Bukkit.getOnlinePlayers()){
                             Alkatraz.getNms().setInvisible(p, false);
                             Alkatraz.getNms().fakeArmor(p, player, p.getInventory().getHelmet(), p.getInventory().getChestplate(), p.getInventory().getLeggings(), p.getInventory().getBoots());
@@ -143,7 +143,7 @@ public class Stealth extends Spell implements Listener {
     private void onArmorEquip(PlayerArmorChangeEvent e){
         Player p = e.getPlayer();
         PlayerData data = DataManager.getPlayerData(p);
-        if (data.isStealth()){
+        if (data.getBoolean("stealth")){
             for (Player player : Bukkit.getOnlinePlayers()){
                 Alkatraz.getNms().fakeArmor(p, player, null, null, null, null);
             }
@@ -154,7 +154,7 @@ public class Stealth extends Spell implements Listener {
     private void onInventoryClick(InventoryClickEvent e){
         Player p = (Player) e.getWhoClicked();
         PlayerData data = DataManager.getPlayerData(p);
-        if (data.isStealth()){
+        if (data.getBoolean("stealth")){
             for (Player player : Bukkit.getOnlinePlayers()){
                 Alkatraz.getNms().fakeArmor(p, player, null, null, null, null);
             }
@@ -168,7 +168,7 @@ public class Stealth extends Spell implements Listener {
         for (Player p : Bukkit.getOnlinePlayers()){
             PlayerData data = DataManager.getPlayerData(p);
             if (player != p){
-                if (td.getCircle() <= data.getCircle()){
+                if (td.getInt("circle") <= data.getInt("circle")){
                     Alkatraz.getNms().setInvisible(p, true);
                     Alkatraz.getNms().fakeArmor(p, player, null, null, null, null);
                 }else{

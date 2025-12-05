@@ -1,1 +1,34 @@
-#May be used in the future....
+# STAT_NAME:TYPE:DEFAULT_VALUE
+stat_list:
+  - "max_mana:double:100"
+  - "mana:double:100"
+  - "circle:int:0"
+  - "mana_regeneration:double:1"
+  - "experience:double:0"
+  - "magic_affinity:double:0"
+  - "magic_resistance:double:0"
+  - "fire_affinity:double:0"
+  - "fire_resistance:double:0"
+  - "air_affinity:double:0"
+  - "air_resistance:double:0"
+  - "water_affinity:double:0"
+  - "water_resistance:double:0"
+  - "earth_affinity:double:0"
+  - "earth_resistance:double:0"
+  - "light_affinity:double:0"
+  - "light_resistance:double:0"
+  - "dark_affinity:double:0"
+  - "dark_resistance:double:0"
+  - "casting:boolean:false"
+  - "stealth:boolean:false"
+
+# JUST THE NAMES
+stat_point_list:
+  - "stat_points"
+  - "reset_tokens"
+  - "fire_points"
+  - "water_points"
+  - "air_points"
+  - "earth_points"
+  - "light_points"
+  - "dark_points"

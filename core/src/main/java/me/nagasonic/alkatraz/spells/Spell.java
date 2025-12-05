@@ -45,12 +45,12 @@ public abstract class Spell {
     public void cast(Player p, ItemStack wand){
         Float castTime = getFullCastTime(wand, getCastTime());
         PlayerData data = DataManager.getPlayerData(p);
-        if (data.getCircle() >= getLevel()){
-            if (data.getMana() >= getCost()){
+        if (data.getInt("circle") >= getLevel()){
+            if (data.getDouble("mana") >= getCost()){
                 if (!p.isDead()){
                     PlayerCastEvent event = new PlayerCastEvent(p, this, wand);
                     if (!event.isCancelled()){
-                        data.setCasting(true);
+                        data.setBoolean("casting", true);
                         DataManager.subMana(p, getCost());
                         DataManager.addExperience(p, Utils.getExp(getLevel()));
                         Utils.sendActionBar(p, ColorFormat.format("Casted: " + getDisplayName()));
@@ -62,7 +62,7 @@ public abstract class Spell {
                         }
                         Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(Alkatraz.getInstance(), () -> {
                             if (!event.isCancelled()){
-                                data.setCasting(false);
+                                data.setBoolean("casting", false);
                                 Bukkit.getServer().getScheduler().cancelTask(d);
                                 castAction(p, wand);
                             }
@@ -152,22 +152,13 @@ public abstract class Spell {
     public double calcDamage(double base, LivingEntity target, Player caster){
         PlayerData data = DataManager.getPlayerData(caster);
         double caffinity = data.getAffinity(getElement());
-        if (getElement() != Element.NONE){
-            caffinity += data.getMagicAffinity();
-        }
         double tres = 0;
         if (target instanceof Player){
             Player t = (Player) target;
             PlayerData tdata = DataManager.getPlayerData(t);
             tres = tdata.getResistance(getElement());
-            if (getElement() != Element.NONE){
-                tres += tdata.getMagicResistance();
-            }
         }else {
             tres = Utils.getEntityResistance(getElement(), target);
-            if (getElement() != Element.NONE){
-                tres += Utils.getEntityResistance(Element.NONE, target);
-            }
         }
         return base * (1 + ((caffinity - tres) / 100));
     }
