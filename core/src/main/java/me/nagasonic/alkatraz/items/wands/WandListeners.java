@@ -34,7 +34,7 @@ public class WandListeners implements Listener {
         if (e.getItem() != null) {
             if (e.getItem().getType() != Material.AIR && e.getItem().getAmount() != 0) {
                 if (Wand.isWand(e.getItem())) {
-                    if (!DataManager.getPlayerData(e.getPlayer()).isCasting()){
+                    if (!DataManager.getPlayerData(e.getPlayer()).getBoolean("casting")){
                         String code = NBT.get(e.getItem(), nbt -> (String) nbt.getString("cast_code"));
                         if (e.getAction().isRightClick()) {
                             NBT.modify(e.getItem(), nbt -> {
@@ -73,7 +73,7 @@ public class WandListeners implements Listener {
             ItemStack wand = p.getItemInHand();
             if (wand.getType() != Material.AIR && wand.getAmount() != 0) {
                 if (Wand.isWand(wand)) {
-                    if (!DataManager.getPlayerData(p).isCasting()){
+                    if (!DataManager.getPlayerData(p).getBoolean("casting")){
                         String code = NBT.get(wand, nbt -> (String) nbt.getString("cast_code"));
                         NBT.modify(wand, nbt -> {
                             nbt.setString("cast_code", code + "L");
@@ -107,7 +107,7 @@ public class WandListeners implements Listener {
         if (wand.getType() != Material.AIR && wand.getAmount() != 0){
             if (Wand.isWand(wand)) {
                 e.setCancelled(true);
-                if (!DataManager.getPlayerData(p).isCasting()){
+                if (!DataManager.getPlayerData(p).getBoolean("casting")){
                     String code = NBT.get(wand, nbt -> (String) nbt.getString("cast_code"));
                     NBT.modify(wand, nbt -> {
                         nbt.setString("cast_code", code + "R");
@@ -141,7 +141,7 @@ public class WandListeners implements Listener {
             if (wand.getType() != Material.AIR && wand.getAmount() != 0){
                 if (Wand.isWand(wand)) {
                     e.setCancelled(true);
-                    if (!DataManager.getPlayerData(p).isCasting()){
+                    if (!DataManager.getPlayerData(p).getBoolean("casting")){
                         String code = NBT.get(wand, nbt -> (String) nbt.getString("cast_code"));
                         NBT.modify(wand, nbt -> {
                             nbt.setString("cast_code", code + "S");
@@ -402,6 +402,10 @@ public class WandListeners implements Listener {
                 }
             }
         }
+        PlayerData data = DataManager.getPlayerData(p);
+        if (data.getBoolean("casting")){
+            data.setBoolean("casting", false);
+        }
     }
 
     @EventHandler
@@ -426,7 +430,7 @@ public class WandListeners implements Listener {
 
     public static void switchTo(Player p) {
         PlayerData data = DataManager.getPlayerData(p);
-        Alkatraz.getNms().fakeExp(p, (float) (data.getMana() / data.getMaxMana()), (int) data.getMana(), 1);
+        Alkatraz.getNms().fakeExp(p, (float) (data.getDouble("mana") / data.getDouble("max_mana")), data.getDouble("mana").intValue(), 1);
     }
 
     public static void switchFrom(Player p){

@@ -26,11 +26,14 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static me.nagasonic.alkatraz.util.ColorFormat.format;
 
 public class DataManager implements Listener {
+
+    // TODO: REWORK STAT SYSTEM USING MAPS FOR EACH STATISTIC
     private static Map<String, PlayerData> playerData = new HashMap<>();
 
     public static PlayerData getPlayerData(OfflinePlayer p) {
@@ -48,50 +51,35 @@ public class DataManager implements Listener {
 
         if (f.exists()){
             FileConfiguration cfg = YamlConfiguration.loadConfiguration(f);
-            data.setMaxMana(cfg.getDouble("stats.max_mana"));
-            data.setMana(cfg.getDouble("stats.mana"));
-            data.setCircle(cfg.getInt("stats.circle"));
-            data.setManaRegeneration(cfg.getDouble("stats.mana_regeneration"));
-            data.setExperience(cfg.getDouble("stats.experience"));
-            data.setMagicAffinity(cfg.getDouble("stats.magic_affinity"));
-            data.setMagicResistance(cfg.getDouble("stats.magic_resistance"));
-            data.setFireAffinity(cfg.getDouble("stats.fire_affinity"));
-            data.setFireResistance(cfg.getDouble("stats.fire_resistance"));
-            data.setAirAffinity(cfg.getDouble("stats.air_affinity"));
-            data.setAirResistance(cfg.getDouble("stats.air_resistance"));
-            data.setEarthAffinity(cfg.getDouble("stats.earth_affinity"));
-            data.setEarthResistance(cfg.getDouble("stats.earth_resistance"));
-            data.setWaterAffinity(cfg.getDouble("stats.water_affinity"));
-            data.setWaterResistance(cfg.getDouble("stats.water_resistance"));
-            data.setLightAffinity(cfg.getDouble("stats.light_affinity"));
-            data.setLightResistance(cfg.getDouble("stats.light_resistance"));
-            data.setDarkAffinity(cfg.getDouble("stats.dark_affinity"));
-            data.setDarkResistance(cfg.getDouble("stats.dark_resistance"));
+            List<String> statNames = StatManager.getStatNames();
+            for (String stat : statNames){
+                String type = StatManager.getType(stat);
+                if (type.equals("double")){
+                    data.setDouble(stat, cfg.getDouble("stats." + stat));
+                }else if (type.equals("int")){
+                    data.setInt(stat, cfg.getInt("stats." + stat));
+                } else if (type.equals("boolean")) {
+                    data.setBoolean(stat, cfg.getBoolean("stats." + stat));
+                }
+            }
             for (Spell spell : SpellRegistry.getAllSpells().values()){
                 if (cfg.getStringList("discovered_spells").contains(spell.getType().toLowerCase())){
                     data.setDiscovered(spell, true);
                 }
             }
         }else {
-            data.setMaxMana(100);
-            data.setMana(100);
-            data.setCircle(0);
-            data.setManaRegeneration(1);
-            data.setExperience(0);
-            data.setMagicAffinity(1);
-            data.setMagicResistance(0);
-            data.setFireAffinity(0);
-            data.setFireResistance(0);
-            data.setAirAffinity(0);
-            data.setAirResistance(0);
-            data.setEarthAffinity(0);
-            data.setEarthResistance(0);
-            data.setWaterAffinity(0);
-            data.setWaterResistance(0);
-            data.setLightAffinity(0);
-            data.setLightResistance(0);
-            data.setDarkAffinity(0);
-            data.setDarkResistance(0);
+            List<String> statNames = StatManager.getStatNames();
+            for (String stat : statNames){
+                String type = StatManager.getType(stat);
+                String def = StatManager.getDefault(stat);
+                if (type.equals("double")){
+                    data.setDouble(stat, Double.valueOf(def));
+                } else if (type.equals("int")) {
+                    data.setInt(stat, Integer.valueOf(def));
+                } else if (type.equals("boolean")){
+                    data.setBoolean(stat, Boolean.valueOf(def));
+                }
+            }
             data.setDiscovered(SpellRegistry.getSpell(MagicMissile.class), true);
         }
         File masteries = new File(getFolderPath(p) + "/mastery.yml");
@@ -106,23 +94,18 @@ public class DataManager implements Listener {
         File stats = new File(getFolderPath(p) + "/stats.yml");
         if (stats.exists()){
             FileConfiguration scfg = YamlConfiguration.loadConfiguration(stats);
-            data.setStatPoints(scfg.getInt("stat_points"));
-            data.setStatResetTokens(scfg.getInt("reset_tokens"));
-            data.setFireStatPoints(scfg.getInt("fire_points"));
-            data.setWaterStatPoints(scfg.getInt("water_points"));
-            data.setAirStatPoints(scfg.getInt("air_points"));
-            data.setEarthStatPoints(scfg.getInt("earth_points"));
-            data.setLightStatPoints(scfg.getInt("light_points"));
-            data.setDarkStatPoints(scfg.getInt("dark_points"));
+            List<String> pointNames = StatManager.getStatPoints();
+            for (String name : pointNames){
+                data.setInt(name, scfg.getInt(name));
+            }
         }else{
-            data.setStatPoints((Integer) Configs.DEFAULT_STAT_POINTS.get());
-            data.setStatResetTokens((Integer) Configs.DEFAULT_RESET_TOKENS.get());
-            data.setFireStatPoints(0);
-            data.setWaterStatPoints(0);
-            data.setAirStatPoints(0);
-            data.setEarthStatPoints(0);
-            data.setLightStatPoints(0);
-            data.setDarkStatPoints(0);
+            List<String> pointNames = StatManager.getStatPoints();
+            for (String name : pointNames){
+                data.setInt(name, 0);
+            }
+            // Overide Stat point and Reset Token values
+            data.setInt("stat_points" , (Integer) Configs.DEFAULT_STAT_POINTS.get());
+            data.setInt("reset_tokens", (Integer) Configs.DEFAULT_RESET_TOKENS.get());
         }
         return data;
     }
@@ -150,14 +133,14 @@ public class DataManager implements Listener {
 
     public static void addMana(Player p, double amount) {
         PlayerData data = getPlayerData(p);
-        data.setMana(data.getMana() + amount);
-        if (data.getMana() > data.getMaxMana()){
-            data.setMana(data.getMaxMana());
+        data.setDouble("mana", data.getDouble("mana") + amount);
+        if (data.getDouble("mana") > data.getDouble("max_mana")){
+            data.setDouble("mana", data.getDouble("max_mana"));
         }
         ItemStack item = p.getItemInHand();
         if (item.getType() != Material.AIR && item.getAmount() != 0){
             if (Wand.isWand(item)){
-                Alkatraz.getNms().fakeExp(p, (float) (data.getMana() / data.getMaxMana()), (int) data.getMana(), 1);
+                Alkatraz.getNms().fakeExp(p, (float) (data.getDouble("mana") / data.getDouble("max_mana")), data.getDouble("mana").intValue(), 1);
             }
         }
     }
@@ -171,12 +154,12 @@ public class DataManager implements Listener {
 
     public static void subMana(Player p, double amount) {
         PlayerData data = getPlayerData(p);
-        data.setMana(data.getMana() - amount);
-        if (data.getMana() < 0) { data.setMana(0); }
+        data.setDouble("mana", data.getDouble("mana") - amount);
+        if (data.getDouble("mana") < 0) { data.setDouble("mana", (double) 0); }
         ItemStack item = p.getItemInHand();
         if (item.getType() != Material.AIR && item.getAmount() != 0){
             if (Wand.isWand(p.getItemInHand())){
-                Alkatraz.getNms().fakeExp(p, (float) (data.getMana() / data.getMaxMana()), (int) data.getMana(), 1);
+                Alkatraz.getNms().fakeExp(p, (float) (data.getDouble("mana") / data.getDouble("max_mana")), data.getDouble("mana").intValue(), 1);
             }
         }
     }
@@ -185,8 +168,8 @@ public class DataManager implements Listener {
         Bukkit.getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
             for (Player p : Bukkit.getOnlinePlayers()){
                 PlayerData data = getPlayerData(p);
-                if (data.getMana() < data.getMaxMana()){
-                    addMana(p, data.getManaRegeneration());
+                if (data.getDouble("mana") < data.getDouble("max_mana")){
+                    addMana(p, data.getDouble("mana_regeneration"));
                 }
             }
         }, 0L, 20L);
@@ -245,18 +228,18 @@ public class DataManager implements Listener {
 
     public static void addExperience(OfflinePlayer p, double exp){
         PlayerData data = p.isOnline() ? DataManager.getPlayerData(p) : DataManager.getConfigData(p);
-        data.setExperience(data.getExperience() + exp);
+        data.setDouble("experience", data.getDouble("experience") + exp);
         if (p.isOnline()){
             BossBar bar = data.getExpBar();
-            String max = data.getCircle() < 9 ? String.valueOf(requiredExperience(data.getCircle() + 1)) : "MAX";
+            String max = data.getInt("circle") < 9 ? String.valueOf(requiredExperience(data.getInt("circle") + 1)) : "MAX";
             if (bar == null){
-                BossBar newbar = Bukkit.createBossBar(format("&bMagic Experience: " + data.getExperience() + "/" + max), BarColor.WHITE, BarStyle.SOLID);
-                if (data.getCircle() < 9){
-                    if (data.getExperience() / requiredExperience(data.getCircle() + 1) > 1){
+                BossBar newbar = Bukkit.createBossBar(format("&bMagic Experience: " + data.getDouble("experience") + "/" + max), BarColor.WHITE, BarStyle.SOLID);
+                if (data.getInt("circle") < 9){
+                    if (data.getDouble("experience") / requiredExperience(data.getInt("circle") + 1) > 1){
                         newbar.setProgress(1);
-                    }else if (data.getExperience() / requiredExperience(data.getCircle() + 1) < 0){
+                    }else if (data.getDouble("experience") / requiredExperience(data.getInt("circle") + 1) < 0){
                         newbar.setProgress(0);
-                    }else {newbar.setProgress(data.getExperience() / requiredExperience(data.getCircle() + 1)); }
+                    }else {newbar.setProgress(data.getDouble("experience") / requiredExperience(data.getInt("circle") + 1)); }
                 }else{
                     newbar.setProgress(1);
                 }
@@ -269,13 +252,13 @@ public class DataManager implements Listener {
                 }, 100L);
             }else{
                 bar.removePlayer(p.getPlayer());
-                bar.setTitle(format("&bMagic Experience: " + data.getExperience() + "/" + max));
-                if (data.getCircle() < 9){
-                    if (data.getExperience() / requiredExperience(data.getCircle() + 1) > 1){
+                bar.setTitle(format("&bMagic Experience: " + data.getDouble("experience") + "/" + max));
+                if (data.getInt("circle") < 9){
+                    if (data.getDouble("experience") / requiredExperience(data.getInt("circle") + 1) > 1){
                         bar.setProgress(1);
-                    }else if (data.getExperience() / requiredExperience(data.getCircle() + 1) < 0){
+                    }else if (data.getDouble("experience") / requiredExperience(data.getInt("circle") + 1) < 0){
                         bar.setProgress(0);
-                    }else {bar.setProgress(data.getExperience() / requiredExperience(data.getCircle() + 1)); }
+                    }else {bar.setProgress(data.getDouble("experience") / requiredExperience(data.getInt("circle") + 1)); }
                 }else{
                     bar.setProgress(1);
                 }
@@ -288,15 +271,15 @@ public class DataManager implements Listener {
                 }, 100L);
             }
         }
-        if (data.getCircle() < 9){
-            if (data.getExperience() >= requiredExperience(data.getCircle() + 1)){
-                double experience = data.getExperience();
-                data.setExperience(0);
+        if (data.getInt("circle") < 9){
+            if (data.getDouble("experience") >= requiredExperience(data.getInt("circle") + 1)){
+                double experience = data.getDouble("experience");
+                data.setDouble("experience", (double) 0);
                 addCircle(p.getPlayer(), 1);
                 if (p.isOnline()){
-                    p.getPlayer().sendMessage(format("&e&lCIRCLE UP!"), format("&bReached the " + StringUtils.toOrdinal(data.getCircle()) + " circle."), format("&bYou are now able to use spells up to the " + StringUtils.toOrdinal(data.getCircle()) + " rank."));
+                    p.getPlayer().sendMessage(format("&e&lCIRCLE UP!"), format("&bReached the " + StringUtils.toOrdinal(data.getInt("circle")) + " circle."), format("&bYou are now able to use spells up to the " + StringUtils.toOrdinal(data.getInt("circle")) + " rank."));
                 }
-                addExperience(p, (experience - requiredExperience(data.getCircle())));
+                addExperience(p, (experience - requiredExperience(data.getInt("circle"))));
             }
         }
         if (!p.isOnline()){
@@ -306,10 +289,10 @@ public class DataManager implements Listener {
 
     public static void addCircle(@NotNull Player p, int circle){
         PlayerData data = p.isOnline() ? getPlayerData(p) : getConfigData(p);
-        int pcircle = data.getCircle();
-        data.setMaxMana(data.getMaxMana() + (getMaxMana(circle + data.getCircle()) - getMaxMana(pcircle)));
-        data.setManaRegeneration(data.getManaRegeneration() + (getManaRegen(circle) - getManaRegen(data.getCircle())));
-        data.setCircle(pcircle + circle);
+        int pcircle = data.getInt("circle");
+        data.setDouble("max_mana", data.getDouble("max_mana") + (getMaxMana(circle + data.getInt("circle")) - getMaxMana(pcircle)));
+        data.setDouble("mana_regeneration", data.getDouble("mana_regeneration") + (getManaRegen(circle) - getManaRegen(data.getInt("circle"))));
+        data.setInt("circle", pcircle + circle);
         if (!p.isOnline()){
             savePlayerData(p, data);
         }
@@ -350,25 +333,17 @@ public class DataManager implements Listener {
     public static void savePlayerData(OfflinePlayer p, PlayerData data){
         File general = new File(getFolderPath(p) + "/general.yml");
         FileConfiguration gcfg = YamlConfiguration.loadConfiguration(general);
-        gcfg.set("stats.max_mana", data.getMaxMana());
-        gcfg.set("stats.mana", data.getMana());
-        gcfg.set("stats.circle", data.getCircle());
-        gcfg.set("stats.mana_regeneration", data.getManaRegeneration());
-        gcfg.set("stats.experience", data.getExperience());
-        gcfg.set("stats.magic_affinity", data.getMagicAffinity());
-        gcfg.set("stats.magic_resistance", data.getMagicResistance());
-        gcfg.set("stats.fire_affinity", data.getFireAffinity());
-        gcfg.set("stats.fire_resistance", data.getFireResistance());
-        gcfg.set("stats.air_affinity", data.getAirAffinity());
-        gcfg.set("stats.air_resistance", data.getAirResistance());
-        gcfg.set("stats.earth_affinity", data.getEarthAffinity());
-        gcfg.set("stats.earth_resistance", data.getEarthResistance());
-        gcfg.set("stats.water_affinity", data.getWaterAffinity());
-        gcfg.set("stats.water_resistance", data.getWaterResistance());
-        gcfg.set("stats.light_affinity", data.getLightAffinity());
-        gcfg.set("stats.light_resistance", data.getLightResistance());
-        gcfg.set("stats.dark_affinity", data.getDarkAffinity());
-        gcfg.set("stats.dark_resistance", data.getDarkResistance());
+        List<String> statNames = StatManager.getStatNames();
+        for (String stat : statNames){
+            String type = StatManager.getType(stat);
+            if (type.equals("double")){
+                gcfg.set("stats." + stat, data.getDouble(stat));
+            }else if (type.equals("int")){
+                gcfg.set("stats." + stat, data.getInt(stat));
+            } else if (type.equals("boolean")) {
+                gcfg.set("stats." + stat, data.getBoolean(stat));
+            } // If not, is an invalid stat, and should not be saved.
+        }
         for (Spell spell : SpellRegistry.getAllSpells().values()){
             if (data.hasDiscovered(spell)){
                 gcfg.getStringList("discovered_spells").add(spell.getType().toLowerCase());
@@ -385,15 +360,10 @@ public class DataManager implements Listener {
 
         File stats = new File(getFolderPath(p) + "/stats.yml");
         FileConfiguration scfg = YamlConfiguration.loadConfiguration(stats);
-        scfg.set("stat_points", data.getStatPoints());
-        scfg.set("reset_tokens", data.getStatResetTokens());
-        scfg.set("fire_points", data.getFireStatPoints());
-        scfg.set("air_points", data.getAirStatPoints());
-        scfg.set("water_points", data.getWaterStatPoints());
-        scfg.set("earth_points", data.getEarthStatPoints());
-        scfg.set("light_points", data.getLightStatPoints());
-        scfg.set("dark_points", data.getDarkStatPoints());
-
+        List<String> points = StatManager.getStatPoints();
+        for (String point : points){
+            scfg.set(point, data.getInt(point));
+        }
         try {
             gcfg.save(general);
             mcfg.save(masteries);

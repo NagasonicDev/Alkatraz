@@ -6,6 +6,7 @@ import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.playerdata.DataManager;
 import me.nagasonic.alkatraz.playerdata.PlayerData;
+import me.nagasonic.alkatraz.spells.Element;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
@@ -48,7 +49,7 @@ public class LesserHeal extends Spell {
         if (!p.isDead()){
             if (p.isSneaking() || p.getTargetEntity(20) == null || !(p.getTargetEntity(20) instanceof Player)){
                 double wandPower = NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
-                double heal = (baseHeal * wandPower) * (1 + DataManager.getPlayerData(p).getLightAffinity() / 100);
+                double heal = (baseHeal * wandPower) * (1 + DataManager.getPlayerData(p).getAffinity(Element.LIGHT) / 100);
                 if (heal > maxHeal){
                     heal = maxHeal;
                 }
@@ -71,7 +72,7 @@ public class LesserHeal extends Spell {
             }else{
                 Player target = (Player) p.getTargetEntity(20);
                 double wandPower = NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
-                double heal = (baseHeal * wandPower) * (1 + DataManager.getPlayerData(p).getLightAffinity() / 100);
+                double heal = (baseHeal * wandPower) * (1 + DataManager.getPlayerData(p).getAffinity(Element.LIGHT) / 100);
                 if (heal > maxHeal){
                     heal = maxHeal;
                 }

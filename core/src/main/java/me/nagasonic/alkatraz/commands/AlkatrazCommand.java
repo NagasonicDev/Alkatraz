@@ -111,22 +111,22 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                 if (args[1].equals("set")){
                     OfflinePlayer p = args.length == 3 ? (OfflinePlayer) sender : Bukkit.getOfflinePlayer(args[3]);
                     PlayerData data = p.isOnline() ? DataManager.getPlayerData(p) : DataManager.getConfigData(p);
-                    if (Double.parseDouble(args[2]) > DataManager.requiredExperience(data.getCircle() + 1) && data.getCircle() < 9){
+                    if (Double.parseDouble(args[2]) > DataManager.requiredExperience(data.getInt("circle") + 1) && data.getInt("circle") < 9){
                         sender.sendMessage("&cCannot set beyond the required experience threshold.");
                         return true;
                     }
-                    data.setExperience(Double.parseDouble(args[2]));
+                    data.setDouble("experience", Double.parseDouble(args[2]));
                     sender.sendMessage(format("&aSet magic experience of " + p.getName() + " to " + args[2]));
                     return true;
                 } else if (args[1].equals("add")) {
                     OfflinePlayer p = args.length == 3 ? (OfflinePlayer) sender : Bukkit.getOfflinePlayer(args[3]);
                     PlayerData data = p.isOnline() ? DataManager.getPlayerData(p) : DataManager.getConfigData(p);
-                    if (data.getExperience() + Double.parseDouble(args[2]) < 0){
+                    if (data.getDouble("experience") + Double.parseDouble(args[2]) < 0){
                         sender.sendMessage("&cCannot have negative experience, please change circle level with /alkatraz circle.");
                         return true;
                     }
                     DataManager.addExperience(p, Double.parseDouble(args[2]));
-                    sender.sendMessage(format("&aAdded " + args[2] + " to magic experience of " + p.getName() + ". (Total: " + data.getExperience() + ")"));
+                    sender.sendMessage(format("&aAdded " + args[2] + " to magic experience of " + p.getName() + ". (Total: " + data.getDouble("experience") + ")"));
                     return true;
                 }else{
                     sender.sendMessage(format("&cPlease choose a valid operator: set/add."));
@@ -150,7 +150,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                         sender.sendMessage("&cCannot set beyond the circle threshold (0-9).");
                         return true;
                     }
-                    DataManager.addCircle(p.getPlayer(), Integer.parseInt(args[2]) - data.getCircle());
+                    DataManager.addCircle(p.getPlayer(), Integer.parseInt(args[2]) - data.getInt("circle"));
                     sender.sendMessage(format("&aSet circle level of " + p.getName() + " to " + args[2]));
                     if (!p.isOnline()) {
                         DataManager.savePlayerData(p, data);
@@ -159,12 +159,12 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                 } else if (args[1].equals("add")) {
                     OfflinePlayer p = args.length == 3 ? (OfflinePlayer) sender : Bukkit.getOfflinePlayer(args[3]);
                     PlayerData data = p.isOnline() ? DataManager.getPlayerData(p) : DataManager.getConfigData(p);
-                    if (data.getCircle() + Integer.parseInt(args[2]) < 0 || data.getCircle() + Integer.parseInt(args[2]) > 9){
+                    if (data.getInt("circle") + Integer.parseInt(args[2]) < 0 || data.getInt("circle") + Integer.parseInt(args[2]) > 9){
                         sender.sendMessage("&cCannot add beyond the circle threshold. (0-9)");
                         return true;
                     }
                     DataManager.addCircle(p.getPlayer(), Integer.parseInt(args[2]));
-                    sender.sendMessage(format("&aAdded " + args[2] + " to circle level of " + p.getName() + ". (New: " + data.getCircle() + ")"));
+                    sender.sendMessage(format("&aAdded " + args[2] + " to circle level of " + p.getName() + ". (New: " + data.getInt("circle") + ")"));
                     if (!p.isOnline()) {
                         DataManager.savePlayerData(p, data);
                     }
