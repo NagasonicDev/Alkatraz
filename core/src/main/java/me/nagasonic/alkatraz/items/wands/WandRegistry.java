@@ -1,6 +1,7 @@
 package me.nagasonic.alkatraz.items.wands;
 
 import me.nagasonic.alkatraz.items.wands.implementation.WoodenWand;
+import org.bukkit.Bukkit;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -39,6 +40,7 @@ public class WandRegistry {
         wandsByType.put(wand.getType(), wand);
         allWandsByType = Collections.unmodifiableMap(wandsByType);
         wand.loadConfiguration();
+        Bukkit.addRecipe(wand.getRecipe());
     }
 
     public static boolean isRegistered(Class<? extends Wand> wand){

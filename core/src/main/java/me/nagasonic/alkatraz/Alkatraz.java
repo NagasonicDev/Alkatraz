@@ -13,6 +13,7 @@ import me.nagasonic.alkatraz.items.wands.WandListeners;
 import me.nagasonic.alkatraz.items.wands.WandRegistry;
 import me.nagasonic.alkatraz.nms.NMS;
 import me.nagasonic.alkatraz.playerdata.DataManager;
+import me.nagasonic.alkatraz.playerdata.StatManager;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
 import me.nagasonic.alkatraz.util.UpdateChecker;
 import me.nagasonic.alkatraz.util.Utils;
@@ -79,6 +80,7 @@ public final class Alkatraz extends JavaPlugin {
         getCommand("spells").setExecutor(new SpellsCommand());
         getCommand("alkatraz").setExecutor(new AlkatrazCommand());
         getCommand("alkatraz").setTabCompleter(new AlkatrazCommand());
+        StatManager.load();
         DataManager.addManaPerSecond();
     }
 
