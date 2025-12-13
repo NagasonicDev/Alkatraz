@@ -25,6 +25,7 @@ public class SpellRegistry {
         registerIfEnabled("detect", new Detect("DETECT"));
         registerIfEnabled("stealth", new Stealth("STEALTH"));
         registerIfEnabled("disguise", new Disguise("DISGUISE"));
+        registerIfEnabled("swift", new Swift("SWIFT"));
     }
 
     private static void registerIfEnabled(String key, Spell spell){

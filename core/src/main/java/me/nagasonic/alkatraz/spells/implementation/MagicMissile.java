@@ -57,7 +57,7 @@ public class MagicMissile extends Spell {
                 for (Entity entity : loc.getNearbyEntities(1, 1, 1)){
                     if (!entity.isDead() && entity != p){
                         LivingEntity le = (LivingEntity) entity;
-                        double wandPower = NBT.get(wand, nbt -> (Double) nbt.getDouble("power"));
+                        double wandPower = NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
                         le.damage(calcDamage(wandPower * baseDamage, le, p));
                         Vector unitVector = entity.getLocation().toVector().subtract(p.getLocation().toVector()).normalize();
                         entity.setVelocity(unitVector.multiply(1));

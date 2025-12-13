@@ -291,7 +291,7 @@ public class DataManager implements Listener {
         PlayerData data = p.isOnline() ? getPlayerData(p) : getConfigData(p);
         int pcircle = data.getInt("circle");
         data.setDouble("max_mana", data.getDouble("max_mana") + (getMaxMana(circle + data.getInt("circle")) - getMaxMana(pcircle)));
-        data.setDouble("mana_regeneration", data.getDouble("mana_regeneration") + (getManaRegen(circle) - getManaRegen(data.getInt("circle"))));
+        data.setDouble("mana_regeneration", data.getDouble("mana_regeneration") + (getManaRegen(circle + pcircle) - getManaRegen(pcircle)));
         data.setInt("circle", pcircle + circle);
         if (!p.isOnline()){
             savePlayerData(p, data);
