@@ -103,25 +103,25 @@ public class PlayerData {
 
     public double getAffinity(Element element){
         return switch (element){
-            case WATER -> getInt("water_affinity");
-            case AIR -> getInt("air_affinity");
-            case DARK -> getInt("dark_affinity");
-            case FIRE -> getInt("fire_affinity");
-            case EARTH -> getInt("earth_affinity");
-            case LIGHT -> getInt("light_affinity");
-            case NONE -> getInt("magic_affinity");
+            case WATER -> getDouble("water_affinity");
+            case AIR -> getDouble("air_affinity");
+            case DARK -> getDouble("dark_affinity");
+            case FIRE -> getDouble("fire_affinity");
+            case EARTH -> getDouble("earth_affinity");
+            case LIGHT -> getDouble("light_affinity");
+            case NONE -> getDouble("magic_affinity");
         };
     }
 
     public double getResistance(Element element){
         return switch (element){
-            case WATER -> getInt("water_resistance");
-            case AIR -> getInt("air_resistance");
-            case DARK -> getInt("dark_resistance");
-            case FIRE -> getInt("fire_resistance");
-            case EARTH -> getInt("earth_resistance");
-            case LIGHT -> getInt("light_resistance");
-            case NONE -> getInt("magic_resistance");
+            case WATER -> getDouble("water_resistance");
+            case AIR -> getDouble("air_resistance");
+            case DARK -> getDouble("dark_resistance");
+            case FIRE -> getDouble("fire_resistance");
+            case EARTH -> getDouble("earth_resistance");
+            case LIGHT -> getDouble("light_resistance");
+            case NONE -> getDouble("magic_resistance");
         };
     }
 

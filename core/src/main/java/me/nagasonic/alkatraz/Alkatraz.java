@@ -199,6 +199,7 @@ public final class Alkatraz extends JavaPlugin {
         saveConfig("spells/detect.yml");
         saveConfig("spells/stealth.yml");
         saveConfig("spells/disguise.yml");
+        saveConfig("spells/swift.yml");
     }
 
     public static GlowingEntities getGlowingEntities() {

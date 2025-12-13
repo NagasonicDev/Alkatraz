@@ -4,6 +4,8 @@ import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
+import me.nagasonic.alkatraz.playerdata.DataManager;
+import me.nagasonic.alkatraz.playerdata.PlayerData;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
 import me.nagasonic.alkatraz.util.*;
@@ -28,6 +30,7 @@ public class Disguise extends Spell implements Listener {
         super(type);
     }
     private boolean selected = false;
+    private Player caster;
     private Inventory gui;
 
     @Override
@@ -42,6 +45,7 @@ public class Disguise extends Spell implements Listener {
 
     @Override
     public void castAction(Player p, ItemStack wand) {
+        caster = p;
         openGUI(p);
     }
 
@@ -191,9 +195,11 @@ public class Disguise extends Spell implements Listener {
     @EventHandler
     private void onInventoryClose(InventoryCloseEvent e){
         if (e.getInventory().equals(gui)){
-            if (!selected){
-                Player p = (Player) e.getPlayer();
-                p.openInventory(gui);
+            if (e.getPlayer() == caster){
+                if (!selected){
+                    caster.sendMessage(format("&cNo player was chosen, cancelling casting..."));
+                    DataManager.addMana(caster, getCost());
+                }
             }
         }
     }
