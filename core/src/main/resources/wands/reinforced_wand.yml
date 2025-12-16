@@ -1,0 +1,25 @@
+id: 'reinforced_wand'
+item_name: '&fReinforced Wand'
+material: STICK
+lore:
+  - '&7A reinforced wand, stronger than a normal'
+  - '&7wand, strong enough to use most spells.'
+  - '' # BREAK FOR ATTRIBUTE LORE
+circle_limit: 5
+power: 1.5 # DAMAGE/EFFECTIVENESS MULTI
+cast_time: 1.25 # CAST TIME MULTI
+fire_damage: 0
+air_damage: 0
+water_damage: 0
+earth_damage: 0
+light_damage: 0
+dark_damage: 0
+recipe:
+  shape:
+    - 'LIS'
+    - 'ISI'
+    - 'SIL'
+  values:
+    - 'L:LAPIS_LAZULI'
+    - 'I:IRON_INGOT'
+    - 'S:STICK'
