@@ -38,7 +38,7 @@ public class Swift extends Spell {
     public void castAction(Player p, ItemStack wand) {
         if (!p.isDead()){
             double wandPower = NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
-            p.setVelocity(p.getEyeLocation().getDirection().normalize().multiply(wandPower * strength).add(new Vector(0, 0.5, 0)));
+            p.setVelocity(p.getEyeLocation().getDirection().normalize().multiply(wandPower * strength));
             AtomicInteger i = new AtomicInteger(0);
             taskID = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
                 if (i.get() < 8){
