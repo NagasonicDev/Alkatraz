@@ -16,6 +16,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -177,11 +178,18 @@ public class Disguise extends Spell implements Listener {
                     } else if (item.getType().equals(Material.PLAYER_HEAD)) {
                         Player target = Bukkit.getPlayer(meta.getDisplayName());
                         Player p = (Player) e.getView().getPlayer();
+                        PlayerData data = DataManager.getPlayerData(p);
                         if (target != null){
-                            Skin skin = Skin.fromURL("https://sessionserver.mojang.com/session/minecraft/profile/" + target.getUniqueId() + "?unsigned=false");
-                            Alkatraz.getNms().changeSkin(p, List.copyOf(Bukkit.getOnlinePlayers()), skin);
-                            selected = true;
-                            p.closeInventory();
+                            if (!Objects.equals(target.getUniqueId().toString(), data.getString("disguise"))){
+                                data.setString("disguise", target.getUniqueId().toString());
+                                p.setDisplayName(target.getName());
+                                Skin skin = Skin.fromURL("https://sessionserver.mojang.com/session/minecraft/profile/" + target.getUniqueId() + "?unsigned=false");
+                                Alkatraz.getNms().changeSkin(p, List.copyOf(Bukkit.getOnlinePlayers()), skin);
+                                selected = true;
+                                p.closeInventory();
+                            }else{
+                                p.sendMessage(format("&cYou are already disguised as this player."));
+                            }
                         }else{
                             p.sendMessage(format("&cCouldn't find this player. Player must be online."));
                         }
@@ -199,6 +207,24 @@ public class Disguise extends Spell implements Listener {
                 if (!selected){
                     caster.sendMessage(format("&cNo player was chosen, cancelling casting..."));
                     DataManager.addMana(caster, getCost());
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    private void onJoin(PlayerJoinEvent e){
+        Player p = e.getPlayer();
+        for (Player other : Bukkit.getOnlinePlayers()){
+            if (other != p){
+                PlayerData odata = DataManager.getPlayerData(other);
+                if (odata.getString("disguise") != null){
+                    UUID uuid = UUID.fromString(odata.getString("disguise"));
+                    if (Bukkit.getPlayer(uuid) != null){
+                        Alkatraz.getNms().changeSkinElse(other, List.of(p), Skin.fromURL("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid + "?unsigned=false"));
+                    }
+                }else{
+                    odata.setString("disguise", p.getUniqueId().toString());
                 }
             }
         }

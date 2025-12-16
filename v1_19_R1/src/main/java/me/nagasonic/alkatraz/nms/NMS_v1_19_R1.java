@@ -101,6 +101,12 @@ public final class NMS_v1_19_R1 implements NMS {
 
     @Override
     public void changeSkin(Player player, List<Player> viewers, Skin skin) {
+        changeSkinElse(player, viewers, skin);
+        refresh(player);
+    }
+
+    @Override
+    public void changeSkinElse(Player player, List<Player> viewers, Skin skin) {
         ServerPlayer nmsPlayer = ((CraftPlayer) player).getHandle();
         GameProfile profile = nmsPlayer.getGameProfile();
         profile.getProperties().removeAll("textures");
@@ -110,7 +116,6 @@ public final class NMS_v1_19_R1 implements NMS {
                 hideAndShow(other, player);
             }
         }
-        refresh(player);
     }
 
     public void refresh(Player player){
