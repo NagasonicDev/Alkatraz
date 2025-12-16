@@ -24,6 +24,7 @@ public abstract class Wand implements Listener {
     protected List<String> lore;
     protected List<String> recipeShape;
     protected List<String> recipeValues;
+    protected int circleLimit;
     protected double power;
     protected double castTime;
 
@@ -47,7 +48,7 @@ public abstract class Wand implements Listener {
     public void loadCommonConfig(YamlConfiguration wandConfig) {
         this.id = wandConfig.getString("id");
         this.name = wandConfig.getString("item_name");
-        this.material = Utils.materialFromString(wandConfig.getString("material"));
+        this.material = Utils.materialFromString(wandConfig.getString("material")).getType();
         this.lore = wandConfig.getStringList("lore");
         this.power = wandConfig.getDouble("power");
         this.castTime = wandConfig.getDouble("cast_time");
@@ -59,6 +60,7 @@ public abstract class Wand implements Listener {
         this.darkDamage = wandConfig.getDouble("dark_damage");
         this.recipeShape = wandConfig.getStringList("recipe.shape");
         this.recipeValues = wandConfig.getStringList("recipe.values");
+        this.circleLimit = wandConfig.getInt("circle_limit");
     }
 
     public ItemStack getItem() {
@@ -102,6 +104,7 @@ public abstract class Wand implements Listener {
         NBT.modify(item, nbt -> {
             nbt.setBoolean("wand", true);
             nbt.setString("cast_code", "");
+            nbt.setInteger("circle_limit", getCircleLimit());
             nbt.setDouble("magic_power", getPower());
             nbt.setDouble("casting_time", getCastTime());
             if (getFireDamage() != 0) { nbt.setDouble("fire_damage", getFireDamage()); }
@@ -132,6 +135,10 @@ public abstract class Wand implements Listener {
 
     public List<String> getLore() {
         return lore;
+    }
+
+    public int getCircleLimit() {
+        return circleLimit;
     }
 
     public double getPower() {

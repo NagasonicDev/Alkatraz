@@ -1,5 +1,6 @@
 package me.nagasonic.alkatraz.items.wands;
 
+import me.nagasonic.alkatraz.items.wands.implementation.ReinforcedWand;
 import me.nagasonic.alkatraz.items.wands.implementation.WoodenWand;
 import org.bukkit.Bukkit;
 
@@ -13,6 +14,7 @@ public class WandRegistry {
 
     public static void registerWands(){
         registerWand(new WoodenWand("WOODEN_WAND"));
+        registerWand(new ReinforcedWand("REINFORCED_WAND"));
     }
 
     public static Map<Class<?>, Wand> getAllWands() {

@@ -7,6 +7,7 @@ import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
 
@@ -32,7 +33,7 @@ public class WoodenWand extends Wand {
         ShapedRecipe recipe = new ShapedRecipe(new NamespacedKey(Alkatraz.getInstance(), "wooden_wand"), this.getItem());
         recipe.shape(getRecipeShape().get(0), getRecipeShape().get(1), getRecipeShape().get(2));
         List<Character> chars = new ArrayList<>();
-        List<Material> mats = new ArrayList<>();
+        List<ItemStack> mats = new ArrayList<>();
         for (String s : getRecipeValues()){
             String[] strs = s.split(":");
             chars.add(s.charAt(0));
