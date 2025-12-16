@@ -19,6 +19,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
@@ -65,7 +66,7 @@ public class Stealth extends Spell implements Listener {
                 for (Player player : Bukkit.getOnlinePlayers()){
                     if (player != p){
                         PlayerData td = DataManager.getPlayerData(player);
-                        if (td.getInt("circle") <= data.getInt("circle")){
+                        if (td.getInt("circle") < data.getInt("circle")){
                             Alkatraz.getNms().setInvisible(p, true);
                             Alkatraz.getNms().fakeArmor(p, player, null, null, null, null);
                         }else{
@@ -175,7 +176,7 @@ public class Stealth extends Spell implements Listener {
             if (td.getBoolean("stealth")){
                 PlayerData data = DataManager.getPlayerData(p);
                 if (p != caster){
-                    if (td.getInt("circle") <= data.getInt("circle")){
+                    if (td.getInt("circle") < data.getInt("circle")){
                         Alkatraz.getNms().setInvisible(caster, true);
                         Alkatraz.getNms().fakeArmor(caster, p, null, null, null, null);
                     }else{
@@ -202,6 +203,21 @@ public class Stealth extends Spell implements Listener {
                 Alkatraz.getNms().setInvisible(player, false);
                 Alkatraz.getNms().fakeArmor(player, player, player.getInventory().getHelmet(), player.getInventory().getChestplate(), player.getInventory().getLeggings(), player.getInventory().getBoots());
                 Alkatraz.getNms().setTransparent(player, player, false);
+            }
+        }
+    }
+
+    @EventHandler
+    private void onWalk(PlayerMoveEvent e){
+        if (e.getPlayer() == caster){
+            PlayerData data = DataManager.getPlayerData(caster);
+            if (data.getBoolean("stealth")){
+                for (Player other : Bukkit.getOnlinePlayers()){
+                    PlayerData odata = DataManager.getPlayerData(other);
+                    if (odata.getInt("circle") >= data.getInt("circle")){
+                        other.spawnParticle(Particle.ASH, caster.getLocation(), 5, 0, 0,0,0);
+                    }
+                }
             }
         }
     }
