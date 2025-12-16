@@ -97,6 +97,7 @@ public abstract class Wand implements Listener {
         if (getWaterDamage() != 0) { lore.add(ColorFormat.format(Element.WATER.getColor() + "Water Damage: " + getWaterDamage())); }
         if (getLightDamage() != 0) { lore.add(ColorFormat.format(Element.LIGHT.getColor() + "Light Damage: " + getLightDamage())); }
         if (getDarkDamage() != 0) { lore.add(ColorFormat.format(Element.DARK.getColor() + "Dark Damage: " + getDarkDamage())); }
+        lore.add(ColorFormat.format("&9Circle Limit: " + getCircleLimit()));
         return lore;
     }
 
