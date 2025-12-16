@@ -60,6 +60,8 @@ public class DataManager implements Listener {
                     data.setInt(stat, cfg.getInt("stats." + stat));
                 } else if (type.equals("boolean")) {
                     data.setBoolean(stat, cfg.getBoolean("stats." + stat));
+                } else if (type.equals("string")) {
+                    data.setString(stat, cfg.getString("stats." + stat));
                 }
             }
             for (Spell spell : SpellRegistry.getAllSpells().values()){
@@ -78,6 +80,8 @@ public class DataManager implements Listener {
                     data.setInt(stat, Integer.valueOf(def));
                 } else if (type.equals("boolean")){
                     data.setBoolean(stat, Boolean.valueOf(def));
+                } else if (type.equals("string")) {
+                    data.setString(stat, def);
                 }
             }
             data.setDiscovered(SpellRegistry.getSpell(MagicMissile.class), true);
@@ -342,7 +346,9 @@ public class DataManager implements Listener {
                 gcfg.set("stats." + stat, data.getInt(stat));
             } else if (type.equals("boolean")) {
                 gcfg.set("stats." + stat, data.getBoolean(stat));
-            } // If not, is an invalid stat, and should not be saved.
+            } else if (type.equals("string")) {
+                gcfg.set("stats." + stat, data.getString(stat));
+            }  // If not, is an invalid stat, and should not be saved.
         }
         for (Spell spell : SpellRegistry.getAllSpells().values()){
             if (data.hasDiscovered(spell)){

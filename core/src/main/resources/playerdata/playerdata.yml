@@ -21,6 +21,7 @@ stat_list:
   - "dark_resistance:double:0"
   - "casting:boolean:false"
   - "stealth:boolean:false"
+  - "disguise:string: "
 
 # JUST THE NAMES
 stat_point_list:

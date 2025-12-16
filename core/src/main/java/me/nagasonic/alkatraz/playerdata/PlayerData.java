@@ -18,6 +18,7 @@ public class PlayerData {
     private Map<String, Double> doubleStats = new HashMap<>();
     private Map<String, Integer> intStats = new HashMap<>();
     private Map<String, Boolean> boolStats = new HashMap<>();
+    private Map<String, String> strStats = new HashMap<>();
 
     public Double getDouble(String key){
         return doubleStats.get(key);
@@ -41,6 +42,14 @@ public class PlayerData {
 
     public void setBoolean(String key, Boolean value){
         boolStats.put(key, value);
+    }
+
+    public String getString(String key) {
+        return strStats.get(key);
+    }
+
+    public void setString(String key, String value) {
+        strStats.put(key, value);
     }
 
     private Map<Spell, Integer> spellMasteries = new HashMap<>();

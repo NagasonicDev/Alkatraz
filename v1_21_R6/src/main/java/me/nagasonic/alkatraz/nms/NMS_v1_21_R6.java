@@ -102,7 +102,13 @@ public final class NMS_v1_21_R6 implements NMS {
     }
 
     @Override
-    public void changeSkin(Player player, List<Player> viewers, Skin skin) {
+    public void changeSkin(Player player, List<Player> viewers, Skin skin) throws UnsupportedOperationException {
+        changeSkinElse(player, viewers, skin);
+        refresh(player);
+    }
+
+    @Override
+    public void changeSkinElse(Player player, List<Player> viewers, Skin skin) throws UnsupportedOperationException {
         ServerPlayer nmsPlayer = ((CraftPlayer) player).getHandle();
         GameProfile profile = nmsPlayer.getGameProfile();
         profile.properties().removeAll("textures");
@@ -112,7 +118,6 @@ public final class NMS_v1_21_R6 implements NMS {
                 hideAndShow(other, player);
             }
         }
-        refresh(player);
     }
 
     public void refresh(Player player) {
