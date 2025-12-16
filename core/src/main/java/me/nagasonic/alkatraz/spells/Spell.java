@@ -25,7 +25,7 @@ public abstract class Spell {
     protected Element element;
     protected String code;
     protected BarColor masteryBarColor;
-    protected Material guiItem;
+    protected ItemStack guiItem;
     protected int cost;
     protected double castTime;
     protected int level;
@@ -92,7 +92,7 @@ public abstract class Spell {
         this.enabled = spellConfig.getBoolean("enabled");
         this.maxMastery = spellConfig.getInt("maximum_mastery");
         this.masteryBarColor = BarColor.valueOf(spellConfig.getString("mastery_bar_color"));
-        this.guiItem = Material.valueOf(spellConfig.getString("gui_item"));
+        this.guiItem = Utils.materialFromString(spellConfig.getString("gui_item"));
     }
 
     public String getType() {
@@ -137,7 +137,7 @@ public abstract class Spell {
         return masteryBarColor;
     }
 
-    public Material getGuiItem() {
+    public ItemStack getGuiItem() {
         return guiItem;
     }
 
