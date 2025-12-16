@@ -5,11 +5,18 @@ Alkatraz is a Magic plugin that allows players to use wands to cast spells using
 When holding a wand, the experience bar will transform into a **Mana Bar**, which shows how much mana you have. Each spell uses a certain amount of mana to cast, which can be seen in the /spell command.
 
 ## Features:
-- 1 Wand
-- 10 Spells
+- 2 Wand
+- 12 Spells
 - Mastery System
 - Advanced Casting System
 - Stat Points
+
+## WIKI:
+https://github.com/NagasonicDev/Alkatraz/wiki
+
+## Wands:
+- **Wooden Wand**: The most basic wand, can only cast up to circle 2 spells.
+- **Reinforced Wand**: An upgraded form of the wooden wand, and can cast up to 5th circle spells.
 
 ## Spells:
 - **Magic Missile**: The basic magic spell, which every player discovered on joining. Shoots a beam up to 20 blocks in front of the player, doing small damage to entities it collides with. Cannot pass through solid blocks.
@@ -22,6 +29,8 @@ When holding a wand, the experience bar will transform into a **Mana Bar**, whic
 - **Detect**: Scans the surroundings of the caster, making any nearby entities glow. Detect range varies depending on circle level, which can be seen in the `detect.yml`.
 - **Stealth**: Hides the player, including their armor, from other players. The player will appear transparent to player's if they have a greater circle level than the caster.
 - **Disguise**: Allows the player to disguise as a different player.
+- **Swift**: Uses a burst of air to launch the player forwards.
+- **Fire Wall**: Creates a wall of flames in the direction the player looks, and curves when the player looks around. Blocks enemies with the risk of taking heavy damage when jumping through the wall.
 
 ## Stat Points and Stats GUI
 Invest skill points into elements to boost their affinity and resistance. Stat points are currently only obtainable by modifying the player's data and the amount given when joining the server for the first time.
