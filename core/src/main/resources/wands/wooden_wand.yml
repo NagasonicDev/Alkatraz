@@ -6,6 +6,7 @@ lore:
   - '&7Can only do basic spells, will likely'
   - '&7break soon.'
   - '' # BREAK FOR ATTRIBUTE LORE
+circle_limit: 2
 power: 1 # DAMAGE/EFFECTIVENESS MULTI
 cast_time: 1 # CAST TIME MULTI
 fire_damage: 0

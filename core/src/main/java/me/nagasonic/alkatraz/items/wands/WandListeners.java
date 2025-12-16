@@ -52,14 +52,7 @@ public class WandListeners implements Listener {
                         Utils.sendActionBar(e.getPlayer(), message);
                         if (code2.length() >= 5){
                             Spell spell = SpellRegistry.getSpell(code2);
-                            if (spell != null) {
-                                if (DataManager.getPlayerData(e.getPlayer()).hasDiscovered(spell) || Permission.hasPermission(e.getPlayer(), Permission.ALL_SPELLS)){
-                                    spell.cast(e.getPlayer(), e.getItem());
-                                }
-                            }
-                            NBT.modify(e.getItem(), nbt -> {
-                                nbt.setString("cast_code", "");
-                            });
+                            tryCast(e.getPlayer(), e.getItem(), spell);
                         }
                     }
                 }
@@ -85,14 +78,7 @@ public class WandListeners implements Listener {
                         Utils.sendActionBar(p, message);
                         if (code2.length() >= 5){
                             Spell spell = SpellRegistry.getSpell(code2);
-                            if (spell != null) {
-                                if (DataManager.getPlayerData(p).hasDiscovered(spell) || Permission.hasPermission(p, Permission.ALL_SPELLS)){
-                                    spell.cast(p, wand);
-                                }
-                            }
-                            NBT.modify(wand, nbt -> {
-                                nbt.setString("cast_code", "");
-                            });
+                            tryCast(p, wand, spell);
                         }
                     }
                 }
@@ -119,14 +105,7 @@ public class WandListeners implements Listener {
                     Utils.sendActionBar(p, message);
                     if (code2.length() >= 5){
                         Spell spell = SpellRegistry.getSpell(code2);
-                        if (spell != null) {
-                            if (DataManager.getPlayerData(p).hasDiscovered(spell) || Permission.hasPermission(p, Permission.ALL_SPELLS)){
-                                spell.cast(p, wand);
-                            }
-                        }
-                        NBT.modify(wand, nbt -> {
-                            nbt.setString("cast_code", "");
-                        });
+                        tryCast(p, wand, spell);
                     }
                 }
             }
@@ -153,14 +132,7 @@ public class WandListeners implements Listener {
                         Utils.sendActionBar(p, message);
                         if (code2.length() >= 5){
                             Spell spell = SpellRegistry.getSpell(code2);
-                            if (spell != null) {
-                                if (DataManager.getPlayerData(p).hasDiscovered(spell) || Permission.hasPermission(p, Permission.ALL_SPELLS)){
-                                    spell.cast(p, wand);
-                                }
-                            }
-                            NBT.modify(wand, nbt -> {
-                                nbt.setString("cast_code", "");
-                            });
+                            tryCast(p, wand, spell);
                         }
                         p.setItemInHand(wand);
                     }
@@ -435,5 +407,21 @@ public class WandListeners implements Listener {
 
     public static void switchFrom(Player p){
         Alkatraz.getNms().fakeExp(p, p.getExp(), p.getLevel(), p.getTotalExperience());
+    }
+
+    private void tryCast(Player p, ItemStack wand, Spell spell){
+        if (spell != null) {
+            if (NBT.get(wand, nbt -> (Integer) nbt.getInteger("circle_limit")) >= spell.getLevel()){
+                if (DataManager.getPlayerData(p).hasDiscovered(spell) || Permission.hasPermission(p, Permission.ALL_SPELLS)){
+                    spell.cast(p, wand);
+                }
+            }else{
+                Utils.sendActionBar(p, "&cYou need a better wand to cast this.");
+            }
+
+        }
+        NBT.modify(wand, nbt -> {
+            nbt.setString("cast_code", "");
+        });
     }
 }
