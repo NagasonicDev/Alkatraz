@@ -19,6 +19,11 @@
         </dependency>
         <dependency>
             <groupId>me.nagasonic</groupId>
+            <artifactId>alkatraz-v1_21_R7</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>me.nagasonic</groupId>
             <artifactId>alkatraz-v1_21_R6</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -115,7 +120,7 @@
                         <!-- NBT-API start -->
                         <relocation>
                             <pattern>de.tr7zw.alkatraz.nbtapi</pattern>
-                            <shadedPattern>${shadedPackage}.de.tr7zw.alkatraz.nbtapi</shadedPattern>
+                            <shadedPattern>${shadedPackage}.me.nagasonic.alkatraz.nbtapi</shadedPattern>
                         </relocation>
                         <!-- NBT-API end -->
                     </relocations>
