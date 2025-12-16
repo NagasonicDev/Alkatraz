@@ -215,7 +215,7 @@ public class Stealth extends Spell implements Listener {
                 for (Player other : Bukkit.getOnlinePlayers()){
                     PlayerData odata = DataManager.getPlayerData(other);
                     if (odata.getInt("circle") >= data.getInt("circle")){
-                        other.spawnParticle(Utils.DUST, caster.getLocation().add(0, 0.3, 0), 5, 0, 0,0,0, new Particle.DustOptions(Color.fromRGB(36, 36, 36), 0.3F));
+                        other.spawnParticle(Utils.DUST, caster.getLocation().add(0, 0.3, 0), 5, new Particle.DustOptions(Color.fromRGB(36, 36, 36), 0.5F));
                     }
                 }
             }
