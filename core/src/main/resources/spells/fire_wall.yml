@@ -1,0 +1,33 @@
+id: 'fire_wall'
+display_name: '&6Fire Wall'
+description:
+  - '&7Creates a wall of fire to block enemies'
+  - '&7and deal heavy damage.'
+# WHETHER THE PLUGIN SHOULD LOAD THE SPELL. DEFAULT: TRUE
+enabled: true
+
+# NONE MEANS ITS DAMAGE DOES NOT SCALE WITH ELEMENTAL DAMAGE, ONLY MAGIC DAMAGE
+element: 'FIRE'
+
+# THE CASTING CODE. 'R' FOR RIGHT CLICK, 'L' FOR LEFT CLICK, 'S' FOR HAND SWAP
+code: 'SSSRR'
+
+# THE MAGIC CIRCLE REQUIRED TO CAST
+level: 3
+
+# BASE CAST TIME (SECONDS)
+cast_time: 1.5
+
+# MANA COST
+mana_cost: 125
+
+# MAXIMUM MASTERY ACHIEVABLE. NOT RECOMMENDED TO CHANGE
+maximum_mastery: 100
+
+base_damage: 3
+
+#THE COLOR OF THE SPELL MASTERY BOSSBAR. OPTIONS ARE: RED, BLUE, YELLOW, PINK, PURPLE, WHITE AND GREEN
+mastery_bar_color: 'RED'
+
+#THE ITEM THAT APPEARS IN THE /SPELLS GUI
+gui_item: 'BLAZE_POWDER'
