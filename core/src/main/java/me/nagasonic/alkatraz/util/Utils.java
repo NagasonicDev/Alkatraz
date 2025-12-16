@@ -3,6 +3,7 @@ package me.nagasonic.alkatraz.util;
 import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.dom.*;
+import me.nagasonic.alkatraz.items.wands.WandRegistry;
 import me.nagasonic.alkatraz.spells.Element;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ChatMessageType;
@@ -277,17 +278,24 @@ public class Utils {
         };
     }
 
-    public static Material materialFromString(String item){
+    public static ItemStack materialFromString(String item){
         ItemStack def = new ItemStack(Material.BARRIER);
         try {
-            def.setType(Material.valueOf(item));
-            return def.getType();
+            if (item.contains("$")){
+                String[] aitem = item.split("$");
+                if (aitem[0] == "WAND"){
+                    def = WandRegistry.getWand(aitem[1]).getItem();
+                }
+            }else{
+                def.setType(Material.valueOf(item));
+            }
+            return def;
         } catch (IllegalArgumentException ignored){
             Alkatraz.logWarning(
                     "ItemStack/Material " + item + " did not lead to an item stack or proper material type. Defaulted to " + "BARRIER"
             );
         }
-        return def.getType();
+        return def;
     }
 
     /**

@@ -98,7 +98,7 @@ public class SpellsGUI implements Listener {
                 Spell spell = spells.get(s);
                 ItemStack item;
                 if (data.hasDiscovered(spell) || target.getPlayer().hasPermission("alkatraz.allspells")){
-                    item = new ItemStack(spell.getGuiItem());
+                    item = spell.getGuiItem();
                     ItemMeta meta = item.getItemMeta();
                     meta.setDisplayName(format(spell.getDisplayName()));
                     List<String> lore = new ArrayList<>();
