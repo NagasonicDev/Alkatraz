@@ -184,8 +184,12 @@ public class Disguise extends Spell implements Listener {
                                 data.setString("disguise", target.getUniqueId().toString());
                                 p.setDisplayName(target.getName());
                                 Skin skin = Skin.fromURL("https://sessionserver.mojang.com/session/minecraft/profile/" + target.getUniqueId() + "?unsigned=false");
-                                Alkatraz.getNms().changeSkin(p, List.copyOf(Bukkit.getOnlinePlayers()), skin);
-                                selected = true;
+                                try {
+                                    Alkatraz.getNms().changeSkin(p, List.copyOf(Bukkit.getOnlinePlayers()), skin);
+                                    selected = true;
+                                } catch (UnsupportedOperationException ex) {
+                                    selected = false;
+                                }
                                 p.closeInventory();
                             }else{
                                 p.sendMessage(format("&cYou are already disguised as this player."));
