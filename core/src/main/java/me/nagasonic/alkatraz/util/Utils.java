@@ -353,19 +353,30 @@ public class Utils {
         return 0;
     }
 
-    public static List<Block> blocksInRadius(Location loc, double radius){
+    public static List<Block> blocksInRadius(Location center, int radius) {
         List<Block> blocks = new ArrayList<>();
-        for (double i = radius / 0.5; i > 0; i -= 0.5){
-            List<Location> locs= ParticleUtils.basicSphere(loc, radius, 10, 10);
-            for (Location l : locs){
-                if (!blocks.contains(l.getBlock())){
-                    blocks.add(l.getBlock());
+        World world = center.getWorld();
+
+        int cx = center.getBlockX();
+        int cy = center.getBlockY();
+        int cz = center.getBlockZ();
+
+        int radiusSquared = radius * radius;
+
+        for (int x = -radius; x <= radius; x++) {
+            for (int y = -radius; y <= radius; y++) {
+                for (int z = -radius; z <= radius; z++) {
+
+                    if (x * x + y * y + z * z > radiusSquared) continue;
+
+                    Block block = world.getBlockAt(cx + x, cy + y, cz + z);
+                    blocks.add(block);
                 }
             }
-            radius -= 0.5;
         }
         return blocks;
     }
+
 
     public static boolean notAir(ItemStack item){
         if (item != null){
@@ -374,5 +385,25 @@ public class Utils {
             }
         }
         return false;
+    }
+
+    public static void raiseColumn(Block block, int depth, int raiseAmount) {
+        World world = block.getWorld();
+        int x = block.getX();
+        int y = block.getY();
+        int z = block.getZ();
+
+        for (int step = 0; step < raiseAmount; step++) {
+            // Move blocks top → bottom
+            for (int i = 0; i <= depth; i++) {
+                Block from = world.getBlockAt(x, y - i + step, z);
+                Block to   = world.getBlockAt(x, y - i + step + 1, z);
+
+                to.setType(from.getType(), false);
+            }
+
+            // Clear the bottom-most block
+            world.getBlockAt(x, y - depth + step, z).setType(Material.AIR, false);
+        }
     }
 }

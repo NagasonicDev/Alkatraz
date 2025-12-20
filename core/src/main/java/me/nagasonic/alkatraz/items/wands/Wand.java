@@ -66,7 +66,6 @@ public abstract class Wand implements Listener {
     public ItemStack getItem() {
         ItemStack item = new ItemStack(getMaterial());
         ItemMeta meta = item.getItemMeta();
-        Alkatraz.logInfo(getName());
         meta.setDisplayName(ColorFormat.format(getName()));
         List<String> lore = new ArrayList<>();
         lore.addAll(getFormmattedLore());

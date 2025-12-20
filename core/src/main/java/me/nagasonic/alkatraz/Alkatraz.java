@@ -51,6 +51,7 @@ public final class Alkatraz extends JavaPlugin {
 
         saveSpellConfigs();
         saveConfig("wands/wooden_wand.yml");
+        saveConfig("wands/reinforced_wand.yml");
         if (!setupNMS()){
             enabled = false;
             return;
@@ -201,6 +202,8 @@ public final class Alkatraz extends JavaPlugin {
         saveConfig("spells/disguise.yml");
         saveConfig("spells/swift.yml");
         saveConfig("spells/fire_wall.yml");
+        saveConfig("spells/earth_spike.yml");
+        saveConfig("spells/water_pulse.yml");
     }
 
     public static GlowingEntities getGlowingEntities() {

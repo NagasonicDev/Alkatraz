@@ -27,6 +27,8 @@ public class SpellRegistry {
         registerIfEnabled("disguise", new Disguise("DISGUISE"));
         registerIfEnabled("swift", new Swift("SWIFT"));
         registerIfEnabled("fire_wall", new FireWall("FIRE_WALL"));
+        registerIfEnabled("earth_spike", new EarthSpike("EARTH_SPIKE"));
+        registerIfEnabled("water_pulse", new WaterPulse("WATER_PULSE"));
     }
 
     private static void registerIfEnabled(String key, Spell spell){

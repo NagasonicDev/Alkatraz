@@ -190,7 +190,6 @@ public class WandListeners implements Listener {
     @EventHandler
     private void onInventoryClick(InventoryClickEvent e) throws InterruptedException {
         if (e.getClickedInventory() == e.getWhoClicked().getInventory()){
-            Alkatraz.logInfo(e.getAction().toString());
             Player p = (Player) e.getWhoClicked();
             if (e.getAction() == InventoryAction.SWAP_WITH_CURSOR){
                 if (e.getSlot() == p.getInventory().getHeldItemSlot()){
