@@ -6,10 +6,7 @@ import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
-import org.bukkit.Bukkit;
-import org.bukkit.Color;
-import org.bukkit.Location;
-import org.bukkit.Particle;
+import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -51,9 +48,9 @@ public class FireWall extends Spell implements Listener {
         Location start = player.getLocation();
 
         double spacing = 0.5;
-        int durationTicks = (int) Math.ceil(duration * 20); // how long wall exists after finishing
+        int durationTicks = (int) Math.ceil(duration * 20); // wall lifetime
 
-        List<Location> wallPoints = new ArrayList<>();
+        List<WallSegment> wallPoints = new ArrayList<>();
 
         Location currentPos = start.clone();
         Vector currentDir = player.getEyeLocation().getDirection().normalize();
@@ -72,12 +69,10 @@ public class FireWall extends Spell implements Listener {
                 // === BUILD PHASE ===
                 if (ticks < length / spacing) {
 
-                    // Read player steering
                     float currentYaw = -player.getEyeLocation().getYaw();
                     float yawDelta = currentYaw - lastYaw[0];
                     lastYaw[0] = currentYaw;
 
-                    // Clamp input
                     yawDelta = Math.max(-10, Math.min(10, yawDelta));
 
                     // Steer ONLY next segment
@@ -86,23 +81,42 @@ public class FireWall extends Spell implements Listener {
                     // Step forward
                     currentPos.add(currentDir.clone().multiply(spacing));
 
-                    // Lock this segment
-                    wallPoints.add(currentPos.clone());
+                    // Lock segment with age
+                    wallPoints.add(new WallSegment(currentPos.clone()));
                 }
 
                 // === RENDER + DAMAGE PHASE ===
-                for (Location base : wallPoints) {
-                    for (double h = 0; h < height; h += 0.5) {
+                for (WallSegment segment : wallPoints) {
+                    segment.age++;
 
-                        Location loc = base.clone().add(0, h, 0);
+                    double riseProgress = Math.min(1.0, segment.age / 30.0);
+                    double currentHeight = height * riseProgress;
 
-                        player.getWorld().spawnParticle(
-                                Particle.FLAME,
-                                loc,
-                                2,
-                                0.05, 0.05, 0.05,
-                                0
-                        );
+                    for (double h = 0; h < currentHeight; h += 0.5) {
+
+                        Location loc = segment.base.clone().add(0, h, 0);
+
+                        if (h == currentHeight - 0.5){
+                            player.getWorld().spawnParticle(
+                                    Particle.LAVA,
+                                    loc,
+                                    4,
+                                    0.05, 0.05, 0.05,
+                                    0
+                            );
+                        }else{
+                            player.getWorld().spawnParticle(
+                                    Particle.FLAME,
+                                    loc,
+                                    2,
+                                    0.05, 0.05, 0.05,
+                                    0
+                            );
+                        }
+
+                        if (loc.getBlock().getType() == Material.AIR) {
+                            loc.getBlock().setType(Material.FIRE);
+                        }
 
                         for (Entity entity : loc.getWorld().getNearbyEntities(loc, 0.6, 0.6, 0.6)) {
                             if (!(entity instanceof LivingEntity)) continue;
@@ -116,7 +130,7 @@ public class FireWall extends Spell implements Listener {
                 }
 
                 // === LIFETIME END ===
-                if (ticks >= durationTicks && currentPos.distance(start) >= length) {
+                if (ticks >= durationTicks && ticks >= length / spacing) {
                     cancel();
                 }
             }
@@ -146,5 +160,15 @@ public class FireWall extends Spell implements Listener {
             }
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());
         return d;
+    }
+
+    class WallSegment {
+        Location base;
+        int age;
+
+        WallSegment(Location base) {
+            this.base = base;
+            this.age = 0;
+        }
     }
 }
