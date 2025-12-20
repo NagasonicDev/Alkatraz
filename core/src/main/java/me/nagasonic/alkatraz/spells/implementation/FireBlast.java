@@ -77,7 +77,7 @@ public class FireBlast extends Spell implements Listener {
     @EventHandler
     private void onDamage(EntityDamageByEntityEvent e){
         if (e != null){
-            if (e.getDamager() == this.fireblast){
+            if (e.getDamager() == this.fireblast && e.getEntity() instanceof LivingEntity){
                 e.setDamage(calcDamage(baseDamage*power, (LivingEntity) e.getEntity(), caster));
             }
         }
