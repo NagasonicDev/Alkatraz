@@ -81,7 +81,7 @@ public class Fireball extends Spell implements Listener {
     @EventHandler
     private void onDamage(EntityDamageByEntityEvent e){
         if (e != null){
-            if (e.getDamager() == this.fireball){
+            if (e.getDamager() == this.fireball && e.getEntity() instanceof LivingEntity){
                 e.setDamage(calcDamage(baseDamage*power, (LivingEntity) e.getEntity(), caster));
             }
         }
