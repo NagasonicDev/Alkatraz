@@ -1,6 +1,7 @@
 package me.nagasonic.alkatraz.spells.types;
 
 import me.nagasonic.alkatraz.spells.Spell;
+import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;
 public abstract class BarrierSpell extends Spell {
 
@@ -28,5 +29,5 @@ public abstract class BarrierSpell extends Spell {
     /**
      * Called when barrier breaks
      */
-    public abstract void onBarrierBreak();
+    public abstract void onBarrierBreak(Location center);
 }

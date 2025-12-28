@@ -31,12 +31,12 @@ public class AirBurst extends AttackSpell {
 
     @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, Player caster) {
-
+        location.getWorld().spawnParticle(Particle.CLOUD, location, 15);
     }
 
     @Override
     public void onCountered(Location location) {
-
+        location.getWorld().spawnParticle(Particle.CLOUD, location, 30);
     }
 
 
@@ -107,7 +107,7 @@ public class AirBurst extends AttackSpell {
                             loc,
                             2,
                             0, 0, 0,
-                            0.2
+                            0.1
                     );
                 }
                 for (LivingEntity le : point.getNearbyLivingEntities(1)){
