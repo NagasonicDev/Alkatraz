@@ -205,7 +205,6 @@ public class SpellComponentHandler implements Listener {
                 Alkatraz.logFine("ratio: " + ratio);
                 if (ratio >= 1.25) {
                     attackProps.reducePower(barrierHP / damage);
-                    barrier.onBarrierBreak();
                     return;
                 }
 
@@ -215,7 +214,6 @@ public class SpellComponentHandler implements Listener {
                     sec.getEntity().remove();
                 }
                 SpellComponentHandler.remove(offenseComp.getComponentID());
-                barrier.onBarrierBreak();
             } else if (attackProps.getType() == AttackType.PHYSICAL){
                 if (barrierProps.getType() == BarrierType.MAGIC) return;
                 attackProps.getCollided().add(barrierProps);
@@ -246,7 +244,6 @@ public class SpellComponentHandler implements Listener {
                 Alkatraz.logFine("ratio: " + ratio);
                 if (ratio >= 1.25) {
                     attackProps.reducePower(barrierHP / damage);
-                    barrier.onBarrierBreak();
                     return;
                 }
 
@@ -258,7 +255,6 @@ public class SpellComponentHandler implements Listener {
                     sbc.getBlock().setType(Material.AIR);
                 }
                 SpellComponentHandler.remove(offenseComp.getComponentID());
-                barrier.onBarrierBreak();
             }
 
         }
