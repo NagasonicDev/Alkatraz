@@ -48,7 +48,7 @@ public class Barrier extends BarrierSpell implements Listener {
     @Override
     public void castAction(Player p, ItemStack wand) {
         Location center = p.getLocation().clone().add(0, 1, 0);
-        BarrierProperties properties = new BarrierProperties(p, Utils.castLocation(p), getMaxHitpoints(), BarrierType.COMBINED);
+        BarrierProperties properties = new BarrierProperties(p, center, getMaxHitpoints(), BarrierType.COMBINED);
         properties.getHealthBar().addPlayer(p);
 
         BukkitRunnable task = new BukkitRunnable() {
@@ -58,7 +58,7 @@ public class Barrier extends BarrierSpell implements Listener {
             @Override
             public void run() {
                 if (properties.isBroken() || ticksPassed >= duration * 5) {
-                    onBarrierBreak();
+                    onBarrierBreak(center);
                     properties.getHealthBar().removeAll();
                     cancel();
                     return;
@@ -122,7 +122,10 @@ public class Barrier extends BarrierSpell implements Listener {
     }
 
     @Override
-    public void onBarrierBreak() {
-
+    public void onBarrierBreak(Location center) {
+        List<Location> particleLocations = ParticleUtils.sphere(center, radius, 200);
+        for (Location loc : particleLocations){
+            loc.getWorld().spawnParticle(Utils.DUST, loc, 1, new Particle.DustOptions(Color.RED, 0.4F));
+        }
     }
 }

@@ -35,12 +35,12 @@ public class FireWall extends AttackSpell implements Listener {
 
     @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, Player caster) {
-
+        location.getWorld().spawnParticle(Particle.FLAME, location, 15);
     }
 
     @Override
     public void onCountered(Location location) {
-
+        location.getWorld().spawnParticle(Particle.FLAME, location, 30);
     }
 
     private double duration;

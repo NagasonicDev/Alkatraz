@@ -39,12 +39,12 @@ public class MagicMissile extends AttackSpell {
 
     @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, Player caster) {
-
+        location.getWorld().spawnParticle(Utils.DUST, location, 15, new Particle.DustOptions(Color.AQUA, 0.6F));
     }
 
     @Override
     public void onCountered(Location location) {
-
+        location.getWorld().spawnParticle(Utils.DUST, location, 30, new Particle.DustOptions(Color.AQUA, 0.6F));
     }
 
     @Override

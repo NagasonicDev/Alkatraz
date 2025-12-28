@@ -38,12 +38,12 @@ public class WaterSphere extends AttackSpell {
 
     @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, Player caster) {
-
+        location.getWorld().spawnParticle(Particle.WATER_SPLASH, location, 15);
     }
 
     @Override
     public void onCountered(Location location) {
-
+        location.getWorld().spawnParticle(Particle.WATER_SPLASH, location, 30);
     }
 
 
