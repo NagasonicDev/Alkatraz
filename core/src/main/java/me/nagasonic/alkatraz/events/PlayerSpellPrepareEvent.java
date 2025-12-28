@@ -9,30 +9,31 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-public class PlayerCastEvent extends Event implements Cancellable {
+public class PlayerSpellPrepareEvent extends Event implements Cancellable {
     private static final HandlerList HANDLERS = new HandlerList();
     private final Player caster;
-    private final SpellProperties props;
+    private final Spell spell;
     private final ItemStack wand;
+    private boolean cancelled = false;
 
     public static HandlerList getHandlerList() {
         return HANDLERS;
     }
 
-    public PlayerCastEvent(Player caster, SpellProperties spell, ItemStack wand){
+    public PlayerSpellPrepareEvent(Player caster, Spell spell, ItemStack wand){
         this.caster = caster;
-        this.props = spell;
+        this.spell = spell;
         this.wand = wand;
     }
 
     @Override
     public boolean isCancelled() {
-        return false;
+        return cancelled;
     }
 
     @Override
     public void setCancelled(boolean cancel) {
-
+        cancelled = cancel;
     }
 
     @Override
@@ -44,8 +45,8 @@ public class PlayerCastEvent extends Event implements Cancellable {
         return caster;
     }
 
-    public SpellProperties getProps() {
-        return props;
+    public Spell getSpell() {
+        return spell;
     }
 
     public ItemStack getWand() {

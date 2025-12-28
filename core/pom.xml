@@ -25,12 +25,20 @@
             <layout>default</layout>
         </repository>
         <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+        <repository>
             <id>spigotmc-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
         <repository>
             <id>papermc</id>
             <url>https://repo.papermc.io/repository/maven-public/</url>
+        </repository>
+        <repository>
+            <id>repsy</id>
+            <url>https://repo.repsy.io/mvn/athlaeos/valhallammo</url>
         </repository>
     </repositories>
 

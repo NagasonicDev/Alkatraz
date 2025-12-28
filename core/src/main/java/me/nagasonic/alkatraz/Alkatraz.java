@@ -15,6 +15,7 @@ import me.nagasonic.alkatraz.nms.NMS;
 import me.nagasonic.alkatraz.playerdata.DataManager;
 import me.nagasonic.alkatraz.playerdata.StatManager;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
+import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.util.UpdateChecker;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.Bukkit;
@@ -39,6 +40,7 @@ public final class Alkatraz extends JavaPlugin {
     private static YamlConfiguration pluginConfig;
     private static NMS nms = null;
     private static boolean enabled = true;
+    private static boolean resourcePackForced = false;
 
     {
         instance = this;
@@ -69,6 +71,7 @@ public final class Alkatraz extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
             return;
         } else nms.onEnable();
+        resourcePackForced = pluginConfig.getBoolean("resource_pack_override");
         Metrics metrics = new Metrics(this, 27657);
         glowingEntities = new GlowingEntities(instance);
         WandRegistry.registerWands();
@@ -83,6 +86,7 @@ public final class Alkatraz extends JavaPlugin {
         getCommand("alkatraz").setTabCompleter(new AlkatrazCommand());
         StatManager.load();
         DataManager.addManaPerSecond();
+        SpellComponentHandler.tick();
     }
 
     @Override
@@ -145,6 +149,14 @@ public final class Alkatraz extends JavaPlugin {
         return nms;
     }
 
+    public static boolean isResourcePackForced() {
+        return resourcePackForced;
+    }
+
+    public static void setResourcePackForced(boolean resourcePackForced) {
+        Alkatraz.resourcePackForced = resourcePackForced;
+    }
+
     public YamlConfiguration saveConfig(String name){
         save(name);
         return ConfigManager.saveConfig(name).get();
@@ -204,6 +216,7 @@ public final class Alkatraz extends JavaPlugin {
         saveConfig("spells/fire_wall.yml");
         saveConfig("spells/earth_spike.yml");
         saveConfig("spells/water_pulse.yml");
+        saveConfig("spells/barrier.yml");
     }
 
     public static GlowingEntities getGlowingEntities() {

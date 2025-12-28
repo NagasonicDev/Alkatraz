@@ -1,9 +1,18 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
+import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
+import me.nagasonic.alkatraz.events.PlayerSpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.Spell;
+import me.nagasonic.alkatraz.spells.components.SpellBlockComponent;
+import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
+import me.nagasonic.alkatraz.spells.components.SpellComponentType;
+import me.nagasonic.alkatraz.spells.types.AttackSpell;
+import me.nagasonic.alkatraz.spells.types.AttackType;
+import me.nagasonic.alkatraz.spells.types.BarrierSpell;
+import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
@@ -15,17 +24,28 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class EarthSpike extends Spell implements Listener {
+public class EarthSpike extends AttackSpell implements Listener {
     public EarthSpike(String type) {
         super(type);
     }
-    private double damage;
+
+    @Override
+    public void onHitBarrier(BarrierSpell barrier, Location location, Player caster) {
+        location.getWorld().spawnParticle(Particle.BLOCK_DUST, location, 15, Material.DIRT.createBlockData());
+    }
+
+    @Override
+    public void onCountered(Location location) {
+        location.getWorld().spawnParticle(Particle.BLOCK_DUST, location, 30, Material.DIRT.createBlockData());
+    }
+
 
     @Override
     public void loadConfiguration() {
@@ -34,7 +54,6 @@ public class EarthSpike extends Spell implements Listener {
         YamlConfiguration spellConfig = ConfigManager.getConfig("spells/earth_spike.yml").get();
 
         loadCommonConfig(spellConfig);
-        damage = spellConfig.getDouble("base_damage");
         Alkatraz.getInstance().getServer().getPluginManager().registerEvents(this, Alkatraz.getInstance());
     }
 
@@ -42,6 +61,7 @@ public class EarthSpike extends Spell implements Listener {
     public void castAction(Player player, ItemStack wand) {
         Block target = player.getTargetBlockExact(20);
         if (target == null || !target.getType().isSolid()) return;
+        AttackProperties props = new AttackProperties(player, Utils.castLocation(player), getBasePower() * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")), AttackType.PHYSICAL);
 
         Map<BlockFace, Integer> columns = new HashMap<>();
         columns.put(BlockFace.SELF, 7);
@@ -55,22 +75,72 @@ public class EarthSpike extends Spell implements Listener {
         columns.put(BlockFace.SOUTH_WEST, 2);
 
         for (Map.Entry<BlockFace, Integer> entry : columns.entrySet()) {
-            Block b = target.getRelative(entry.getKey());
+            Block block = target.getRelative(entry.getKey());
+            if (props.isCountered() || props.isCancelled()) return;
             int height = entry.getValue();
-            Location loc = b.getLocation();
-            for (Entity entity : b.getWorld().getNearbyEntities(loc, 0.7, 0.7, 0.7)) {
-                if (entity instanceof LivingEntity le && !le.equals(player)) {
-                    le.damage(damage, player);
-                    le.setVelocity(new Vector(0, 0.6, 0));
+            Location loc = block.getLocation();
+            World world = block.getWorld();
+            int x = block.getX();
+            int y = block.getY();
+            int z = block.getZ();
+
+            BukkitRunnable task = new BukkitRunnable() {
+                int step = 0;
+                @Override
+                public void run() {
+                    if (props.isCountered() || props.isCancelled()) {
+                        cancel();
+                        return;
+                    }
+                    // Move blocks top → bottom
+                    for (int i = 0; i <= height; i++) {
+                        if (props.isCountered() || props.isCancelled()) {
+                            cancel();
+                            return;
+                        }
+                        Block from = world.getBlockAt(x, y - i + step, z);
+                        Block to   = world.getBlockAt(x, y - i + step + 1, z);
+                        to.setType(from.getType(), false);
+                    }
+
+                    SpellBlockComponent comp = new SpellBlockComponent(
+                            EarthSpike.this,
+                            props,
+                            player,
+                            wand,
+                            SpellComponentType.OFFENSE,
+                            world.getBlockAt(x, y + step, z),
+                            1,
+                            2
+                    );
+                    SpellComponentHandler.register(comp);
+                    Block topBlock = world.getBlockAt(x, y + step, z);
+                    for (Entity entity : topBlock.getWorld().getNearbyEntities(loc, 0.7, 0.7, 0.7)) {
+                        if (props.isCountered() || props.isCancelled()) {
+                            return;
+                        }
+                        if (entity instanceof LivingEntity le && !le.equals(player)) {
+                            le.damage(getPower(player, le, props.getRemainingPower()), player);
+                            le.setVelocity(new Vector(0, 0.6, 0));
+                        }
+                    }
+                    world.getBlockAt(x, y - height + step, z).setType(Material.AIR, false);
+                    if (props.isCountered() || props.isCancelled()) {
+                        cancel();
+                        return;
+                    }
+                    step++;
+                    if (step >= height) cancel();
                 }
-            }
-            Utils.raiseColumn(b, height, height);
+            };
+            task.runTaskTimer(Alkatraz.getInstance(), 0, 1);
         }
     }
 
     @Override
-    public int circleAction(Player p) {
+    public int circleAction(Player p, PlayerSpellPrepareEvent e) {
         int d = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
+            if (e.isCancelled()) return;
             Location playerLoc = p.getEyeLocation(); // Player eye location
             float yaw = playerLoc.getYaw();
             float pitch = playerLoc.getPitch();

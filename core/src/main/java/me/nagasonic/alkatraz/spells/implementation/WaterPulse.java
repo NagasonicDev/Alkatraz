@@ -1,9 +1,19 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
+import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
+import me.nagasonic.alkatraz.events.PlayerSpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.Spell;
+import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
+import me.nagasonic.alkatraz.spells.components.SpellComponentType;
+import me.nagasonic.alkatraz.spells.components.SpellParticleComponent;
+import me.nagasonic.alkatraz.spells.types.AttackSpell;
+import me.nagasonic.alkatraz.spells.types.AttackType;
+import me.nagasonic.alkatraz.spells.types.BarrierSpell;
+import me.nagasonic.alkatraz.spells.types.properties.SpellProperties;
+import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
@@ -20,11 +30,21 @@ import org.bukkit.util.Vector;
 
 import java.util.List;
 
-public class WaterPulse extends Spell implements Listener {
+public class WaterPulse extends AttackSpell implements Listener {
     public WaterPulse(String type) {
         super(type);
     }
-    private double strength;
+
+    @Override
+    public void onHitBarrier(BarrierSpell barrier, Location location, Player caster) {
+
+    }
+
+    @Override
+    public void onCountered(Location location) {
+
+    }
+
 
     @Override
     public void loadConfiguration() {
@@ -33,11 +53,11 @@ public class WaterPulse extends Spell implements Listener {
         YamlConfiguration spellConfig = ConfigManager.getConfig("spells/water_pulse.yml").get();
 
         loadCommonConfig(spellConfig);
-        strength = spellConfig.getDouble("push_strength");
     }
 
     @Override
     public void castAction(Player p, ItemStack wand) {
+        AttackProperties props = new AttackProperties(p, Utils.castLocation(p), getBasePower() * getBasePower() * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")), AttackType.MAGIC);
         Location centre = p.getLocation();
 
         BukkitRunnable task = new BukkitRunnable() {
@@ -45,10 +65,25 @@ public class WaterPulse extends Spell implements Listener {
 
             @Override
             public void run() {
+                if (props.isCancelled() || props.isCountered()){
+                    cancel();
+                    return;
+                }
                 r += 0.5;
                 List<Location> circle = ParticleUtils.circle(centre, r, 4/r, 0, 0);
                 for (Location loc : circle){
                     loc.getWorld().spawnParticle(Particle.WATER_SPLASH, loc, 5, 0, 0, 0,0);
+                    SpellParticleComponent comp = new SpellParticleComponent(
+                            WaterPulse.this,
+                            props,
+                            p,
+                            wand,
+                            SpellComponentType.OFFENSE,
+                            loc,
+                            0.25,
+                            1
+                    );
+                    SpellComponentHandler.register(comp);
                     for (Block b : Utils.blocksInRadius(loc, 2)){
                         if (b.getType() == Material.FIRE){
                             b.setType(Material.AIR);
@@ -62,12 +97,16 @@ public class WaterPulse extends Spell implements Listener {
                         }
                     }
                     for (Entity entity : loc.getWorld().getNearbyEntities(loc, 1, 1, 1)) {
+                        if (props.isCountered() || props.isCancelled()) {
+                            cancel();
+                            return;
+                        }
                         if (!(entity instanceof LivingEntity)) continue;
                         if (entity.equals(p)) continue;
 
                         LivingEntity target = (LivingEntity) entity;
                         Vector direction = target.getLocation().toVector().subtract(loc.toVector());
-                        direction.normalize().multiply(strength);
+                        direction.normalize().multiply(props.getRemainingPower());
                         direction.setY(0.5);
                         target.setVelocity(direction);
                     }
@@ -82,8 +121,9 @@ public class WaterPulse extends Spell implements Listener {
     }
 
     @Override
-    public int circleAction(Player p) {
+    public int circleAction(Player p, PlayerSpellPrepareEvent e) {
         int d = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
+            if (e.isCancelled()) return;
             Location playerLoc = p.getEyeLocation(); // Player eye location
             float yaw = playerLoc.getYaw();
             float pitch = playerLoc.getPitch();

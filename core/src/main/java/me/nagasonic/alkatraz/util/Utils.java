@@ -406,4 +406,8 @@ public class Utils {
             world.getBlockAt(x, y - depth + step, z).setType(Material.AIR, false);
         }
     }
+
+    public static Location castLocation(Player p){
+        return p.getEyeLocation().getDirection().normalize().multiply(1.5).toLocation(p.getWorld());
+    }
 }

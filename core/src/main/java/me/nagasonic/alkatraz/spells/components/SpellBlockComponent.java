@@ -2,13 +2,13 @@ package me.nagasonic.alkatraz.spells.components;
 
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.types.properties.SpellProperties;
-import org.bukkit.Location;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.UUID;
 
-public class SpellParticleComponent implements SpellComponent {
+public class SpellBlockComponent implements SpellComponent{
 
 
     // Static definition
@@ -24,17 +24,17 @@ public class SpellParticleComponent implements SpellComponent {
     private final UUID componentID = UUID.randomUUID();
 
     // Spatial + lifetime
-    private final Location location;
+    private final Block location;
     private final double collisionRadius;
     private int lifeTicks;
 
-    public SpellParticleComponent(
+    public SpellBlockComponent(
             Spell spell,
             SpellProperties properties,
             Player caster,
             ItemStack wand,
             SpellComponentType type,
-            Location location,
+            Block location,
             double collisionRadius,
             int lifeTicks
     ) {
@@ -43,7 +43,7 @@ public class SpellParticleComponent implements SpellComponent {
         this.caster = caster;
         this.wand = wand;
         this.type = type;
-        this.location = location.clone(); // safety
+        this.location = location;
         this.collisionRadius = collisionRadius;
         this.lifeTicks = lifeTicks;
     }
@@ -87,7 +87,7 @@ public class SpellParticleComponent implements SpellComponent {
         return collisionRadius;
     }
 
-    public Location getLocation() {
+    public Block getBlock() {
         return location;
     }
 

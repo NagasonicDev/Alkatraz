@@ -21,6 +21,8 @@ cast_time: 0.5
 # MANA COST
 mana_cost: 15
 
+power: 1.5
+
 # MAXIMUM MASTERY ACHIEVABLE. NOT RECOMMENDED TO CHANGE
 maximum_mastery: 100
 

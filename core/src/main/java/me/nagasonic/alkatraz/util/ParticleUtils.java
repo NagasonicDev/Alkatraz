@@ -18,6 +18,7 @@ public class ParticleUtils {
             loc.subtract(line);
             line.normalize();
         }
+        locs.remove(0);
         return locs;
     }
 
@@ -110,27 +111,30 @@ public class ParticleUtils {
         return points;
     }
 
-    public static List<Location> basicSphere(Location center, double radius, double yawStepSize, double pitchStepSize){
-        List<Location> points = new ArrayList<>();
+    public static List<Location> sphere(Location center, double radius, int points) {
+        List<Location> locations = new ArrayList<>();
+        if (center.getWorld() == null) return locations;
 
-        // Loop over pitch from 0° (top) to 180° (bottom)
-        for (double pitchDeg = 0; pitchDeg <= 180; pitchDeg += pitchStepSize) {
-            double phi = Math.toRadians(pitchDeg); // vertical angle
+        double phi = Math.PI * (3.0 - Math.sqrt(5.0)); // golden angle
 
-            // Loop over yaw from 0° to 360°
-            for (double yawDeg = 0; yawDeg < 360; yawDeg += yawStepSize) {
-                double theta = Math.toRadians(yawDeg); // horizontal angle
+        for (int i = 0; i < points; i++) {
+            double y = 1 - (i / (double) (points - 1)) * 2;
+            double r = Math.sqrt(1 - y * y);
+            double theta = phi * i;
 
-                double x = radius * Math.sin(phi) * Math.cos(theta);
-                double y = radius * Math.cos(phi);
-                double z = radius * Math.sin(phi) * Math.sin(theta);
+            double x = Math.cos(theta) * r;
+            double z = Math.sin(theta) * r;
 
-                Vector offset = new Vector(x, y, z);
-                points.add(center.clone().add(offset));
-            }
+            locations.add(
+                    center.clone().add(
+                            x * radius,
+                            y * radius,
+                            z * radius
+                    )
+            );
         }
 
-        return points;
+        return locations;
     }
 
     public static List<Location> fibonacciSphere(Location center, double radius, int points) {
@@ -167,17 +171,17 @@ public class ParticleUtils {
         double sizeMult = 5 / size;
 
         // Smooth circles
-        locs.addAll(circle(loc, 1.5 / sizeMult, 40, newYaw, -pitch + 90));
-        locs.addAll(circle(loc, 4.45 / sizeMult, 10, newYaw, -pitch + 90));
+        locs.addAll(circle(loc, 1.5 / sizeMult, 80, newYaw, -pitch + 90));
+        locs.addAll(circle(loc, 4.45 / sizeMult, 40, newYaw, -pitch + 90));
 
         // Squares (polygons) with smooth edges
-        locs.addAll(regularPolygon(loc, 4, 3.0 / sizeMult, 10, newYaw, -pitch + 180, 0));
-        locs.addAll(regularPolygon(loc, 4, 3.0 / sizeMult, 10, newYaw, -pitch + 180, 60));
+        locs.addAll(regularPolygon(loc, 4, 3.0 / sizeMult, 5, newYaw, -pitch + 180, 0));
+        locs.addAll(regularPolygon(loc, 4, 3.0 / sizeMult, 5, newYaw, -pitch + 180, 60));
 
         // Decorative Fibonacci spheres placed on a hex ring around the magic circle
         List<Location> sphereCenters = regularPolygon(loc, 6, 4.0 / sizeMult, 1, newYaw, -pitch + 180, 0);
         for (Location sphereCenter : sphereCenters) {
-            locs.addAll(fibonacciSphere(sphereCenter, 0.25 / sizeMult, 12));
+            locs.addAll(fibonacciSphere(sphereCenter, 0.25 / sizeMult, 6));
         }
 
         return locs;

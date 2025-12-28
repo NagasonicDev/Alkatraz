@@ -2,7 +2,7 @@ package me.nagasonic.alkatraz.spells;
 
 import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
-import me.nagasonic.alkatraz.events.PlayerCastEvent;
+import me.nagasonic.alkatraz.events.PlayerSpellPrepareEvent;
 import me.nagasonic.alkatraz.playerdata.DataManager;
 import me.nagasonic.alkatraz.playerdata.PlayerData;
 import me.nagasonic.alkatraz.util.ColorFormat;
@@ -40,7 +40,7 @@ public abstract class Spell {
 
     public abstract void castAction(Player p, ItemStack wand);
 
-    public abstract int circleAction(Player p);
+    public abstract int circleAction(Player p, PlayerSpellPrepareEvent e);
 
     public void cast(Player p, ItemStack wand){
         Float castTime = getFullCastTime(wand, getCastTime());
@@ -48,20 +48,20 @@ public abstract class Spell {
         if (data.getInt("circle") >= getLevel()){
             if (data.getDouble("mana") >= getCost()){
                 if (!p.isDead()){
-                    PlayerCastEvent event = new PlayerCastEvent(p, this, wand);
-                    if (!event.isCancelled()){
+                    PlayerSpellPrepareEvent castEvent = new PlayerSpellPrepareEvent(p, this, wand);
+                    if (!castEvent.isCancelled()){
                         data.setBoolean("casting", true);
                         DataManager.subMana(p, getCost());
                         DataManager.addExperience(p, Utils.getExp(getLevel()));
                         Utils.sendActionBar(p, ColorFormat.format("Casted: " + getDisplayName()));
-                        int d = circleAction(p);
+                        int d = circleAction(p, castEvent);
                         Float v = castTime * 20;
                         Long finalCastTime = v.longValue();
                         if (data.getSpellMastery(this) >= getMaxMastery()){
                             finalCastTime = (long) (castTime * 1.25);
                         }
                         Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(Alkatraz.getInstance(), () -> {
-                            if (!event.isCancelled()){
+                            if (!castEvent.isCancelled()){
                                 data.setBoolean("casting", false);
                                 Bukkit.getServer().getScheduler().cancelTask(d);
                                 castAction(p, wand);
@@ -149,7 +149,7 @@ public abstract class Spell {
         return wCastTime * spellCastTime.floatValue();
     }
 
-    public double calcDamage(double base, LivingEntity target, Player caster){
+    public double calcPower(double base, LivingEntity target, Player caster){
         PlayerData data = DataManager.getPlayerData(caster);
         double caffinity = data.getAffinity(getElement());
         double tres = 0;
