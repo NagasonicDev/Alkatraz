@@ -26,7 +26,7 @@ mana_cost: 50
 maximum_mastery: 125
 
 # STRENGTH OF PUSHBACK. DEFAULT: 1.5
-push_strength: 1.5
+power: 1.5
 
 #THE COLOR OF THE SPELL MASTERY BOSSBAR. OPTIONS ARE: RED, BLUE, YELLOW, PINK, PURPLE, WHITE AND GREEN
 mastery_bar_color: 'BLUE'

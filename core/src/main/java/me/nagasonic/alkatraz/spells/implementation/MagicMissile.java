@@ -4,8 +4,16 @@ import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
+import me.nagasonic.alkatraz.events.PlayerSpellPrepareEvent;
 import me.nagasonic.alkatraz.playerdata.DataManager;
 import me.nagasonic.alkatraz.spells.Spell;
+import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
+import me.nagasonic.alkatraz.spells.components.SpellComponentType;
+import me.nagasonic.alkatraz.spells.components.SpellParticleComponent;
+import me.nagasonic.alkatraz.spells.types.AttackSpell;
+import me.nagasonic.alkatraz.spells.types.AttackType;
+import me.nagasonic.alkatraz.spells.types.BarrierSpell;
+import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.Bukkit;
@@ -18,16 +26,26 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 import java.util.List;
 
 
-public class MagicMissile extends Spell {
+public class MagicMissile extends AttackSpell {
     public MagicMissile(String type) {
         super(type);
     }
-    private double baseDamage;
+
+    @Override
+    public void onHitBarrier(BarrierSpell barrier, Location location, Player caster) {
+
+    }
+
+    @Override
+    public void onCountered(Location location) {
+
+    }
 
     @Override
     public void loadConfiguration() {
@@ -36,40 +54,85 @@ public class MagicMissile extends Spell {
         YamlConfiguration spellConfig = ConfigManager.getConfig("spells/magic_missile.yml").get();
 
         loadCommonConfig(spellConfig);
-        baseDamage = spellConfig.getDouble("base_damage");
     }
 
     @Override
     public void castAction(Player p, ItemStack wand) {
         if (!p.isDead()){
+            AttackProperties props = new AttackProperties(p, Utils.castLocation(p), getBasePower() * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")), AttackType.MAGIC);
             Location loc1 = p.getEyeLocation();
             Vector direction = p.getEyeLocation().getDirection();
             Location loc2 = p.getEyeLocation().add(direction.multiply(20));
             List<Location> locs = ParticleUtils.line(0.5, loc1, loc2);
             locs.remove(0); //Function puts loc2 as the first index, so if it is a solid block, the missile will not fire.
             locs.add(loc2);
-            for (Location loc : locs){
-                Block b = loc.getBlock();
-                if (!b.isPassable() && !b.isLiquid() && b.isCollidable() && b.isSolid()) {
-                    break;
-                }
-                p.spawnParticle(Particle.REDSTONE, loc, 50, new Particle.DustOptions(Color.AQUA, 0.5F));
-                for (Entity entity : loc.getNearbyEntities(1, 1, 1)){
-                    if (!entity.isDead() && entity != p){
-                        LivingEntity le = (LivingEntity) entity;
-                        double wandPower = NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
-                        le.damage(calcDamage(wandPower * baseDamage, le, p));
-                        Vector unitVector = entity.getLocation().toVector().subtract(p.getLocation().toVector()).normalize();
+            BukkitRunnable task = new BukkitRunnable() {
+
+                int index = 0;
+
+                @Override
+                public void run() {
+
+                    if (props.isCountered() || props.isCancelled()) {
+                        cancel();
+                        return;
+                    }
+
+                    if (index >= locs.size()) {
+                        cancel();
+                        return;
+                    }
+
+                    Location loc = locs.get(index++);
+                    Block b = loc.getBlock();
+
+                    if (!b.isPassable() && !b.isLiquid() && b.isCollidable() && b.isSolid()) {
+                        cancel();
+                        return;
+                    }
+
+                    p.spawnParticle(
+                            Particle.REDSTONE,
+                            loc,
+                            50,
+                            new Particle.DustOptions(Color.AQUA, 0.5F)
+                    );
+                    SpellParticleComponent comp = new SpellParticleComponent(
+                            MagicMissile.this,
+                            props,
+                            p,
+                            wand,
+                            SpellComponentType.OFFENSE,
+                            loc,
+                            0.25,
+                            1
+                    );
+                    SpellComponentHandler.register(comp);
+
+                    for (Entity entity : loc.getNearbyEntities(1, 1, 1)) {
+                        if (entity.isDead() || entity.equals(p)) break;
+                        if (!(entity instanceof LivingEntity le)) break;
+                        if (props.isCancelled() || props.isCountered()) break;
+                        le.damage(props.getRemainingPower());
+
+                        Vector unitVector = entity.getLocation()
+                                .toVector()
+                                .subtract(p.getLocation().toVector())
+                                .normalize();
+
                         entity.setVelocity(unitVector.multiply(1));
                     }
                 }
-            }
+
+            };
+            task.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
         }
     }
 
     @Override
-    public int circleAction(Player p) {
+    public int circleAction(Player p, PlayerSpellPrepareEvent e) {
         int d = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
+            if (e.isCancelled()) return;
             Location playerLoc = p.getEyeLocation(); // Player eye location
             float yaw = playerLoc.getYaw();
             float pitch = playerLoc.getPitch();
@@ -90,9 +153,5 @@ public class MagicMissile extends Spell {
             }
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());
         return d;
-    }
-
-    public double getBaseDamage() {
-        return baseDamage;
     }
 }

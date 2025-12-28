@@ -4,6 +4,7 @@ import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
+import me.nagasonic.alkatraz.events.PlayerSpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
@@ -52,8 +53,9 @@ public class Swift extends Spell {
     }
 
     @Override
-    public int circleAction(Player p) {
+    public int circleAction(Player p, PlayerSpellPrepareEvent e) {
         int d = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
+            if (e.isCancelled()) return;
             Location playerLoc = p.getEyeLocation(); // Player eye location
             float yaw = playerLoc.getYaw();
             float pitch = 0;

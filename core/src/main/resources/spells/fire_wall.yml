@@ -24,7 +24,7 @@ mana_cost: 125
 # MAXIMUM MASTERY ACHIEVABLE. NOT RECOMMENDED TO CHANGE
 maximum_mastery: 100
 
-base_damage: 3
+power: 3
 
 # HOW LONG THE WALL LASTS. DEFAULT: 12.5
 duration: 12.5

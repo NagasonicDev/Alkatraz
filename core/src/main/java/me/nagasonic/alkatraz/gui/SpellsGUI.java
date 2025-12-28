@@ -1,6 +1,7 @@
 package me.nagasonic.alkatraz.gui;
 
 import de.tr7zw.nbtapi.NBT;
+import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.playerdata.DataManager;
 import me.nagasonic.alkatraz.playerdata.PlayerData;
 import me.nagasonic.alkatraz.spells.Spell;
@@ -52,7 +53,7 @@ public class SpellsGUI implements Listener {
         if (target.isOnline()){
             data = DataManager.getPlayerData(target);
         }else{ data = DataManager.getConfigData(target); }
-        Inventory gui = Bukkit.createInventory(null, 54, "Spells");
+        Inventory gui = Bukkit.createInventory(null, 54, Alkatraz.isResourcePackForced() ? format("&f\uF808\uF001") : "&7Spells");
         for (int i = 0; i < 9; i++){
             gui.setItem(i, Utils.getBlank());
         }

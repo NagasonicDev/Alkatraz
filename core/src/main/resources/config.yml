@@ -18,3 +18,6 @@ resistance_per_point: 10
 
 # The delay (ticks) of spawning the magic circle particles. DEFAULT: 10
 circle_ticks: 10
+
+# Unused at the moment, but keep false, otherwise some names/titles will appear weird.
+resource_pack_override: false
