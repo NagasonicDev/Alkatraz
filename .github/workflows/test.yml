@@ -22,6 +22,11 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
           cache: maven
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: maven
       - uses: SpraxDev/Action-SpigotMC@v5
         with:
           versions: ${{ matrix.version }}
