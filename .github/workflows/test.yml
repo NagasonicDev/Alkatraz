@@ -1,0 +1,29 @@
+name: Test Plugin
+
+on:
+  push:
+    branches: [ master, ver/* ]
+  pull_request:
+    branches: [ master, ver/* ]
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        runtime: ['paper', 'spigot', 'purpur']
+        version: ['1.21.11', '1.20.6', '1.19.4']
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - uses: NagasonicDev/TestMC@v1.0.0
+        with:
+          path: 'path/to/plugin.jar'
+          runtime: ${{ matrix.runtime }}
+          version: ${{ matrix.version }}
+          time: 120
+          commands: |
+            version
