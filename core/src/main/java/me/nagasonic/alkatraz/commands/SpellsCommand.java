@@ -1,7 +1,7 @@
 package me.nagasonic.alkatraz.commands;
 
 import me.nagasonic.alkatraz.dom.Permission;
-import me.nagasonic.alkatraz.gui.SpellsGUI;
+import me.nagasonic.alkatraz.gui.implementation.SpellsMenu;
 import me.nagasonic.alkatraz.util.ColorFormat;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -32,7 +32,8 @@ public class SpellsCommand implements CommandExecutor {
             sender.sendMessage(ColorFormat.format("&cUsage: /spells [<player>]"));
             return true;
         }
-        SpellsGUI.openGUI(p, target);
+        SpellsMenu menu = new SpellsMenu(p);
+        menu.open();
         return true;
     }
 }

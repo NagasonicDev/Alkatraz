@@ -1,14 +1,14 @@
 package me.nagasonic.alkatraz.commands;
 
-import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.dom.Permission;
-import me.nagasonic.alkatraz.gui.StatsGUI;
+import me.nagasonic.alkatraz.gui.implementation.StatsMenu;
 import me.nagasonic.alkatraz.items.wands.Wand;
 import me.nagasonic.alkatraz.items.wands.WandRegistry;
-import me.nagasonic.alkatraz.playerdata.DataManager;
-import me.nagasonic.alkatraz.playerdata.PlayerData;
+import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
+import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
+import me.nagasonic.alkatraz.util.StatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -48,11 +48,8 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                     sender.sendMessage(format("&cCouldn't find a player named " + args[2] + ". Make sure they are online."));
                     return true;
                 }
-                PlayerData data = p.isOnline() ? DataManager.getPlayerData(p) : DataManager.getConfigData(p);
-                data.setDiscovered(spell, true);
-                if (!p.isOnline()) {
-                    DataManager.savePlayerData(p, data);
-                }
+                MagicProfile data = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
+                data.setDiscoveredSpell(spell, true);
             }else{
                 sender.sendMessage(format("&cYou do not have permission to use this command."));
                 return true;
@@ -73,11 +70,8 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                     sender.sendMessage(format("&cCouldn't find a player named " + args[2] + ". Make sure they are online."));
                     return true;
                 }
-                PlayerData data = p.isOnline() ? DataManager.getPlayerData(p) : DataManager.getConfigData(p);
-                data.setDiscovered(spell, false);
-                if (!p.isOnline()) {
-                    DataManager.savePlayerData(p, data);
-                }
+                MagicProfile data = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
+                data.setDiscoveredSpell(spell, false);
             }else{
                 sender.sendMessage(format("&cYou do not have permission to use this command."));
                 return true;
@@ -110,8 +104,8 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                 }
                 if (args[1].equals("set")){
                     OfflinePlayer p = args.length == 3 ? (OfflinePlayer) sender : Bukkit.getOfflinePlayer(args[3]);
-                    PlayerData data = p.isOnline() ? DataManager.getPlayerData(p) : DataManager.getConfigData(p);
-                    if (Double.parseDouble(args[2]) > DataManager.requiredExperience(data.getInt("circle") + 1) && data.getInt("circle") < 9){
+                    MagicProfile data = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
+                    if (Double.parseDouble(args[2]) > StatUtils.requiredExperience(data.getCircleLevel() + 1) && data.getCircleLevel() < 9){
                         sender.sendMessage("&cCannot set beyond the required experience threshold.");
                         return true;
                     }
@@ -120,13 +114,13 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                     return true;
                 } else if (args[1].equals("add")) {
                     OfflinePlayer p = args.length == 3 ? (OfflinePlayer) sender : Bukkit.getOfflinePlayer(args[3]);
-                    PlayerData data = p.isOnline() ? DataManager.getPlayerData(p) : DataManager.getConfigData(p);
-                    if (data.getDouble("experience") + Double.parseDouble(args[2]) < 0){
+                    MagicProfile data = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
+                    if (data.getExperience() + Double.parseDouble(args[2]) < 0){
                         sender.sendMessage("&cCannot have negative experience, please change circle level with /alkatraz circle.");
                         return true;
                     }
-                    DataManager.addExperience(p, Double.parseDouble(args[2]));
-                    sender.sendMessage(format("&aAdded " + args[2] + " to magic experience of " + p.getName() + ". (Total: " + data.getDouble("experience") + ")"));
+                    StatUtils.addExperience(p, Double.parseDouble(args[2]));
+                    sender.sendMessage(format("&aAdded " + args[2] + " to magic experience of " + p.getName() + ". (Total: " + data.getExperience() + ")"));
                     return true;
                 }else{
                     sender.sendMessage(format("&cPlease choose a valid operator: set/add."));
@@ -145,29 +139,23 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                 }
                 if (args[1].equals("set")){
                     OfflinePlayer p = args.length == 3 ? (OfflinePlayer) sender : Bukkit.getOfflinePlayer(args[3]);
-                    PlayerData data = p.isOnline() ? DataManager.getPlayerData(p) : DataManager.getConfigData(p);
+                    MagicProfile data = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
                     if (Integer.parseInt(args[2]) < 0 || Integer.parseInt(args[2]) > 9){
                         sender.sendMessage("&cCannot set beyond the circle threshold (0-9).");
                         return true;
                     }
-                    DataManager.addCircle(p.getPlayer(), Integer.parseInt(args[2]) - data.getInt("circle"));
+                    StatUtils.addCircle(p.getPlayer(), Integer.parseInt(args[2]) - data.getCircleLevel());
                     sender.sendMessage(format("&aSet circle level of " + p.getName() + " to " + args[2]));
-                    if (!p.isOnline()) {
-                        DataManager.savePlayerData(p, data);
-                    }
                     return true;
                 } else if (args[1].equals("add")) {
                     OfflinePlayer p = args.length == 3 ? (OfflinePlayer) sender : Bukkit.getOfflinePlayer(args[3]);
-                    PlayerData data = p.isOnline() ? DataManager.getPlayerData(p) : DataManager.getConfigData(p);
-                    if (data.getInt("circle") + Integer.parseInt(args[2]) < 0 || data.getInt("circle") + Integer.parseInt(args[2]) > 9){
+                    MagicProfile data = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
+                    if (data.getCircleLevel() + Integer.parseInt(args[2]) < 0 || data.getCircleLevel() + Integer.parseInt(args[2]) > 9){
                         sender.sendMessage("&cCannot add beyond the circle threshold. (0-9)");
                         return true;
                     }
-                    DataManager.addCircle(p.getPlayer(), Integer.parseInt(args[2]));
-                    sender.sendMessage(format("&aAdded " + args[2] + " to circle level of " + p.getName() + ". (New: " + data.getInt("circle") + ")"));
-                    if (!p.isOnline()) {
-                        DataManager.savePlayerData(p, data);
-                    }
+                    StatUtils.addCircle(p.getPlayer(), Integer.parseInt(args[2]));
+                    sender.sendMessage(format("&aAdded " + args[2] + " to circle level of " + p.getName() + ". (New: " + data.getCircleLevel() + ")"));
                     return true;
                 }else{
                     sender.sendMessage(format("&cPlease choose a valid operator: set/add."));
@@ -190,7 +178,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                     return true;
                 }
                 OfflinePlayer p = args.length == 4 ? (OfflinePlayer) sender : Bukkit.getOfflinePlayer(args[3]);
-                PlayerData data = p.isOnline() ? DataManager.getPlayerData(p) : DataManager.getConfigData(p);
+                MagicProfile data = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
                 double amount = Double.parseDouble(args[3]);
                 if (args[2].equals("add")){
                     if (amount + data.getSpellMastery(spell) > spell.getMaxMastery()){
@@ -202,7 +190,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                             sender.sendMessage(format("&cSpell Mastery cannot be less than 0."));
                             return true;
                         }
-                        DataManager.addSpellMastery(p, spell, (int) amount);
+                        StatUtils.addSpellMastery(p, spell, (int) amount);
                         sender.sendMessage(format("&aAdded " + amount + " to " + p.getName() + "'s mastery of " + spell.getDisplayName()));
                         return true;
                     }
@@ -228,12 +216,12 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                 Player p = (Player) sender;
                 if (args.length == 2){
                     if (Permission.hasPermission(p, Permission.COMMAND_STATS_OTHER)){
-                        StatsGUI.createGUI(p, Objects.requireNonNull(Bukkit.getPlayer(args[1])));
+                        new StatsMenu(p, Objects.requireNonNull(Bukkit.getPlayer(args[1]))).open();
                     }else{
                         p.sendMessage(format("&cYou do not have permission to see another player's stats."));
                     }
                 }else{
-                    StatsGUI.createGUI(p, p);
+                    new StatsMenu(p, p).open();
                 }
             }
         } else if (args[0].equals("reload")) {

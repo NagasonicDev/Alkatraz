@@ -5,8 +5,8 @@ import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.events.PlayerSpellPrepareEvent;
-import me.nagasonic.alkatraz.playerdata.DataManager;
-import me.nagasonic.alkatraz.playerdata.PlayerData;
+import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
+import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
 import me.nagasonic.alkatraz.util.*;
@@ -180,10 +180,10 @@ public class Disguise extends Spell implements Listener {
                     } else if (item.getType().equals(Material.PLAYER_HEAD)) {
                         Player target = Bukkit.getPlayer(meta.getDisplayName());
                         Player p = (Player) e.getView().getPlayer();
-                        PlayerData data = DataManager.getPlayerData(p);
+                        MagicProfile data = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
                         if (target != null){
-                            if (!Objects.equals(target.getUniqueId().toString(), data.getString("disguise"))){
-                                data.setString("disguise", target.getUniqueId().toString());
+                            if (!Objects.equals(target.getUniqueId().toString(), data.getDisguise())){
+                                data.setDisguise(target.getUniqueId().toString());
                                 p.setDisplayName(target.getName());
                                 Skin skin = Skin.fromURL("https://sessionserver.mojang.com/session/minecraft/profile/" + target.getUniqueId() + "?unsigned=false");
                                 try {
@@ -212,7 +212,7 @@ public class Disguise extends Spell implements Listener {
             if (e.getPlayer() == caster){
                 if (!selected){
                     caster.sendMessage(format("&cNo player was chosen, cancelling casting..."));
-                    DataManager.addMana(caster, getCost());
+                    StatUtils.addMana(caster, getCost());
                 }
             }
         }
@@ -223,14 +223,14 @@ public class Disguise extends Spell implements Listener {
         Player p = e.getPlayer();
         for (Player other : Bukkit.getOnlinePlayers()){
             if (other != p){
-                PlayerData odata = DataManager.getPlayerData(other);
-                if (odata.getString("disguise") != null){
-                    UUID uuid = UUID.fromString(odata.getString("disguise"));
+                MagicProfile odata = ProfileManager.getProfile(other.getUniqueId(), MagicProfile.class);
+                if (odata.getDisguise() != null){
+                    UUID uuid = UUID.fromString(odata.getDisguise());
                     if (Bukkit.getPlayer(uuid) != null){
                         Alkatraz.getNms().changeSkinElse(other, List.of(p), Skin.fromURL("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid + "?unsigned=false"));
                     }
                 }else{
-                    odata.setString("disguise", p.getUniqueId().toString());
+                    odata.setDisguise(p.getUniqueId().toString());
                 }
             }
         }
