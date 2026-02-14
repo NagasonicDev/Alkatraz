@@ -24,7 +24,7 @@ jobs:
           cache: maven
       - uses: SpraxDev/Action-SpigotMC@v5
         with:
-          versions: 1.19.4
+          versions: 1.19.4, 1.19.3, 1.19.2
           remapped: true
       - uses: actions/setup-java@v4
         with:
@@ -33,7 +33,7 @@ jobs:
           cache: maven
       - uses: SpraxDev/Action-SpigotMC@v5
         with:
-          versions: 1.21.11, 1.20.6
+          versions: 1.21.11, 1.21.10, 1.21.8, 1.21.5, 1.21.4, 1.21.3, 1.21.2, 1.20.6, 1.20.4, 1.20.2, 1.20.1
           remapped: true
       - name: Build with Maven
         run: mvn -B package --file pom.xml
