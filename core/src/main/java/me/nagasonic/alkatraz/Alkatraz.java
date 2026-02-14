@@ -6,14 +6,14 @@ import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.ConfigUpdater;
 import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.dom.MinecraftVersion;
-import me.nagasonic.alkatraz.gui.SpellsGUI;
-import me.nagasonic.alkatraz.gui.StatsGUI;
+import me.nagasonic.alkatraz.gui.MenuListener;
 import me.nagasonic.alkatraz.items.wands.Wand;
 import me.nagasonic.alkatraz.items.wands.WandListeners;
 import me.nagasonic.alkatraz.items.wands.WandRegistry;
 import me.nagasonic.alkatraz.nms.NMS;
-import me.nagasonic.alkatraz.playerdata.DataManager;
 import me.nagasonic.alkatraz.playerdata.StatManager;
+import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
+import me.nagasonic.alkatraz.playerdata.profiles.ProfileRegistry;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.util.UpdateChecker;
@@ -74,23 +74,23 @@ public final class Alkatraz extends JavaPlugin {
         resourcePackForced = pluginConfig.getBoolean("resource_pack_override");
         Metrics metrics = new Metrics(this, 27657);
         glowingEntities = new GlowingEntities(instance);
+        ProfileRegistry.registerProfiles();
+        ProfileManager.initialize();
         WandRegistry.registerWands();
         SpellRegistry.registerSpells();
         registerListener(new WandListeners());
-        registerListener(new DataManager());
-        registerListener(new SpellsGUI());
-        registerListener(new StatsGUI());
+        Bukkit.getPluginManager().registerEvents(new MenuListener(), this);
         logInfo("NMS version " + nms.getClass().getSimpleName() + " registered!");
         getCommand("spells").setExecutor(new SpellsCommand());
         getCommand("alkatraz").setExecutor(new AlkatrazCommand());
         getCommand("alkatraz").setTabCompleter(new AlkatrazCommand());
         StatManager.load();
-        DataManager.addManaPerSecond();
         SpellComponentHandler.tick();
     }
 
     @Override
     public void onDisable() {
+        ProfileManager.shutdown();
         for (Player p : Bukkit.getOnlinePlayers()){
             ItemStack wand = p.getInventory().getItem(p.getInventory().getHeldItemSlot());
             if (wand != null){
@@ -101,7 +101,6 @@ public final class Alkatraz extends JavaPlugin {
                 }
             }
         }
-        DataManager.saveAll();
     }
 
     public static Alkatraz getInstance() {
