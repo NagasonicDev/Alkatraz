@@ -5,9 +5,6 @@ import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.events.PlayerSpellPrepareEvent;
-import me.nagasonic.alkatraz.playerdata.DataManager;
-import me.nagasonic.alkatraz.playerdata.PlayerData;
-import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
 import me.nagasonic.alkatraz.spells.components.SpellParticleComponent;
@@ -27,7 +24,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class WaterSphere extends AttackSpell {

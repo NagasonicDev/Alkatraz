@@ -3,8 +3,8 @@ package me.nagasonic.alkatraz.items.wands;
 import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.dom.Permission;
-import me.nagasonic.alkatraz.playerdata.DataManager;
-import me.nagasonic.alkatraz.playerdata.PlayerData;
+import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
+import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
 import me.nagasonic.alkatraz.util.Utils;
@@ -34,7 +34,7 @@ public class WandListeners implements Listener {
         if (e.getItem() != null) {
             if (e.getItem().getType() != Material.AIR && e.getItem().getAmount() != 0) {
                 if (Wand.isWand(e.getItem())) {
-                    if (!DataManager.getPlayerData(e.getPlayer()).getBoolean("casting")){
+                    if (!ProfileManager.getProfile(e.getPlayer().getUniqueId(), MagicProfile.class).isCasting()){
                         String code = NBT.get(e.getItem(), nbt -> (String) nbt.getString("cast_code"));
                         if (e.getAction().isRightClick()) {
                             NBT.modify(e.getItem(), nbt -> {
@@ -66,7 +66,7 @@ public class WandListeners implements Listener {
             ItemStack wand = p.getItemInHand();
             if (wand.getType() != Material.AIR && wand.getAmount() != 0) {
                 if (Wand.isWand(wand)) {
-                    if (!DataManager.getPlayerData(p).getBoolean("casting")){
+                    if (!ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class).isCasting()){
                         String code = NBT.get(wand, nbt -> (String) nbt.getString("cast_code"));
                         NBT.modify(wand, nbt -> {
                             nbt.setString("cast_code", code + "L");
@@ -93,7 +93,7 @@ public class WandListeners implements Listener {
         if (wand.getType() != Material.AIR && wand.getAmount() != 0){
             if (Wand.isWand(wand)) {
                 e.setCancelled(true);
-                if (!DataManager.getPlayerData(p).getBoolean("casting")){
+                if (!ProfileManager.getProfile(e.getPlayer().getUniqueId(), MagicProfile.class).isCasting()){
                     String code = NBT.get(wand, nbt -> (String) nbt.getString("cast_code"));
                     NBT.modify(wand, nbt -> {
                         nbt.setString("cast_code", code + "R");
@@ -120,7 +120,7 @@ public class WandListeners implements Listener {
             if (wand.getType() != Material.AIR && wand.getAmount() != 0){
                 if (Wand.isWand(wand)) {
                     e.setCancelled(true);
-                    if (!DataManager.getPlayerData(p).getBoolean("casting")){
+                    if (!ProfileManager.getProfile(e.getPlayer().getUniqueId(), MagicProfile.class).isCasting()){
                         String code = NBT.get(wand, nbt -> (String) nbt.getString("cast_code"));
                         NBT.modify(wand, nbt -> {
                             nbt.setString("cast_code", code + "S");
@@ -373,9 +373,9 @@ public class WandListeners implements Listener {
                 }
             }
         }
-        PlayerData data = DataManager.getPlayerData(p);
-        if (data.getBoolean("casting")){
-            data.setBoolean("casting", false);
+        MagicProfile data = ProfileManager.getProfile(e.getPlayer().getUniqueId(), MagicProfile.class);
+        if (data.isCasting()){
+            data.setCasting(false);
         }
     }
 
@@ -400,8 +400,8 @@ public class WandListeners implements Listener {
     }
 
     public static void switchTo(Player p) {
-        PlayerData data = DataManager.getPlayerData(p);
-        Alkatraz.getNms().fakeExp(p, (float) (data.getDouble("mana") / data.getDouble("max_mana")), data.getDouble("mana").intValue(), 1);
+        MagicProfile data = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
+        Alkatraz.getNms().fakeExp(p, (float) (data.getMana() / data.getMaxMana()), (int) data.getMana(), 1);
     }
 
     public static void switchFrom(Player p){
@@ -411,7 +411,7 @@ public class WandListeners implements Listener {
     private void tryCast(Player p, ItemStack wand, Spell spell){
         if (spell != null) {
             if (NBT.get(wand, nbt -> (Integer) nbt.getInteger("circle_limit")) >= spell.getLevel()){
-                if (DataManager.getPlayerData(p).hasDiscovered(spell) || Permission.hasPermission(p, Permission.ALL_SPELLS)){
+                if (ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class).hasDiscoveredSpell(spell) || Permission.hasPermission(p, Permission.ALL_SPELLS)){
                     spell.cast(p, wand);
                 }
             }else{

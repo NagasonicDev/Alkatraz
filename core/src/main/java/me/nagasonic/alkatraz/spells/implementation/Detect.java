@@ -6,8 +6,8 @@ import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.events.PlayerSpellPrepareEvent;
-import me.nagasonic.alkatraz.playerdata.DataManager;
-import me.nagasonic.alkatraz.playerdata.PlayerData;
+import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
+import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
@@ -51,9 +51,9 @@ public class Detect extends Spell {
         if (!p.isDead()){
             AtomicDouble l = new AtomicDouble(1);
             Location a = p.getLocation();
-            PlayerData data = DataManager.getPlayerData(p);
+            MagicProfile data = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
             GlowingEntities ge = Alkatraz.getGlowingEntities();
-            double range = ranges.get(data.getInt("circle"));
+            double range = ranges.get(data.getCircleLevel());
             int r = 20;
             taskID = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
                 if (l.get() < r){
@@ -73,9 +73,9 @@ public class Detect extends Spell {
                                         color = ChatColor.YELLOW;
                                     }
                                     if (le instanceof Player target){
-                                        PlayerData tdata = DataManager.getPlayerData(target);
-                                        if (data.getInt("circle") >= tdata.getInt("circle")){
-                                            if (tdata.getBoolean("stealth")){
+                                        MagicProfile tdata = ProfileManager.getProfile(target.getUniqueId(), MagicProfile.class);
+                                        if (data.getCircleLevel() >= tdata.getCircleLevel()){
+                                            if (tdata.isStealth()){
                                                 ge.setGlowing(target, p, ChatColor.DARK_GRAY);
                                             }else{
                                                 ge.setGlowing(target, p, color);

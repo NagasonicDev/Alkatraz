@@ -5,8 +5,8 @@ import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.events.PlayerSpellPrepareEvent;
-import me.nagasonic.alkatraz.playerdata.DataManager;
-import me.nagasonic.alkatraz.playerdata.PlayerData;
+import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
+import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.Element;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.util.ParticleUtils;
@@ -16,8 +16,6 @@ import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
@@ -50,7 +48,7 @@ public class LesserHeal extends Spell {
         if (!p.isDead()){
             if (p.isSneaking() || p.getTargetEntity(20) == null || !(p.getTargetEntity(20) instanceof Player)){
                 double wandPower = NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
-                double heal = (baseHeal * wandPower) * (1 + DataManager.getPlayerData(p).getAffinity(Element.LIGHT) / 100);
+                double heal = (baseHeal * wandPower) * (1 + ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class).getAffinity(Element.LIGHT) / 100);
                 if (heal > maxHeal){
                     heal = maxHeal;
                 }
@@ -73,7 +71,7 @@ public class LesserHeal extends Spell {
             }else{
                 Player target = (Player) p.getTargetEntity(20);
                 double wandPower = NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
-                double heal = (baseHeal * wandPower) * (1 + DataManager.getPlayerData(p).getAffinity(Element.LIGHT) / 100);
+                double heal = (baseHeal * wandPower) * (1 + ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class).getAffinity(Element.LIGHT) / 100);
                 if (heal > maxHeal){
                     heal = maxHeal;
                 }

@@ -189,7 +189,6 @@ public class SpellComponentHandler implements Listener {
                 barrierProps.damage(damage);
                 barrier.onHit(damage, attack);
                 attack.onHitBarrier(barrier, defenseLoc, caster);
-                Alkatraz.logFine("hp: " + barrierProps.getHitpoints());
 
                 if (!barrierProps.isBroken()) {
                     attack.onCountered(offenseLoc);
@@ -202,7 +201,6 @@ public class SpellComponentHandler implements Listener {
                 }
 
                 double ratio = damage / barrierHP;
-                Alkatraz.logFine("ratio: " + ratio);
                 if (ratio >= 1.25) {
                     attackProps.reducePower(barrierHP / damage);
                     return;
@@ -226,7 +224,6 @@ public class SpellComponentHandler implements Listener {
                 barrierProps.damage(damage);
                 barrier.onHit(damage, attack);
                 attack.onHitBarrier(barrier, defenseLoc, caster);
-                Alkatraz.logFine("hp: " + barrierProps.getHitpoints());
 
                 if (!barrierProps.isBroken()) {
                     attack.onCountered(offenseLoc);
@@ -241,7 +238,6 @@ public class SpellComponentHandler implements Listener {
                 }
 
                 double ratio = damage / barrierHP;
-                Alkatraz.logFine("ratio: " + ratio);
                 if (ratio >= 1.25) {
                     attackProps.reducePower(barrierHP / damage);
                     return;
