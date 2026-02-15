@@ -37,7 +37,7 @@ public abstract class AttackSpell extends Spell {
      */
     public double getPower(Player caster, LivingEntity target, double power) {
         // Apply spell option modifiers
-        double modifiedPower = applyPlayerModifiers(caster, power);
+        double modifiedPower = getModifiedStat(caster, "damage", power);
 
         // Apply affinity/resistance
         MagicProfile casterProfile = ProfileManager.getProfile(caster, MagicProfile.class);
@@ -58,32 +58,9 @@ public abstract class AttackSpell extends Spell {
      * Overload for non-entity targets (barriers, constructs, etc)
      */
     public double getPower(Player caster, double power) {
-        double modifiedPower = applyPlayerModifiers(caster, power);
+        double modifiedPower = getModifiedStat(caster, "damage", power);
         MagicProfile profile = ProfileManager.getProfile(caster, MagicProfile.class);
         return modifiedPower * (1 + (profile.getAffinity(getElement()) / 100));
-    }
-
-    /**
-     * Applies player-specific spell modifiers from their spell options
-     */
-    private double applyPlayerModifiers(Player caster, double baseStat) {
-        MagicProfile profile = ProfileManager.getProfile(caster, MagicProfile.class);
-
-        if (profile.hasSpellModifier(this, "damage")) {
-            double value = profile.getSpellModifiers(this, "damage").value();
-            String typeStr = profile.getSpellModifierType(profile.getSpellModifiers(this, "damage"));
-
-            if (typeStr != null) {
-                StatModifierImpact.ModifierType type = StatModifierImpact.ModifierType.valueOf(typeStr);
-                return switch (type) {
-                    case ADD -> baseStat + value;
-                    case MULTIPLY -> baseStat * value;
-                    case SET -> value;
-                };
-            }
-        }
-
-        return baseStat;
     }
 
     /**

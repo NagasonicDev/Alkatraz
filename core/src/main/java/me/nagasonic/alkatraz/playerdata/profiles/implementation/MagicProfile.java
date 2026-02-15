@@ -406,6 +406,17 @@ public class MagicProfile extends Profile {
     }
 
     /**
+     * Returns a sum of all values of spell modifiers
+     */
+    public double sumSpellModifiers(Spell spell, String id) {
+        double sum = 0;
+        for (SpellModifier mod : getSpellModifiers(spell, id)) {
+            sum += mod.value();
+        }
+        return sum;
+    }
+
+    /**
      * Clears all spell modifiers (useful for recalculation on login)
      */
     public void clearAllSpellModifiers() {
@@ -421,29 +432,29 @@ public class MagicProfile extends Profile {
     /**
      * Adds a spell tag
      */
-    public void addSpellTag(String tag) {
-        getStringSet("spellTags").add(tag);
+    public void addSpellTag(Spell spell, String tag) {
+        getStringSet(spell.getId() + ".tags").add(tag);
     }
 
     /**
      * Removes a spell tag
      */
-    public void removeSpellTag(String tag) {
-        getStringSet("spellTags").remove(tag);
+    public void removeSpellTag(Spell spell, String tag) {
+        getStringSet(spell.getId() + ".tags").remove(tag);
     }
 
     /**
      * Checks if player has a spell tag
      */
-    public boolean hasSpellTag(String tag) {
-        return getStringSet("spellTags").contains(tag);
+    public boolean hasSpellTag(Spell spell, String tag) {
+        return getStringSet(spell.getId() + ".tags").contains(tag);
     }
 
     /**
      * Gets all active spell tags
      */
-    public Collection<String> getAllSpellTags() {
-        return new HashSet<>(getStringSet("spellTags"));
+    public Collection<String> getAllSpellTags(Spell spell) {
+        return new HashSet<>(getStringSet(spell.getId() + ".tags"));
     }
 
     @Override

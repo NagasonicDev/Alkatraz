@@ -176,9 +176,9 @@ public abstract class Spell {
     /**
      * Checks if player has a specific spell tag from their options
      */
-    protected boolean hasSpellTag(Player caster, String tag) {
+    protected boolean hasSpellTag(Player caster, Spell spell, String tag) {
         MagicProfile profile = ProfileManager.getProfile(caster, MagicProfile.class);
-        return profile.hasSpellTag(tag);
+        return profile.hasSpellTag(spell, tag);
     }
 
     /**
@@ -228,8 +228,13 @@ public abstract class Spell {
 
         // Check for mana cost modifier
         if (profile.hasSpellModifier(this, "mana_cost")) {
-            MagicProfile.SpellModifier costModifier = profile.getSpellModifiers(this, "mana_cost");
-            return (int) Math.max(0, cost + costModifier.value());
+
+            List<MagicProfile.SpellModifier> mods = profile.getSpellModifiers(this, "mana_cost");
+            double value = 0;
+            for (MagicProfile.SpellModifier mod : mods){
+                value += mod.value();
+            }
+            return (int) Math.max(0, cost + value);
         }
 
         return cost;
