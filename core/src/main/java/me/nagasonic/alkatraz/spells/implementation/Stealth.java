@@ -8,13 +8,15 @@ import me.nagasonic.alkatraz.events.PlayerSpellPrepareEvent;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.Spell;
+import me.nagasonic.alkatraz.spells.configuration.OptionValue;
+import me.nagasonic.alkatraz.spells.configuration.SpellOption;
+import me.nagasonic.alkatraz.spells.configuration.impact.implementation.StatModifierImpact;
+import me.nagasonic.alkatraz.spells.configuration.impact.implementation.TagImpact;
+import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.StatUtils;
 import me.nagasonic.alkatraz.util.Utils;
-import org.bukkit.Bukkit;
-import org.bukkit.Color;
-import org.bukkit.Location;
-import org.bukkit.Particle;
+import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -36,8 +38,24 @@ public class Stealth extends Spell implements Listener {
         super(type);
     }
     private Map<Integer, Double> costs = new HashMap<>();
-    private List<Player> casters = new ArrayList<>();
     private int taskID;
+
+    @Override
+    public void setupOptions(){
+        SpellOption armorInvis = new SpellOption(this, "armor_invis", "Whether armor is visible.", Material.DIAMOND_CHESTPLATE);
+        OptionValue<Boolean> armorShown = new OptionValue<>("armor_shown", "Armor Shown",
+                "Armor is shown to other players.",
+                Material.ENDER_PEARL,
+                false);
+        armorInvis.addValue(armorShown);
+        OptionValue<Boolean> armorHidden = new OptionValue<>("armor_hidden", "Armor Hidden",
+                "Armor is hidden for other players",
+                Material.BARRIER,
+                true);
+        armorHidden.addRequirement(new NumberStatRequirement<>("mastery_" + getType().toLowerCase(), 100));
+        armorInvis.addValue(armorHidden);
+        addOption(armorInvis);
+    }
 
     @Override
     public void loadConfiguration() {
@@ -53,8 +71,7 @@ public class Stealth extends Spell implements Listener {
 
     @Override
     public void castAction(Player p, ItemStack wand) {
-        if (!p.isDead()){
-            casters.add(p);
+        if (!p.isDead()) {
             MagicProfile data = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
             if (data.isStealth()){
                 data.setStealth(false);
@@ -71,15 +88,21 @@ public class Stealth extends Spell implements Listener {
                         MagicProfile td = ProfileManager.getProfile(player.getUniqueId(), MagicProfile.class);
                         if (td.getCircleLevel() < data.getCircleLevel()){
                             Alkatraz.getNms().setInvisible(p, true);
-                            Alkatraz.getNms().fakeArmor(p, player, null, null, null, null);
+                            if ((boolean) getOption("armor_invis").getSelectedValue(p).getValue()){
+                                Alkatraz.getNms().fakeArmor(p, player, null, null, null, null);
+                            }else Alkatraz.getNms().fakeArmor(p, player, p.getInventory().getHelmet(), p.getInventory().getChestplate(), p.getInventory().getLeggings(), p.getInventory().getBoots());
                         }else{
                             Alkatraz.getNms().setInvisible(p, true);
-                            Alkatraz.getNms().fakeArmor(p, player, null, null, null, null);
+                            if ((boolean) getOption("armor_invis").getSelectedValue(p).getValue()){
+                                Alkatraz.getNms().fakeArmor(p, player, null, null, null, null);
+                            }else Alkatraz.getNms().fakeArmor(p, player, p.getInventory().getHelmet(), p.getInventory().getChestplate(), p.getInventory().getLeggings(), p.getInventory().getBoots());
                             Alkatraz.getNms().setTransparent(p, player, true);
                         }
                     }else {
                         Alkatraz.getNms().setInvisible(p, true);
-                        Alkatraz.getNms().fakeArmor(p, player, null, null, null, null);
+                        if ((boolean) getOption("armor_invis").getSelectedValue(p).getValue()){
+                            Alkatraz.getNms().fakeArmor(p, player, null, null, null, null);
+                        }else Alkatraz.getNms().fakeArmor(p, player, p.getInventory().getHelmet(), p.getInventory().getChestplate(), p.getInventory().getLeggings(), p.getInventory().getBoots());
                         Alkatraz.getNms().setTransparent(p, player, true);
                     }
                 }
@@ -156,7 +179,9 @@ public class Stealth extends Spell implements Listener {
         MagicProfile data = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
         if (data.isStealth()){
             for (Player player : Bukkit.getOnlinePlayers()){
-                Alkatraz.getNms().fakeArmor(p, player, null, null, null, null);
+                if ((boolean) getOption("armor_invis").getSelectedValue(p).getValue()){
+                    Alkatraz.getNms().fakeArmor(p, player, null, null, null, null);
+                }else Alkatraz.getNms().fakeArmor(p, player, p.getInventory().getHelmet(), p.getInventory().getChestplate(), p.getInventory().getLeggings(), p.getInventory().getBoots());
             }
         }
     }
@@ -167,15 +192,16 @@ public class Stealth extends Spell implements Listener {
         MagicProfile data = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
         if (data.isStealth()){
             for (Player player : Bukkit.getOnlinePlayers()){
-                Alkatraz.getNms().fakeArmor(p, player, null, null, null, null);
+                if ((boolean) getOption("armor_invis").getSelectedValue(p).getValue()){
+                    Alkatraz.getNms().fakeArmor(p, player, null, null, null, null);
+                }else Alkatraz.getNms().fakeArmor(p, player, p.getInventory().getHelmet(), p.getInventory().getChestplate(), p.getInventory().getLeggings(), p.getInventory().getBoots());
             }
         }
     }
 
     @EventHandler
     private void onJoin(PlayerJoinEvent e){
-        if (casters == null) return;
-        for (Player caster : casters) {
+        for (Player caster : Bukkit.getOnlinePlayers()) {
             if (caster != null){
                 Player p = e.getPlayer();
                 MagicProfile td = ProfileManager.getProfile(caster.getUniqueId(), MagicProfile.class);
@@ -184,18 +210,24 @@ public class Stealth extends Spell implements Listener {
                     if (p != caster){
                         if (td.getCircleLevel() < data.getCircleLevel()){
                             Alkatraz.getNms().setInvisible(caster, true);
-                            Alkatraz.getNms().fakeArmor(caster, p, null, null, null, null);
+                            if ((boolean) getOption("armor_invis").getSelectedValue(caster).getValue()){
+                                Alkatraz.getNms().fakeArmor(caster, p, null, null, null, null);
+                            }else Alkatraz.getNms().fakeArmor(caster, p, p.getInventory().getHelmet(), p.getInventory().getChestplate(), p.getInventory().getLeggings(), p.getInventory().getBoots());
                         }else{
                             Alkatraz.getNms().setInvisible(caster, true);
-                            Alkatraz.getNms().fakeArmor(caster, p, null, null, null, null);
+                            if ((boolean) getOption("armor_invis").getSelectedValue(caster).getValue()){
+                                Alkatraz.getNms().fakeArmor(caster, p, null, null, null, null);
+                            }else Alkatraz.getNms().fakeArmor(caster, p, p.getInventory().getHelmet(), p.getInventory().getChestplate(), p.getInventory().getLeggings(), p.getInventory().getBoots());
                             Alkatraz.getNms().setTransparent(caster, p, true);
                         }
                     }else {
                         Alkatraz.getNms().setInvisible(caster, true);
-                        Alkatraz.getNms().fakeArmor(caster, caster, null, null, null, null);
+                        if ((boolean) getOption("armor_invis").getSelectedValue(caster).getValue()){
+                            Alkatraz.getNms().fakeArmor(caster, caster, null, null, null, null);
+                        }else Alkatraz.getNms().fakeArmor(caster, caster, p.getInventory().getHelmet(), p.getInventory().getChestplate(), p.getInventory().getLeggings(), p.getInventory().getBoots());
                         Alkatraz.getNms().setTransparent(caster, caster, true);
                     }
-                }else casters.remove(caster);
+                }
             }
         }
     }
@@ -214,15 +246,12 @@ public class Stealth extends Spell implements Listener {
 
     @EventHandler
     private void onWalk(PlayerMoveEvent e){
-        if (casters == null) return;
-        if (casters.contains(e.getPlayer())){
-            MagicProfile data = ProfileManager.getProfile(e.getPlayer().getUniqueId(), MagicProfile.class);
-            if (data.isStealth()){
-                for (Player other : Bukkit.getOnlinePlayers()){
-                    MagicProfile odata = ProfileManager.getProfile(other.getUniqueId(), MagicProfile.class);
-                    if (odata.getCircleLevel() >= data.getCircleLevel()){
-                        other.spawnParticle(Utils.DUST, e.getPlayer().getLocation().add(0, 0.3, 0), 5, new Particle.DustOptions(Color.fromRGB(36, 36, 36), 0.5F));
-                    }
+        MagicProfile data = ProfileManager.getProfile(e.getPlayer().getUniqueId(), MagicProfile.class);
+        if (data.isStealth()){
+            for (Player other : Bukkit.getOnlinePlayers()){
+                MagicProfile odata = ProfileManager.getProfile(other.getUniqueId(), MagicProfile.class);
+                if (odata.getCircleLevel() >= data.getCircleLevel()){
+                    other.spawnParticle(Utils.DUST, e.getPlayer().getLocation().add(0, 0.3, 0), 5, new Particle.DustOptions(Color.fromRGB(36, 36, 36), 0.5F));
                 }
             }
         }
