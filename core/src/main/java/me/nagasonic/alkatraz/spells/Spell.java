@@ -8,6 +8,7 @@ import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.configuration.SpellOption;
 import me.nagasonic.alkatraz.spells.configuration.impact.implementation.StatModifierImpact;
 import me.nagasonic.alkatraz.util.ColorFormat;
+import me.nagasonic.alkatraz.util.StatUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.boss.BarColor;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("unused")
 public abstract class Spell {
@@ -31,6 +33,7 @@ public abstract class Spell {
     protected String code;
     protected BarColor masteryBarColor;
     protected ItemStack guiItem;
+    protected long cooldown;
     protected int cost;
     protected double castTime;
     protected int level;
@@ -79,6 +82,15 @@ public abstract class Spell {
             return;
         }
 
+        // Check Cooldown
+        if (profile.getCooldown(this) != null) {
+            long timeLeft = System.currentTimeMillis() - profile.getCooldown(this);
+            if (TimeUnit.MILLISECONDS.toSeconds(timeLeft) < getCooldown()) {
+                Utils.sendActionBar(p, "&cPlease wait " + TimeUnit.MILLISECONDS.toSeconds(timeLeft) + " seconds before casting this spell.");
+                return;
+            }
+        }
+
         // Check if player is alive
         if (p.isDead()) {
             return;
@@ -99,7 +111,7 @@ public abstract class Spell {
         profile.setMana(profile.getMana() - manaCost);
 
         // Add experience
-        addExperience(p, Utils.getExp(getLevel()));
+        StatUtils.addExperience(p, Utils.getExp(getLevel()));
 
         // Send action bar message
         Utils.sendActionBar(p, ColorFormat.format("Casted: " + getDisplayName()));
@@ -115,6 +127,7 @@ public abstract class Spell {
         Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(Alkatraz.getInstance(), () -> {
             if (!castEvent.isCancelled()) {
                 profile.setCasting(false);
+                profile.setCooldown(this, System.currentTimeMillis());
                 Bukkit.getServer().getScheduler().cancelTask(circleTaskId);
                 castAction(p, wand);
             }
@@ -122,7 +135,7 @@ public abstract class Spell {
 
         // Add spell mastery
         if (profile.getSpellMastery(this) < getMaxMastery()) {
-            addSpellMastery(p, this, 1);
+            StatUtils.addSpellMastery(p, this, 1);
         }
     }
 
@@ -140,6 +153,7 @@ public abstract class Spell {
         this.level = spellConfig.getInt("level");
         this.enabled = spellConfig.getBoolean("enabled");
         this.maxMastery = spellConfig.getInt("maximum_mastery");
+        this.cooldown = spellConfig.getLong("cooldown");
         this.masteryBarColor = BarColor.valueOf(spellConfig.getString("mastery_bar_color"));
         this.guiItem = Utils.materialFromString(spellConfig.getString("gui_item"));
     }
@@ -241,27 +255,6 @@ public abstract class Spell {
     }
 
     /**
-     * Adds experience to the player
-     */
-    protected void addExperience(Player player, double amount) {
-        MagicProfile profile = ProfileManager.getProfile(player, MagicProfile.class);
-        profile.setExperience(profile.getExperience() + amount);
-
-        // TODO: Check for level up and handle accordingly
-        // This would replace the old DataManager.addExperience logic
-    }
-
-    /**
-     * Adds spell mastery to the player
-     */
-    protected void addSpellMastery(Player player, Spell spell, int amount) {
-        MagicProfile profile = ProfileManager.getProfile(player, MagicProfile.class);
-        int currentMastery = profile.getSpellMastery(spell);
-        if (currentMastery < 0) currentMastery = 0;
-        profile.setSpellMastery(spell, Math.min(currentMastery + amount, spell.getMaxMastery()));
-    }
-
-    /**
      * Calculates final cast time based on mastery
      */
     private long calculateFinalCastTime(MagicProfile profile, float baseCastTime) {
@@ -333,6 +326,10 @@ public abstract class Spell {
 
     public int getCost() {
         return cost;
+    }
+
+    public long getCooldown() {
+        return cooldown;
     }
 
     public double getCastTime() {

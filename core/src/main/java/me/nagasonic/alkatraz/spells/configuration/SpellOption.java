@@ -13,13 +13,15 @@ import java.util.Optional;
 public class SpellOption {
     private final Spell spell;
     private final String id;
+    private final int defIndex;
     private String description;
     private final Material icon;
     private List<OptionValue<?>> optionValues;
 
-    public SpellOption(Spell spell, String id, String description, Material icon) {
+    public SpellOption(Spell spell, String id, String description, Material icon, int defIndex) {
         this.spell = spell;
         this.id = id;
+        this.defIndex = defIndex;
         this.description = description;
         this.icon = icon;
         this.optionValues = new ArrayList<>();
@@ -31,6 +33,10 @@ public class SpellOption {
 
     public String getId() {
         return id;
+    }
+
+    public int getDefIndex() {
+        return defIndex;
     }
 
     public String getDescription() {
@@ -99,8 +105,12 @@ public class SpellOption {
      * Gets the currently selected value ID for a player from their profile
      */
     public String getSelectedValueId(Player player) {
+        String id = spell.getId() + "." + getId();
         MagicProfile profile = ProfileManager.getProfile(player, MagicProfile.class);
-        return profile.getSpellOption(spell.getId() + "." + getId());
+        if (profile.getSpellOption(id) == null) {
+            profile.setSpellOption(id, getOptionValues().get(getDefIndex()).getId());
+        }
+        return profile.getSpellOption(id);
     }
 
     /**
@@ -110,9 +120,9 @@ public class SpellOption {
         String valueId = getSelectedValueId(player);
         if (valueId == null && !optionValues.isEmpty()) {
             // Return first value as default
-            return optionValues.get(0);
+            return optionValues.get(defIndex);
         }
-        return getValueById(valueId).orElse(optionValues.isEmpty() ? null : optionValues.get(0));
+        return getValueById(valueId).orElse(optionValues.isEmpty() ? null : optionValues.get(defIndex));
     }
 
     /**

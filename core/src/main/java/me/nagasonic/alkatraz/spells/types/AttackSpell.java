@@ -16,7 +16,6 @@ public abstract class AttackSpell extends Spell {
 
     public AttackSpell(String type) {
         super(type);
-        setupOptions();
     }
 
     @Override

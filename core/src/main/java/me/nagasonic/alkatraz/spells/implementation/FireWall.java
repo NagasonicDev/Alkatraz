@@ -9,6 +9,8 @@ import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
 import me.nagasonic.alkatraz.spells.components.SpellParticleComponent;
+import me.nagasonic.alkatraz.spells.configuration.OptionValue;
+import me.nagasonic.alkatraz.spells.configuration.SpellOption;
 import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
@@ -31,6 +33,27 @@ import java.util.List;
 public class FireWall extends AttackSpell implements Listener {
     public FireWall(String type) {
         super(type);
+    }
+
+    @Override
+    protected void setupOptions() {
+        SpellOption fire = new SpellOption(this, "fire_blocks", "Whether wall lights blocks on fire.", Material.FLINT_AND_STEEL, 0);
+        OptionValue<Boolean> alights = new OptionValue<>("alight_blocks",
+                "Alights Blocks", "Fire wall lights blocks on fire.", Material.BLAZE_POWDER, true);
+        fire.addValue(alights);
+        OptionValue<Boolean> noFire = new OptionValue<>("no_fire",
+                "No Fire", "Fire wall will not light blocks on fire", Material.BARRIER, false);
+        fire.addValue(noFire);
+        addOption(fire);
+
+        SpellOption curves = new SpellOption(this, "wall_curves", "Whether the wall curves with look.", Material.ENDER_EYE, 0);
+        OptionValue<Boolean> curvesValue = new OptionValue<>("curves",
+                "Curves", "Fire wall will curve in the direction of the player", Material.ENDER_EYE, true);
+        curves.addValue(curvesValue);
+        OptionValue<Boolean> noCurve = new  OptionValue<>("no_curve",
+                "Doesn't Curve", "Fire wall will be straight", Material.STICK, false);
+        curves.addValue(noCurve);
+        addOption(curves);
     }
 
     @Override
@@ -87,16 +110,16 @@ public class FireWall extends AttackSpell implements Listener {
 
                 // === BUILD PHASE ===
                 if (ticks < length / spacing && !props.isCountered() && !props.isCancelled()) {
+                    if ((boolean) getOption("wall_curves").getSelectedValue(player).getValue()){
+                        float currentYaw = -player.getEyeLocation().getYaw();
+                        float yawDelta = currentYaw - lastYaw[0];
+                        lastYaw[0] = currentYaw;
 
-                    float currentYaw = -player.getEyeLocation().getYaw();
-                    float yawDelta = currentYaw - lastYaw[0];
-                    lastYaw[0] = currentYaw;
+                        yawDelta = Math.max(-10, Math.min(10, yawDelta));
 
-                    yawDelta = Math.max(-10, Math.min(10, yawDelta));
-
-                    // Steer ONLY next segment
-                    currentDir.rotateAroundY(yawDelta * turnStrength);
-
+                        // Steer ONLY next segment
+                        currentDir.rotateAroundY(yawDelta * turnStrength);
+                    }
                     // Step forward
                     currentPos.add(currentDir.clone().multiply(spacing));
 
@@ -144,7 +167,7 @@ public class FireWall extends AttackSpell implements Listener {
                         );
                         SpellComponentHandler.register(comp);
 
-                        if (loc.getBlock().getType() == Material.AIR) {
+                        if (loc.getBlock().getType() == Material.AIR && (boolean) getOption("fire_blocks").getSelectedValue(player).getValue()) {
                             loc.getBlock().setType(Material.FIRE);
                         }
 

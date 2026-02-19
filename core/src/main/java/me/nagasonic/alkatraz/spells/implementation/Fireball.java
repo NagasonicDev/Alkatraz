@@ -29,6 +29,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.metadata.MetadataValue;
 import org.bukkit.util.Vector;
 
 import java.util.List;
@@ -42,7 +43,7 @@ public class Fireball extends AttackSpell implements Listener {
     @Override
     protected void setupOptions(){
         SpellOption speedOption = new SpellOption(this, "speed",
-                "Adjust fireball velocity", Material.FEATHER);
+                "Adjust fireball velocity", Material.FEATHER, 1);
         OptionValue<Double> slowSpeed = new OptionValue<>(
                 "slow", "Slow", "Slower projectile, maximum damage",
                 Material.SOUL_SAND, 0.3
@@ -81,7 +82,7 @@ public class Fireball extends AttackSpell implements Listener {
         addOption(speedOption);
 
         SpellOption breaksBlocksOption = new SpellOption(this, "breaks_blocks",
-                "Whether the fireball should break blocks", Material.DIAMOND_PICKAXE);
+                "Whether the fireball should break blocks", Material.DIAMOND_PICKAXE, 0);
         OptionValue<Boolean> breaksBlocks = new OptionValue<>(
                 "breaks_blocks", "Breaks Blocks", "Fireball will break blocks on collision", Material.LIME_CONCRETE, true
         );
@@ -94,29 +95,30 @@ public class Fireball extends AttackSpell implements Listener {
         addOption(breaksBlocksOption);
 
         SpellOption sizeOption = new SpellOption(this, "size",
-                "Adjust fireball explosion size", Material.TNT);
+                "Adjust fireball explosion size", Material.TNT, 1);
         OptionValue<Double> small = new  OptionValue<>(
-                "small_size", "Small Size", "Small fireball explosion.", Material.IRON_NUGGET, 0.75
+                "small_size", "Small Size", "Small fireball explosion.", Material.IRON_NUGGET, 1.0
         );
         small.addRequirement(new NumberStatRequirement<>("circleLevel", 3, "Requires Circle Level 3"));
-        small.addImpact(new StatModifierImpact(this, "size", 0.75,  StatModifierImpact.ModifierType.SET));
-        small.addImpact(new StatModifierImpact(this, "damage", 1.4, StatModifierImpact.ModifierType.SET));
+        small.addImpact(new StatModifierImpact(this, "size", 1,  StatModifierImpact.ModifierType.SET));
+        small.addImpact(new StatModifierImpact(this, "damage", 1.4, StatModifierImpact.ModifierType.MULTIPLY));
         small.addImpact(new StatModifierImpact(this, "projectile_speed", 1.1, StatModifierImpact.ModifierType.MULTIPLY));
         sizeOption.addValue(small);
 
         OptionValue<Double> normal = new OptionValue<>(
-                "normal_size", "Normal Size", "Normal fireball explosion", Material.IRON_INGOT, 1.0
+                "normal_size", "Normal Size", "Normal fireball explosion", Material.IRON_INGOT, 1.5
         );
-        normal.addImpact(new StatModifierImpact(this, "size", 1, StatModifierImpact.ModifierType.SET));
+        normal.addImpact(new StatModifierImpact(this, "size", 1.5, StatModifierImpact.ModifierType.SET));
+        normal.addImpact(new StatModifierImpact(this, "size", 1.5, StatModifierImpact.ModifierType.SET));
         sizeOption.addValue(normal);
 
         OptionValue<Double> large = new OptionValue<>(
-                "large_size", "Large Size", "Large fireball explosion", Material.IRON_BLOCK, 1.25
+                "large_size", "Large Size", "Large fireball explosion", Material.IRON_BLOCK, 2.0
         );
         large.addRequirement(new NumberStatRequirement<>("circleLevel", 3, "Requires Circle Level 3"));
-        large.addImpact(new StatModifierImpact(this, "size", 1.25, StatModifierImpact.ModifierType.SET));
+        large.addImpact(new StatModifierImpact(this, "size", 2, StatModifierImpact.ModifierType.SET));
         large.addImpact(new StatModifierImpact(this, "damage", 0.6, StatModifierImpact.ModifierType.MULTIPLY));
-        large.addImpact(new StatModifierImpact(this, "projectile_speed", 0.9, StatModifierImpact.ModifierType.SET));
+        large.addImpact(new StatModifierImpact(this, "projectile_speed", 0.9, StatModifierImpact.ModifierType.MULTIPLY));
         sizeOption.addValue(large);
 
         addOption(sizeOption);
@@ -150,7 +152,7 @@ public class Fireball extends AttackSpell implements Listener {
         AttackProperties props = new AttackProperties(
                 caster,
                 Utils.castLocation(caster),
-                getBasePower() * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")),
+                getPower(caster, getBasePower()) * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")),
                 AttackType.MAGIC
         );
 

@@ -62,7 +62,7 @@ public class StatUtils {
         }
     }
 
-    public static void addSpellMastery(OfflinePlayer p, Spell spell, int mastery){
+    public static void addSpellMastery(Player p, Spell spell, int mastery){
         MagicProfile profile = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
         if (profile.getSpellMastery(spell) == -1 && mastery > 0){
             profile.setSpellMastery(spell, 0);
