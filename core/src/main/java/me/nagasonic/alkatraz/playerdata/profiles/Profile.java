@@ -11,6 +11,7 @@ public abstract class Profile {
     protected Map<String, NumberHolder<Integer>> ints = new HashMap<>();
     protected Map<String, NumberHolder<Double>> doubles = new HashMap<>();
     protected Map<String, NumberHolder<Float>> floats = new HashMap<>();
+    protected Map<String, NumberHolder<Long>> longs = new HashMap<>();
     protected Map<String, BooleanHolder> bools = new HashMap<>();
     protected Map<String, StringHolder> strings = new HashMap<>();
     protected Map<String, Collection<String>> stringSets = new HashMap<>();
@@ -38,6 +39,10 @@ public abstract class Profile {
 
     public Collection<String> getFloats() {
         return floats.keySet();
+    }
+
+    public Collection<String> getLongs() {
+        return longs.keySet();
     }
 
     public Collection<String> getBools() {
@@ -114,6 +119,28 @@ public abstract class Profile {
         NumberHolder<Float> floatHolder = floats.get(stat);
         if (floatHolder == null) throw new IllegalArgumentException("Float stat " + stat + " not found");
         floatHolder.setValue(value);
+    }
+
+    public boolean isLong(String stat) {
+        return longs.containsKey(stat);
+    }
+
+    public long getLong(String stat) {
+        NumberHolder<Long> longHolder = longs.get(stat);
+        if (longHolder == null) throw new IllegalArgumentException("Long stat " + stat + " not found");
+        return longHolder.getValue();
+    }
+
+    public long getDefaultLong(String stat) {
+        NumberHolder<Long> longHolder = longs.get(stat);
+        if (longHolder == null) throw new IllegalArgumentException("Long stat " + stat + " not found");
+        return longHolder.getDefault();
+    }
+
+    public void setLong(String stat, long value) {
+        NumberHolder<Long> longHolder = longs.get(stat);
+        if (longHolder == null) throw new IllegalArgumentException("Long stat " + stat + " not found");
+        longHolder.setValue(value);
     }
 
     public boolean isBool(String stat) {
@@ -194,6 +221,13 @@ public abstract class Profile {
         floats.put(name, new NumberHolder<>(def, def));
     }
 
+    protected void longStat(String name) { longStat(name, 0); }
+    protected void longStat(String name, long def) {
+        if (allStatNames.contains(name)) return;
+        allStatNames.add(name);
+        longs.put(name, new NumberHolder<>(def, def));
+    }
+
     protected void boolStat(String name) { boolStat(name, false); }
     protected void boolStat(String name, boolean def){
         if (allStatNames.contains(name)) return;
@@ -230,8 +264,14 @@ public abstract class Profile {
         for (Map.Entry<String, NumberHolder<Double>> entry : profile.doubles.entrySet()) {
             this.doubles.put(entry.getKey(), entry.getValue().copy());
         }
+        for (Map.Entry<String, NumberHolder<Long>> entry : profile.longs.entrySet()) {
+            this.longs.put(entry.getKey(), entry.getValue().copy());
+        }
         for (Map.Entry<String, Collection<String>> entry : profile.stringSets.entrySet()) {
             this.stringSets.put(entry.getKey(), new HashSet<>(entry.getValue()));
+        }
+        for (Map.Entry<String, StringHolder> entry : profile.strings.entrySet()) {
+            this.strings.put(entry.getKey(), entry.getValue().copy());
         }
         for (Map.Entry<String, BooleanHolder> entry : profile.bools.entrySet()) {
             this.bools.put(entry.getKey(), entry.getValue().copy());

@@ -8,6 +8,10 @@ import me.nagasonic.alkatraz.events.PlayerSpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
 import me.nagasonic.alkatraz.spells.components.SpellParticleComponent;
+import me.nagasonic.alkatraz.spells.configuration.OptionValue;
+import me.nagasonic.alkatraz.spells.configuration.SpellOption;
+import me.nagasonic.alkatraz.spells.configuration.impact.implementation.StatModifierImpact;
+import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
@@ -18,6 +22,7 @@ import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.SizedFireball;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
@@ -27,6 +32,70 @@ import java.util.List;
 public class AirBurst extends AttackSpell {
     public AirBurst(String type){
         super(type);
+    }
+
+    @Override
+    protected void setupOptions() {
+        SpellOption sizeOption = new SpellOption(this, "blast_size",
+                "How large the burst of air is.", Material.FEATHER, 1);
+        OptionValue<Double> small = new OptionValue<>("small_burst", "Small Burst",
+                "A small burst of air.", Material.IRON_NUGGET, 0.75);
+        small.addRequirement(new NumberStatRequirement<>("circleLevel", 3));
+        small.addRequirement(new NumberStatRequirement<>("mastery_" + getType().toLowerCase(), 50));
+        small.addImpact(new StatModifierImpact(this, "blast_size", 0.75, StatModifierImpact.ModifierType.SET));
+        small.addImpact(new StatModifierImpact(this, "damage", 1.3, StatModifierImpact.ModifierType.MULTIPLY));
+        sizeOption.addValue(small);
+
+        OptionValue<Double> normalSize = new OptionValue<>("normal_burst", "Normal Burst",
+                "A normal burst of air.", Material.IRON_INGOT, 1.0);
+        normalSize.addImpact(new StatModifierImpact(this, "blast_size", 1, StatModifierImpact.ModifierType.SET));
+        sizeOption.addValue(normalSize);
+
+        OptionValue<Double> large = new OptionValue<>("large_burst", "Large Burst",
+                "A large burst of air.", Material.IRON_BLOCK, 1.3);
+        large.addRequirement(new NumberStatRequirement<>("circleLevel", 3));
+        large.addRequirement(new NumberStatRequirement<>("mastery_" + getType().toLowerCase(), 30));
+        large.addImpact(new StatModifierImpact(this, "blast_size", 1.3, StatModifierImpact.ModifierType.SET));
+        large.addImpact(new StatModifierImpact(this, "damage", 0.7, StatModifierImpact.ModifierType.MULTIPLY));
+        sizeOption.addValue(large);
+
+        addOption(sizeOption);
+
+        SpellOption rangeOption = new SpellOption(this, "range",
+                "Range of the burst.", Material.SPYGLASS, 2);
+        OptionValue<Double> XLow = new OptionValue<>("extra_low_range", "Extra Low Range",
+                "Burst does not travel far.", Material.ARROW, 5.0);
+        XLow.addImpact(new StatModifierImpact(this, "range", 5.0, StatModifierImpact.ModifierType.SET));
+        XLow.addImpact(new StatModifierImpact(this, "blast_size", 1.2, StatModifierImpact.ModifierType.MULTIPLY));
+        XLow.addImpact(new StatModifierImpact(this, "damage", 1.15, StatModifierImpact.ModifierType.MULTIPLY));
+        XLow.addRequirement(new NumberStatRequirement<>("mastery_" + getType().toLowerCase(), 100));
+        XLow.addRequirement(new NumberStatRequirement<>("circleLevel", 3));
+        rangeOption.addValue(XLow);
+
+        OptionValue<Double> low = new OptionValue<>("low_range", "Low Range",
+                "Burst travels a smaller distance.", Material.TIPPED_ARROW, 7.5);
+        low.addImpact(new StatModifierImpact(this, "range", 7.5, StatModifierImpact.ModifierType.SET));
+        low.addImpact(new StatModifierImpact(this, "blast_size", 1.1, StatModifierImpact.ModifierType.MULTIPLY));
+        low.addImpact(new StatModifierImpact(this, "damage", 1.075, StatModifierImpact.ModifierType.MULTIPLY));
+        low.addRequirement(new NumberStatRequirement<>("mastery_" + getType().toLowerCase(), 50));
+        low.addRequirement(new NumberStatRequirement<>("circleLevel", 2));
+        rangeOption.addValue(low);
+
+        OptionValue<Double> normal = new OptionValue<>("normal_range", "Normal Range",
+                "Burst travels a normal amount.", Material.SPECTRAL_ARROW, 7.5);
+        normal.addImpact(new StatModifierImpact(this, "range", 10, StatModifierImpact.ModifierType.SET));
+        rangeOption.addValue(normal);
+
+        OptionValue<Double> extended = new OptionValue<>("extended_range", "Extended Range",
+                "Burst travels further than usual.", Material.BOW, 12.5);
+        extended.addImpact(new StatModifierImpact(this, "range", 12.5, StatModifierImpact.ModifierType.SET));
+        extended.addImpact(new StatModifierImpact(this, "blast_size", 0.9, StatModifierImpact.ModifierType.MULTIPLY));
+        extended.addImpact(new StatModifierImpact(this, "damage", 0.925, StatModifierImpact.ModifierType.MULTIPLY));
+        extended.addRequirement(new NumberStatRequirement<>("mastery_" + getType().toLowerCase(), 50));
+        extended.addRequirement(new NumberStatRequirement<>("circleLevel", 2));
+        rangeOption.addValue(extended);
+
+        addOption(rangeOption);
     }
 
     @Override
@@ -59,7 +128,7 @@ public class AirBurst extends AttackSpell {
                 2,
                 caster.getEyeLocation(),
                 caster.getEyeLocation().add(
-                        caster.getEyeLocation().getDirection().multiply(20)
+                        caster.getEyeLocation().getDirection().multiply(getModifiedStat(caster, "range", 10))
                 )
         );
 
@@ -98,7 +167,7 @@ public class AirBurst extends AttackSpell {
                         40                       // lifespan (ticks)
                 );
 
-                for (Location loc : ParticleUtils.circle(point, 1.5, 16, yaw, pitch)) {
+                for (Location loc : ParticleUtils.circle(point, getModifiedStat(caster, "blast_size", 1), 16, yaw, pitch)) {
                     if (properties.isCountered()) {
                         return;
                     }
@@ -110,7 +179,7 @@ public class AirBurst extends AttackSpell {
                             0.1
                     );
                 }
-                for (LivingEntity le : point.getNearbyLivingEntities(1)){
+                for (LivingEntity le : point.getNearbyLivingEntities(getModifiedStat(caster, "blast_size", 1))){
                     le.setVelocity(caster.getEyeLocation().getDirection().multiply(getPower(caster, le, properties.getRemainingPower())));
                 }
 

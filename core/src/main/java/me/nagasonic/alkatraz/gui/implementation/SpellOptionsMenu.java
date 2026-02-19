@@ -1,11 +1,10 @@
 package me.nagasonic.alkatraz.gui.implementation;
 
 import me.nagasonic.alkatraz.gui.PagedMenu;
-import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
-import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
+import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.configuration.SpellOption;
-import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.util.ColorFormat;
+import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -19,9 +18,9 @@ import java.util.List;
  * Paginated menu showing all spell options
  */
 public class SpellOptionsMenu extends PagedMenu<SpellOption> {
-    private final AttackSpell spell;
+    private final Spell spell;
 
-    public SpellOptionsMenu(Player viewer, AttackSpell spell) {
+    public SpellOptionsMenu(Player viewer, Spell spell) {
         super(viewer, 
               ColorFormat.format("&6" + spell.getDisplayName() + " &7- Options"),
               54,
@@ -58,15 +57,10 @@ public class SpellOptionsMenu extends PagedMenu<SpellOption> {
         meta.setLore(lore);
         spellInfo.setItemMeta(meta);
         inventory.setItem(4, spellInfo);
-        
-        // Fill borders with glass panes
-        ItemStack border = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
-        ItemMeta borderMeta = border.getItemMeta();
-        borderMeta.setDisplayName(" ");
-        border.setItemMeta(borderMeta);
-        
-        for (int i : new int[]{0, 1, 2, 3, 5, 6, 7, 8, 9, 18, 27, 36}) {
-            inventory.setItem(i, border);
+
+        int[] slots = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 17, 18, 26, 27, 35, 36, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53};
+        for (int i : slots){
+            inventory.setItem(i, Utils.getBlank());
         }
     }
 
@@ -82,8 +76,6 @@ public class SpellOptionsMenu extends PagedMenu<SpellOption> {
 
     @Override
     protected ItemStack createDisplayItem(SpellOption option, int index) {
-        MagicProfile profile = ProfileManager.getProfile(viewer, MagicProfile.class);
-        
         ItemStack item = new ItemStack(option.getIcon());
         ItemMeta meta = item.getItemMeta();
         

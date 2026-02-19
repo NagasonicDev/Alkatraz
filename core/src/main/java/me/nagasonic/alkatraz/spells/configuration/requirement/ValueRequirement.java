@@ -1,6 +1,5 @@
 package me.nagasonic.alkatraz.spells.configuration.requirement;
 
-import me.nagasonic.alkatraz.spells.Spell;
 import org.bukkit.entity.Player;
 
 public interface ValueRequirement {

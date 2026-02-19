@@ -286,7 +286,27 @@ public class MagicProfile extends Profile {
     }
 
     // ============================================
-    // Spell Mastery Management (replaces PlayerData.spellMasteries map)
+    // Spell Cooldown Management
+    // ============================================
+
+    public Long getCooldown(Spell spell) {
+        String id = spell.getId() + "_cooldown";
+        if (longs.containsKey(id)) { return getLong(id); }
+        return null;
+    }
+
+    public void setCooldown(Spell spell, Long cooldown) {
+        String id = spell.getId() + "_cooldown";
+        if (!longs.containsKey(id)) {
+            longStat(id, cooldown);
+        }else{
+            setLong(id, cooldown);
+        }
+    }
+
+
+    // ============================================
+    // Spell Mastery Management
     // ============================================
 
     /**
@@ -493,7 +513,7 @@ public class MagicProfile extends Profile {
     // ============================================
 
     protected Map<Spell, BossBar> masteryBars = new HashMap<>();
-    protected BossBar expBar;
+    protected BossBar expBar = null;
 
     public Map<Spell, BossBar> getMasteryBars() {
         return masteryBars;

@@ -86,6 +86,11 @@ public class ProfilePersistence {
             config.set("stats.floats." + stat, profile.getFloat(stat));
         }
 
+        // Save all long stats
+        for (String stat : profile.getLongs()) {
+            config.set("stats.longs." + stat, profile.getLong(stat));
+        }
+
         // Save all boolean stats
         for (String stat : profile.getBools()) {
             config.set("stats.bools." + stat, profile.getBool(stat));
@@ -152,6 +157,15 @@ public class ProfilePersistence {
             }
         }
 
+        // Load all long stats
+        if (config.contains("stats.longs")) {
+            for (String stat : profile.getLongs()) {
+                if (config.contains("stats.longs." + stat)) {
+                    profile.setLong(stat, config.getLong("stats.longs." + stat));
+                }
+            }
+        }
+
         // Load all boolean stats
         if (config.contains("stats.bools")) {
             for (String stat : profile.getBools()) {
@@ -161,11 +175,21 @@ public class ProfilePersistence {
             }
         }
 
-        // Load all string set stats
+        // Load all string stats
         if (config.contains("stats.strings")) {
-            for (String stat : profile.getStringSets()) {
+            for (String stat : profile.getStrings()) {
                 if (config.contains("stats.strings." + stat)) {
-                    List<String> strings = config.getStringList("stats.strings." + stat);
+                    String string = config.getString("stats.strings." + stat);
+                    profile.setString(stat, string);
+                }
+            }
+        }
+
+        // Load all string set stats
+        if (config.contains("stats.stringSets")) {
+            for (String stat : profile.getStringSets()) {
+                if (config.contains("stats.stringSets." + stat)) {
+                    List<String> strings = config.getStringList("stats.stringSets." + stat);
                     profile.setStringSet(stat, new HashSet<>(strings));
                 }
             }

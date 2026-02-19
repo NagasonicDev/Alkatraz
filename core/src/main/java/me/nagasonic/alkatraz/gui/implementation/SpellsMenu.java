@@ -6,8 +6,8 @@ import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
-import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.util.ColorFormat;
+import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -35,6 +35,16 @@ public class SpellsMenu extends PagedMenu<Spell> {
         return Alkatraz.isResourcePackForced() 
             ? ColorFormat.format("&f\uF808\uF001")
             : ColorFormat.format("Spells");
+    }
+
+    @Override
+    protected void addDecorations(){
+        if (!Alkatraz.isResourcePackForced()){
+            int[] slots = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 17, 18, 26, 27, 35, 36, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53};
+            for (int i : slots){
+                inventory.setItem(i, Utils.getBlank());
+            }
+        }
     }
 
     @Override
@@ -66,6 +76,7 @@ public class SpellsMenu extends PagedMenu<Spell> {
         lore.add("");
         lore.add(ColorFormat.format("&bCode: " + spell.getCode()));
         lore.add(ColorFormat.format("&bMana Cost: " + spell.getCost()));
+        lore.add(ColorFormat.format("&bCooldown: " + spell.getCooldown() + "s"));
         lore.add(ColorFormat.format("&bCast Time: " + spell.getCastTime() + "s"));
         lore.add(ColorFormat.format("&bElement: " + spell.getElement().getName()));
         lore.add(ColorFormat.format("&bMastery: " + profile.getSpellMastery(spell) + "/" + spell.getMaxMastery()));
@@ -73,7 +84,7 @@ public class SpellsMenu extends PagedMenu<Spell> {
         lore.add(ColorFormat.format("&eCircle: " + spell.getLevel()));
         
         // Add option indicator if spell has options
-        if (spell instanceof AttackSpell attackSpell && !attackSpell.getAllOptions().isEmpty()) {
+        if (!spell.getAllOptions().isEmpty()) {
             lore.add("");
             lore.add(ColorFormat.format("&a✦ Has Spell Options"));
             lore.add(ColorFormat.format("&7Click to configure"));
@@ -108,9 +119,9 @@ public class SpellsMenu extends PagedMenu<Spell> {
         ItemStack clicked = event.getCurrentItem();
         boolean hasOptions = getBoolData(clicked, "has_options");
         
-        if (hasOptions && spell instanceof AttackSpell attackSpell) {
+        if (hasOptions) {
             // Open spell options menu
-            SpellOptionsMenu optionsMenu = new SpellOptionsMenu(viewer, attackSpell);
+            SpellOptionsMenu optionsMenu = new SpellOptionsMenu(viewer, spell);
             optionsMenu.open();
         }
     }

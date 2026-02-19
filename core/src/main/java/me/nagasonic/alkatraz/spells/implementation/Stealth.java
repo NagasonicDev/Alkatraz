@@ -41,8 +41,8 @@ public class Stealth extends Spell implements Listener {
     private int taskID;
 
     @Override
-    public void setupOptions(){
-        SpellOption armorInvis = new SpellOption(this, "armor_invis", "Whether armor is visible.", Material.DIAMOND_CHESTPLATE);
+    protected void setupOptions(){
+        SpellOption armorInvis = new SpellOption(this, "armor_invis", "Whether armor is visible.", Material.DIAMOND_CHESTPLATE, 0);
         OptionValue<Boolean> armorShown = new OptionValue<>("armor_shown", "Armor Shown",
                 "Armor is shown to other players.",
                 Material.ENDER_PEARL,

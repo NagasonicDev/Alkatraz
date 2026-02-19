@@ -10,7 +10,6 @@ import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
 import me.nagasonic.alkatraz.util.StatUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -43,7 +42,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                     sender.sendMessage(format("&cThere is no spell named " + args[1]));
                     return true;
                 }
-                OfflinePlayer p = args.length == 3 ? Bukkit.getOfflinePlayer(args[2]) : (OfflinePlayer) sender;
+                Player p = args.length == 3 ? Bukkit.getPlayer(args[2]) : (Player) sender;
                 if (p == null){
                     sender.sendMessage(format("&cCouldn't find a player named " + args[2] + ". Make sure they are online."));
                     return true;
@@ -65,7 +64,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                     sender.sendMessage(format("&cThere is no spell named " + args[1]));
                     return true;
                 }
-                OfflinePlayer p = args.length == 3 ? Bukkit.getOfflinePlayer(args[2]) : (OfflinePlayer) sender;
+                Player p = args.length == 3 ? Bukkit.getPlayer(args[2]) : (Player) sender;
                 if (p == null){
                     sender.sendMessage(format("&cCouldn't find a player named " + args[2] + ". Make sure they are online."));
                     return true;
@@ -103,7 +102,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                     return true;
                 }
                 if (args[1].equals("set")){
-                    OfflinePlayer p = args.length == 3 ? (OfflinePlayer) sender : Bukkit.getOfflinePlayer(args[3]);
+                    Player p = args.length == 3 ? (Player) sender : Bukkit.getPlayer(args[3]);
                     MagicProfile data = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
                     if (Double.parseDouble(args[2]) > StatUtils.requiredExperience(data.getCircleLevel() + 1) && data.getCircleLevel() < 9){
                         sender.sendMessage("&cCannot set beyond the required experience threshold.");
@@ -113,7 +112,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                     sender.sendMessage(format("&aSet magic experience of " + p.getName() + " to " + args[2]));
                     return true;
                 } else if (args[1].equals("add")) {
-                    OfflinePlayer p = args.length == 3 ? (OfflinePlayer) sender : Bukkit.getOfflinePlayer(args[3]);
+                    Player p = args.length == 3 ? (Player) sender : Bukkit.getPlayer(args[3]);
                     MagicProfile data = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
                     if (data.getExperience() + Double.parseDouble(args[2]) < 0){
                         sender.sendMessage("&cCannot have negative experience, please change circle level with /alkatraz circle.");
@@ -138,7 +137,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                     return true;
                 }
                 if (args[1].equals("set")){
-                    OfflinePlayer p = args.length == 3 ? (OfflinePlayer) sender : Bukkit.getOfflinePlayer(args[3]);
+                    Player p = args.length == 3 ? (Player) sender : Bukkit.getPlayer(args[3]);
                     MagicProfile data = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
                     if (Integer.parseInt(args[2]) < 0 || Integer.parseInt(args[2]) > 9){
                         sender.sendMessage("&cCannot set beyond the circle threshold (0-9).");
@@ -148,7 +147,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                     sender.sendMessage(format("&aSet circle level of " + p.getName() + " to " + args[2]));
                     return true;
                 } else if (args[1].equals("add")) {
-                    OfflinePlayer p = args.length == 3 ? (OfflinePlayer) sender : Bukkit.getOfflinePlayer(args[3]);
+                    Player p = args.length == 3 ? (Player) sender : Bukkit.getPlayer(args[3]);
                     MagicProfile data = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
                     if (data.getCircleLevel() + Integer.parseInt(args[2]) < 0 || data.getCircleLevel() + Integer.parseInt(args[2]) > 9){
                         sender.sendMessage("&cCannot add beyond the circle threshold. (0-9)");
@@ -177,7 +176,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                     sender.sendMessage(format("&cThere is no spell named " + args[1]));
                     return true;
                 }
-                OfflinePlayer p = args.length == 4 ? (OfflinePlayer) sender : Bukkit.getOfflinePlayer(args[3]);
+                Player p = args.length == 4 ? (Player) sender : Bukkit.getPlayer(args[3]);
                 MagicProfile data = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
                 double amount = Double.parseDouble(args[3]);
                 if (args[2].equals("add")){

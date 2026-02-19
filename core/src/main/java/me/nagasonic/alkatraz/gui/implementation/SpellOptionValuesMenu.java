@@ -1,12 +1,13 @@
 package me.nagasonic.alkatraz.gui.implementation;
 
 import me.nagasonic.alkatraz.gui.PagedMenu;
+import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.configuration.OptionValue;
 import me.nagasonic.alkatraz.spells.configuration.SpellOption;
 import me.nagasonic.alkatraz.spells.configuration.impact.ValueImpact;
 import me.nagasonic.alkatraz.spells.configuration.requirement.ValueRequirement;
-import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.util.ColorFormat;
+import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
@@ -23,10 +24,10 @@ import java.util.List;
  * Paginated menu showing all values for a spell option with selection
  */
 public class SpellOptionValuesMenu extends PagedMenu<OptionValue<?>> {
-    private final AttackSpell spell;
+    private final Spell spell;
     private final SpellOption option;
 
-    public SpellOptionValuesMenu(Player viewer, AttackSpell spell, SpellOption option) {
+    public SpellOptionValuesMenu(Player viewer, Spell spell, SpellOption option) {
         super(viewer,
               ColorFormat.format("&6" + option.getId() + " &7- Select Value"),
               54,
@@ -63,15 +64,11 @@ public class SpellOptionValuesMenu extends PagedMenu<OptionValue<?>> {
         meta.setLore(lore);
         optionInfo.setItemMeta(meta);
         inventory.setItem(4, optionInfo);
-        
-        // Fill borders
-        ItemStack border = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
-        ItemMeta borderMeta = border.getItemMeta();
-        borderMeta.setDisplayName(" ");
-        border.setItemMeta(borderMeta);
-        
-        for (int i : new int[]{0, 1, 2, 3, 5, 6, 7, 8, 9, 18, 27, 36}) {
-            inventory.setItem(i, border);
+
+
+        int[] slots = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 17, 18, 26, 27, 35, 36, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53};
+        for (int i : slots){
+            inventory.setItem(i, Utils.getBlank());
         }
     }
 
