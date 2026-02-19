@@ -1,11 +1,6 @@
 name: Test Plugin
 
 on:
-  push:
-    branches: [ master, ver/* ]
-  pull_request:
-    branches: [ master, ver/* ]
-
   workflow_dispatch: 
 
 jobs:
