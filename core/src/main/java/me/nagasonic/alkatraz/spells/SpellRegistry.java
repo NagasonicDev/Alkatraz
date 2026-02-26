@@ -30,6 +30,9 @@ public class SpellRegistry {
         registerIfEnabled("earth_spike", new EarthSpike("EARTH_SPIKE"));
         registerIfEnabled("water_pulse", new WaterPulse("WATER_PULSE"));
         registerIfEnabled("barrier", new Barrier("BARRIER"));
+        registerIfEnabled("dark_tendrils", new DarkTendrils("DARK_TENDRILS"));
+        registerIfEnabled("wind_vortex", new WindVortex("WIND_VORTEX"));
+        registerIfEnabled("air_ball", new AirBall("AIR_BALL"));
     }
 
     private static void registerIfEnabled(String key, Spell spell){

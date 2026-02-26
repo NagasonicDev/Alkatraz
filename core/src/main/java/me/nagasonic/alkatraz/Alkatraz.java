@@ -216,6 +216,9 @@ public final class Alkatraz extends JavaPlugin {
         saveConfig("spells/earth_spike.yml");
         saveConfig("spells/water_pulse.yml");
         saveConfig("spells/barrier.yml");
+        saveConfig("spells/dark_tendrils.yml");
+        saveConfig("spells/wind_vortex.yml");
+        saveConfig("spells/air_ball.yml");
     }
 
     public static GlowingEntities getGlowingEntities() {
