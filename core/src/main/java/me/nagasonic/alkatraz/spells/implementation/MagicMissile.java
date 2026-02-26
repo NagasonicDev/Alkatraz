@@ -90,7 +90,7 @@ public class MagicMissile extends AttackSpell {
                     }
 
                     p.spawnParticle(
-                            Particle.REDSTONE,
+                            Utils.DUST,
                             loc,
                             50,
                             new Particle.DustOptions(Color.AQUA, 0.5F)

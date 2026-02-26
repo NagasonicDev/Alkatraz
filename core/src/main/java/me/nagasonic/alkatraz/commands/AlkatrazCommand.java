@@ -1,10 +1,12 @@
 package me.nagasonic.alkatraz.commands;
 
+import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.dom.Permission;
 import me.nagasonic.alkatraz.gui.implementation.StatsMenu;
 import me.nagasonic.alkatraz.items.wands.Wand;
 import me.nagasonic.alkatraz.items.wands.WandRegistry;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
+import me.nagasonic.alkatraz.playerdata.profiles.ProfileRegistry;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
@@ -227,6 +229,10 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
             if (Permission.hasPermission(sender, Permission.COMMAND_RELOAD)){
                 if (args.length == 1){
                     SpellRegistry.reload();
+                    for (String config : ConfigManager.getDefaultConfigs().keySet()){
+                        ConfigManager.reloadConfig(config);
+                    }
+                    WandRegistry.reload();
                     sender.sendMessage(format("&aReloaded configs."));
                 }
             }
