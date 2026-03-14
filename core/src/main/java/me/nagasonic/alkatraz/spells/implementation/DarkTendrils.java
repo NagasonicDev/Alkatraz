@@ -415,6 +415,11 @@ public class DarkTendrils extends AttackSpell implements Listener {
                 if (entity == caster) continue;
                 if (entity instanceof ArmorStand) continue;
                 if (entity instanceof Player && ((Player) entity).getGameMode() == GameMode.SPECTATOR) continue;
+                if (entity instanceof Player p){
+                    MagicProfile cp = ProfileManager.getProfile(caster.getUniqueId(), MagicProfile.class);
+                    MagicProfile op = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
+                    if (op.isStealth() && op.getCircleLevel() > cp.getCircleLevel()) continue;
+                }
 
                 double distance = entity.getLocation().distance(tendril.getLocation());
                 if (distance < closestDistance) {

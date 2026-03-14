@@ -10,6 +10,7 @@ import me.nagasonic.alkatraz.playerdata.profiles.ProfileRegistry;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
+import me.nagasonic.alkatraz.spells.spellbooks.SpellbookFactory;
 import me.nagasonic.alkatraz.util.StatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -236,6 +237,9 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                     sender.sendMessage(format("&aReloaded configs."));
                 }
             }
+        } else if (args[0].equals("test")) {
+            Player p = (Player) sender;
+            p.getInventory().addItem(SpellbookFactory.createDarkRandomSpellbook());
         }
 
         return true;

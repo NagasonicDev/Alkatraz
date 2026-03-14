@@ -1,5 +1,6 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
+import com.destroystokyo.paper.event.entity.EntityJumpEvent;
 import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
@@ -167,6 +168,7 @@ public class AirBall extends Spell implements Listener {
         horse.setOwner(caster);
         horse.getInventory().setSaddle(new ItemStack(Material.SADDLE));
         horse.setInvisible(true);
+        Alkatraz.getNms().setInvisible(horse, true);
         horse.setInvulnerable(false); // Can be damaged
         horse.setSilent(true);
         horse.setAI(false); // No AI
@@ -280,7 +282,7 @@ public class AirBall extends Spell implements Listener {
     /**
      * Air ball instance behavior
      */
-    private class AirBallInstance extends BukkitRunnable {
+    private class AirBallInstance extends BukkitRunnable implements Listener {
         private final Player rider;
         private final Horse horse;
         private final SpellEntityComponent component;
@@ -301,6 +303,7 @@ public class AirBall extends Spell implements Listener {
             this.speed = speed;
             this.jumpPower = jumpPower;
             this.props = props;
+            Alkatraz.getInstance().getServer().getPluginManager().registerEvents(this, Alkatraz.getInstance());
         }
 
         @Override
@@ -342,9 +345,6 @@ public class AirBall extends Spell implements Listener {
             rotation += 0.3;
             if (rotation >= Math.PI * 2) rotation -= Math.PI * 2;
 
-            // Handle jump boost detection
-            handleJumpBoost();
-
             // Spawn particles
             spawnAirBallParticles();
 
@@ -359,59 +359,22 @@ public class AirBall extends Spell implements Listener {
         }
 
         /**
-         * Detects jump and applies extra boost
-         */
-        private void handleJumpBoost() {
-            boolean onGround = horse.isOnGround();
-            
-            // Detect when horse leaves ground (jump)
-            if (wasOnGround && !onGround) {
-                long now = System.currentTimeMillis();
-                if (now - lastJumpTime > 500) { // 500ms cooldown
-                    // Apply extra upward boost
-                    Vector velocity = horse.getVelocity();
-                    velocity.setY(velocity.getY() + (jumpPower * 0.3)); // Add extra boost
-                    horse.setVelocity(velocity);
-                    
-                    // Effects
-                    horse.getWorld().playSound(horse.getLocation(), Sound.ENTITY_PHANTOM_FLAP, 0.8f, 1.8f);
-                    spawnJumpParticles();
-                    
-                    lastJumpTime = now;
-                }
-            }
-            
-            wasOnGround = onGround;
-        }
-
-        /**
          * Spawns the sphere of particles around the air ball
          */
         private void spawnAirBallParticles() {
             Location center = horse.getLocation().add(0, 1, 0);
             
             // Create sphere of particles
-            int particles = 30;
-            double radius = 1.5;
-            
-            for (int i = 0; i < particles; i++) {
-                double theta = Math.random() * Math.PI * 2;
-                double phi = Math.random() * Math.PI;
-                
-                double x = radius * Math.sin(phi) * Math.cos(theta);
-                double y = radius * Math.sin(phi) * Math.sin(theta);
-                double z = radius * Math.cos(phi);
-                
-                Location particleLoc = center.clone().add(x, y, z);
-                particleLoc.getWorld().spawnParticle(Particle.CLOUD, particleLoc, 1, 0, 0, 0, 0);
+            for (Location ploc : ParticleUtils.sphere(center, 0.75, 10)){
+                ploc.getWorld().spawnParticle(Particle.CLOUD, ploc, 1, 0, 0, 0, 0);
             }
             
             // Horizontal rings (every 3 ticks)
             if (ticksElapsed % 3 == 0) {
                 for (int ring = 0; ring < 3; ring++) {
                     double ringHeight = (ring - 1) * 0.7;
-                    double ringRadius = Math.sqrt(radius * radius - ringHeight * ringHeight);
-                    if (Double.isNaN(ringRadius)) ringRadius = radius * 0.5;
+                    double ringRadius = Math.sqrt(0.75 * 0.75 - ringHeight * ringHeight);
+                    if (Double.isNaN(ringRadius)) ringRadius = 0.75 * 0.5;
                     
                     int ringParticles = 20;
                     for (int i = 0; i < ringParticles; i++) {
@@ -425,29 +388,11 @@ public class AirBall extends Spell implements Listener {
                     }
                 }
             }
-            
-            // Spiral effect
-            if (ticksElapsed % 2 == 0) {
-                int spiralPoints = 15;
-                for (int i = 0; i < spiralPoints; i++) {
-                    double progress = (double) i / spiralPoints;
-                    double angle = progress * Math.PI * 4 + rotation;
-                    double currentRadius = radius * Math.sin(progress * Math.PI);
-                    double height = (progress - 0.5) * 2 * radius;
-                    
-                    double x = Math.cos(angle) * currentRadius;
-                    double z = Math.sin(angle) * currentRadius;
-                    
-                    Location particleLoc = center.clone().add(x, height, z);
-                    particleLoc.getWorld().spawnParticle(Particle.SWEEP_ATTACK, particleLoc, 1);
-                }
-            }
         }
 
-        /**
-         * Spawns particles when player jumps
-         */
-        private void spawnJumpParticles() {
+        @EventHandler
+        private void onJump(EntityJumpEvent event) {
+            if (!event.getEntity().equals(horse)) return;
             Location loc = horse.getLocation();
             loc.getWorld().spawnParticle(Particle.CLOUD, loc, 15, 0.5, 0.2, 0.5, 0.1);
             loc.getWorld().spawnParticle(Particle.SWEEP_ATTACK, loc, 5, 0.5, 0.2, 0.5);

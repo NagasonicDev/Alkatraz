@@ -12,7 +12,7 @@ import java.util.Objects;
 
 public class SpellRegistry {
     private static Map<Class<?>, Spell> allSpells = Collections.unmodifiableMap(new HashMap<>());
-    private static Map<String, Spell> allSpellsByCode = Collections.unmodifiableMap(new HashMap<>());
+    private static Map<String, Spell> allSpellsByID = Collections.unmodifiableMap(new HashMap<>());
 
     public static void registerSpells(){
         registerIfEnabled("magic_missile", new MagicMissile("MAGIC_MISSILE"));
@@ -44,8 +44,8 @@ public class SpellRegistry {
         return allSpells;
     }
 
-    public static Map<String, Spell> getAllSpellsByCode() {
-        return allSpellsByCode;
+    public static Map<String, Spell> getAllSpellsByID() {
+        return allSpellsByID;
     }
 
     public static <T extends Spell> Spell getSpell(Class<T> spell){
@@ -53,8 +53,8 @@ public class SpellRegistry {
         return allSpells.get(spell);
     }
 
-    public static Spell getSpell(String code){
-        return allSpellsByCode.get(code);
+    public static Spell getSpell(String id){
+        return allSpellsByID.get(id);
     }
 
     public static Spell getSpellFromName(String name) {
@@ -71,9 +71,9 @@ public class SpellRegistry {
         spells.put(spell.getClass(), spell);
         allSpells = Collections.unmodifiableMap(spells);
         spell.loadConfiguration();
-        Map<String, Spell> spellsByCode = new HashMap<>(allSpellsByCode);
-        spellsByCode.put(spell.getCode(), spell);
-        allSpellsByCode = Collections.unmodifiableMap(spellsByCode);
+        Map<String, Spell> spellsById = new HashMap<>(allSpellsByID);
+        spellsById.put(spell.getId(), spell);
+        allSpellsByID = Collections.unmodifiableMap(spellsById);
         Alkatraz.logInfo("Registered spell: " + spell.getId());
     }
 
