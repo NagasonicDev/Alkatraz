@@ -84,9 +84,9 @@ public abstract class Spell {
 
         // Check Cooldown
         if (profile.getCooldown(this) != null) {
-            long timeLeft = System.currentTimeMillis() - profile.getCooldown(this);
-            if (TimeUnit.MILLISECONDS.toSeconds(timeLeft) < getCooldown()) {
-                Utils.sendActionBar(p, "&cPlease wait " + TimeUnit.MILLISECONDS.toSeconds(timeLeft) + " seconds before casting this spell.");
+            long time = System.currentTimeMillis() - profile.getCooldown(this);
+            if (TimeUnit.MILLISECONDS.toSeconds(time) < getCooldown()) {
+                Utils.sendActionBar(p, "&cPlease wait " + TimeUnit.MILLISECONDS.toSeconds(getCooldown() - time) + " seconds before casting this spell.");
                 return;
             }
         }
