@@ -1,6 +1,7 @@
 package me.nagasonic.alkatraz.nms;
 
 import me.nagasonic.alkatraz.util.Skin;
+import org.bukkit.entity.Horse;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
@@ -14,6 +15,7 @@ public interface NMS extends Listener {
     void fakeExp(Player player, float progress, int level, int totalExp);
     void changeSkin(Player player, List<Player> viewers, Skin skin);
     void changeSkinElse(Player player, List<Player> viewers, Skin skin);
+    void fakeHorseSaddle(Horse horse, Player target, boolean saddle);
     default void onEnable(){
         // default: do nothing
     }

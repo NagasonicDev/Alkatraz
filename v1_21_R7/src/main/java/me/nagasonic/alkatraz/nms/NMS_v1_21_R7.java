@@ -6,6 +6,9 @@ import com.mojang.datafixers.util.Pair;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.util.Skin;
 import net.minecraft.network.protocol.game.*;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -15,18 +18,45 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_21_R7.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_21_R7.entity.CraftHorse;
 import org.bukkit.craftbukkit.v1_21_R7.entity.CraftPlayer;
-import org.bukkit.entity.HumanEntity;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
+import java.lang.reflect.Field;
 import java.util.*;
 
 public final class NMS_v1_21_R7 implements NMS {
+
+    private static EntityDataAccessor<Byte> HORSE_DATA_ID_FLAGS;
+    static {
+        try {
+            for (Field field : AbstractHorse.class.getDeclaredFields()) {
+                if (!EntityDataAccessor.class.isAssignableFrom(field.getType())) continue;
+
+                field.setAccessible(true);
+                Object value = field.get(null);
+
+                if (value instanceof EntityDataAccessor<?> accessor) {
+                    // We want BYTE serializer (flags field)
+                    if (accessor.serializer() == EntityDataSerializers.BYTE) {
+                        HORSE_DATA_ID_FLAGS = (EntityDataAccessor<Byte>) accessor;
+                        break;
+                    }
+                }
+            }
+
+            if (HORSE_DATA_ID_FLAGS == null) {
+                throw new IllegalStateException("Could not find horse flags accessor");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     @Override
     public void setInvisible(org.bukkit.entity.Entity target, boolean invis) {
@@ -111,6 +141,37 @@ public final class NMS_v1_21_R7 implements NMS {
                 hideAndShow(other, player);
             }
         }
+    }
+
+    @Override
+    public void fakeHorseSaddle(Horse horse, Player target, boolean saddle) {
+        ServerPlayer nmsPlayer = ((CraftPlayer) target).getHandle();
+        net.minecraft.world.entity.animal.equine.Horse nmsHorse = ((CraftHorse) horse).getHandle();
+
+        SynchedEntityData data = nmsHorse.getEntityData();
+
+        // Get current flags
+        byte flags = data.get(HORSE_DATA_ID_FLAGS);
+
+        // Remove saddle bit (0x04)
+        byte modifiedFlags = (byte) (flags & ~0x04);
+
+        // Create spoofed metadata entry
+        SynchedEntityData.DataValue<Byte> dataValue =
+                new SynchedEntityData.DataValue<>(
+                        HORSE_DATA_ID_FLAGS.id(),
+                        EntityDataSerializers.BYTE,
+                        modifiedFlags
+                );
+
+        // Send packet
+        ClientboundSetEntityDataPacket packet =
+                new ClientboundSetEntityDataPacket(
+                        nmsHorse.getId(),
+                        List.of(dataValue)
+                );
+
+        nmsPlayer.connection.send(packet);
     }
 
     public void refresh(Player player) {

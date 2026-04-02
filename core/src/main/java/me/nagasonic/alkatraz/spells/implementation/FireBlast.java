@@ -10,6 +10,8 @@ import me.nagasonic.alkatraz.spells.components.SpellComponent;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
 import me.nagasonic.alkatraz.spells.components.SpellEntityComponent;
+import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
+import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
@@ -102,6 +104,17 @@ public class FireBlast extends AttackSpell implements Listener {
         return d;
     }
 
+    @Override
+    public ItemStack getSpellBook() {
+        return new Spellbook(getId())
+                .setDisplayName("&eScroll of Apollo &oII")
+                .addLoreLine("")
+                .addLoreLine("&7A scroll containing the knowledge to enhance")
+                .addLoreLine("&7fireball.")
+                .addRequirement(new NumberStatRequirement<>("circleLevel", 2))
+                .build();
+    }
+
     @EventHandler
     private void onDamage(EntityDamageByEntityEvent e){
         if (!(e.getDamager() instanceof org.bukkit.entity.Fireball fireball)) return;
@@ -124,7 +137,7 @@ public class FireBlast extends AttackSpell implements Listener {
         SpellComponent comp = SpellComponentHandler.getActiveComponent(UUID.fromString(idString));
         if (comp.getSpell() != this) return;
         Location loc = e.getHitBlock() != null ? e.getHitBlock().getLocation() : e.getHitEntity().getLocation();
-        List<Block> blocks = Utils.blocksInRadius(loc, 2);
+        List<Block> blocks = Utils.blocksInRadius(loc, 3);
         for (Block block : blocks){
             if (block.getType() == Material.AIR){
                 block.setType(Material.FIRE);

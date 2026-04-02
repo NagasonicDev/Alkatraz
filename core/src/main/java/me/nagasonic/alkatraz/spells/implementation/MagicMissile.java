@@ -152,4 +152,9 @@ public class MagicMissile extends AttackSpell {
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());
         return d;
     }
+
+    @Override
+    public ItemStack getSpellBook() {
+        return null;
+    }
 }

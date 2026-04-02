@@ -1,13 +1,15 @@
 package me.nagasonic.alkatraz.spells.spellbooks;
 
+import me.nagasonic.alkatraz.spells.Element;
+import me.nagasonic.alkatraz.spells.Spell;
+import me.nagasonic.alkatraz.spells.SpellRegistry;
 import me.nagasonic.alkatraz.spells.configuration.impact.implementation.ManaCostImpact;
 import me.nagasonic.alkatraz.spells.configuration.impact.implementation.StatModifierImpact;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Factory class for creating spellbooks
@@ -25,198 +27,80 @@ public class SpellbookFactory {
      * Creates a Fireball spellbook
      * Basic spell, low requirements
      */
-    public static ItemStack createFireballSpellbook() {
-        return new Spellbook("fireball")
-                .setMaterial(Material.FIRE_CHARGE)
-                .setDisplayName("&cFireball Tome")
-                .addLoreLine("")
-                .addLoreLine("&7A charred book that radiates heat.")
-                .build();
-    }
-    
-    /**
-     * Creates a Dark Tendrils spellbook
-     * Mid-level spell with circle requirement
-     */
-    public static ItemStack createDarkTendrilsSpellbook() {
-        return new Spellbook("dark_tendrils")
-                .setMaterial(Material.ENDER_EYE)
-                .setDisplayName("&5Grimoire of Shadows")
-                .addRequirement(new NumberStatRequirement<>("circleLevel", 3, "Requires Circle Level 3"))
-                .addLoreLine("")
-                .addLoreLine("&7Dark whispers emanate from these pages...")
-                .build();
-    }
-    
-    /**
-     * Creates a Wind Vortex spellbook
-     * No special requirements, but gives bonus mana
-     */
-    public static ItemStack createWindVortexSpellbook() {
-        return new Spellbook("wind_vortex")
-                .setMaterial(Material.FEATHER)
-                .setDisplayName("&fWinds of Change")
-                .addImpact(new ManaCostImpact(null, -10)) // Grants 10 bonus max mana
-                .addLoreLine("")
-                .addLoreLine("&7The pages flutter even when closed.")
-                .build();
-    }
-    
-    /**
-     * Creates an Air Ball spellbook
-     * High-level spell with strict requirements and impacts
-     */
-    public static ItemStack createAirBallSpellbook() {
-        return new Spellbook("air_ball")
-                .setMaterial(Material.GHAST_TEAR)
-                .setDisplayName("&fAvatar's Manual")
-                .addRequirement(new NumberStatRequirement<>("circleLevel", 4, "Requires Circle Level 4"))
-                .addRequirement(new NumberStatRequirement<>("airPoints", 10, "Requires 10 Air Points"))
-                .addImpact(new StatModifierImpact(null, "airAffinity", 5.0, StatModifierImpact.ModifierType.ADD))
-                .addLoreLine("")
-                .addLoreLine("&7Ancient airbending techniques are")
-                .addLoreLine("&7inscribed within these sacred texts.")
-                .build();
-    }
-    
-    /**
-     * Creates a Water Pulse spellbook
-     */
-    public static ItemStack createWaterPulseSpellbook() {
-        return new Spellbook("water_pulse")
-                .setMaterial(Material.HEART_OF_THE_SEA)
-                .setDisplayName("&bOceanic Codex")
-                .addRequirement(new NumberStatRequirement<>("circleLevel", 2, "Requires Circle Level 2"))
-                .addLoreLine("")
-                .addLoreLine("&7Droplets of water bead on its surface.")
-                .build();
+    public static ItemStack createSpellBook(Spell spell) {
+        return spell.getSpellBook();
     }
     
     // ==========================================
     // RANDOM SPELLBOOKS
     // ==========================================
-    
-    /**
-     * Creates a Common Random Spellbook
-     * Contains basic spells with high weights
-     */
-    public static ItemStack createCommonRandomSpellbook() {
-        return new RandomSpellbook("Common")
-                .setMaterial(Material.BOOK)
-                .setDisplayName("&7Common Spellbook")
-                .addSpell("fireball", 100)        // Very common
-                .addSpell("water_pulse", 80)      // Common
-                .addLoreLine("")
-                .addLoreLine("&7Contains basic magical knowledge.")
-                .build();
+
+    public static int getWeight(int circle){
+        return switch (circle){
+            case 1 -> 10000;
+            case 2 -> 5000;
+            case 3 -> 2500;
+            case 4 -> 1250;
+            case 5 -> 750;
+            case 6 -> 375;
+            case 7 -> 150;
+            case 8 -> 75;
+            case 9 -> 30;
+            default -> 0;
+        };
     }
-    
-    /**
-     * Creates an Uncommon Random Spellbook
-     * Mix of basic and intermediate spells
-     */
-    public static ItemStack createUncommonRandomSpellbook() {
-        return new RandomSpellbook("Uncommon")
-                .setMaterial(Material.WRITABLE_BOOK)
-                .setDisplayName("&aUncommon Spellbook")
-                .addSpell("fireball", 60)         // Less common
-                .addSpell("water_pulse", 70)      // Somewhat common
-                .addSpell("wind_vortex", 50)      // Uncommon
-                .addSpell("dark_tendrils", 40)    // Rare
+
+
+    public static ItemStack createRandomSpellBook(int... circles){
+        Map<Integer, List<Spell>> spellsByCircle = new HashMap<>();
+        for (int c : circles) {
+            List<Spell> spells = new ArrayList<>();
+            for (Spell spell : SpellRegistry.getAllSpells().values()) {
+                if (spell.getLevel() == c){
+                    spells.add(spell);
+                }
+            }
+            spellsByCircle.put(c, spells);
+        }
+        RandomSpellbook random = new RandomSpellbook("Random Spellbook")
+                .setDisplayName("&7Random Spellbook")
                 .addLoreLine("")
-                .addLoreLine("&7Contains intermediate magical knowledge.")
-                .build();
+                .addLoreLine("&7Contains spells from " + Arrays.toString(circles) + " circle levels");
+        for (Integer circle : spellsByCircle.keySet()) {
+            List<Spell> spells = spellsByCircle.get(circle);
+            for (Spell spell : spells){
+                random.addSpell(spell.getId(), getWeight(circle));
+            }
+        }
+        return random.build();
     }
-    
-    /**
-     * Creates a Rare Random Spellbook
-     * Focuses on advanced spells
-     */
-    public static ItemStack createRareRandomSpellbook() {
-        return new RandomSpellbook("Rare")
-                .setMaterial(Material.ENCHANTED_BOOK)
-                .setDisplayName("&9Rare Spellbook")
-                .addSpell("wind_vortex", 60)      // More common in rare books
-                .addSpell("dark_tendrils", 70)    // Common in rare books
-                .addSpell("air_ball", 30)         // Rare even here
+
+    public static ItemStack createRandomElementSpellBook(Element element){
+        Map<Integer, List<Spell>> spellsByCircle = new HashMap<>();
+        for (Spell spell : SpellRegistry.getAllSpells().values()) {
+            if (spell.getElement() == element){
+                if (!spellsByCircle.containsKey(spell.getLevel())){
+                    List<Spell> spells = new ArrayList<>();
+                    spells.add(spell);
+                    spellsByCircle.put(spell.getLevel(), spells);
+                }else{
+                    List<Spell> spells = spellsByCircle.get(spell.getLevel());
+                    spells.add(spell);
+                    spellsByCircle.replace(spell.getLevel(), spells);
+                }
+            }
+        }
+        RandomSpellbook random = new RandomSpellbook(element.getName() + " Spellbook")
+                .setDisplayName(element.getColor() + element.getName() + " Spellbook")
                 .addLoreLine("")
-                .addLoreLine("&7Contains advanced magical knowledge.")
-                .build();
-    }
-    
-    /**
-     * Creates an Epic Random Spellbook
-     * High-tier spells only
-     */
-    public static ItemStack createEpicRandomSpellbook() {
-        return new RandomSpellbook("Epic")
-                .setMaterial(Material.ENCHANTED_BOOK)
-                .setDisplayName("&5Epic Spellbook")
-                .addSpell("dark_tendrils", 50)
-                .addSpell("air_ball", 60)
-                .addSpell("wind_vortex", 40)
-                .addLoreLine("")
-                .addLoreLine("&7Contains powerful magical secrets.")
-                .build();
-    }
-    
-    /**
-     * Creates a Fire Element Random Spellbook
-     * Only contains fire spells
-     */
-    public static ItemStack createFireRandomSpellbook() {
-        return new RandomSpellbook("Fire")
-                .setMaterial(Material.FIRE_CHARGE)
-                .setDisplayName("&cFire Spellbook")
-                .addSpell("fireball", 100)
-                // Add more fire spells as you create them
-                // .addSpell("fire_blast", 60)
-                // .addSpell("meteor", 20)
-                .addLoreLine("")
-                .addLoreLine("&7Contains spells of flame and ash.")
-                .build();
-    }
-    
-    /**
-     * Creates an Air Element Random Spellbook
-     */
-    public static ItemStack createAirRandomSpellbook() {
-        return new RandomSpellbook("Air")
-                .setMaterial(Material.FEATHER)
-                .setDisplayName("&fAir Spellbook")
-                .addSpell("wind_vortex", 70)
-                .addSpell("air_ball", 50)
-                .addLoreLine("")
-                .addLoreLine("&7Contains spells of wind and sky.")
-                .build();
-    }
-    
-    /**
-     * Creates a Water Element Random Spellbook
-     */
-    public static ItemStack createWaterRandomSpellbook() {
-        return new RandomSpellbook("Water")
-                .setMaterial(Material.HEART_OF_THE_SEA)
-                .setDisplayName("&bWater Spellbook")
-                .addSpell("water_pulse", 100)
-                // Add more water spells as you create them
-                .addLoreLine("")
-                .addLoreLine("&7Contains spells of ocean and ice.")
-                .build();
-    }
-    
-    /**
-     * Creates a Dark Element Random Spellbook
-     */
-    public static ItemStack createDarkRandomSpellbook() {
-        return new RandomSpellbook("Dark")
-                .setMaterial(Material.ENDER_EYE)
-                .setDisplayName("&5Dark Spellbook")
-                .addSpell("dark_tendrils", 100)
-                // Add more dark spells as you create them
-                .addLoreLine("")
-                .addLoreLine("&7Contains spells of shadow and void.")
-                .build();
+                .addLoreLine("&7Contains" + element.getName() + " spells.");
+        for (Integer circle : spellsByCircle.keySet()) {
+            List<Spell> spells = spellsByCircle.get(circle);
+            for (Spell spell : spells){
+                random.addSpell(spell.getId(), getWeight(circle));
+            }
+        }
+        return random.build();
     }
     
     // ==========================================

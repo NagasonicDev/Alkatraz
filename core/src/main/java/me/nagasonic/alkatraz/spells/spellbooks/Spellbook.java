@@ -52,7 +52,7 @@ public class Spellbook {
         this.impacts = new ArrayList<>();
         
         // Default appearance
-        this.material = Material.BOOK;
+        this.material = Material.KNOWLEDGE_BOOK;
         this.displayName = spell != null ? "&6Spellbook: " + spell.getDisplayName() : "&6Unknown Spellbook";
         this.lore = new ArrayList<>();
         generateDefaultLore();
@@ -191,6 +191,7 @@ public class Spellbook {
             player.sendMessage(ColorFormat.format("&cThis spellbook appears to be corrupted!"));
             return false;
         }
+        player.getInventory().getItemInMainHand().setAmount(player.getInventory().getItemInMainHand().getAmount() - 1);
         
         MagicProfile profile = ProfileManager.getProfile(player, MagicProfile.class);
         

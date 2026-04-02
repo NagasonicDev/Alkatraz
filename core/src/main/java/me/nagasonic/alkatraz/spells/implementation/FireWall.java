@@ -11,6 +11,8 @@ import me.nagasonic.alkatraz.spells.components.SpellComponentType;
 import me.nagasonic.alkatraz.spells.components.SpellParticleComponent;
 import me.nagasonic.alkatraz.spells.configuration.OptionValue;
 import me.nagasonic.alkatraz.spells.configuration.SpellOption;
+import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
+import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
@@ -214,6 +216,16 @@ public class FireWall extends AttackSpell implements Listener {
             }
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());
         return d;
+    }
+
+    @Override
+    public ItemStack getSpellBook() {
+        return new Spellbook(getId())
+                .setDisplayName("&cRecord of Brunhild")
+                .addLoreLine("")
+                .addLoreLine("&7The record of the punishment of the Valkyrie Brunhild")
+                .addRequirement(new NumberStatRequirement<>("circleLevel", 3))
+                .build();
     }
 
     class WallSegment {

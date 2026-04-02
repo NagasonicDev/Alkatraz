@@ -51,7 +51,7 @@ public class WandListeners implements Listener {
                         message = message.replace("S", "❖");
                         Utils.sendActionBar(e.getPlayer(), message);
                         if (code2.length() >= 5){
-                            Spell spell = SpellRegistry.getSpell(code2);
+                            Spell spell = SpellRegistry.getSpellByCode(code2);
                             tryCast(e.getPlayer(), e.getItem(), spell);
                         }
                     }
@@ -77,7 +77,7 @@ public class WandListeners implements Listener {
                         message = message.replace("S", "❖");
                         Utils.sendActionBar(p, message);
                         if (code2.length() >= 5){
-                            Spell spell = SpellRegistry.getSpell(code2);
+                            Spell spell = SpellRegistry.getSpellByCode(code2);
                             tryCast(p, wand, spell);
                         }
                     }
@@ -104,7 +104,7 @@ public class WandListeners implements Listener {
                     message = message.replace("S", "❖");
                     Utils.sendActionBar(p, message);
                     if (code2.length() >= 5){
-                        Spell spell = SpellRegistry.getSpell(code2);
+                        Spell spell = SpellRegistry.getSpellByCode(code2);
                         tryCast(p, wand, spell);
                     }
                 }
@@ -131,7 +131,7 @@ public class WandListeners implements Listener {
                         message = message.replace("S", "❖");
                         Utils.sendActionBar(p, message);
                         if (code2.length() >= 5){
-                            Spell spell = SpellRegistry.getSpell(code2);
+                            Spell spell = SpellRegistry.getSpellByCode(code2);
                             tryCast(p, wand, spell);
                         }
                         p.setItemInHand(wand);

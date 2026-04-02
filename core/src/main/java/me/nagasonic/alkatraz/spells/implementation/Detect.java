@@ -9,6 +9,8 @@ import me.nagasonic.alkatraz.events.PlayerSpellPrepareEvent;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.Spell;
+import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
+import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
@@ -136,5 +138,15 @@ public class Detect extends Spell {
             }
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());
         return d;
+    }
+
+    @Override
+    public ItemStack getSpellBook() {
+        return new Spellbook(getId())
+                .setDisplayName("&fCypher's First Manual")
+                .addLoreLine("")
+                .addLoreLine("&7A book containing the info of a Moroccan Agent.")
+                .addRequirement(new NumberStatRequirement<>("circleLevel", 2))
+                .build();
     }
 }

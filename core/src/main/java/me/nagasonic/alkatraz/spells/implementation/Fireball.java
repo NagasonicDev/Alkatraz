@@ -14,6 +14,7 @@ import me.nagasonic.alkatraz.spells.configuration.SpellOption;
 import me.nagasonic.alkatraz.spells.configuration.impact.implementation.ManaCostImpact;
 import me.nagasonic.alkatraz.spells.configuration.impact.implementation.StatModifierImpact;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
+import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
@@ -193,6 +194,16 @@ public class Fireball extends AttackSpell implements Listener {
             }
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());
         return d;
+    }
+
+    @Override
+    public ItemStack getSpellBook() {
+        return new Spellbook(getId())
+                .setDisplayName("&eScroll of the Apollo &oI")
+                .addLoreLine("")
+                .addLoreLine("&7The first scroll, containing the basis of")
+                .addLoreLine("&7fire magic.")
+                .build();
     }
 
     @EventHandler

@@ -13,6 +13,7 @@ import me.nagasonic.alkatraz.spells.configuration.SpellOption;
 import me.nagasonic.alkatraz.spells.configuration.impact.implementation.ManaCostImpact;
 import me.nagasonic.alkatraz.spells.configuration.impact.implementation.StatModifierImpact;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
+import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
@@ -263,6 +264,16 @@ public class DarkTendrils extends AttackSpell implements Listener {
             }
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());
         return d;
+    }
+
+    @Override
+    public ItemStack getSpellBook() {
+        return new Spellbook(getId())
+                .setDisplayName("&8Grimoire of Shadows &oChapter 1")
+                .addLoreLine("")
+                .addLoreLine("&7&oDarkness is the light of the dusk.")
+                .addRequirement(new NumberStatRequirement<>("circleLevel", 3))
+                .build();
     }
 
     @EventHandler

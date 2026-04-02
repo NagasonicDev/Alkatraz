@@ -32,7 +32,6 @@ public class SpellRegistry {
         registerIfEnabled("barrier", new Barrier("BARRIER"));
         registerIfEnabled("dark_tendrils", new DarkTendrils("DARK_TENDRILS"));
         registerIfEnabled("wind_vortex", new WindVortex("WIND_VORTEX"));
-        registerIfEnabled("air_ball", new AirBall("AIR_BALL"));
     }
 
     private static void registerIfEnabled(String key, Spell spell){
@@ -51,6 +50,13 @@ public class SpellRegistry {
     public static <T extends Spell> Spell getSpell(Class<T> spell){
         if (!allSpells.containsKey(spell)) throw new IllegalArgumentException("Spell " + spell.getSimpleName() + " was not registered for usage");
         return allSpells.get(spell);
+    }
+
+    public static Spell getSpellByCode(String code){
+        for (Spell spell : allSpells.values()){
+            if (Objects.equals(spell.getCode(), code)) return spell;
+        }
+        return null;
     }
 
     public static Spell getSpell(String id){

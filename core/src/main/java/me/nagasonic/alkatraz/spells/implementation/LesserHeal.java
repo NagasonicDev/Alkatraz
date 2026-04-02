@@ -9,6 +9,7 @@ import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.Element;
 import me.nagasonic.alkatraz.spells.Spell;
+import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.Bukkit;
@@ -140,5 +141,14 @@ public class LesserHeal extends Spell {
             }
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());
         return d;
+    }
+
+    @Override
+    public ItemStack getSpellBook() {
+        return new Spellbook(getId())
+                .setDisplayName("&eAsclepius' Pharmacopoeia &o1st Edition")
+                .addLoreLine("")
+                .addLoreLine("&7The knowledge of the god of medicine.")
+                .build();
     }
 }

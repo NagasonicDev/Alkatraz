@@ -239,7 +239,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
             }
         } else if (args[0].equals("test")) {
             Player p = (Player) sender;
-            p.getInventory().addItem(SpellbookFactory.createDarkRandomSpellbook());
+            p.getInventory().addItem(SpellbookFactory.createRandomSpellBook(1, 2, 3, 4, 5, 6, 7, 8, 9));
         }
 
         return true;
