@@ -9,6 +9,8 @@ import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
+import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
+import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.util.*;
 import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -73,6 +75,16 @@ public class Disguise extends Spell implements Listener {
             }
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());
         return d;
+    }
+
+    @Override
+    public ItemStack getSpellBook() {
+        return new Spellbook(getId())
+                .setDisplayName("&dIllusionist's Guide &oI")
+                .addLoreLine("")
+                .addLoreLine("&7The first step in mastering the art of illusions.")
+                .addRequirement(new NumberStatRequirement<>("circleLevel", 3))
+                .build();
     }
 
     private Map<Integer, List<Player>> guiPages = new HashMap<>();

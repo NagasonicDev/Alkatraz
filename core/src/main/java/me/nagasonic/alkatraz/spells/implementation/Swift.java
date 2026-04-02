@@ -6,6 +6,8 @@ import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.events.PlayerSpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.Spell;
+import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
+import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.Bukkit;
@@ -74,6 +76,16 @@ public class Swift extends Spell {
             }
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());
         return d;
+    }
+
+    @Override
+    public ItemStack getSpellBook() {
+        return new Spellbook(getId())
+                .setDisplayName("&fHermes' Tachys Manual")
+                .addLoreLine("")
+                .addLoreLine("&7The secret to Hermes' instant deliveries.")
+                .addRequirement(new NumberStatRequirement<>("circleLevel", 2))
+                .build();
     }
 
     private void stop(){

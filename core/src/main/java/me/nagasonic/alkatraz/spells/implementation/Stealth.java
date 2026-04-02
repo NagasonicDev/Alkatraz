@@ -13,6 +13,7 @@ import me.nagasonic.alkatraz.spells.configuration.SpellOption;
 import me.nagasonic.alkatraz.spells.configuration.impact.implementation.StatModifierImpact;
 import me.nagasonic.alkatraz.spells.configuration.impact.implementation.TagImpact;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
+import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.StatUtils;
 import me.nagasonic.alkatraz.util.Utils;
@@ -167,6 +168,17 @@ public class Stealth extends Spell implements Listener {
             }
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());
         return d;
+    }
+
+    @Override
+    public ItemStack getSpellBook() {
+        return new Spellbook(getId())
+                .setDisplayName("&8A Beginners Guide to Assassination")
+                .addLoreLine("")
+                .addLoreLine("&7A book written by a certain teacher")
+                .addLoreLine("&7to help is students kill him.")
+                .addRequirement(new NumberStatRequirement<>("circleLevel", 2))
+                .build();
     }
 
     private void stop(){

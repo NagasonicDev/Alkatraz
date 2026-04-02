@@ -61,6 +61,8 @@ public abstract class Spell {
 
     public abstract int circleAction(Player p, PlayerSpellPrepareEvent e);
 
+    public abstract ItemStack getSpellBook();
+
     /**
      * Main spell casting method - handles validation, mana consumption, and timing
      */

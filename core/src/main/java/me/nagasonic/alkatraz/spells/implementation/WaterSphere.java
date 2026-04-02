@@ -8,6 +8,7 @@ import me.nagasonic.alkatraz.events.PlayerSpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
 import me.nagasonic.alkatraz.spells.components.SpellParticleComponent;
+import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
@@ -154,5 +155,15 @@ public class WaterSphere extends AttackSpell {
             }
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());
         return d;
+    }
+
+    @Override
+    public ItemStack getSpellBook() {
+        return new Spellbook(getId())
+                .setDisplayName("&9Water Sutra &oVol. I")
+                .addLoreLine("")
+                .addLoreLine("&7The first part of a trilogy, revealing")
+                .addLoreLine("&7the basics of water magic.")
+                .build();
     }
 }

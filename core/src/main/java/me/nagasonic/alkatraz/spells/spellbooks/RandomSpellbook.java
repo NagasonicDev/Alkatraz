@@ -206,6 +206,7 @@ public class RandomSpellbook {
      */
     public static void use(Player player, ItemStack item) {
         if (!isRandomSpellbook(item)) return;
+        player.getInventory().getItemInMainHand().setAmount(player.getInventory().getItemInMainHand().getAmount() - 1);
         
         // Load weighted spells from NBT
         Map<String, Double> weightedSpells = new HashMap<>();
@@ -252,7 +253,7 @@ public class RandomSpellbook {
             ItemStack newBook = spellbook.build();
             
             // Replace item in player's hand
-            player.getInventory().setItemInMainHand(newBook);
+            player.getInventory().addItem(newBook);
             
             // Message
             player.sendMessage(ColorFormat.format("&aThe spellbook transforms into " + selectedSpell.getDisplayName() + "&a!"));

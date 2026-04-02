@@ -16,8 +16,10 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.RelativeMovement;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_21_R1.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_21_R1.entity.CraftPlayer;
+import org.bukkit.entity.Horse;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -115,6 +117,26 @@ public final class NMS_v1_21_R1 implements NMS {
                 hideAndShow(other, player);
             }
         }
+    }
+
+    @Override
+    public void fakeHorseSaddle(Horse horse, Player target, boolean saddle) {
+        net.minecraft.world.entity.Entity nmsEntity = ((CraftEntity) horse).getHandle();
+        ServerPlayer viewer = ((CraftPlayer) target).getHandle();
+        List<Pair<EquipmentSlot, ItemStack>> equipmentList = new ArrayList<>();
+        java.util.function.Function<org.bukkit.inventory.ItemStack, ItemStack> toNms =
+                (item) -> item != null ? org.bukkit.craftbukkit.v1_21_R1.inventory.CraftItemStack.asNMSCopy(item) : ItemStack.EMPTY;
+        equipmentList.add(new Pair<>(EquipmentSlot.HEAD, toNms.apply(saddle ? new org.bukkit.inventory.ItemStack(Material.SADDLE) : null)));
+        equipmentList.add(new Pair<>(EquipmentSlot.FEET, toNms.apply(saddle ? new org.bukkit.inventory.ItemStack(Material.SADDLE) : null)));
+        equipmentList.add(new Pair<>(EquipmentSlot.LEGS, toNms.apply(saddle ? new org.bukkit.inventory.ItemStack(Material.SADDLE) : null)));
+        equipmentList.add(new Pair<>(EquipmentSlot.CHEST, toNms.apply(saddle ? new org.bukkit.inventory.ItemStack(Material.SADDLE) : null)));
+        equipmentList.add(new Pair<>(EquipmentSlot.MAINHAND, toNms.apply(saddle ? new org.bukkit.inventory.ItemStack(Material.SADDLE) : null)));
+        equipmentList.add(new Pair<>(EquipmentSlot.OFFHAND, toNms.apply(saddle ? new org.bukkit.inventory.ItemStack(Material.SADDLE) : null)));
+
+        ClientboundSetEquipmentPacket packet =
+                new ClientboundSetEquipmentPacket(nmsEntity.getId(), equipmentList);
+
+        viewer.connection.send(packet);
     }
 
     public void refresh(Player player){
