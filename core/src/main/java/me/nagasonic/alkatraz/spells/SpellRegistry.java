@@ -15,22 +15,24 @@ public class SpellRegistry {
     private static Map<String, Spell> allSpellsByID = Collections.unmodifiableMap(new HashMap<>());
 
     public static void registerSpells(){
-        registerIfEnabled("magic_missile", new MagicMissile("MAGIC_MISSILE"));
-        registerIfEnabled("fireball", new Fireball("FIREBALL"));
-        registerIfEnabled("water_sphere", new WaterSphere("WATER_SPHERE"));
+        registerIfEnabled("air_blades", new AirBlades("AIR_BLADES"));
         registerIfEnabled("air_burst", new AirBurst("AIR_BURST"));
-        registerIfEnabled("earth_throw", new EarthThrow("EARTH_THROW"));
-        registerIfEnabled("lesser_heal", new LesserHeal("LESSER_HEAL"));
-        registerIfEnabled("fire_blast", new FireBlast("FIRE_BLAST"));
-        registerIfEnabled("detect", new Detect("DETECT"));
-        registerIfEnabled("stealth", new Stealth("STEALTH"));
-        registerIfEnabled("disguise", new Disguise("DISGUISE"));
-        registerIfEnabled("swift", new Swift("SWIFT"));
-        registerIfEnabled("fire_wall", new FireWall("FIRE_WALL"));
-        registerIfEnabled("earth_spike", new EarthSpike("EARTH_SPIKE"));
-        registerIfEnabled("water_pulse", new WaterPulse("WATER_PULSE"));
         registerIfEnabled("barrier", new Barrier("BARRIER"));
         registerIfEnabled("dark_tendrils", new DarkTendrils("DARK_TENDRILS"));
+        registerIfEnabled("detect", new Detect("DETECT"));
+        registerIfEnabled("disguise", new Disguise("DISGUISE"));
+        registerIfEnabled("earth_spike", new EarthSpike("EARTH_SPIKE"));
+        registerIfEnabled("earth_throw", new EarthThrow("EARTH_THROW"));
+        registerIfEnabled("fireball", new Fireball("FIREBALL"));
+        registerIfEnabled("fire_blast", new FireBlast("FIRE_BLAST"));
+        registerIfEnabled("fire_wall", new FireWall("FIRE_WALL"));
+        registerIfEnabled("geyser", new Geyser("GEYSER"));
+        registerIfEnabled("lesser_heal", new LesserHeal("LESSER_HEAL"));
+        registerIfEnabled("magic_missile", new MagicMissile("MAGIC_MISSILE"));
+        registerIfEnabled("stealth", new Stealth("STEALTH"));
+        registerIfEnabled("swift", new Swift("SWIFT"));
+        registerIfEnabled("water_pulse", new WaterPulse("WATER_PULSE"));
+        registerIfEnabled("water_sphere", new WaterSphere("WATER_SPHERE"));
         registerIfEnabled("wind_vortex", new WindVortex("WIND_VORTEX"));
     }
 
