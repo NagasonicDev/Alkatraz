@@ -38,6 +38,7 @@ public class Spellbook {
     // Display customization
     protected String displayName;
     protected List<String> lore;
+    protected List<String> clore;
     protected Material material;
     
     /**
@@ -55,6 +56,7 @@ public class Spellbook {
         this.material = Material.KNOWLEDGE_BOOK;
         this.displayName = spell != null ? "&6Spellbook: " + spell.getDisplayName() : "&6Unknown Spellbook";
         this.lore = new ArrayList<>();
+        this.clore = new ArrayList<>();
         generateDefaultLore();
     }
     
@@ -107,7 +109,7 @@ public class Spellbook {
     }
     
     /**
-     * Sets custom lore (replaces default)
+     * Sets base lore (replaces default)
      */
     public Spellbook setLore(List<String> lore) {
         this.lore = new ArrayList<>(lore);
@@ -115,10 +117,30 @@ public class Spellbook {
     }
     
     /**
-     * Adds a line to the lore
+     * Adds a line to the base lore
      */
     public Spellbook addLoreLine(String line) {
         this.lore.add(line);
+        return this;
+    }
+
+    /**
+     * Sets custom lore (above the base lore)
+     * @param clore
+     * @return Spellbook
+     */
+    public Spellbook setCustomLore(List<String> clore) {
+        this.clore = new ArrayList<>(clore);
+        return this;
+    }
+
+    /**
+     * Adds a line to the added lore.
+     * @param line
+     * @return
+     */
+    public Spellbook addCustomLoreLine(String line) {
+        this.clore.add(line);
         return this;
     }
     
@@ -145,6 +167,9 @@ public class Spellbook {
             List<String> finalLore = new ArrayList<>();
             
             // Add custom lore
+            for (String line : clore){
+                finalLore.add(ColorFormat.format(line));
+            }
             for (String line : lore) {
                 finalLore.add(ColorFormat.format(line));
             }
@@ -191,8 +216,6 @@ public class Spellbook {
             player.sendMessage(ColorFormat.format("&cThis spellbook appears to be corrupted!"));
             return false;
         }
-        player.getInventory().getItemInMainHand().setAmount(player.getInventory().getItemInMainHand().getAmount() - 1);
-        
         MagicProfile profile = ProfileManager.getProfile(player, MagicProfile.class);
         
         // Check if spell is already discovered
@@ -208,6 +231,7 @@ public class Spellbook {
                 return false;
             }
         }
+        player.getInventory().getItemInMainHand().setAmount(player.getInventory().getItemInMainHand().getAmount() - 1);
         
         // All requirements met - begin discovery animation
         playDiscoveryAnimation(player, () -> {
