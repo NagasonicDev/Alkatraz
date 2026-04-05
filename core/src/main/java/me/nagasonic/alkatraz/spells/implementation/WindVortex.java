@@ -233,8 +233,8 @@ public class WindVortex extends AttackSpell implements Listener {
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
                 .setDisplayName("&fTome of Wind &oVol. 2")
-                .addLoreLine("")
-                .addLoreLine("&7Demonstrates the influence of wind on surroundings.")
+                .addCustomLoreLine("&8Demonstrates the influence of wind on surroundings.")
+                .addCustomLoreLine("")
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 2))
                 .build();
     }

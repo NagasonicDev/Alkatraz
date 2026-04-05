@@ -270,8 +270,8 @@ public class DarkTendrils extends AttackSpell implements Listener {
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
                 .setDisplayName("&8Grimoire of Shadows &oChapter 1")
-                .addLoreLine("")
-                .addLoreLine("&7&oDarkness is the light of the dusk.")
+                .addCustomLoreLine("&8&oDarkness is the light of the dusk.")
+                .addCustomLoreLine("")
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 3))
                 .build();
     }

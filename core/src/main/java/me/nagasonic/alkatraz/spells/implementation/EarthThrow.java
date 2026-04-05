@@ -22,6 +22,7 @@ import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProper
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.FallingBlock;
@@ -70,22 +71,25 @@ public class EarthThrow extends AttackSpell implements Listener {
             Location loc = p.getEyeLocation();
             Vector direction = loc.getDirection();
             if (p.isOnGround()){
-                BlockData data = Bukkit.createBlockData(Ground.getGround(p.getLocation().getBlock().getBiome()));
-                FallingBlock b = loc.getWorld().spawnFallingBlock(loc, data);
-                b.setHurtEntities(false);
-                b.setVelocity(direction.multiply(1).setY(0.3));
-                SpellEntityComponent comp = new SpellEntityComponent(
-                        this,
-                        props,
-                        p,
-                        wand,
-                        SpellComponentType.OFFENSE,
-                        b
-                );
-                SpellComponentHandler.register(comp);
-                NBT.modifyPersistentData(b, nbt -> {
-                    nbt.setString("componentID", comp.getComponentID().toString());
-                });
+                Block block = p.getLocation().subtract(0,1,0).getBlock();
+                if (Ground.isGround(block.getType())) {
+                    BlockData data = Bukkit.createBlockData(block.getType());
+                    FallingBlock b = loc.getWorld().spawnFallingBlock(loc, data);
+                    b.setHurtEntities(false);
+                    b.setVelocity(direction.multiply(1).setY(0.3));
+                    SpellEntityComponent comp = new SpellEntityComponent(
+                            this,
+                            props,
+                            p,
+                            wand,
+                            SpellComponentType.OFFENSE,
+                            b
+                    );
+                    SpellComponentHandler.register(comp);
+                    NBT.modifyPersistentData(b, nbt -> {
+                        nbt.setString("componentID", comp.getComponentID().toString());
+                    });
+                }
             }
         }
     }
@@ -118,9 +122,9 @@ public class EarthThrow extends AttackSpell implements Listener {
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
                 .setDisplayName(Element.EARTH.getColor() + "Tome of the Blind Earthseer &oSection I")
-                .addLoreLine("")
-                .addLoreLine("&7The first of a series containing the knowledge")
-                .addLoreLine("&7of the greatest earthbender in the world.")
+                .addCustomLoreLine("&8The first of a series containing the knowledge")
+                .addCustomLoreLine("&8of the greatest earthbender in the world.")
+                .addCustomLoreLine("")
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 2))
                 .build();
     }

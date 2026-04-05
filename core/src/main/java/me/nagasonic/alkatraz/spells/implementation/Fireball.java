@@ -200,9 +200,9 @@ public class Fireball extends AttackSpell implements Listener {
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
                 .setDisplayName("&eScroll of the Apollo &oI")
-                .addLoreLine("")
-                .addLoreLine("&7The first scroll, containing the basis of")
-                .addLoreLine("&7fire magic.")
+                .addLoreLine("&8The first scroll, containing the basis of")
+                .addLoreLine("&8fire magic.")
+                .addCustomLoreLine("")
                 .build();
     }
 

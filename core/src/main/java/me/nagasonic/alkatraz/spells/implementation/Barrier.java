@@ -119,8 +119,8 @@ public class Barrier extends BarrierSpell implements Listener {
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
                 .setDisplayName("&aAegis Codex &oPart I")
-                .addLoreLine("")
-                .addLoreLine("&7&oDefense is the best Offense &r&7 - Barrier Master")
+                .addCustomLoreLine("&8&oDefense is the best Offense &r&7 - Barrier Master")
+                .addCustomLoreLine("")
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 3))
                 .build();
     }

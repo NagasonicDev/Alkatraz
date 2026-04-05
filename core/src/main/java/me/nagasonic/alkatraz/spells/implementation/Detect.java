@@ -144,8 +144,8 @@ public class Detect extends Spell {
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
                 .setDisplayName("&fCypher's First Manual")
-                .addLoreLine("")
-                .addLoreLine("&7A book containing the info of a Moroccan Agent.")
+                .addCustomLoreLine("&8A book containing the info of a Moroccan Agent.")
+                .addCustomLoreLine("")
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 2))
                 .build();
     }

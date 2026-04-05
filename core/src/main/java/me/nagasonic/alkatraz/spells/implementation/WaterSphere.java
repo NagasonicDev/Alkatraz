@@ -161,9 +161,9 @@ public class WaterSphere extends AttackSpell {
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
                 .setDisplayName("&9Water Sutra &oVol. I")
-                .addLoreLine("")
-                .addLoreLine("&7The first part of a trilogy, revealing")
-                .addLoreLine("&7the basics of water magic.")
+                .addCustomLoreLine("&8The first part of a trilogy, revealing")
+                .addCustomLoreLine("&8the basics of water magic.")
+                .addCustomLoreLine("")
                 .build();
     }
 }
