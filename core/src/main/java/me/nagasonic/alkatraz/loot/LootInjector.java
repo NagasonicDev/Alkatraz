@@ -5,6 +5,7 @@ import org.bukkit.Location;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.world.LootGenerateEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.loot.LootContext;
@@ -59,6 +60,7 @@ public class LootInjector implements Listener {
         @EventHandler(priority = EventPriority.HIGH)
         public static void onLootGenerate(LootGenerateEvent event) {
             LootTable table = event.getLootTable();
+            Alkatraz.logInfo(table.getKey().toString());
 
             // Check each registered injector
             for (LootInjector injector : REGISTERED_INJECTORS) {
