@@ -6,6 +6,7 @@ import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.util.ColorFormat;
+import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -194,8 +195,7 @@ public class RandomSpellbook {
             double percent = (entry.getValue() / totalWeight) * 100.0;
             percentages.put(entry.getKey(), percent);
         }
-
-        return percentages.get(spell).toString();
+        return Utils.getDecimalFormat(2).format(percentages.get(spell));
     }
     
     /**
@@ -206,7 +206,6 @@ public class RandomSpellbook {
      */
     public static void use(Player player, ItemStack item) {
         if (!isRandomSpellbook(item)) return;
-        player.getInventory().getItemInMainHand().setAmount(player.getInventory().getItemInMainHand().getAmount() - 1);
         
         // Load weighted spells from NBT
         Map<String, Double> weightedSpells = new HashMap<>();
@@ -245,15 +244,13 @@ public class RandomSpellbook {
             player.sendMessage(ColorFormat.format("&cSelected spell not found!"));
             return;
         }
+        player.getInventory().getItemInMainHand().setAmount(player.getInventory().getItemInMainHand().getAmount() - 1);
         
         // Play transformation animation
         playTransformationAnimation(player, selectedSpell, () -> {
-            // Create regular spellbook for the selected spell
-            Spellbook spellbook = new Spellbook(selectedSpellId);
-            ItemStack newBook = spellbook.build();
             
             // Replace item in player's hand
-            player.getInventory().addItem(newBook);
+            player.getInventory().addItem(selectedSpell.getSpellBook());
             
             // Message
             player.sendMessage(ColorFormat.format("&aThe spellbook transforms into " + selectedSpell.getDisplayName() + "&a!"));
