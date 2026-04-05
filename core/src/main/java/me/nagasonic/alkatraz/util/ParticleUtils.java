@@ -74,48 +74,26 @@ public class ParticleUtils {
         return locations;
     }
 
-    public static List<Location> createSpiral(Location center, float yaw, float pitch, double radius, double height, int points, double turns) {
-        List<Location> locations = new ArrayList<>();
+    public static List<Location> spiral(Location origin, double height, double initialRadius, double endRadius, double revolutions, double degreesPerPoint) {
+        List<Location> points = new ArrayList<>();
 
-        // Convert yaw & pitch to radians
-        double yawRad = Math.toRadians(-yaw);
-        double pitchRad = Math.toRadians(-pitch);
+        double totalDegrees = revolutions * 360.0;
+        int numPoints = (int) Math.ceil(totalDegrees / degreesPerPoint);
 
-        // Build forward direction manually
-        Vector forward = new Vector(
-                Math.cos(pitchRad) * Math.sin(yawRad),
-                Math.sin(pitchRad),
-                Math.cos(pitchRad) * Math.cos(yawRad)
-        ).normalize();
+        for (int i = 0; i <= numPoints; i++) {
+            double t = (double) i / numPoints;
 
-        Vector up = new Vector(0, 1, 0);
+            double angleRad = Math.toRadians(t * totalDegrees);
+            double radius = initialRadius + (endRadius - initialRadius) * t;
+            double y = height * t;
 
-        if (Math.abs(forward.dot(up)) > 0.99) {
-            up = new Vector(1, 0, 0);
+            double x = Math.cos(angleRad) * radius;
+            double z = Math.sin(angleRad) * radius;
+
+            points.add(origin.clone().add(x, y, z));
         }
 
-        Vector right = forward.clone().crossProduct(up).normalize();
-        Vector realUp = right.clone().crossProduct(forward).normalize();
-
-        for (int i = 0; i < points; i++) {
-
-            double progress = (double) i / points;
-
-            double angle = 2 * Math.PI * turns * progress;
-            double currentHeight = height * progress;
-
-            double x = Math.cos(angle) * radius;
-            double z = Math.sin(angle) * radius;
-
-            Vector offset =
-                    right.clone().multiply(x)
-                            .add(realUp.clone().multiply(z))
-                            .add(forward.clone().multiply(currentHeight));
-
-            locations.add(center.clone().add(offset));
-        }
-
-        return locations;
+        return points;
     }
 
     public static List<Location> regularPolygon(Location center, int sides, double radius, int frequency, float yaw, float pitch, float rotationOffsetDegrees) {
