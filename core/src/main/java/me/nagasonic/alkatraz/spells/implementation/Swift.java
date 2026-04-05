@@ -82,8 +82,8 @@ public class Swift extends Spell {
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
                 .setDisplayName("&fHermes' Tachys Manual")
-                .addLoreLine("")
-                .addLoreLine("&7The secret to Hermes' instant deliveries.")
+                .addCustomLoreLine("&8The secret to Hermes' instant deliveries.")
+                .addCustomLoreLine("")
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 2))
                 .build();
     }

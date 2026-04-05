@@ -81,8 +81,8 @@ public class Disguise extends Spell implements Listener {
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
                 .setDisplayName("&dIllusionist's Guide &oI")
-                .addLoreLine("")
-                .addLoreLine("&7The first step in mastering the art of illusions.")
+                .addCustomLoreLine("&8The first step in mastering the art of illusions.")
+                .addCustomLoreLine("")
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 3))
                 .build();
     }

@@ -174,9 +174,9 @@ public class Stealth extends Spell implements Listener {
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
                 .setDisplayName("&8A Beginners Guide to Assassination")
-                .addLoreLine("")
-                .addLoreLine("&7A book written by a certain teacher")
-                .addLoreLine("&7to help is students kill him.")
+                .addCustomLoreLine("&8A book written by a certain teacher")
+                .addCustomLoreLine("&8to help is students kill him.")
+                .addCustomLoreLine("")
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 2))
                 .build();
     }

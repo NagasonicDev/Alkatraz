@@ -222,8 +222,8 @@ public class FireWall extends AttackSpell implements Listener {
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
                 .setDisplayName("&cRecord of Brunhild")
-                .addLoreLine("")
-                .addLoreLine("&7The record of the punishment of the Valkyrie Brunhild")
+                .addLoreLine("&8The record of the punishment of the Valkyrie Brunhild")
+                .addCustomLoreLine("")
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 3))
                 .build();
     }

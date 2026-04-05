@@ -4,7 +4,10 @@ import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
+import me.nagasonic.alkatraz.dom.Ground;
 import me.nagasonic.alkatraz.events.PlayerSpellPrepareEvent;
+import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
+import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.Element;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.components.SpellBlockComponent;
@@ -63,6 +66,11 @@ public class EarthSpike extends AttackSpell implements Listener {
     @Override
     public void castAction(Player player, ItemStack wand) {
         Block target = player.getTargetBlockExact(20);
+        if (Ground.isGround(target.getType())) {
+            Utils.sendActionBar(player, "&cMust be casted on earth.");
+            MagicProfile profile = ProfileManager.getProfile(player, MagicProfile.class);
+
+        }
         if (target == null || !target.getType().isSolid()) return;
         AttackProperties props = new AttackProperties(player, Utils.castLocation(player), getBasePower() * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")), AttackType.PHYSICAL);
 
@@ -103,7 +111,7 @@ public class EarthSpike extends AttackSpell implements Listener {
                         }
                         Block from = world.getBlockAt(x, y - i + step, z);
                         Block to   = world.getBlockAt(x, y - i + step + 1, z);
-                        to.setType(from.getType(), false);
+                        if (Ground.isGround(from.getType())) to.setType(from.getType(), false); //Only move "Earth" blocks
                     }
 
                     SpellBlockComponent comp = new SpellBlockComponent(
@@ -118,13 +126,13 @@ public class EarthSpike extends AttackSpell implements Listener {
                     );
                     SpellComponentHandler.register(comp);
                     Block topBlock = world.getBlockAt(x, y + step, z);
-                    for (Entity entity : topBlock.getWorld().getNearbyEntities(loc, 0.7, 0.7, 0.7)) {
+                    for (Entity entity : topBlock.getWorld().getNearbyEntities(loc, 1.5, 1.5, 1.5)) {
                         if (props.isCountered() || props.isCancelled()) {
                             return;
                         }
                         if (entity instanceof LivingEntity le && !le.equals(player)) {
                             le.damage(getPower(player, le, props.getRemainingPower()), player);
-                            le.setVelocity(new Vector(0, 0.6, 0));
+                            le.setVelocity(new Vector(0, 1, 0));
                         }
                     }
                     world.getBlockAt(x, y - height + step, z).setType(Material.AIR, false);
@@ -166,9 +174,9 @@ public class EarthSpike extends AttackSpell implements Listener {
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
                 .setDisplayName(Element.EARTH.getColor() + "Tome of the Blind Earthseer &oSection II")
-                .addLoreLine("")
-                .addLoreLine("&7The 2nd lesson of the seeker of the")
-                .addLoreLine("&7pinnacle of Earth magic")
+                .addCustomLoreLine("&8The 2nd lesson of the seeker of the")
+                .addCustomLoreLine("&8pinnacle of Earth magic")
+                .addCustomLoreLine("")
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 2))
                 .build();
     }

@@ -147,8 +147,8 @@ public class LesserHeal extends Spell {
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
                 .setDisplayName("&eAsclepius' Pharmacopoeia &o1st Edition")
-                .addLoreLine("")
-                .addLoreLine("&7The knowledge of the god of medicine.")
+                .addLoreLine("&8The knowledge of the god of medicine.")
+                .addCustomLoreLine("")
                 .build();
     }
 }

@@ -150,9 +150,9 @@ public class WaterPulse extends AttackSpell implements Listener {
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
                 .setDisplayName("&9Water Sutra &oVol. II")
-                .addLoreLine("")
-                .addLoreLine("&7The second part of a trilogy, containing")
-                .addLoreLine("&7the area potential of water magic.")
+                .addCustomLoreLine("&8The second part of a trilogy, containing")
+                .addCustomLoreLine("&8the area potential of water magic.")
+                .addCustomLoreLine("")
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 2))
                 .build();
     }

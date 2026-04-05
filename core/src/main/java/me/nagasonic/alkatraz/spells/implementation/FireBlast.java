@@ -108,9 +108,9 @@ public class FireBlast extends AttackSpell implements Listener {
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
                 .setDisplayName("&eScroll of Apollo &oII")
-                .addLoreLine("")
-                .addLoreLine("&7A scroll containing the knowledge to enhance")
-                .addLoreLine("&7fireball.")
+                .addLoreLine("&8A scroll containing the knowledge to enhance")
+                .addLoreLine("&8fireball.")
+                .addCustomLoreLine("")
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 2))
                 .build();
     }

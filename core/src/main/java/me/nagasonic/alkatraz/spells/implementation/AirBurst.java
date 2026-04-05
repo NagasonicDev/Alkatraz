@@ -219,8 +219,8 @@ public class AirBurst extends AttackSpell {
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
                 .setDisplayName("&7Tome of Wind &oVol. 1")
-                .addLoreLine("")
-                .addLoreLine("&7A beginners guide to wind magic.")
+                .addCustomLoreLine("&8A beginners guide to wind magic.")
+                .addCustomLoreLine("")
                 .build();
     }
 }
