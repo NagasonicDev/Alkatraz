@@ -11,6 +11,7 @@ import me.nagasonic.alkatraz.items.wands.Wand;
 import me.nagasonic.alkatraz.items.wands.WandListeners;
 import me.nagasonic.alkatraz.items.wands.WandRegistry;
 import me.nagasonic.alkatraz.loot.LootInjector;
+import me.nagasonic.alkatraz.loot.MobLootInjector;
 import me.nagasonic.alkatraz.loot.implementation.SpellbookLoot;
 import me.nagasonic.alkatraz.nms.NMS;
 import me.nagasonic.alkatraz.playerdata.StatManager;
@@ -83,6 +84,7 @@ public final class Alkatraz extends JavaPlugin {
         SpellRegistry.registerSpells();
         registerListener(new SpellbookListener());
         LootInjector.register(this);
+        MobLootInjector.register(this);
         SpellbookLoot.registerAll();
         registerListener(new WandListeners());
         Bukkit.getPluginManager().registerEvents(new MenuListener(), this);
@@ -207,22 +209,24 @@ public final class Alkatraz extends JavaPlugin {
     }
 
     private void saveSpellConfigs(){
-        saveConfig("spells/magic_missile.yml");
-        saveConfig("spells/fireball.yml");
-        saveConfig("spells/water_sphere.yml");
+        saveConfig("spells/air_blades.yml");
         saveConfig("spells/air_burst.yml");
-        saveConfig("spells/earth_throw.yml");
-        saveConfig("spells/lesser_heal.yml");
-        saveConfig("spells/fire_blast.yml");
-        saveConfig("spells/detect.yml");
-        saveConfig("spells/stealth.yml");
-        saveConfig("spells/disguise.yml");
-        saveConfig("spells/swift.yml");
-        saveConfig("spells/fire_wall.yml");
-        saveConfig("spells/earth_spike.yml");
-        saveConfig("spells/water_pulse.yml");
         saveConfig("spells/barrier.yml");
         saveConfig("spells/dark_tendrils.yml");
+        saveConfig("spells/detect.yml");
+        saveConfig("spells/disguise.yml");
+        saveConfig("spells/earth_spike.yml");
+        saveConfig("spells/earth_throw.yml");
+        saveConfig("spells/fire_blast.yml");
+        saveConfig("spells/fire_wall.yml");
+        saveConfig("spells/fireball.yml");
+        saveConfig("spells/geyser.yml");
+        saveConfig("spells/lesser_heal.yml");
+        saveConfig("spells/magic_missile.yml");
+        saveConfig("spells/stealth.yml");
+        saveConfig("spells/swift.yml");
+        saveConfig("spells/water_pulse.yml");
+        saveConfig("spells/water_sphere.yml");
         saveConfig("spells/wind_vortex.yml");
     }
 
