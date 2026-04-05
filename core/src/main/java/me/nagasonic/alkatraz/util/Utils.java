@@ -15,6 +15,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -29,6 +30,14 @@ import org.bukkit.inventory.meta.ItemMeta;
 public class Utils {
     public static final Particle DUST = Particle.valueOf(oldOrNew("REDSTONE", "DUST"));
     private static final Random random = new Random();
+
+    public static DecimalFormat getDecimalFormat(int places) {
+        String s = "";
+        for (int i = 1; i <= places; i++) {
+            s = s + "0";
+        }
+        return new DecimalFormat("#." + s);
+    }
 
     public static Random getRandom(){
         return random;
@@ -221,30 +230,6 @@ public class Utils {
     public static void sendTitle(Player whomst, String title, String subtitle, int duration, int fade){
         if (!StringUtils.isEmpty(title)) whomst.sendTitle(chat(title), chat(subtitle), fade, duration, fade);
     }
-
-    public static <T extends Weighted> List<T> weightedSelection(Collection<T> entries, int rolls, double luck, double fortune){
-        // weighted selection
-        double totalWeight = 0;
-        List<T> selectedEntries = new ArrayList<>();
-        if (entries.isEmpty()) return selectedEntries;
-        List<Pair<T, Double>> totalEntries = new ArrayList<>();
-        for (T entry : entries){
-            totalWeight += entry.getWeight(luck, fortune);
-            totalEntries.add(new Pair<>(entry, totalWeight));
-        }
-
-        for (int i = 0; i < rolls; i++){
-            double random = Utils.getRandom().nextDouble() * totalWeight;
-            for (Pair<T, Double> pair : totalEntries){
-                if (pair.getTwo() >= random) {
-                    selectedEntries.add(pair.getOne());
-                    break;
-                }
-            }
-        }
-        return selectedEntries;
-    }
-
 
     public static <T> T thisorDefault(T input, T def){
         return input == null ? def : input;
