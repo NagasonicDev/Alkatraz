@@ -1,11 +1,14 @@
 package me.nagasonic.alkatraz.loot.implementation;
 
 import me.nagasonic.alkatraz.loot.LootInjector;
+import me.nagasonic.alkatraz.loot.MobLootInjector;
 import me.nagasonic.alkatraz.spells.Element;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
 import me.nagasonic.alkatraz.spells.spellbooks.SpellbookFactory;
 import org.bukkit.Material;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Mob;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -128,16 +131,16 @@ public class SpellbookLoot {
      */
     private static void registerMobDrops() {
         // Zombie - common spellbooks (5% chance)
-        LootInjector.builder()
-                .forLootTable("entities/zombie")
+        MobLootInjector.builder()
+                .forEntity(EntityType.ZOMBIE)
                 .addItem(SpellbookFactory.createRandomSpellBook(1, 2), 100)
                 .addItem(new ItemStack(Material.AIR), 1900) // 95% chance of nothing
                 .maxItems(1)
                 .register();
         
         // Skeleton - common/uncommon (5% chance)
-        LootInjector.builder()
-                .forLootTable("entities/skeleton")
+        MobLootInjector.builder()
+                .forEntity(EntityType.SKELETON)
                 .addItem(SpellbookFactory.createRandomSpellBook(1, 2), 60)
                 .addItem(SpellbookFactory.createRandomSpellBook(1, 2, 3), 40)
                 .addItem(new ItemStack(Material.AIR), 1900)
@@ -145,8 +148,8 @@ public class SpellbookLoot {
                 .register();
         
         // Witch - uncommon/rare (15% chance)
-        LootInjector.builder()
-                .forLootTable("entities/witch")
+        MobLootInjector.builder()
+                .forEntity(EntityType.WITCH)
                 .addItem(SpellbookFactory.createRandomSpellBook(1, 2, 3), 80)
                 .addItem(SpellbookFactory.createRandomSpellBook(2, 3, 4), 60)
                 .addItem(SpellbookFactory.createRandomElementSpellBook(Element.DARK), 40)
@@ -155,8 +158,8 @@ public class SpellbookLoot {
                 .register();
         
         // Evoker - rare/epic (50% chance)
-        LootInjector.builder()
-                .forLootTable("entities/evoker")
+        MobLootInjector.builder()
+                .forEntity(EntityType.EVOKER)
                 .addItem(SpellbookFactory.createRandomSpellBook(2, 3, 4), 70)
                 .addItem(SpellbookFactory.createRandomSpellBook(4, 5, 6), 50)
                 .addItem(SpellbookFactory.createRandomElementSpellBook(Element.DARK), 30)
@@ -165,8 +168,8 @@ public class SpellbookLoot {
                 .register();
         
         // Blaze - fire spellbooks (20% chance)
-        LootInjector.builder()
-                .forLootTable("entities/blaze")
+        MobLootInjector.builder()
+                .forEntity(EntityType.BLAZE)
                 .addItem(SpellbookFactory.createRandomElementSpellBook(Element.FIRE), 100)
                 .addItem(SpellbookFactory.createSpellBook(SpellRegistry.getSpell("fire_blast")), 50)
                 .addItem(new ItemStack(Material.AIR), 350) // 80% nothing
@@ -174,8 +177,8 @@ public class SpellbookLoot {
                 .register();
         
         // Drowned - water spellbooks (10% chance)
-        LootInjector.builder()
-                .forLootTable("entities/drowned")
+        MobLootInjector.builder()
+                .forEntity(EntityType.DROWNED)
                 .addItem(SpellbookFactory.createRandomElementSpellBook(Element.WATER), 100)
                 .addItem(SpellbookFactory.createSpellBook(SpellRegistry.getSpell("water_pulse")), 40)
                 .addItem(new ItemStack(Material.AIR), 860) // 90% nothing
@@ -183,8 +186,8 @@ public class SpellbookLoot {
                 .register();
         
         // Enderman - dark/air spellbooks (8% chance)
-        LootInjector.builder()
-                .forLootTable("entities/enderman")
+        MobLootInjector.builder()
+                .forEntity(EntityType.ENDERMAN)
                 .addItem(SpellbookFactory.createRandomElementSpellBook(Element.DARK), 70)
                 .addItem(SpellbookFactory.createRandomElementSpellBook(Element.AIR), 50)
                 .addItem(SpellbookFactory.createSpellBook(SpellRegistry.getSpell("dark_tendrils")), 30)
@@ -193,8 +196,8 @@ public class SpellbookLoot {
                 .register();
         
         // Wither Skeleton - rare/dark (12% chance)
-        LootInjector.builder()
-                .forLootTable("entities/wither_skeleton")
+        MobLootInjector.builder()
+                .forEntity(EntityType.WITHER_SKELETON)
                 .addItem(SpellbookFactory.createRandomSpellBook(2, 3, 4), 70)
                 .addItem(SpellbookFactory.createRandomElementSpellBook(Element.DARK), 80)
                 .addItem(new ItemStack(Material.AIR), 683) // 88% nothing
@@ -202,24 +205,24 @@ public class SpellbookLoot {
                 .register();
         
         // Elder Guardian - epic/water (100% chance - boss mob)
-        LootInjector.builder()
-                .forLootTable("entities/elder_guardian")
+        MobLootInjector.builder()
+                .forEntity(EntityType.ELDER_GUARDIAN)
                 .addItem(SpellbookFactory.createRandomSpellBook(4, 5, 6), 60)
                 .addItem(SpellbookFactory.createRandomElementSpellBook(Element.WATER), 40)
                 .maxItems(1)
                 .register();
         
         // Ender Dragon - guaranteed epic (100% chance)
-        LootInjector.builder()
-                .forLootTable("entities/ender_dragon")
+        MobLootInjector.builder()
+                .forEntity(EntityType.ENDER_DRAGON)
                 .addItem(SpellbookFactory.createRandomSpellBook(4, 5, 6), 80)
                 .addItem(SpellbookFactory.createRandomSpellBook(7, 8, 9), 20)
                 .maxItems(2) // 2 spellbooks!
                 .register();
         
         // Wither - guaranteed epic (100% chance)
-        LootInjector.builder()
-                .forLootTable("entities/wither")
+        MobLootInjector.builder()
+                .forEntity(EntityType.WITHER)
                 .addItem(SpellbookFactory.createRandomSpellBook(4, 5, 6), 80)
                 .addItem(SpellbookFactory.createRandomSpellBook(7, 8, 9), 20)
                 .addItem(SpellbookFactory.createRandomElementSpellBook(Element.DARK), 60)
