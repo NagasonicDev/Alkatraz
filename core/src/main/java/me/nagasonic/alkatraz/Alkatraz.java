@@ -13,6 +13,7 @@ import me.nagasonic.alkatraz.items.wands.WandRegistry;
 import me.nagasonic.alkatraz.loot.LootInjector;
 import me.nagasonic.alkatraz.loot.MobLootInjector;
 import me.nagasonic.alkatraz.loot.implementation.SpellbookLoot;
+import me.nagasonic.alkatraz.mob.MobModifier;
 import me.nagasonic.alkatraz.nms.NMS;
 import me.nagasonic.alkatraz.playerdata.StatManager;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
@@ -84,6 +85,7 @@ public final class Alkatraz extends JavaPlugin {
         SpellRegistry.registerSpells();
         registerListener(new SpellbookListener());
         LootInjector.register(this);
+        registerListener(new MobModifier());
         MobLootInjector.register(this);
         SpellbookLoot.registerAll();
         registerListener(new WandListeners());
