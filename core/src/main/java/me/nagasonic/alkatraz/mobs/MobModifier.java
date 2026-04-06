@@ -86,9 +86,10 @@ public class MobModifier implements Listener {
 
         String path = "mobs/" + type.name().toLowerCase() + ".yml";
 
-        // Save the default file if it ships inside the jar; skip silently if not
-        Alkatraz.getInstance().saveResource(path, false);
-
+        if (!Alkatraz.getPluginConfig().contains(path)) {
+            profileCache.put(type, null);
+            return null;
+        }
         Config configOpt = ConfigManager.getConfig(path);
         if (configOpt == null) {
             profileCache.put(type, null);
@@ -176,4 +177,6 @@ public class MobModifier implements Listener {
         final Map<Element, Double> resistances = new HashMap<>();
         List<String> spellIds = new ArrayList<>();
     }
+
+
 }
