@@ -1,0 +1,28 @@
+# mobs/evoker.yml
+fire_affinity:    20.0
+fire_resistance:  15.0
+
+water_affinity:   10.0
+water_resistance: 20.0
+
+earth_affinity:   30.0
+earth_resistance: 40.0
+
+air_affinity:     20.0
+air_resistance:   30.0
+
+light_affinity: 0.0
+light_resistance: -30.0
+
+dark_affinity: 0.0
+dark_resistance: 40.0
+
+magic_affinity:   90.0
+magic_resistance: 95.0
+
+spells:
+  - 'fireball'
+  - 'fire_blast'
+  - 'air_blades'
+  - 'lesser_heal'
+  - 'stealth'

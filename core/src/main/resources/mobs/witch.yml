@@ -1,0 +1,28 @@
+# mobs/witch.yml
+fire_affinity:    30.0
+fire_resistance:  20.0
+
+water_affinity:   30.0
+water_resistance: 20.0
+
+earth_affinity:   30.0
+earth_resistance: 20.0
+
+air_affinity:     30.0
+air_resistance:   20.0
+
+light_affinity: 30.0
+light_resistance: 20.0
+
+dark_affinity: 30.0
+dark_resistance: 20.0
+
+magic_affinity:   70.0
+magic_resistance: 40.0
+
+spells:
+  - 'fireball'
+  - 'geyser'
+  - 'water_pulse'
+  - 'lesser_heal'
+  - 'fire_blast'

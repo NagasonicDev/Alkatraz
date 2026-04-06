@@ -5,6 +5,7 @@ import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.dom.*;
 import me.nagasonic.alkatraz.items.wands.WandRegistry;
 import me.nagasonic.alkatraz.spells.Element;
+import me.nagasonic.alkatraz.spells.SpellRegistry;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -394,5 +395,18 @@ public class Utils {
 
     public static Location castLocation(Player p){
         return p.getEyeLocation().getDirection().normalize().multiply(1.5).toLocation(p.getWorld());
+    }
+
+    public static String genCode(){
+        String chars = "RSL";
+        StringBuilder builder = new  StringBuilder();
+        Random random = new Random();
+        for (int i = 1; i <= 5; i++){
+            builder.append(chars.charAt(random.nextInt(chars.length())));
+        }
+        if (SpellRegistry.getSpellByCode(builder.toString()) != null){
+            return genCode();
+        }
+        return builder.toString();
     }
 }

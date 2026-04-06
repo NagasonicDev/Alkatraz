@@ -69,8 +69,9 @@ public class StatUtils {
         }
         if (profile.getSpellMastery(spell) + mastery < 0){
             profile.setSpellMastery(spell, 0);
-        }else if (profile.getSpellMastery(spell) + mastery > spell.getMaxMastery()){
+        }else if (profile.getSpellMastery(spell) + mastery >= spell.getMaxMastery()){
             profile.setSpellMastery(spell, spell.getMaxMastery());
+            profile.setStatPoints(profile.getStatPoints() + getStatPointsMastery(spell.getLevel()));
         }else { profile.setSpellMastery(spell, profile.getSpellMastery(spell) + mastery); }
         if (p.isOnline()){
             Map<Spell, BossBar> masteryBars = profile.getMasteryBars();
@@ -108,6 +109,22 @@ public class StatUtils {
                 }, 100L);
             }
         }
+    }
+
+    public static int getStatPointsMastery(int circle){
+        return switch (circle) {
+            case 0 -> 1;
+            case 1 -> 2;
+            case 2 -> 3;
+            case 3 -> 4;
+            case 4 -> 5;
+            case 5 -> 6;
+            case 6 -> 7;
+            case 7 -> 8;
+            case 8 -> 9;
+            case 9 -> 10;
+            default -> 0;
+        };
     }
 
     public static Long requiredExperience(int circle){
@@ -190,6 +207,7 @@ public class StatUtils {
                 profile.setExperience(0);
 
                 addCircle(p.getPlayer(), 1);
+                profile.setStatPoints(profile.getStatPoints() + getStatPoints(profile.getCircleLevel()));
 
                 if (p.isOnline()) {
                     p.getPlayer().sendMessage(
@@ -205,6 +223,21 @@ public class StatUtils {
                         experience - requiredExperience(profile.getCircleLevel()));
             }
         }
+    }
+
+    public static int getStatPoints(int circle) {
+        return switch (circle){
+            case 1 -> 5;
+            case 2 -> 5;
+            case 3 -> 7;
+            case 4 -> 10;
+            case 5 -> 10;
+            case 6 -> 15;
+            case 7 -> 15;
+            case 8 -> 20;
+            case 9 -> 25;
+            default -> 0;
+        };
     }
 
     public static void addCircle(@NotNull Player p, int circle) {

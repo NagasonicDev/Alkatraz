@@ -1,0 +1,24 @@
+# mobs/elder_guardian.yml
+fire_affinity:    0.0
+fire_resistance:  -25.0
+
+water_affinity:   90.0
+water_resistance: 70.0
+
+earth_affinity:   20.0
+earth_resistance: 25.0
+
+air_affinity:     0.0
+air_resistance:   -50.0
+
+light_affinity: 0.0
+light_resistance: 20.0
+
+dark_affinity: 0.0
+dark_resistance: 10.0
+
+magic_affinity:   100.0
+magic_resistance: 150.0
+
+spells:
+  - 'geyser'

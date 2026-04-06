@@ -1,0 +1,23 @@
+# mobs/cave_spider.yml
+fire_affinity:    0.0
+fire_resistance:  -20.0
+
+water_affinity:   0.0
+water_resistance: -15.0
+
+earth_affinity:   30.0
+earth_resistance: 20.0
+
+air_affinity:     0.0
+air_resistance:   -10.0
+
+light_affinity: 0.0
+light_resistance: -20.0
+
+dark_affinity: 0.0
+dark_resistance: 10.0
+
+magic_affinity:   10.0
+magic_resistance: 30.0
+
+spells: []

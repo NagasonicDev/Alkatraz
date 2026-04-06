@@ -1,0 +1,23 @@
+# mobs/magma_cube.yml
+fire_affinity:    40.0
+fire_resistance:  35.0
+
+water_affinity:   0.0
+water_resistance: -60.0
+
+earth_affinity:   30.0
+earth_resistance: 20.0
+
+air_affinity:     0.0
+air_resistance:   0.0
+
+light_affinity: 0.0
+light_resistance: 0.0
+
+dark_affinity: 0.0
+dark_resistance: 10.0
+
+magic_affinity:   0.0
+magic_resistance: 10.0
+
+spells: []

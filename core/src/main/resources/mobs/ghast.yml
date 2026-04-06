@@ -1,0 +1,23 @@
+# mobs/ghast.yml
+fire_affinity:    70.0
+fire_resistance:  50.0
+
+water_affinity:   0.0
+water_resistance: -40.0
+
+earth_affinity:   0.0
+earth_resistance: -10.0
+
+air_affinity:     60.0
+air_resistance:   40.0
+
+light_affinity: 0.0
+light_resistance: 10.0
+
+dark_affinity: 0.0
+dark_resistance: 10.0
+
+magic_affinity:   20.0
+magic_resistance: 15.0
+
+spells: []

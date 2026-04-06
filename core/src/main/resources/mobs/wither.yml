@@ -1,0 +1,23 @@
+# mobs/wither.yml
+fire_affinity:    0.0
+fire_resistance:  75.0
+
+water_affinity:   40.0
+water_resistance: 60.0
+
+earth_affinity:   20.0
+earth_resistance: 15.0
+
+air_affinity:     30.0
+air_resistance:   50.0
+
+light_affinity: 0.0
+light_resistance: -50.0
+
+dark_affinity: 30.0
+dark_resistance: 55.0
+
+magic_affinity:   50.0
+magic_resistance: 100.0
+
+spells: []

@@ -1,0 +1,25 @@
+# mobs/guardian.yml
+fire_affinity:    0.0
+fire_resistance:  -30.0
+
+water_affinity:   50.0
+water_resistance: 40.0
+
+earth_affinity:   10.0
+earth_resistance: 15.0
+
+air_affinity:     0.0
+air_resistance:   -15.0
+
+light_affinity: 0.0
+light_resistance: 15.0
+
+dark_affinity: 0.0
+dark_resistance: 5.0
+
+magic_affinity:   40.0
+magic_resistance: 20.0
+
+spells:
+  - 'water_pulse'
+  - 'water_sphere'
