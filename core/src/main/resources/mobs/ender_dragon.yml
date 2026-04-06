@@ -1,0 +1,23 @@
+# mobs/ender_dragon.yml
+fire_affinity:    100.0
+fire_resistance:  150.0
+
+water_affinity:   90.0
+water_resistance: 40.0
+
+earth_affinity:   80.0
+earth_resistance: -70.0
+
+air_affinity:     100.0
+air_resistance:   90.0
+
+light_affinity: 0.0
+light_resistance: -75.0
+
+dark_affinity: 80.0
+dark_resistance: 60.0
+
+magic_affinity:   100.0
+magic_resistance: 60.0
+
+spells: []

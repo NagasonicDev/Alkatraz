@@ -12,6 +12,7 @@ import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
 import me.nagasonic.alkatraz.spells.spellbooks.SpellbookFactory;
 import me.nagasonic.alkatraz.util.StatUtils;
+import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -24,6 +25,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 
 import static me.nagasonic.alkatraz.util.ColorFormat.format;
 
@@ -240,6 +242,8 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
         } else if (args[0].equals("test")) {
             Player p = (Player) sender;
             p.getInventory().addItem(SpellbookFactory.createRandomSpellBook(1, 2, 3, 4, 5, 6, 7, 8, 9));
+        } else if (args[0].equals("gencode")) {
+            sender.sendMessage(Utils.genCode());
         }
 
         return true;
