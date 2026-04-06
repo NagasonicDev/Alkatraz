@@ -110,8 +110,9 @@ public class MagicMissile extends AttackSpell {
                     for (Entity entity : loc.getNearbyEntities(1, 1, 1)) {
                         if (entity.isDead() || entity.equals(p)) break;
                         if (!(entity instanceof LivingEntity le)) break;
-                        if (props.isCancelled() || props.isCountered()) break;
+                        if (props.isCancelled() || props.isCountered() || props.hasHit(le)) break;
                         le.damage(props.getRemainingPower());
+                        props.hit(le);
 
                         Vector unitVector = entity.getLocation()
                                 .toVector()

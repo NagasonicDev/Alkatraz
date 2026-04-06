@@ -3,7 +3,10 @@ package me.nagasonic.alkatraz.spells.types.properties.implementation;
 import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.properties.SpellProperties;
 import org.bukkit.Location;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+
+import java.util.List;
 
 public class AttackProperties extends SpellProperties {
 
@@ -11,6 +14,7 @@ public class AttackProperties extends SpellProperties {
     private final double initialPower;
     private boolean countered;
     private AttackType type;
+    private List<Entity> hit;
 
     public AttackProperties(Player caster, Location castLocation, double initialPower, AttackType type) {
         super(caster, castLocation);
@@ -46,5 +50,13 @@ public class AttackProperties extends SpellProperties {
 
     public double getInitialPower() {
         return initialPower;
+    }
+
+    public boolean hasHit(Entity entity){
+        return hit.contains(entity);
+    }
+
+    public void hit(Entity entity){
+        hit.add(entity);
     }
 }
