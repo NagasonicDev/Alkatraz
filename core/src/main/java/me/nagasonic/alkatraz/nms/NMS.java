@@ -15,7 +15,6 @@ public interface NMS extends Listener {
     void fakeExp(Player player, float progress, int level, int totalExp);
     void changeSkin(Player player, List<Player> viewers, Skin skin);
     void changeSkinElse(Player player, List<Player> viewers, Skin skin);
-    void fakeHorseSaddle(Horse horse, Player target, boolean saddle);
     default void onEnable(){
         // default: do nothing
     }
