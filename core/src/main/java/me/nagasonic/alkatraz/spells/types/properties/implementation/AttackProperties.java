@@ -6,6 +6,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AttackProperties extends SpellProperties {
@@ -14,7 +15,7 @@ public class AttackProperties extends SpellProperties {
     private final double initialPower;
     private boolean countered;
     private AttackType type;
-    private List<Entity> hit;
+    private List<Entity> hit = new ArrayList<>();
 
     public AttackProperties(Player caster, Location castLocation, double initialPower, AttackType type) {
         super(caster, castLocation);
