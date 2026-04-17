@@ -1,0 +1,38 @@
+id: 'tremor'
+display_name: '#A0522DTremor'
+description:
+  - '&7Sends out a shockwave through the ground'
+  - '&7launching enemies up and dealing damage.'
+# WHETHER THE PLUGIN SHOULD LOAD THE SPELL. DEFAULT: TRUE
+enabled: true
+
+# NONE MEANS ITS DAMAGE DOES NOT SCALE WITH ELEMENTAL DAMAGE, ONLY MAGIC DAMAGE
+element: 'EARTH'
+
+# THE CASTING CODE. 'R' FOR RIGHT CLICK, 'L' FOR LEFT CLICK, 'S' FOR HAND SWAP
+code: 'SLLRS'
+
+# THE MAGIC CIRCLE REQUIRED TO CAST
+level: 3
+
+# COOLDOWN BEFORE CASTING AGAIN
+cooldown: 25
+
+# BASE CAST TIME (SECONDS)
+cast_time: 1.5
+
+# MANA COST
+mana_cost: 101
+
+# MAXIMUM MASTERY ACHIEVABLE. NOT RECOMMENDED TO CHANGE
+maximum_mastery: 250
+
+power: 4.5
+
+#THE COLOR OF THE SPELL MASTERY BOSSBAR. OPTIONS ARE: RED, BLUE, YELLOW, PINK, PURPLE, WHITE AND GREEN
+mastery_bar_color: 'GREEN'
+
+#THE ITEM THAT APPEARS IN THE /SPELLS GUI
+gui_item: 'CRACKED_STONE_BRICKS'
+
+
