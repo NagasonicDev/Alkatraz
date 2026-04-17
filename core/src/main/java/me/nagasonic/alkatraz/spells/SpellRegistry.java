@@ -27,10 +27,12 @@ public class SpellRegistry {
         registerIfEnabled("fire_blast", new FireBlast("FIRE_BLAST"));
         registerIfEnabled("fire_wall", new FireWall("FIRE_WALL"));
         registerIfEnabled("geyser", new Geyser("GEYSER"));
+        registerIfEnabled("heal", new Heal("HEAL"));
         registerIfEnabled("lesser_heal", new LesserHeal("LESSER_HEAL"));
         registerIfEnabled("magic_missile", new MagicMissile("MAGIC_MISSILE"));
         registerIfEnabled("stealth", new Stealth("STEALTH"));
         registerIfEnabled("swift", new Swift("SWIFT"));
+        registerIfEnabled("tremor", new Tremor("TREMOR"));
         registerIfEnabled("water_pulse", new WaterPulse("WATER_PULSE"));
         registerIfEnabled("water_sphere", new WaterSphere("WATER_SPHERE"));
         registerIfEnabled("wind_vortex", new WindVortex("WIND_VORTEX"));

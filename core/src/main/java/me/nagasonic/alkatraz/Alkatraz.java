@@ -15,7 +15,6 @@ import me.nagasonic.alkatraz.loot.MobLootInjector;
 import me.nagasonic.alkatraz.loot.implementation.SpellbookLoot;
 import me.nagasonic.alkatraz.mob.MobModifier;
 import me.nagasonic.alkatraz.nms.NMS;
-import me.nagasonic.alkatraz.playerdata.StatManager;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileRegistry;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
@@ -57,6 +56,7 @@ public final class Alkatraz extends JavaPlugin {
         saveConfig("playerdata/playerdata.yml");
 
         saveSpellConfigs();
+        saveMobConfigs();
         saveConfig("wands/wooden_wand.yml");
         saveConfig("wands/reinforced_wand.yml");
         if (!setupNMS()){
@@ -94,7 +94,6 @@ public final class Alkatraz extends JavaPlugin {
         getCommand("spells").setExecutor(new SpellsCommand());
         getCommand("alkatraz").setExecutor(new AlkatrazCommand());
         getCommand("alkatraz").setTabCompleter(new AlkatrazCommand());
-        StatManager.load();
         SpellComponentHandler.tick();
     }
 
@@ -223,13 +222,39 @@ public final class Alkatraz extends JavaPlugin {
         saveConfig("spells/fire_wall.yml");
         saveConfig("spells/fireball.yml");
         saveConfig("spells/geyser.yml");
+        saveConfig("spells/heal.yml");
         saveConfig("spells/lesser_heal.yml");
         saveConfig("spells/magic_missile.yml");
         saveConfig("spells/stealth.yml");
         saveConfig("spells/swift.yml");
+        saveConfig("spells/tremor.yml");
         saveConfig("spells/water_pulse.yml");
         saveConfig("spells/water_sphere.yml");
         saveConfig("spells/wind_vortex.yml");
+    }
+
+    private void saveMobConfigs() {
+        saveConfig("mobs/blaze.yml");
+        saveConfig("mobs/cave_spider.yml");
+        saveConfig("mobs/creeper.yml");
+        saveConfig("mobs/drowned.yml");
+        saveConfig("mobs/elder_guardian.yml");
+        saveConfig("mobs/ender_dragon.yml");
+        saveConfig("mobs/enderman.yml");
+        saveConfig("mobs/evoker.yml");
+        saveConfig("mobs/ghast.yml");
+        saveConfig("mobs/guardian.yml");
+        saveConfig("mobs/hoglin.yml");
+        saveConfig("mobs/magma_cube.yml");
+        saveConfig("mobs/piglin.yml");
+        saveConfig("mobs/piglin_brute.yml");
+        saveConfig("mobs/skeleton.yml");
+        saveConfig("mobs/slime.yml");
+        saveConfig("mobs/spider.yml");
+        saveConfig("mobs/witch.yml");
+        saveConfig("mobs/wither.yml");
+        saveConfig("mobs/zoglin.yml");
+        saveConfig("mobs/zombie.yml");
     }
 
     public static GlowingEntities getGlowingEntities() {
