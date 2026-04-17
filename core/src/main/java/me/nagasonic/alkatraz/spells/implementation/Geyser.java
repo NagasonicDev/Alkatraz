@@ -10,6 +10,7 @@ import me.nagasonic.alkatraz.spells.configuration.SpellOption;
 import me.nagasonic.alkatraz.spells.configuration.impact.implementation.ManaCostImpact;
 import me.nagasonic.alkatraz.spells.configuration.impact.implementation.StatModifierImpact;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
+import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
@@ -187,7 +188,14 @@ public class Geyser extends AttackSpell {
 
     @Override
     public ItemStack getSpellBook() {
-        return null;
+        return new Spellbook(getId())
+                .setDisplayName("&9Water Sutra &oVol. III")
+                .addCustomLoreLine("&8The final part of a trilogy, containing")
+                .addCustomLoreLine("&8the final step of mastering the basics of")
+                .addCustomLoreLine("&8water magic.")
+                .addCustomLoreLine("")
+                .addRequirement(new NumberStatRequirement<>("circleLevel", 3))
+                .build();
     }
 
     // -------------------------------------------------------------------------
@@ -212,10 +220,11 @@ public class Geyser extends AttackSpell {
         );
 
         // Target: ~6 blocks in front of the caster on the ground
-        Location epicentre = findGround(
+        Location epicentre = Utils.findTopSolid(
                 caster.getLocation().add(
                         caster.getLocation().getDirection().setY(0).normalize().multiply(6)
-                )
+                ),
+                10
         );
 
         // Phase 1 — warning spiral, then erupt
@@ -352,10 +361,6 @@ public class Geyser extends AttackSpell {
         }, 0L, 1L);
     }
 
-    // -------------------------------------------------------------------------
-    // Barrier / Counter
-    // -------------------------------------------------------------------------
-
     @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, Player caster) {
         location.getWorld().spawnParticle(Particle.WATER_SPLASH, location, 25, 0.3, 0.3, 0.3, 0.1);
@@ -364,25 +369,5 @@ public class Geyser extends AttackSpell {
     @Override
     public void onCountered(Location location) {
         location.getWorld().spawnParticle(Particle.WATER_SPLASH, location, 40, 0.4, 0.4, 0.4, 0.15);
-    }
-
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
-
-    /**
-     * Walks downward from the given location until it finds a solid block,
-     * then returns the location on top of it. Falls back to the original
-     * location if nothing solid is found within 10 blocks.
-     */
-    private Location findGround(Location from) {
-        Location check = from.clone();
-        for (int i = 0; i < 10; i++) {
-            if (check.getBlock().getType().isSolid()) {
-                return check.clone().add(0, 1, 0);
-            }
-            check.subtract(0, 1, 0);
-        }
-        return from;
     }
 }
