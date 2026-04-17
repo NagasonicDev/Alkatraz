@@ -9,13 +9,16 @@ import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.Element;
 import me.nagasonic.alkatraz.spells.Spell;
+import me.nagasonic.alkatraz.spells.configuration.OptionValue;
+import me.nagasonic.alkatraz.spells.configuration.SpellOption;
+import me.nagasonic.alkatraz.spells.configuration.impact.implementation.ManaCostImpact;
+import me.nagasonic.alkatraz.spells.configuration.impact.implementation.StatModifierImpact;
+import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
-import org.bukkit.Bukkit;
-import org.bukkit.Color;
-import org.bukkit.Location;
-import org.bukkit.Particle;
+import org.bukkit.*;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -34,6 +37,68 @@ public class LesserHeal extends Spell {
     private int taskID;
 
     @Override
+    protected void setupOptions() {
+
+        // --- Heal Potency --------------------------------------------------------
+        SpellOption potencyOption = new SpellOption(this, "potency",
+                "Adjust the base heal amount", Material.GLISTERING_MELON_SLICE, 0);
+
+        OptionValue<Double> minorHeal = new OptionValue<>(
+                "minor", "Minor", "Small heal — lower mana cost (-30%)",
+                Material.WHEAT, 0.6
+        );
+        minorHeal.addImpact(new StatModifierImpact(this, "heal", 0.6, StatModifierImpact.ModifierType.MULTIPLY));
+        potencyOption.addValue(minorHeal);
+
+        OptionValue<Double> normalHeal = new OptionValue<>(
+                "normal", "Normal", "Standard heal amount",
+                Material.GLISTERING_MELON_SLICE, 1.0
+        );
+        normalHeal.addImpact(new StatModifierImpact(this, "heal", 1.0, StatModifierImpact.ModifierType.MULTIPLY));
+        potencyOption.addValue(normalHeal);
+
+        OptionValue<Double> greaterHeal = new OptionValue<>(
+                "greater", "Greater", "Enhanced heal — approaches the max heal cap",
+                Material.GOLDEN_APPLE, 1.5
+        );
+        greaterHeal.addRequirement(new NumberStatRequirement<>("circleLevel", 3, "Requires Circle Level 3"));
+        greaterHeal.addImpact(new StatModifierImpact(this, "heal", 1.5, StatModifierImpact.ModifierType.MULTIPLY));
+        greaterHeal.addImpact(new ManaCostImpact(this, 15));
+        potencyOption.addValue(greaterHeal);
+
+        addOption(potencyOption);
+
+        // --- Range ---------------------------------------------------------------
+        SpellOption rangeOption = new SpellOption(this, "range",
+                "Maximum target distance", Material.SPYGLASS, 2);
+
+        OptionValue<Integer> shortRange = new OptionValue<>(
+                "short", "Short", "8-block range — lower mana cost",
+                Material.STICK, 8
+        );
+        shortRange.addImpact(new StatModifierImpact(this, "target_range", 8, StatModifierImpact.ModifierType.SET));
+        rangeOption.addValue(shortRange);
+
+        OptionValue<Integer> normalRange = new OptionValue<>(
+                "normal", "Normal", "Standard 20-block range",
+                Material.BLAZE_ROD, 20
+        );
+        normalRange.addImpact(new StatModifierImpact(this, "target_range", 20, StatModifierImpact.ModifierType.SET));
+        rangeOption.addValue(normalRange);
+
+        OptionValue<Integer> longRange = new OptionValue<>(
+                "long", "Long", "Extended 35-block range",
+                Material.END_ROD, 35
+        );
+        longRange.addRequirement(new NumberStatRequirement<>("circleLevel", 3, "Requires Circle Level 3"));
+        longRange.addImpact(new StatModifierImpact(this, "target_range", 35, StatModifierImpact.ModifierType.SET));
+        longRange.addImpact(new ManaCostImpact(this, 10));
+        rangeOption.addValue(longRange);
+
+        addOption(rangeOption);
+    }
+
+    @Override
     public void loadConfiguration() {
         Alkatraz.getInstance().save("spells/lesser_heal.yml");
 
@@ -47,13 +112,16 @@ public class LesserHeal extends Spell {
     @Override
     public void castAction(Player p, ItemStack wand) {
         if (!p.isDead()){
-            if (p.isSneaking() || p.getTargetEntity(20) == null || !(p.getTargetEntity(20) instanceof Player)){
+            if (p.isSneaking() || p.getTargetEntity((int) getModifiedStat(p, "target_range", 20)) == null || !(p.getTargetEntity((int) getModifiedStat(p, "target_range", 20)) instanceof Player)){
                 double wandPower = NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
-                double heal = (baseHeal * wandPower) * (1 + ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class).getAffinity(Element.LIGHT) / 100);
+                double base = (baseHeal * wandPower) * (1 + ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class).getAffinity(Element.LIGHT) / 100);
+                double heal = getModifiedStat(p, "heal", base);
                 if (heal > maxHeal){
                     heal = maxHeal;
                 }
-                p.setHealth(p.getHealth() + heal);
+                if (p.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue() < p.getHealth() + heal){
+                    p.setHealth(p.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
+                }else p.setHealth(p.getHealth() + heal);
                 AtomicInteger l = new AtomicInteger(0);
                 List<Location> locs = ParticleUtils.createHelix(p.getLocation(), 2, 0.5, 2, 10);
                 taskID = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
@@ -70,13 +138,16 @@ public class LesserHeal extends Spell {
                     }else{ stopCast();}
                 }, 0L, 1L);
             }else{
-                Player target = (Player) p.getTargetEntity(20);
+                Player target = (Player) p.getTargetEntity((int) getModifiedStat(p, "target_range", 20));
                 double wandPower = NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
-                double heal = (baseHeal * wandPower) * (1 + ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class).getAffinity(Element.LIGHT) / 100);
+                double base = (baseHeal * wandPower) * (1 + ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class).getAffinity(Element.LIGHT) / 100);
+                double heal = getModifiedStat(p, "heal", base);
                 if (heal > maxHeal){
                     heal = maxHeal;
                 }
-                target.setHealth(target.getHealth() + heal);
+                if (target.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue() < target.getHealth() + heal){
+                    target.setHealth(target.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
+                }else target.setHealth(target.getHealth() + heal);
                 AtomicInteger l = new AtomicInteger(0);
                 List<Location> locs = ParticleUtils.createHelix(target.getLocation(), 2, 0.5, 2, 10);
                 taskID = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
@@ -104,7 +175,7 @@ public class LesserHeal extends Spell {
     public int circleAction(Player p, PlayerSpellPrepareEvent e) {
         int d = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
             if (e.isCancelled()) return;
-            if (p.isSneaking() || p.getTargetEntity(20) == null || !(p.getTargetEntity(20) instanceof Player)){
+            if (p.isSneaking() || p.getTargetEntity((int) getModifiedStat(p, "target_range", 20)) == null || !(p.getTargetEntity((int) getModifiedStat(p, "target_range", 20)) instanceof Player)){
                 Location playerLoc = p.getLocation();
                 float yaw = playerLoc.getYaw();
                 float pitch = 0;
@@ -120,7 +191,7 @@ public class LesserHeal extends Spell {
                     }
                 }
             }else{
-                Location playerLoc = p.getTargetEntity(20).getLocation();
+                Location playerLoc = p.getTargetEntity((int) getModifiedStat(p, "target_range", 20)).getLocation();
                 float yaw = playerLoc.getYaw();
                 float pitch = 0;
 
@@ -149,6 +220,7 @@ public class LesserHeal extends Spell {
                 .setDisplayName("&eAsclepius' Pharmacopoeia &o1st Edition")
                 .addLoreLine("&8The knowledge of the god of medicine.")
                 .addCustomLoreLine("")
+                .addRequirement(new NumberStatRequirement<>("circleLevel", 2))
                 .build();
     }
 }
