@@ -409,4 +409,15 @@ public class Utils {
         }
         return builder.toString();
     }
+
+    public static Location findTopSolid(Location top, int depth){
+        Location check = top.clone();
+        for (int i = 0; i < depth; i++) {
+            if (check.getBlock().getType().isSolid()) {
+                return check.clone();
+            }
+            check.subtract(0, 1, 0);
+        }
+        return null;
+    }
 }
