@@ -4,7 +4,7 @@ import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
-import me.nagasonic.alkatraz.events.PlayerSpellPrepareEvent;
+import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.Element;
@@ -20,6 +20,8 @@ import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
@@ -167,41 +169,85 @@ public class LesserHeal extends Spell {
         }
     }
 
+    @Override
+    public void mobCastAction(Mob caster, ItemStack wand) {
+        double wandPower = NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+        double heal = (baseHeal * wandPower) * (1 + Utils.getEntityAffinity(Element.LIGHT, caster) / 100);
+        if (heal > maxHeal){
+            heal = maxHeal;
+        }
+        if (caster.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue() < caster.getHealth() + heal){
+            caster.setHealth(caster.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
+        }else caster.setHealth(caster.getHealth() + heal);
+        AtomicInteger l = new AtomicInteger(0);
+        List<Location> locs = ParticleUtils.createHelix(caster.getLocation(), 2, 0.5, 2, 10);
+        taskID = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
+            if (l.get() < locs.size()){
+                Location a = null;
+                try {
+                    a = locs.get(l.get());
+                } catch (IndexOutOfBoundsException e) {
+                }
+                if (a != null){
+                    a.getWorld().spawnParticle(Particle.TOTEM, a, 1, 0, 0, 0, 0);
+                    l.addAndGet(1);
+                }
+            }else{ stopCast();}
+        }, 0L, 1L);
+    }
+
     private void stopCast(){
         Bukkit.getServer().getScheduler().cancelTask(taskID);
     }
 
     @Override
-    public int circleAction(Player p, PlayerSpellPrepareEvent e) {
+    public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
         int d = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
             if (e.isCancelled()) return;
-            if (p.isSneaking() || p.getTargetEntity((int) getModifiedStat(p, "target_range", 20)) == null || !(p.getTargetEntity((int) getModifiedStat(p, "target_range", 20)) instanceof Player)){
-                Location playerLoc = p.getLocation();
+            if (caster instanceof Player p){
+                if (p.isSneaking() || p.getTargetEntity((int) getModifiedStat(p, "target_range", 20)) == null || !(p.getTargetEntity((int) getModifiedStat(p, "target_range", 20)) instanceof Player)){
+                    Location playerLoc = p.getLocation();
+                    float yaw = playerLoc.getYaw();
+                    float pitch = 0;
+
+                    // Call magicCircle with proper center, yaw, pitch and offset
+                    List<Location> magicCirclePoints = ParticleUtils.circle(playerLoc, 1, 20, yaw, pitch);
+                    magicCirclePoints.add(playerLoc);
+
+                    // Spawn particles at all calculated points
+                    for (int i = 0; i < magicCirclePoints.size(); i++){
+                        for (Location loc1 : magicCirclePoints) {
+                            loc1.getWorld().spawnParticle(Utils.DUST, loc1, 1, new Particle.DustOptions(Color.YELLOW, 0.4F));
+                        }
+                    }
+                }else{
+                    Location playerLoc = p.getTargetEntity((int) getModifiedStat(p, "target_range", 20)).getLocation();
+                    float yaw = playerLoc.getYaw();
+                    float pitch = 0;
+
+                    // Calculate offset vector pointing forward relative to player orientation
+                    Vector forward = playerLoc.getDirection().normalize().multiply(1.5); // 1.5 blocks in front
+                    Location loc = playerLoc.clone().add(forward);
+
+                    // Call magicCircle with proper center, yaw, pitch and offset
+                    List<Location> magicCirclePoints = ParticleUtils.circle(loc, 1, 20, yaw, -pitch + 90);
+                    magicCirclePoints.add(loc);
+
+                    // Spawn particles at all calculated points
+                    for (int i = 0; i < magicCirclePoints.size(); i++){
+                        for (Location loc1 : magicCirclePoints) {
+                            loc1.getWorld().spawnParticle(Utils.DUST, loc1, 1, new Particle.DustOptions(Color.YELLOW, 0.4F));
+                        }
+                    }
+                }
+            }else{
+                Location playerLoc = caster.getLocation();
                 float yaw = playerLoc.getYaw();
                 float pitch = 0;
 
                 // Call magicCircle with proper center, yaw, pitch and offset
                 List<Location> magicCirclePoints = ParticleUtils.circle(playerLoc, 1, 20, yaw, pitch);
                 magicCirclePoints.add(playerLoc);
-
-                // Spawn particles at all calculated points
-                for (int i = 0; i < magicCirclePoints.size(); i++){
-                    for (Location loc1 : magicCirclePoints) {
-                        loc1.getWorld().spawnParticle(Utils.DUST, loc1, 1, new Particle.DustOptions(Color.YELLOW, 0.4F));
-                    }
-                }
-            }else{
-                Location playerLoc = p.getTargetEntity((int) getModifiedStat(p, "target_range", 20)).getLocation();
-                float yaw = playerLoc.getYaw();
-                float pitch = 0;
-
-                // Calculate offset vector pointing forward relative to player orientation
-                Vector forward = playerLoc.getDirection().normalize().multiply(1.5); // 1.5 blocks in front
-                Location loc = playerLoc.clone().add(forward);
-
-                // Call magicCircle with proper center, yaw, pitch and offset
-                List<Location> magicCirclePoints = ParticleUtils.circle(loc, 1, 20, yaw, -pitch + 90);
-                magicCirclePoints.add(loc);
 
                 // Spawn particles at all calculated points
                 for (int i = 0; i < magicCirclePoints.size(); i++){
@@ -222,5 +268,10 @@ public class LesserHeal extends Spell {
                 .addCustomLoreLine("")
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 2))
                 .build();
+    }
+
+    @Override
+    public boolean canMobCast(Mob mob){
+        return mob.getHealth() < mob.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
     }
 }

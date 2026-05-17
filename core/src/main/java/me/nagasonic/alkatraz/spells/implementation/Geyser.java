@@ -4,7 +4,7 @@ import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
-import me.nagasonic.alkatraz.events.PlayerSpellPrepareEvent;
+import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.configuration.OptionValue;
 import me.nagasonic.alkatraz.spells.configuration.SpellOption;
 import me.nagasonic.alkatraz.spells.configuration.impact.implementation.ManaCostImpact;
@@ -20,6 +20,7 @@ import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
@@ -173,10 +174,10 @@ public class Geyser extends AttackSpell {
     // -------------------------------------------------------------------------
 
     @Override
-    public int circleAction(Player p, PlayerSpellPrepareEvent e) {
+    public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
         return Bukkit.getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
             if (e.isCancelled()) return;
-            Location eye = p.getEyeLocation();
+            Location eye = caster.getEyeLocation();
             Vector forward = eye.getDirection().normalize().multiply(1.5);
             List<Location> points = ParticleUtils.magicCircle(eye, eye.getYaw(), eye.getPitch(), forward, 2, 0);
             for (Location loc : points) {
@@ -206,10 +207,10 @@ public class Geyser extends AttackSpell {
     public void castAction(Player caster, ItemStack wand) {
         if (caster.isDead()) return;
 
-        double height      = getModifiedStat(caster, "height",       10.0);
-        double radius      = getModifiedStat(caster, "radius",        2.5);
+        double height = getModifiedStat(caster, "height",       10.0);
+        double radius = getModifiedStat(caster, "radius",        2.5);
         double launchPower = getModifiedStat(caster, "launch_power",  1.0);
-        double basePower   = getPower(caster, getBasePower())
+        double basePower = getPower(caster, getBasePower())
                 * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
 
         AttackProperties props = new AttackProperties(
@@ -231,6 +232,33 @@ public class Geyser extends AttackSpell {
         playWarningThenErupt(caster, epicentre, height, radius, launchPower, props);
     }
 
+    @Override
+    public void mobCastAction(Mob caster, ItemStack wand) {
+        if (caster.isDead()) return;
+
+        double height = 10.0;
+        double radius = 2.5;
+        double launchPower = 1;
+        double basePower = getPower(caster, getBasePower())
+                * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+
+        AttackProperties props = new AttackProperties(
+                caster,
+                Utils.castLocation(caster),
+                basePower,
+                AttackType.MAGIC
+        );
+
+        // Target: ~6 blocks in front of the caster on the ground
+        Location epicentre = Utils.findTopSolid(
+                caster.getTarget().getLocation(),
+                10
+        );
+
+        // Phase 1 — warning spiral, then erupt
+        playWarningThenErupt(caster, epicentre, height, radius, launchPower, props);
+    }
+
     // -------------------------------------------------------------------------
     // Phase 1 — Warning Spiral
     // -------------------------------------------------------------------------
@@ -242,7 +270,7 @@ public class Geyser extends AttackSpell {
      * The spiral goes from radius→0 (inward) so it looks like energy
      * converging toward the epicentre just before it blows.
      */
-    private void playWarningThenErupt(Player caster, Location epicentre,
+    private void playWarningThenErupt(LivingEntity caster, Location epicentre,
                                       double height, double radius,
                                       double launchPower, AttackProperties props) {
 
@@ -297,7 +325,7 @@ public class Geyser extends AttackSpell {
      * Damage and launch are applied on the first tick so entities are hit
      * the moment the eruption begins.
      */
-    private void playEruption(Player caster, Location epicentre,
+    private void playEruption(LivingEntity caster, Location epicentre,
                               double height, double radius,
                               double launchPower, AttackProperties props) {
 
@@ -334,7 +362,7 @@ public class Geyser extends AttackSpell {
             // Damage + launch on the very first eruption tick
             if (tick[0] == 1) {
                 for (LivingEntity target : epicentre.getNearbyLivingEntities(radius, height, radius)) {
-                    if (target.getUniqueId().equals(caster.getUniqueId())) continue;
+                    if (target.equals(caster)) continue;
                     if (damaged.contains(target.getUniqueId())) continue;
                     damaged.add(target.getUniqueId());
 
@@ -362,7 +390,7 @@ public class Geyser extends AttackSpell {
     }
 
     @Override
-    public void onHitBarrier(BarrierSpell barrier, Location location, Player caster) {
+    public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
         location.getWorld().spawnParticle(Particle.WATER_SPLASH, location, 25, 0.3, 0.3, 0.3, 0.1);
     }
 

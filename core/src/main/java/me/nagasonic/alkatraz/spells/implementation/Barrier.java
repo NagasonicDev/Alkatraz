@@ -3,7 +3,7 @@ package me.nagasonic.alkatraz.spells.implementation;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
-import me.nagasonic.alkatraz.events.PlayerSpellPrepareEvent;
+import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
 import me.nagasonic.alkatraz.spells.components.SpellParticleComponent;
@@ -17,6 +17,8 @@ import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
@@ -92,10 +94,56 @@ public class Barrier extends BarrierSpell implements Listener {
     }
 
     @Override
-    public int circleAction(Player p, PlayerSpellPrepareEvent e) {
+    public void mobCastAction(Mob caster, ItemStack wand) {
+        Location center = caster.getLocation().clone().add(0, 1, 0);
+        BarrierProperties properties = new BarrierProperties(caster, center, getMaxHitpoints(), BarrierType.COMBINED);
+
+        BukkitRunnable task = new BukkitRunnable() {
+
+            int ticksPassed = 0;
+
+            @Override
+            public void run() {
+                if (properties.isBroken() || ticksPassed >= duration * 5) {
+                    onBarrierBreak(center);
+                    properties.getHealthBar().removeAll();
+                    cancel();
+                    return;
+                }
+
+                List<Location> particleLocations = ParticleUtils.sphere(center, radius, 200);
+
+                for (Location loc : particleLocations) {
+
+                    SpellParticleComponent particle =
+                            new SpellParticleComponent(
+                                    Barrier.this,
+                                    properties,
+                                    caster,
+                                    wand,
+                                    SpellComponentType.DEFENSE,
+                                    loc,
+                                    0.6,
+                                    4
+                            );
+                    SpellComponentHandler.register(particle);
+
+                    // Spawn visual particle
+                    loc.getWorld().spawnParticle(Particle.SPELL_WITCH, loc, 1, 0, 0, 0, 0);
+                }
+
+                ticksPassed++;
+            }
+        };
+
+        task.runTaskTimer(Alkatraz.getInstance(), 0, 4);
+    }
+
+    @Override
+    public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
         int d = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
             if (e.isCancelled()) return;
-            Location playerLoc = p.getEyeLocation(); // Player eye location
+            Location playerLoc = caster.getEyeLocation(); // Player eye location
             float yaw = playerLoc.getYaw();
             float pitch = playerLoc.getPitch();
 

@@ -11,6 +11,7 @@ import me.nagasonic.alkatraz.spells.types.properties.implementation.BarrierPrope
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -182,7 +183,7 @@ public class SpellComponentHandler implements Listener {
                 attackProps.getCollided().add(barrierProps);
                 barrierProps.getCollided().add(attackProps);
 
-                Player caster = offenseComp.getCaster();
+                LivingEntity caster = offenseComp.getCaster();
                 double damage = attackProps.getRemainingPower();
                 double barrierHP = barrierProps.getHitpoints();
 
@@ -217,7 +218,7 @@ public class SpellComponentHandler implements Listener {
                 attackProps.getCollided().add(barrierProps);
                 barrierProps.getCollided().add(attackProps);
 
-                Player caster = offenseComp.getCaster();
+                LivingEntity caster = offenseComp.getCaster();
                 double damage = attackProps.getRemainingPower();
                 double barrierHP = barrierProps.getHitpoints();
 

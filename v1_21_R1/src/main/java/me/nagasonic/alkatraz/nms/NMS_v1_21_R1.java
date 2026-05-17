@@ -119,6 +119,16 @@ public final class NMS_v1_21_R1 implements NMS {
         }
     }
 
+    @Override
+    public void registerMagicEntities() {
+
+    }
+
+    @Override
+    public Optional<org.bukkit.entity.Entity> spawnMagicEntity(String key, Location location) {
+        return Optional.empty();
+    }
+
     public void refresh(Player player){
         ServerPlayer nmsPlayer = ((CraftPlayer) player).getHandle();
         resendInfoPackets(player, player);

@@ -3,6 +3,7 @@ package me.nagasonic.alkatraz.spells.components;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.types.properties.SpellProperties;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -11,14 +12,14 @@ import java.util.UUID;
 public class SpellEntityComponent implements SpellComponent {
     private final Spell spell;
     private final SpellProperties properties;
-    private final Player caster;
+    private final LivingEntity caster;
     private final ItemStack wand;
     private final SpellComponentType type;
     private double collisionRadius = 0.25;
     private UUID componentID;
     private final Entity entity;
 
-    public SpellEntityComponent(Spell spell, SpellProperties properties, Player caster, ItemStack wand, SpellComponentType type, Entity entity){
+    public SpellEntityComponent(Spell spell, SpellProperties properties, LivingEntity caster, ItemStack wand, SpellComponentType type, Entity entity){
         this.spell = spell;
         this.properties = properties;
         this.caster = caster;
@@ -39,7 +40,7 @@ public class SpellEntityComponent implements SpellComponent {
     }
 
     @Override
-    public Player getCaster() {
+    public LivingEntity getCaster() {
         return caster;
     }
 

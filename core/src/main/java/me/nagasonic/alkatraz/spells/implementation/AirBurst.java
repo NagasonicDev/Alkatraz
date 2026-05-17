@@ -4,7 +4,7 @@ import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
-import me.nagasonic.alkatraz.events.PlayerSpellPrepareEvent;
+import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
 import me.nagasonic.alkatraz.spells.components.SpellParticleComponent;
@@ -17,14 +17,13 @@ import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
-import me.nagasonic.alkatraz.util.ColorFormat;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.SizedFireball;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
@@ -101,7 +100,7 @@ public class AirBurst extends AttackSpell {
     }
 
     @Override
-    public void onHitBarrier(BarrierSpell barrier, Location location, Player caster) {
+    public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
         location.getWorld().spawnParticle(Particle.CLOUD, location, 15);
     }
 
@@ -192,10 +191,83 @@ public class AirBurst extends AttackSpell {
     }
 
     @Override
-    public int circleAction(Player p, PlayerSpellPrepareEvent e) {
+    public void mobCastAction(Mob caster, ItemStack wand) {
+        if (caster.isDead()) return;
+
+        final AttackProperties properties = new AttackProperties(caster, Utils.castLocation(caster), getBasePower() * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")), AttackType.MAGIC);
+
+        Vector direction = caster.getTarget().getLocation().toVector().subtract(caster.getLocation().toVector());
+
+        final List<Location> lineLocs = ParticleUtils.line(
+                2,
+                caster.getEyeLocation(),
+                caster.getEyeLocation().add(
+                        direction.multiply(20)
+                )
+        );
+
+        final float yaw = caster.getEyeLocation().getYaw();
+        final float pitch = -caster.getEyeLocation().getPitch() + 90;
+        final int totalPoints = lineLocs.size();
+
+        new BukkitRunnable() {
+
+            private int index = 0;
+
+            @Override
+            public void run() {
+
+
+                if (caster.isDead() || properties.isCountered()) {
+                    cancel();
+                    return;
+                }
+
+                if (index >= totalPoints) {
+                    cancel();
+                    return;
+                }
+
+                Location point = lineLocs.get(index++);
+
+                SpellParticleComponent component = new SpellParticleComponent(
+                        AirBurst.this,
+                        properties,
+                        caster,
+                        wand,
+                        SpellComponentType.OFFENSE,
+                        point,
+                        1.75,                    // collision radius
+                        40                       // lifespan (ticks)
+                );
+
+                for (Location loc : ParticleUtils.circle(point, 1, 16, yaw, pitch)) {
+                    if (properties.isCountered()) {
+                        return;
+                    }
+                    loc.getWorld().spawnParticle(
+                            Particle.CLOUD,
+                            loc,
+                            2,
+                            0, 0, 0,
+                            0.1
+                    );
+                }
+                for (LivingEntity le : point.getNearbyLivingEntities(1)){
+                    le.setVelocity(caster.getEyeLocation().getDirection().multiply(getPower(caster, le, properties.getRemainingPower())));
+                }
+
+                SpellComponentHandler.register(component);
+            }
+
+        }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
+    }
+
+    @Override
+    public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
         int d = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
             if (e.isCancelled()) return;
-            Location playerLoc = p.getEyeLocation(); // Player eye location
+            Location playerLoc = caster.getEyeLocation(); // Player eye location
             float yaw = playerLoc.getYaw();
             float pitch = playerLoc.getPitch();
 

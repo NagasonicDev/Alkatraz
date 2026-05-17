@@ -5,9 +5,8 @@ import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.dom.Ground;
-import me.nagasonic.alkatraz.events.PlayerSpellPrepareEvent;
+import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.Element;
-import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.components.SpellComponent;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
@@ -27,6 +26,7 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -44,7 +44,7 @@ public class EarthThrow extends AttackSpell implements Listener {
     }
 
     @Override
-    public void onHitBarrier(BarrierSpell barrier, Location location, Player caster) {
+    public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
         location.getWorld().spawnParticle(Particle.BLOCK_DUST, location, 15, Material.DIRT.createBlockData());
     }
 
@@ -71,7 +71,7 @@ public class EarthThrow extends AttackSpell implements Listener {
             Location loc = p.getEyeLocation();
             Vector direction = loc.getDirection();
             if (p.isOnGround()){
-                Block block = p.getLocation().subtract(0,1,0).getBlock();
+                Block block = p.getLocation().subtract(0,0.5,0).getBlock();
                 if (Ground.isGround(block.getType())) {
                     BlockData data = Bukkit.createBlockData(block.getType());
                     FallingBlock b = loc.getWorld().spawnFallingBlock(loc, data);
@@ -95,10 +95,40 @@ public class EarthThrow extends AttackSpell implements Listener {
     }
 
     @Override
-    public int circleAction(Player p, PlayerSpellPrepareEvent e) {
+    public void mobCastAction(Mob caster, ItemStack wand) {
+        if (!caster.isDead()){
+            AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster), getBasePower() * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")), AttackType.PHYSICAL);
+            Location loc = caster.getEyeLocation();
+            Vector direction = caster.getTarget().getLocation().toVector().subtract(caster.getLocation().toVector()).normalize();
+            if (caster.isOnGround()){
+                Block block = caster.getLocation().subtract(0,0.5,0).getBlock();
+                if (Ground.isGround(block.getType())) {
+                    BlockData data = Bukkit.createBlockData(block.getType());
+                    FallingBlock b = loc.getWorld().spawnFallingBlock(loc, data);
+                    b.setHurtEntities(false);
+                    b.setVelocity(direction.multiply(1).setY(0.3));
+                    SpellEntityComponent comp = new SpellEntityComponent(
+                            this,
+                            props,
+                            caster,
+                            wand,
+                            SpellComponentType.OFFENSE,
+                            b
+                    );
+                    SpellComponentHandler.register(comp);
+                    NBT.modifyPersistentData(b, nbt -> {
+                        nbt.setString("componentID", comp.getComponentID().toString());
+                    });
+                }
+            }
+        }
+    }
+
+    @Override
+    public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
         int d = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
             if (e.isCancelled()) return;
-            Location playerLoc = p.getEyeLocation(); // Player eye location
+            Location playerLoc = caster.getEyeLocation(); // Player eye location
             float yaw = playerLoc.getYaw();
             float pitch = playerLoc.getPitch();
 

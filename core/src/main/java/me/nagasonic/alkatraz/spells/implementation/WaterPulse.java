@@ -4,8 +4,7 @@ import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
-import me.nagasonic.alkatraz.events.PlayerSpellPrepareEvent;
-import me.nagasonic.alkatraz.spells.Spell;
+import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
 import me.nagasonic.alkatraz.spells.components.SpellParticleComponent;
@@ -14,7 +13,6 @@ import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
-import me.nagasonic.alkatraz.spells.types.properties.SpellProperties;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
@@ -24,6 +22,7 @@ import org.bukkit.block.data.Levelled;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
@@ -38,7 +37,7 @@ public class WaterPulse extends AttackSpell implements Listener {
     }
 
     @Override
-    public void onHitBarrier(BarrierSpell barrier, Location location, Player caster) {
+    public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
         location.getWorld().spawnParticle(Particle.WATER_SPLASH, location, 15);
     }
 
@@ -123,10 +122,75 @@ public class WaterPulse extends AttackSpell implements Listener {
     }
 
     @Override
-    public int circleAction(Player p, PlayerSpellPrepareEvent e) {
+    public void mobCastAction(Mob caster, ItemStack wand) {
+        AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster), getBasePower() * getBasePower() * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")), AttackType.MAGIC);
+        Location centre = caster.getLocation();
+
+        BukkitRunnable task = new BukkitRunnable() {
+            double r = 0;
+
+            @Override
+            public void run() {
+                if (props.isCancelled() || props.isCountered()){
+                    cancel();
+                    return;
+                }
+                r += 0.5;
+                List<Location> circle = ParticleUtils.circle(centre, r, 4/r, 0, 0);
+                for (Location loc : circle){
+                    loc.getWorld().spawnParticle(Particle.WATER_SPLASH, loc, 5, 0, 0, 0,0);
+                    SpellParticleComponent comp = new SpellParticleComponent(
+                            WaterPulse.this,
+                            props,
+                            caster,
+                            wand,
+                            SpellComponentType.OFFENSE,
+                            loc,
+                            0.25,
+                            1
+                    );
+                    SpellComponentHandler.register(comp);
+                    for (Block b : Utils.blocksInRadius(loc, 2)){
+                        if (b.getType() == Material.FIRE){
+                            b.setType(Material.AIR);
+                        }else if (b.getType() == Material.LAVA){
+                            Levelled blockdata = (Levelled) b.getBlockData();
+                            if (blockdata.getLevel() == 0){
+                                b.setType(Material.OBSIDIAN);
+                            }else{
+                                b.setType(Material.COBBLESTONE);
+                            }
+                        }
+                    }
+                    for (Entity entity : loc.getWorld().getNearbyEntities(loc, 1, 1, 1)) {
+                        if (props.isCountered() || props.isCancelled()) {
+                            cancel();
+                            return;
+                        }
+                        if (!(entity instanceof LivingEntity)) continue;
+                        if (entity.equals(caster)) continue;
+
+                        LivingEntity target = (LivingEntity) entity;
+                        Vector direction = target.getLocation().toVector().subtract(loc.toVector());
+                        direction.normalize().multiply(props.getRemainingPower());
+                        direction.setY(0.5);
+                        target.setVelocity(direction);
+                    }
+                }
+                if (r == 10){
+                    cancel();
+                }
+            }
+        };
+
+        task.runTaskTimer(Alkatraz.getInstance(), 0, 1);
+    }
+
+    @Override
+    public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
         int d = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
             if (e.isCancelled()) return;
-            Location playerLoc = p.getEyeLocation(); // Player eye location
+            Location playerLoc = caster.getEyeLocation(); // Player eye location
             float yaw = playerLoc.getYaw();
             float pitch = playerLoc.getPitch();
 

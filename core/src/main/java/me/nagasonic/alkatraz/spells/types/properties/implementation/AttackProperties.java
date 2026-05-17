@@ -4,6 +4,7 @@ import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.properties.SpellProperties;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -17,7 +18,7 @@ public class AttackProperties extends SpellProperties {
     private AttackType type;
     private List<Entity> hit = new ArrayList<>();
 
-    public AttackProperties(Player caster, Location castLocation, double initialPower, AttackType type) {
+    public AttackProperties(LivingEntity caster, Location castLocation, double initialPower, AttackType type) {
         super(caster, castLocation);
         this.remainingPower = initialPower;
         this.initialPower = initialPower;

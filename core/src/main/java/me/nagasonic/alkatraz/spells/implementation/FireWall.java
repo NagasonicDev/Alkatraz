@@ -4,8 +4,7 @@ import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
-import me.nagasonic.alkatraz.events.PlayerSpellPrepareEvent;
-import me.nagasonic.alkatraz.spells.Spell;
+import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
 import me.nagasonic.alkatraz.spells.components.SpellParticleComponent;
@@ -23,6 +22,7 @@ import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
@@ -59,7 +59,7 @@ public class FireWall extends AttackSpell implements Listener {
     }
 
     @Override
-    public void onHitBarrier(BarrierSpell barrier, Location location, Player caster) {
+    public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
         location.getWorld().spawnParticle(Particle.FLAME, location, 15);
     }
 
@@ -195,10 +195,115 @@ public class FireWall extends AttackSpell implements Listener {
     }
 
     @Override
-    public int circleAction(Player p, PlayerSpellPrepareEvent e) {
+    public void mobCastAction(Mob caster, ItemStack wand) {
+        AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster), getBasePower() * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")), AttackType.MAGIC);
+        Location start = caster.getLocation();
+
+        double spacing = 0.5;
+        int durationTicks = (int) Math.ceil(duration * 20); // wall lifetime
+
+        List<WallSegment> wallPoints = new ArrayList<>();
+
+        Location currentPos = start.clone();
+        Vector currentDir = caster.getTarget().getLocation().toVector().subtract(caster.getLocation().toVector()).normalize();
+
+        float[] lastYaw = { -caster.getTarget().getLocation().subtract(caster.getLocation().toVector()).getYaw() };
+        double turnStrength = 0.015;
+
+        BukkitRunnable wallTask = new BukkitRunnable() {
+
+            int ticks = 0;
+
+            @Override
+            public void run() {
+                ticks++;
+
+                // === BUILD PHASE ===
+                if (ticks < length / spacing && !props.isCountered() && !props.isCancelled()) {
+                    float currentYaw = -caster.getTarget().getLocation().subtract(caster.getLocation().toVector()).getYaw();
+                    float yawDelta = currentYaw - lastYaw[0];
+                    lastYaw[0] = currentYaw;
+
+                    yawDelta = Math.max(-10, Math.min(10, yawDelta));
+
+                    currentDir.rotateAroundY(yawDelta * turnStrength);
+                    // Step forward
+                    currentPos.add(currentDir.clone().multiply(spacing));
+
+                    // Lock segment with age
+                    wallPoints.add(new WallSegment(currentPos.clone()));
+                }
+
+                // === RENDER + DAMAGE PHASE ===
+                for (WallSegment segment : wallPoints) {
+                    segment.age++;
+
+                    double riseProgress = Math.min(1.0, segment.age / 30.0);
+                    double currentHeight = height * riseProgress;
+
+                    for (double h = 0; h < currentHeight; h += 0.5) {
+
+                        Location loc = segment.base.clone().add(0, h, 0);
+
+                        if (h == currentHeight - 0.5){
+                            caster.getWorld().spawnParticle(
+                                    Particle.LAVA,
+                                    loc,
+                                    2,
+                                    0.05, 0.05, 0.05,
+                                    0
+                            );
+                        }else{
+                            caster.getWorld().spawnParticle(
+                                    Particle.FLAME,
+                                    loc,
+                                    2,
+                                    0.05, 0.05, 0.05,
+                                    0
+                            );
+                        }
+                        SpellParticleComponent comp = new SpellParticleComponent(
+                                FireWall.this,
+                                props,
+                                caster,
+                                wand,
+                                SpellComponentType.OFFENSE,
+                                loc,
+                                0.25,
+                                2
+                        );
+                        SpellComponentHandler.register(comp);
+
+                        if (loc.getBlock().getType() == Material.AIR) {
+                            loc.getBlock().setType(Material.FIRE);
+                        }
+
+                        for (Entity entity : loc.getWorld().getNearbyEntities(loc, 0.6, 0.6, 0.6)) {
+                            if (!(entity instanceof LivingEntity)) continue;
+                            if (entity.equals(caster)) continue;
+
+                            LivingEntity target = (LivingEntity) entity;
+                            target.damage(props.getRemainingPower());
+                            target.setFireTicks(40);
+                        }
+                    }
+                }
+
+                // === LIFETIME END ===
+                if (ticks >= durationTicks && ticks >= length / spacing) {
+                    cancel();
+                }
+            }
+        };
+
+        wallTask.runTaskTimer(Alkatraz.getInstance(), 0, 1);
+    }
+
+    @Override
+    public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
         int d = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
             if (e.isCancelled()) return;
-            Location playerLoc = p.getEyeLocation(); // Player eye location
+            Location playerLoc = caster.getEyeLocation(); // Player eye location
             float yaw = playerLoc.getYaw();
             float pitch = playerLoc.getPitch();
 

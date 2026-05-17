@@ -3,9 +3,11 @@ package me.nagasonic.alkatraz.spells;
 import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.events.PlayerSpellPrepareEvent;
+import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.configuration.SpellOption;
+import me.nagasonic.alkatraz.spells.configuration.SpellOptionLoader;
 import me.nagasonic.alkatraz.spells.configuration.impact.implementation.StatModifierImpact;
 import me.nagasonic.alkatraz.util.ColorFormat;
 import me.nagasonic.alkatraz.util.StatUtils;
@@ -14,6 +16,7 @@ import org.bukkit.*;
 import org.bukkit.boss.BarColor;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -48,6 +51,15 @@ public abstract class Spell {
         setupOptions();
     }
 
+    public final void loadOptions() {
+        SpellOptionLoader.loadOptions(this, this.id);
+
+        // If no options were loaded from YAML, fall back to the code-based hook.
+        if (options.isEmpty()) {
+            setupOptions();
+        }
+    }
+
     /**
      * Override this to define spell options (called once on spell registration)
      */
@@ -59,7 +71,9 @@ public abstract class Spell {
 
     public abstract void castAction(Player p, ItemStack wand);
 
-    public abstract int circleAction(Player p, PlayerSpellPrepareEvent e);
+    public abstract void mobCastAction(Mob caster, ItemStack wand);
+
+    public abstract int circleAction(LivingEntity caster, SpellPrepareEvent e);
 
     public abstract ItemStack getSpellBook();
 
@@ -158,6 +172,10 @@ public abstract class Spell {
         this.cooldown = spellConfig.getLong("cooldown");
         this.masteryBarColor = BarColor.valueOf(spellConfig.getString("mastery_bar_color"));
         this.guiItem = Utils.materialFromString(spellConfig.getString("gui_item"));
+    }
+
+    public boolean canMobCast(Mob mob) {
+        return true;
     }
 
     // ============================================
@@ -259,12 +277,11 @@ public abstract class Spell {
     /**
      * Calculates final cast time based on mastery
      */
-    private long calculateFinalCastTime(MagicProfile profile, float baseCastTime) {
+    public long calculateFinalCastTime(MagicProfile profile, float baseCastTime) {
         float castTimeInTicks = baseCastTime * 20;
 
-        // If player has max mastery, reduce cast time by 25%
         if (profile.getSpellMastery(this) >= getMaxMastery()) {
-            castTimeInTicks *= 0.75f; // 25% faster (was bugged before as 1.25x slower!)
+            castTimeInTicks *= 0.75f;
         }
 
         return (long) castTimeInTicks;

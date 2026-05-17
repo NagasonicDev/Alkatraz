@@ -4,7 +4,7 @@ import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
-import me.nagasonic.alkatraz.events.PlayerSpellPrepareEvent;
+import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.components.SpellComponent;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
@@ -24,14 +24,15 @@ import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.metadata.MetadataValue;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.List;
 import java.util.UUID;
@@ -126,7 +127,7 @@ public class Fireball extends AttackSpell implements Listener {
     }
 
     @Override
-    public void onHitBarrier(BarrierSpell barrier, Location location, Player caster) {
+    public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
         location.getWorld().spawnParticle(Particle.FLAME, location, 15);
     }
 
@@ -173,10 +174,37 @@ public class Fireball extends AttackSpell implements Listener {
     }
 
     @Override
-    public int circleAction(Player p, PlayerSpellPrepareEvent e) {
+    public void mobCastAction(@UnknownNullability Mob caster, ItemStack wand) {
+        if (caster.isDead()) return;
+
+        AttackProperties props = new AttackProperties(
+                caster,
+                Utils.castLocation(caster),
+                getBasePower() * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")),
+                AttackType.MAGIC
+        );
+        Vector direction = caster.getTarget().getLocation().toVector().subtract(caster.getLocation().toVector());
+
+        org.bukkit.entity.Fireball fireball = caster.launchProjectile(
+                org.bukkit.entity.Fireball.class,
+                direction.multiply(0.1)
+        );
+
+        SpellEntityComponent entityComp = new SpellEntityComponent(
+                this, props, caster, wand, SpellComponentType.OFFENSE, fireball
+        );
+        entityComp.setCollisionRadius(0.5);
+        NBT.modifyPersistentData(fireball, nbt -> {
+            nbt.setString("component_id", entityComp.getComponentID().toString());
+        });
+        SpellComponentHandler.register(entityComp);
+    }
+
+    @Override
+    public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
         int d = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
             if (e.isCancelled()) return;
-            Location playerLoc = p.getEyeLocation(); // Player eye location
+            Location playerLoc = caster.getEyeLocation(); // Player eye location
             float yaw = playerLoc.getYaw();
             float pitch = playerLoc.getPitch();
 
@@ -215,7 +243,8 @@ public class Fireball extends AttackSpell implements Listener {
         SpellComponent comp = SpellComponentHandler.getActiveComponent(UUID.fromString(idString));
         if (!(comp instanceof SpellEntityComponent ecomp)) return;
         if (!(ecomp.getProperties() instanceof AttackProperties props)) return;
-        double finalDamage = getPower(comp.getCaster(), le, props.getRemainingPower());
+        double finalDamage;
+        finalDamage = getPower(comp.getCaster(), le, props.getRemainingPower());
         e.setDamage(finalDamage);
 
     }
@@ -229,9 +258,15 @@ public class Fireball extends AttackSpell implements Listener {
         if (comp.getSpell().getClass() != Fireball.class) return;
         if (!(comp instanceof SpellEntityComponent ecomp)) return;
         if (!(ecomp.getProperties() instanceof AttackProperties props)) return;
-        if ((boolean) getOption("breaks_blocks").getSelectedValue(comp.getCaster()).getValue()) return;
+        if (comp.getCaster() instanceof Player p && (boolean) getOption("breaks_blocks").getSelectedValue(p).getValue()) return;
         e.setCancelled(true);
-        for (LivingEntity entity : fireball.getLocation().getNearbyLivingEntities((double) getOption("size").getSelectedValue(comp.getCaster()).getValue())){
+        double size;
+        if (comp.getCaster() instanceof Player p) {
+            size = (double) getOption("size").getSelectedValue(p).getValue();
+        } else{
+            size = (double) getOption("size").getOptionValues().get(getOption("size").getDefIndex()).getValue();
+        }
+        for (LivingEntity entity : fireball.getLocation().getNearbyLivingEntities(size)){
             entity.damage(getPower(comp.getCaster(), entity, props.getRemainingPower()));
         }
     }
