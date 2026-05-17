@@ -72,7 +72,9 @@ public class StatUtils {
         }else if (profile.getSpellMastery(spell) + mastery >= spell.getMaxMastery()){
             profile.setSpellMastery(spell, spell.getMaxMastery());
             profile.setStatPoints(profile.getStatPoints() + getStatPointsMastery(spell.getLevel()));
-        }else { profile.setSpellMastery(spell, profile.getSpellMastery(spell) + mastery); }
+        }else {
+            profile.setSpellMastery(spell, profile.getSpellMastery(spell) + mastery);
+        }
         if (p.isOnline()){
             Map<Spell, BossBar> masteryBars = profile.getMasteryBars();
             if (masteryBars.containsKey(spell)){

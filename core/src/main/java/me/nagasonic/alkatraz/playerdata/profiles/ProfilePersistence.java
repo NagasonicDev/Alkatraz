@@ -3,6 +3,7 @@ package me.nagasonic.alkatraz.playerdata.profiles;
 import me.nagasonic.alkatraz.Alkatraz;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -132,65 +133,84 @@ public class ProfilePersistence {
 
         // Load all integer stats
         if (config.contains("stats.ints")) {
-            for (String stat : profile.getInts()) {
-                if (config.contains("stats.ints." + stat)) {
-                    profile.setInt(stat, config.getInt("stats.ints." + stat));
+            ConfigurationSection section = config.getConfigurationSection("stats.ints");
+            for (String stat : section.getKeys(false)) {
+                if (profile.isInt(stat)){
+                    profile.setInt(stat, section.getInt(stat));
+                }else{
+                    profile.intStat(stat, section.getInt(stat));
                 }
             }
         }
 
         // Load all double stats
         if (config.contains("stats.doubles")) {
-            for (String stat : profile.getDoubles()) {
-                if (config.contains("stats.doubles." + stat)) {
-                    profile.setDouble(stat, config.getDouble("stats.doubles." + stat));
+            ConfigurationSection section = config.getConfigurationSection("stats.doubles");
+            for (String stat : section.getKeys(false)) {
+                if (profile.isDouble(stat)){
+                    profile.setDouble(stat, section.getDouble(stat));
+                }else{
+                    profile.doubleStat(stat, section.getDouble(stat));
                 }
             }
         }
 
         // Load all float stats
         if (config.contains("stats.floats")) {
-            for (String stat : profile.getFloats()) {
-                if (config.contains("stats.floats." + stat)) {
-                    profile.setFloat(stat, (float) config.getDouble("stats.floats." + stat));
+            ConfigurationSection section = config.getConfigurationSection("stats.floats");
+            for (String stat : section.getKeys(false)) {
+                if (profile.isFloat(stat)){
+                    profile.setFloat(stat, (float) section.getDouble(stat));
+                }else{
+                    profile.floatStat(stat, (float) section.getDouble(stat));
                 }
             }
         }
 
         // Load all long stats
         if (config.contains("stats.longs")) {
-            for (String stat : profile.getLongs()) {
-                if (config.contains("stats.longs." + stat)) {
-                    profile.setLong(stat, config.getLong("stats.longs." + stat));
+            ConfigurationSection section = config.getConfigurationSection("stats.longs");
+            for (String stat : section.getKeys(false)) {
+                if (profile.isLong(stat)){
+                    profile.setLong(stat, section.getLong(stat));
+                }else{
+                    profile.longStat(stat, section.getLong(stat));
                 }
             }
         }
 
         // Load all boolean stats
         if (config.contains("stats.bools")) {
-            for (String stat : profile.getBools()) {
-                if (config.contains("stats.bools." + stat)) {
-                    profile.setBool(stat, config.getBoolean("stats.bools." + stat));
+            ConfigurationSection section = config.getConfigurationSection("stats.bools");
+            for (String stat : section.getKeys(false)) {
+                if (profile.isBool(stat)){
+                    profile.setBool(stat, section.getBoolean(stat));
+                }else{
+                    profile.boolStat(stat, section.getBoolean(stat));
                 }
             }
         }
 
         // Load all string stats
         if (config.contains("stats.strings")) {
-            for (String stat : profile.getStrings()) {
-                if (config.contains("stats.strings." + stat)) {
-                    String string = config.getString("stats.strings." + stat);
-                    profile.setString(stat, string);
+            ConfigurationSection section = config.getConfigurationSection("stats.strings");
+            for (String stat : section.getKeys(false)) {
+                if (profile.isString(stat)){
+                    profile.setString(stat, section.getString(stat));
+                }else{
+                    profile.stringStat(stat, section.getString(stat));
                 }
             }
         }
 
         // Load all string set stats
         if (config.contains("stats.stringSets")) {
-            for (String stat : profile.getStringSets()) {
-                if (config.contains("stats.stringSets." + stat)) {
-                    List<String> strings = config.getStringList("stats.stringSets." + stat);
-                    profile.setStringSet(stat, new HashSet<>(strings));
+            ConfigurationSection section = config.getConfigurationSection("stats.stringSets");
+            for (String stat : section.getKeys(false)) {
+                if (profile.isStringSet(stat)){
+                    profile.setStringSet(stat, section.getStringList(stat));
+                }else{
+                    profile.stringSetStat(stat, Set.copyOf(section.getStringList(stat)));
                 }
             }
         }
