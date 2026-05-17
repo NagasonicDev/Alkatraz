@@ -4,7 +4,7 @@ import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
-import me.nagasonic.alkatraz.events.PlayerSpellPrepareEvent;
+import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
 import me.nagasonic.alkatraz.spells.components.SpellParticleComponent;
@@ -22,6 +22,7 @@ import org.bukkit.block.Block;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -36,7 +37,7 @@ public class MagicMissile extends AttackSpell {
     }
 
     @Override
-    public void onHitBarrier(BarrierSpell barrier, Location location, Player caster) {
+    public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
         location.getWorld().spawnParticle(Utils.DUST, location, 15, new Particle.DustOptions(Color.AQUA, 0.6F));
     }
 
@@ -89,7 +90,7 @@ public class MagicMissile extends AttackSpell {
                         return;
                     }
 
-                    p.spawnParticle(
+                    p.getWorld().spawnParticle(
                             Utils.DUST,
                             loc,
                             50,
@@ -129,10 +130,84 @@ public class MagicMissile extends AttackSpell {
     }
 
     @Override
-    public int circleAction(Player p, PlayerSpellPrepareEvent e) {
+    public void mobCastAction(Mob caster, ItemStack wand) {
+        if (!caster.isDead()){
+            AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster), getBasePower() * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")), AttackType.MAGIC);
+            Location loc1 = caster.getEyeLocation();
+            Vector direction = caster.getTarget().getLocation().toVector().subtract(caster.getLocation().toVector()).normalize();
+            Location loc2 = caster.getEyeLocation().add(direction.multiply(20));
+            List<Location> locs = ParticleUtils.line(0.5, loc1, loc2);
+            locs.remove(0); //Function puts loc2 as the first index, so if it is a solid block, the missile will not fire.
+            locs.add(loc2);
+            BukkitRunnable task = new BukkitRunnable() {
+
+                int index = 0;
+
+                @Override
+                public void run() {
+
+                    if (props.isCountered() || props.isCancelled()) {
+                        cancel();
+                        return;
+                    }
+
+                    if (index >= locs.size()) {
+                        cancel();
+                        return;
+                    }
+
+                    Location loc = locs.get(index++);
+                    Block b = loc.getBlock();
+
+                    if (!b.isPassable() && !b.isLiquid() && b.isCollidable() && b.isSolid()) {
+                        cancel();
+                        return;
+                    }
+
+                    caster.getWorld().spawnParticle(
+                            Utils.DUST,
+                            loc,
+                            50,
+                            new Particle.DustOptions(Color.AQUA, 0.5F)
+                    );
+                    SpellParticleComponent comp = new SpellParticleComponent(
+                            MagicMissile.this,
+                            props,
+                            caster,
+                            wand,
+                            SpellComponentType.OFFENSE,
+                            loc,
+                            0.25,
+                            1
+                    );
+                    SpellComponentHandler.register(comp);
+
+                    for (Entity entity : loc.getNearbyEntities(1, 1, 1)) {
+                        if (entity.isDead() || entity.equals(caster)) break;
+                        if (!(entity instanceof LivingEntity le)) break;
+                        if (props.isCancelled() || props.isCountered() || props.hasHit(le)) break;
+                        le.damage(props.getRemainingPower());
+                        props.hit(le);
+
+                        Vector unitVector = entity.getLocation()
+                                .toVector()
+                                .subtract(caster.getLocation().toVector())
+                                .normalize();
+
+                        entity.setVelocity(unitVector.multiply(1));
+                    }
+                }
+
+            };
+            task.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
+        }
+    }
+
+    @Override
+    public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
         int d = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
             if (e.isCancelled()) return;
-            Location playerLoc = p.getEyeLocation(); // Player eye location
+            Location playerLoc = caster.getEyeLocation(); // Player eye location
             float yaw = playerLoc.getYaw();
             float pitch = playerLoc.getPitch();
 

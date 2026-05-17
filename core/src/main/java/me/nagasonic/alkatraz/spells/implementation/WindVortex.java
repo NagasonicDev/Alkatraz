@@ -4,7 +4,7 @@ import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
-import me.nagasonic.alkatraz.events.PlayerSpellPrepareEvent;
+import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
 import me.nagasonic.alkatraz.spells.components.SpellParticleComponent;
@@ -24,6 +24,7 @@ import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
@@ -152,7 +153,7 @@ public class WindVortex extends AttackSpell implements Listener {
     }
 
     @Override
-    public void onHitBarrier(BarrierSpell barrier, Location location, Player caster) {
+    public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
         // Wind disperses on barrier
         location.getWorld().spawnParticle(Particle.CLOUD, location, 30, 1, 1, 1, 0.1);
         location.getWorld().spawnParticle(Particle.SWEEP_ATTACK, location, 5);
@@ -208,10 +209,36 @@ public class WindVortex extends AttackSpell implements Listener {
     }
 
     @Override
-    public int circleAction(Player p, PlayerSpellPrepareEvent e) {
+    public void mobCastAction(Mob caster, ItemStack wand) {
+        if (caster.isDead()) return;
+
+        // Get modified stats
+        double radius = vortexRadius;
+        double pull = pullStrength;
+        int duration = vortexDuration;
+
+        // Create attack properties
+        double power = getPower(caster, getBasePower()) * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+        AttackProperties props = new AttackProperties(
+                caster,
+                caster.getLocation(),
+                power,
+                AttackType.MAGIC
+        );
+
+        // Start vortex behavior
+        VortexBehavior task = new VortexBehavior(caster, wand, props, radius, pull, duration, power);
+        task.runTaskTimer(Alkatraz.getInstance(), 0L, tickRate);
+
+        // Initial sound effect
+        caster.getWorld().playSound(caster.getLocation(), Sound.ENTITY_ENDER_DRAGON_FLAP, 1.0f, 1.5f);
+    }
+
+    @Override
+    public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
         int d = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
             if (e.isCancelled()) return;
-            Location playerLoc = p.getEyeLocation();
+            Location playerLoc = caster.getEyeLocation();
             float yaw = playerLoc.getYaw();
             float pitch = playerLoc.getPitch();
 
@@ -243,7 +270,7 @@ public class WindVortex extends AttackSpell implements Listener {
      * Vortex behavior - pulls entities and deals damage
      */
     private class VortexBehavior extends BukkitRunnable {
-        private final Player caster;
+        private final LivingEntity caster;
         private final ItemStack wand;
         private final AttackProperties props;
         private final double radius;
@@ -253,7 +280,7 @@ public class WindVortex extends AttackSpell implements Listener {
         private int ticksElapsed = 0;
         private double rotation = 0;
 
-        public VortexBehavior(Player caster, ItemStack wand, AttackProperties props, 
+        public VortexBehavior(LivingEntity caster, ItemStack wand, AttackProperties props,
                              double radius, double pullStrength, int duration, double damagePerTick) {
             this.caster = caster;
             this.wand = wand;
@@ -273,7 +300,7 @@ public class WindVortex extends AttackSpell implements Listener {
             }
 
             // Check if caster is still valid
-            if (caster.isDead() || !caster.isOnline()) {
+            if (caster.isDead()) {
                 cleanup();
                 cancel();
                 return;

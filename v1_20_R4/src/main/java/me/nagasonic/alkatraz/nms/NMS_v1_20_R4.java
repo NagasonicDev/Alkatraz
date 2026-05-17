@@ -13,10 +13,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_20_R4.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_20_R4.entity.CraftPlayer;
-import org.bukkit.entity.Horse;
-import org.bukkit.entity.HumanEntity;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import net.minecraft.world.item.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -110,6 +107,16 @@ public final class NMS_v1_20_R4 implements NMS {
                 hideAndShow(other, player);
             }
         }
+    }
+
+    @Override
+    public void registerMagicEntities() {
+
+    }
+
+    @Override
+    public Optional<Entity> spawnMagicEntity(String key, Location location) {
+        return Optional.empty();
     }
 
     @SuppressWarnings("UnstableApiUsage")

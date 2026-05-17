@@ -3,6 +3,7 @@ package me.nagasonic.alkatraz.spells.components;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.types.properties.SpellProperties;
 import org.bukkit.Location;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -18,7 +19,7 @@ public class SpellParticleComponent implements SpellComponent {
     private final SpellProperties properties;
 
     // Context
-    private final Player caster;
+    private final LivingEntity caster;
     private final ItemStack wand;
     private final SpellComponentType type;
     private final UUID componentID = UUID.randomUUID();
@@ -31,7 +32,7 @@ public class SpellParticleComponent implements SpellComponent {
     public SpellParticleComponent(
             Spell spell,
             SpellProperties properties,
-            Player caster,
+            LivingEntity caster,
             ItemStack wand,
             SpellComponentType type,
             Location location,
@@ -63,7 +64,7 @@ public class SpellParticleComponent implements SpellComponent {
     }
 
     @Override
-    public Player getCaster() {
+    public LivingEntity getCaster() {
         return caster;
     }
 

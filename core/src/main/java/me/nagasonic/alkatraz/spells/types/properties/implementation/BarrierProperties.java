@@ -8,6 +8,7 @@ import org.bukkit.Location;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -21,7 +22,7 @@ public class BarrierProperties extends SpellProperties {
     private BarrierType type;
     private BossBar healthBar;
 
-    public BarrierProperties(Player caster, Location castLocation, double hitpoints, BarrierType type) {
+    public BarrierProperties(LivingEntity caster, Location castLocation, double hitpoints, BarrierType type) {
         super(caster, castLocation);
         this.hitpoints = hitpoints;
         this.initialHitpoints = hitpoints;

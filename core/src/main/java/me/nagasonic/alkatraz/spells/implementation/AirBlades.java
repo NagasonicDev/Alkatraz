@@ -4,7 +4,7 @@ import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
-import me.nagasonic.alkatraz.events.PlayerSpellPrepareEvent;
+import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
 import me.nagasonic.alkatraz.spells.components.SpellParticleComponent;
@@ -24,6 +24,7 @@ import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
@@ -52,57 +53,16 @@ public class AirBlades extends AttackSpell implements Listener {
     }
 
     // ============================================
-    // Spell Options
-    // ============================================
-
-    @Override
-    protected void setupOptions() {
-        SpellOption bladeCountOption = new SpellOption(
-                this, "blade_count",
-                "Number of blades fired per click.",
-                Material.FEATHER,
-                1
-        );
-
-        // --- Single blade ---
-        OptionValue<Integer> oneBlade = new OptionValue<>(
-                "one", "Single Blade", "Fires one focused blade.",
-                Material.FEATHER, 1
-        );
-        oneBlade.addImpact(new StatModifierImpact(this, "blade_count", 1, StatModifierImpact.ModifierType.SET));
-        oneBlade.addImpact(new ManaCostImpact(this, -10));
-        bladeCountOption.addValue(oneBlade);
-
-        // --- Triple blade (default) ---
-        OptionValue<Integer> threeBlades = new OptionValue<>(
-                "three", "Triple Blades", "Fires three blades in a spread.",
-                Material.FEATHER, 3
-        );
-        threeBlades.addImpact(new StatModifierImpact(this, "blade_count", 3, StatModifierImpact.ModifierType.SET));
-        bladeCountOption.addValue(threeBlades);
-
-        // --- Five blades (requires circle level 3) ---
-        OptionValue<Integer> fiveBlades = new OptionValue<>(
-                "five", "Five Blades", "Fires five blades in a wide spread.",
-                Material.FEATHER, 5
-        );
-        fiveBlades.addRequirement(new NumberStatRequirement<>("circleLevel", 3, "Requires Circle Level 3"));
-        fiveBlades.addImpact(new StatModifierImpact(this, "blade_count", 5, StatModifierImpact.ModifierType.SET));
-        fiveBlades.addImpact(new ManaCostImpact(this, 15));
-        bladeCountOption.addValue(fiveBlades);
-
-        addOption(bladeCountOption);
-    }
-
-    // ============================================
     // Configuration
     // ============================================
 
     @Override
     public void loadConfiguration() {
+        Alkatraz.getInstance().saveConfig("spells/air_blades_options.yml");
         Alkatraz.getInstance().save("spells/air_blades.yml");
         YamlConfiguration spellConfig = ConfigManager.getConfig("spells/air_blades.yml").get();
         loadCommonConfig(spellConfig);
+        loadOptions();
 
         this.bladeSpeed    = spellConfig.getDouble("blade_speed");
         this.bladeRange    = spellConfig.getDouble("blade_range");
@@ -118,12 +78,23 @@ public class AirBlades extends AttackSpell implements Listener {
     @Override
     public void castAction(Player caster, ItemStack wand) {
         int bladeCount = (int) getModifiedStat(caster, "blade_count",
-                (double) (int) getOption("blade_count").getSelectedValue(caster).getValue());
+                 (int) getOption("blade_count").getSelectedValue(caster).getValue());
+
+        double power = getPower(caster, getBasePower())
+                * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+        double size = getModifiedStat(caster, "blade_size", 0.6);
+
+        fireBlades(caster, wand, bladeCount, power, size);
+    }
+
+    @Override
+    public void mobCastAction(Mob caster, ItemStack wand) {
+        int bladeCount = 2;
 
         double power = getPower(caster, getBasePower())
                 * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
 
-        fireBlades(caster, wand, bladeCount, power);
+        fireBlades(caster, wand, bladeCount, power, 0.6);
     }
 
     // ============================================
@@ -135,10 +106,14 @@ public class AirBlades extends AttackSpell implements Listener {
      * With 1 blade: no spread (fires straight).
      * With 3 or 5 blades: evenly distributed across {@code bladeSpread} degrees.
      */
-    private void fireBlades(Player caster, ItemStack wand, int count, double power) {
+    private void fireBlades(LivingEntity caster, ItemStack wand, int count, double power, double size) {
         caster.getWorld().playSound(caster.getLocation(), Sound.ENTITY_ENDER_DRAGON_FLAP, 0.9f, 1.6f);
 
-        Vector aimDir = caster.getEyeLocation().getDirection().normalize();
+        Vector aimDir;
+        if (caster instanceof Mob m) {
+            aimDir = m.getTarget().getLocation().toVector().subtract(m.getLocation().toVector()).normalize();
+            Alkatraz.logInfo(aimDir.toString());
+        }else aimDir = caster.getEyeLocation().getDirection().normalize();
 
         // Build the list of yaw offsets (in radians) for this volley
         List<Double> offsets = new ArrayList<>();
@@ -163,14 +138,14 @@ public class AirBlades extends AttackSpell implements Listener {
                     AttackType.MAGIC
             );
 
-            launchBlade(caster, wand, props, bladeDir);
+            launchBlade(caster, wand, props, bladeDir, size);
         }
     }
 
     /**
      * Launches a single blade projectile along {@code direction}.
      */
-    private void launchBlade(Player caster, ItemStack wand, AttackProperties props, Vector direction) {
+    private void launchBlade(LivingEntity caster, ItemStack wand, AttackProperties props, Vector direction, double size) {
         new BukkitRunnable() {
             // Travel in small steps; each step is one tick
             final Location position = caster.getEyeLocation().clone();
@@ -205,7 +180,7 @@ public class AirBlades extends AttackSpell implements Listener {
                 }
 
                 // ---- Visual: blade cross-section (two perpendicular lines of particles) ----
-                spawnBladeParticles(position, direction);
+                spawnBladeParticles(position, direction, size);
 
                 // ---- Register as an offensive spell component for the counter/barrier system ----
                 SpellParticleComponent comp = new SpellParticleComponent(
@@ -250,18 +225,18 @@ public class AirBlades extends AttackSpell implements Listener {
     /**
      * Draws a blade silhouette: a short line of particles perpendicular to travel direction.
      */
-    private void spawnBladeParticles(Location center, Vector direction) {
+    private void spawnBladeParticles(Location center, Vector direction, double size) {
         // Perpendicular vector in the horizontal plane
         Vector perp = new Vector(-direction.getZ(), 0, direction.getX()).normalize();
 
         int steps = 5;
-        double halfLen = 0.6; // half-length of the blade cross in blocks
+        double halfLen = size; // half-length of the blade cross in blocks
 
         for (int i = -steps; i <= steps; i++) {
             double t = ((double) i / steps) * halfLen;
             Location loc = center.clone().add(perp.clone().multiply(t));
             loc.getWorld().spawnParticle(
-                    Particle.REDSTONE, loc, 1, 0, 0, 0, 0,
+                    Utils.DUST, loc, 1, 0, 0, 0, 0,
                     new Particle.DustOptions(Color.fromRGB(220, 235, 255), 0.7f)
             );
         }
@@ -271,7 +246,7 @@ public class AirBlades extends AttackSpell implements Listener {
             double t = ((double) i / 2) * 0.3;
             Location loc = center.clone().add(0, t, 0);
             loc.getWorld().spawnParticle(
-                    Particle.REDSTONE, loc, 1, 0, 0, 0, 0,
+                    Utils.DUST, loc, 1, 0, 0, 0, 0,
                     new Particle.DustOptions(Color.WHITE, 0.5f)
             );
         }
@@ -290,7 +265,7 @@ public class AirBlades extends AttackSpell implements Listener {
     // ============================================
 
     @Override
-    public void onHitBarrier(BarrierSpell barrier, Location location, Player caster) {
+    public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
         location.getWorld().spawnParticle(Particle.CLOUD, location, 20, 0.5, 0.5, 0.5, 0.1);
         location.getWorld().spawnParticle(Particle.SWEEP_ATTACK, location, 4);
         location.getWorld().playSound(location, Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1f, 1.6f);
@@ -308,10 +283,10 @@ public class AirBlades extends AttackSpell implements Listener {
     // ============================================
 
     @Override
-    public int circleAction(Player p, PlayerSpellPrepareEvent e) {
+    public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
         return Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
             if (e.isCancelled()) return;
-            Location playerLoc = p.getEyeLocation();
+            Location playerLoc = caster.getEyeLocation();
             float yaw   = playerLoc.getYaw();
             float pitch = playerLoc.getPitch();
             Vector forward = playerLoc.getDirection().normalize().multiply(1.5);

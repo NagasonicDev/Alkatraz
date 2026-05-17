@@ -1,17 +1,17 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
 import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent;
+import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
-import me.nagasonic.alkatraz.events.PlayerSpellPrepareEvent;
+import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
+import me.nagasonic.alkatraz.spells.Element;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.configuration.OptionValue;
 import me.nagasonic.alkatraz.spells.configuration.SpellOption;
-import me.nagasonic.alkatraz.spells.configuration.impact.implementation.StatModifierImpact;
-import me.nagasonic.alkatraz.spells.configuration.impact.implementation.TagImpact;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.util.ParticleUtils;
@@ -19,6 +19,9 @@ import me.nagasonic.alkatraz.util.StatUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -29,7 +32,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -147,10 +149,42 @@ public class Stealth extends Spell implements Listener {
     }
 
     @Override
-    public int circleAction(Player p, PlayerSpellPrepareEvent e) {
+    public void mobCastAction(Mob caster, ItemStack wand) {
+        if (!caster.isDead()) {
+            NBT.modifyPersistentData(caster, nbt -> {
+                nbt.setBoolean("stealth", true);
+            });
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                Alkatraz.getNms().setInvisible(caster, true);
+                if (caster instanceof HumanEntity e) {
+                    Alkatraz.getNms().fakeArmor(e, player, null, null, null, null);
+                }
+            }
+            Bukkit.getScheduler().scheduleSyncDelayedTask(Alkatraz.getInstance(), () -> {
+                if (!caster.isDead()) {
+                    for (Player player : Bukkit.getOnlinePlayers()) {
+                        Alkatraz.getNms().setInvisible(caster, false);
+                        if (caster instanceof HumanEntity e) {
+                            Alkatraz.getNms().fakeArmor(e, player, e.getInventory().getHelmet(), e.getInventory().getChestplate(), e.getInventory().getLeggings(), e.getInventory().getBoots());
+                        }
+                    }
+                    Bukkit.getScheduler().scheduleSyncDelayedTask(Alkatraz.getInstance(), () -> {
+                        if (!caster.isDead()) {
+                            NBT.modifyPersistentData(caster, nbt -> {
+                                nbt.setBoolean("stealth", false);
+                            });
+                        }
+                    }, 200L);
+                }
+            }, 600L);
+        }
+    }
+
+    @Override
+    public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
         int d = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
             if (e.isCancelled()) return;
-            Location playerLoc = p.getEyeLocation(); // Player eye location
+            Location playerLoc = caster.getEyeLocation(); // Player eye location
             float yaw = playerLoc.getYaw();
             float pitch = playerLoc.getPitch();
 
@@ -267,5 +301,10 @@ public class Stealth extends Spell implements Listener {
                 }
             }
         }
+    }
+
+    @Override
+    public boolean canMobCast(Mob mob){
+        return !NBT.getPersistentData(mob, nbt -> nbt.getBoolean("stealth"));
     }
 }

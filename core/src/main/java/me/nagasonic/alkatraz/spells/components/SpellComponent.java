@@ -2,6 +2,7 @@ package me.nagasonic.alkatraz.spells.components;
 
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.types.properties.SpellProperties;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -10,7 +11,7 @@ import java.util.UUID;
 public interface SpellComponent {
     Spell getSpell();
     SpellProperties getProperties();
-    Player getCaster();
+    LivingEntity getCaster();
     ItemStack getWand();
     SpellComponentType getType();
     UUID getComponentID();

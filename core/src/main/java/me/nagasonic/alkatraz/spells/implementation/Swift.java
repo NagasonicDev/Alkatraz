@@ -4,7 +4,7 @@ import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
-import me.nagasonic.alkatraz.events.PlayerSpellPrepareEvent;
+import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
@@ -14,7 +14,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
@@ -55,10 +58,27 @@ public class Swift extends Spell {
     }
 
     @Override
-    public int circleAction(Player p, PlayerSpellPrepareEvent e) {
+    public void mobCastAction(Mob caster, ItemStack wand) {
+        if (!caster.isDead()){
+            double wandPower = NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+            caster.setVelocity(caster.getEyeLocation().getDirection().normalize().multiply(wandPower * strength));
+            AtomicInteger i = new AtomicInteger(0);
+            taskID = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
+                if (i.get() < 8){
+                    caster.getWorld().spawnParticle(Particle.CLOUD, caster.getLocation(), 10, 0.5, 0.5, 0.5, 0.25);
+                    i.set(i.get() + 1);
+                }else{
+                    stop();
+                }
+            }, 0L, 5L);
+        }
+    }
+
+    @Override
+    public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
         int d = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
             if (e.isCancelled()) return;
-            Location playerLoc = p.getEyeLocation(); // Player eye location
+            Location playerLoc = caster.getEyeLocation(); // Player eye location
             float yaw = playerLoc.getYaw();
             float pitch = 0;
 
@@ -90,5 +110,14 @@ public class Swift extends Spell {
 
     private void stop(){
         Bukkit.getServer().getScheduler().cancelTask(this.taskID);
+    }
+
+    @Override
+    public boolean canMobCast(Mob m) {
+        double dif = m.getHealth() /  m.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
+        if (dif <= 0.3){
+            return true;
+        }
+        return false;
     }
 }

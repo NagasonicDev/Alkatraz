@@ -5,9 +5,7 @@ import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.dom.Ground;
-import me.nagasonic.alkatraz.events.PlayerSpellPrepareEvent;
-import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
-import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
+import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.Element;
 import me.nagasonic.alkatraz.spells.components.*;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
@@ -15,7 +13,6 @@ import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
-import me.nagasonic.alkatraz.spells.types.properties.SpellProperties;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
@@ -24,6 +21,7 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -34,7 +32,6 @@ import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class Tremor extends AttackSpell implements Listener {
     public Tremor(String type) {
@@ -42,7 +39,7 @@ public class Tremor extends AttackSpell implements Listener {
     }
 
     @Override
-    public void onHitBarrier(BarrierSpell barrier, Location location, Player caster) {
+    public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
         location.getWorld().spawnParticle(Particle.BLOCK_DUST, location, 15, Material.DIRT.createBlockData());
     }
 
@@ -146,10 +143,94 @@ public class Tremor extends AttackSpell implements Listener {
     }
 
     @Override
-    public int circleAction(Player p, PlayerSpellPrepareEvent e) {
+    public void mobCastAction(Mob caster, ItemStack wand) {
+        if (!caster.isDead()){
+            AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster), getBasePower() * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")), AttackType.PHYSICAL);
+            final Location base = caster.getLocation().subtract(0, 0.5, 0);
+            Vector dir = caster.getTarget().getLocation().toVector().subtract(caster.getLocation().toVector()).normalize();
+            Vector perp = dir.clone().rotateAroundY(90);
+            List<Location> locations = new ArrayList<>();
+            locations.add(base.clone());
+            locations.add(base.clone().add(perp));
+            locations.add(base.clone().subtract(perp));
+            locations.add(base.clone().add(perp.multiply(2)));
+            locations.add(base.clone().subtract(perp.multiply(2)));
+            new BukkitRunnable(){
+                private int counter = 0;
+                private List<Location> previous = new ArrayList<>(locations);
+
+                @Override
+                public void run() {
+                    if (props.isCountered() || props.isCancelled()) {
+                        cancel();
+                        return;
+                    }
+                    List<Location> toAdd = new ArrayList<>();
+                    if (previous.isEmpty()) {
+                        cancel();
+                        return;
+                    }
+                    for (Location prev : previous) {
+                        Location top = prev.clone();
+                        top.add(dir);
+                        top.add(0, 5, 0);
+                        Location loc = Utils.findTopSolid(top, 10);
+                        if (loc == null){
+                            cancel();
+                            return;
+                        }
+                        if (Ground.isGround(loc.getBlock().getType())){
+                            SpellBlockComponent component = new SpellBlockComponent(
+                                    Tremor.this,
+                                    props,
+                                    caster,
+                                    wand,
+                                    SpellComponentType.OFFENSE,
+                                    loc.getBlock(),
+                                    1,
+                                    8
+                            );
+                            SpellComponentHandler.register(component);
+                            BlockData data = Bukkit.createBlockData(loc.getBlock().getType());
+                            FallingBlock b = loc.getWorld().spawnFallingBlock(loc.add(0, 0.5, 0), data);
+                            b.setHurtEntities(false);
+                            b.setVelocity(new Vector(0, 0.5, 0));
+                            NBT.modifyPersistentData(b, nbt -> {
+                                nbt.setString("spell", getId());
+                            });
+                            List<Location> locs = ParticleUtils.circle(loc, 1, 1, 0, 0);
+                            for (Location l : locs){
+                                l.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, l, 1);
+                            }
+                            for (LivingEntity entity : loc.getNearbyLivingEntities(2)) {
+                                if (entity != caster && !props.hasHit(entity)) {
+                                    entity.setVelocity(new Vector(0, 1, 0));
+                                    entity.damage(getPower(caster, entity, props.getRemainingPower()));
+                                    props.hit(entity);
+                                }
+                            }
+
+                            toAdd.add(loc);
+                        }else{
+                            previous.remove(prev);
+                        }
+                    }
+                    previous.clear();
+                    previous = toAdd;
+                    if (counter == 11) {
+                        cancel();
+                    }
+                    counter++;
+                }
+            }.runTaskTimer(Alkatraz.getInstance(), 0, 1);
+        }
+    }
+
+    @Override
+    public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
         int d = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
             if (e.isCancelled()) return;
-            Location playerLoc = p.getEyeLocation(); // Player eye location
+            Location playerLoc = caster.getEyeLocation(); // Player eye location
             float yaw = playerLoc.getYaw();
             float pitch = playerLoc.getPitch();
 

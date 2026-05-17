@@ -8,6 +8,7 @@ import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 
 public abstract class AttackSpell extends Spell {
@@ -34,42 +35,65 @@ public abstract class AttackSpell extends Spell {
     /**
      * Gets power with player-specific modifiers applied
      */
-    public double getPower(Player caster, LivingEntity target, double power) {
-        // Apply spell option modifiers
-        double modifiedPower = getModifiedStat(caster, "damage", power);
+    public double getPower(LivingEntity caster, LivingEntity target, double power) {
+        if (caster instanceof Player p){
+            // Apply spell option modifiers
+            double modifiedPower = getModifiedStat(p, "damage", power);
 
-        // Apply affinity/resistance
-        MagicProfile casterProfile = ProfileManager.getProfile(caster, MagicProfile.class);
-        double casterAffinity = casterProfile.getAffinity(getElement());
+            // Apply affinity/resistance
+            MagicProfile casterProfile = ProfileManager.getProfile(p, MagicProfile.class);
+            double casterAffinity = casterProfile.getAffinity(getElement());
 
-        double targetResistance;
-        if (target instanceof Player t) {
-            MagicProfile targetProfile = ProfileManager.getProfile(t, MagicProfile.class);
-            targetResistance = targetProfile.getResistance(getElement());
-        } else {
-            targetResistance = Utils.getEntityResistance(getElement(), target);
+            double targetResistance;
+            if (target instanceof Player t) {
+                MagicProfile targetProfile = ProfileManager.getProfile(t, MagicProfile.class);
+                targetResistance = targetProfile.getResistance(getElement());
+            } else {
+                targetResistance = Utils.getEntityResistance(getElement(), target);
+            }
+
+            return modifiedPower * (1 + ((casterAffinity - targetResistance) / 100));
+        }else {
+            double casterAffinity = Utils.getEntityAffinity(getElement(), caster);
+
+            double targetResistance;
+            if (target instanceof Player t) {
+                MagicProfile targetProfile = ProfileManager.getProfile(t, MagicProfile.class);
+                targetResistance = targetProfile.getResistance(getElement());
+            } else {
+                targetResistance = Utils.getEntityResistance(getElement(), target);
+            }
+            return power * (1 + ((casterAffinity - targetResistance) / 100));
         }
-
-        return modifiedPower * (1 + ((casterAffinity - targetResistance) / 100));
     }
 
     /**
      * Overload for non-entity targets (barriers, constructs, etc)
      */
-    public double getPower(Player caster, double power) {
-        double modifiedPower = getModifiedStat(caster, "damage", power);
-        MagicProfile profile = ProfileManager.getProfile(caster, MagicProfile.class);
-        return modifiedPower * (1 + (profile.getAffinity(getElement()) / 100));
+    public double getPower(LivingEntity caster, double power) {
+        if (caster instanceof Player p){
+            double modifiedPower = getModifiedStat(p, "damage", power);
+            MagicProfile profile = ProfileManager.getProfile(p, MagicProfile.class);
+            return modifiedPower * (1 + (profile.getAffinity(getElement()) / 100));
+        }else{
+            double casterAffinity = Utils.getEntityAffinity(getElement(), caster);
+            return power * (1 + (casterAffinity / 100));
+        }
     }
 
     /**
      * Called when this spell hits a barrier
      */
-    public abstract void onHitBarrier(BarrierSpell barrier, Location location, Player caster);
+    public abstract void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster);
 
     /**
      * Called when this spell is fully countered
      */
     public abstract void onCountered(Location location);
+
+    @Override
+    public boolean canMobCast(Mob mob){
+        return mob.getTarget() != null;
+    }
 
 }
