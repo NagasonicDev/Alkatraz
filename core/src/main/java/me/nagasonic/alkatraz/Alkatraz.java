@@ -80,6 +80,7 @@ public final class Alkatraz extends JavaPlugin {
         Metrics metrics = new Metrics(this, 27657);
         glowingEntities = new GlowingEntities(instance);
         ProfileRegistry.registerProfiles();
+        nms.registerMagicEntities();
         ProfileManager.initialize();
         WandRegistry.registerWands();
         SpellRegistry.registerSpells();

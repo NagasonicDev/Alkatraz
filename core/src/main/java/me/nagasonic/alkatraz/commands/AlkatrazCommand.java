@@ -1,5 +1,6 @@
 package me.nagasonic.alkatraz.commands;
 
+import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.dom.Permission;
 import me.nagasonic.alkatraz.gui.implementation.StatsMenu;
@@ -241,7 +242,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
             }
         } else if (args[0].equals("test")) {
             Player p = (Player) sender;
-            p.getInventory().addItem(SpellbookFactory.createRandomSpellBook(1, 2, 3, 4, 5, 6, 7, 8, 9));
+            Alkatraz.getNms().spawnMagicEntity("magic_zombie", p.getLocation());
         } else if (args[0].equals("gencode")) {
             sender.sendMessage(Utils.genCode());
         }

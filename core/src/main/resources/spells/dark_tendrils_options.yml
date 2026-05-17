@@ -1,0 +1,293 @@
+# =============================================================================
+# dark_tendrils_options.yml
+# Spell option configuration for the Dark Tendrils spell.
+#
+# Structure overview:
+#   options:
+#     <option-id>:
+#       description:   <string>
+#       icon:          <Material name>
+#       default_index: <int>   # 0-based index into 'values' list order
+#       values:
+#         <value-id>:
+#           display_name: <string>
+#           description:  <string>
+#           icon:         <Material name>
+#           value_type:   int | double | float | boolean | string | auto
+#           value:        <typed value>
+#           requirements: [...]   # optional — list of requirement entries
+#           impacts:      [...]   # optional — list of impact entries
+#
+# Requirement entry fields:
+#   type: number_stat | boolean_stat | permission | option_value | composite
+#   (plus type-specific fields — see ValueRequirementFactory for full docs)
+#
+# Impact entry fields:
+#   type: stat_modifier | mana_cost | tag
+#   (plus type-specific fields — see ValueImpactFactory for full docs)
+# =============================================================================
+
+options:
+
+  # ---------------------------------------------------------------------------
+  # speed — Adjust tendril movement speed
+  # ---------------------------------------------------------------------------
+  speed:
+    description: "Adjust tendril movement speed"
+    icon: FEATHER
+    default_index: 1          # "normal" is the default
+
+    values:
+
+      slow:
+        display_name: "Slow Hunt"
+        description: "Slower tendrils, more damage"
+        icon: SOUL_SAND
+        value_type: double
+        value: 0.2
+        requirements:
+          - type: number_stat
+            stat: mastery_dark_tendrils
+            minimum: 50
+            description: "Requires 50 Dark Tendrils mastery"
+        impacts:
+          - type: stat_modifier
+            stat: tendril_speed
+            value: 0.2
+            modifier: SET
+          - type: stat_modifier
+            stat: lock_on_speed
+            value: 0.6
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 1.3
+            modifier: MULTIPLY
+
+      normal:
+        display_name: "Normal Hunt"
+        description:  "Standard hunting speed"
+        icon: FEATHER
+        value_type: double
+        value: 0.3
+        # No requirements — available to everyone.
+        impacts:
+          - type: stat_modifier
+            stat: tendril_speed
+            value: 0.3
+            modifier: SET
+          - type: stat_modifier
+            stat: lock_on_speed
+            value: 0.8
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 1.0
+            modifier: MULTIPLY
+
+      fast:
+        display_name: "Rapid Hunt"
+        description: "Fast tendrils, less damage"
+        icon: SUGAR
+        value_type: double
+        value: 0.5
+        requirements:
+          - type: number_stat
+            stat: mastery_dark_tendrils
+            minimum: 100
+            description: "Requires 100 Dark Tendrils mastery"
+          - type: number_stat
+            stat: circleLevel
+            minimum: 4
+            description: "Requires Circle Level 4"
+        impacts:
+          - type: stat_modifier
+            stat: tendril_speed
+            value: 0.5
+            modifier: SET
+          - type: stat_modifier
+            stat: lock_on_speed
+            value: 1.2
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 0.7
+            modifier: MULTIPLY
+          - type: mana_cost
+            change: 10
+
+  # ---------------------------------------------------------------------------
+  # duration — Adjust tendril lifetime
+  # ---------------------------------------------------------------------------
+  duration:
+    description: "Adjust tendril lifetime"
+    icon: CLOCK
+    default_index: 1          # "normal" is the default
+
+    values:
+
+      short:
+        display_name: "Short Life"
+        description: "15 second duration, reduced cost"
+        icon: CLOCK
+        value_type: int
+        value: 15
+        requirements:
+          - type: number_stat
+            stat: mastery_dark_tendrils
+            minimum: 25
+            description: "Requires 25 Dark Tendrils mastery"
+        impacts:
+          - type: stat_modifier
+            stat: duration
+            value: 15
+            modifier: SET
+          - type: mana_cost
+            change: -15
+
+      normal:
+        display_name: "Normal Life"
+        description: "30 second duration"
+        icon: CLOCK
+        value_type: int
+        value: 30
+        impacts:
+          - type: stat_modifier
+            stat: duration
+            value: 30
+            modifier: SET
+
+      long:
+        display_name: "Extended Life"
+        description: "60 second duration, higher cost"
+        icon: CLOCK
+        value_type: int
+        value: 60
+        requirements:
+          - type: number_stat
+            stat: mastery_dark_tendrils
+            minimum: 100
+            description: "Requires 100 Dark Tendrils mastery"
+          - type: number_stat
+            stat: circleLevel
+            minimum: 5
+            description: "Requires Circle Level 5"
+        impacts:
+          - type: stat_modifier
+            stat: duration
+            value: 60
+            modifier: SET
+          - type: mana_cost
+            change: 25
+
+  # ---------------------------------------------------------------------------
+  # effects — Adjust debuff potency
+  # ---------------------------------------------------------------------------
+  effects:
+    description: "Adjust debuff potency"
+    icon: FERMENTED_SPIDER_EYE
+    default_index: 0          # "normal" is the default
+
+    values:
+
+      normal:
+        display_name: "Normal Debuffs"
+        description: "Standard effect duration (5s)"
+        icon: SPIDER_EYE
+        value_type: int
+        value: 5
+        impacts:
+          - type: stat_modifier
+            stat: effect_duration
+            value: 5
+            modifier: SET
+
+      strong:
+        display_name: "Strong Debuffs"
+        description:  "Extended effect duration (10s)"
+        icon: FERMENTED_SPIDER_EYE
+        value_type: int
+        value: 10
+        requirements:
+          - type: number_stat
+            stat: mastery_dark_tendrils
+            minimum: 80
+            description: "Requires 80 Dark Tendrils mastery"
+          - type: number_stat
+            stat: circleLevel
+            minimum: 4
+            description: "Requires Circle Level 4"
+        impacts:
+          - type: stat_modifier
+            stat: effect_duration
+            value: 10
+            modifier: SET
+          - type: mana_cost
+            change: 20
+
+  # -------------------------------------------------------------
+  # Tendril Count (1-3)
+  # -------------------------------------------------------------
+  count:
+    description: "Adjust Tendril Count"
+    icon: PAPER
+    default_index: 0
+
+    values:
+      single:
+        display_name: "Single Tendril"
+        description: "A single dark tendril."
+        icon: STICK
+        value_type: int
+        value: 1
+        impacts:
+          - type: stat_modifier
+            stat: tendril_count
+            value: 1
+            modifier: SET
+
+      double:
+        display_name: "Double Tendrils"
+        description: "Prepare for trouble! And make it double!"
+        icon: SHEARS
+        value_type: int
+        value: 2
+        requirements:
+          - type: number_stat
+            stat: mastery_dark_tendrils
+            minimum: 80
+            description: "Requires 80 Dark Tendrils mastery"
+          - type: number_stat
+            stat: circleLevel
+            minimum: 4
+            description: "Requires Circle Level 4"
+        impacts:
+          - type: stat_modifier
+            stat: tendril_count
+            value: 2
+            modifier: SET
+          - type: mana_cost
+            change: 25
+
+      triple:
+        display_name: "Triple Tendrils"
+        description: "Third time's the charm?"
+        icon: TRIDENT
+        value_type: int
+        value: 3
+        requirements:
+          - type: number_stat
+            stat: mastery_dark_tendrils
+            minimum: 150
+            description: "Requires 150 Dark Tendrils mastery"
+          - type: number_stat
+            stat: circleLevel
+            minimum: 4
+            description: "Requires Circle Level 4"
+        impacts:
+          - type: stat_modifier
+            stat: tendril_count
+            value: 3
+            modifier: SET
+          - type: mana_cost
+            change: 40
