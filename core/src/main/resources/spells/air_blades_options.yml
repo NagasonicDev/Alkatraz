@@ -1,0 +1,149 @@
+# =============================================================================
+# air_blades_options.yml
+# Spell option configuration for the Air Blades spell.
+#
+# Structure overview:
+#   options:
+#     <option-id>:
+#       description:   <string>
+#       icon:          <Material name>
+#       default_index: <int>   # 0-based index into 'values' list order
+#       values:
+#         <value-id>:
+#           display_name: <string>
+#           description:  <string>
+#           icon:         <Material name>
+#           value_type:   int | double | float | boolean | string | auto
+#           value:        <typed value>
+#           requirements: [...]   # optional — list of requirement entries
+#           impacts:      [...]   # optional — list of impact entries
+#
+# Requirement entry fields:
+#   type: number_stat | boolean_stat | permission | option_value | composite
+#
+# Impact entry fields:
+#   type: stat_modifier | mana_cost | tag
+# =============================================================================
+
+options:
+  count:
+    description: "Number of blades fired."
+    icon: FEATHER
+    default_index: 1
+
+    values:
+
+      single:
+        display_name: "Single Blade"
+        description: "Fires one focused blade."
+        icon: STICK
+        value_type: int
+        value: 1
+        impacts:
+          - type: stat_modifier
+            stat: blade_count
+            value: 1
+            modifier: SET
+          - type: mana_cost
+            change: -10
+          - type: stat_modifier
+            stat: blade_size
+            value: 1.2
+            modifier: MULTIPLY
+
+      triple:
+        display_name: "Tri-Blade"
+        description: "Fires three blades in a spread."
+        icon: TRIDENT
+        value_type: int
+        value: 3
+        impacts:
+          - type: stat_modifier
+            stat: blade_count
+            value: 3
+            modifier: SET
+
+      quintuple:
+        display_name: "Five Blades"
+        description: "Fires five blades in a wide spread."
+        icon: NETHER_STAR
+        value_type: int
+        value: 5
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 3
+            description: "Requires Circle Level 3"
+        impacts:
+          - type: stat_modifier
+            stat: blade_count
+            value: 5
+            modifier: SET
+
+  size:
+    description: "Change the size of each blade."
+    icon: DEBUG_STICK
+    default_index: 1
+
+    values:
+      small:
+        display_name: "Small Blades"
+        description: "Fires small blades that pack a punch."
+        icon: IRON_NUGGET
+        value_type: double
+        value: 0.4
+        requirements:
+          - type: number_stat
+            stat: mastery_air_blades
+            minimum: 50
+            description: "Requires at least 50 mastery in Air Blades"
+          - type: number_stat
+            stat: circleLevel
+            minimum: 3
+            description: "Requires Circle Level 3"
+        impacts:
+          - type: stat_modifier
+            stat: blade_size
+            value: 0.4
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 1.25
+            modifier: MULTIPLY
+
+      normal:
+        display_name: "Normal Blades"
+        description: "The normal size of blades."
+        icon: IRON_INGOT
+        value_type: double
+        value: 0.6
+        impacts:
+          - type: stat_modifier
+            stat: blade_size
+            value: 0.6
+            modifier: SET
+
+      large:
+        display_name: "Large Blades"
+        description: "Large blades for AOE carnage."
+        icon: IRON_BLOCK
+        value_type: double
+        value: 0.8
+        requirements:
+          - type: number_stat
+            stat: mastery_air_blades
+            minimum: 45
+            description: "Requires at least 45 mastery in Air Blades"
+          - type: number_stat
+            stat: circleLevel
+            minimum: 3
+            description: "Requires Circle Level 3"
+        impacts:
+          - type: stat_modifier
+            stat: blade_size
+            value: 0.9
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 0.75
+            modifier: MULTIPLY

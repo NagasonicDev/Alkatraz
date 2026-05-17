@@ -393,8 +393,8 @@ public class Utils {
         }
     }
 
-    public static Location castLocation(Player p){
-        return p.getEyeLocation().getDirection().normalize().multiply(1.5).toLocation(p.getWorld());
+    public static Location castLocation(LivingEntity caster){
+        return caster.getEyeLocation().getDirection().normalize().multiply(1.5).toLocation(caster.getWorld());
     }
 
     public static String genCode(){
