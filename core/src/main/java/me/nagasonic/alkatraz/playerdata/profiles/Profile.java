@@ -242,10 +242,11 @@ public abstract class Profile {
         strings.put(name, new StringHolder(def, def));
     }
 
-    protected void stringSetStat(String name){
+    protected void stringSetStat(String name) { stringSetStat(name, new HashSet<>()); }
+    protected void stringSetStat(String name, Set<String> def){
         if (allStatNames.contains(name)) return;
         allStatNames.add(name);
-        stringSets.put(name, new HashSet<>());
+        stringSets.put(name, def);
     }
 
     public Profile getBlankProfile(Player player){

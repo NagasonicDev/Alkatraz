@@ -314,7 +314,7 @@ public class MagicProfile extends Profile {
      * Returns -1 if spell mastery not set (same as old system)
      */
     public int getSpellMastery(Spell spell) {
-        String key = "mastery_" + spell.getType().toLowerCase();
+        String key = "mastery_" + spell.getId();
         try {
             if (isInt(key)) {
                 return getInt(key);
@@ -329,7 +329,7 @@ public class MagicProfile extends Profile {
      * Sets the mastery level for a spell (matches old PlayerData.setSpellMastery())
      */
     public void setSpellMastery(Spell spell, int mastery) {
-        String key = "mastery_" + spell.getType().toLowerCase();
+        String key = "mastery_" + spell.getId();
         // Dynamically create the stat if it doesn't exist
         if (!isInt(key)) {
             intStat(key, mastery);
