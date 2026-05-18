@@ -1,0 +1,209 @@
+# =============================================================================
+# air_burst_options.yml
+# Spell option configuration for the Air Burst spell.
+#
+# Structure overview:
+#   options:
+#     <option-id>:
+#       description:   <string>
+#       icon:          <Material name>
+#       default_index: <int>   # 0-based index into 'values' list order
+#       values:
+#         <value-id>:
+#           display_name: <string>
+#           description:  <string>
+#           icon:         <Material name>
+#           value_type:   int | double | float | boolean | string | auto
+#           value:        <typed value>
+#           requirements: [...]   # optional — list of requirement entries
+#           impacts:      [...]   # optional — list of impact entries
+#
+# Requirement entry fields:
+#   type: number_stat | boolean_stat | permission | option_value | composite
+#
+# Impact entry fields:
+#   type: stat_modifier | mana_cost | tag
+# =============================================================================
+
+options:
+
+  # ---------------------------------------------------------------------------
+  # blast_size — How large the burst of air is
+  # ---------------------------------------------------------------------------
+  blast_size:
+    description: "How large the burst of air is."
+    icon: FEATHER
+    default_index: 1        # normal_burst
+
+    values:
+
+      small_burst:
+        display_name: "Small Burst"
+        description: "A small burst of air."
+        icon: IRON_NUGGET
+        value_type: double
+        value: 0.75
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 3
+            description: "Requires Circle Level 3"
+          - type: number_stat
+            stat: mastery_air_burst   # replace with your spell type string lowercased
+            minimum: 50
+            description: "Requires 50 Air Burst mastery"
+        impacts:
+          - type: stat_modifier
+            stat: blast_size
+            value: 0.75
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 1.3
+            modifier: MULTIPLY
+
+      normal_burst:
+        display_name: "Normal Burst"
+        description: "A normal burst of air."
+        icon: IRON_INGOT
+        value_type: double
+        value: 1.0
+        impacts:
+          - type: stat_modifier
+            stat: blast_size
+            value: 1.0
+            modifier: SET
+
+      large_burst:
+        display_name: "Large Burst"
+        description: "A large burst of air."
+        icon: IRON_BLOCK
+        value_type: double
+        value: 1.3
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 3
+            description: "Requires Circle Level 3"
+          - type: number_stat
+            stat: mastery_air_burst
+            minimum: 30
+            description: "Requires 30 Air Burst mastery"
+        impacts:
+          - type: stat_modifier
+            stat: blast_size
+            value: 1.3
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 0.7
+            modifier: MULTIPLY
+
+  # ---------------------------------------------------------------------------
+  # range — Range of the burst
+  # ---------------------------------------------------------------------------
+  range:
+    description: "Range of the burst."
+    icon: SPYGLASS
+    default_index: 2        # normal_range
+
+    values:
+
+      extra_low_range:
+        display_name: "Extra Low Range"
+        description: "Burst does not travel far."
+        icon: ARROW
+        value_type: double
+        value: 5.0
+        requirements:
+          - type: number_stat
+            stat: mastery_air_burst
+            minimum: 100
+            description: "Requires 100 Air Burst mastery"
+          - type: number_stat
+            stat: circleLevel
+            minimum: 3
+            description: "Requires Circle Level 3"
+        impacts:
+          - type: stat_modifier
+            stat: range
+            value: 5.0
+            modifier: SET
+          - type: stat_modifier
+            stat: blast_size
+            value: 1.2
+            modifier: MULTIPLY
+          - type: stat_modifier
+            stat: damage
+            value: 1.15
+            modifier: MULTIPLY
+
+      low_range:
+        display_name: "Low Range"
+        description: "Burst travels a smaller distance."
+        icon: TIPPED_ARROW
+        value_type: double
+        value: 7.5
+        requirements:
+          - type: number_stat
+            stat: mastery_air_burst
+            minimum: 50
+            description: "Requires 50 Air Burst mastery"
+          - type: number_stat
+            stat: circleLevel
+            minimum: 2
+            description: "Requires Circle Level 2"
+        impacts:
+          - type: stat_modifier
+            stat: range
+            value: 7.5
+            modifier: SET
+          - type: stat_modifier
+            stat: blast_size
+            value: 1.1
+            modifier: MULTIPLY
+          - type: stat_modifier
+            stat: damage
+            value: 1.075
+            modifier: MULTIPLY
+
+      normal_range:
+        display_name: "Normal Range"
+        description: "Burst travels a normal amount."
+        icon: SPECTRAL_ARROW
+        value_type: double
+        value: 10.0
+        impacts:
+          - type: stat_modifier
+            stat: range
+            value: 10.0
+            modifier: SET
+
+      extended_range:
+        display_name: "Extended Range"
+        description: "Burst travels further than usual."
+        icon: BOW
+        value_type: double
+        value: 12.5
+        requirements:
+          - type: number_stat
+            stat: mastery_air_burst
+            minimum: 50
+            description: "Requires 50 Air Burst mastery"
+          - type: number_stat
+            stat: circleLevel
+            minimum: 2
+            description: "Requires Circle Level 2"
+        impacts:
+          - type: stat_modifier
+            stat: range
+            value: 12.5
+            modifier: SET
+          - type: stat_modifier
+            stat: blast_size
+            value: 0.9
+            modifier: MULTIPLY
+          - type: stat_modifier
+            stat: damage
+            value: 0.925
+            modifier: MULTIPLY

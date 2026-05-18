@@ -1,0 +1,223 @@
+# =============================================================================
+# geyser_options.yml
+# Spell option configuration for the Geyser spell.
+#
+# Structure overview:
+#   options:
+#     <option-id>:
+#       description:   <string>
+#       icon:          <Material name>
+#       default_index: <int>   # 0-based index into 'values' list order
+#       values:
+#         <value-id>:
+#           display_name: <string>
+#           description:  <string>
+#           icon:         <Material name>
+#           value_type:   int | double | float | boolean | string | auto
+#           value:        <typed value>
+#           requirements: [...]   # optional — list of requirement entries
+#           impacts:      [...]   # optional — list of impact entries
+#
+# Requirement entry fields:
+#   type: number_stat | boolean_stat | permission | option_value | composite
+#
+# Impact entry fields:
+#   type: stat_modifier | mana_cost | tag
+# =============================================================================
+
+options:
+
+  # ---------------------------------------------------------------------------
+  # height — Adjust the height of the geyser column
+  # ---------------------------------------------------------------------------
+  height:
+    description: "Adjust the height of the geyser column"
+    icon: SCAFFOLDING
+    default_index: 0
+
+    values:
+
+      short:
+        display_name: "Short"
+        description: "Low geyser — 5 blocks high, concentrated damage (+20%)"
+        icon: IRON_NUGGET
+        value_type: double
+        value: 5.0
+        impacts:
+          - type: stat_modifier
+            stat: height
+            value: 5.0
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 1.2
+            modifier: MULTIPLY
+
+      normal:
+        display_name: "Normal"
+        description: "Standard geyser — 10 blocks high"
+        icon: IRON_INGOT
+        value_type: double
+        value: 10.0
+        impacts:
+          - type: stat_modifier
+            stat: height
+            value: 10.0
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 1.0
+            modifier: MULTIPLY
+
+      tall:
+        display_name: "Tall"
+        description: "High geyser — 18 blocks, reduced damage (-20%)"
+        icon: IRON_BLOCK
+        value_type: double
+        value: 18.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 4
+            description: "Requires Circle Level 4"
+        impacts:
+          - type: stat_modifier
+            stat: height
+            value: 18.0
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 0.8
+            modifier: MULTIPLY
+          - type: mana_cost
+            change: 10
+
+  # ---------------------------------------------------------------------------
+  # power — Adjust the launch force of the geyser
+  # ---------------------------------------------------------------------------
+  power:
+    description: "Adjust the launch force of the geyser"
+    icon: PISTON
+    default_index: 1
+
+    values:
+
+      weak:
+        display_name: "Weak"
+        description: "Gentle push — lower mana cost"
+        icon: SLIME_BALL
+        value_type: double
+        value: 0.6
+        impacts:
+          - type: stat_modifier
+            stat: launch_power
+            value: 0.6
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 0.7
+            modifier: MULTIPLY
+
+      normal:
+        display_name: "Normal"
+        description: "Standard launch force"
+        icon: FEATHER
+        value_type: double
+        value: 1.0
+        impacts:
+          - type: stat_modifier
+            stat: launch_power
+            value: 1.0
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 1.0
+            modifier: MULTIPLY
+
+      strong:
+        display_name: "Strong"
+        description: "Powerful eruption — launches enemies high (+30% damage)"
+        icon: BLAZE_POWDER
+        value_type: double
+        value: 1.6
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 3
+            description: "Requires Circle Level 3"
+        impacts:
+          - type: stat_modifier
+            stat: launch_power
+            value: 1.6
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 1.3
+            modifier: MULTIPLY
+          - type: mana_cost
+            change: 12
+
+  # ---------------------------------------------------------------------------
+  # radius — Adjust the width of the geyser base
+  # ---------------------------------------------------------------------------
+  radius:
+    description: "Adjust the width of the geyser base"
+    icon: TNT
+    default_index: 1
+
+    values:
+
+      narrow:
+        display_name: "Narrow"
+        description: "Tight geyser — concentrated damage (+15%)"
+        icon: GOLD_NUGGET
+        value_type: double
+        value: 1.0
+        impacts:
+          - type: stat_modifier
+            stat: radius
+            value: 1.0
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 1.15
+            modifier: MULTIPLY
+
+      normal:
+        display_name: "Normal"
+        description: "Standard geyser width — 2.5 block radius"
+        icon: GOLD_INGOT
+        value_type: double
+        value: 2.5
+        impacts:
+          - type: stat_modifier
+            stat: radius
+            value: 2.5
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 1.0
+            modifier: MULTIPLY
+
+      wide:
+        display_name: "Wide"
+        description: "Broad eruption — 4.5 block radius, reduced damage (-25%)"
+        icon: GOLD_BLOCK
+        value_type: double
+        value: 4.5
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 4
+            description: "Requires Circle Level 4"
+        impacts:
+          - type: stat_modifier
+            stat: radius
+            value: 4.5
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 0.75
+            modifier: MULTIPLY
+          - type: mana_cost
+            change: 8
