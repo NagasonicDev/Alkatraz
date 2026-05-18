@@ -1,0 +1,201 @@
+# =============================================================================
+# wind_vortex_options.yml
+# Spell option configuration for the Wind Vortex spell.
+#
+# Structure overview:
+#   options:
+#     <option-id>:
+#       description:   <string>
+#       icon:          <Material name>
+#       default_index: <int>   # 0-based index into 'values' list order
+#       values:
+#         <value-id>:
+#           display_name: <string>
+#           description:  <string>
+#           icon:         <Material name>
+#           value_type:   int | double | float | boolean | string | auto
+#           value:        <typed value>
+#           requirements: [...]   # optional — list of requirement entries
+#           impacts:      [...]   # optional — list of impact entries
+#
+# Requirement entry fields:
+#   type: number_stat | boolean_stat | permission | option_value | composite
+#
+# Impact entry fields:
+#   type: stat_modifier | mana_cost | tag
+# =============================================================================
+
+options:
+
+  # ---------------------------------------------------------------------------
+  # pull_strength — Adjust vortex pull strength
+  # ---------------------------------------------------------------------------
+  pull_strength:
+    description: "Adjust vortex pull strength"
+    icon: FISHING_ROD
+    default_index: 1
+
+    values:
+
+      gentle:
+        display_name: "Gentle Pull"
+        description: "Weaker pull, reduced damage"
+        icon: STRING
+        value_type: double
+        value: 0.3
+        impacts:
+          - type: stat_modifier
+            stat: pull_strength
+            value: 0.15
+            modifier: SET
+          - type: mana_cost
+            change: -10
+
+      normal:
+        display_name: "Normal Pull"
+        description: "Standard pull strength"
+        icon: FISHING_ROD
+        value_type: double
+        value: 0.4
+        impacts:
+          - type: stat_modifier
+            stat: pull_strength
+            value: 0.25
+            modifier: SET
+
+      strong:
+        display_name: "Strong Pull"
+        description: "Powerful pull, increased damage"
+        icon: TRIPWIRE_HOOK
+        value_type: double
+        value: 0.6
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 3
+            description: "Requires Circle Level 3"
+        impacts:
+          - type: stat_modifier
+            stat: pull_strength
+            value: 0.4
+            modifier: SET
+          - type: mana_cost
+            change: 15
+
+  # ---------------------------------------------------------------------------
+  # radius — Adjust vortex size
+  # ---------------------------------------------------------------------------
+  radius:
+    description: "Adjust vortex size"
+    icon: ENDER_EYE
+    default_index: 1
+
+    values:
+
+      small:
+        display_name: "Small Vortex"
+        description: "Smaller area, faster pull"
+        icon: ENDER_PEARL
+        value_type: double
+        value: 5.0
+        impacts:
+          - type: stat_modifier
+            stat: radius
+            value: 5.0
+            modifier: SET
+          - type: stat_modifier
+            stat: pull_strength
+            value: 1.2
+            modifier: MULTIPLY
+          - type: mana_cost
+            change: -10
+
+      normal:
+        display_name: "Normal Vortex"
+        description: "Standard area"
+        icon: ENDER_EYE
+        value_type: double
+        value: 8.0
+        impacts:
+          - type: stat_modifier
+            stat: radius
+            value: 8.0
+            modifier: SET
+
+      large:
+        display_name: "Large Vortex"
+        description: "Massive area, weaker pull"
+        icon: END_CRYSTAL
+        value_type: double
+        value: 12.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 4
+            description: "Requires Circle Level 4"
+        impacts:
+          - type: stat_modifier
+            stat: radius
+            value: 12.0
+            modifier: SET
+          - type: stat_modifier
+            stat: pull_strength
+            value: 0.8
+            modifier: MULTIPLY
+          - type: mana_cost
+            change: 20
+
+  # ---------------------------------------------------------------------------
+  # duration — Adjust vortex duration
+  # ---------------------------------------------------------------------------
+  duration:
+    description: "Adjust vortex duration"
+    icon: CLOCK
+    default_index: 1
+
+    values:
+
+      brief:
+        display_name: "Brief Vortex"
+        description: "3 second duration"
+        icon: CLOCK
+        value_type: int
+        value: 3
+        impacts:
+          - type: stat_modifier
+            stat: duration
+            value: 3
+            modifier: SET
+          - type: mana_cost
+            change: -15
+
+      normal:
+        display_name: "Normal Vortex"
+        description: "5 second duration"
+        icon: CLOCK
+        value_type: int
+        value: 5
+        impacts:
+          - type: stat_modifier
+            stat: duration
+            value: 5
+            modifier: SET
+
+      extended:
+        display_name: "Extended Vortex"
+        description: "8 second duration"
+        icon: CLOCK
+        value_type: int
+        value: 8
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 3
+            description: "Requires Circle Level 3"
+        impacts:
+          - type: stat_modifier
+            stat: duration
+            value: 8
+            modifier: SET
+          - type: mana_cost
+            change: 20

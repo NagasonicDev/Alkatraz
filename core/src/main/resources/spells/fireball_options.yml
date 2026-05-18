@@ -1,0 +1,210 @@
+# =============================================================================
+# fireball_options.yml
+# Spell option configuration for the Fireball spell.
+#
+# Structure overview:
+#   options:
+#     <option-id>:
+#       description:   <string>
+#       icon:          <Material name>
+#       default_index: <int>   # 0-based index into 'values' list order
+#       values:
+#         <value-id>:
+#           display_name: <string>
+#           description:  <string>
+#           icon:         <Material name>
+#           value_type:   int | double | float | boolean | string | auto
+#           value:        <typed value>
+#           requirements: [...]   # optional — list of requirement entries
+#           impacts:      [...]   # optional — list of impact entries
+#
+# Requirement entry fields:
+#   type: number_stat | boolean_stat | permission | option_value | composite
+#
+# Impact entry fields:
+#   type: stat_modifier | mana_cost | tag
+# =============================================================================
+
+options:
+
+  # ---------------------------------------------------------------------------
+  # speed — Adjust fireball velocity
+  # ---------------------------------------------------------------------------
+  speed:
+    description: "Adjust fireball velocity"
+    icon: FEATHER
+    default_index: 1
+
+    values:
+
+      slow:
+        display_name: "Slow"
+        description: "Slower projectile, maximum damage"
+        icon: SOUL_SAND
+        value_type: double
+        value: 0.3
+        impacts:
+          - type: stat_modifier
+            stat: projectile_speed
+            value: 0.3
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 1.2
+            modifier: MULTIPLY
+
+      normal:
+        display_name: "Normal"
+        description: "Standard projectile speed"
+        icon: FEATHER
+        value_type: double
+        value: 0.5
+        impacts:
+          - type: stat_modifier
+            stat: projectile_speed
+            value: 0.5
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 1.0
+            modifier: MULTIPLY
+
+      fast:
+        display_name: "Fast"
+        description: "Faster projectile, reduced damage (-20%)"
+        icon: SUGAR
+        value_type: double
+        value: 0.8
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 2
+            description: "Requires Circle Level 2"
+        impacts:
+          - type: stat_modifier
+            stat: projectile_speed
+            value: 0.8
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 0.8
+            modifier: MULTIPLY
+
+      blazing:
+        display_name: "Blazing"
+        description: "Extremely fast, heavy damage penalty (-40%)"
+        icon: BLAZE_POWDER
+        value_type: double
+        value: 1.2
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 4
+            description: "Requires Circle Level 4"
+        impacts:
+          - type: stat_modifier
+            stat: projectile_speed
+            value: 1.2
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 0.6
+            modifier: MULTIPLY
+          - type: mana_cost
+            change: 15
+
+  # ---------------------------------------------------------------------------
+  # breaks_blocks — Whether the fireball should break blocks
+  # ---------------------------------------------------------------------------
+  breaks_blocks:
+    description: "Whether the fireball should break blocks"
+    icon: DIAMOND_PICKAXE
+    default_index: 0
+
+    values:
+
+      breaks_blocks:
+        display_name: "Breaks Blocks"
+        description: "Fireball will break blocks on collision"
+        icon: LIME_CONCRETE
+        value_type: boolean
+        value: true
+
+      block_protection:
+        display_name: "Blocks Protected"
+        description: "Fireball will not break blocks."
+        icon: RED_CONCRETE
+        value_type: boolean
+        value: false
+
+  # ---------------------------------------------------------------------------
+  # size — Adjust fireball explosion size
+  # ---------------------------------------------------------------------------
+  size:
+    description: "Adjust fireball explosion size"
+    icon: TNT
+    default_index: 1
+
+    values:
+
+      small_size:
+        display_name: "Small Size"
+        description: "Small fireball explosion."
+        icon: IRON_NUGGET
+        value_type: double
+        value: 1.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 3
+            description: "Requires Circle Level 3"
+        impacts:
+          - type: stat_modifier
+            stat: size
+            value: 1.0
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 1.4
+            modifier: MULTIPLY
+          - type: stat_modifier
+            stat: projectile_speed
+            value: 1.1
+            modifier: MULTIPLY
+
+      normal_size:
+        display_name: "Normal Size"
+        description: "Normal fireball explosion"
+        icon: IRON_INGOT
+        value_type: double
+        value: 1.5
+        impacts:
+          - type: stat_modifier
+            stat: size
+            value: 1.5
+            modifier: SET
+
+      large_size:
+        display_name: "Large Size"
+        description: "Large fireball explosion"
+        icon: IRON_BLOCK
+        value_type: double
+        value: 2.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 3
+            description: "Requires Circle Level 3"
+        impacts:
+          - type: stat_modifier
+            stat: size
+            value: 2.0
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 0.6
+            modifier: MULTIPLY
+          - type: stat_modifier
+            stat: projectile_speed
+            value: 0.9
+            modifier: MULTIPLY

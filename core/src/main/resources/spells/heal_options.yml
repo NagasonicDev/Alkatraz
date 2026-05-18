@@ -1,0 +1,135 @@
+# =============================================================================
+# heal_options.yml
+# Spell option configuration for the Heal spell.
+#
+# Structure overview:
+#   options:
+#     <option-id>:
+#       description:   <string>
+#       icon:          <Material name>
+#       default_index: <int>   # 0-based index into 'values' list order
+#       values:
+#         <value-id>:
+#           display_name: <string>
+#           description:  <string>
+#           icon:         <Material name>
+#           value_type:   int | double | float | boolean | string | auto
+#           value:        <typed value>
+#           requirements: [...]   # optional — list of requirement entries
+#           impacts:      [...]   # optional — list of impact entries
+#
+# Requirement entry fields:
+#   type: number_stat | boolean_stat | permission | option_value | composite
+#
+# Impact entry fields:
+#   type: stat_modifier | mana_cost | tag
+# =============================================================================
+
+
+options:
+
+  # ---------------------------------------------------------------------------
+  # potency — Adjust the base heal amount
+  # ---------------------------------------------------------------------------
+  potency:
+    description: "Adjust the base heal amount"
+    icon: GLISTERING_MELON_SLICE
+    default_index: 0
+
+    values:
+
+      minor:
+        display_name: "Minor"
+        description: "Small heal — lower mana cost (-30%)"
+        icon: WHEAT
+        value_type: double
+        value: 0.6
+        impacts:
+          - type: stat_modifier
+            stat: heal
+            value: 0.6
+            modifier: MULTIPLY
+
+      normal:
+        display_name: "Normal"
+        description: "Standard heal amount"
+        icon: GLISTERING_MELON_SLICE
+        value_type: double
+        value: 1.0
+        impacts:
+          - type: stat_modifier
+            stat: heal
+            value: 1.0
+            modifier: MULTIPLY
+
+      greater:
+        display_name: "Greater"
+        description: "Enhanced heal — approaches the max heal cap"
+        icon: GOLDEN_APPLE
+        value_type: double
+        value: 1.5
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 3
+            description: "Requires Circle Level 3"
+        impacts:
+          - type: stat_modifier
+            stat: heal
+            value: 1.5
+            modifier: MULTIPLY
+          - type: mana_cost
+            change: 15
+
+  # ---------------------------------------------------------------------------
+  # range — Maximum target distance
+  # ---------------------------------------------------------------------------
+  range:
+    description: "Maximum target distance"
+    icon: SPYGLASS
+    default_index: 2
+
+    values:
+
+      short:
+        display_name: "Short"
+        description: "8-block range — lower mana cost"
+        icon: STICK
+        value_type: int
+        value: 8
+        impacts:
+          - type: stat_modifier
+            stat: target_range
+            value: 8
+            modifier: SET
+
+      normal:
+        display_name: "Normal"
+        description: "Standard 20-block range"
+        icon: BLAZE_ROD
+        value_type: int
+        value: 20
+        impacts:
+          - type: stat_modifier
+            stat: target_range
+            value: 20
+            modifier: SET
+
+      long:
+        display_name: "Long"
+        description: "Extended 35-block range"
+        icon: END_ROD
+        value_type: int
+        value: 35
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 3
+            description: "Requires Circle Level 3"
+        impacts:
+          - type: stat_modifier
+            stat: target_range
+            value: 35
+            modifier: SET
+          - type: mana_cost
+            change: 10
