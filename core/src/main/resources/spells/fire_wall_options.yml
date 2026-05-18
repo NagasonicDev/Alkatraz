@@ -1,0 +1,105 @@
+options:
+
+  # ---------------------------------------------------------------------------
+  # fire_blocks — Whether wall lights blocks on fire
+  # ---------------------------------------------------------------------------
+  fire_blocks:
+    description: "Whether wall lights blocks on fire."
+    icon: FLINT_AND_STEEL
+    default_index: 0
+
+    values:
+
+      alight_blocks:
+        display_name: "Alights Blocks"
+        description: "Fire wall lights blocks on fire."
+        icon: BLAZE_POWDER
+        value_type: boolean
+        value: true
+
+      no_fire:
+        display_name: "No Fire"
+        description: "Fire wall will not light blocks on fire"
+        icon: BARRIER
+        value_type: boolean
+        value: false
+
+  # ---------------------------------------------------------------------------
+  # wall_curves — Whether the wall curves with look
+  # ---------------------------------------------------------------------------
+  wall_curves:
+    description: "Whether the wall curves with look."
+    icon: ENDER_EYE
+    default_index: 0
+
+    values:
+
+      curves:
+        display_name: "Curves"
+        description: "Fire wall will curve in the direction of the player"
+        icon: ENDER_EYE
+        value_type: boolean
+        value: true
+
+      no_curve:
+        display_name: "Doesn't Curve"
+        description: "Fire wall will be straight"
+        icon: STICK
+        value_type: boolean
+        value: false
+
+  # ---------------------------------------------------------------------------
+  # wall_length — Length of the fire wall
+  # ---------------------------------------------------------------------------
+  wall_length:
+    description: "Length of the fire wall."
+    icon: STICK
+    default_index: 1
+
+    values:
+
+      short_wall:
+        display_name: "Short Wall"
+        description: "A shorter fire wall."
+        icon: IRON_NUGGET
+        value_type: int
+        value: 15
+        requirements:
+          - type: number_stat
+            stat: mastery_fire_wall
+            minumum: 40
+            description: "Requires at least 40 mastery in Fire Wall"
+        impacts:
+          - type: stat_modifier
+            stat: wall_length
+            value: 15
+            modifier: SET
+
+      normal_wall:
+        display_name: "Normal Wall"
+        description: "A standard length fire wall."
+        icon: IRON_INGOT
+        value_type: int
+        value: 25
+        impacts:
+          - type: stat_modifier
+            stat: wall_length
+            value: 25
+            modifier: SET
+
+      long_wall:
+        display_name: "Long Wall"
+        description: "A longer fire wall."
+        icon: IRON_BLOCK
+        value_type: int
+        value: 35
+        requirements:
+          - type: number_stat
+            stat: mastery_fire_wall
+            minumum: 40
+            description: "Requires at least 40 mastery in Fire Wall"
+        impacts:
+          - type: stat_modifier
+            stat: wall_length
+            value: 35
+            modifier: SET

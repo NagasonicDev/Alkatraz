@@ -69,7 +69,7 @@ public class FireWall extends AttackSpell implements Listener {
     }
 
     private double duration;
-    private double length;
+    private double defLength;
     private double height;
 
     @Override
@@ -80,7 +80,7 @@ public class FireWall extends AttackSpell implements Listener {
 
         loadCommonConfig(spellConfig);
         duration = spellConfig.getDouble("duration");
-        length = spellConfig.getDouble("length");
+        defLength = spellConfig.getDouble("length");
         height = spellConfig.getDouble("height");
         Alkatraz.getInstance().getServer().getPluginManager().registerEvents(this, Alkatraz.getInstance());
     }
@@ -101,6 +101,7 @@ public class FireWall extends AttackSpell implements Listener {
 
         float[] lastYaw = { -player.getEyeLocation().getYaw() };
         double turnStrength = 0.015;
+        final double length = getModifiedStat(player, "wall_length", defLength);
 
         BukkitRunnable wallTask = new BukkitRunnable() {
 
@@ -219,7 +220,7 @@ public class FireWall extends AttackSpell implements Listener {
                 ticks++;
 
                 // === BUILD PHASE ===
-                if (ticks < length / spacing && !props.isCountered() && !props.isCancelled()) {
+                if (ticks < defLength / spacing && !props.isCountered() && !props.isCancelled()) {
                     float currentYaw = -caster.getTarget().getLocation().subtract(caster.getLocation().toVector()).getYaw();
                     float yawDelta = currentYaw - lastYaw[0];
                     lastYaw[0] = currentYaw;
@@ -290,7 +291,7 @@ public class FireWall extends AttackSpell implements Listener {
                 }
 
                 // === LIFETIME END ===
-                if (ticks >= durationTicks && ticks >= length / spacing) {
+                if (ticks >= durationTicks && ticks >= defLength / spacing) {
                     cancel();
                 }
             }
