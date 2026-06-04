@@ -1,0 +1,318 @@
+# =============================================================================
+# buff_options.yml
+# =============================================================================
+#
+# Uses the generic pooled-slot option pattern:
+#   - option_role: pool  — master list of selectable values + custom menu
+#   - option_role: slot   — per-slot selection (inherits values from pool)
+#   - menu_slots: <int>   — slot headers shown in the pool menu (1–7, buff uses 3)
+#   - group: <id>         — collapses hidden options into one menu entry
+#
+# Cast-time effects use cast_modifier impacts (see ValueImpactFactory).
+# =============================================================================
+
+options:
+
+  duration:
+    description: "How long the applied buffs last"
+    icon: CLOCK
+    default_index: 1
+
+    values:
+
+      short:
+        display_name: "Short"
+        description: "Buffs last 15 seconds, reduced cost"
+        icon: CLOCK
+        value_type: int
+        value: 15
+        impacts:
+          - type: stat_modifier
+            stat: duration
+            value: 15
+            modifier: SET
+          - type: mana_cost
+            change: -10
+
+      normal:
+        display_name: "Normal"
+        description: "Buffs last 30 seconds"
+        icon: CLOCK
+        value_type: int
+        value: 30
+        impacts:
+          - type: stat_modifier
+            stat: duration
+            value: 30
+            modifier: SET
+
+      extended:
+        display_name: "Extended"
+        description: "Buffs last 60 seconds"
+        icon: CLOCK
+        value_type: int
+        value: 60
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 4
+            description: "Requires Circle Level 4"
+        impacts:
+          - type: stat_modifier
+            stat: duration
+            value: 60
+            modifier: SET
+          - type: mana_cost
+            change: 20
+
+  buff_pool:
+    description: "Available buff types"
+    display_name: "Configure Buffs"
+    icon: BEACON
+    hidden: true
+    group: configure_buffs
+    option_role: pool
+    menu_slots: 3
+    use_custom_menu: true
+    custom_menu: "me.nagasonic.alkatraz.gui.implementation.options.PooledSlotSelectionMenu"
+    default_index: 0
+
+    values:
+
+      strength_low:
+        display_name: "+15% Strength"
+        description: "Increases outgoing damage by 15%"
+        icon: IRON_SWORD
+        value_type: string
+        value: strength_low
+        impacts:
+          - type: cast_modifier
+            kind: attribute
+            attribute: GENERIC_ATTACK_DAMAGE
+            amount: 0.15
+            operation: ADD_SCALAR
+            description: "+15% Strength"
+
+      strength_high:
+        display_name: "+25% Strength"
+        description: "Increases outgoing damage by 25%"
+        icon: DIAMOND_SWORD
+        value_type: string
+        value: strength_high
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 3
+            description: "Requires Circle Level 3"
+        impacts:
+          - type: cast_modifier
+            kind: attribute
+            attribute: GENERIC_ATTACK_DAMAGE
+            amount: 0.25
+            operation: ADD_SCALAR
+            description: "+25% Strength"
+
+      speed_low:
+        display_name: "+20% Speed"
+        description: "Increases movement speed by 20%"
+        icon: FEATHER
+        value_type: string
+        value: speed_low
+        impacts:
+          - type: cast_modifier
+            kind: attribute
+            attribute: GENERIC_MOVEMENT_SPEED
+            amount: 0.20
+            operation: ADD_SCALAR
+            description: "+20% Speed"
+
+      speed_high:
+        display_name: "+35% Speed"
+        description: "Increases movement speed by 35%"
+        icon: SUGAR
+        value_type: string
+        value: speed_high
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 3
+            description: "Requires Circle Level 3"
+        impacts:
+          - type: cast_modifier
+            kind: attribute
+            attribute: GENERIC_MOVEMENT_SPEED
+            amount: 0.35
+            operation: ADD_SCALAR
+            description: "+35% Speed"
+
+      defence_low:
+        display_name: "+15% Defence"
+        description: "Reduces incoming damage by 15%"
+        icon: IRON_CHESTPLATE
+        value_type: string
+        value: defence_low
+        impacts:
+          - type: cast_modifier
+            kind: attribute
+            attribute: GENERIC_ARMOR
+            amount: 0.15
+            operation: ADD_SCALAR
+            description: "+15% Defence"
+
+      defence_high:
+        display_name: "+25% Defence"
+        description: "Reduces incoming damage by 25%"
+        icon: DIAMOND_CHESTPLATE
+        value_type: string
+        value: defence_high
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 3
+            description: "Requires Circle Level 3"
+        impacts:
+          - type: cast_modifier
+            kind: attribute
+            attribute: GENERIC_ARMOR
+            amount: 0.25
+            operation: ADD_SCALAR
+            description: "+25% Defence"
+
+      mana_regen:
+        display_name: "+20% Mana Regen"
+        description: "Increases mana regeneration by 20%"
+        icon: LAPIS_LAZULI
+        value_type: string
+        value: mana_regen
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 2
+            description: "Requires Circle Level 2"
+        impacts:
+          - type: cast_modifier
+            kind: stat
+            stat: mana_regen_bonus
+            value: 0.20
+            description: "+20% Mana Regen"
+
+      magic_power:
+        display_name: "+20% Magic Power"
+        description: "Increases spell damage by 20%"
+        icon: BLAZE_POWDER
+        value_type: string
+        value: magic_power
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 3
+            description: "Requires Circle Level 3"
+        impacts:
+          - type: cast_modifier
+            kind: stat
+            stat: magic_power_bonus
+            value: 0.20
+            description: "+20% Magic Power"
+
+      cast_speed:
+        display_name: "+15% Cast Speed"
+        description: "Reduces cast time by 15%"
+        icon: CLOCK
+        value_type: string
+        value: cast_speed
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 4
+            description: "Requires Circle Level 4"
+        impacts:
+          - type: cast_modifier
+            kind: stat
+            stat: cast_speed_bonus
+            value: 0.15
+            description: "+15% Cast Speed"
+
+      affinity_boost:
+        display_name: "+10 Elemental Affinity"
+        description: "Increases elemental affinity by 10"
+        icon: NETHER_STAR
+        value_type: string
+        value: affinity_boost
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 5
+            description: "Requires Circle Level 5"
+        impacts:
+          - type: cast_modifier
+            kind: stat
+            stat: affinity_bonus
+            value: 10.0
+            description: "+10 Elemental Affinity"
+
+  buff_slot_1:
+    description: "First buff slot"
+    display_name: "Slot 1"
+    icon: BEACON
+    hidden: true
+    group: configure_buffs
+    option_role: slot
+    slot_index: 1
+    inherit_values_from: buff_pool
+    default_index: 0
+
+    values:
+      none:
+        display_name: "Empty"
+        description: "No buff assigned"
+        icon: LIGHT_GRAY_STAINED_GLASS_PANE
+        value_type: string
+        value: none
+
+  buff_slot_2:
+    description: "Second buff slot"
+    display_name: "Slot 2"
+    icon: BEACON
+    hidden: true
+    group: configure_buffs
+    option_role: slot
+    slot_index: 2
+    inherit_values_from: buff_pool
+    default_index: 0
+    requirements:
+      - type: number_stat
+        stat: circleLevel
+        minimum: 3
+        description: "Requires Circle Level 3"
+
+    values:
+      none:
+        display_name: "Empty"
+        description: "No buff assigned"
+        icon: LIGHT_GRAY_STAINED_GLASS_PANE
+        value_type: string
+        value: none
+
+  buff_slot_3:
+    description: "Third buff slot"
+    display_name: "Slot 3"
+    icon: BEACON
+    hidden: true
+    group: configure_buffs
+    option_role: slot
+    slot_index: 3
+    inherit_values_from: buff_pool
+    default_index: 0
+    requirements:
+      - type: number_stat
+        stat: circleLevel
+        minimum: 5
+        description: "Requires Circle Level 5"
+
+    values:
+      none:
+        display_name: "Empty"
+        description: "No buff assigned"
+        icon: LIGHT_GRAY_STAINED_GLASS_PANE
+        value_type: string
+        value: none

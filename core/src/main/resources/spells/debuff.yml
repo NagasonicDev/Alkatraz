@@ -1,0 +1,17 @@
+id: debuff
+display_name: "Debuff"
+description:
+  - "Applies your configured debuffs"
+  - "to a target you are looking at."
+element: DARK
+code: SRLSS
+cast_time: 1.5
+mana_cost: 45
+level: 2
+enabled: true
+maximum_mastery: 100
+cooldown: 25
+mastery_bar_color: PURPLE
+gui_item: FERMENTED_SPIDER_EYE
+base_duration: 20
+target_range: 24

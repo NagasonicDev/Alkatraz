@@ -4,6 +4,7 @@ import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.events.PlayerSpellPrepareEvent;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
+import me.nagasonic.alkatraz.gui.Menu;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.configuration.SpellOption;
@@ -61,10 +62,11 @@ public abstract class Spell {
     }
 
     /**
-     * Override this to define spell options (called once on spell registration)
+     * Override this to define spell options in code (called as a fallback when
+     * no YAML options file is found).
      */
     protected void setupOptions() {
-        // Subclasses can override to add their options
+        // Subclasses can override to add their options programmatically.
     }
 
     public abstract void loadConfiguration();
@@ -78,7 +80,8 @@ public abstract class Spell {
     public abstract ItemStack getSpellBook();
 
     /**
-     * Main spell casting method - handles validation, mana consumption, and timing
+     * Main spell casting method — handles validation, mana consumption, and
+     * timing.
      */
     public void cast(Player p, ItemStack wand) {
         MagicProfile profile = ProfileManager.getProfile(p, MagicProfile.class);
@@ -102,23 +105,20 @@ public abstract class Spell {
         if (profile.getCooldown(this) != null) {
             long timePassed = System.currentTimeMillis() - profile.getCooldown(this);
             if (TimeUnit.MILLISECONDS.toSeconds(timePassed) < getCooldown()) {
-                Utils.sendActionBar(p, "&cPlease wait " + TimeUnit.MILLISECONDS.toSeconds(getCooldown() * 1000 - timePassed) + " seconds before casting this spell.");
+                Utils.sendActionBar(p, "&cPlease wait "
+                        + TimeUnit.MILLISECONDS.toSeconds(getCooldown() * 1000 - timePassed)
+                        + " seconds before casting this spell.");
                 return;
             }
         }
 
         // Check if player is alive
-        if (p.isDead()) {
-            return;
-        }
+        if (p.isDead()) return;
 
         // Create and fire spell prepare event
         PlayerSpellPrepareEvent castEvent = new PlayerSpellPrepareEvent(p, this, wand);
         Bukkit.getPluginManager().callEvent(castEvent);
-
-        if (castEvent.isCancelled()) {
-            return;
-        }
+        if (castEvent.isCancelled()) return;
 
         // Set casting state
         profile.setCasting(true);
@@ -136,18 +136,19 @@ public abstract class Spell {
         int circleTaskId = circleAction(p, castEvent);
 
         // Calculate cast time (affected by wand and mastery)
-        float baseCastTime = getFullCastTime(wand, getCastTime());
-        long finalCastTime = calculateFinalCastTime(profile, baseCastTime);
+        float baseCastTime  = getFullCastTime(wand, getCastTime());
+        long  finalCastTime = calculateFinalCastTime(profile, baseCastTime);
 
         // Schedule spell execution after cast time
-        Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(Alkatraz.getInstance(), () -> {
-            if (!castEvent.isCancelled()) {
-                profile.setCasting(false);
-                profile.setCooldown(this, System.currentTimeMillis());
-                Bukkit.getServer().getScheduler().cancelTask(circleTaskId);
-                castAction(p, wand);
-            }
-        }, finalCastTime);
+        Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(
+                Alkatraz.getInstance(), () -> {
+                    if (!castEvent.isCancelled()) {
+                        profile.setCasting(false);
+                        profile.setCooldown(this, System.currentTimeMillis());
+                        Bukkit.getServer().getScheduler().cancelTask(circleTaskId);
+                        castAction(p, wand);
+                    }
+                }, finalCastTime);
 
         // Add spell mastery
         if (profile.getSpellMastery(this) < getMaxMastery()) {
@@ -156,22 +157,22 @@ public abstract class Spell {
     }
 
     /**
-     * Loads common spell configuration from YAML
+     * Loads common spell configuration from YAML.
      */
     public void loadCommonConfig(YamlConfiguration spellConfig) {
-        this.id = spellConfig.getString("id");
-        this.displayName = spellConfig.getString("display_name");
-        this.description = spellConfig.getStringList("description");
-        this.element = Element.valueOf(spellConfig.getString("element"));
-        this.code = spellConfig.getString("code");
-        this.castTime = spellConfig.getDouble("cast_time");
-        this.cost = spellConfig.getInt("mana_cost");
-        this.level = spellConfig.getInt("level");
-        this.enabled = spellConfig.getBoolean("enabled");
-        this.maxMastery = spellConfig.getInt("maximum_mastery");
-        this.cooldown = spellConfig.getLong("cooldown");
+        this.id            = spellConfig.getString("id");
+        this.displayName   = spellConfig.getString("display_name");
+        this.description   = spellConfig.getStringList("description");
+        this.element       = Element.valueOf(spellConfig.getString("element"));
+        this.code          = spellConfig.getString("code");
+        this.castTime      = spellConfig.getDouble("cast_time");
+        this.cost          = spellConfig.getInt("mana_cost");
+        this.level         = spellConfig.getInt("level");
+        this.enabled       = spellConfig.getBoolean("enabled");
+        this.maxMastery    = spellConfig.getInt("maximum_mastery");
+        this.cooldown      = spellConfig.getLong("cooldown");
         this.masteryBarColor = BarColor.valueOf(spellConfig.getString("mastery_bar_color"));
-        this.guiItem = Utils.materialFromString(spellConfig.getString("gui_item"));
+        this.guiItem       = Utils.materialFromString(spellConfig.getString("gui_item"));
     }
 
     public boolean canMobCast(Mob mob) {
@@ -182,23 +183,14 @@ public abstract class Spell {
     // Spell Options Management
     // ============================================
 
-    /**
-     * Adds a spell option to this spell
-     */
     public void addOption(SpellOption option) {
         options.put(option.getId(), option);
     }
 
-    /**
-     * Gets a spell option by ID
-     */
     public SpellOption getOption(String optionId) {
         return options.get(optionId);
     }
 
-    /**
-     * Gets all spell options
-     */
     public Map<String, SpellOption> getAllOptions() {
         return new HashMap<>(options);
     }
@@ -207,46 +199,35 @@ public abstract class Spell {
     // Player Profile Helpers
     // ============================================
 
-    /**
-     * Checks if player has a specific spell tag from their options
-     */
     protected boolean hasSpellTag(Player caster, Spell spell, String tag) {
         MagicProfile profile = ProfileManager.getProfile(caster, MagicProfile.class);
         return profile.hasSpellTag(spell, tag);
     }
 
-    /**
-     * Gets a stat value with player modifiers applied
-     * Uses the SpellModifier record approach
-     */
     protected double getModifiedStat(Player caster, String statName, double baseValue) {
         MagicProfile profile = ProfileManager.getProfile(caster, MagicProfile.class);
 
         if (profile.hasSpellModifier(this, statName)) {
-            List<MagicProfile.SpellModifier> modifiers = profile.getSpellModifiers(this, statName);
-            List<MagicProfile.SpellModifier> adds = new ArrayList<>();
+            List<MagicProfile.SpellModifier> modifiers =
+                    profile.getSpellModifiers(this, statName);
+            List<MagicProfile.SpellModifier> adds  = new ArrayList<>();
             List<MagicProfile.SpellModifier> mults = new ArrayList<>();
-            List<MagicProfile.SpellModifier> sets = new ArrayList<>();
+            List<MagicProfile.SpellModifier> sets  = new ArrayList<>();
+
             for (MagicProfile.SpellModifier modifier : modifiers) {
                 String typeStr = profile.getSpellModifierType(modifier);
-
                 if (typeStr != null) {
-                    StatModifierImpact.ModifierType type = StatModifierImpact.ModifierType.valueOf(typeStr);
-                    if (type == StatModifierImpact.ModifierType.ADD) adds.add(modifier);
+                    StatModifierImpact.ModifierType type =
+                            StatModifierImpact.ModifierType.valueOf(typeStr);
+                    if (type == StatModifierImpact.ModifierType.ADD)      adds.add(modifier);
                     if (type == StatModifierImpact.ModifierType.MULTIPLY) mults.add(modifier);
-                    if (type == StatModifierImpact.ModifierType.SET) sets.add(modifier);
+                    if (type == StatModifierImpact.ModifierType.SET)      sets.add(modifier);
                 }
                 double val = 0;
-                for (MagicProfile.SpellModifier setmod : sets){
-                    val += setmod.value();
-                }
+                for (MagicProfile.SpellModifier setmod : sets) val += setmod.value();
                 val /= sets.size();
-                for (MagicProfile.SpellModifier mult : mults){
-                    val *= mult.value();
-                }
-                for (MagicProfile.SpellModifier addmod : adds){
-                    val += addmod.value();
-                }
+                for (MagicProfile.SpellModifier mult   : mults) val *= mult.value();
+                for (MagicProfile.SpellModifier addmod : adds)  val += addmod.value();
                 return val;
             }
         }
@@ -254,52 +235,34 @@ public abstract class Spell {
         return baseValue;
     }
 
-    /**
-     * Gets mana cost with player modifiers applied
-     */
     protected int getModifiedManaCost(Player caster) {
         MagicProfile profile = ProfileManager.getProfile(caster, MagicProfile.class);
 
-        // Check for mana cost modifier
         if (profile.hasSpellModifier(this, "mana_cost")) {
-
-            List<MagicProfile.SpellModifier> mods = profile.getSpellModifiers(this, "mana_cost");
+            List<MagicProfile.SpellModifier> mods =
+                    profile.getSpellModifiers(this, "mana_cost");
             double value = 0;
-            for (MagicProfile.SpellModifier mod : mods){
-                value += mod.value();
-            }
+            for (MagicProfile.SpellModifier mod : mods) value += mod.value();
             return (int) Math.max(0, cost + value);
         }
 
         return cost;
     }
 
-    /**
-     * Calculates final cast time based on mastery
-     */
     public long calculateFinalCastTime(MagicProfile profile, float baseCastTime) {
         float castTimeInTicks = baseCastTime * 20;
-
         if (profile.getSpellMastery(this) >= getMaxMastery()) {
             castTimeInTicks *= 0.75f;
         }
-
         return (long) castTimeInTicks;
     }
 
-    /**
-     * Calculates full cast time including wand modifier
-     */
     public float getFullCastTime(ItemStack wand, double spellCastTime) {
         Double wandCastTime = NBT.get(wand, nbt -> (Double) nbt.getDouble("casting_time"));
         if (wandCastTime == null) wandCastTime = 1.0;
         return wandCastTime.floatValue() * (float) spellCastTime;
     }
 
-    /**
-     * Calculates power with affinity and resistance
-     * (Replacement for old calcPower method)
-     */
     public double calcPower(double base, LivingEntity target, Player caster) {
         MagicProfile casterProfile = ProfileManager.getProfile(caster, MagicProfile.class);
         double casterAffinity = casterProfile.getAffinity(getElement());
@@ -319,59 +282,18 @@ public abstract class Spell {
     // Getters
     // ============================================
 
-    public String getType() {
-        return type;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public Element getElement() {
-        return element;
-    }
-
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public List<String> getDescription() {
-        return description;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public int getCost() {
-        return cost;
-    }
-
-    public long getCooldown() {
-        return cooldown;
-    }
-
-    public double getCastTime() {
-        return castTime;
-    }
-
-    public int getMaxMastery() {
-        return maxMastery;
-    }
-
-    public int getLevel() {
-        return level;
-    }
-
-    public BarColor getMasteryBarColor() {
-        return masteryBarColor;
-    }
-
-    public ItemStack getGuiItem() {
-        return guiItem;
-    }
-
-    public boolean isEnabled() {
-        return enabled;
-    }
+    public String getType()          { return type; }
+    public String getId()            { return id; }
+    public Element getElement()      { return element; }
+    public String getDisplayName()   { return displayName; }
+    public List<String> getDescription() { return description; }
+    public String getCode()          { return code; }
+    public int getCost()             { return cost; }
+    public long getCooldown()        { return cooldown; }
+    public double getCastTime()      { return castTime; }
+    public int getMaxMastery()       { return maxMastery; }
+    public int getLevel()            { return level; }
+    public BarColor getMasteryBarColor() { return masteryBarColor; }
+    public ItemStack getGuiItem()    { return guiItem; }
+    public boolean isEnabled()       { return enabled; }
 }

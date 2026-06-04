@@ -1,6 +1,7 @@
 package me.nagasonic.alkatraz.spells.configuration;
 
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.gui.Menu;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.configuration.impact.ValueImpact;
 import me.nagasonic.alkatraz.spells.configuration.impact.ValueImpactFactory;
@@ -11,7 +12,9 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 
 /**
@@ -30,8 +33,8 @@ public class SpellOptionLoader {
      * Reads the options file for the given spell and registers every
      * SpellOption / OptionValue found within it onto the spell.
      *
-     * @param spell      The spell instance that options will be added to.
-     * @param spellId    The spell's config ID (e.g. "dark_tendrils").
+     * @param spell   The spell instance that options will be added to.
+     * @param spellId The spell's config ID (e.g. "dark_tendrils").
      */
     public static void loadOptions(Spell spell, String spellId) {
         String relativePath = "spells/" + spellId + "_options.yml";
@@ -51,40 +54,103 @@ public class SpellOptionLoader {
             return;
         }
 
+        Map<String, ConfigurationSection> optionSections = new LinkedHashMap<>();
+        Map<String, SpellOption> parsed = new LinkedHashMap<>();
+
         for (String optionKey : optionsSection.getKeys(false)) {
-            ConfigurationSection optionSection = optionsSection.getConfigurationSection(optionKey);
+            ConfigurationSection optionSection =
+                    optionsSection.getConfigurationSection(optionKey);
             if (optionSection == null) continue;
 
+            optionSections.put(optionKey, optionSection);
             SpellOption option = parseOption(spell, optionKey, optionSection, relativePath);
             if (option != null) {
-                spell.addOption(option);
+                parsed.put(optionKey, option);
             }
         }
+
+        // Second pass: copy values from a pool option when requested.
+        for (Map.Entry<String, SpellOption> entry : parsed.entrySet()) {
+            ConfigurationSection section = optionSections.get(entry.getKey());
+            String inheritFrom = section.getString("inherit_values_from", null);
+            if (inheritFrom == null || inheritFrom.isBlank()) continue;
+
+            SpellOption source = parsed.get(inheritFrom);
+            if (source == null) {
+                warn(relativePath, entry.getKey(),
+                        "inherit_values_from references unknown option '" + inheritFrom + "'");
+                continue;
+            }
+
+            for (OptionValue<?> poolValue : source.getOptionValues()) {
+                if (entry.getValue().getValueById(poolValue.getId()).isEmpty()) {
+                    entry.getValue().addValue(cloneValue(poolValue));
+                }
+            }
+        }
+
+        parsed.values().forEach(spell::addOption);
     }
 
     // =========================================================================
     // Option parsing
     // =========================================================================
 
-    private static SpellOption parseOption(Spell spell, String optionKey,
+    private static SpellOption parseOption(Spell spell,
+                                           String optionKey,
                                            ConfigurationSection section,
                                            String filePath) {
         String description = section.getString("description", "");
+        String displayName = section.getString("display_name", description);
         String iconStr     = section.getString("icon", "BARRIER");
         int    defIndex    = section.getInt("default_index", 0);
 
         Material icon = parseMaterial(iconStr, filePath, optionKey + ".icon");
         SpellOption option = new SpellOption(spell, optionKey, description, icon, defIndex);
+        option.setDisplayName(displayName);
 
+        // ----- Role / slot metadata (for pooled slot groups) -----
+        String roleStr = section.getString("option_role", "normal");
+        option.setRole(parseOptionRole(roleStr, filePath, optionKey));
+        option.setSlotIndex(section.getInt("slot_index", 0));
+        option.setMenuSlots(section.getInt("menu_slots", 0));
+
+        // ----- Custom-menu fields -----
+        boolean useCustomMenu = section.getBoolean("use_custom_menu", false);
+        String  customMenu    = section.getString("custom_menu", null);
+        option.setUseCustomMenu(useCustomMenu);
+        if (customMenu != null && !customMenu.isBlank()) {
+            option.setCustomMenuClass(customMenu);
+        }
+
+        // ----- Grouping / visibility fields -----
+        boolean hidden = section.getBoolean("hidden", false);
+        String  group  = section.getString("group", null);
+        option.setHidden(hidden);
+        if (group != null && !group.isBlank()) {
+            option.setGroup(group);
+        }
+
+        parseRequirementsList(spell, section.getList("requirements"), option, filePath, optionKey);
+        parseImpactsList(spell, section.getList("impacts"), option, filePath, optionKey);
+
+        // ----- Values -----
         ConfigurationSection valuesSection = section.getConfigurationSection("values");
         if (valuesSection == null) {
-            Alkatraz.getInstance().getLogger().warning(
-                    "[SpellOptionLoader] Option '" + optionKey + "' has no 'values' in " + filePath);
+            // An option with use_custom_menu=true may legitimately have no
+            // values (the custom menu manages its own data), so only warn
+            // when it is a normal option.
+            if (!useCustomMenu) {
+                Alkatraz.getInstance().getLogger().warning(
+                        "[SpellOptionLoader] Option '" + optionKey
+                                + "' has no 'values' in " + filePath);
+            }
             return option;
         }
 
         for (String valueKey : valuesSection.getKeys(false)) {
-            ConfigurationSection valueSection = valuesSection.getConfigurationSection(valueKey);
+            ConfigurationSection valueSection =
+                    valuesSection.getConfigurationSection(valueKey);
             if (valueSection == null) continue;
 
             OptionValue<?> value = parseValue(spell, valueKey, valueSection, filePath);
@@ -103,11 +169,13 @@ public class SpellOptionLoader {
     /**
      * Parses an OptionValue from a config section.
      *
-     * The raw YAML value under 'value' is always stored as the appropriate
-     * Java type (Integer, Double, Boolean, String) based on the 'value_type'
-     * key. If 'value_type' is omitted the raw Object from YAML is used as-is.
+     * The raw YAML value under {@code value} is always stored as the
+     * appropriate Java type (Integer, Double, Boolean, String) based on the
+     * {@code value_type} key.  If {@code value_type} is omitted the raw
+     * Object from YAML is used as-is.
      */
-    private static OptionValue<?> parseValue(Spell spell, String valueKey,
+    private static OptionValue<?> parseValue(Spell spell,
+                                             String valueKey,
                                              ConfigurationSection section,
                                              String filePath) {
         String displayName  = section.getString("display_name", valueKey);
@@ -117,48 +185,87 @@ public class SpellOptionLoader {
 
         Material icon = parseMaterial(iconStr, filePath, valueKey + ".icon");
 
-        // Resolve the typed value
-        Object rawValue = section.get("value");
+        Object rawValue   = section.get("value");
         Object typedValue = coerceValue(rawValue, valueTypeStr, filePath, valueKey);
 
         @SuppressWarnings({"unchecked", "rawtypes"})
-        OptionValue<?> optionValue = new OptionValue(valueKey, displayName, description, icon, typedValue);
+        OptionValue<?> optionValue =
+                new OptionValue(valueKey, displayName, description, icon, typedValue);
 
-        // Requirements
-        List<?> requirementsList = section.getList("requirements");
-        if (requirementsList != null) {
-            for (Object reqObj : requirementsList) {
-                ConfigurationSection reqSection;
-                if (reqObj instanceof ConfigurationSection cs) {
-                    reqSection = cs;
-                } else if (reqObj instanceof java.util.Map<?, ?> reqMap) {
-                    reqSection = mapToSection(reqMap, section, "_req_tmp");
-                } else {
-                    continue;
-                }
-                ValueRequirement req = parseRequirement(spell, reqSection, filePath, valueKey);
-                if (req != null) optionValue.addRequirement(req);
-            }
-        }
-
-        // Impacts
-        List<?> impactsList = section.getList("impacts");
-        if (impactsList != null) {
-            for (Object impObj : impactsList) {
-                ConfigurationSection impSection;
-                if (impObj instanceof ConfigurationSection cs) {
-                    impSection = cs;
-                } else if (impObj instanceof java.util.Map<?, ?> impMap) {
-                    impSection = mapToSection(impMap, section, "_imp_tmp");
-                } else {
-                    continue;
-                }
-                ValueImpact impact = parseImpact(spell, impSection, filePath, valueKey);
-                if (impact != null) optionValue.addImpact(impact);
-            }
-        }
+        parseRequirementsList(spell, section.getList("requirements"), optionValue, filePath, valueKey);
+        parseImpactsList(spell, section.getList("impacts"), optionValue, filePath, valueKey);
 
         return optionValue;
+    }
+
+    private static void parseRequirementsList(Spell spell,
+                                              List<?> requirementsList,
+                                              SpellOption option,
+                                              String filePath,
+                                              String contextKey) {
+        if (requirementsList == null) return;
+        YamlConfiguration tmp = new YamlConfiguration();
+        for (Object reqObj : requirementsList) {
+            ConfigurationSection reqSection = asConfigSection(reqObj, tmp);
+            if (reqSection == null) continue;
+            ValueRequirement req = parseRequirement(spell, reqSection, filePath, contextKey);
+            if (req != null) option.addRequirement(req);
+        }
+    }
+
+    private static void parseRequirementsList(Spell spell,
+                                              List<?> requirementsList,
+                                              OptionValue<?> optionValue,
+                                              String filePath,
+                                              String contextKey) {
+        if (requirementsList == null) return;
+        YamlConfiguration tmp = new YamlConfiguration();
+        for (Object reqObj : requirementsList) {
+            ConfigurationSection reqSection = asConfigSection(reqObj, tmp);
+            if (reqSection == null) continue;
+            ValueRequirement req = parseRequirement(spell, reqSection, filePath, contextKey);
+            if (req != null) optionValue.addRequirement(req);
+        }
+    }
+
+    private static void parseImpactsList(Spell spell,
+                                         List<?> impactsList,
+                                         SpellOption option,
+                                         String filePath,
+                                         String contextKey) {
+        if (impactsList == null) return;
+        YamlConfiguration tmp = new YamlConfiguration();
+        for (Object impObj : impactsList) {
+            ConfigurationSection impSection = asConfigSection(impObj, tmp);
+            if (impSection == null) continue;
+            ValueImpact impact = parseImpact(spell, impSection, filePath, contextKey);
+            if (impact != null) option.addImpact(impact);
+        }
+    }
+
+    private static void parseImpactsList(Spell spell,
+                                         List<?> impactsList,
+                                         OptionValue<?> optionValue,
+                                         String filePath,
+                                         String contextKey) {
+        if (impactsList == null) return;
+        YamlConfiguration tmp = new YamlConfiguration();
+        for (Object impObj : impactsList) {
+            ConfigurationSection impSection = asConfigSection(impObj, tmp);
+            if (impSection == null) continue;
+            ValueImpact impact = parseImpact(spell, impSection, filePath, contextKey);
+            if (impact != null) optionValue.addImpact(impact);
+        }
+    }
+
+    private static ConfigurationSection asConfigSection(Object obj, YamlConfiguration tmp) {
+        if (obj instanceof ConfigurationSection cs) {
+            return cs;
+        }
+        if (obj instanceof java.util.Map<?, ?> map) {
+            return mapToSection(map, tmp.createSection("tmp"), "entry");
+        }
+        return null;
     }
 
     // =========================================================================
@@ -211,9 +318,11 @@ public class SpellOptionLoader {
 
     /**
      * Coerces a raw YAML value to the desired Java type.
-     * Supported value_type strings: int, integer, double, float, boolean, string, auto.
+     * Supported value_type strings: int, integer, double, float, boolean,
+     * string, auto.
      */
-    private static Object coerceValue(Object raw, String valueType, String file, String key) {
+    private static Object coerceValue(Object raw, String valueType,
+                                      String file, String key) {
         if (raw == null) return null;
         return switch (valueType.toLowerCase()) {
             case "int", "integer" -> ((Number) raw).intValue();
@@ -236,7 +345,7 @@ public class SpellOptionLoader {
 
     /**
      * Bukkit's YAML list-of-maps returns LinkedHashMap entries, not
-     * ConfigurationSections. This helper wraps such a map back into a
+     * ConfigurationSections.  This helper wraps such a map back into a
      * MemorySection so the factory methods always receive a uniform type.
      */
     @SuppressWarnings({"unchecked", "deprecation"})
@@ -248,6 +357,37 @@ public class SpellOptionLoader {
             tmp.set(entry.getKey().toString(), entry.getValue());
         }
         return tmp;
+    }
+
+    private static SpellOption.OptionRole parseOptionRole(String roleStr,
+                                                          String filePath,
+                                                          String optionKey) {
+        return switch (roleStr.toLowerCase()) {
+            case "pool" -> SpellOption.OptionRole.POOL;
+            case "slot" -> SpellOption.OptionRole.SLOT;
+            case "normal" -> SpellOption.OptionRole.NORMAL;
+            default -> {
+                warn(filePath, optionKey,
+                        "Unknown option_role '" + roleStr + "', using NORMAL");
+                yield SpellOption.OptionRole.NORMAL;
+            }
+        };
+    }
+
+    /**
+     * Shallow-clones an option value so slot options can share pool definitions.
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static OptionValue<?> cloneValue(OptionValue<?> source) {
+        OptionValue clone = new OptionValue(
+                source.getId(),
+                source.getDisplayName(),
+                source.getDescription(),
+                source.getIcon(),
+                source.getValue());
+        source.getRequirements().forEach(clone::addRequirement);
+        source.getImpacts().forEach(clone::addImpact);
+        return clone;
     }
 
     private static void warn(String file, String key, String message) {

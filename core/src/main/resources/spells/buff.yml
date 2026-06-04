@@ -1,0 +1,18 @@
+id: buff
+display_name: "Buff"
+description:
+  - "Applies your configured buffs"
+  - "for a set duration."
+  - "Sneak to buff another player."
+element: NONE
+code: SRLSS
+cast_time: 1.5
+mana_cost: 40
+level: 2
+enabled: true
+maximum_mastery: 100
+cooldown: 30
+mastery_bar_color: BLUE
+gui_item: BEACON
+base_duration: 30
+target_range: 20
