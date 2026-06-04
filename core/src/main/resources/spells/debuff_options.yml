@@ -1,0 +1,309 @@
+# =============================================================================
+# debuff_options.yml — pooled-slot debuff configuration (mirrors buff_options.yml)
+# =============================================================================
+
+options:
+
+  duration:
+    description: "How long debuffs last on the target"
+    icon: CLOCK
+    default_index: 1
+
+    values:
+
+      short:
+        display_name: "Short"
+        description: "Debuffs last 10 seconds, reduced cost"
+        icon: CLOCK
+        value_type: int
+        value: 10
+        impacts:
+          - type: stat_modifier
+            stat: duration
+            value: 10
+            modifier: SET
+          - type: mana_cost
+            change: -10
+
+      normal:
+        display_name: "Normal"
+        description: "Debuffs last 20 seconds"
+        icon: CLOCK
+        value_type: int
+        value: 20
+        impacts:
+          - type: stat_modifier
+            stat: duration
+            value: 20
+            modifier: SET
+
+      extended:
+        display_name: "Extended"
+        description: "Debuffs last 40 seconds"
+        icon: CLOCK
+        value_type: int
+        value: 40
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 4
+            description: "Requires Circle Level 4"
+        impacts:
+          - type: stat_modifier
+            stat: duration
+            value: 40
+            modifier: SET
+          - type: mana_cost
+            change: 15
+
+  debuff_pool:
+    description: "Available debuff types"
+    display_name: "Configure Debuffs"
+    icon: FERMENTED_SPIDER_EYE
+    hidden: true
+    group: configure_debuffs
+    option_role: pool
+    menu_slots: 3
+    use_custom_menu: true
+    custom_menu: "me.nagasonic.alkatraz.gui.implementation.options.PooledSlotSelectionMenu"
+    default_index: 0
+
+    values:
+
+      weakness_low:
+        display_name: "-15% Strength"
+        description: "Reduces outgoing damage by 15%"
+        icon: IRON_SWORD
+        value_type: string
+        value: weakness_low
+        impacts:
+          - type: cast_modifier
+            kind: attribute
+            attribute: GENERIC_ATTACK_DAMAGE
+            amount: -0.15
+            operation: ADD_SCALAR
+            description: "-15% Strength"
+
+      weakness_high:
+        display_name: "-25% Strength"
+        description: "Reduces outgoing damage by 25%"
+        icon: DIAMOND_SWORD
+        value_type: string
+        value: weakness_high
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 3
+            description: "Requires Circle Level 3"
+        impacts:
+          - type: cast_modifier
+            kind: attribute
+            attribute: GENERIC_ATTACK_DAMAGE
+            amount: -0.25
+            operation: ADD_SCALAR
+            description: "-25% Strength"
+
+      slow_low:
+        display_name: "-20% Speed"
+        description: "Reduces movement speed by 20%"
+        icon: FEATHER
+        value_type: string
+        value: slow_low
+        impacts:
+          - type: cast_modifier
+            kind: attribute
+            attribute: GENERIC_MOVEMENT_SPEED
+            amount: -0.20
+            operation: ADD_SCALAR
+            description: "-20% Speed"
+
+      slow_high:
+        display_name: "-35% Speed"
+        description: "Reduces movement speed by 35%"
+        icon: SUGAR
+        value_type: string
+        value: slow_high
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 3
+            description: "Requires Circle Level 3"
+        impacts:
+          - type: cast_modifier
+            kind: attribute
+            attribute: GENERIC_MOVEMENT_SPEED
+            amount: -0.35
+            operation: ADD_SCALAR
+            description: "-35% Speed"
+
+      vulnerability_low:
+        display_name: "-15% Armour"
+        description: "Reduces armour, increasing damage taken"
+        icon: IRON_CHESTPLATE
+        value_type: string
+        value: vulnerability_low
+        impacts:
+          - type: cast_modifier
+            kind: attribute
+            attribute: GENERIC_ARMOR
+            amount: -0.15
+            operation: ADD_SCALAR
+            description: "-15% Armour"
+
+      vulnerability_high:
+        display_name: "-25% Armour"
+        description: "Reduces armour significantly"
+        icon: DIAMOND_CHESTPLATE
+        value_type: string
+        value: vulnerability_high
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 3
+            description: "Requires Circle Level 3"
+        impacts:
+          - type: cast_modifier
+            kind: attribute
+            attribute: GENERIC_ARMOR
+            amount: -0.25
+            operation: ADD_SCALAR
+            description: "-25% Armour"
+
+      mana_suppression:
+        display_name: "-20% Mana Regen"
+        description: "Reduces mana regeneration (players only)"
+        icon: LAPIS_LAZULI
+        value_type: string
+        value: mana_suppression
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 2
+            description: "Requires Circle Level 2"
+        impacts:
+          - type: cast_modifier
+            kind: stat
+            stat: mana_regen_bonus
+            value: -0.20
+            description: "-20% Mana Regen"
+
+      magic_suppression:
+        display_name: "-20% Magic Power"
+        description: "Reduces spell damage (players only)"
+        icon: BLAZE_POWDER
+        value_type: string
+        value: magic_suppression
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 3
+            description: "Requires Circle Level 3"
+        impacts:
+          - type: cast_modifier
+            kind: stat
+            stat: magic_power_bonus
+            value: -0.20
+            description: "-20% Magic Power"
+
+      cast_slow:
+        display_name: "-15% Cast Speed"
+        description: "Increases cast time (players only)"
+        icon: CLOCK
+        value_type: string
+        value: cast_slow
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 4
+            description: "Requires Circle Level 4"
+        impacts:
+          - type: cast_modifier
+            kind: stat
+            stat: cast_speed_bonus
+            value: -0.15
+            description: "-15% Cast Speed"
+
+      affinity_drain:
+        display_name: "-10 Elemental Affinity"
+        description: "Reduces elemental affinity (players only)"
+        icon: NETHER_STAR
+        value_type: string
+        value: affinity_drain
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 5
+            description: "Requires Circle Level 5"
+        impacts:
+          - type: cast_modifier
+            kind: stat
+            stat: affinity_bonus
+            value: -10.0
+            description: "-10 Elemental Affinity"
+
+  debuff_slot_1:
+    description: "First debuff slot"
+    display_name: "Slot 1"
+    icon: FERMENTED_SPIDER_EYE
+    hidden: true
+    group: configure_debuffs
+    option_role: slot
+    slot_index: 1
+    inherit_values_from: debuff_pool
+    default_index: 0
+
+    values:
+      none:
+        display_name: "Empty"
+        description: "No debuff assigned"
+        icon: LIGHT_GRAY_STAINED_GLASS_PANE
+        value_type: string
+        value: none
+
+  debuff_slot_2:
+    description: "Second debuff slot"
+    display_name: "Slot 2"
+    icon: FERMENTED_SPIDER_EYE
+    hidden: true
+    group: configure_debuffs
+    option_role: slot
+    slot_index: 2
+    inherit_values_from: debuff_pool
+    default_index: 0
+    requirements:
+      - type: number_stat
+        stat: circleLevel
+        minimum: 3
+        description: "Requires Circle Level 3"
+
+    values:
+      none:
+        display_name: "Empty"
+        description: "No debuff assigned"
+        icon: LIGHT_GRAY_STAINED_GLASS_PANE
+        value_type: string
+        value: none
+
+  debuff_slot_3:
+    description: "Third debuff slot"
+    display_name: "Slot 3"
+    icon: FERMENTED_SPIDER_EYE
+    hidden: true
+    group: configure_debuffs
+    option_role: slot
+    slot_index: 3
+    inherit_values_from: debuff_pool
+    default_index: 0
+    requirements:
+      - type: number_stat
+        stat: circleLevel
+        minimum: 5
+        description: "Requires Circle Level 5"
+
+    values:
+      none:
+        display_name: "Empty"
+        description: "No debuff assigned"
+        icon: LIGHT_GRAY_STAINED_GLASS_PANE
+        value_type: string
+        value: none

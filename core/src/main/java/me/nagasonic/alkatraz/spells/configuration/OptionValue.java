@@ -77,6 +77,9 @@ public class OptionValue<T> {
      * Checks if all requirements are currently met for a specific player
      */
     public boolean meetsRequirements(Player player) {
+        if (parentOption != null && !parentOption.meetsRequirements(player)) {
+            return false;
+        }
         for (ValueRequirement req : requirements) {
             if (!req.isMet(player)) {
                 return false;
@@ -90,6 +93,9 @@ public class OptionValue<T> {
      */
     public List<ValueRequirement> getUnmetRequirements(Player player) {
         List<ValueRequirement> unmet = new ArrayList<>();
+        if (parentOption != null) {
+            unmet.addAll(parentOption.getUnmetRequirements(player));
+        }
         for (ValueRequirement req : requirements) {
             if (!req.isMet(player)) {
                 unmet.add(req);

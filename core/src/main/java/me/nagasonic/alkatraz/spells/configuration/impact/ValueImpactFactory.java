@@ -1,9 +1,11 @@
 package me.nagasonic.alkatraz.spells.configuration.impact;
 
 import me.nagasonic.alkatraz.spells.Spell;
+import me.nagasonic.alkatraz.spells.configuration.impact.implementation.CastModifierImpact;
 import me.nagasonic.alkatraz.spells.configuration.impact.implementation.ManaCostImpact;
 import me.nagasonic.alkatraz.spells.configuration.impact.implementation.StatModifierImpact;
 import me.nagasonic.alkatraz.spells.configuration.impact.implementation.TagImpact;
+import me.nagasonic.alkatraz.spells.modifier.AppliedModifierFactory;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.util.HashMap;
@@ -112,6 +114,24 @@ public final class ValueImpactFactory {
             String description = s.getString("description", "Adds tag: " + tag);
             return new TagImpact(spell, tag, description);
         });
+
+        /*
+         * cast_modifier
+         * -------------
+         * Declares a modifier applied when the spell is cast (not on option select).
+         * kind: attribute | stat
+         *
+         * attribute kind:
+         *   attribute:  GENERIC_ATTACK_DAMAGE (Attribute enum name)
+         *   amount:     <double>
+         *   operation:  ADD_NUMBER | ADD_SCALAR | MULTIPLY_SCALAR_1
+         *
+         * stat kind:
+         *   stat:   <string>  — MagicProfile spell-modifier id
+         *   value:  <double>
+         */
+        register("cast_modifier", (spell, s) ->
+                new CastModifierImpact(AppliedModifierFactory.fromConfig(s)));
     }
 
     // ── Public API ────────────────────────────────────────────────────────────

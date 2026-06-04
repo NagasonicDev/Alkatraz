@@ -449,32 +449,47 @@ public class MagicProfile extends Profile {
     // Spell Tag Management (persisted)
     // ============================================
 
+    private String spellTagsKey(Spell spell) {
+        return spell.getId() + ".tags";
+    }
+
+    private void ensureSpellTagsSet(Spell spell) {
+        String key = spellTagsKey(spell);
+        if (!isStringSet(key)) {
+            stringSetStat(key);
+        }
+    }
+
     /**
      * Adds a spell tag
      */
     public void addSpellTag(Spell spell, String tag) {
-        getStringSet(spell.getId() + ".tags").add(tag);
+        ensureSpellTagsSet(spell);
+        getStringSet(spellTagsKey(spell)).add(tag);
     }
 
     /**
      * Removes a spell tag
      */
     public void removeSpellTag(Spell spell, String tag) {
-        getStringSet(spell.getId() + ".tags").remove(tag);
+        if (!isStringSet(spellTagsKey(spell))) return;
+        getStringSet(spellTagsKey(spell)).remove(tag);
     }
 
     /**
      * Checks if player has a spell tag
      */
     public boolean hasSpellTag(Spell spell, String tag) {
-        return getStringSet(spell.getId() + ".tags").contains(tag);
+        if (!isStringSet(spellTagsKey(spell))) return false;
+        return getStringSet(spellTagsKey(spell)).contains(tag);
     }
 
     /**
      * Gets all active spell tags
      */
     public Collection<String> getAllSpellTags(Spell spell) {
-        return new HashSet<>(getStringSet(spell.getId() + ".tags"));
+        if (!isStringSet(spellTagsKey(spell))) return Set.of();
+        return new HashSet<>(getStringSet(spellTagsKey(spell)));
     }
 
     @Override

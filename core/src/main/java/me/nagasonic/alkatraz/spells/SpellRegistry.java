@@ -18,6 +18,8 @@ public class SpellRegistry {
         registerIfEnabled("air_blades", new AirBlades("AIR_BLADES"));
         registerIfEnabled("air_burst", new AirBurst("AIR_BURST"));
         registerIfEnabled("barrier", new Barrier("BARRIER"));
+        registerIfEnabled("buff", new Buff("BUFF"));
+        registerIfEnabled("debuff", new Debuff("DEBUFF"));
         registerIfEnabled("dark_tendrils", new DarkTendrils("DARK_TENDRILS"));
         registerIfEnabled("detect", new Detect("DETECT"));
         registerIfEnabled("disguise", new Disguise("DISGUISE"));

@@ -214,6 +214,9 @@ public final class Alkatraz extends JavaPlugin {
         saveConfig("spells/air_blades.yml");
         saveConfig("spells/air_burst.yml");
         saveConfig("spells/barrier.yml");
+        saveConfig("spells/buff.yml");
+        saveConfig("spells/debuff.yml");
+        saveConfig("spells/debuff_options.yml");
         saveConfig("spells/dark_tendrils.yml");
         saveConfig("spells/detect.yml");
         saveConfig("spells/disguise.yml");
