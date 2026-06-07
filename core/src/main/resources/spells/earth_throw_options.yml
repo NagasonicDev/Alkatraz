@@ -1,0 +1,52 @@
+options:
+  throw_force:
+    description: "Adjust the thrown earth speed."
+    icon: DIRT
+    default_index: 1
+    values:
+      lob:
+        display_name: "Lob"
+        description: "Slower thrown earth."
+        icon: CLAY_BALL
+        value_type: double
+        value: 0.7
+      normal:
+        display_name: "Normal"
+        description: "Default thrown earth speed."
+        icon: DIRT
+        value_type: double
+        value: 1.0
+      hurl:
+        display_name: "Hurl"
+        description: "Faster thrown earth."
+        icon: STONE
+        value_type: double
+        value: 1.35
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 3
+            description: "Requires Circle Level 3"
+  impact_radius:
+    description: "Adjust the landing impact radius."
+    icon: TNT
+    default_index: 1
+    values:
+      tight:
+        display_name: "Tight"
+        description: "Smaller impact."
+        icon: IRON_NUGGET
+        value_type: double
+        value: 2.0
+      standard:
+        display_name: "Standard"
+        description: "Default impact."
+        icon: IRON_INGOT
+        value_type: double
+        value: 3.0
+      wide:
+        display_name: "Wide"
+        description: "Larger impact."
+        icon: IRON_BLOCK
+        value_type: double
+        value: 4.0

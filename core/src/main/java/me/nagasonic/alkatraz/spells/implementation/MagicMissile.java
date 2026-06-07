@@ -49,10 +49,12 @@ public class MagicMissile extends AttackSpell {
     @Override
     public void loadConfiguration() {
         Alkatraz.getInstance().save("spells/magic_missile.yml");
+        Alkatraz.getInstance().saveConfig("spells/magic_missile_options.yml");
 
         YamlConfiguration spellConfig = ConfigManager.getConfig("spells/magic_missile.yml").get();
 
         loadCommonConfig(spellConfig);
+        loadOptions();
     }
 
     @Override
@@ -61,7 +63,7 @@ public class MagicMissile extends AttackSpell {
             AttackProperties props = new AttackProperties(p, Utils.castLocation(p), getBasePower() * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")), AttackType.MAGIC);
             Location loc1 = p.getEyeLocation();
             Vector direction = p.getEyeLocation().getDirection();
-            Location loc2 = p.getEyeLocation().add(direction.multiply(20));
+            Location loc2 = p.getEyeLocation().add(direction.multiply((Double) getOption("missile_range").getSelectedValue(p).getValue()));
             List<Location> locs = ParticleUtils.line(0.5, loc1, loc2);
             locs.remove(0); //Function puts loc2 as the first index, so if it is a solid block, the missile will not fire.
             locs.add(loc2);
@@ -132,7 +134,10 @@ public class MagicMissile extends AttackSpell {
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
         if (!caster.isDead()){
-            AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster), getBasePower() * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")), AttackType.MAGIC);
+            double wandp = wand == null ? 1 : NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+            double power = getPower(caster, getBasePower())
+                    * wandp;
+            AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster), power, AttackType.MAGIC);
             Location loc1 = caster.getEyeLocation();
             Vector direction = caster.getTarget().getLocation().toVector().subtract(caster.getLocation().toVector()).normalize();
             Location loc2 = caster.getEyeLocation().add(direction.multiply(20));

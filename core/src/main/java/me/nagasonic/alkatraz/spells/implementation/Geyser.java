@@ -55,116 +55,13 @@ public class Geyser extends AttackSpell {
     }
 
     // -------------------------------------------------------------------------
-    // Spell Options
-    // -------------------------------------------------------------------------
-
-    @Override
-    protected void setupOptions() {
-
-        // --- Height ----------------------------------------------------------
-        SpellOption heightOption = new SpellOption(this, "height",
-                "Adjust the height of the geyser column", Material.SCAFFOLDING, 0);
-
-        OptionValue<Double> shortHeight = new OptionValue<>(
-                "short", "Short", "Low geyser — 5 blocks high, concentrated damage (+20%)",
-                Material.IRON_NUGGET, 5.0
-        );
-        shortHeight.addImpact(new StatModifierImpact(this, "height", 5.0, StatModifierImpact.ModifierType.SET));
-        shortHeight.addImpact(new StatModifierImpact(this, "damage", 1.2, StatModifierImpact.ModifierType.MULTIPLY));
-        heightOption.addValue(shortHeight);
-
-        OptionValue<Double> normalHeight = new OptionValue<>(
-                "normal", "Normal", "Standard geyser — 10 blocks high",
-                Material.IRON_INGOT, 10.0
-        );
-        normalHeight.addImpact(new StatModifierImpact(this, "height", 10.0, StatModifierImpact.ModifierType.SET));
-        normalHeight.addImpact(new StatModifierImpact(this, "damage", 1.0, StatModifierImpact.ModifierType.MULTIPLY));
-        heightOption.addValue(normalHeight);
-
-        OptionValue<Double> tallHeight = new OptionValue<>(
-                "tall", "Tall", "High geyser — 18 blocks, reduced damage (-20%)",
-                Material.IRON_BLOCK, 18.0
-        );
-        tallHeight.addRequirement(new NumberStatRequirement<>("circleLevel", 4, "Requires Circle Level 4"));
-        tallHeight.addImpact(new StatModifierImpact(this, "height", 18.0, StatModifierImpact.ModifierType.SET));
-        tallHeight.addImpact(new StatModifierImpact(this, "damage", 0.8, StatModifierImpact.ModifierType.MULTIPLY));
-        tallHeight.addImpact(new ManaCostImpact(this, 10));
-        heightOption.addValue(tallHeight);
-
-        addOption(heightOption);
-
-        // --- Power -----------------------------------------------------------
-        SpellOption powerOption = new SpellOption(this, "power",
-                "Adjust the launch force of the geyser", Material.PISTON, 1);
-
-        OptionValue<Double> weakPower = new OptionValue<>(
-                "weak", "Weak", "Gentle push — lower mana cost",
-                Material.SLIME_BALL, 0.6
-        );
-        weakPower.addImpact(new StatModifierImpact(this, "launch_power", 0.6, StatModifierImpact.ModifierType.SET));
-        weakPower.addImpact(new StatModifierImpact(this, "damage", 0.7, StatModifierImpact.ModifierType.MULTIPLY));
-        powerOption.addValue(weakPower);
-
-        OptionValue<Double> normalPower = new OptionValue<>(
-                "normal", "Normal", "Standard launch force",
-                Material.FEATHER, 1.0
-        );
-        normalPower.addImpact(new StatModifierImpact(this, "launch_power", 1.0, StatModifierImpact.ModifierType.SET));
-        normalPower.addImpact(new StatModifierImpact(this, "damage", 1.0, StatModifierImpact.ModifierType.MULTIPLY));
-        powerOption.addValue(normalPower);
-
-        OptionValue<Double> strongPower = new OptionValue<>(
-                "strong", "Strong", "Powerful eruption — launches enemies high (+30% damage)",
-                Material.BLAZE_POWDER, 1.6
-        );
-        strongPower.addRequirement(new NumberStatRequirement<>("circleLevel", 3, "Requires Circle Level 3"));
-        strongPower.addImpact(new StatModifierImpact(this, "launch_power", 1.6, StatModifierImpact.ModifierType.SET));
-        strongPower.addImpact(new StatModifierImpact(this, "damage", 1.3, StatModifierImpact.ModifierType.MULTIPLY));
-        strongPower.addImpact(new ManaCostImpact(this, 12));
-        powerOption.addValue(strongPower);
-
-        addOption(powerOption);
-
-        // --- Radius ----------------------------------------------------------
-        SpellOption radiusOption = new SpellOption(this, "radius",
-                "Adjust the width of the geyser base", Material.TNT, 2);
-
-        OptionValue<Double> narrowRadius = new OptionValue<>(
-                "narrow", "Narrow", "Tight geyser — concentrated damage (+15%)",
-                Material.GOLD_NUGGET, 1.0
-        );
-        narrowRadius.addImpact(new StatModifierImpact(this, "radius", 1.0, StatModifierImpact.ModifierType.SET));
-        narrowRadius.addImpact(new StatModifierImpact(this, "damage", 1.15, StatModifierImpact.ModifierType.MULTIPLY));
-        radiusOption.addValue(narrowRadius);
-
-        OptionValue<Double> normalRadius = new OptionValue<>(
-                "normal", "Normal", "Standard geyser width — 2.5 block radius",
-                Material.GOLD_INGOT, 2.5
-        );
-        normalRadius.addImpact(new StatModifierImpact(this, "radius", 2.5, StatModifierImpact.ModifierType.SET));
-        normalRadius.addImpact(new StatModifierImpact(this, "damage", 1.0, StatModifierImpact.ModifierType.MULTIPLY));
-        radiusOption.addValue(normalRadius);
-
-        OptionValue<Double> wideRadius = new OptionValue<>(
-                "wide", "Wide", "Broad eruption — 4.5 block radius, reduced damage (-25%)",
-                Material.GOLD_BLOCK, 4.5
-        );
-        wideRadius.addRequirement(new NumberStatRequirement<>("circleLevel", 4, "Requires Circle Level 4"));
-        wideRadius.addImpact(new StatModifierImpact(this, "radius", 4.5, StatModifierImpact.ModifierType.SET));
-        wideRadius.addImpact(new StatModifierImpact(this, "damage", 0.75, StatModifierImpact.ModifierType.MULTIPLY));
-        wideRadius.addImpact(new ManaCostImpact(this, 8));
-        radiusOption.addValue(wideRadius);
-
-        addOption(radiusOption);
-    }
-
-    // -------------------------------------------------------------------------
     // Config
     // -------------------------------------------------------------------------
 
     @Override
     public void loadConfiguration() {
         Alkatraz.getInstance().save("spells/geyser.yml");
+        Alkatraz.getInstance().saveConfig("spells/geyser_options.yml");
         YamlConfiguration spellConfig = ConfigManager.getConfig("spells/geyser.yml").get();
         loadCommonConfig(spellConfig);
     }
@@ -239,13 +136,14 @@ public class Geyser extends AttackSpell {
         double height = 10.0;
         double radius = 2.5;
         double launchPower = 1;
-        double basePower = getPower(caster, getBasePower())
-                * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+        double wandp = wand == null ? 1 : NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+        double power = getPower(caster, getBasePower())
+                * wandp;
 
         AttackProperties props = new AttackProperties(
                 caster,
                 Utils.castLocation(caster),
-                basePower,
+                power,
                 AttackType.MAGIC
         );
 

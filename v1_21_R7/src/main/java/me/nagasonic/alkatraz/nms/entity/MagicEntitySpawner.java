@@ -1,6 +1,6 @@
 package me.nagasonic.alkatraz.nms.entity;
 
-import me.nagasonic.alkatraz.nms.entity.implementation.MagicZombie;
+import me.nagasonic.alkatraz.nms.entity.implementation.ZombieMage;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 
@@ -31,7 +31,7 @@ public final class MagicEntitySpawner {
      */
     public static Optional<Entity> spawn(String key, Location location) {
         return switch (key) {
-            case "magic_zombie" -> Optional.of((Entity) MagicZombie.spawn(location));
+            case "magic_zombie" -> Optional.of((Entity) ZombieMage.spawn(location));
             // case "magic_skeleton" -> Optional.of(MagicSkeleton.spawn(location));
             // case "magic_witch"    -> Optional.of(MagicWitch.spawn(location));
             default -> Optional.empty();

@@ -56,22 +56,25 @@ public class EarthSpike extends AttackSpell implements Listener {
     @Override
     public void loadConfiguration() {
         Alkatraz.getInstance().save("spells/earth_spike.yml");
+        Alkatraz.getInstance().saveConfig("spells/earth_spike_options.yml");
 
         YamlConfiguration spellConfig = ConfigManager.getConfig("spells/earth_spike.yml").get();
 
         loadCommonConfig(spellConfig);
+        loadOptions();
         Alkatraz.getInstance().getServer().getPluginManager().registerEvents(this, Alkatraz.getInstance());
     }
 
     @Override
     public void castAction(Player player, ItemStack wand) {
-        Block target = player.getTargetBlockExact(20);
-        if (!Ground.isGround(target.getType())) {
+        Block target = player.getTargetBlockExact((int) Math.round((Double) getOption("spike_reach").getSelectedValue(player).getValue()));
+        if (target == null || !Ground.isGround(target.getType())) {
             Utils.sendActionBar(player, "&cMust be casted on earth.");
             return;
         }
-        if (target == null || !target.getType().isSolid()) return;
+        if (!target.getType().isSolid()) return;
         AttackProperties props = new AttackProperties(player, Utils.castLocation(player), getBasePower() * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")), AttackType.PHYSICAL);
+        double heightMultiplier = (Double) getOption("spike_height").getSelectedValue(player).getValue();
 
         Map<BlockFace, Integer> columns = new HashMap<>();
         columns.put(BlockFace.SELF, 7);
@@ -87,7 +90,7 @@ public class EarthSpike extends AttackSpell implements Listener {
         for (Map.Entry<BlockFace, Integer> entry : columns.entrySet()) {
             Block block = target.getRelative(entry.getKey());
             if (props.isCountered() || props.isCancelled()) return;
-            int height = entry.getValue();
+            int height = Math.max(1, (int) Math.round(entry.getValue() * heightMultiplier));
             Location loc = block.getLocation();
             World world = block.getWorld();
             int x = block.getX();
@@ -154,7 +157,10 @@ public class EarthSpike extends AttackSpell implements Listener {
             return;
         }
         if (target == null || !target.getType().isSolid()) return;
-        AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster), getBasePower() * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")), AttackType.PHYSICAL);
+        double wandp = wand == null ? 1 : NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+        double power = getPower(caster, getBasePower())
+                * wandp;
+        AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster), power, AttackType.PHYSICAL);
 
         Map<BlockFace, Integer> columns = new HashMap<>();
         columns.put(BlockFace.SELF, 7);

@@ -3,6 +3,7 @@ package me.nagasonic.alkatraz.items.wands;
 import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.dom.Permission;
+import me.nagasonic.alkatraz.playerdata.SpellHotbarManager;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.Spell;
@@ -31,10 +32,16 @@ public class WandListeners implements Listener {
 
     @EventHandler
     private void onClick(PlayerInteractEvent e){
+        if (SpellHotbarManager.isActive(e.getPlayer())) return ;
         if (e.getItem() != null) {
             if (e.getItem().getType() != Material.AIR && e.getItem().getAmount() != 0) {
                 if (Wand.isWand(e.getItem())) {
-                    if (!ProfileManager.getProfile(e.getPlayer().getUniqueId(), MagicProfile.class).isCasting()){
+                    MagicProfile data = ProfileManager.getProfile(e.getPlayer(), MagicProfile.class);
+                    if (data.getCastMode().equals("hotbar")){
+                        SpellHotbarManager.enter(e.getPlayer(), e.getItem());
+                        return;
+                    }
+                    if (!data.isCasting()){
                         String code = NBT.get(e.getItem(), nbt -> (String) nbt.getString("cast_code"));
                         if (e.getAction().isRightClick()) {
                             NBT.modify(e.getItem(), nbt -> {
@@ -63,10 +70,16 @@ public class WandListeners implements Listener {
     @EventHandler
     private void onAttack(EntityDamageByEntityEvent e) {
         if (e.getDamager() instanceof Player p) {
+            if (SpellHotbarManager.isActive(p)) return ;
             ItemStack wand = p.getItemInHand();
             if (wand.getType() != Material.AIR && wand.getAmount() != 0) {
                 if (Wand.isWand(wand)) {
-                    if (!ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class).isCasting()){
+                    MagicProfile data = ProfileManager.getProfile(p, MagicProfile.class);
+                    if (data.getCastMode().equals("hotbar")){
+                        SpellHotbarManager.enter(p, wand);
+                        return;
+                    }
+                    if (!data.isCasting()){
                         String code = NBT.get(wand, nbt -> (String) nbt.getString("cast_code"));
                         NBT.modify(wand, nbt -> {
                             nbt.setString("cast_code", code + "L");
@@ -90,10 +103,16 @@ public class WandListeners implements Listener {
     private void onClickEntity(PlayerInteractEntityEvent e) {
         ItemStack wand = e.getPlayer().getInventory().getItem(e.getHand());
         Player p = e.getPlayer();
+        if (SpellHotbarManager.isActive(p)) return ;
         if (wand.getType() != Material.AIR && wand.getAmount() != 0){
             if (Wand.isWand(wand)) {
                 e.setCancelled(true);
-                if (!ProfileManager.getProfile(e.getPlayer().getUniqueId(), MagicProfile.class).isCasting()){
+                MagicProfile data = ProfileManager.getProfile(e.getPlayer(), MagicProfile.class);
+                if (data.getCastMode().equals("hotbar")){
+                    SpellHotbarManager.enter(e.getPlayer(), wand);
+                    return;
+                }
+                if (!data.isCasting()){
                     String code = NBT.get(wand, nbt -> (String) nbt.getString("cast_code"));
                     NBT.modify(wand, nbt -> {
                         nbt.setString("cast_code", code + "R");
@@ -116,6 +135,7 @@ public class WandListeners implements Listener {
     private void onSwap(PlayerSwapHandItemsEvent e){
         ItemStack wand = e.getOffHandItem();
         Player p = e.getPlayer();
+        if (SpellHotbarManager.isActive(p)) return ;
         if (wand != null){
             if (wand.getType() != Material.AIR && wand.getAmount() != 0){
                 if (Wand.isWand(wand)) {
@@ -153,6 +173,7 @@ public class WandListeners implements Listener {
 
     @EventHandler
     private void onHandSwitch(PlayerItemHeldEvent e) {
+        if (SpellHotbarManager.isActive(e.getPlayer())) return ;
         ItemStack wand = e.getPlayer().getInventory().getItem(e.getPreviousSlot());
         if (wand != null){
             if (wand.getType() != Material.AIR && wand.getAmount() != 0) {
@@ -169,6 +190,7 @@ public class WandListeners implements Listener {
     @EventHandler
     private void onWand(PlayerItemHeldEvent e) {
         Player p = e.getPlayer();
+        if (SpellHotbarManager.isActive(p)) return ;
         ItemStack prev = p.getInventory().getItem(e.getPreviousSlot());
         ItemStack curr = p.getInventory().getItem(e.getNewSlot());
         if (prev != null) {
@@ -181,7 +203,7 @@ public class WandListeners implements Listener {
         if (curr != null){
             if (curr.getType() != Material.AIR && curr.getAmount() != 0){
                 if (Wand.isWand(curr)) {
-                    switchTo(p);
+                    switchTo(p, curr);
                 }
             }
         }
@@ -189,6 +211,7 @@ public class WandListeners implements Listener {
 
     @EventHandler
     private void onInventoryClick(InventoryClickEvent e) throws InterruptedException {
+        if (SpellHotbarManager.isActive((Player) e.getWhoClicked())) return;
         if (e.getClickedInventory() == e.getWhoClicked().getInventory()){
             Player p = (Player) e.getWhoClicked();
             if (e.getAction() == InventoryAction.SWAP_WITH_CURSOR){
@@ -197,7 +220,7 @@ public class WandListeners implements Listener {
                     if (cursor != null){
                         if (cursor.getType() != Material.AIR && cursor.getAmount() != 0){
                             if (Wand.isWand(cursor)) {
-                                switchTo(p);
+                                switchTo(p, cursor);
                             }
                         }
                     }
@@ -219,7 +242,7 @@ public class WandListeners implements Listener {
                         boolean clickedIsWand = Wand.isWand(swapped);
                         boolean hotbarIsWand = Wand.isWand(swappedWith);
                         if (clickedIsWand && !hotbarIsWand) {
-                            switchTo(p);
+                            switchTo(p, swapped);
                         }
                         else if (!clickedIsWand && hotbarIsWand) {
                             switchFrom(p);
@@ -227,7 +250,7 @@ public class WandListeners implements Listener {
                     } else if (notAir(swapped) && !notAir(swappedWith)) {
                         boolean isWand = Wand.isWand(swapped);
                         if (isWand){
-                            switchTo(p);
+                            switchTo(p, swapped);
                         }
                     } else if (notAir(swappedWith) && !notAir(swapped)) {
                         boolean isWand = Wand.isWand(swappedWith);
@@ -245,7 +268,7 @@ public class WandListeners implements Listener {
                             switchFrom(p);
                         }
                         else if (!clickedIsWand && hotbarIsWand) {
-                            switchTo(p);
+                            switchTo(p, swapped);
                         }
                     } else if (notAir(swapped) && !notAir(swappedWith)) {
                         boolean isWand = Wand.isWand(swapped);
@@ -255,7 +278,7 @@ public class WandListeners implements Listener {
                     } else if (notAir(swappedWith) && !notAir(swapped)) {
                         boolean isWand = Wand.isWand(swappedWith);
                         if (isWand){
-                            switchTo(p);
+                            switchTo(p, swappedWith);
                         }
                     }
                 }
@@ -276,7 +299,7 @@ public class WandListeners implements Listener {
                     if (cursor.getType() != Material.AIR && cursor.getAmount() != 0){
                         if (Wand.isWand(cursor)) {
                             if (e.getSlot() == p.getInventory().getHeldItemSlot()){
-                                switchTo(p);
+                                switchTo(p, cursor);
                             }
                         }
                     }
@@ -292,7 +315,7 @@ public class WandListeners implements Listener {
                                     if (wand != null){
                                         if (wand.getType() != Material.AIR && wand.getAmount() != 0){
                                             if (Wand.isWand(wand)) {
-                                                switchTo(p);
+                                                switchTo(p, wand);
                                             }
                                         }
                                     }
@@ -317,6 +340,7 @@ public class WandListeners implements Listener {
     @EventHandler
     private void onDrop(PlayerDropItemEvent e){
         Player p = e.getPlayer();
+        if (SpellHotbarManager.isActive(p)) return ;
         ItemStack dropped = e.getItemDrop().getItemStack();
         ItemStack hand = p.getItemInHand();
         if (dropped.getType() != Material.AIR && dropped.getAmount() != 0){
@@ -334,6 +358,7 @@ public class WandListeners implements Listener {
     private void onPickup(PlayerPickupItemEvent e){
         ItemStack item = e.getItem().getItemStack();
         Player p = e.getPlayer();
+        if (SpellHotbarManager.isActive(p)) return ;
         if (item.getType() != Material.AIR && item.getAmount() != 0){
             if (Wand.isWand(item)){
                 for (int i = 0; i <= p.getInventory().getHeldItemSlot(); i++){
@@ -341,7 +366,7 @@ public class WandListeners implements Listener {
                     ItemStack s = p.getInventory().getItem(i);
                     if (s != null){
                         if (s.getAmount() == 0 || s.getType() == Material.AIR){
-                            switchTo(p);
+                            switchTo(p, item);
                             break;
                         }
                     }
@@ -387,7 +412,7 @@ public class WandListeners implements Listener {
             if (wand.getType() != Material.AIR && wand.getAmount() != 0){
                 if (Wand.isWand(wand)){
                     Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(Alkatraz.getInstance(), () -> {
-                        switchTo(p);
+                        switchTo(p, wand);
                     }, 1L);
                 }
             }
@@ -399,13 +424,14 @@ public class WandListeners implements Listener {
         exp.remove(p.getUniqueId().toString());
     }
 
-    public static void switchTo(Player p) {
+    public static void switchTo(Player p, ItemStack wand) {
         MagicProfile data = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
         Alkatraz.getNms().fakeExp(p, (float) (data.getMana() / data.getMaxMana()), (int) data.getMana(), 1);
     }
 
-    public static void switchFrom(Player p){
+    public static void switchFrom(Player p) {
         Alkatraz.getNms().fakeExp(p, p.getExp(), p.getLevel(), p.getTotalExperience());
+        SpellHotbarManager.exit(p);
     }
 
     private void tryCast(Player p, ItemStack wand, Spell spell){

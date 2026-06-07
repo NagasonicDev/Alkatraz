@@ -1,0 +1,85 @@
+options:
+  barrier_size:
+    description: "Adjust the barrier radius."
+    icon: BARRIER
+    default_index: 1
+    values:
+      compact:
+        display_name: "Compact"
+        description: "Smaller shield radius."
+        icon: IRON_NUGGET
+        value_type: double
+        value: 2.0
+      normal:
+        display_name: "Normal"
+        description: "Default shield radius."
+        icon: IRON_INGOT
+        value_type: double
+        value: 3.0
+      wide:
+        display_name: "Wide"
+        description: "Larger shield radius."
+        icon: IRON_BLOCK
+        value_type: double
+        value: 4.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 4
+            description: "Requires Circle Level 4"
+  barrier_duration:
+    description: "Adjust how long the barrier lasts."
+    icon: CLOCK
+    default_index: 1
+    values:
+      brief:
+        display_name: "Brief"
+        description: "Shorter barrier duration."
+        icon: CLOCK
+        value_type: double
+        value: 30.0
+      standard:
+        display_name: "Standard"
+        description: "Default barrier duration."
+        icon: COMPASS
+        value_type: double
+        value: 60.0
+      enduring:
+        display_name: "Enduring"
+        description: "Longer barrier duration."
+        icon: RECOVERY_COMPASS
+        value_type: double
+        value: 90.0
+        requirements:
+          - type: number_stat
+            stat: mastery_barrier
+            minimum: 75
+            description: "Requires 75 Barrier mastery"
+  barrier_hitpoints:
+    description: "Adjust how much damage the barrier absorbs."
+    icon: SHIELD
+    default_index: 1
+    values:
+      fragile:
+        display_name: "Fragile"
+        description: "Lower barrier hitpoints."
+        icon: CRACKED_STONE_BRICKS
+        value_type: double
+        value: 14.0
+      standard:
+        display_name: "Standard"
+        description: "Default barrier hitpoints."
+        icon: SHIELD
+        value_type: double
+        value: 20.0
+      reinforced:
+        display_name: "Reinforced"
+        description: "Higher barrier hitpoints."
+        icon: ANVIL
+        value_type: double
+        value: 28.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 4
+            description: "Requires Circle Level 4"

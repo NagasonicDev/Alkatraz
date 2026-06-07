@@ -43,90 +43,6 @@ public class Fireball extends AttackSpell implements Listener {
     }
 
     @Override
-    protected void setupOptions(){
-        SpellOption speedOption = new SpellOption(this, "speed",
-                "Adjust fireball velocity", Material.FEATHER, 1);
-        OptionValue<Double> slowSpeed = new OptionValue<>(
-                "slow", "Slow", "Slower projectile, maximum damage",
-                Material.SOUL_SAND, 0.3
-        );
-        slowSpeed.addImpact(new StatModifierImpact(this, "projectile_speed", 0.3, StatModifierImpact.ModifierType.SET));
-        slowSpeed.addImpact(new StatModifierImpact(this, "damage", 1.2, StatModifierImpact.ModifierType.MULTIPLY));
-        speedOption.addValue(slowSpeed);
-
-        OptionValue<Double> normalSpeed = new OptionValue<>(
-                "normal", "Normal", "Standard projectile speed",
-                Material.FEATHER, 0.5
-        );
-        normalSpeed.addImpact(new StatModifierImpact(this, "projectile_speed", 0.5, StatModifierImpact.ModifierType.SET));
-        normalSpeed.addImpact(new StatModifierImpact(this, "damage", 1.0, StatModifierImpact.ModifierType.MULTIPLY));
-        speedOption.addValue(normalSpeed);
-
-        OptionValue<Double> fastSpeed = new OptionValue<>(
-                "fast", "Fast", "Faster projectile, reduced damage (-20%)",
-                Material.SUGAR, 0.8
-        );
-        fastSpeed.addRequirement(new NumberStatRequirement<>("circleLevel", 2, "Requires Circle Level 2"));
-        fastSpeed.addImpact(new StatModifierImpact(this, "projectile_speed", 0.8, StatModifierImpact.ModifierType.SET));
-        fastSpeed.addImpact(new StatModifierImpact(this, "damage", 0.8, StatModifierImpact.ModifierType.MULTIPLY));
-        speedOption.addValue(fastSpeed);
-
-        OptionValue<Double> blazingSpeed = new OptionValue<>(
-                "blazing", "Blazing", "Extremely fast, heavy damage penalty (-40%)",
-                Material.BLAZE_POWDER, 1.2
-        );
-        blazingSpeed.addRequirement(new NumberStatRequirement<>("circleLevel", 4, "Requires Circle Level 4"));
-        blazingSpeed.addImpact(new StatModifierImpact(this, "projectile_speed", 1.2, StatModifierImpact.ModifierType.SET));
-        blazingSpeed.addImpact(new StatModifierImpact(this, "damage", 0.6, StatModifierImpact.ModifierType.MULTIPLY));
-        blazingSpeed.addImpact(new ManaCostImpact(this, 15));
-        speedOption.addValue(blazingSpeed);
-
-        addOption(speedOption);
-
-        SpellOption breaksBlocksOption = new SpellOption(this, "breaks_blocks",
-                "Whether the fireball should break blocks", Material.DIAMOND_PICKAXE, 0);
-        OptionValue<Boolean> breaksBlocks = new OptionValue<>(
-                "breaks_blocks", "Breaks Blocks", "Fireball will break blocks on collision", Material.LIME_CONCRETE, true
-        );
-        breaksBlocksOption.addValue(breaksBlocks);
-        OptionValue<Boolean> notBreakBlocks = new OptionValue<>(
-                "block_protection", "Blocks Protected", "Fireball will not break blocks.", Material.RED_CONCRETE, false
-        );
-        breaksBlocksOption.addValue(notBreakBlocks);
-
-        addOption(breaksBlocksOption);
-
-        SpellOption sizeOption = new SpellOption(this, "size",
-                "Adjust fireball explosion size", Material.TNT, 1);
-        OptionValue<Double> small = new  OptionValue<>(
-                "small_size", "Small Size", "Small fireball explosion.", Material.IRON_NUGGET, 1.0
-        );
-        small.addRequirement(new NumberStatRequirement<>("circleLevel", 3, "Requires Circle Level 3"));
-        small.addImpact(new StatModifierImpact(this, "size", 1,  StatModifierImpact.ModifierType.SET));
-        small.addImpact(new StatModifierImpact(this, "damage", 1.4, StatModifierImpact.ModifierType.MULTIPLY));
-        small.addImpact(new StatModifierImpact(this, "projectile_speed", 1.1, StatModifierImpact.ModifierType.MULTIPLY));
-        sizeOption.addValue(small);
-
-        OptionValue<Double> normal = new OptionValue<>(
-                "normal_size", "Normal Size", "Normal fireball explosion", Material.IRON_INGOT, 1.5
-        );
-        normal.addImpact(new StatModifierImpact(this, "size", 1.5, StatModifierImpact.ModifierType.SET));
-        normal.addImpact(new StatModifierImpact(this, "size", 1.5, StatModifierImpact.ModifierType.SET));
-        sizeOption.addValue(normal);
-
-        OptionValue<Double> large = new OptionValue<>(
-                "large_size", "Large Size", "Large fireball explosion", Material.IRON_BLOCK, 2.0
-        );
-        large.addRequirement(new NumberStatRequirement<>("circleLevel", 3, "Requires Circle Level 3"));
-        large.addImpact(new StatModifierImpact(this, "size", 2, StatModifierImpact.ModifierType.SET));
-        large.addImpact(new StatModifierImpact(this, "damage", 0.6, StatModifierImpact.ModifierType.MULTIPLY));
-        large.addImpact(new StatModifierImpact(this, "projectile_speed", 0.9, StatModifierImpact.ModifierType.MULTIPLY));
-        sizeOption.addValue(large);
-
-        addOption(sizeOption);
-    }
-
-    @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
         location.getWorld().spawnParticle(Particle.FLAME, location, 15);
     }
@@ -139,6 +55,7 @@ public class Fireball extends AttackSpell implements Listener {
 
     @Override
     public void loadConfiguration() {
+        Alkatraz.getInstance().saveConfig("spells/fireball_options.yml");
         Alkatraz.getInstance().save("spells/fireball.yml");
         YamlConfiguration spellConfig = ConfigManager.getConfig("spells/fireball.yml").get();
         loadCommonConfig(spellConfig);
@@ -176,11 +93,14 @@ public class Fireball extends AttackSpell implements Listener {
     @Override
     public void mobCastAction(@UnknownNullability Mob caster, ItemStack wand) {
         if (caster.isDead()) return;
+        double wandp = wand == null ? 1 : NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+        double power = getPower(caster, getBasePower())
+                * wandp;
 
         AttackProperties props = new AttackProperties(
                 caster,
                 Utils.castLocation(caster),
-                getBasePower() * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")),
+                power,
                 AttackType.MAGIC
         );
         Vector direction = caster.getTarget().getLocation().toVector().subtract(caster.getLocation().toVector());

@@ -47,10 +47,12 @@ public class WaterSphere extends AttackSpell {
     @Override
     public void loadConfiguration() {
         Alkatraz.getInstance().save("spells/water_sphere.yml");
+        Alkatraz.getInstance().saveConfig("spells/water_sphere_options.yml");
 
         YamlConfiguration spellConfig = ConfigManager.getConfig("spells/water_sphere.yml").get();
 
         loadCommonConfig(spellConfig);
+        loadOptions();
     }
     
     @Override
@@ -60,8 +62,9 @@ public class WaterSphere extends AttackSpell {
             List<Location> lineLocs = ParticleUtils.line(
                     2,
                     p.getEyeLocation(),
-                    p.getEyeLocation().add(p.getEyeLocation().getDirection().multiply(40))
+                    p.getEyeLocation().add(p.getEyeLocation().getDirection().multiply((Double) getOption("sphere_range").getSelectedValue(p).getValue()))
             );
+            double size = (Double) getOption("sphere_size").getSelectedValue(p).getValue();
 
             new BukkitRunnable() {
 
@@ -80,7 +83,7 @@ public class WaterSphere extends AttackSpell {
 
                     Location a = lineLocs.get(index);
 
-                    List<Location> locs = ParticleUtils.sphere(a, 0.75, 24);
+                    List<Location> locs = ParticleUtils.sphere(a, size, 24);
                     for (Location loc : locs) {
                         loc.getWorld().spawnParticle(Particle.WATER_DROP, loc, 2, 0, 0, 0, 0);
                         SpellParticleComponent comp = new SpellParticleComponent(
@@ -106,7 +109,7 @@ public class WaterSphere extends AttackSpell {
                         }
                     }
 
-                    for (Entity entity : a.getNearbyEntities(1, 1, 1)) {
+                    for (Entity entity : a.getNearbyEntities(size + 0.25, size + 0.25, size + 0.25)) {
                         if (props.isCancelled() || props.isCountered()){
                             cancel();
                             return;
@@ -135,7 +138,10 @@ public class WaterSphere extends AttackSpell {
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
         if (!caster.isDead()){
-            AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster), getBasePower() * getBasePower() * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")), AttackType.MAGIC);
+            double wandp = wand == null ? 1 : NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+            double power = getPower(caster, getBasePower())
+                    * wandp;
+            AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster), power, AttackType.MAGIC);
             List<Location> lineLocs = ParticleUtils.line(
                     2,
                     caster.getEyeLocation(),

@@ -66,7 +66,11 @@ public class SpellRegistry {
     }
 
     public static Spell getSpell(String id){
-        return allSpellsByID.get(id);
+        if (id == null || id.isEmpty()) return null;
+        return getAllSpells().values().stream()
+                .filter(s -> id.equals(s.getId()))
+                .findFirst()
+                .orElse(null);
     }
 
     public static Spell getSpellFromName(String name) {

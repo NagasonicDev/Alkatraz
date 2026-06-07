@@ -1,4 +1,4 @@
-# mobs/zombie.yml
+# mobs/zombie_fighter.yml
 fire_affinity:    0.0
 fire_resistance:  -25.0
 
@@ -20,4 +20,5 @@ dark_resistance: 50.0
 magic_affinity:   0.0
 magic_resistance: 20.0
 
-spells: []
+spells:
+  - 'buff'

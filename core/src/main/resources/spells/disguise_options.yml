@@ -1,0 +1,18 @@
+options:
+  target_scope:
+    description: "Adjust which players appear as disguise targets."
+    icon: PLAYER_HEAD
+    default_index: 0
+    values:
+      all_players:
+        display_name: "All Players"
+        description: "Show every online player."
+        icon: ENDER_EYE
+        value_type: double
+        value: -1.0
+      nearby_players:
+        display_name: "Nearby Players"
+        description: "Only show nearby players."
+        icon: SPYGLASS
+        value_type: double
+        value: 24.0

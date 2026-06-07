@@ -1,0 +1,24 @@
+options:
+  missile_range:
+    description: "Adjust Magic Missile travel distance."
+    icon: SPYGLASS
+    default_index: 1
+    values:
+      short:
+        display_name: "Short"
+        description: "Shorter missile range."
+        icon: ARROW
+        value_type: double
+        value: 12.0
+      normal:
+        display_name: "Normal"
+        description: "Default missile range."
+        icon: SPECTRAL_ARROW
+        value_type: double
+        value: 20.0
+      long:
+        display_name: "Long"
+        description: "Longer missile range."
+        icon: BOW
+        value_type: double
+        value: 30.0

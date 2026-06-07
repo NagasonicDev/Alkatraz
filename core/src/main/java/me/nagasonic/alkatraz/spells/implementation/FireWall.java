@@ -38,27 +38,6 @@ public class FireWall extends AttackSpell implements Listener {
     }
 
     @Override
-    protected void setupOptions() {
-        SpellOption fire = new SpellOption(this, "fire_blocks", "Whether wall lights blocks on fire.", Material.FLINT_AND_STEEL, 0);
-        OptionValue<Boolean> alights = new OptionValue<>("alight_blocks",
-                "Alights Blocks", "Fire wall lights blocks on fire.", Material.BLAZE_POWDER, true);
-        fire.addValue(alights);
-        OptionValue<Boolean> noFire = new OptionValue<>("no_fire",
-                "No Fire", "Fire wall will not light blocks on fire", Material.BARRIER, false);
-        fire.addValue(noFire);
-        addOption(fire);
-
-        SpellOption curves = new SpellOption(this, "wall_curves", "Whether the wall curves with look.", Material.ENDER_EYE, 0);
-        OptionValue<Boolean> curvesValue = new OptionValue<>("curves",
-                "Curves", "Fire wall will curve in the direction of the player", Material.ENDER_EYE, true);
-        curves.addValue(curvesValue);
-        OptionValue<Boolean> noCurve = new  OptionValue<>("no_curve",
-                "Doesn't Curve", "Fire wall will be straight", Material.STICK, false);
-        curves.addValue(noCurve);
-        addOption(curves);
-    }
-
-    @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
         location.getWorld().spawnParticle(Particle.FLAME, location, 15);
     }
@@ -75,6 +54,7 @@ public class FireWall extends AttackSpell implements Listener {
     @Override
     public void loadConfiguration() {
         Alkatraz.getInstance().save("spells/fire_wall.yml");
+        Alkatraz.getInstance().saveConfig("spells/fire_wall_options.yml");
 
         YamlConfiguration spellConfig = ConfigManager.getConfig("spells/fire_wall.yml").get();
 
@@ -197,7 +177,10 @@ public class FireWall extends AttackSpell implements Listener {
 
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
-        AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster), getBasePower() * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")), AttackType.MAGIC);
+        double wandp = wand == null ? 1 : NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+        double power = getPower(caster, getBasePower())
+                * wandp;
+        AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster), power, AttackType.MAGIC);
         Location start = caster.getLocation();
 
         double spacing = 0.5;

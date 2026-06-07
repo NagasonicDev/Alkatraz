@@ -50,16 +50,20 @@ public class WaterPulse extends AttackSpell implements Listener {
     @Override
     public void loadConfiguration() {
         Alkatraz.getInstance().save("spells/water_pulse.yml");
+        Alkatraz.getInstance().saveConfig("spells/water_pulse_options.yml");
 
         YamlConfiguration spellConfig = ConfigManager.getConfig("spells/water_pulse.yml").get();
 
         loadCommonConfig(spellConfig);
+        loadOptions();
     }
 
     @Override
     public void castAction(Player p, ItemStack wand) {
         AttackProperties props = new AttackProperties(p, Utils.castLocation(p), getBasePower() * getBasePower() * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")), AttackType.MAGIC);
         Location centre = p.getLocation();
+        double maxRadius = (Double) getOption("pulse_radius").getSelectedValue(p).getValue();
+        double step = (Double) getOption("pulse_speed").getSelectedValue(p).getValue();
 
         BukkitRunnable task = new BukkitRunnable() {
             double r = 0;
@@ -70,7 +74,7 @@ public class WaterPulse extends AttackSpell implements Listener {
                     cancel();
                     return;
                 }
-                r += 0.5;
+                r += step;
                 List<Location> circle = ParticleUtils.circle(centre, r, 4/r, 0, 0);
                 for (Location loc : circle){
                     loc.getWorld().spawnParticle(Particle.WATER_SPLASH, loc, 5, 0, 0, 0,0);
@@ -112,7 +116,7 @@ public class WaterPulse extends AttackSpell implements Listener {
                         target.setVelocity(direction);
                     }
                 }
-                if (r == 10){
+                if (r >= maxRadius){
                     cancel();
                 }
             }
@@ -123,7 +127,10 @@ public class WaterPulse extends AttackSpell implements Listener {
 
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
-        AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster), getBasePower() * getBasePower() * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")), AttackType.MAGIC);
+        double wandp = wand == null ? 1 : NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+        double power = getPower(caster, getBasePower())
+                * wandp;
+        AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster), power, AttackType.MAGIC);
         Location centre = caster.getLocation();
 
         BukkitRunnable task = new BukkitRunnable() {

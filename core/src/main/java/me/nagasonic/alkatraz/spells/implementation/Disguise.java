@@ -42,10 +42,12 @@ public class Disguise extends Spell implements Listener {
     @Override
     public void loadConfiguration() {
         Alkatraz.getInstance().save("spells/disguise.yml");
+        Alkatraz.getInstance().saveConfig("spells/disguise_options.yml");
 
         YamlConfiguration spellConfig = ConfigManager.getConfig("spells/disguise.yml").get();
 
         loadCommonConfig(spellConfig);
+        loadOptions();
         Alkatraz.getInstance().getServer().getPluginManager().registerEvents(this, Alkatraz.getInstance());
     }
 
@@ -102,7 +104,12 @@ public class Disguise extends Spell implements Listener {
         int p = 1;
         int pageNumbers = (int) Math.ceil((double) spells.size() / 36);
         List<Player> pagePlayers = new ArrayList<>();
+        double targetRange = (Double) getOption("target_scope").getSelectedValue(player).getValue();
         for (Player p1 : Bukkit.getServer().getOnlinePlayers()){
+            if (!p1.equals(player) && targetRange >= 0 && p1.getWorld().equals(player.getWorld())
+                    && p1.getLocation().distance(player.getLocation()) > targetRange) {
+                continue;
+            }
             if (i < 36){
                 pagePlayers.add(p1);
                 i++;
