@@ -1,6 +1,7 @@
 package me.nagasonic.alkatraz.playerdata.profiles;
 
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
@@ -105,6 +106,18 @@ public class ProfilePersistence {
         for (String stat : profile.getStringSets()) {
             config.set("stats.stringSets." + stat, new ArrayList<>(profile.getStringSet(stat)));
         }
+
+        MagicProfile mprofile = (MagicProfile) profile;
+        if (mprofile != null) {
+            Map<Integer, String> hotbarSpells = mprofile.getHotbarSpellIds();
+            ConfigurationSection hotbarSection = config.createSection("hotbar");
+            for (Map.Entry<Integer, String> entry : hotbarSpells.entrySet()) {
+                hotbarSection.set(String.valueOf(entry.getKey()), entry.getValue());
+            }
+        }
+
+
+
 
         try {
             config.save(file);
@@ -211,6 +224,22 @@ public class ProfilePersistence {
                     profile.setStringSet(stat, section.getStringList(stat));
                 }else{
                     profile.stringSetStat(stat, Set.copyOf(section.getStringList(stat)));
+                }
+            }
+        }
+
+        if (config.contains("hotbar")) {
+            ConfigurationSection hotbarSection = config.getConfigurationSection("hotbar");
+            for (String key : hotbarSection.getKeys(false)) {
+                try {
+                    int slotIndex = Integer.parseInt(key);
+                    String spellId = hotbarSection.getString(key);
+                    MagicProfile mp = (MagicProfile) profile;
+                    if (mp != null) {
+                        mp.setHotbarSpell(slotIndex, spellId);
+                    }
+                } catch (NumberFormatException e) {
+                    Alkatraz.getInstance().getLogger().warning("Invalid hotbar slot key '" + key + "' for player " + uuid);
                 }
             }
         }

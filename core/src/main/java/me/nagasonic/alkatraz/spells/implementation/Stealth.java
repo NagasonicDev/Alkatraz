@@ -63,6 +63,7 @@ public class Stealth extends Spell implements Listener {
     @Override
     public void loadConfiguration() {
         Alkatraz.getInstance().save("spells/stealth.yml");
+        Alkatraz.getInstance().saveConfig("spells/stealth_options.yml");
 
         YamlConfiguration spellConfig = ConfigManager.getConfig("spells/stealth.yml").get();
         for (int i = 2; i <= 9; i++){

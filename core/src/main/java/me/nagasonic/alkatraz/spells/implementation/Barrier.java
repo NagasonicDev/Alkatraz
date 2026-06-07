@@ -39,17 +39,22 @@ public class Barrier extends BarrierSpell implements Listener {
     @Override
     public void loadConfiguration() {
         Alkatraz.getInstance().save("spells/barrier.yml");
+        Alkatraz.getInstance().saveConfig("spells/barrier_options.yml");
 
         YamlConfiguration spellConfig = ConfigManager.getConfig("spells/barrier.yml").get();
         radius = spellConfig.getDouble("radius");
         duration = spellConfig.getDouble("duration");
         loadCommonConfig(spellConfig);
+        loadOptions();
     }
 
     @Override
     public void castAction(Player p, ItemStack wand) {
         Location center = p.getLocation().clone().add(0, 1, 0);
-        BarrierProperties properties = new BarrierProperties(p, center, getMaxHitpoints(), BarrierType.COMBINED);
+        double activeRadius = (Double) getOption("barrier_size").getSelectedValue(p).getValue();
+        double activeDuration = (Double) getOption("barrier_duration").getSelectedValue(p).getValue();
+        double activeHitpoints = (Double) getOption("barrier_hitpoints").getSelectedValue(p).getValue();
+        BarrierProperties properties = new BarrierProperties(p, center, activeHitpoints, BarrierType.COMBINED);
         properties.getHealthBar().addPlayer(p);
 
         BukkitRunnable task = new BukkitRunnable() {
@@ -58,14 +63,14 @@ public class Barrier extends BarrierSpell implements Listener {
 
             @Override
             public void run() {
-                if (properties.isBroken() || ticksPassed >= duration * 5) {
-                    onBarrierBreak(center);
+                if (properties.isBroken() || ticksPassed >= activeDuration * 5) {
+                    onBarrierBreak(center, activeRadius);
                     properties.getHealthBar().removeAll();
                     cancel();
                     return;
                 }
 
-                List<Location> particleLocations = ParticleUtils.sphere(center, radius, 200);
+                List<Location> particleLocations = ParticleUtils.sphere(center, activeRadius, 200);
 
                 for (Location loc : particleLocations) {
 
@@ -180,7 +185,11 @@ public class Barrier extends BarrierSpell implements Listener {
 
     @Override
     public void onBarrierBreak(Location center) {
-        List<Location> particleLocations = ParticleUtils.sphere(center, radius, 200);
+        onBarrierBreak(center, radius);
+    }
+
+    private void onBarrierBreak(Location center, double breakRadius) {
+        List<Location> particleLocations = ParticleUtils.sphere(center, breakRadius, 200);
         for (Location loc : particleLocations){
             loc.getWorld().spawnParticle(Utils.DUST, loc, 1, new Particle.DustOptions(Color.RED, 0.4F));
         }

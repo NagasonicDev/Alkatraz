@@ -58,101 +58,6 @@ public class WindVortex extends AttackSpell implements Listener {
     }
 
     @Override
-    protected void setupOptions() {
-        // Pull Strength Option
-        SpellOption pullOption = new SpellOption(this, "pull_strength",
-                "Adjust vortex pull strength", Material.FISHING_ROD, 1);
-
-        OptionValue<Double> gentlePull = new OptionValue<>(
-                "gentle", "Gentle Pull", "Weaker pull, reduced damage",
-                Material.STRING, 0.3
-        );
-        gentlePull.addImpact(new StatModifierImpact(this, "pull_strength", 0.15, StatModifierImpact.ModifierType.SET));
-        gentlePull.addImpact(new ManaCostImpact(this, -10));
-        pullOption.addValue(gentlePull);
-
-        OptionValue<Double> normalPull = new OptionValue<>(
-                "normal", "Normal Pull", "Standard pull strength",
-                Material.FISHING_ROD, 0.4
-        );
-        normalPull.addImpact(new StatModifierImpact(this, "pull_strength", 0.25, StatModifierImpact.ModifierType.SET));
-        pullOption.addValue(normalPull);
-
-        OptionValue<Double> strongPull = new OptionValue<>(
-                "strong", "Strong Pull", "Powerful pull, increased damage",
-                Material.TRIPWIRE_HOOK, 0.6
-        );
-        strongPull.addRequirement(new NumberStatRequirement<>("circleLevel", 3, "Requires Circle Level 3"));
-        strongPull.addImpact(new StatModifierImpact(this, "pull_strength", 0.4, StatModifierImpact.ModifierType.SET));
-        strongPull.addImpact(new ManaCostImpact(this, 15));
-        pullOption.addValue(strongPull);
-
-        addOption(pullOption);
-
-        // Radius Option
-        SpellOption radiusOption = new SpellOption(this, "radius",
-                "Adjust vortex size", Material.ENDER_EYE, 1);
-
-        OptionValue<Double> smallVortex = new OptionValue<>(
-                "small", "Small Vortex", "Smaller area, faster pull",
-                Material.ENDER_PEARL, 5.0
-        );
-        smallVortex.addImpact(new StatModifierImpact(this, "radius", 5.0, StatModifierImpact.ModifierType.SET));
-        smallVortex.addImpact(new StatModifierImpact(this, "pull_strength", 1.2, StatModifierImpact.ModifierType.MULTIPLY));
-        smallVortex.addImpact(new ManaCostImpact(this, -10));
-        radiusOption.addValue(smallVortex);
-
-        OptionValue<Double> normalVortex = new OptionValue<>(
-                "normal", "Normal Vortex", "Standard area",
-                Material.ENDER_EYE, 8.0
-        );
-        normalVortex.addImpact(new StatModifierImpact(this, "radius", 8.0, StatModifierImpact.ModifierType.SET));
-        radiusOption.addValue(normalVortex);
-
-        OptionValue<Double> largeVortex = new OptionValue<>(
-                "large", "Large Vortex", "Massive area, weaker pull",
-                Material.END_CRYSTAL, 12.0
-        );
-        largeVortex.addRequirement(new NumberStatRequirement<>("circleLevel", 4, "Requires Circle Level 4"));
-        largeVortex.addImpact(new StatModifierImpact(this, "radius", 12.0, StatModifierImpact.ModifierType.SET));
-        largeVortex.addImpact(new StatModifierImpact(this, "pull_strength", 0.8, StatModifierImpact.ModifierType.MULTIPLY));
-        largeVortex.addImpact(new ManaCostImpact(this, 20));
-        radiusOption.addValue(largeVortex);
-
-        addOption(radiusOption);
-
-        // Duration Option
-        SpellOption durationOption = new SpellOption(this, "duration",
-                "Adjust vortex duration", Material.CLOCK, 1);
-
-        OptionValue<Integer> shortVortex = new OptionValue<>(
-                "brief", "Brief Vortex", "3 second duration",
-                Material.CLOCK, 3
-        );
-        shortVortex.addImpact(new StatModifierImpact(this, "duration", 3, StatModifierImpact.ModifierType.SET));
-        shortVortex.addImpact(new ManaCostImpact(this, -15));
-        durationOption.addValue(shortVortex);
-
-        OptionValue<Integer> normalDuration = new OptionValue<>(
-                "normal", "Normal Vortex", "5 second duration",
-                Material.CLOCK, 5
-        );
-        normalDuration.addImpact(new StatModifierImpact(this, "duration", 5, StatModifierImpact.ModifierType.SET));
-        durationOption.addValue(normalDuration);
-
-        OptionValue<Integer> extendedVortex = new OptionValue<>(
-                "extended", "Extended Vortex", "8 second duration",
-                Material.CLOCK, 8
-        );
-        extendedVortex.addRequirement(new NumberStatRequirement<>("circleLevel", 3, "Requires Circle Level 3"));
-        extendedVortex.addImpact(new StatModifierImpact(this, "duration", 8, StatModifierImpact.ModifierType.SET));
-        extendedVortex.addImpact(new ManaCostImpact(this, 20));
-        durationOption.addValue(extendedVortex);
-
-        addOption(durationOption);
-    }
-
-    @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
         // Wind disperses on barrier
         location.getWorld().spawnParticle(Particle.CLOUD, location, 30, 1, 1, 1, 0.1);
@@ -170,6 +75,7 @@ public class WindVortex extends AttackSpell implements Listener {
     @Override
     public void loadConfiguration() {
         Alkatraz.getInstance().save("spells/wind_vortex.yml");
+        Alkatraz.getInstance().saveConfig("spells/wind_vortex_options.yml");
         YamlConfiguration spellConfig = ConfigManager.getConfig("spells/wind_vortex.yml").get();
         loadCommonConfig(spellConfig);
         
@@ -218,7 +124,9 @@ public class WindVortex extends AttackSpell implements Listener {
         int duration = vortexDuration;
 
         // Create attack properties
-        double power = getPower(caster, getBasePower()) * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+        double wandp = wand == null ? 1 : NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+        double power = getPower(caster, getBasePower())
+                * wandp;
         AttackProperties props = new AttackProperties(
                 caster,
                 caster.getLocation(),

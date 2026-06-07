@@ -1,0 +1,52 @@
+options:
+  pulse_radius:
+    description: "Adjust Water Pulse maximum radius."
+    icon: HEART_OF_THE_SEA
+    default_index: 1
+    values:
+      compact:
+        display_name: "Compact"
+        description: "Smaller pulse radius."
+        icon: PRISMARINE_SHARD
+        value_type: double
+        value: 6.0
+      normal:
+        display_name: "Normal"
+        description: "Default pulse radius."
+        icon: HEART_OF_THE_SEA
+        value_type: double
+        value: 10.0
+      tidal:
+        display_name: "Tidal"
+        description: "Larger pulse radius."
+        icon: CONDUIT
+        value_type: double
+        value: 14.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 3
+            description: "Requires Circle Level 3"
+  pulse_speed:
+    description: "Adjust how quickly the pulse expands."
+    icon: WATER_BUCKET
+    default_index: 1
+    values:
+      slow:
+        display_name: "Slow"
+        description: "Slower pulse expansion."
+        icon: BLUE_ICE
+        value_type: double
+        value: 0.35
+      standard:
+        display_name: "Standard"
+        description: "Default pulse expansion."
+        icon: WATER_BUCKET
+        value_type: double
+        value: 0.5
+      fast:
+        display_name: "Fast"
+        description: "Faster pulse expansion."
+        icon: ICE
+        value_type: double
+        value: 0.75

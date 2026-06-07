@@ -36,6 +36,7 @@ public class Detect extends Spell {
     @Override
     public void loadConfiguration() {
         Alkatraz.getInstance().save("spells/detect.yml");
+        Alkatraz.getInstance().saveConfig("spells/detect_options.yml");
 
         YamlConfiguration spellConfig = ConfigManager.getConfig("spells/detect.yml").get();
         for (int i = 2; i <= 9; i++){
@@ -43,6 +44,7 @@ public class Detect extends Spell {
         }
         duration = spellConfig.getLong("detect_duration");
         loadCommonConfig(spellConfig);
+        loadOptions();
     }
 
     @Override
@@ -52,7 +54,8 @@ public class Detect extends Spell {
             Location a = p.getLocation();
             MagicProfile data = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
             GlowingEntities ge = Alkatraz.getGlowingEntities();
-            double range = ranges.get(data.getCircleLevel());
+            double range = ranges.get(data.getCircleLevel()) * (Double) getOption("scan_range").getSelectedValue(p).getValue();
+            long activeDuration = Math.round((Double) getOption("glow_duration").getSelectedValue(p).getValue());
             int r = 20;
             taskID = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
                 if (l.get() < r){
@@ -105,7 +108,7 @@ public class Detect extends Spell {
                         throw new RuntimeException(e);
                     }
                 }
-            }, duration * 20);
+            }, activeDuration * 20);
         }
     }
 

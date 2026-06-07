@@ -57,10 +57,12 @@ public class EarthThrow extends AttackSpell implements Listener {
     @Override
     public void loadConfiguration() {
         Alkatraz.getInstance().save("spells/earth_throw.yml");
+        Alkatraz.getInstance().saveConfig("spells/earth_throw_options.yml");
 
         YamlConfiguration spellConfig = ConfigManager.getConfig("spells/earth_throw.yml").get();
 
         loadCommonConfig(spellConfig);
+        loadOptions();
         Alkatraz.getInstance().getServer().getPluginManager().registerEvents(this, Alkatraz.getInstance());
     }
 
@@ -76,7 +78,7 @@ public class EarthThrow extends AttackSpell implements Listener {
                     BlockData data = Bukkit.createBlockData(block.getType());
                     FallingBlock b = loc.getWorld().spawnFallingBlock(loc, data);
                     b.setHurtEntities(false);
-                    b.setVelocity(direction.multiply(1).setY(0.3));
+                    b.setVelocity(direction.multiply((Double) getOption("throw_force").getSelectedValue(p).getValue()).setY(0.3));
                     SpellEntityComponent comp = new SpellEntityComponent(
                             this,
                             props,
@@ -97,7 +99,10 @@ public class EarthThrow extends AttackSpell implements Listener {
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
         if (!caster.isDead()){
-            AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster), getBasePower() * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")), AttackType.PHYSICAL);
+            double wandp = wand == null ? 1 : NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+            double power = getPower(caster, getBasePower())
+                    * wandp;
+            AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster), power, AttackType.PHYSICAL);
             Location loc = caster.getEyeLocation();
             Vector direction = caster.getTarget().getLocation().toVector().subtract(caster.getLocation().toVector()).normalize();
             if (caster.isOnGround()){
@@ -174,11 +179,12 @@ public class EarthThrow extends AttackSpell implements Listener {
                 if (!(p instanceof AttackProperties props)) return;
                 e.getBlock().setType(Material.AIR);
                 Location loc = e.getBlock().getLocation();
-                List<Location> locs = ParticleUtils.circle(loc, 3, 1, 0, 0);
+                double radius = comp.getCaster() instanceof Player player ? (Double) getOption("impact_radius").getSelectedValue(player).getValue() : 3.0;
+                List<Location> locs = ParticleUtils.circle(loc, radius, 1, 0, 0);
                 for (Location l : locs){
                     l.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, l, 1);
                 }
-                for (LivingEntity le : loc.getNearbyLivingEntities(3)){
+                for (LivingEntity le : loc.getNearbyLivingEntities(radius)){
                     le.damage(props.getRemainingPower());
                     Vector direction = le.getLocation().toVector().subtract(loc.toVector());
                     direction.normalize().multiply(1);
@@ -204,11 +210,12 @@ public class EarthThrow extends AttackSpell implements Listener {
                     e.setCancelled(true);
                     Location loc = b.getLocation();
                     b.remove();
-                    List<Location> locs = ParticleUtils.circle(loc, 3, 1, 0, 0);
+                    double radius = comp.getCaster() instanceof Player player ? (Double) getOption("impact_radius").getSelectedValue(player).getValue() : 3.0;
+                    List<Location> locs = ParticleUtils.circle(loc, radius, 1, 0, 0);
                     for (Location l : locs){
                         l.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, l, 5);
                     }
-                    for (LivingEntity le : loc.getNearbyLivingEntities(3)){
+                    for (LivingEntity le : loc.getNearbyLivingEntities(radius)){
                         le.damage(props.getRemainingPower());
                         Vector direction = le.getLocation().toVector().subtract(loc.toVector());
                         direction.normalize().multiply(1);

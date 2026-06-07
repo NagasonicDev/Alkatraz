@@ -8,10 +8,6 @@ import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.components.*;
-import me.nagasonic.alkatraz.spells.configuration.OptionValue;
-import me.nagasonic.alkatraz.spells.configuration.SpellOption;
-import me.nagasonic.alkatraz.spells.configuration.impact.implementation.ManaCostImpact;
-import me.nagasonic.alkatraz.spells.configuration.impact.implementation.StatModifierImpact;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.spells.types.AttackSpell;
@@ -160,7 +156,9 @@ public class DarkTendrils extends AttackSpell implements Listener {
         int duration = tendrilDuration;
 
         // Create attack properties
-        double power = getPower(caster, getBasePower()) * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+        double wandp = wand == null ? 1 : NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+        double power = getPower(caster, getBasePower())
+                * wandp;
         AttackProperties props = new AttackProperties(
                 caster,
                 Utils.castLocation(caster),

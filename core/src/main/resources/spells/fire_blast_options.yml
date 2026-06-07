@@ -1,0 +1,52 @@
+options:
+  blast_speed:
+    description: "Adjust Fire Blast projectile speed."
+    icon: FIRE_CHARGE
+    default_index: 1
+    values:
+      heavy:
+        display_name: "Heavy"
+        description: "Slower fireball."
+        icon: MAGMA_CREAM
+        value_type: double
+        value: 0.35
+      normal:
+        display_name: "Normal"
+        description: "Default fireball speed."
+        icon: FIRE_CHARGE
+        value_type: double
+        value: 0.5
+      fast:
+        display_name: "Fast"
+        description: "Faster fireball."
+        icon: BLAZE_POWDER
+        value_type: double
+        value: 0.75
+  fire_spread:
+    description: "Adjust how much fire is created on impact."
+    icon: FLINT_AND_STEEL
+    default_index: 1
+    values:
+      contained:
+        display_name: "Contained"
+        description: "Smaller fire spread."
+        icon: CAMPFIRE
+        value_type: double
+        value: 1.5
+      normal:
+        display_name: "Normal"
+        description: "Default fire spread."
+        icon: FLINT_AND_STEEL
+        value_type: double
+        value: 3.0
+      wildfire:
+        display_name: "Wildfire"
+        description: "Larger fire spread."
+        icon: FIRE_CHARGE
+        value_type: double
+        value: 4.5
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 3
+            description: "Requires Circle Level 3"

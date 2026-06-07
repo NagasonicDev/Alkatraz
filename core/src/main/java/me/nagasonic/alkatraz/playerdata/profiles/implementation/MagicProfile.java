@@ -1,6 +1,7 @@
 package me.nagasonic.alkatraz.playerdata.profiles.implementation;
 
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.playerdata.SpellHotbarManager;
 import me.nagasonic.alkatraz.playerdata.profiles.Profile;
 import me.nagasonic.alkatraz.spells.Element;
 import me.nagasonic.alkatraz.spells.Spell;
@@ -61,6 +62,7 @@ public class MagicProfile extends Profile {
 
         // Strings
         stringStat("disguise");
+        stringStat("castMode", "code");
 
         // String sets for spell data
         stringSetStat("discoveredSpells");  // Stores spell types that player has discovered
@@ -207,6 +209,13 @@ public class MagicProfile extends Profile {
 
     public String getDisguise() { return getString("disguise"); }
     public void setDisguise(String value) { setString("disguise", value); }
+
+    public String getCastMode() { return getString("castMode"); }
+    public void setCastMode(String value) {
+        if (value.equals("code") || value.equals("hotbar")) {
+            setString("castMode", value);
+        }
+    }
 
     /**
      * Gets affinity for a specific element (matches old PlayerData.getAffinity())
@@ -520,6 +529,25 @@ public class MagicProfile extends Profile {
                 StatUtils.addMana(Bukkit.getPlayer(getOwner()), getManaRegeneration());
             }
         }, 0L, 20L);
+    }
+
+    // ============================================
+    // Spell Hotbar stuff
+    // ============================================
+
+    private Map<Integer, String> hotbarSpellIds = new HashMap<>();
+
+    public Map<Integer, String> getHotbarSpellIds() {
+        return hotbarSpellIds;
+    }
+
+    public void setHotbarSpell(int slotIndex, String spellId) {
+        if (slotIndex < 0 || slotIndex >= SpellHotbarManager.SPELL_SLOT_COUNT) return;
+        hotbarSpellIds.put(slotIndex, spellId);
+    }
+
+    public void removeHotbarSpell(String spellId) {
+        hotbarSpellIds.entrySet().removeIf(entry -> spellId.equals(entry.getValue()));
     }
 
 

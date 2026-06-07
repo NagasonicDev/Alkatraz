@@ -69,7 +69,7 @@ public class Buff extends Spell {
         boolean onOther = target instanceof Player p && !p.getUniqueId().equals(caster.getUniqueId());
 
         String casterMsg = onOther
-                ? "&bBuffs applied to &f" + ((Player) target).getName() + " &bfor &f" + duration + "&b seconds!"
+                ? "&bBuffs applied to &f" + target.getName() + " &bfor &f" + duration + "&b seconds!"
                 : "&bBuffs active for &f" + duration + "&b seconds!";
         String targetMsg = "&bYou have been buffed for &f" + duration + "&b seconds!";
 

@@ -1,0 +1,52 @@
+options:
+  spike_reach:
+    description: "Adjust Earth Spike targeting range."
+    icon: POINTED_DRIPSTONE
+    default_index: 1
+    values:
+      close:
+        display_name: "Close"
+        description: "Shorter target range."
+        icon: SPYGLASS
+        value_type: double
+        value: 12.0
+      normal:
+        display_name: "Normal"
+        description: "Default target range."
+        icon: POINTED_DRIPSTONE
+        value_type: double
+        value: 20.0
+      far:
+        display_name: "Far"
+        description: "Longer target range."
+        icon: SPYGLASS
+        value_type: double
+        value: 28.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 3
+            description: "Requires Circle Level 3"
+  spike_height:
+    description: "Adjust Earth Spike height."
+    icon: DEEPSLATE
+    default_index: 1
+    values:
+      low:
+        display_name: "Low"
+        description: "Shorter spikes."
+        icon: COBBLESTONE
+        value_type: double
+        value: 0.75
+      standard:
+        display_name: "Standard"
+        description: "Default spike height."
+        icon: STONE
+        value_type: double
+        value: 1.0
+      high:
+        display_name: "High"
+        description: "Taller spikes."
+        icon: DEEPSLATE
+        value_type: double
+        value: 1.3

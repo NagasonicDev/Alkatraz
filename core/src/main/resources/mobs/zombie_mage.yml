@@ -1,0 +1,26 @@
+# mobs/zombie_mage.yml
+fire_affinity:    10.0
+fire_resistance:  -25.0
+
+water_affinity:   10.0
+water_resistance: 0.0
+
+earth_affinity:   25.0
+earth_resistance: 20.0
+
+air_affinity:     10.0
+air_resistance:   0.0
+
+light_affinity: -50.0
+light_resistance: 0.0
+
+dark_affinity: 0.0
+dark_resistance: 55.0
+
+magic_affinity:   0.0
+magic_resistance: 40.0
+
+spells:
+  - 'fireball'
+  - 'earth_spike'
+  - 'water_sphere'

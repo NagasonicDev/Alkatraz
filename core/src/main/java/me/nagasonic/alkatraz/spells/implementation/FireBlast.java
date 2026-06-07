@@ -52,10 +52,12 @@ public class FireBlast extends AttackSpell implements Listener {
     @Override
     public void loadConfiguration() {
         Alkatraz.getInstance().save("spells/fire_blast.yml");
+        Alkatraz.getInstance().saveConfig("spells/fire_blast_options.yml");
 
         YamlConfiguration spellConfig = ConfigManager.getConfig("spells/fire_blast.yml").get();
 
         loadCommonConfig(spellConfig);
+        loadOptions();
         Alkatraz.getInstance().getServer().getPluginManager().registerEvents(this, Alkatraz.getInstance());
     }
 
@@ -63,7 +65,7 @@ public class FireBlast extends AttackSpell implements Listener {
     public void castAction(Player p, ItemStack wand) {
         if (!p.isDead()){
             AttackProperties props = new AttackProperties(p, Utils.castLocation(p), getBasePower() * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")), AttackType.MAGIC);
-            LargeFireball fire = p.launchProjectile(LargeFireball.class, p.getLocation().getDirection().multiply(0.5));
+            LargeFireball fire = p.launchProjectile(LargeFireball.class, p.getLocation().getDirection().multiply((Double) getOption("blast_speed").getSelectedValue(p).getValue()));
             SpellEntityComponent comp = new SpellEntityComponent(
                     this,
                     props,
@@ -83,7 +85,10 @@ public class FireBlast extends AttackSpell implements Listener {
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
         if (!caster.isDead()){
-            AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster), getBasePower() * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")), AttackType.MAGIC);
+            double wandp = wand == null ? 1 : NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+            double power = getPower(caster, getBasePower())
+                    * wandp;
+            AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster), power, AttackType.MAGIC);
             LargeFireball fire = caster.launchProjectile(LargeFireball.class, caster.getTarget().getLocation().toVector().subtract(caster.getLocation().toVector()).multiply(0.1));
             SpellEntityComponent comp = new SpellEntityComponent(
                     this,
@@ -158,7 +163,8 @@ public class FireBlast extends AttackSpell implements Listener {
         SpellComponent comp = SpellComponentHandler.getActiveComponent(UUID.fromString(idString));
         if (comp.getSpell() != this) return;
         Location loc = e.getHitBlock() != null ? e.getHitBlock().getLocation() : e.getHitEntity().getLocation();
-        List<Block> blocks = Utils.blocksInRadius(loc, 3);
+        double radius = comp.getCaster() instanceof Player player ? (Double) getOption("fire_spread").getSelectedValue(player).getValue() : 3.0;
+        List<Block> blocks = Utils.blocksInRadius(loc, (int) Math.round(radius));
         for (Block block : blocks){
             if (block.getType() == Material.AIR){
                 block.setType(Material.FIRE);

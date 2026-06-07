@@ -23,22 +23,7 @@ import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_21_R7.CraftWorld;
 import org.bukkit.craftbukkit.v1_21_R7.inventory.CraftItemStack;
 
-/**
- * MagicZombie
- *
- * A zombie that hangs back at spell-casting range rather than charging in.
- * Visually identical to a vanilla zombie; behaviourally it keeps 6-12 blocks
- * from its target and selects a spell to cast from its yml roster.
- *
- * Spawning
- * ────────
- * Use the static {@link #spawn(Location)} factory — it handles NMS level
- * resolution, positioning and finalizeSpawn in one call:
- *
- *   MagicZombie.spawn(player.getLocation());
- */
-public class MagicZombie extends Zombie implements MagicEntity {
-
+public class ZombieFighter extends Zombie implements MagicEntity {
     // -------------------------------------------------------------------------
     // MagicEntity state
     // -------------------------------------------------------------------------
@@ -53,22 +38,19 @@ public class MagicZombie extends Zombie implements MagicEntity {
     // -------------------------------------------------------------------------
     // Constants
     // -------------------------------------------------------------------------
-
-    private static final double MIN_CAST_DIST = 6.0;
-    private static final double MAX_CAST_DIST = 12.0;
     private static final double CAST_RANGE    = 14.0;
-    private static final int    CAST_COOLDOWN = 40;
+    private static final int    CAST_COOLDOWN = 1800;
 
     // -------------------------------------------------------------------------
     // Constructor
     // -------------------------------------------------------------------------
 
-    public MagicZombie(EntityType<? extends Zombie> type, Level level) {
+    public ZombieFighter(EntityType<? extends Zombie> type, Level level) {
         super(type, level);
 
-        MagicProfile profile = MagicEntityRegistry.getProfile("magic_zombie")
+        MagicProfile profile = MagicEntityRegistry.getProfile("zombie_fighter")
                 .orElseThrow(() -> new IllegalStateException(
-                        "MagicZombie profile not loaded — did you call MagicEntityRegistry.registerAll()?"));
+                        "ZombieFighter profile not loaded"));
 
         initMagic(profile, this);
     }
@@ -78,17 +60,16 @@ public class MagicZombie extends Zombie implements MagicEntity {
     // -------------------------------------------------------------------------
 
     /**
-     * Creates and spawns a MagicZombie at the given Bukkit location.
+     * Creates and spawns a ZombieFighter at the given Bukkit location.
      *
      * @param location target location (world must be loaded)
-     * @return the spawned MagicZombie
+     * @return the spawned ZombieFighter
      */
-    public static MagicZombie spawn(Location location) {
+    public static ZombieFighter spawn(Location location) {
         ServerLevel level = ((CraftWorld) location.getWorld()).getHandle();
 
-        MagicZombie zombie = new MagicZombie(EntityType.ZOMBIE, level);
+        ZombieFighter zombie = new ZombieFighter(EntityType.ZOMBIE, level);
         zombie.setPos(location.getX(), location.getY(), location.getZ());
-        zombie.setItemInHand(InteractionHand.MAIN_HAND, CraftItemStack.asNMSCopy(WandRegistry.getWand("WOODEN_WAND").getItem()));
 
         zombie.finalizeSpawn(level,
                 level.getCurrentDifficultyAt(zombie.blockPosition()),
@@ -108,8 +89,6 @@ public class MagicZombie extends Zombie implements MagicEntity {
         targetSelector.removeAllGoals(g -> true);
 
         goalSelector.addGoal(1, new FloatGoal(this));
-        goalSelector.addGoal(2, new KeepSpellRangeGoal(
-                this, MIN_CAST_DIST, MAX_CAST_DIST, 1.1D));
         goalSelector.addGoal(3, new CastSpellGoal(
                 this, this, CAST_RANGE, CAST_COOLDOWN));
         goalSelector.addGoal(4, new WaterAvoidingRandomStrollGoal(this, 0.8D));
@@ -122,21 +101,11 @@ public class MagicZombie extends Zombie implements MagicEntity {
     }
 
     // -------------------------------------------------------------------------
-    // Suppress vanilla melee
-    // -------------------------------------------------------------------------
-
-    @Override
-    public boolean doHurtTarget(ServerLevel level, net.minecraft.world.entity.Entity target) {
-        return distanceTo(target) < MIN_CAST_DIST * 0.5
-                && super.doHurtTarget(level, target);
-    }
-
-    // -------------------------------------------------------------------------
     // Display name
     // -------------------------------------------------------------------------
 
     @Override
     public net.minecraft.network.chat.Component getDisplayName() {
-        return net.minecraft.network.chat.Component.literal("§8Arcane Zombie");
+        return net.minecraft.network.chat.Component.literal("§8Zombie Fighter");
     }
 }

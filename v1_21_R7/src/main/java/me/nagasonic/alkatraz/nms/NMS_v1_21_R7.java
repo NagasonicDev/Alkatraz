@@ -5,12 +5,9 @@ import com.mojang.authlib.properties.Property;
 import com.mojang.datafixers.util.Pair;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.nms.entity.MagicEntityRegistry;
-import me.nagasonic.alkatraz.nms.entity.implementation.MagicZombie;
+import me.nagasonic.alkatraz.nms.entity.implementation.ZombieMage;
 import me.nagasonic.alkatraz.util.Skin;
 import net.minecraft.network.protocol.game.*;
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.syncher.EntityDataSerializers;
-import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -22,7 +19,6 @@ import net.minecraft.world.phys.Vec3;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_21_R7.CraftWorld;
 import org.bukkit.craftbukkit.v1_21_R7.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_21_R7.entity.CraftHorse;
 import org.bukkit.craftbukkit.v1_21_R7.entity.CraftPlayer;
 import org.bukkit.entity.*;
 import org.bukkit.potion.PotionEffect;
@@ -30,7 +26,6 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
-import java.lang.reflect.Field;
 import java.util.*;
 
 public final class NMS_v1_21_R7 implements NMS {
@@ -129,7 +124,7 @@ public final class NMS_v1_21_R7 implements NMS {
     public Optional<org.bukkit.entity.Entity> spawnMagicEntity(String key, Location location) {
         ServerLevel level = ((CraftWorld) location.getWorld()).getHandle();
         return switch (key) {
-            case "magic_zombie" -> Optional.of(MagicZombie.spawn(location).getBukkitEntity());
+            case "magic_zombie" -> Optional.of(ZombieMage.spawn(location).getBukkitEntity());
             // case "magic_skeleton" -> Optional.of(spawnSkeleton(level, location));
             // case "magic_witch"    -> Optional.of(spawnWitch(level, location));
             default -> Optional.empty();

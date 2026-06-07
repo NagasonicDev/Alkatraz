@@ -39,70 +39,9 @@ public class LesserHeal extends Spell {
     private int taskID;
 
     @Override
-    protected void setupOptions() {
-
-        // --- Heal Potency --------------------------------------------------------
-        SpellOption potencyOption = new SpellOption(this, "potency",
-                "Adjust the base heal amount", Material.GLISTERING_MELON_SLICE, 0);
-
-        OptionValue<Double> minorHeal = new OptionValue<>(
-                "minor", "Minor", "Small heal — lower mana cost (-30%)",
-                Material.WHEAT, 0.6
-        );
-        minorHeal.addImpact(new StatModifierImpact(this, "heal", 0.6, StatModifierImpact.ModifierType.MULTIPLY));
-        potencyOption.addValue(minorHeal);
-
-        OptionValue<Double> normalHeal = new OptionValue<>(
-                "normal", "Normal", "Standard heal amount",
-                Material.GLISTERING_MELON_SLICE, 1.0
-        );
-        normalHeal.addImpact(new StatModifierImpact(this, "heal", 1.0, StatModifierImpact.ModifierType.MULTIPLY));
-        potencyOption.addValue(normalHeal);
-
-        OptionValue<Double> greaterHeal = new OptionValue<>(
-                "greater", "Greater", "Enhanced heal — approaches the max heal cap",
-                Material.GOLDEN_APPLE, 1.5
-        );
-        greaterHeal.addRequirement(new NumberStatRequirement<>("circleLevel", 3, "Requires Circle Level 3"));
-        greaterHeal.addImpact(new StatModifierImpact(this, "heal", 1.5, StatModifierImpact.ModifierType.MULTIPLY));
-        greaterHeal.addImpact(new ManaCostImpact(this, 15));
-        potencyOption.addValue(greaterHeal);
-
-        addOption(potencyOption);
-
-        // --- Range ---------------------------------------------------------------
-        SpellOption rangeOption = new SpellOption(this, "range",
-                "Maximum target distance", Material.SPYGLASS, 2);
-
-        OptionValue<Integer> shortRange = new OptionValue<>(
-                "short", "Short", "8-block range — lower mana cost",
-                Material.STICK, 8
-        );
-        shortRange.addImpact(new StatModifierImpact(this, "target_range", 8, StatModifierImpact.ModifierType.SET));
-        rangeOption.addValue(shortRange);
-
-        OptionValue<Integer> normalRange = new OptionValue<>(
-                "normal", "Normal", "Standard 20-block range",
-                Material.BLAZE_ROD, 20
-        );
-        normalRange.addImpact(new StatModifierImpact(this, "target_range", 20, StatModifierImpact.ModifierType.SET));
-        rangeOption.addValue(normalRange);
-
-        OptionValue<Integer> longRange = new OptionValue<>(
-                "long", "Long", "Extended 35-block range",
-                Material.END_ROD, 35
-        );
-        longRange.addRequirement(new NumberStatRequirement<>("circleLevel", 3, "Requires Circle Level 3"));
-        longRange.addImpact(new StatModifierImpact(this, "target_range", 35, StatModifierImpact.ModifierType.SET));
-        longRange.addImpact(new ManaCostImpact(this, 10));
-        rangeOption.addValue(longRange);
-
-        addOption(rangeOption);
-    }
-
-    @Override
     public void loadConfiguration() {
         Alkatraz.getInstance().save("spells/lesser_heal.yml");
+        Alkatraz.getInstance().saveConfig("spells/lesser_heal_options.yml");
 
         YamlConfiguration spellConfig = ConfigManager.getConfig("spells/lesser_heal.yml").get();
 
@@ -171,7 +110,7 @@ public class LesserHeal extends Spell {
 
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
-        double wandPower = NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+        double wandPower = wand == null ? 1 : NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
         double heal = (baseHeal * wandPower) * (1 + Utils.getEntityAffinity(Element.LIGHT, caster) / 100);
         if (heal > maxHeal){
             heal = maxHeal;

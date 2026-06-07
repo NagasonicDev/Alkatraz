@@ -3,7 +3,7 @@ package me.nagasonic.alkatraz.nms.entity;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.Config;
 import me.nagasonic.alkatraz.config.ConfigManager;
-import me.nagasonic.alkatraz.nms.entity.implementation.MagicZombie;
+import me.nagasonic.alkatraz.nms.entity.implementation.ZombieMage;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,7 +20,7 @@ import java.util.Optional;
  * that once from your plugin's onEnable.
  *
  * Spawning is handled directly by each subclass via a static {@code spawn()}
- * method — see {@link MagicZombie#spawn(org.bukkit.Location)} for the pattern.
+ * method — see {@link ZombieMage#spawn(org.bukkit.Location)} for the pattern.
  */
 public final class MagicEntityRegistry {
 
@@ -35,7 +35,7 @@ public final class MagicEntityRegistry {
     /** Call once from {@code Alkatraz#onEnable} after the config system is ready. */
     public static void registerAll() {
         Alkatraz.logInfo("Registering MagicEntityRegistry");
-        register("magic_zombie",   "mobs/zombie.yml");
+        register("zombie_mage",   "mobs/zombie_mage.yml");
     }
 
     // -------------------------------------------------------------------------

@@ -1,10 +1,10 @@
 id: buff
-display_name: "Buff"
+display_name: "&eBuff"
 description:
-  - "Applies your configured buffs"
-  - "for a set duration."
-  - "Sneak to buff another player."
-element: NONE
+  - "&7Applies your configured buffs"
+  - "&7for a set duration."
+  - "&8Sneak to buff another player."
+element: LIGHT
 code: SRLSS
 cast_time: 1.5
 mana_cost: 40

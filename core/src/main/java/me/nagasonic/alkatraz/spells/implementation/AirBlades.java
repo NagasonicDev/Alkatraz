@@ -90,9 +90,9 @@ public class AirBlades extends AttackSpell implements Listener {
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
         int bladeCount = 2;
-
+        double wandp = wand == null ? 1 : NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
         double power = getPower(caster, getBasePower())
-                * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+                * wandp;
 
         fireBlades(caster, wand, bladeCount, power, 0.6);
     }

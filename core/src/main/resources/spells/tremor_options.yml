@@ -1,0 +1,52 @@
+options:
+  tremor_width:
+    description: "Adjust Tremor lane spacing."
+    icon: DIRT_PATH
+    default_index: 1
+    values:
+      narrow:
+        display_name: "Narrow"
+        description: "Narrower tremor lanes."
+        icon: DIRT
+        value_type: double
+        value: 0.75
+      normal:
+        display_name: "Normal"
+        description: "Default tremor lanes."
+        icon: DIRT_PATH
+        value_type: double
+        value: 1.0
+      wide:
+        display_name: "Wide"
+        description: "Wider tremor lanes."
+        icon: COARSE_DIRT
+        value_type: double
+        value: 1.4
+  tremor_length:
+    description: "Adjust how far Tremor travels."
+    icon: SPYGLASS
+    default_index: 1
+    values:
+      short:
+        display_name: "Short"
+        description: "Shorter tremor."
+        icon: COBBLESTONE
+        value_type: double
+        value: 7.0
+      standard:
+        display_name: "Standard"
+        description: "Default tremor length."
+        icon: STONE
+        value_type: double
+        value: 11.0
+      long:
+        display_name: "Long"
+        description: "Longer tremor."
+        icon: DEEPSLATE
+        value_type: double
+        value: 15.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 4
+            description: "Requires Circle Level 4"

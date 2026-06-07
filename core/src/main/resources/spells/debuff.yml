@@ -1,10 +1,10 @@
 id: debuff
-display_name: "Debuff"
+display_name: "&7Debuff"
 description:
-  - "Applies your configured debuffs"
-  - "to a target you are looking at."
+  - "&7Applies your configured debuffs"
+  - "&7to a target you are looking at."
 element: DARK
-code: SRLSS
+code: LSLSS
 cast_time: 1.5
 mana_cost: 45
 level: 2

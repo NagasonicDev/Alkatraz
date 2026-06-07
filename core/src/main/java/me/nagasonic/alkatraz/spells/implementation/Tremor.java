@@ -51,10 +51,12 @@ public class Tremor extends AttackSpell implements Listener {
     @Override
     public void loadConfiguration() {
         Alkatraz.getInstance().save("spells/tremor.yml");
+        Alkatraz.getInstance().saveConfig("spells/tremor_options.yml");
 
         YamlConfiguration spellConfig = ConfigManager.getConfig("spells/tremor.yml").get();
 
         loadCommonConfig(spellConfig);
+        loadOptions();
         Alkatraz.getInstance().getServer().getPluginManager().registerEvents(this,  Alkatraz.getInstance());
     }
 
@@ -65,12 +67,14 @@ public class Tremor extends AttackSpell implements Listener {
             final Location base = p.getLocation().subtract(0, 0.5, 0);
             Vector dir = p.getEyeLocation().getDirection();
             Vector perp = dir.clone().rotateAroundY(90);
+            double laneWidth = (Double) getOption("tremor_width").getSelectedValue(p).getValue();
+            int maxSteps = (int) Math.round((Double) getOption("tremor_length").getSelectedValue(p).getValue());
             List<Location> locations = new ArrayList<>();
             locations.add(base.clone());
-            locations.add(base.clone().add(perp));
-            locations.add(base.clone().subtract(perp));
-            locations.add(base.clone().add(perp.multiply(2)));
-            locations.add(base.clone().subtract(perp.multiply(2)));
+            locations.add(base.clone().add(perp.clone().multiply(laneWidth)));
+            locations.add(base.clone().subtract(perp.clone().multiply(laneWidth)));
+            locations.add(base.clone().add(perp.clone().multiply(2 * laneWidth)));
+            locations.add(base.clone().subtract(perp.clone().multiply(2 * laneWidth)));
             new BukkitRunnable(){
                 private int counter = 0;
                 private List<Location> previous = new ArrayList<>(locations);
@@ -133,7 +137,7 @@ public class Tremor extends AttackSpell implements Listener {
                     }
                     previous.clear();
                     previous = toAdd;
-                    if (counter == 11) {
+                    if (counter >= maxSteps) {
                         cancel();
                     }
                     counter++;
@@ -145,7 +149,10 @@ public class Tremor extends AttackSpell implements Listener {
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
         if (!caster.isDead()){
-            AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster), getBasePower() * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")), AttackType.PHYSICAL);
+            double wandp = wand == null ? 1 : NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+            double power = getPower(caster, getBasePower())
+                    * wandp;
+            AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster), power, AttackType.PHYSICAL);
             final Location base = caster.getLocation().subtract(0, 0.5, 0);
             Vector dir = caster.getTarget().getLocation().toVector().subtract(caster.getLocation().toVector()).normalize();
             Vector perp = dir.clone().rotateAroundY(90);

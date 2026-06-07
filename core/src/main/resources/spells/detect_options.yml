@@ -1,0 +1,57 @@
+options:
+  scan_range:
+    description: "Adjust how far Detect scans."
+    icon: SPYGLASS
+    default_index: 1
+    values:
+      focused:
+        display_name: "Focused"
+        description: "Shorter scan range."
+        icon: ENDER_PEARL
+        value_type: double
+        value: 0.75
+      normal:
+        display_name: "Normal"
+        description: "Default scan range."
+        icon: SPYGLASS
+        value_type: double
+        value: 1.0
+      wide:
+        display_name: "Wide"
+        description: "Longer scan range."
+        icon: ENDER_EYE
+        value_type: double
+        value: 1.5
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 3
+            description: "Requires Circle Level 3"
+  glow_duration:
+    description: "Adjust how long detected entities glow."
+    icon: GLOWSTONE_DUST
+    default_index: 1
+    values:
+      brief:
+        display_name: "Brief"
+        description: "Shorter glow duration."
+        icon: REDSTONE
+        value_type: double
+        value: 10.0
+      standard:
+        display_name: "Standard"
+        description: "Default glow duration."
+        icon: GLOWSTONE_DUST
+        value_type: double
+        value: 15.0
+      lingering:
+        display_name: "Lingering"
+        description: "Longer glow duration."
+        icon: GLOWSTONE
+        value_type: double
+        value: 25.0
+        requirements:
+          - type: number_stat
+            stat: mastery_detect
+            minimum: 50
+            description: "Requires 50 Detect mastery"

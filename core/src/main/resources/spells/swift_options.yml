@@ -1,0 +1,29 @@
+options:
+  dash_style:
+    description: "Adjust Swift dash strength."
+    icon: FEATHER
+    default_index: 1
+    values:
+      controlled:
+        display_name: "Controlled"
+        description: "Shorter, easier dash."
+        icon: RABBIT_HIDE
+        value_type: double
+        value: 0.75
+      balanced:
+        display_name: "Balanced"
+        description: "Default dash strength."
+        icon: FEATHER
+        value_type: double
+        value: 1.0
+      burst:
+        display_name: "Burst"
+        description: "Longer, faster dash."
+        icon: FIREWORK_ROCKET
+        value_type: double
+        value: 1.35
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 3
+            description: "Requires Circle Level 3"

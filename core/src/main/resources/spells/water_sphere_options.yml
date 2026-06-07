@@ -1,0 +1,47 @@
+options:
+  sphere_range:
+    description: "Adjust Water Sphere travel distance."
+    icon: NAUTILUS_SHELL
+    default_index: 1
+    values:
+      close:
+        display_name: "Close"
+        description: "Shorter travel distance."
+        icon: PRISMARINE_SHARD
+        value_type: double
+        value: 25.0
+      normal:
+        display_name: "Normal"
+        description: "Default travel distance."
+        icon: NAUTILUS_SHELL
+        value_type: double
+        value: 40.0
+      far:
+        display_name: "Far"
+        description: "Longer travel distance."
+        icon: HEART_OF_THE_SEA
+        value_type: double
+        value: 55.0
+  sphere_size:
+    description: "Adjust Water Sphere size."
+    icon: WATER_BUCKET
+    default_index: 1
+    values:
+      small:
+        display_name: "Small"
+        description: "Smaller sphere."
+        icon: BLUE_DYE
+        value_type: double
+        value: 0.5
+      standard:
+        display_name: "Standard"
+        description: "Default sphere size."
+        icon: WATER_BUCKET
+        value_type: double
+        value: 0.75
+      large:
+        display_name: "Large"
+        description: "Larger sphere."
+        icon: PUFFERFISH_BUCKET
+        value_type: double
+        value: 1.1

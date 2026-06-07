@@ -35,8 +35,10 @@ public class Swift extends Spell {
     @Override
     public void loadConfiguration() {
         Alkatraz.getInstance().save("spells/swift.yml");
+        Alkatraz.getInstance().saveConfig("spells/swift_options.yml");
         YamlConfiguration spellConfig = ConfigManager.getConfig("spells/swift.yml").get();
         loadCommonConfig(spellConfig);
+        loadOptions();
         strength = spellConfig.getDouble("dash_strength");
     }
 
@@ -44,7 +46,8 @@ public class Swift extends Spell {
     public void castAction(Player p, ItemStack wand) {
         if (!p.isDead()){
             double wandPower = NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
-            p.setVelocity(p.getEyeLocation().getDirection().normalize().multiply(wandPower * strength));
+            double dashMultiplier = (Double) getOption("dash_style").getSelectedValue(p).getValue();
+            p.setVelocity(p.getEyeLocation().getDirection().normalize().multiply(wandPower * strength * dashMultiplier));
             AtomicInteger i = new AtomicInteger(0);
             taskID = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
                 if (i.get() < 8){
@@ -60,7 +63,7 @@ public class Swift extends Spell {
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
         if (!caster.isDead()){
-            double wandPower = NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+            double wandPower = wand == null ? 1 : NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
             caster.setVelocity(caster.getEyeLocation().getDirection().normalize().multiply(wandPower * strength));
             AtomicInteger i = new AtomicInteger(0);
             taskID = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
