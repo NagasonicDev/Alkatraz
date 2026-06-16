@@ -1,0 +1,20 @@
+key: alkatraz:wooden_wand
+material: STICK
+display_name: '&r&fWooden Wand'
+lore:
+  - '&7A plain old wand.'
+  - '&7Can only do basic spells, will likely'
+  - '&7break soon.'
+components:
+  - alkatraz:wand
+  - alkatraz:mana_container
+attributes:
+  alkatraz:spell_power: 1
+  alkatraz:max_circle: 2
+  alkatraz:cast_time_multiplier: 1
+  alkatraz:fire_affinity: 0
+  alkatraz:air_affinity: 0
+  alkatraz:water_affinity: 0
+  alkatraz:earth_affinity: 0
+  alkatraz:light_affinity: 0
+  alkatraz:dark_affinity: 0
