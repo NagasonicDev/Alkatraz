@@ -1,0 +1,20 @@
+key: alkatraz:reinforced_wand
+material: BLAZE_ROD
+display_name: '&r&fReinforced Wand'
+lore:
+  - '&7A reinforced wand capable of'
+  - '&7holding socketed upgrades.'
+components:
+  - alkatraz:wand
+  - alkatraz:mana_container
+  - alkatraz:socket_holder
+attributes:
+  alkatraz:spell_power: 10
+  alkatraz:max_circle: 5
+  alkatraz:cast_time_multiplier: 0.8
+  alkatraz:fire_affinity: 0
+  alkatraz:air_affinity: 0
+  alkatraz:water_affinity: 0
+  alkatraz:earth_affinity: 0
+  alkatraz:light_affinity: 0
+  alkatraz:dark_affinity: 0

@@ -1,0 +1,12 @@
+key: alkatraz:fire_rune
+attributes:
+  alkatraz:fire_affinity: 10
+triggers:
+  - trigger: alkatraz:on_spell_hit
+    priority: 0
+    conditions:
+      - type: spell_element
+        element: FIRE
+    effects:
+      - type: ignite
+        duration_ticks: 80
