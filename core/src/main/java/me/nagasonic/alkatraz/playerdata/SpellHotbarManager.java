@@ -8,6 +8,7 @@ import me.nagasonic.alkatraz.spells.SpellRegistry;
 import me.nagasonic.alkatraz.util.ColorFormat;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -36,10 +37,10 @@ public class SpellHotbarManager {
     /** Number of configurable spell slots (slots 0-7). */
     public static final int SPELL_SLOT_COUNT = 8;
 
-    // Per-player saved inventories: UUID -> array of 36 items (slots 0-35)
     private static final Map<UUID, ItemStack[]> savedInventories = new HashMap<>();
+    private static final Map<UUID, ItemStack> savedOffhand = new HashMap<>();
+    private static final Map<UUID, Integer> savedHeldSlot = new HashMap<>();
 
-    // Track which players are currently in hotbar mode
     private static final Map<UUID, ItemStack> hotbarActive = new HashMap<>();
 
     // -------------------------------------------------------------------------
@@ -57,20 +58,26 @@ public class SpellHotbarManager {
         if (hotbarActive.containsKey(player.getUniqueId())) return;
         hotbarActive.put(player.getUniqueId(), wand);
 
-        // Save the full inventory (hotbar + main, 36 slots)
-        ItemStack[] contents = player.getInventory().getStorageContents();
-        ItemStack[] snapshot = new ItemStack[36];
-        for (int i = 0; i < 36; i++) {
-            ItemStack item = contents[i];
-            snapshot[i] = (item != null && item.getType() != Material.AIR)
-                    ? item.clone() : null;
-        }
-        savedInventories.put(player.getUniqueId(), snapshot);
+        UUID uuid = player.getUniqueId();
 
-        // Wipe the entire storage inventory
-        for (int i = 0; i < 36; i++) {
-            player.getInventory().setItem(i, null);
-        }
+        savedInventories.put(
+                uuid,
+                player.getInventory().getStorageContents().clone()
+        );
+
+        savedOffhand.put(
+                uuid,
+                player.getInventory().getItemInOffHand() == null
+                        ? null
+                        : player.getInventory().getItemInOffHand().clone()
+        );
+
+        savedHeldSlot.put(
+                uuid,
+                player.getInventory().getHeldItemSlot()
+        );
+
+        player.getInventory().setStorageContents(new ItemStack[36]);
 
         // Place configured spells into slots 0-7
         MagicProfile profile = ProfileManager.getProfile(player, MagicProfile.class);
@@ -87,7 +94,6 @@ public class SpellHotbarManager {
 
         // Place the wand in slot 8
         player.getInventory().setItem(EXIT_SLOT, wand != null ? wand.clone() : null);
-        player.getInventory().setHeldItemSlot(EXIT_SLOT);
         player.updateInventory();
     }
 
@@ -99,19 +105,22 @@ public class SpellHotbarManager {
      */
     public static void exit(Player player) {
         if (!hotbarActive.containsKey(player.getUniqueId())) return;
-        hotbarActive.remove(player.getUniqueId());
+        UUID uuid = player.getUniqueId();
 
-        // Wipe the hotbar slots we injected
-        for (int i = 0; i < 36; i++) {
-            player.getInventory().setItem(i, null);
+        hotbarActive.remove(uuid);
+
+        ItemStack[] storage = savedInventories.remove(uuid);
+        ItemStack offhand = savedOffhand.remove(uuid);
+        Integer heldSlot = savedHeldSlot.remove(uuid);
+
+        if (storage != null) {
+            player.getInventory().setStorageContents(storage);
         }
 
-        // Restore saved inventory
-        ItemStack[] snapshot = savedInventories.remove(player.getUniqueId());
-        if (snapshot != null) {
-            for (int i = 0; i < snapshot.length; i++) {
-                player.getInventory().setItem(i, snapshot[i]);
-            }
+        player.getInventory().setItemInOffHand(offhand);
+
+        if (heldSlot != null) {
+            player.getInventory().setHeldItemSlot(heldSlot);
         }
 
         player.updateInventory();

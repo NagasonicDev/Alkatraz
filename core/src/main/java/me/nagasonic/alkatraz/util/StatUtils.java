@@ -4,6 +4,8 @@ import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.items.wands.Wand;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
+import me.nagasonic.alkatraz.progression.ProgressionService;
+import me.nagasonic.alkatraz.progression.circle.CircleDefinition;
 import me.nagasonic.alkatraz.spells.Spell;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -137,97 +139,24 @@ public class StatUtils {
     }
 
     public static void addExperience(OfflinePlayer p, double exp) {
-        MagicProfile profile = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
+        addArcaneKnowledge(p, exp);
+    }
 
-        profile.setExperience(profile.getExperience() + exp);
+    public static void addArcaneKnowledge(OfflinePlayer p, double amount) {
+        ProgressionService.addArcaneKnowledge(p, amount);
+    }
 
-        if (p.isOnline()) {
-            BossBar bar = profile.getExpBar();
-            String max = profile.getCircleLevel() < 9
-                    ? String.valueOf(requiredExperience(profile.getCircleLevel() + 1))
-                    : "MAX";
+    public static void addArcaneKnowledge(OfflinePlayer p, String sourceId) {
+        ProgressionService.addArcaneKnowledge(p, sourceId);
+    }
 
-            if (bar == null) {
-                BossBar newbar = Bukkit.createBossBar(
-                        format("&bMagic Experience: " + profile.getExperience() + "/" + max),
-                        BarColor.WHITE,
-                        BarStyle.SOLID
-                );
-
-                if (profile.getCircleLevel() < 9) {
-                    double progress = profile.getExperience() /
-                            requiredExperience(profile.getCircleLevel() + 1);
-
-                    newbar.setProgress(Math.max(0, Math.min(1, progress)));
-                } else {
-                    newbar.setProgress(1);
-                }
-
-                newbar.addPlayer(p.getPlayer());
-                profile.setExpBar(newbar);
-
-                Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(
-                        Alkatraz.getInstance(),
-                        () -> {
-                            if (newbar.getProgress() == profile.getExpBar().getProgress()) {
-                                newbar.removePlayer(p.getPlayer());
-                            }
-                        },
-                        100L
-                );
-            } else {
-                bar.removePlayer(p.getPlayer());
-                bar.setTitle(format("&bMagic Experience: " + profile.getExperience() + "/" + max));
-
-                if (profile.getCircleLevel() < 9) {
-                    double progress = profile.getExperience() /
-                            requiredExperience(profile.getCircleLevel() + 1);
-
-                    bar.setProgress(Math.max(0, Math.min(1, progress)));
-                } else {
-                    bar.setProgress(1);
-                }
-
-                bar.addPlayer(p.getPlayer());
-                profile.setExpBar(bar);
-
-                Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(
-                        Alkatraz.getInstance(),
-                        () -> {
-                            if (bar.getProgress() == profile.getExpBar().getProgress()) {
-                                bar.removePlayer(p.getPlayer());
-                            }
-                        },
-                        100L
-                );
-            }
-        }
-
-        if (profile.getCircleLevel() < 9) {
-            if (profile.getExperience() >= requiredExperience(profile.getCircleLevel() + 1)) {
-                double experience = profile.getExperience();
-                profile.setExperience(0);
-
-                addCircle(p.getPlayer(), 1);
-                profile.setStatPoints(profile.getStatPoints() + getStatPoints(profile.getCircleLevel()));
-
-                if (p.isOnline()) {
-                    p.getPlayer().sendMessage(
-                            format("&e&lCIRCLE UP!"),
-                            format("&bReached the " +
-                                    StringUtils.toOrdinal(profile.getCircleLevel()) + " circle."),
-                            format("&bYou are now able to use spells up to the " +
-                                    StringUtils.toOrdinal(profile.getCircleLevel()) + " rank.")
-                    );
-                }
-
-                addExperience(p,
-                        experience - requiredExperience(profile.getCircleLevel()));
-            }
-        }
+    public static void addArcaneKnowledge(OfflinePlayer p, String sourceId, int circle) {
+        ProgressionService.addArcaneKnowledge(p, sourceId, circle);
     }
 
     public static int getStatPoints(int circle) {
+        CircleDefinition definition = ProgressionService.getCircleDefinition(circle);
+        if (definition != null) return definition.getStatPoints();
         return switch (circle){
             case 1 -> 5;
             case 2 -> 5;
@@ -263,6 +192,8 @@ public class StatUtils {
     }
 
     private static double getManaRegen(int circle){
+        CircleDefinition definition = ProgressionService.getCircleDefinition(circle);
+        if (definition != null) return definition.getManaRegeneration();
         return switch (circle){
             case 0 -> 1;
             case 1 -> 2;
@@ -279,6 +210,8 @@ public class StatUtils {
     }
 
     private static int getMaxMana(int circle){
+        CircleDefinition definition = ProgressionService.getCircleDefinition(circle);
+        if (definition != null) return (int) definition.getMaxMana();
         return switch (circle){
             case 0 -> 100;
             case 1 -> 200;

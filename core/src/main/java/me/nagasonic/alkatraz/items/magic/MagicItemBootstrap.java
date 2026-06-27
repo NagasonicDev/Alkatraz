@@ -6,6 +6,7 @@ import me.nagasonic.alkatraz.items.magic.attribute.AttributeType;
 import me.nagasonic.alkatraz.items.magic.attribute.EquipmentAttributeSource;
 import me.nagasonic.alkatraz.items.magic.component.ComponentType;
 import me.nagasonic.alkatraz.items.magic.condition.AlwaysCondition;
+import me.nagasonic.alkatraz.items.magic.condition.ArcaneKnowledgeCondition;
 import me.nagasonic.alkatraz.items.magic.condition.CompareAttributeCondition;
 import me.nagasonic.alkatraz.items.magic.condition.ConditionType;
 import me.nagasonic.alkatraz.items.magic.condition.SpellElementCondition;
@@ -130,6 +131,8 @@ public final class MagicItemBootstrap {
                 MagicKeys.alkatraz("compare_attribute"), CompareAttributeCondition::fromConfig));
         MagicItemRegistries.CONDITION_TYPES.register(new ConditionType(
                 MagicKeys.alkatraz("spell_element"), SpellElementCondition::fromConfig));
+        MagicItemRegistries.CONDITION_TYPES.register(new ConditionType(
+                MagicKeys.alkatraz("arcane_knowledge"), ArcaneKnowledgeCondition::fromConfig));
 
         MagicItemRegistries.EFFECT_TYPES.register(new EffectType(
                 MagicKeys.alkatraz("ignite"), IgniteEffect::fromConfig));

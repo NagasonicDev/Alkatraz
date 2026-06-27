@@ -1,0 +1,93 @@
+# Research definitions are rendered as a directed acyclic graph.
+# Nodes may have multiple parents; cycles are rejected during load.
+
+categories:
+  foundations:
+    display_name: '&dFoundations'
+    icon: BOOK
+
+nodes:
+  awakened_focus:
+    display_name: '&dAwakened Focus'
+    category: foundations
+    icon: AMETHYST_SHARD
+    position:
+      x: 0
+      y: 2
+    description:
+      - 'The first formal study of channelled mana.'
+      - 'It gives your wand work a stable point of reference.'
+    parents: []
+    unlocks:
+      - 'Opens the first arcane research paths.'
+    visibility:
+      hidden_until_available: false
+
+  glyph_literacy:
+    display_name: '&bGlyph Literacy'
+    category: foundations
+    icon: WRITABLE_BOOK
+    position:
+      x: 2
+      y: 1
+    description:
+      - 'A practical understanding of magical notation.'
+      - 'Many later studies rely on these symbols.'
+    parents:
+      - awakened_focus
+    unlocks:
+      - 'Future glyph-based spell options.'
+    visibility:
+      hidden_until_available: false
+
+  resonance_mapping:
+    display_name: '&eResonance Mapping'
+    category: foundations
+    icon: COMPASS
+    position:
+      x: 2
+      y: 3
+    description:
+      - 'Chart how arcane force moves through objects.'
+      - 'This is the basis for stronger foci and tools.'
+    parents:
+      - awakened_focus
+    unlocks:
+      - 'Future wand and equipment improvements.'
+    visibility:
+      hidden_until_available: false
+
+  ritual_geometry:
+    display_name: '&5Ritual Geometry'
+    category: foundations
+    icon: ENCHANTING_TABLE
+    position:
+      x: 5
+      y: 2
+    description:
+      - 'Combine symbols and resonance into stable patterns.'
+      - 'This research demonstrates a merged DAG dependency.'
+    parents:
+      - glyph_literacy
+      - resonance_mapping
+    unlocks:
+      - 'Future ritual mechanics.'
+    visibility:
+      hidden_until_available: false
+
+  controlled_overflow:
+    display_name: '&cControlled Overflow'
+    category: foundations
+    icon: BLAZE_POWDER
+    position:
+      x: 7
+      y: 2
+    description:
+      - 'Safely exceed normal channel limits for a moment.'
+      - 'Dangerous, but deeply useful once properly understood.'
+    parents:
+      - ritual_geometry
+    unlocks:
+      - 'Future advanced spell progression.'
+    visibility:
+      hidden_until_available: true

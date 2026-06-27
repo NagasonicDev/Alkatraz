@@ -56,7 +56,7 @@ public class SpellbookFactory {
         for (int c : circles) {
             List<Spell> spells = new ArrayList<>();
             for (Spell spell : SpellRegistry.getAllSpells().values()) {
-                if (spell.getLevel() == c){
+                if (spell.getRequiredCircleLevel() == c){
                     spells.add(spell);
                 }
             }
@@ -79,14 +79,14 @@ public class SpellbookFactory {
         Map<Integer, List<Spell>> spellsByCircle = new HashMap<>();
         for (Spell spell : SpellRegistry.getAllSpells().values()) {
             if (spell.getElement() == element){
-                if (!spellsByCircle.containsKey(spell.getLevel())){
+                if (!spellsByCircle.containsKey(spell.getRequiredCircleLevel())){
                     List<Spell> spells = new ArrayList<>();
                     spells.add(spell);
-                    spellsByCircle.put(spell.getLevel(), spells);
+                    spellsByCircle.put(spell.getRequiredCircleLevel(), spells);
                 }else{
-                    List<Spell> spells = spellsByCircle.get(spell.getLevel());
+                    List<Spell> spells = spellsByCircle.get(spell.getRequiredCircleLevel());
                     spells.add(spell);
-                    spellsByCircle.replace(spell.getLevel(), spells);
+                    spellsByCircle.replace(spell.getRequiredCircleLevel(), spells);
                 }
             }
         }

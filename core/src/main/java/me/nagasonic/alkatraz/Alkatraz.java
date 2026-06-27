@@ -8,15 +8,20 @@ import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.dom.MinecraftVersion;
 import me.nagasonic.alkatraz.gui.MenuListener;
 import me.nagasonic.alkatraz.items.wands.Wand;
+import me.nagasonic.alkatraz.items.wands.WandHotbarListeners;
 import me.nagasonic.alkatraz.items.wands.WandListeners;
 import me.nagasonic.alkatraz.items.wands.WandRegistry;
 import me.nagasonic.alkatraz.loot.LootInjector;
 import me.nagasonic.alkatraz.loot.MobLootInjector;
 import me.nagasonic.alkatraz.loot.implementation.SpellbookLoot;
-import me.nagasonic.alkatraz.mob.MobModifier;
+import me.nagasonic.alkatraz.mobs.MagicEntities;
+import me.nagasonic.alkatraz.mobs.MagicEntitySpawnListener;
+import me.nagasonic.alkatraz.mobs.MobModifier;
 import me.nagasonic.alkatraz.nms.NMS;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileRegistry;
+import me.nagasonic.alkatraz.progression.ProgressionService;
+import me.nagasonic.alkatraz.progression.research.ResearchService;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.spellbooks.SpellbookListener;
@@ -54,6 +59,8 @@ public final class Alkatraz extends JavaPlugin {
     public void onLoad() {
         pluginConfig = saveAndUpdateConfig("config.yml");
         saveConfig("playerdata/playerdata.yml");
+        saveConfig("progression.yml");
+        saveConfig("research.yml");
 
         saveSpellConfigs();
         saveMobConfigs();
@@ -80,16 +87,23 @@ public final class Alkatraz extends JavaPlugin {
         Metrics metrics = new Metrics(this, 27657);
         glowingEntities = new GlowingEntities(instance);
         ProfileRegistry.registerProfiles();
+        MagicEntities.registerProfiles();
         nms.registerMagicEntities();
         ProfileManager.initialize();
+        ProgressionService.initialize();
+        ResearchService.initialize();
+        //MagicItemBootstrap.initialize();
         WandRegistry.registerWands();
         SpellRegistry.registerSpells();
         registerListener(new SpellbookListener());
         LootInjector.register(this);
+        registerListener(new MagicEntitySpawnListener());
         registerListener(new MobModifier());
         MobLootInjector.register(this);
         SpellbookLoot.registerAll();
         registerListener(new WandListeners());
+        registerListener(new WandHotbarListeners());
+        //registerListener(new MagicItemTriggerAdapter());
         Bukkit.getPluginManager().registerEvents(new MenuListener(), this);
         logInfo("NMS version " + nms.getClass().getSimpleName() + " registered!");
         getCommand("spells").setExecutor(new SpellsCommand());
@@ -259,6 +273,9 @@ public final class Alkatraz extends JavaPlugin {
         saveConfig("mobs/wither.yml");
         saveConfig("mobs/zoglin.yml");
         saveConfig("mobs/zombie.yml");
+        saveConfig("mobs/zombie_mage.yml");
+        saveConfig("mobs/zombie_fighter.yml");
+        saveConfig("mobs/skeletal_mage.yml");
     }
 
     public static GlowingEntities getGlowingEntities() {

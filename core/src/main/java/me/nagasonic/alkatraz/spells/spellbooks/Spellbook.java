@@ -79,7 +79,7 @@ public class Spellbook {
         }
         
         lore.add("");
-        lore.add("&eCircle " + spell.getLevel() + " &7| &b" + spell.getElement().name());
+        lore.add("&eCircle " + spell.getRequiredCircleLevel() + " &7| &b" + spell.getElement().name());
         lore.add("");
         lore.add("&7Right-click to discover this spell!");
     }

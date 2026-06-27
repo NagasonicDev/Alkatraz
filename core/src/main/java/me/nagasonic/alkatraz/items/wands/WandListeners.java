@@ -2,11 +2,12 @@ package me.nagasonic.alkatraz.items.wands;
 
 import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
-import me.nagasonic.alkatraz.dom.Permission;
+import me.nagasonic.alkatraz.gui.implementation.research.ResearchGraphMenu;
 import me.nagasonic.alkatraz.playerdata.SpellHotbarManager;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.Spell;
+import me.nagasonic.alkatraz.spells.SpellCastValidator;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.Bukkit;
@@ -18,6 +19,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
+import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
@@ -36,6 +38,11 @@ public class WandListeners implements Listener {
         if (e.getItem() != null) {
             if (e.getItem().getType() != Material.AIR && e.getItem().getAmount() != 0) {
                 if (Wand.isWand(e.getItem())) {
+                    if (e.getAction().isRightClick() && isEnchantingTable(e.getClickedBlock())) {
+                        e.setCancelled(true);
+                        new ResearchGraphMenu(e.getPlayer()).open();
+                        return;
+                    }
                     MagicProfile data = ProfileManager.getProfile(e.getPlayer(), MagicProfile.class);
                     if (data.getCastMode().equals("hotbar")){
                         SpellHotbarManager.enter(e.getPlayer(), e.getItem());
@@ -436,17 +443,16 @@ public class WandListeners implements Listener {
 
     private void tryCast(Player p, ItemStack wand, Spell spell){
         if (spell != null) {
-            if (NBT.get(wand, nbt -> (Integer) nbt.getInteger("circle_limit")) >= spell.getLevel()){
-                if (ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class).hasDiscoveredSpell(spell) || Permission.hasPermission(p, Permission.ALL_SPELLS)){
-                    spell.cast(p, wand);
-                }
-            }else{
-                Utils.sendActionBar(p, "&cYou need a better wand to cast this.");
+            if (SpellCastValidator.canCast(p, wand, spell)){
+                spell.cast(p, wand);
             }
-
         }
         NBT.modify(wand, nbt -> {
             nbt.setString("cast_code", "");
         });
+    }
+
+    private boolean isEnchantingTable(Block block) {
+        return block != null && block.getType() == Material.ENCHANTING_TABLE;
     }
 }

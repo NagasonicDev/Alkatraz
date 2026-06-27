@@ -4,11 +4,9 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.datafixers.util.Pair;
 import me.nagasonic.alkatraz.Alkatraz;
-import me.nagasonic.alkatraz.nms.entity.MagicEntityRegistry;
-import me.nagasonic.alkatraz.nms.entity.implementation.ZombieMage;
+import me.nagasonic.alkatraz.nms.entity.MagicEntitySpawner;
 import me.nagasonic.alkatraz.util.Skin;
 import net.minecraft.network.protocol.game.*;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -17,7 +15,6 @@ import net.minecraft.world.entity.Relative;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_21_R7.CraftWorld;
 import org.bukkit.craftbukkit.v1_21_R7.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_21_R7.entity.CraftPlayer;
 import org.bukkit.entity.*;
@@ -117,18 +114,12 @@ public final class NMS_v1_21_R7 implements NMS {
 
     @Override
     public void registerMagicEntities() {
-        MagicEntityRegistry.registerAll();
+        // Version-specific entity registration (e.g. custom EntityTypes) goes here.
     }
 
     @Override
     public Optional<org.bukkit.entity.Entity> spawnMagicEntity(String key, Location location) {
-        ServerLevel level = ((CraftWorld) location.getWorld()).getHandle();
-        return switch (key) {
-            case "magic_zombie" -> Optional.of(ZombieMage.spawn(location).getBukkitEntity());
-            // case "magic_skeleton" -> Optional.of(spawnSkeleton(level, location));
-            // case "magic_witch"    -> Optional.of(spawnWitch(level, location));
-            default -> Optional.empty();
-        };
+        return MagicEntitySpawner.INSTANCE.spawnMagicEntity(key, location);
     }
 
     public void refresh(Player player) {

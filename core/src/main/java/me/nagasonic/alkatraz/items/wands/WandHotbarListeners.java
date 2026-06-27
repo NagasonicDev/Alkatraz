@@ -2,13 +2,17 @@ package me.nagasonic.alkatraz.items.wands;
 
 import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.playerdata.SpellHotbarManager;
+import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
+import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.Spell;
+import me.nagasonic.alkatraz.spells.SpellCastValidator;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.*;
@@ -128,6 +132,8 @@ public class WandHotbarListeners implements Listener {
     @EventHandler
     private void onClick(PlayerInteractEvent e){
         if (e.getAction() != Action.RIGHT_CLICK_BLOCK && e.getAction() != Action.RIGHT_CLICK_AIR) return;
+        MagicProfile profile = ProfileManager.getProfile(e.getPlayer(), MagicProfile.class);
+        if (profile.isCasting()) return;
         if (SpellHotbarManager.isActive(e.getPlayer())){
             int slot = e.getPlayer().getInventory().getHeldItemSlot();
             if (slot == SpellHotbarManager.EXIT_SLOT){
@@ -135,7 +141,7 @@ public class WandHotbarListeners implements Listener {
             }else{
                 String id = NBT.get(e.getPlayer().getInventory().getItemInMainHand(), nbt -> (String) nbt.getString("spell_id"));
                 Spell spell = SpellRegistry.getSpell(id);
-                if (spell != null) {
+                if (SpellCastValidator.canCast(e.getPlayer(), SpellHotbarManager.getWand(e.getPlayer()), spell)) {
                     spell.cast(e.getPlayer(), SpellHotbarManager.getWand(e.getPlayer()));
                 }
             }
@@ -144,6 +150,8 @@ public class WandHotbarListeners implements Listener {
 
     @EventHandler
     private void onEntityClick(PlayerInteractEntityEvent e) {
+        MagicProfile profile = ProfileManager.getProfile(e.getPlayer(), MagicProfile.class);
+        if (profile.isCasting()) return;
         if (SpellHotbarManager.isActive(e.getPlayer())){
             int slot = e.getPlayer().getInventory().getHeldItemSlot();
             if (slot == SpellHotbarManager.EXIT_SLOT){
@@ -151,7 +159,7 @@ public class WandHotbarListeners implements Listener {
             }else{
                 String id = NBT.get(e.getPlayer().getInventory().getItemInMainHand(), nbt -> (String) nbt.getString("spell_id"));
                 Spell spell = SpellRegistry.getSpell(id);
-                if (spell != null) {
+                if (SpellCastValidator.canCast(e.getPlayer(), SpellHotbarManager.getWand(e.getPlayer()), spell)) {
                     spell.cast(e.getPlayer(), SpellHotbarManager.getWand(e.getPlayer()));
                 }
             }
@@ -160,7 +168,8 @@ public class WandHotbarListeners implements Listener {
 
     @EventHandler
     private void onAtEntityClick(PlayerInteractAtEntityEvent e) {
-
+        MagicProfile profile = ProfileManager.getProfile(e.getPlayer(), MagicProfile.class);
+        if (profile.isCasting()) return;
         if (SpellHotbarManager.isActive(e.getPlayer())){
             int slot = e.getPlayer().getInventory().getHeldItemSlot();
             if (slot == SpellHotbarManager.EXIT_SLOT){
@@ -168,10 +177,36 @@ public class WandHotbarListeners implements Listener {
             }else{
                 String id = NBT.get(e.getPlayer().getInventory().getItemInMainHand(), nbt -> (String) nbt.getString("spell_id"));
                 Spell spell = SpellRegistry.getSpell(id);
-                if (spell != null) {
+                if (SpellCastValidator.canCast(e.getPlayer(), SpellHotbarManager.getWand(e.getPlayer()), spell)) {
                     spell.cast(e.getPlayer(), SpellHotbarManager.getWand(e.getPlayer()));
                 }
             }
+        }
+    }
+
+    @EventHandler
+    private void onPickup(EntityPickupItemEvent e) {
+
+        if (!(e.getEntity() instanceof Player player)) {
+            return;
+        }
+
+        if (SpellHotbarManager.isActive(player)) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    private void onArmorStand(PlayerArmorStandManipulateEvent e) {
+        if (SpellHotbarManager.isActive(e.getPlayer())) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    private void onOffhandSwap(PlayerSwapHandItemsEvent e) {
+        if (SpellHotbarManager.isActive(e.getPlayer())) {
+            e.setCancelled(true);
         }
     }
 }

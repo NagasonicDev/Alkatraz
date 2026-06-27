@@ -119,7 +119,7 @@ public class SpellsMenu extends PagedMenu<Spell> {
         lore.add(ColorFormat.format("&bElement: " + spell.getElement().getName()));
         lore.add(ColorFormat.format("&bMastery: " + profile.getSpellMastery(spell) + "/" + spell.getMaxMastery()));
         lore.add("");
-        lore.add(ColorFormat.format("&eCircle: " + spell.getLevel()));
+        lore.add(ColorFormat.format("&eCircle: " + spell.getRequiredCircleLevel()));
 
         if (!spell.getAllOptions().isEmpty()) {
             lore.add("");
@@ -143,7 +143,7 @@ public class SpellsMenu extends PagedMenu<Spell> {
 
         meta.setDisplayName(ColorFormat.format("&8???"));
         List<String> lore = new ArrayList<>();
-        lore.add(ColorFormat.format("&7&oCircle: " + spell.getLevel()));
+        lore.add(ColorFormat.format("&7&oCircle: " + spell.getRequiredCircleLevel()));
         meta.setLore(lore);
         item.setItemMeta(meta);
 

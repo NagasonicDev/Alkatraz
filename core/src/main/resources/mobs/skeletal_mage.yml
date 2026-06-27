@@ -1,4 +1,10 @@
 # mobs/skeletal_mage.yml
+
+replaces: skeleton
+spawn_chance: 4
+spawn_reasons:
+  - NATURAL
+
 fire_affinity:    0.0
 fire_resistance:  -30.0
 

@@ -1,49 +1,37 @@
 package me.nagasonic.alkatraz.nms.entity.implementation;
 
 import me.nagasonic.alkatraz.items.wands.WandRegistry;
-import me.nagasonic.alkatraz.nms.entity.MagicEntity;
-import me.nagasonic.alkatraz.nms.entity.MagicEntityRegistry;
-import me.nagasonic.alkatraz.nms.entity.MagicProfile;
-import me.nagasonic.alkatraz.nms.entity.goals.CastSpellGoal;
-import me.nagasonic.alkatraz.nms.entity.goals.KeepSpellRangeGoal;
+import me.nagasonic.alkatraz.mobs.MagicEntityType;
+import me.nagasonic.alkatraz.mobs.MobBrain;
+import me.nagasonic.alkatraz.mobs.SpellCastConfig;
+import me.nagasonic.alkatraz.nms.entity.definitions.NMSMagicZombie;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.ai.goal.FloatGoal;
-import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
-import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
-import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
-import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
-import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.zombie.Zombie;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_21_R7.CraftWorld;
 import org.bukkit.craftbukkit.v1_21_R7.inventory.CraftItemStack;
 
-public class ZombieMage extends Zombie implements MagicEntity {
+/**
+ * A ranged zombie mage that keeps its distance and casts spells frequently.
+ * Melee is suppressed unless the target walks right up to it.
+ */
+public final class ZombieMage extends NMSMagicZombie {
 
     // -------------------------------------------------------------------------
-    // MagicEntity state
+    // Brain
     // -------------------------------------------------------------------------
 
-    private final MagicData magicData = new MagicData();
-
-    @Override
-    public MagicData getMagicData() {
-        return magicData;
-    }
-
-    // -------------------------------------------------------------------------
-    // Constants
-    // -------------------------------------------------------------------------
-
-    private static final double MIN_CAST_DIST = 6.0;
-    private static final double MAX_CAST_DIST = 12.0;
-    private static final double CAST_RANGE    = 14.0;
-    private static final int    CAST_COOLDOWN = 40;
+    private static final MobBrain BRAIN = MobBrain.builder()
+            .canSwim(true)
+            .spellCast(new SpellCastConfig(6.0, 12.0, 14.0, 40))
+            .meleeAttack(false)
+            .lookAtPlayerRange(8.0f)
+            .randomStroll(true)
+            .build();
 
     // -------------------------------------------------------------------------
     // Constructor
@@ -51,13 +39,17 @@ public class ZombieMage extends Zombie implements MagicEntity {
 
     public ZombieMage(EntityType<? extends Zombie> type, Level level) {
         super(type, level);
-
-        MagicProfile profile = MagicEntityRegistry.getProfile("zombie_mage")
-                .orElseThrow(() -> new IllegalStateException(
-                        "ZombieMage profile not loaded — did you call MagicEntityRegistry.registerAll()?"));
-
-        initMagic(profile, this);
     }
+
+    // -------------------------------------------------------------------------
+    // Identity
+    // -------------------------------------------------------------------------
+
+    @Override
+    protected MagicEntityType entityType() { return MagicEntityType.ZOMBIE_MAGE; }
+
+    @Override
+    protected MobBrain brain() { return BRAIN; }
 
     // -------------------------------------------------------------------------
     // Static spawn factory
@@ -74,7 +66,8 @@ public class ZombieMage extends Zombie implements MagicEntity {
 
         ZombieMage zombie = new ZombieMage(EntityType.ZOMBIE, level);
         zombie.setPos(location.getX(), location.getY(), location.getZ());
-        zombie.setItemInHand(InteractionHand.MAIN_HAND, CraftItemStack.asNMSCopy(WandRegistry.getWand("WOODEN_WAND").getItem()));
+        zombie.setItemInHand(InteractionHand.MAIN_HAND,
+                CraftItemStack.asNMSCopy(WandRegistry.getWand("WOODEN_WAND").getItem()));
 
         zombie.finalizeSpawn(level,
                 level.getCurrentDifficultyAt(zombie.blockPosition()),
@@ -85,35 +78,13 @@ public class ZombieMage extends Zombie implements MagicEntity {
     }
 
     // -------------------------------------------------------------------------
-    // Goals
+    // Suppress vanilla melee at close range
     // -------------------------------------------------------------------------
 
-    @Override
-    protected void registerGoals() {
-        goalSelector.removeAllGoals(g -> true);
-        targetSelector.removeAllGoals(g -> true);
-
-        goalSelector.addGoal(1, new FloatGoal(this));
-        goalSelector.addGoal(2, new KeepSpellRangeGoal(
-                this, MIN_CAST_DIST, MAX_CAST_DIST, 1.1D));
-        goalSelector.addGoal(3, new CastSpellGoal(
-                this, this, CAST_RANGE, CAST_COOLDOWN));
-        goalSelector.addGoal(4, new WaterAvoidingRandomStrollGoal(this, 0.8D));
-        goalSelector.addGoal(5, new LookAtPlayerGoal(this, Player.class, 8.0F));
-        goalSelector.addGoal(6, new RandomLookAroundGoal(this));
-
-        targetSelector.addGoal(1, new HurtByTargetGoal(this));
-        targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(
-                this, Player.class, true));
-    }
-
-    // -------------------------------------------------------------------------
-    // Suppress vanilla melee
-    // -------------------------------------------------------------------------
-
+    /** Only allow a melee hit if the target is well within the minimum cast distance. */
     @Override
     public boolean doHurtTarget(ServerLevel level, net.minecraft.world.entity.Entity target) {
-        return distanceTo(target) < MIN_CAST_DIST * 0.5
+        return distanceTo(target) < BRAIN.spellCast().minCastDist() * 0.5
                 && super.doHurtTarget(level, target);
     }
 
