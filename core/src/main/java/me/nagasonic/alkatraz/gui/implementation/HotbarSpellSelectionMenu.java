@@ -179,7 +179,7 @@ public class HotbarSpellSelectionMenu extends PagedMenu<Spell> {
 
         List<String> lore = new ArrayList<>();
         lore.add(ColorFormat.format("&7" + spell.getElement().getName()
-                + "  &eCircle " + spell.getLevel()));
+                + "  &eCircle " + spell.getRequiredCircleLevel()));
         lore.add(ColorFormat.format("&bMana Cost: &f" + spell.getCost()));
         lore.add(ColorFormat.format("&bCast Time: &f" + spell.getCastTime() + "s"));
         lore.add(ColorFormat.format("&bCooldown:  &f" + spell.getCooldown() + "s"));

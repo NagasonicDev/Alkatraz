@@ -1,16 +1,6 @@
 package me.nagasonic.alkatraz.spells.configuration.requirement;
 
-import org.bukkit.entity.Player;
+import me.nagasonic.alkatraz.configuration.requirement.Requirement;
 
-public interface ValueRequirement {
-    /**
-     * Checks if this requirement is met for the given player
-     * @param player The Player.
-     */
-    boolean isMet(Player player);
-
-    /**
-     * Gets a description of this requirement for display to players
-     */
-    String getDescription();
+public interface ValueRequirement extends Requirement {
 }

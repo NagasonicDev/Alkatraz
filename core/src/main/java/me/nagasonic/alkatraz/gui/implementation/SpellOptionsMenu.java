@@ -189,7 +189,7 @@ public class SpellOptionsMenu extends PagedMenu<SpellOption> {
         List<String> lore = new ArrayList<>();
         lore.add(ColorFormat.format("&7Configure spell options"));
         lore.add("");
-        lore.add(ColorFormat.format("&eCircle: " + spell.getLevel()));
+        lore.add(ColorFormat.format("&eCircle: " + spell.getRequiredCircleLevel()));
         meta.setLore(lore);
         spellInfo.setItemMeta(meta);
         inventory.setItem(4, spellInfo);

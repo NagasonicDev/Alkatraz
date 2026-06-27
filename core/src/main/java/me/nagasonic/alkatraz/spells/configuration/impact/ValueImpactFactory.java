@@ -1,5 +1,7 @@
 package me.nagasonic.alkatraz.spells.configuration.impact;
 
+import me.nagasonic.alkatraz.configuration.impact.Impact;
+import me.nagasonic.alkatraz.configuration.impact.ImpactFactory;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.configuration.impact.implementation.CastModifierImpact;
 import me.nagasonic.alkatraz.spells.configuration.impact.implementation.ManaCostImpact;
@@ -145,6 +147,7 @@ public final class ValueImpactFactory {
      */
     public static void register(String type, Builder builder) {
         REGISTRY.put(type.toLowerCase(), builder);
+        ImpactFactory.register(type, builder::build);
     }
 
     /**
@@ -158,6 +161,16 @@ public final class ValueImpactFactory {
      */
     public static ValueImpact create(String type, Spell spell, ConfigurationSection section) {
         Builder builder = REGISTRY.get(type.toLowerCase());
+        if (builder != null) {
+            return builder.build(spell, section);
+        }
+        if (ImpactFactory.isRegistered(type)) {
+            Impact impact = ImpactFactory.create(type, spell, section);
+            if (impact instanceof ValueImpact valueImpact) {
+                return valueImpact;
+            }
+            throw new IllegalArgumentException("Impact type '" + type + "' cannot be used as a spell value impact");
+        }
         if (builder == null) {
             throw new IllegalArgumentException(
                     "Unknown impact type '" + type + "'. " +
@@ -168,7 +181,7 @@ public final class ValueImpactFactory {
 
     /** Returns true if a builder is registered for the given type string. */
     public static boolean isRegistered(String type) {
-        return REGISTRY.containsKey(type.toLowerCase());
+        return REGISTRY.containsKey(type.toLowerCase()) || ImpactFactory.isRegistered(type);
     }
 
     private ValueImpactFactory() {}

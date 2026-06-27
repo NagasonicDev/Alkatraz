@@ -35,6 +35,7 @@ public class MagicProfile extends Profile {
         doubleStat("mana", 100);
         doubleStat("manaRegeneration", 1);
         doubleStat("experience", 0);
+        doubleStat("arcaneKnowledge", 0);
 
         // Magic affinity/resistance
         doubleStat("magicAffinity", 0);
@@ -68,6 +69,9 @@ public class MagicProfile extends Profile {
         stringSetStat("discoveredSpells");  // Stores spell types that player has discovered
         stringSetStat("spellOptions");      // Stores spell option selections (format: "optionId:valueId")
         stringSetStat("spellTags");         // Stores active spell tags
+        stringSetStat("researchProgress");  // Adapter storage for configurable research requirements
+        stringSetStat("researchStarted");
+        stringSetStat("researchCompleted");
 
         // Note: Spell masteries are stored as dynamic int stats (see getSpellMastery/setSpellMastery)
     }
@@ -147,7 +151,22 @@ public class MagicProfile extends Profile {
     public void setManaRegeneration(double value) { setDouble("manaRegeneration", value); }
 
     public double getExperience() { return getDouble("experience"); }
-    public void setExperience(double value) { setDouble("experience", value); }
+    public void setExperience(double value) {
+        setDouble("experience", value);
+        setArcaneKnowledge(value);
+    }
+
+    public double getArcaneKnowledge() {
+        double arcaneKnowledge = getDouble("arcaneKnowledge");
+        double legacyExperience = isDouble("experience") ? getDouble("experience") : 0;
+        return Math.max(arcaneKnowledge, legacyExperience);
+    }
+    public void setArcaneKnowledge(double value) {
+        setDouble("arcaneKnowledge", value);
+        if (isDouble("experience")) {
+            setDouble("experience", value);
+        }
+    }
 
     // ============================================
     // Magic Affinity/Resistance Getters/Setters
@@ -292,6 +311,47 @@ public class MagicProfile extends Profile {
      */
     public Collection<String> getAllDiscoveredSpellTypes() {
         return new HashSet<>(getStringSet("discoveredSpells"));
+    }
+
+    public boolean hasResearch(String researchId) {
+        return hasCompletedResearch(researchId);
+    }
+
+    public void setResearch(String researchId, boolean completed) {
+        setResearchCompleted(researchId, completed);
+    }
+
+    public boolean hasStartedResearch(String researchId) {
+        return researchId != null && getStringSet("researchStarted").contains(researchId.toLowerCase());
+    }
+
+    public boolean hasCompletedResearch(String researchId) {
+        if (researchId == null) return false;
+        String key = researchId.toLowerCase();
+        return getStringSet("researchCompleted").contains(key) || getStringSet("researchProgress").contains(key);
+    }
+
+    public void setResearchStarted(String researchId, boolean started) {
+        if (researchId == null || researchId.isBlank()) return;
+        String key = researchId.toLowerCase();
+        if (started && !hasCompletedResearch(key)) {
+            getStringSet("researchStarted").add(key);
+        } else {
+            getStringSet("researchStarted").remove(key);
+        }
+    }
+
+    public void setResearchCompleted(String researchId, boolean completed) {
+        if (researchId == null || researchId.isBlank()) return;
+        String key = researchId.toLowerCase();
+        if (completed) {
+            getStringSet("researchCompleted").add(key);
+            getStringSet("researchProgress").add(key);
+            getStringSet("researchStarted").remove(key);
+        } else {
+            getStringSet("researchCompleted").remove(key);
+            getStringSet("researchProgress").remove(key);
+        }
     }
 
     // ============================================
@@ -557,6 +617,7 @@ public class MagicProfile extends Profile {
 
     protected Map<Spell, BossBar> masteryBars = new HashMap<>();
     protected BossBar expBar = null;
+    protected BossBar arcaneKnowledgeBar = null;
 
     public Map<Spell, BossBar> getMasteryBars() {
         return masteryBars;
@@ -572,5 +633,14 @@ public class MagicProfile extends Profile {
 
     public void setExpBar(BossBar expBar) {
         this.expBar = expBar;
+    }
+
+    public BossBar getArcaneKnowledgeBar() {
+        return arcaneKnowledgeBar != null ? arcaneKnowledgeBar : expBar;
+    }
+
+    public void setArcaneKnowledgeBar(BossBar arcaneKnowledgeBar) {
+        this.arcaneKnowledgeBar = arcaneKnowledgeBar;
+        this.expBar = arcaneKnowledgeBar;
     }
 }

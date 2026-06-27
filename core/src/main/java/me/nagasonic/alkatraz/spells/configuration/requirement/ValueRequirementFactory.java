@@ -1,5 +1,7 @@
 package me.nagasonic.alkatraz.spells.configuration.requirement;
 
+import me.nagasonic.alkatraz.configuration.requirement.Requirement;
+import me.nagasonic.alkatraz.configuration.requirement.RequirementFactory;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.*;
 import org.bukkit.configuration.ConfigurationSection;
@@ -166,6 +168,7 @@ public final class ValueRequirementFactory {
      */
     public static void register(String type, Builder builder) {
         REGISTRY.put(type.toLowerCase(), builder);
+        RequirementFactory.register(type, builder::build);
     }
 
     /**
@@ -179,6 +182,16 @@ public final class ValueRequirementFactory {
      */
     public static ValueRequirement create(String type, Spell spell, ConfigurationSection section) {
         Builder builder = REGISTRY.get(type.toLowerCase());
+        if (builder != null) {
+            return builder.build(spell, section);
+        }
+        if (RequirementFactory.isRegistered(type)) {
+            Requirement requirement = RequirementFactory.create(spell, section);
+            if (requirement instanceof ValueRequirement valueRequirement) {
+                return valueRequirement;
+            }
+            throw new IllegalArgumentException("Requirement type '" + type + "' cannot be used as a spell value requirement");
+        }
         if (builder == null) {
             throw new IllegalArgumentException(
                     "Unknown requirement type '" + type + "'. " +
@@ -189,7 +202,7 @@ public final class ValueRequirementFactory {
 
     /** Returns true if a builder is registered for the given type string. */
     public static boolean isRegistered(String type) {
-        return REGISTRY.containsKey(type.toLowerCase());
+        return REGISTRY.containsKey(type.toLowerCase()) || RequirementFactory.isRegistered(type);
     }
 
     private ValueRequirementFactory() {}

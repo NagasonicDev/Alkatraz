@@ -41,6 +41,7 @@ public abstract class Spell {
     protected int cost;
     protected double castTime;
     protected int level;
+    protected int requiredCircle;
     protected boolean enabled;
     protected int maxMastery;
 
@@ -87,7 +88,7 @@ public abstract class Spell {
         MagicProfile profile = ProfileManager.getProfile(p, MagicProfile.class);
 
         // Check circle level requirement
-        if (profile.getCircleLevel() < getLevel()) {
+        if (profile.getCircleLevel() < getRequiredCircleLevel()) {
             Utils.sendActionBar(p, "&cToo low Magic Circle");
             return;
         }
@@ -114,20 +115,20 @@ public abstract class Spell {
 
         // Check if player is alive
         if (p.isDead()) return;
-
+        // Set casting state
+        profile.setCasting(true);
         // Create and fire spell prepare event
         PlayerSpellPrepareEvent castEvent = new PlayerSpellPrepareEvent(p, this, wand);
         Bukkit.getPluginManager().callEvent(castEvent);
         if (castEvent.isCancelled()) return;
 
-        // Set casting state
-        profile.setCasting(true);
+
 
         // Consume mana
         profile.setMana(profile.getMana() - manaCost);
 
-        // Add experience
-        StatUtils.addExperience(p, Utils.getExp(getLevel()));
+        // Add Arcane Knowledge through the configurable progression source.
+        StatUtils.addArcaneKnowledge(p, "spell_cast", getRequiredCircleLevel());
 
         // Send action bar message
         Utils.sendActionBar(p, ColorFormat.format("Casted: " + getDisplayName()));
@@ -168,6 +169,7 @@ public abstract class Spell {
         this.castTime      = spellConfig.getDouble("cast_time");
         this.cost          = spellConfig.getInt("mana_cost");
         this.level         = spellConfig.getInt("level");
+        this.requiredCircle = spellConfig.getInt("required_circle", this.level);
         this.enabled       = spellConfig.getBoolean("enabled");
         this.maxMastery    = spellConfig.getInt("maximum_mastery");
         this.cooldown      = spellConfig.getLong("cooldown");
@@ -258,8 +260,12 @@ public abstract class Spell {
     }
 
     public float getFullCastTime(ItemStack wand, double spellCastTime) {
-        Double wandCastTime = NBT.get(wand, nbt -> (Double) nbt.getDouble("casting_time"));
-        if (wandCastTime == null) wandCastTime = 1.0;
+        Double wandCastTime;
+        if (wand != null){
+            wandCastTime = NBT.get(wand, nbt -> (Double) nbt.getDouble("casting_time"));
+        }else{
+            wandCastTime = 1.0;
+        }
         return wandCastTime.floatValue() * (float) spellCastTime;
     }
 
@@ -293,6 +299,7 @@ public abstract class Spell {
     public double getCastTime()      { return castTime; }
     public int getMaxMastery()       { return maxMastery; }
     public int getLevel()            { return level; }
+    public int getRequiredCircleLevel() { return requiredCircle; }
     public BarColor getMasteryBarColor() { return masteryBarColor; }
     public ItemStack getGuiItem()    { return guiItem; }
     public boolean isEnabled()       { return enabled; }

@@ -79,6 +79,9 @@
                 <configuration>
                     <source>${javaVersion}</source>
                     <target>${javaVersion}</target>
+                    <excludes>
+                        <exclude>**/me/nagasonic/alkatraz/items/magic/**</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
         </plugins>

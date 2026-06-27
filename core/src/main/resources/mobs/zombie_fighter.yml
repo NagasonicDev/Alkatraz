@@ -1,4 +1,10 @@
 # mobs/zombie_fighter.yml
+
+replaces: zombie
+spawn_chance: 3
+spawn_reasons:
+  - NATURAL
+
 fire_affinity:    0.0
 fire_resistance:  -25.0
 

@@ -5,6 +5,7 @@ stat_list:
   - "circle:int:0"
   - "mana_regeneration:double:1"
   - "experience:double:0"
+  - "arcane_knowledge:double:0"
   - "magic_affinity:double:0"
   - "magic_resistance:double:0"
   - "fire_affinity:double:0"

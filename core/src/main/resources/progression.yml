@@ -1,0 +1,104 @@
+# Progression framework configuration.
+#
+# Arcane Knowledge is numeric progress. Circle Level is milestone progress
+# evaluated through the requirement framework below.
+
+arcane_knowledge:
+  sources:
+    spell_cast:
+      enabled: true
+      amount: 1
+      circle_amounts:
+        0: 1
+        1: 2
+        2: 4
+        3: 7
+        4: 14
+        5: 26
+        6: 50
+        7: 94
+        8: 179
+        9: 340
+
+circle:
+  auto_advance: true
+  levels:
+    1:
+      stat_points: 5
+      max_mana: 200
+      mana_regeneration: 2
+      requirements:
+        - type: arcane_knowledge
+          amount: 300
+        - type: spell_mastery
+          spell: magic_missile
+          mastery: 250
+          description: "Requires max mastery Magic Missile"
+    2:
+      stat_points: 5
+      max_mana: 400
+      mana_regeneration: 2.5
+      requirements:
+        - type: arcane_knowledge
+          amount: 1040
+        - type: mastered_spell_count
+          circle: 1
+          count: 1
+          description: "Requires 1 max-mastered 1st circle spell"
+    3:
+      stat_points: 7
+      max_mana: 800
+      mana_regeneration: 3
+      requirements:
+        - type: arcane_knowledge
+          amount: 2636
+        - type: mastered_spell_count
+          circle: 2
+          count: 2
+          description: "Requires 1 max-mastered 2nd circle spell"
+    4:
+      stat_points: 10
+      max_mana: 1250
+      mana_regeneration: 5
+      requirements:
+        - type: arcane_knowledge
+          amount: 6570
+        - type: mastered_spell_count
+          circle: 3
+          count: 3
+          description: "Requires 1 max-mastered 3rd circle spell"
+    5:
+      stat_points: 10
+      max_mana: 2000
+      mana_regeneration: 6.25
+      requirements:
+        - type: arcane_knowledge
+          amount: 15566
+    6:
+      stat_points: 15
+      max_mana: 2750
+      mana_regeneration: 7.5
+      requirements:
+        - type: arcane_knowledge
+          amount: 36916
+    7:
+      stat_points: 15
+      max_mana: 4000
+      mana_regeneration: 10
+      requirements:
+        - type: arcane_knowledge
+          amount: 86360
+    8:
+      stat_points: 20
+      max_mana: 7500
+      mana_regeneration: 12.5
+      requirements:
+        - type: arcane_knowledge
+          amount: 202531
+    9:
+      stat_points: 25
+      max_mana: 10000
+      mana_regeneration: 15
+      requirements:
+        - type: arcane_knowledge
+          amount: 474531

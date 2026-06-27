@@ -2,6 +2,7 @@ package me.nagasonic.alkatraz.items.magic.trigger;
 
 import me.nagasonic.alkatraz.items.magic.equipment.EquipmentSlot;
 import me.nagasonic.alkatraz.items.magic.instance.MagicItemInstance;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
