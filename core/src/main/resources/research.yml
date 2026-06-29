@@ -1,93 +1,701 @@
-# Research definitions are rendered as a directed acyclic graph.
-# Nodes may have multiple parents; cycles are rejected during load.
+# Research definitions are rendered as directed acyclic graphs.
+# Objectives are functional and update from gameplay events handled by ResearchObjectiveListener.
 
 categories:
-  foundations:
-    display_name: '&dFoundations'
-    icon: BOOK
+  magic:
+    display_name: '&dMagic'
+    icon: ENCHANTING_TABLE
+  fire:
+    display_name: '&cFire'
+    icon: BLAZE_POWDER
+  water:
+    display_name: '&9Water'
+    icon: HEART_OF_THE_SEA
+  earth:
+    display_name: '&2Earth'
+    icon: MOSS_BLOCK
+  air:
+    display_name: '&fAir'
+    icon: FEATHER
+  light:
+    display_name: '&eLight'
+    icon: GLOWSTONE_DUST
+  dark:
+    display_name: '&8Dark'
+    icon: ECHO_SHARD
 
 nodes:
   awakened_focus:
     display_name: '&dAwakened Focus'
-    category: foundations
+    category: magic
     icon: AMETHYST_SHARD
-    position:
-      x: 0
-      y: 2
+    position: { x: 0, y: 0 }
     description:
-      - 'The first formal study of channelled mana.'
-      - 'It gives your wand work a stable point of reference.'
+      - 'Shape raw mana into a stable point of focus.'
+      - 'This is the first lesson every serious mage must master.'
     parents: []
+    objectives:
+      open_the_path:
+        display_name: 'Cast any spell to awaken your focus.'
+        event: spell_cast
+        amount: 1
+    rewards:
+      arcane_knowledge:
+        type: magic_stat
+        target: arcaneKnowledge
+        amount: 5
+        display: '+5 Arcane Knowledge.'
+      max_mana:
+        type: magic_stat
+        target: maxMana
+        amount: 10
+        display: '+10 Maximum Mana.'
     unlocks:
-      - 'Opens the first arcane research paths.'
+      - 'Reveals the first elemental studies.'
     visibility:
       hidden_until_available: false
 
-  glyph_literacy:
-    display_name: '&bGlyph Literacy'
-    category: foundations
-    icon: WRITABLE_BOOK
-    position:
-      x: 2
-      y: 1
+  mana_conservation:
+    display_name: '&bMana Conservation'
+    category: magic
+    icon: LAPIS_LAZULI
+    position: { x: 0, y: -2 }
     description:
-      - 'A practical understanding of magical notation.'
-      - 'Many later studies rely on these symbols.'
-    parents:
-      - awakened_focus
+      - 'Learn to hold power without letting it leak away.'
+      - 'Patient casting creates stronger work than haste.'
+    parents: [awakened_focus]
+    objectives:
+      steady_casting:
+        display_name: 'Cast five spells in any environment.'
+        event: spell_cast
+        amount: 5
+    rewards:
+      mana_regeneration:
+        type: magic_stat
+        target: manaRegeneration
+        amount: 0.25
+        display: '+0.25 Mana Regeneration.'
     unlocks:
-      - 'Future glyph-based spell options.'
-    visibility:
-      hidden_until_available: false
-
-  resonance_mapping:
-    display_name: '&eResonance Mapping'
-    category: foundations
-    icon: COMPASS
-    position:
-      x: 2
-      y: 3
-    description:
-      - 'Chart how arcane force moves through objects.'
-      - 'This is the basis for stronger foci and tools.'
-    parents:
-      - awakened_focus
-    unlocks:
-      - 'Future wand and equipment improvements.'
+      - 'Improves long-form magical practice.'
     visibility:
       hidden_until_available: false
 
   ritual_geometry:
     display_name: '&5Ritual Geometry'
-    category: foundations
+    category: magic
     icon: ENCHANTING_TABLE
-    position:
-      x: 5
-      y: 2
+    position: { x: -2, y: 0 }
     description:
-      - 'Combine symbols and resonance into stable patterns.'
-      - 'This research demonstrates a merged DAG dependency.'
-    parents:
-      - glyph_literacy
-      - resonance_mapping
+      - 'Place symbols in patterns that mana can follow.'
+      - 'A good ritual is a map, not a miracle.'
+    parents: [awakened_focus]
+    objectives:
+      prepared_tools:
+        display_name: 'Enchant an item to study bound patterns.'
+        event: item_enchant
+        amount: 1
+    rewards:
+      stat_points:
+        type: magic_stat
+        target: statPoints
+        amount: 1
+        display: '+1 Stat Point.'
     unlocks:
-      - 'Future ritual mechanics.'
+      - 'Opens structured research techniques.'
     visibility:
       hidden_until_available: false
 
-  controlled_overflow:
-    display_name: '&cControlled Overflow'
-    category: foundations
-    icon: BLAZE_POWDER
-    position:
-      x: 7
-      y: 2
+  spellcraft_field_notes:
+    display_name: '&aSpellcraft Field Notes'
+    category: magic
+    icon: WRITABLE_BOOK
+    position: { x: 2, y: 0 }
     description:
-      - 'Safely exceed normal channel limits for a moment.'
-      - 'Dangerous, but deeply useful once properly understood.'
-    parents:
-      - ritual_geometry
+      - 'Record how spells behave outside the safety of theory.'
+      - 'Useful notes separate study from guesswork.'
+    parents: [awakened_focus]
+    objectives:
+      practical_casting:
+        display_name: 'Cast ten spells while exploring.'
+        event: spell_cast
+        amount: 10
+    rewards:
+      magic_affinity:
+        type: magic_stat
+        target: magicAffinity
+        amount: 2
+        display: '+2 Magic Affinity.'
     unlocks:
-      - 'Future advanced spell progression.'
+      - 'Strengthens all elemental practice.'
+    visibility:
+      hidden_until_available: false
+
+  disciplined_channel:
+    display_name: '&dDisciplined Channel'
+    category: magic
+    icon: NETHER_STAR
+    position: { x: 0, y: 2 }
+    description:
+      - 'Bring theory, field notes, and ritual discipline together.'
+      - 'The channel becomes reliable enough for greater work.'
+    parents: [mana_conservation, ritual_geometry, spellcraft_field_notes]
+    objectives:
+      balanced_study:
+        display_name: 'Reach experience level ten.'
+        event: player_level
+        amount: 1
+        filters:
+          min_level: 10
+    rewards:
+      max_health:
+        type: vanilla_attribute
+        target: GENERIC_MAX_HEALTH
+        amount: 2
+        display: '+2 Maximum Health.'
+      magic_resistance:
+        type: magic_stat
+        target: magicResistance
+        amount: 2
+        display: '+2 Magic Resistance.'
+    unlocks:
+      - 'Marks the mage as ready for deeper elemental studies.'
+    visibility:
+      hidden_until_available: true
+
+  fire_spark:
+    display_name: '&cKindled Spark'
+    category: fire
+    icon: BLAZE_POWDER
+    position: { x: 0, y: 0 }
+    description:
+      - 'Find the first controlled heat within your mana.'
+      - 'Fire rewards courage, but punishes carelessness.'
+    parents: [awakened_focus]
+    objectives:
+      cast_fire:
+        display_name: 'Cast three Fire spells.'
+        event: spell_cast
+        amount: 3
+        filters:
+          element: FIRE
+    rewards:
+      fire_affinity:
+        type: magic_stat
+        target: fireAffinity
+        amount: 3
+        display: '+3 Fire Affinity.'
+      fire_points:
+        type: magic_stat
+        target: firePoints
+        amount: 1
+        display: '+1 Fire Point.'
+    unlocks:
+      - 'Unlocks the Fire research branch.'
+    visibility:
+      hidden_until_available: false
+
+  water_first_tide:
+    display_name: '&9First Tide'
+    category: water
+    icon: WATER_BUCKET
+    position: { x: 0, y: 0 }
+    description:
+      - 'Let mana settle into flow, pressure, and patience.'
+      - 'Water wins by adapting before it strikes.'
+    parents: [awakened_focus]
+    objectives:
+      cast_water:
+        display_name: 'Cast three Water spells.'
+        event: spell_cast
+        amount: 3
+        filters:
+          element: WATER
+    rewards:
+      water_affinity:
+        type: magic_stat
+        target: waterAffinity
+        amount: 3
+        display: '+3 Water Affinity.'
+      water_points:
+        type: magic_stat
+        target: waterPoints
+        amount: 1
+        display: '+1 Water Point.'
+    unlocks:
+      - 'Unlocks the Water research branch.'
+    visibility:
+      hidden_until_available: false
+
+  earth_stone_memory:
+    display_name: '&2Stone Memory'
+    category: earth
+    icon: MOSS_BLOCK
+    position: { x: 0, y: 0 }
+    description:
+      - 'Listen to old stone until it answers through your hands.'
+      - 'Earth magic begins with endurance.'
+    parents: [awakened_focus]
+    objectives:
+      cast_earth:
+        display_name: 'Cast three Earth spells.'
+        event: spell_cast
+        amount: 3
+        filters:
+          element: EARTH
+    rewards:
+      earth_affinity:
+        type: magic_stat
+        target: earthAffinity
+        amount: 3
+        display: '+3 Earth Affinity.'
+      earth_points:
+        type: magic_stat
+        target: earthPoints
+        amount: 1
+        display: '+1 Earth Point.'
+    unlocks:
+      - 'Unlocks the Earth research branch.'
+    visibility:
+      hidden_until_available: false
+
+  air_open_breath:
+    display_name: '&fOpen Breath'
+    category: air
+    icon: FEATHER
+    position: { x: 0, y: 0 }
+    description:
+      - 'Make your mana light enough to move before thought.'
+      - 'Air magic favors timing, distance, and release.'
+    parents: [awakened_focus]
+    objectives:
+      cast_air:
+        display_name: 'Cast three Air spells.'
+        event: spell_cast
+        amount: 3
+        filters:
+          element: AIR
+    rewards:
+      air_affinity:
+        type: magic_stat
+        target: airAffinity
+        amount: 3
+        display: '+3 Air Affinity.'
+      air_points:
+        type: magic_stat
+        target: airPoints
+        amount: 1
+        display: '+1 Air Point.'
+    unlocks:
+      - 'Unlocks the Air research branch.'
+    visibility:
+      hidden_until_available: false
+
+  light_first_lantern:
+    display_name: '&eFirst Lantern'
+    category: light
+    icon: LANTERN
+    position: { x: 0, y: 0 }
+    description:
+      - 'Turn mana toward clarity, warmth, and repair.'
+      - 'Light is not soft; it is honest.'
+    parents: [awakened_focus]
+    objectives:
+      cast_light:
+        display_name: 'Cast three Light spells.'
+        event: spell_cast
+        amount: 3
+        filters:
+          element: LIGHT
+    rewards:
+      light_affinity:
+        type: magic_stat
+        target: lightAffinity
+        amount: 3
+        display: '+3 Light Affinity.'
+      light_points:
+        type: magic_stat
+        target: lightPoints
+        amount: 1
+        display: '+1 Light Point.'
+    unlocks:
+      - 'Unlocks the Light research branch.'
+    visibility:
+      hidden_until_available: false
+
+  dark_quiet_shadow:
+    display_name: '&8Quiet Shadow'
+    category: dark
+    icon: ECHO_SHARD
+    position: { x: 0, y: 0 }
+    description:
+      - 'Approach the hidden current beneath ordinary mana.'
+      - 'Darkness is secrecy, weight, and consequence.'
+    parents: [awakened_focus]
+    objectives:
+      cast_dark:
+        display_name: 'Cast three Dark spells.'
+        event: spell_cast
+        amount: 3
+        filters:
+          element: DARK
+    rewards:
+      dark_affinity:
+        type: magic_stat
+        target: darkAffinity
+        amount: 3
+        display: '+3 Dark Affinity.'
+      dark_points:
+        type: magic_stat
+        target: darkPoints
+        amount: 1
+        display: '+1 Dark Point.'
+    unlocks:
+      - 'Unlocks the Dark research branch.'
+    visibility:
+      hidden_until_available: false
+
+  fire_ember_control:
+    display_name: '&6Ember Control'
+    category: fire
+    icon: CAMPFIRE
+    position: { x: -2, y: 2 }
+    description:
+      - 'Keep flame alive without letting it spread.'
+      - 'Small fires teach precision better than grand infernos.'
+    parents: [fire_spark]
+    objectives:
+      burn_hostiles:
+        display_name: 'Defeat five creatures after casting Fire spells.'
+        event: kill_with_spell
+        amount: 5
+        filters:
+          element: FIRE
+    rewards:
+      fire_resistance:
+        type: magic_stat
+        target: fireResistance
+        amount: 2
+        display: '+2 Fire Resistance.'
+    unlocks:
+      - 'Improves safety around volatile spells.'
+    visibility:
+      hidden_until_available: false
+
+  fire_inferno_rite:
+    display_name: '&cInferno Rite'
+    category: fire
+    icon: BLAZE_ROD
+    position: { x: 2, y: 2 }
+    description:
+      - 'Call heat through motion, breath, and violent intent.'
+      - 'Only a focused mage can make destruction useful.'
+    parents: [fire_spark, fire_ember_control]
+    objectives:
+      close_range_fire:
+        display_name: 'Defeat three enemies with Fire spells within eight blocks.'
+        event: kill_with_spell
+        amount: 3
+        filters:
+          element: FIRE
+          max_distance: 8
+    rewards:
+      attack_speed:
+        type: vanilla_attribute
+        target: GENERIC_ATTACK_SPEED
+        amount: 0.05
+        display: '+0.05 Attack Speed.'
+      fire_affinity:
+        type: magic_stat
+        target: fireAffinity
+        amount: 2
+        display: '+2 Fire Affinity.'
+    unlocks:
+      - 'Completes the first Fire rite.'
+    visibility:
+      hidden_until_available: true
+
+  water_restorative_current:
+    display_name: '&bRestorative Current'
+    category: water
+    icon: PRISMARINE_CRYSTALS
+    position: { x: -2, y: 2 }
+    description:
+      - 'Study the way moving water carries wounds away.'
+      - 'Restoration begins with clean motion.'
+    parents: [water_first_tide]
+    objectives:
+      gather_water_life:
+        display_name: 'Fish successfully three times.'
+        event: fish
+        amount: 3
+        filters:
+          state: CAUGHT_FISH
+    rewards:
+      max_mana:
+        type: magic_stat
+        target: maxMana
+        amount: 8
+        display: '+8 Maximum Mana.'
+    unlocks:
+      - 'Improves sustain-focused magic.'
+    visibility:
+      hidden_until_available: false
+
+  water_depth_oath:
+    display_name: '&3Depth Oath'
+    category: water
+    icon: HEART_OF_THE_SEA
+    position: { x: 2, y: 2 }
+    description:
+      - 'Swear patience to the deep and learn its pressure.'
+      - 'The calm surface hides immense force.'
+    parents: [water_first_tide, water_restorative_current]
+    objectives:
+      water_victories:
+        display_name: 'Defeat three enemies after casting Water spells.'
+        event: kill_with_spell
+        amount: 3
+        filters:
+          element: WATER
+    rewards:
+      water_resistance:
+        type: magic_stat
+        target: waterResistance
+        amount: 3
+        display: '+3 Water Resistance.'
+    unlocks:
+      - 'Completes the first Water oath.'
+    visibility:
+      hidden_until_available: true
+
+  earth_quarry_signs:
+    display_name: '&aQuarry Signs'
+    category: earth
+    icon: IRON_PICKAXE
+    position: { x: -2, y: 2 }
+    description:
+      - 'Break stone and read the pressure lines it leaves behind.'
+      - 'Every fracture is a sentence.'
+    parents: [earth_stone_memory]
+    objectives:
+      break_stone:
+        display_name: 'Break twenty stone blocks.'
+        event: block_break
+        amount: 20
+        filters:
+          block: STONE
+    rewards:
+      armor:
+        type: vanilla_attribute
+        target: GENERIC_ARMOR
+        amount: 1
+        display: '+1 Armor.'
+    unlocks:
+      - 'Improves defensive Earth work.'
+    visibility:
+      hidden_until_available: false
+
+  earth_bulwark_vow:
+    display_name: '&2Bulwark Vow'
+    category: earth
+    icon: SHIELD
+    position: { x: 2, y: 2 }
+    description:
+      - 'Hold your ground while mana settles into your bones.'
+      - 'The mountain does not need to hurry.'
+    parents: [earth_stone_memory, earth_quarry_signs]
+    objectives:
+      earth_victories:
+        display_name: 'Defeat three enemies after casting Earth spells.'
+        event: kill_with_spell
+        amount: 3
+        filters:
+          element: EARTH
+    rewards:
+      earth_resistance:
+        type: magic_stat
+        target: earthResistance
+        amount: 3
+        display: '+3 Earth Resistance.'
+      max_health:
+        type: vanilla_attribute
+        target: GENERIC_MAX_HEALTH
+        amount: 2
+        display: '+2 Maximum Health.'
+    unlocks:
+      - 'Completes the first Earth vow.'
+    visibility:
+      hidden_until_available: true
+
+  air_kinetic_step:
+    display_name: '&bKinetic Step'
+    category: air
+    icon: RABBIT_FOOT
+    position: { x: 2, y: -2 }
+    description:
+      - 'Study motion until the body wastes less effort.'
+      - 'A light step is often better than a hard shield.'
+    parents: [air_open_breath]
+    objectives:
+      distant_air:
+        display_name: 'Defeat three enemies with Air spells from at least ten blocks away.'
+        event: kill_with_spell
+        amount: 3
+        filters:
+          element: AIR
+          min_distance: 10
+    rewards:
+      movement_speed:
+        type: vanilla_attribute
+        target: GENERIC_MOVEMENT_SPEED
+        amount: 0.01
+        display: '+0.01 Movement Speed.'
+    unlocks:
+      - 'Improves mobility-focused magic.'
+    visibility:
+      hidden_until_available: false
+
+  air_storm_eye:
+    display_name: '&fStorm Eye'
+    category: air
+    icon: PHANTOM_MEMBRANE
+    position: { x: -2, y: 2 }
+    description:
+      - 'Stand calmly inside violent motion.'
+      - 'Control is proven when the storm bends around you.'
+    parents: [air_open_breath, air_kinetic_step]
+    objectives:
+      air_practice:
+        display_name: 'Cast eight Air spells.'
+        event: spell_cast
+        amount: 8
+        filters:
+          element: AIR
+    rewards:
+      air_resistance:
+        type: magic_stat
+        target: airResistance
+        amount: 3
+        display: '+3 Air Resistance.'
+    unlocks:
+      - 'Completes the first Air meditation.'
+    visibility:
+      hidden_until_available: true
+
+  light_mending_script:
+    display_name: '&eMending Script'
+    category: light
+    icon: GOLDEN_APPLE
+    position: { x: -2, y: 2 }
+    description:
+      - 'Write restorative intent into a repeatable form.'
+      - 'The best healing is consistent enough to trust.'
+    parents: [light_first_lantern]
+    objectives:
+      consume_remedy:
+        display_name: 'Consume a golden apple.'
+        event: item_consume
+        amount: 1
+        filters:
+          item: GOLDEN_APPLE
+    rewards:
+      mana_regeneration:
+        type: magic_stat
+        target: manaRegeneration
+        amount: 0.2
+        display: '+0.2 Mana Regeneration.'
+    unlocks:
+      - 'Improves restorative Light work.'
+    visibility:
+      hidden_until_available: false
+
+  light_radiant_oath:
+    display_name: '&eRadiant Oath'
+    category: light
+    icon: GLOWSTONE
+    position: { x: 2, y: 2 }
+    description:
+      - 'Carry enough light that fear has less room to grow.'
+      - 'Protection becomes an act of discipline.'
+    parents: [light_first_lantern, light_mending_script]
+    objectives:
+      light_practice:
+        display_name: 'Cast eight Light spells.'
+        event: spell_cast
+        amount: 8
+        filters:
+          element: LIGHT
+    rewards:
+      light_resistance:
+        type: magic_stat
+        target: lightResistance
+        amount: 3
+        display: '+3 Light Resistance.'
+      luck:
+        type: vanilla_attribute
+        target: GENERIC_LUCK
+        amount: 1
+        display: '+1 Luck.'
+    unlocks:
+      - 'Completes the first Light oath.'
+    visibility:
+      hidden_until_available: true
+
+  dark_tethered_whisper:
+    display_name: '&5Tethered Whisper'
+    category: dark
+    icon: SCULK
+    position: { x: 2, y: -2 }
+    description:
+      - 'Bind intention to silence and let the target feel it late.'
+      - 'Subtle magic still leaves a mark.'
+    parents: [dark_quiet_shadow]
+    objectives:
+      dark_victories:
+        display_name: 'Defeat five enemies after casting Dark spells.'
+        event: kill_with_spell
+        amount: 5
+        filters:
+          element: DARK
+    rewards:
+      attack_damage:
+        type: vanilla_attribute
+        target: GENERIC_ATTACK_DAMAGE
+        amount: 0.5
+        display: '+0.5 Attack Damage.'
+    unlocks:
+      - 'Improves pressure-focused Dark work.'
+    visibility:
+      hidden_until_available: false
+
+  dark_eclipse_compact:
+    display_name: '&8Eclipse Compact'
+    category: dark
+    icon: BLACK_CANDLE
+    position: { x: -2, y: 2 }
+    description:
+      - 'Accept the cost of hidden power and name it clearly.'
+      - 'A compact is strongest when nothing is left implied.'
+    parents: [dark_quiet_shadow, dark_tethered_whisper]
+    objectives:
+      night_study:
+        display_name: 'Cast eight Dark spells.'
+        event: spell_cast
+        amount: 8
+        filters:
+          element: DARK
+    rewards:
+      dark_resistance:
+        type: magic_stat
+        target: darkResistance
+        amount: 3
+        display: '+3 Dark Resistance.'
+      arcane_knowledge:
+        type: magic_stat
+        target: arcaneKnowledge
+        amount: 10
+        display: '+10 Arcane Knowledge.'
+    unlocks:
+      - 'Completes the first Dark compact.'
     visibility:
       hidden_until_available: true

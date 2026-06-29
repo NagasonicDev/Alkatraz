@@ -60,7 +60,6 @@ public class LootInjector implements Listener {
         @EventHandler(priority = EventPriority.HIGH)
         public static void onLootGenerate(LootGenerateEvent event) {
             LootTable table = event.getLootTable();
-            Alkatraz.logInfo(table.getKey().toString());
 
             // Check each registered injector
             for (LootInjector injector : REGISTERED_INJECTORS) {

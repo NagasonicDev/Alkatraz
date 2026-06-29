@@ -60,6 +60,7 @@ public class MagicProfile extends Profile {
         // Booleans
         boolStat("casting", false);
         boolStat("stealth", false);
+        boolStat("canCast", true);
 
         // Strings
         stringStat("disguise");
@@ -72,6 +73,8 @@ public class MagicProfile extends Profile {
         stringSetStat("researchProgress");  // Adapter storage for configurable research requirements
         stringSetStat("researchStarted");
         stringSetStat("researchCompleted");
+        stringSetStat("researchObjectiveProgress");
+        stringSetStat("researchRewardsApplied");
 
         // Note: Spell masteries are stored as dynamic int stats (see getSpellMastery/setSpellMastery)
     }
@@ -274,6 +277,9 @@ public class MagicProfile extends Profile {
     // Boolean Stats Getters/Setters
     // ============================================
 
+    public boolean canCast() { return getBool("canCast"); }
+    public void setCanCast(boolean value) { setBool("canCast", value); }
+
     public boolean isCasting() { return getBool("casting"); }
     public void setCasting(boolean value) { setBool("casting", value); }
 
@@ -331,6 +337,13 @@ public class MagicProfile extends Profile {
         return getStringSet("researchCompleted").contains(key) || getStringSet("researchProgress").contains(key);
     }
 
+    public Collection<String> getCompletedResearchIds() {
+        Set<String> completed = new HashSet<>();
+        completed.addAll(getStringSet("researchCompleted"));
+        completed.addAll(getStringSet("researchProgress"));
+        return completed;
+    }
+
     public void setResearchStarted(String researchId, boolean started) {
         if (researchId == null || researchId.isBlank()) return;
         String key = researchId.toLowerCase();
@@ -352,6 +365,82 @@ public class MagicProfile extends Profile {
             getStringSet("researchCompleted").remove(key);
             getStringSet("researchProgress").remove(key);
         }
+    }
+
+    public int getResearchObjectiveProgress(String researchId, String objectiveId) {
+        String prefix = researchProgressPrefix(researchId, objectiveId);
+        for (String entry : getStringSet("researchObjectiveProgress")) {
+            if (entry.startsWith(prefix)) {
+                try {
+                    return Integer.parseInt(entry.substring(prefix.length()));
+                } catch (NumberFormatException ignored) {
+                    return 0;
+                }
+            }
+        }
+        return 0;
+    }
+
+    public void setResearchObjectiveProgress(String researchId, String objectiveId, int progress) {
+        if (researchId == null || objectiveId == null) return;
+        String prefix = researchProgressPrefix(researchId, objectiveId);
+        getStringSet("researchObjectiveProgress").removeIf(entry -> entry.startsWith(prefix));
+        getStringSet("researchObjectiveProgress").add(prefix + Math.max(0, progress));
+    }
+
+    public int addResearchObjectiveProgress(String researchId, String objectiveId, int amount, int max) {
+        int next = Math.min(max, getResearchObjectiveProgress(researchId, objectiveId) + Math.max(0, amount));
+        setResearchObjectiveProgress(researchId, objectiveId, next);
+        return next;
+    }
+
+    public boolean hasAppliedResearchRewards(String researchId) {
+        return researchId != null && getStringSet("researchRewardsApplied").contains(researchId.toLowerCase());
+    }
+
+    public void setResearchRewardsApplied(String researchId, boolean applied) {
+        if (researchId == null || researchId.isBlank()) return;
+        String key = researchId.toLowerCase();
+        if (applied) {
+            getStringSet("researchRewardsApplied").add(key);
+        } else {
+            getStringSet("researchRewardsApplied").remove(key);
+        }
+    }
+
+    public boolean addMagicStat(String stat, double amount, String operation) {
+        if (stat == null || stat.isBlank()) return false;
+        String mode = operation == null ? "add" : operation.toLowerCase();
+        if (isInt(stat)) {
+            int value = getInt(stat);
+            setInt(stat, (int) Math.round(applyRewardOperation(value, amount, mode)));
+            return true;
+        }
+        if (isDouble(stat)) {
+            setDouble(stat, applyRewardOperation(getDouble(stat), amount, mode));
+            return true;
+        }
+        if (isFloat(stat)) {
+            setFloat(stat, (float) applyRewardOperation(getFloat(stat), amount, mode));
+            return true;
+        }
+        if (isLong(stat)) {
+            setLong(stat, Math.round(applyRewardOperation(getLong(stat), amount, mode)));
+            return true;
+        }
+        return false;
+    }
+
+    private String researchProgressPrefix(String researchId, String objectiveId) {
+        return researchId.toLowerCase() + ":" + objectiveId.toLowerCase() + "=";
+    }
+
+    private double applyRewardOperation(double current, double amount, String operation) {
+        return switch (operation) {
+            case "set" -> amount;
+            case "multiply" -> current * amount;
+            default -> current + amount;
+        };
     }
 
     // ============================================

@@ -1,5 +1,6 @@
 package me.nagasonic.alkatraz.events;
 
+import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.types.properties.SpellProperties;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -12,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 public class CastEvent extends Event implements Cancellable {
     private static final HandlerList HANDLERS = new HandlerList();
     private final LivingEntity caster;
+    private final Spell spell;
     private final SpellProperties props;
     private final ItemStack wand;
 
@@ -19,9 +21,10 @@ public class CastEvent extends Event implements Cancellable {
         return HANDLERS;
     }
 
-    public CastEvent(LivingEntity caster, SpellProperties spell, ItemStack wand){
+    public CastEvent(LivingEntity caster, Spell spell,  SpellProperties props, ItemStack wand){
         this.caster = caster;
-        this.props = spell;
+        this.spell = spell;
+        this.props = props;
         this.wand = wand;
     }
 
@@ -32,12 +35,16 @@ public class CastEvent extends Event implements Cancellable {
 
     @Override
     public void setCancelled(boolean cancel) {
-
+        props.cancel();
     }
 
     @Override
     public @NotNull HandlerList getHandlers() {
         return HANDLERS;
+    }
+
+    public Spell getSpell() {
+        return spell;
     }
 
     public LivingEntity getCaster() {

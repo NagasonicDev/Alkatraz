@@ -4,6 +4,7 @@ import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
+import me.nagasonic.alkatraz.events.PlayerCastEvent;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
@@ -59,6 +60,8 @@ public class WaterSphere extends AttackSpell {
     public void castAction(Player p, ItemStack wand) {
         if (!p.isDead()){
             AttackProperties props = new AttackProperties(p, Utils.castLocation(p), getBasePower() * getBasePower() * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")), AttackType.MAGIC);
+            PlayerCastEvent castEvent = new PlayerCastEvent(p, this, props, wand);
+            Bukkit.getPluginManager().callEvent(castEvent);
             List<Location> lineLocs = ParticleUtils.line(
                     2,
                     p.getEyeLocation(),

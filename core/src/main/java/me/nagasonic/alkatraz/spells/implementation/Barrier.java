@@ -3,6 +3,8 @@ package me.nagasonic.alkatraz.spells.implementation;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
+import me.nagasonic.alkatraz.events.CastEvent;
+import me.nagasonic.alkatraz.events.PlayerCastEvent;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
@@ -55,6 +57,8 @@ public class Barrier extends BarrierSpell implements Listener {
         double activeDuration = (Double) getOption("barrier_duration").getSelectedValue(p).getValue();
         double activeHitpoints = (Double) getOption("barrier_hitpoints").getSelectedValue(p).getValue();
         BarrierProperties properties = new BarrierProperties(p, center, activeHitpoints, BarrierType.COMBINED);
+        PlayerCastEvent castEvent = new PlayerCastEvent(p, this, properties, wand);
+        Bukkit.getPluginManager().callEvent(castEvent);
         properties.getHealthBar().addPlayer(p);
 
         BukkitRunnable task = new BukkitRunnable() {
@@ -102,6 +106,8 @@ public class Barrier extends BarrierSpell implements Listener {
     public void mobCastAction(Mob caster, ItemStack wand) {
         Location center = caster.getLocation().clone().add(0, 1, 0);
         BarrierProperties properties = new BarrierProperties(caster, center, getMaxHitpoints(), BarrierType.COMBINED);
+        CastEvent castEvent = new CastEvent(caster, this, properties, wand);
+        Bukkit.getPluginManager().callEvent(castEvent);
 
         BukkitRunnable task = new BukkitRunnable() {
 

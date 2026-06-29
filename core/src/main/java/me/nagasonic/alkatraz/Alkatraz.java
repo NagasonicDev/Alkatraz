@@ -21,6 +21,7 @@ import me.nagasonic.alkatraz.nms.NMS;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileRegistry;
 import me.nagasonic.alkatraz.progression.ProgressionService;
+import me.nagasonic.alkatraz.progression.research.ResearchObjectiveListener;
 import me.nagasonic.alkatraz.progression.research.ResearchService;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
@@ -103,6 +104,7 @@ public final class Alkatraz extends JavaPlugin {
         SpellbookLoot.registerAll();
         registerListener(new WandListeners());
         registerListener(new WandHotbarListeners());
+        registerListener(new ResearchObjectiveListener());
         //registerListener(new MagicItemTriggerAdapter());
         Bukkit.getPluginManager().registerEvents(new MenuListener(), this);
         logInfo("NMS version " + nms.getClass().getSimpleName() + " registered!");

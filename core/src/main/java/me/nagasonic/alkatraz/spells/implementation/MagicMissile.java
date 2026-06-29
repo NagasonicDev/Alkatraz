@@ -4,6 +4,8 @@ import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
+import me.nagasonic.alkatraz.events.CastEvent;
+import me.nagasonic.alkatraz.events.PlayerCastEvent;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
@@ -61,6 +63,8 @@ public class MagicMissile extends AttackSpell {
     public void castAction(Player p, ItemStack wand) {
         if (!p.isDead()){
             AttackProperties props = new AttackProperties(p, Utils.castLocation(p), getBasePower() * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")), AttackType.MAGIC);
+            PlayerCastEvent castEvent = new PlayerCastEvent(p, this, props, wand);
+            Bukkit.getPluginManager().callEvent(castEvent);
             Location loc1 = p.getEyeLocation();
             Vector direction = p.getEyeLocation().getDirection();
             Location loc2 = p.getEyeLocation().add(direction.multiply((Double) getOption("missile_range").getSelectedValue(p).getValue()));
@@ -138,6 +142,8 @@ public class MagicMissile extends AttackSpell {
             double power = getPower(caster, getBasePower())
                     * wandp;
             AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster), power, AttackType.MAGIC);
+            CastEvent castEvent = new CastEvent(caster, this, props, wand);
+            Bukkit.getPluginManager().callEvent(castEvent);
             Location loc1 = caster.getEyeLocation();
             Vector direction = caster.getTarget().getLocation().toVector().subtract(caster.getLocation().toVector()).normalize();
             Location loc2 = caster.getEyeLocation().add(direction.multiply(20));

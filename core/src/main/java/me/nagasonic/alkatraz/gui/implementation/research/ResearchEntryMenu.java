@@ -4,6 +4,8 @@ import me.nagasonic.alkatraz.gui.Menu;
 import me.nagasonic.alkatraz.progression.research.ResearchService;
 import me.nagasonic.alkatraz.progression.research.ResearchState;
 import me.nagasonic.alkatraz.progression.research.definition.ResearchNode;
+import me.nagasonic.alkatraz.progression.research.definition.ResearchObjective;
+import me.nagasonic.alkatraz.progression.research.definition.ResearchReward;
 import me.nagasonic.alkatraz.util.ColorFormat;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -34,8 +36,9 @@ public class ResearchEntryMenu extends Menu {
         inventory.clear();
         ResearchState state = ResearchService.getState(viewer, node);
         inventory.setItem(4, summaryItem(state));
-        inventory.setItem(20, requirementsItem(state));
-        inventory.setItem(24, unlocksItem());
+        inventory.setItem(19, requirementsItem(state));
+        inventory.setItem(22, tasksItem());
+        inventory.setItem(25, rewardsItem());
         inventory.setItem(31, actionItem(state));
         inventory.setItem(45, backItem());
         addLinkedResearch();
@@ -90,12 +93,13 @@ public class ResearchEntryMenu extends Menu {
         meta.setDisplayName(ColorFormat.format("&eRequirements"));
         List<String> lore = new ArrayList<>();
         if (node.getParents().isEmpty()) {
-            lore.add(ColorFormat.format("&7No prior research required."));
+            lore.add(ColorFormat.format("&aNo prior research required."));
         } else {
             for (String parentId : node.getParents()) {
                 ResearchService.getNode(parentId).ifPresent(parent -> {
                     ResearchState parentState = ResearchService.getState(viewer, parent);
-                    lore.add(ColorFormat.format(stateColor(parentState) + parent.getDisplayName()));
+                    String mark = parentState == ResearchState.COMPLETED ? "&a[Done] " : "&c[Missing] ";
+                    lore.add(ColorFormat.format(mark + stateColor(parentState) + parent.getDisplayName()));
                 });
             }
         }
@@ -104,14 +108,44 @@ public class ResearchEntryMenu extends Menu {
         return item;
     }
 
-    private ItemStack unlocksItem() {
+    private ItemStack tasksItem() {
+        ItemStack item = new ItemStack(ResearchService.objectivesComplete(viewer, node) ? Material.FILLED_MAP : Material.MAP);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(ColorFormat.format("&bResearch Tasks"));
+        List<String> lore = new ArrayList<>();
+        if (node.getObjectives().isEmpty()) {
+            lore.add(ColorFormat.format("&aNo tasks required."));
+        } else {
+            for (ResearchObjective objective : node.getObjectives()) {
+                int progress = ResearchService.getObjectiveProgress(viewer, node, objective);
+                String mark = progress >= objective.getAmount() ? "&a[Done] " : "&e- ";
+                lore.add(ColorFormat.format(mark + objective.getDisplayName()));
+                lore.add(ColorFormat.format("&8  " + progress + "/" + objective.getAmount()));
+            }
+        }
+        meta.setLore(lore);
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    private ItemStack rewardsItem() {
         ItemStack item = new ItemStack(Material.CHEST);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ColorFormat.format("&aUnlocks"));
+        meta.setDisplayName(ColorFormat.format("&aRewards"));
         List<String> lore = new ArrayList<>();
-        if (node.getUnlocks().isEmpty()) {
-            lore.add(ColorFormat.format("&7No configured unlock text."));
+        if (node.getRewards().isEmpty()) {
+            lore.add(ColorFormat.format("&7No configured rewards."));
         } else {
+            for (ResearchReward reward : node.getRewards()) {
+                lore.add(ColorFormat.format("&7" + rewardText(reward)));
+            }
+        }
+        if (node.getUnlocks().isEmpty()) {
+            lore.add(ColorFormat.format("&7"));
+            lore.add(ColorFormat.format("&7No connected unlock text."));
+        } else {
+            lore.add(ColorFormat.format("&7"));
+            lore.add(ColorFormat.format("&dUnlocks:"));
             for (String unlock : node.getUnlocks()) {
                 lore.add(ColorFormat.format("&7" + unlock));
             }
@@ -150,7 +184,11 @@ public class ResearchEntryMenu extends Menu {
         if (state == ResearchState.AVAILABLE) {
             lore.add(ColorFormat.format("&7Begin studying this research."));
         } else if (state == ResearchState.IN_PROGRESS) {
-            lore.add(ColorFormat.format("&7Record your findings."));
+            if (ResearchService.objectivesComplete(viewer, node)) {
+                lore.add(ColorFormat.format("&7Record your findings and claim rewards."));
+            } else {
+                lore.add(ColorFormat.format("&7Complete all research tasks first."));
+            }
         } else {
             lore.add(ColorFormat.format("&7No action available."));
         }
@@ -203,7 +241,17 @@ public class ResearchEntryMenu extends Menu {
     }
 
     private String formatState(ResearchState state) {
-        return state.name().toLowerCase().replace('_', ' ');
+        String words = state.name().toLowerCase().replace('_', ' ');
+        return Character.toUpperCase(words.charAt(0)) + words.substring(1);
+    }
+
+    private String rewardText(ResearchReward reward) {
+        if (reward.getDisplay() != null && !reward.getDisplay().isBlank()) {
+            return reward.getDisplay();
+        }
+        String target = reward.getTarget().replace('_', ' ');
+        String value = reward.getAmount() % 1 == 0 ? String.valueOf((int) reward.getAmount()) : String.valueOf(reward.getAmount());
+        return "+" + value + " " + Character.toUpperCase(target.charAt(0)) + target.substring(1);
     }
 
     private String stateColor(ResearchState state) {

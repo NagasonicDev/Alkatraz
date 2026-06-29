@@ -5,6 +5,8 @@ import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.dom.Ground;
+import me.nagasonic.alkatraz.events.CastEvent;
+import me.nagasonic.alkatraz.events.PlayerCastEvent;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.Element;
 import me.nagasonic.alkatraz.spells.components.*;
@@ -64,6 +66,8 @@ public class Tremor extends AttackSpell implements Listener {
     public void castAction(Player p, ItemStack wand) {
         if (!p.isDead()){
             AttackProperties props = new AttackProperties(p, Utils.castLocation(p), getBasePower() * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")), AttackType.PHYSICAL);
+            PlayerCastEvent castEvent = new PlayerCastEvent(p, this, props, wand);
+            Bukkit.getPluginManager().callEvent(castEvent);
             final Location base = p.getLocation().subtract(0, 0.5, 0);
             Vector dir = p.getEyeLocation().getDirection();
             Vector perp = dir.clone().rotateAroundY(90);
@@ -153,6 +157,8 @@ public class Tremor extends AttackSpell implements Listener {
             double power = getPower(caster, getBasePower())
                     * wandp;
             AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster), power, AttackType.PHYSICAL);
+            CastEvent castEvent = new CastEvent(caster, this, props, wand);
+            Bukkit.getPluginManager().callEvent(castEvent);
             final Location base = caster.getLocation().subtract(0, 0.5, 0);
             Vector dir = caster.getTarget().getLocation().toVector().subtract(caster.getLocation().toVector()).normalize();
             Vector perp = dir.clone().rotateAroundY(90);

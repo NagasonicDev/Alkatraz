@@ -4,6 +4,8 @@ import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
+import me.nagasonic.alkatraz.events.CastEvent;
+import me.nagasonic.alkatraz.events.PlayerCastEvent;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
@@ -78,6 +80,7 @@ public class WindVortex extends AttackSpell implements Listener {
         Alkatraz.getInstance().saveConfig("spells/wind_vortex_options.yml");
         YamlConfiguration spellConfig = ConfigManager.getConfig("spells/wind_vortex.yml").get();
         loadCommonConfig(spellConfig);
+        loadOptions();
         
         // Load vortex-specific config
         this.vortexDuration = spellConfig.getInt("vortex_duration");
@@ -105,6 +108,8 @@ public class WindVortex extends AttackSpell implements Listener {
                 power,
                 AttackType.MAGIC
         );
+        PlayerCastEvent castEvent = new PlayerCastEvent(caster, this, props, wand);
+        Bukkit.getPluginManager().callEvent(castEvent);
 
         // Start vortex behavior
         VortexBehavior task = new VortexBehavior(caster, wand, props, radius, pull, duration, power);
@@ -133,6 +138,8 @@ public class WindVortex extends AttackSpell implements Listener {
                 power,
                 AttackType.MAGIC
         );
+        CastEvent castEvent = new CastEvent(caster, this, props, wand);
+        Bukkit.getPluginManager().callEvent(castEvent);
 
         // Start vortex behavior
         VortexBehavior task = new VortexBehavior(caster, wand, props, radius, pull, duration, power);
