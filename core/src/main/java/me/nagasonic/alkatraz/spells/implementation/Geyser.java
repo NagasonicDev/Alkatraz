@@ -4,6 +4,8 @@ import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
+import me.nagasonic.alkatraz.events.CastEvent;
+import me.nagasonic.alkatraz.events.PlayerCastEvent;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.configuration.OptionValue;
 import me.nagasonic.alkatraz.spells.configuration.SpellOption;
@@ -64,6 +66,7 @@ public class Geyser extends AttackSpell {
         Alkatraz.getInstance().saveConfig("spells/geyser_options.yml");
         YamlConfiguration spellConfig = ConfigManager.getConfig("spells/geyser.yml").get();
         loadCommonConfig(spellConfig);
+        loadOptions();
     }
 
     // -------------------------------------------------------------------------
@@ -116,6 +119,8 @@ public class Geyser extends AttackSpell {
                 basePower,
                 AttackType.MAGIC
         );
+        PlayerCastEvent castEvent = new PlayerCastEvent(caster, this, props, wand);
+        Bukkit.getPluginManager().callEvent(castEvent);
 
         // Target: ~6 blocks in front of the caster on the ground
         Location epicentre = Utils.findTopSolid(
@@ -146,6 +151,8 @@ public class Geyser extends AttackSpell {
                 power,
                 AttackType.MAGIC
         );
+        CastEvent castEvent = new CastEvent(caster, this, props, wand);
+        Bukkit.getPluginManager().callEvent(castEvent);
 
         // Target: ~6 blocks in front of the caster on the ground
         Location epicentre = Utils.findTopSolid(

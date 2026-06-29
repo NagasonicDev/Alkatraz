@@ -4,6 +4,8 @@ import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
+import me.nagasonic.alkatraz.events.CastEvent;
+import me.nagasonic.alkatraz.events.PlayerCastEvent;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
@@ -83,8 +85,15 @@ public class AirBlades extends AttackSpell implements Listener {
         double power = getPower(caster, getBasePower())
                 * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
         double size = getModifiedStat(caster, "blade_size", 0.6);
-
-        fireBlades(caster, wand, bladeCount, power, size);
+        AttackProperties props = new AttackProperties(
+                caster,
+                caster.getEyeLocation(),
+                power,
+                AttackType.MAGIC
+        );
+        PlayerCastEvent castEvent = new PlayerCastEvent(caster, this, props, wand);
+        Bukkit.getPluginManager().callEvent(castEvent);
+        fireBlades(caster, wand, bladeCount, size, props);
     }
 
     @Override
@@ -93,8 +102,15 @@ public class AirBlades extends AttackSpell implements Listener {
         double wandp = wand == null ? 1 : NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
         double power = getPower(caster, getBasePower())
                 * wandp;
-
-        fireBlades(caster, wand, bladeCount, power, 0.6);
+        AttackProperties props = new AttackProperties(
+                caster,
+                caster.getEyeLocation(),
+                power,
+                AttackType.MAGIC
+        );
+        CastEvent castEvent = new CastEvent(caster, this, props, wand);
+        Bukkit.getPluginManager().callEvent(castEvent);
+        fireBlades(caster, wand, bladeCount, 0.6, props);
     }
 
     // ============================================
@@ -106,13 +122,12 @@ public class AirBlades extends AttackSpell implements Listener {
      * With 1 blade: no spread (fires straight).
      * With 3 or 5 blades: evenly distributed across {@code bladeSpread} degrees.
      */
-    private void fireBlades(LivingEntity caster, ItemStack wand, int count, double power, double size) {
+    private void fireBlades(LivingEntity caster, ItemStack wand, int count, double size, AttackProperties props) {
         caster.getWorld().playSound(caster.getLocation(), Sound.ENTITY_ENDER_DRAGON_FLAP, 0.9f, 1.6f);
 
         Vector aimDir;
         if (caster instanceof Mob m) {
             aimDir = m.getTarget().getLocation().toVector().subtract(m.getLocation().toVector()).normalize();
-            Alkatraz.logInfo(aimDir.toString());
         }else aimDir = caster.getEyeLocation().getDirection().normalize();
 
         // Build the list of yaw offsets (in radians) for this volley
@@ -130,13 +145,6 @@ public class AirBlades extends AttackSpell implements Listener {
         for (double yawOffset : offsets) {
             // Rotate aimDir around the Y axis by yawOffset
             Vector bladeDir = rotateAroundY(aimDir.clone(), yawOffset);
-
-            AttackProperties props = new AttackProperties(
-                    caster,
-                    caster.getEyeLocation(),
-                    power,
-                    AttackType.MAGIC
-            );
 
             launchBlade(caster, wand, props, bladeDir, size);
         }

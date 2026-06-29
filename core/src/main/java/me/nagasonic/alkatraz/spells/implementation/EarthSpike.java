@@ -5,6 +5,8 @@ import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.dom.Ground;
+import me.nagasonic.alkatraz.events.CastEvent;
+import me.nagasonic.alkatraz.events.PlayerCastEvent;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
@@ -74,6 +76,8 @@ public class EarthSpike extends AttackSpell implements Listener {
         }
         if (!target.getType().isSolid()) return;
         AttackProperties props = new AttackProperties(player, Utils.castLocation(player), getBasePower() * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")), AttackType.PHYSICAL);
+        PlayerCastEvent castEvent = new PlayerCastEvent(player, this, props, wand);
+        Bukkit.getPluginManager().callEvent(castEvent);
         double heightMultiplier = (Double) getOption("spike_height").getSelectedValue(player).getValue();
 
         Map<BlockFace, Integer> columns = new HashMap<>();
@@ -161,7 +165,8 @@ public class EarthSpike extends AttackSpell implements Listener {
         double power = getPower(caster, getBasePower())
                 * wandp;
         AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster), power, AttackType.PHYSICAL);
-
+        CastEvent castEvent = new CastEvent(caster, this, props, wand);
+        Bukkit.getPluginManager().callEvent(castEvent);
         Map<BlockFace, Integer> columns = new HashMap<>();
         columns.put(BlockFace.SELF, 7);
         columns.put(BlockFace.NORTH, 5);

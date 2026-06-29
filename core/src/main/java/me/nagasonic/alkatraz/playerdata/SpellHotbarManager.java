@@ -1,11 +1,13 @@
 package me.nagasonic.alkatraz.playerdata;
 
 import de.tr7zw.nbtapi.NBT;
+import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
 import me.nagasonic.alkatraz.util.ColorFormat;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -57,6 +59,8 @@ public class SpellHotbarManager {
     public static void enter(Player player, ItemStack wand) {
         if (hotbarActive.containsKey(player.getUniqueId())) return;
         hotbarActive.put(player.getUniqueId(), wand);
+        MagicProfile profile = ProfileManager.getProfile(player, MagicProfile.class);
+        profile.setCanCast(false);
 
         UUID uuid = player.getUniqueId();
 
@@ -80,7 +84,7 @@ public class SpellHotbarManager {
         player.getInventory().setStorageContents(new ItemStack[36]);
 
         // Place configured spells into slots 0-7
-        MagicProfile profile = ProfileManager.getProfile(player, MagicProfile.class);
+
         for (int slot = 0; slot < SPELL_SLOT_COUNT; slot++) {
             String spellId = profile.getHotbarSpellIds().get(slot);
             Spell spell = SpellRegistry.getSpell(spellId);
@@ -95,6 +99,9 @@ public class SpellHotbarManager {
         // Place the wand in slot 8
         player.getInventory().setItem(EXIT_SLOT, wand != null ? wand.clone() : null);
         player.updateInventory();
+        Bukkit.getScheduler().scheduleSyncDelayedTask(Alkatraz.getInstance(), () -> {
+            profile.setCanCast(true);
+        }, 4L);
     }
 
     /**

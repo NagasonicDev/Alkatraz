@@ -4,6 +4,8 @@ import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
+import me.nagasonic.alkatraz.events.CastEvent;
+import me.nagasonic.alkatraz.events.PlayerCastEvent;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
@@ -104,6 +106,8 @@ public class DarkTendrils extends AttackSpell implements Listener {
                 power,
                 AttackType.MAGIC
         );
+        PlayerCastEvent castEvent = new PlayerCastEvent(caster, this, props, wand);
+        Bukkit.getPluginManager().callEvent(castEvent);
 
         for (int i = 1; i <= count; i++){
             // Spawn tendril armor stand (invisible, small, no gravity)
@@ -165,6 +169,8 @@ public class DarkTendrils extends AttackSpell implements Listener {
                 power,
                 AttackType.MAGIC
         );
+        CastEvent castEvent = new CastEvent(caster, this, props, wand);
+        Bukkit.getPluginManager().callEvent(castEvent);
 
         for (int i = 1; i <= 2; i++){
             // Spawn tendril armor stand (invisible, small, no gravity)

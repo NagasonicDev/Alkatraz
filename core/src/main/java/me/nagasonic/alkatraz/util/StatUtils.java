@@ -2,6 +2,7 @@ package me.nagasonic.alkatraz.util;
 
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.items.wands.Wand;
+import me.nagasonic.alkatraz.playerdata.SpellHotbarManager;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.progression.ProgressionService;
@@ -32,7 +33,7 @@ public class StatUtils {
 
         ItemStack item = p.getInventory().getItemInMainHand();
         if (item.getType() != Material.AIR && item.getAmount() != 0) {
-            if (Wand.isWand(item)) {
+            if (Wand.isWand(item) || SpellHotbarManager.isActive(p)){
                 Alkatraz.getNms().fakeExp(
                         p,
                         (float) (profile.getMana() / profile.getMaxMana()),
@@ -53,7 +54,7 @@ public class StatUtils {
 
         ItemStack item = p.getInventory().getItemInMainHand();
         if (item.getType() != Material.AIR && item.getAmount() != 0) {
-            if (Wand.isWand(item)) {
+            if (Wand.isWand(item) || SpellHotbarManager.isActive(p)) {
                 Alkatraz.getNms().fakeExp(
                         p,
                         (float) (profile.getMana() / profile.getMaxMana()),

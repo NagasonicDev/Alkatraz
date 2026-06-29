@@ -369,7 +369,6 @@ public class WandListeners implements Listener {
         if (item.getType() != Material.AIR && item.getAmount() != 0){
             if (Wand.isWand(item)){
                 for (int i = 0; i <= p.getInventory().getHeldItemSlot(); i++){
-                    Alkatraz.logFine("" + i);
                     ItemStack s = p.getInventory().getItem(i);
                     if (s != null){
                         if (s.getAmount() == 0 || s.getType() == Material.AIR){
@@ -391,7 +390,6 @@ public class WandListeners implements Listener {
             int current = changedExp.get(p.getUniqueId().toString());
             changedExp.replace(p.getUniqueId().toString(), current + e.getAmount());
         }
-        Alkatraz.logFine(String.valueOf(changedExp.get(p.getUniqueId().toString())));
     }
 
     @EventHandler

@@ -96,6 +96,10 @@ public abstract class Spell {
         // Get modified mana cost (can be affected by spell options)
         int manaCost = getModifiedManaCost(p);
 
+        if (!profile.canCast()) {
+            Utils.sendActionBar(p, "&cYou cannot cast right now");
+            return;
+        }
         // Check mana
         if (profile.getMana() < manaCost) {
             Utils.sendActionBar(p, "&cNot Enough Mana");

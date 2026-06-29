@@ -5,6 +5,8 @@ import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
+import me.nagasonic.alkatraz.events.CastEvent;
+import me.nagasonic.alkatraz.events.PlayerCastEvent;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
@@ -70,6 +72,7 @@ public class Stealth extends Spell implements Listener {
             costs.put(i, spellConfig.getDouble("cost_over_time.circle_" + i));
         }
         loadCommonConfig(spellConfig);
+        loadOptions();
         Alkatraz.getInstance().getServer().getPluginManager().registerEvents(this, Alkatraz.getInstance());
     }
 
@@ -77,6 +80,8 @@ public class Stealth extends Spell implements Listener {
     public void castAction(Player p, ItemStack wand) {
         if (!p.isDead()) {
             MagicProfile data = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
+            PlayerCastEvent castEvent = new PlayerCastEvent(p, this, null, wand);
+            Bukkit.getPluginManager().callEvent(castEvent);
             if (data.isStealth()){
                 data.setStealth(false);
                 StatUtils.addMana(p, getCost()); //Give cost to reverse canceling
@@ -152,6 +157,8 @@ public class Stealth extends Spell implements Listener {
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
         if (!caster.isDead()) {
+            CastEvent castEvent = new CastEvent(caster, this, null, wand);
+            Bukkit.getPluginManager().callEvent(castEvent);
             NBT.modifyPersistentData(caster, nbt -> {
                 nbt.setBoolean("stealth", true);
             });

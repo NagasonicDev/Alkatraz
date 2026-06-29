@@ -13,8 +13,8 @@ import org.jetbrains.annotations.NotNull;
 public class PlayerCastEvent extends CastEvent {
     private final Player caster;
 
-    public PlayerCastEvent(Player caster, SpellProperties spell, ItemStack wand) {
-        super(caster, spell, wand);
+    public PlayerCastEvent(Player caster, Spell spell, SpellProperties props, ItemStack wand) {
+        super(caster, spell, props, wand);
         this.caster = caster;
     }
 
