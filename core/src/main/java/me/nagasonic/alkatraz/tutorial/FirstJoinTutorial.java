@@ -102,6 +102,8 @@ public class FirstJoinTutorial implements Listener {
             sendMessage(player, "&7Type &e/spells &7to see all available spells.");
             sendMessage(player, "&7Visit the &dAlkatraz Wiki &7for more info:");
             sendClickableLink(player, "https://github.com/NagasonicDev/Alkatraz/wiki", "&d\u2726 Click to open the Alkatraz Wiki");
+            sendMessage(player, "&7Have suggestions or found a bug? Join our &dDiscord&7:");
+            sendClickableLink(player, "https://discord.gg/qZ5hHc5KcN", "&d\u2726 Click to join the Alkatraz Discord");
             sendMessage(player, "&d\u2726 &fHappy casting! &d\u2726");
             player.spigot().sendMessage(ChatMessageType.ACTION_BAR,
                     new TextComponent(ColorFormat.format("&d\u2728 Alkatraz &7- type &e/spells &7to begin &d\u2728")));

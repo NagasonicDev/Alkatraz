@@ -1,0 +1,23 @@
+# mobs/snow_golem.yml
+fire_affinity:    0.0
+fire_resistance:  -100.0
+
+water_affinity:   40.0
+water_resistance: 30.0
+
+earth_affinity:   0.0
+earth_resistance: 0.0
+
+air_affinity:     10.0
+air_resistance:   10.0
+
+light_affinity: 10.0
+light_resistance: 10.0
+
+dark_affinity: 0.0
+dark_resistance: -10.0
+
+magic_affinity:   0.0
+magic_resistance: 0.0
+
+spells: []
