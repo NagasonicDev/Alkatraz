@@ -43,3 +43,6 @@ mastery_bar_color: 'WHITE'
 
 #THE ITEM THAT APPEARS IN THE /SPELLS GUI
 gui_item: 'FEATHER'
+
+cast_sound: 'ENTITY_ENDER_DRAGON_FLAP'
+cast_sound_volume: 0.6

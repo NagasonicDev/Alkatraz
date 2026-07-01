@@ -5,15 +5,11 @@ import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
-import me.nagasonic.alkatraz.events.CastEvent;
-import me.nagasonic.alkatraz.events.PlayerCastEvent;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.Element;
 import me.nagasonic.alkatraz.spells.Spell;
-import me.nagasonic.alkatraz.spells.configuration.OptionValue;
-import me.nagasonic.alkatraz.spells.configuration.SpellOption;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.util.ParticleUtils;
@@ -46,23 +42,6 @@ public class Stealth extends Spell implements Listener {
     private int taskID;
 
     @Override
-    protected void setupOptions(){
-        SpellOption armorInvis = new SpellOption(this, "armor_invis", "Whether armor is visible.", Material.DIAMOND_CHESTPLATE, 0);
-        OptionValue<Boolean> armorShown = new OptionValue<>("armor_shown", "Armor Shown",
-                "Armor is shown to other players.",
-                Material.ENDER_PEARL,
-                false);
-        armorInvis.addValue(armorShown);
-        OptionValue<Boolean> armorHidden = new OptionValue<>("armor_hidden", "Armor Hidden",
-                "Armor is hidden for other players",
-                Material.BARRIER,
-                true);
-        armorHidden.addRequirement(new NumberStatRequirement<>("mastery_" + getType().toLowerCase(), 100));
-        armorInvis.addValue(armorHidden);
-        addOption(armorInvis);
-    }
-
-    @Override
     public void loadConfiguration() {
         Alkatraz.getInstance().save("spells/stealth.yml");
         Alkatraz.getInstance().saveConfig("spells/stealth_options.yml");
@@ -80,8 +59,6 @@ public class Stealth extends Spell implements Listener {
     public void castAction(Player p, ItemStack wand) {
         if (!p.isDead()) {
             MagicProfile data = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
-            PlayerCastEvent castEvent = new PlayerCastEvent(p, this, null, wand);
-            Bukkit.getPluginManager().callEvent(castEvent);
             if (data.isStealth()){
                 data.setStealth(false);
                 StatUtils.addMana(p, getCost()); //Give cost to reverse canceling
@@ -157,8 +134,6 @@ public class Stealth extends Spell implements Listener {
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
         if (!caster.isDead()) {
-            CastEvent castEvent = new CastEvent(caster, this, null, wand);
-            Bukkit.getPluginManager().callEvent(castEvent);
             NBT.modifyPersistentData(caster, nbt -> {
                 nbt.setBoolean("stealth", true);
             });

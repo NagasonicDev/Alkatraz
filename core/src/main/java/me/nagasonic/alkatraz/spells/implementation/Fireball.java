@@ -4,8 +4,6 @@ import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
-import me.nagasonic.alkatraz.events.CastEvent;
-import me.nagasonic.alkatraz.events.PlayerCastEvent;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.components.SpellComponent;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
@@ -77,8 +75,6 @@ public class Fireball extends AttackSpell implements Listener {
                 getPower(caster, getBasePower()) * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")),
                 AttackType.MAGIC
         );
-        PlayerCastEvent castEvent = new PlayerCastEvent(caster, this, props, wand);
-        Bukkit.getPluginManager().callEvent(castEvent);
 
         org.bukkit.entity.Fireball fireball = caster.launchProjectile(
                 org.bukkit.entity.Fireball.class,
@@ -108,8 +104,6 @@ public class Fireball extends AttackSpell implements Listener {
                 power,
                 AttackType.MAGIC
         );
-        CastEvent castEvent = new CastEvent(caster, this, props, wand);
-        Bukkit.getPluginManager().callEvent(castEvent);
         Vector direction = caster.getTarget().getLocation().toVector().subtract(caster.getLocation().toVector());
 
         org.bukkit.entity.Fireball fireball = caster.launchProjectile(

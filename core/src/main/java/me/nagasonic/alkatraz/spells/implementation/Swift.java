@@ -4,8 +4,6 @@ import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
-import me.nagasonic.alkatraz.events.CastEvent;
-import me.nagasonic.alkatraz.events.PlayerCastEvent;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
@@ -47,8 +45,6 @@ public class Swift extends Spell {
     @Override
     public void castAction(Player p, ItemStack wand) {
         if (!p.isDead()){
-            PlayerCastEvent castEvent = new PlayerCastEvent(p, this, null, wand);
-            Bukkit.getPluginManager().callEvent(castEvent);
             double wandPower = NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
             double dashMultiplier = (Double) getOption("dash_style").getSelectedValue(p).getValue();
             p.setVelocity(p.getEyeLocation().getDirection().normalize().multiply(wandPower * strength * dashMultiplier));
@@ -67,8 +63,6 @@ public class Swift extends Spell {
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
         if (!caster.isDead()){
-            CastEvent castEvent = new CastEvent(caster, this, null, wand);
-            Bukkit.getPluginManager().callEvent(castEvent);
             double wandPower = wand == null ? 1 : NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
             caster.setVelocity(caster.getEyeLocation().getDirection().normalize().multiply(wandPower * strength));
             AtomicInteger i = new AtomicInteger(0);

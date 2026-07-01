@@ -47,3 +47,6 @@ mastery_bar_color: 'WHITE'
 
 # THE ITEM THAT APPEARS IN THE /SPELLS GUI
 gui_item: 'FEATHER'
+
+cast_sound: 'ENTITY_PLAYER_ATTACK_SWEEP'
+cast_sound_volume: 0.5

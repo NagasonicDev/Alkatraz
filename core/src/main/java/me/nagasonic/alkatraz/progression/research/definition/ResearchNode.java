@@ -18,6 +18,7 @@ public class ResearchNode {
     private final List<ResearchObjective> objectives;
     private final List<ResearchReward> rewards;
     private final boolean hiddenUntilAvailable;
+    private final int researchPointsCost;
 
     public ResearchNode(
             String id,
@@ -31,7 +32,8 @@ public class ResearchNode {
             List<String> unlocks,
             List<ResearchObjective> objectives,
             List<ResearchReward> rewards,
-            boolean hiddenUntilAvailable
+            boolean hiddenUntilAvailable,
+            int researchPointsCost
     ) {
         this.id = id;
         this.displayName = displayName;
@@ -45,6 +47,7 @@ public class ResearchNode {
         this.objectives = List.copyOf(objectives);
         this.rewards = List.copyOf(rewards);
         this.hiddenUntilAvailable = hiddenUntilAvailable;
+        this.researchPointsCost = researchPointsCost;
     }
 
     public String getId() {
@@ -93,5 +96,9 @@ public class ResearchNode {
 
     public boolean isHiddenUntilAvailable() {
         return hiddenUntilAvailable;
+    }
+
+    public int getResearchPointsCost() {
+        return researchPointsCost;
     }
 }

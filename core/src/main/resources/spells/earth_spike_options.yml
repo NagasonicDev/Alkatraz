@@ -10,12 +10,31 @@ options:
         icon: SPYGLASS
         value_type: double
         value: 12.0
+        requirements:
+          - type: number_stat
+            stat: mastery_earth_spike
+            minimum: 40
+            description: "Requires at least 40 mastery in Earth Spike"
+        impacts:
+          - type: stat_modifier
+            stat: spike_reach
+            value: 12.0
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 1.15
+            modifier: MULTIPLY
       normal:
         display_name: "Normal"
         description: "Default target range."
         icon: POINTED_DRIPSTONE
         value_type: double
         value: 20.0
+        impacts:
+          - type: stat_modifier
+            stat: spike_reach
+            value: 20.0
+            modifier: SET
       far:
         display_name: "Far"
         description: "Longer target range."
@@ -27,6 +46,19 @@ options:
             stat: circleLevel
             minimum: 3
             description: "Requires Circle Level 3"
+          - type: number_stat
+            stat: mastery_earth_spike
+            minimum: 50
+            description: "Requires 50 Earth Spike mastery"
+        impacts:
+          - type: stat_modifier
+            stat: spike_reach
+            value: 28.0
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 0.85
+            modifier: MULTIPLY
   spike_height:
     description: "Adjust Earth Spike height."
     icon: DEEPSLATE
@@ -38,15 +70,92 @@ options:
         icon: COBBLESTONE
         value_type: double
         value: 0.75
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 2
+            description: "Requires Circle Level 2"
+        impacts:
+          - type: stat_modifier
+            stat: spike_height
+            value: 0.75
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 1.2
+            modifier: MULTIPLY
       standard:
         display_name: "Standard"
         description: "Default spike height."
         icon: STONE
         value_type: double
         value: 1.0
+        impacts:
+          - type: stat_modifier
+            stat: spike_height
+            value: 1.0
+            modifier: SET
       high:
         display_name: "High"
         description: "Taller spikes."
         icon: DEEPSLATE
         value_type: double
         value: 1.3
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 3
+            description: "Requires Circle Level 3"
+          - type: number_stat
+            stat: mastery_earth_spike
+            minimum: 50
+            description: "Requires 50 Earth Spike mastery"
+        impacts:
+          - type: stat_modifier
+            stat: spike_height
+            value: 1.3
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 0.8
+            modifier: MULTIPLY
+
+  self_destruct:
+    description: "Whether spikes undo themselves after a period."
+    icon: CLOCK
+    default_index: 0
+
+    values:
+
+      off:
+        display_name: "No Undo"
+        description: "Spikes remain until naturally broken."
+        icon: BARRIER
+        value_type: boolean
+        value: false
+        impacts:
+          - type: stat_modifier
+            stat: self_destruct
+            value: false
+            modifier: SET
+
+      on:
+        display_name: "Self-Destruct"
+        description: "Spike crumbles after the set period."
+        icon: CLOCK
+        value_type: boolean
+        value: true
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 3
+            description: "Requires Circle Level 3"
+          - type: number_stat
+            stat: mastery_earth_spike
+            minimum: 30
+            description: "Requires 30 Earth Spike mastery"
+        impacts:
+          - type: stat_modifier
+            stat: self_destruct
+            value: true
+            modifier: SET

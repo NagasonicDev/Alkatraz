@@ -1,0 +1,26 @@
+id: 'earthen_wall'
+display_name: '&6Earthen Wall'
+description:
+  - '&7Raises a wall of earth to block'
+  - '&7and damage enemies.'
+enabled: true
+element: 'EARTH'
+code: 'LLRSR'
+level: 4
+cooldown: 15
+cast_time: 2.0
+mana_cost: 70
+maximum_mastery: 200
+power: 3.0
+duration: 10.0
+height: 6
+length: 20
+mastery_bar_color: 'GREEN'
+gui_item: 'STONE'
+
+# SELF-DESTRUCT: Ticks after wall is fully raised before blocks are restored (20 ticks = 1 second)
+self_destruct_ticks: 100
+
+cast_sound: 'BLOCK_STONE_BREAK'
+cast_sound_volume: 0.6
+cast_sound_pitch: 0.5

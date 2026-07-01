@@ -36,6 +36,7 @@ public class MagicProfile extends Profile {
         doubleStat("manaRegeneration", 1);
         doubleStat("experience", 0);
         doubleStat("arcaneKnowledge", 0);
+        intStat("researchPoints", 0);
 
         // Magic affinity/resistance
         doubleStat("magicAffinity", 0);
@@ -61,6 +62,7 @@ public class MagicProfile extends Profile {
         boolStat("casting", false);
         boolStat("stealth", false);
         boolStat("canCast", true);
+        boolStat("tutorialSeen", false);
 
         // Strings
         stringStat("disguise");
@@ -170,6 +172,10 @@ public class MagicProfile extends Profile {
             setDouble("experience", value);
         }
     }
+
+    public int getResearchPoints() { return getInt("researchPoints"); }
+    public void setResearchPoints(int value) { setInt("researchPoints", value); }
+    public void addResearchPoints(int amount) { setResearchPoints(Math.max(0, getResearchPoints() + amount)); }
 
     // ============================================
     // Magic Affinity/Resistance Getters/Setters
@@ -303,10 +309,6 @@ public class MagicProfile extends Profile {
     public void setDiscoveredSpell(Spell spell, boolean discovered) {
         if (discovered) {
             getStringSet("discoveredSpells").add(spell.getType().toLowerCase());
-            // Initialize mastery if not set
-            if (getSpellMastery(spell) < 0) {
-                setSpellMastery(spell, 0);
-            }
         } else {
             getStringSet("discoveredSpells").remove(spell.getType().toLowerCase());
         }
@@ -469,7 +471,7 @@ public class MagicProfile extends Profile {
 
     /**
      * Gets the mastery level for a spell (matches old PlayerData.getSpellMastery())
-     * Returns -1 if spell mastery not set (same as old system)
+     * Returns 0 if spell mastery not set.
      */
     public int getSpellMastery(Spell spell) {
         String key = "mastery_" + spell.getId();
@@ -480,7 +482,7 @@ public class MagicProfile extends Profile {
         } catch (IllegalArgumentException e) {
             // Stat doesn't exist yet
         }
-        return -1;
+        return 0;
     }
 
     /**
@@ -707,6 +709,8 @@ public class MagicProfile extends Profile {
     protected Map<Spell, BossBar> masteryBars = new HashMap<>();
     protected BossBar expBar = null;
     protected BossBar arcaneKnowledgeBar = null;
+    protected int arcaneKnowledgeBarTaskId = -1;
+    protected Map<Spell, Integer> masteryBarTaskIds = new HashMap<>();
 
     public Map<Spell, BossBar> getMasteryBars() {
         return masteryBars;
@@ -731,5 +735,21 @@ public class MagicProfile extends Profile {
     public void setArcaneKnowledgeBar(BossBar arcaneKnowledgeBar) {
         this.arcaneKnowledgeBar = arcaneKnowledgeBar;
         this.expBar = arcaneKnowledgeBar;
+    }
+
+    public int getArcaneKnowledgeBarTaskId() {
+        return arcaneKnowledgeBarTaskId;
+    }
+
+    public void setArcaneKnowledgeBarTaskId(int taskId) {
+        this.arcaneKnowledgeBarTaskId = taskId;
+    }
+
+    public Map<Spell, Integer> getMasteryBarTaskIds() {
+        return masteryBarTaskIds;
+    }
+
+    public void setMasteryBarTaskIds(Map<Spell, Integer> masteryBarTaskIds) {
+        this.masteryBarTaskIds = masteryBarTaskIds;
     }
 }

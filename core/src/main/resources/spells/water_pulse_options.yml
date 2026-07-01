@@ -10,12 +10,35 @@ options:
         icon: PRISMARINE_SHARD
         value_type: double
         value: 6.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 2
+            description: "Requires Circle Level 2"
+          - type: number_stat
+            stat: mastery_water_pulse
+            minimum: 25
+            description: "Requires 25 Water Pulse mastery"
+        impacts:
+          - type: stat_modifier
+            stat: pulse_radius
+            value: 6.0
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 1.2
+            modifier: MULTIPLY
       normal:
         display_name: "Normal"
         description: "Default pulse radius."
         icon: HEART_OF_THE_SEA
         value_type: double
         value: 10.0
+        impacts:
+          - type: stat_modifier
+            stat: pulse_radius
+            value: 10.0
+            modifier: SET
       tidal:
         display_name: "Tidal"
         description: "Larger pulse radius."
@@ -27,6 +50,19 @@ options:
             stat: circleLevel
             minimum: 3
             description: "Requires Circle Level 3"
+          - type: number_stat
+            stat: mastery_water_pulse
+            minimum: 50
+            description: "Requires 50 Water Pulse mastery"
+        impacts:
+          - type: stat_modifier
+            stat: pulse_radius
+            value: 14.0
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 0.8
+            modifier: MULTIPLY
   pulse_speed:
     description: "Adjust how quickly the pulse expands."
     icon: WATER_BUCKET
@@ -38,15 +74,52 @@ options:
         icon: BLUE_ICE
         value_type: double
         value: 0.35
+        requirements:
+          - type: number_stat
+            stat: mastery_water_pulse
+            minimum: 50
+            description: "Requires at least 50 mastery in Water Pulse"
+        impacts:
+          - type: stat_modifier
+            stat: pulse_speed
+            value: 0.35
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 1.15
+            modifier: MULTIPLY
       standard:
         display_name: "Standard"
         description: "Default pulse expansion."
         icon: WATER_BUCKET
         value_type: double
         value: 0.5
+        impacts:
+          - type: stat_modifier
+            stat: pulse_speed
+            value: 0.5
+            modifier: SET
       fast:
         display_name: "Fast"
         description: "Faster pulse expansion."
         icon: ICE
         value_type: double
         value: 0.75
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 3
+            description: "Requires Circle Level 3"
+          - type: number_stat
+            stat: mastery_water_pulse
+            minimum: 50
+            description: "Requires 50 Water Pulse mastery"
+        impacts:
+          - type: stat_modifier
+            stat: pulse_speed
+            value: 0.75
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 0.85
+            modifier: MULTIPLY

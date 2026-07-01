@@ -21,12 +21,14 @@ public class BarrierProperties extends SpellProperties {
     private boolean broken;
     private BarrierType type;
     private BossBar healthBar;
+    private double radius;
 
-    public BarrierProperties(LivingEntity caster, Location castLocation, double hitpoints, BarrierType type) {
+    public BarrierProperties(LivingEntity caster, Location castLocation, double hitpoints, BarrierType type, double radius) {
         super(caster, castLocation);
         this.hitpoints = hitpoints;
         this.initialHitpoints = hitpoints;
         this.type = type;
+        this.radius = radius;
         this.healthBar = Bukkit.createBossBar(format("&dBarrier: %health%/%initHealth%")
                 .replaceAll("%health%", String.valueOf(hitpoints))
                 .replaceAll("%initHealth%", String.valueOf(initialHitpoints)),
@@ -72,5 +74,13 @@ public class BarrierProperties extends SpellProperties {
 
     public BossBar getHealthBar() {
         return healthBar;
+    }
+
+    public double getRadius() {
+        return radius;
+    }
+
+    public void setCastLocation(Location location) {
+        this.castLocation = location;
     }
 }

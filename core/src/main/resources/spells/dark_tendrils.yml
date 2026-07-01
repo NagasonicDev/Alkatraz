@@ -43,3 +43,9 @@ mastery_bar_color: 'PURPLE'
 
 #THE ITEM THAT APPEARS IN THE /SPELLS GUI
 gui_item: 'ENDER_EYE'
+
+prepare_sound: 'ENTITY_PHANTOM_HURT'
+prepare_sound_volume: 0.4
+prepare_sound_pitch: 1.5
+cast_sound: 'ENTITY_WITHER_SHOOT'
+cast_sound_pitch: 1.3

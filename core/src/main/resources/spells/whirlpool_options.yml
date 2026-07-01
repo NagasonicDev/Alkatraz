@@ -1,0 +1,209 @@
+options:
+
+  radius:
+    description: "Radius of the whirlpool."
+    icon: WATER_BUCKET
+    default_index: 1
+
+    values:
+
+      small:
+        display_name: "Small"
+        description: "4 block radius."
+        icon: WATER_BUCKET
+        value_type: double
+        value: 4.0
+        impacts:
+          - type: stat_modifier
+            stat: radius
+            value: 4.0
+            modifier: SET
+
+      medium:
+        display_name: "Medium"
+        description: "5 block radius."
+        icon: WATER_BUCKET
+        value_type: double
+        value: 5.0
+        impacts:
+          - type: stat_modifier
+            stat: radius
+            value: 5.0
+            modifier: SET
+
+      large:
+        display_name: "Large"
+        description: "7 block radius."
+        icon: WATER_BUCKET
+        value_type: double
+        value: 7.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 5
+            description: "Requires Circle Level 5"
+          - type: number_stat
+            stat: mastery_whirlpool
+            minimum: 60
+            description: "Requires 60 Whirlpool mastery"
+        impacts:
+          - type: stat_modifier
+            stat: radius
+            value: 7.0
+            modifier: SET
+
+  duration:
+    description: "How long the whirlpool lasts."
+    icon: CLOCK
+    default_index: 1
+
+    values:
+
+      brief:
+        display_name: "Brief"
+        description: "Lasts 5 seconds."
+        icon: CLOCK
+        value_type: double
+        value: 5.0
+        impacts:
+          - type: stat_modifier
+            stat: duration
+            value: 5.0
+            modifier: SET
+
+      standard:
+        display_name: "Standard"
+        description: "Lasts 8 seconds."
+        icon: CLOCK
+        value_type: double
+        value: 8.0
+        impacts:
+          - type: stat_modifier
+            stat: duration
+            value: 8.0
+            modifier: SET
+
+      prolonged:
+        display_name: "Prolonged"
+        description: "Lasts 12 seconds."
+        icon: CLOCK
+        value_type: double
+        value: 12.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 5
+            description: "Requires Circle Level 5"
+          - type: number_stat
+            stat: mastery_whirlpool
+            minimum: 50
+            description: "Requires 50 Whirlpool mastery"
+        impacts:
+          - type: stat_modifier
+            stat: duration
+            value: 12.0
+            modifier: SET
+
+  damage_per_tick:
+    description: "Damage dealt each tick near the center."
+    icon: TRIDENT
+    default_index: 1
+
+    values:
+
+      low:
+        display_name: "Low"
+        description: "0.5 damage per tick."
+        icon: TRIDENT
+        value_type: double
+        value: 0.5
+        impacts:
+          - type: stat_modifier
+            stat: damage_per_tick
+            value: 0.5
+            modifier: SET
+
+      medium:
+        display_name: "Medium"
+        description: "1.0 damage per tick."
+        icon: TRIDENT
+        value_type: double
+        value: 1.0
+        impacts:
+          - type: stat_modifier
+            stat: damage_per_tick
+            value: 1.0
+            modifier: SET
+
+      high:
+        display_name: "High"
+        description: "1.5 damage per tick."
+        icon: TRIDENT
+        value_type: double
+        value: 1.5
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 5
+            description: "Requires Circle Level 5"
+          - type: number_stat
+            stat: mastery_whirlpool
+            minimum: 60
+            description: "Requires 60 Whirlpool mastery"
+        impacts:
+          - type: stat_modifier
+            stat: damage_per_tick
+            value: 1.5
+            modifier: SET
+
+  pull_strength:
+    description: "How strongly enemies are pulled in."
+    icon: FISHING_ROD
+    default_index: 1
+
+    values:
+
+      gentle:
+        display_name: "Gentle"
+        description: "Weak pull."
+        icon: FISHING_ROD
+        value_type: double
+        value: 0.3
+        impacts:
+          - type: stat_modifier
+            stat: pull_strength
+            value: 0.3
+            modifier: SET
+
+      strong:
+        display_name: "Strong"
+        description: "Strong pull."
+        icon: FISHING_ROD
+        value_type: double
+        value: 0.5
+        impacts:
+          - type: stat_modifier
+            stat: pull_strength
+            value: 0.5
+            modifier: SET
+
+      violent:
+        display_name: "Violent"
+        description: "Extremely strong pull."
+        icon: FISHING_ROD
+        value_type: double
+        value: 0.7
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 5
+            description: "Requires Circle Level 5"
+          - type: number_stat
+            stat: mastery_whirlpool
+            minimum: 50
+            description: "Requires 50 Whirlpool mastery"
+        impacts:
+          - type: stat_modifier
+            stat: pull_strength
+            value: 0.7
+            modifier: SET

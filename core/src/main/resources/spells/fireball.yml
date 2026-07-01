@@ -35,4 +35,6 @@ mastery_bar_color: 'RED'
 #THE ITEM THAT APPEARS IN THE /SPELLS GUI
 gui_item: 'FIRE_CHARGE'
 
+cast_sound: 'ITEM_FIRECHARGE_USE'
+
 

@@ -1,0 +1,19 @@
+id: 'flaming_volley'
+display_name: '&6Flaming Volley'
+description:
+  - '&7Fires a volley of flaming arrows'
+  - '&7that ignite enemies on impact.'
+enabled: true
+element: 'FIRE'
+code: 'RLRRR'
+level: 4
+cooldown: 10
+cast_time: 1.5
+mana_cost: 60
+maximum_mastery: 200
+power: 3.0
+arrow_speed: 0.8
+arrow_range: 50.0
+arrow_spread: 45.0
+mastery_bar_color: 'RED'
+gui_item: 'BOW'

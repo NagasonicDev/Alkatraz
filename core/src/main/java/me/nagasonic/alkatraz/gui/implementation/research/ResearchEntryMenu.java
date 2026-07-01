@@ -54,7 +54,13 @@ public class ResearchEntryMenu extends Menu {
             return true;
         }
         if ("start".equals(action)) {
-            ResearchService.start(viewer, node);
+            boolean started = ResearchService.start(viewer, node);
+            if (!started) {
+                int cost = node.getResearchPointsCost();
+                if (cost > 0) {
+                    viewer.sendMessage(ColorFormat.format("&cYou need " + cost + " Research Points to start this research."));
+                }
+            }
             refresh();
             return true;
         }
@@ -182,6 +188,19 @@ public class ResearchEntryMenu extends Menu {
         meta.setDisplayName(ColorFormat.format(name));
         List<String> lore = new ArrayList<>();
         if (state == ResearchState.AVAILABLE) {
+            int cost = node.getResearchPointsCost();
+            if (cost > 0) {
+                int balance = me.nagasonic.alkatraz.playerdata.profiles.ProfileManager
+                        .getProfile(viewer, me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile.class)
+                        .getResearchPoints();
+                boolean canAfford = balance >= cost;
+                lore.add(ColorFormat.format("&7Cost: &b" + cost + " Research Points"));
+                lore.add(ColorFormat.format("&7Balance: &f" + balance));
+                if (!canAfford) {
+                    lore.add(ColorFormat.format("&cNot enough Research Points!"));
+                }
+                lore.add(ColorFormat.format(""));
+            }
             lore.add(ColorFormat.format("&7Begin studying this research."));
         } else if (state == ResearchState.IN_PROGRESS) {
             if (ResearchService.objectivesComplete(viewer, node)) {

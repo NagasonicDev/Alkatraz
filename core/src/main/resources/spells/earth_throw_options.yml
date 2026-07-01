@@ -10,23 +10,55 @@ options:
         icon: CLAY_BALL
         value_type: double
         value: 0.7
+        requirements:
+          - type: number_stat
+            stat: mastery_earth_throw
+            minimum: 45
+            description: "Requires at least 45 mastery in Earth Throw"
+        impacts:
+          - type: stat_modifier
+            stat: throw_force
+            value: 0.7
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 1.15
+            modifier: MULTIPLY
       normal:
         display_name: "Normal"
         description: "Default thrown earth speed."
         icon: DIRT
         value_type: double
         value: 1.0
+        impacts:
+          - type: stat_modifier
+            stat: throw_force
+            value: 1.0
+            modifier: SET
       hurl:
         display_name: "Hurl"
-        description: "Faster thrown earth."
-        icon: STONE
+        description: "Hefty lob with 1.5 force."
+        icon: ANVIL
         value_type: double
-        value: 1.35
+        value: 1.5
         requirements:
           - type: number_stat
             stat: circleLevel
             minimum: 3
             description: "Requires Circle Level 3"
+          - type: number_stat
+            stat: mastery_earth_throw
+            minimum: 40
+            description: "Requires 40 Earth Throw mastery"
+        impacts:
+          - type: stat_modifier
+            stat: throw_force
+            value: 1.35
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 0.85
+            modifier: MULTIPLY
   impact_radius:
     description: "Adjust the landing impact radius."
     icon: TNT
@@ -38,15 +70,52 @@ options:
         icon: IRON_NUGGET
         value_type: double
         value: 2.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 2
+            description: "Requires Circle Level 2"
+        impacts:
+          - type: stat_modifier
+            stat: impact_radius
+            value: 2.0
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 1.15
+            modifier: MULTIPLY
       standard:
         display_name: "Standard"
         description: "Default impact."
         icon: IRON_INGOT
         value_type: double
         value: 3.0
+        impacts:
+          - type: stat_modifier
+            stat: impact_radius
+            value: 3.0
+            modifier: SET
       wide:
         display_name: "Wide"
         description: "Larger impact."
         icon: IRON_BLOCK
         value_type: double
         value: 4.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 3
+            description: "Requires Circle Level 3"
+          - type: number_stat
+            stat: mastery_earth_throw
+            minimum: 60
+            description: "Requires 60 Earth Throw mastery"
+        impacts:
+          - type: stat_modifier
+            stat: impact_radius
+            value: 4.0
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 0.85
+            modifier: MULTIPLY

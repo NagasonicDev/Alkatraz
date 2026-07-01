@@ -11,7 +11,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <revision>0.8</revision>
+        <revision>0.9</revision>
         <javaVersion>17</javaVersion>
         <testServerPath>D:\NagaDevTestServer\1.20.6\plugins</testServerPath>
         <shadedPackage>me.nagasonic.alkatraz.shaded</shadedPackage>
@@ -38,6 +38,8 @@
         <module>v1_21_R5</module>
         <module>v1_21_R6</module>
         <module>v1_21_R7</module>
+        <module>v26_R1</module>
+        <module>v26_R2</module>
     </modules>
 
     <profiles>
@@ -75,7 +77,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.10.1</version>
+                <version>3.13.0</version>
                 <configuration>
                     <source>${javaVersion}</source>
                     <target>${javaVersion}</target>

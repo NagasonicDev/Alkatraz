@@ -4,7 +4,6 @@ import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
-import me.nagasonic.alkatraz.events.PlayerCastEvent;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
@@ -68,8 +67,6 @@ public class Disguise extends Spell implements Listener {
         DisguiseProperties props = new DisguiseProperties(p, p.getEyeLocation());
         activeCasts.put(p.getUniqueId(), props);
 
-        PlayerCastEvent castEvent = new PlayerCastEvent(p, this, null, wand);
-        Bukkit.getPluginManager().callEvent(castEvent);
 
         openGUI(p, props);
     }

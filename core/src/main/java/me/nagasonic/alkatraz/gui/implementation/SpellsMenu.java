@@ -20,16 +20,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Paginated spell list menu.
- *
- * <p>Slot 49 (bottom-centre) hosts a "Configure Hotbar" button that opens
- * {@link HotbarSpellSelectionMenu}.  Navigation arrows are shifted to slots
- * 45 (previous) and 53 (next) to avoid colliding with the new button.
- */
 public class SpellsMenu extends PagedMenu<Spell> {
 
-    /** Slot for the "Configure Hotbar" button (bottom-centre of a 54-slot inv). */
     private static final int CONFIGURE_HOTBAR_SLOT = 49;
 
     public SpellsMenu(Player viewer) {
@@ -38,6 +30,7 @@ public class SpellsMenu extends PagedMenu<Spell> {
                 54,
                 getSortedSpells(),
                 28);
+        this.contentSlots = getInnerContentSlots();
     }
 
     private static List<Spell> getSortedSpells() {
@@ -53,24 +46,27 @@ public class SpellsMenu extends PagedMenu<Spell> {
                 : ColorFormat.format("Spells");
     }
 
-    // -------------------------------------------------------------------------
-    // Layout
-    // -------------------------------------------------------------------------
+    private static int[] getInnerContentSlots() {
+        int[] slots = new int[28];
+        int idx = 0;
+        for (int row = 1; row <= 4; row++) {
+            for (int col = 1; col <= 7; col++) {
+                slots[idx++] = row * 9 + col;
+            }
+        }
+        return slots;
+    }
 
     @Override
     protected void addDecorations() {
         if (!Alkatraz.isResourcePackForced()) {
-            int[] slots = {0, 1, 2, 3, 4, 5, 6, 7, 8,
-                    9, 17, 18, 26, 27, 35,
-                    36, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53};
-            for (int i : slots) {
+            for (int i = 0; i < 54; i++) {
                 inventory.setItem(i, Utils.getBlank());
             }
         }
         inventory.setItem(CONFIGURE_HOTBAR_SLOT, createConfigureHotbarItem());
     }
 
-    /** Builds the "Configure Spell Hotbar" button placed at slot 49. */
     private ItemStack createConfigureHotbarItem() {
         ItemStack item = new ItemStack(Material.COMPARATOR);
         ItemMeta meta = item.getItemMeta();
@@ -83,10 +79,6 @@ public class SpellsMenu extends PagedMenu<Spell> {
         setMenuData(item, "action", "open_hotbar_config");
         return item;
     }
-
-    // -------------------------------------------------------------------------
-    // Item creation
-    // -------------------------------------------------------------------------
 
     @Override
     protected ItemStack createDisplayItem(Spell spell, int index) {
@@ -149,10 +141,6 @@ public class SpellsMenu extends PagedMenu<Spell> {
 
         return item;
     }
-
-    // -------------------------------------------------------------------------
-    // Click handling
-    // -------------------------------------------------------------------------
 
     @Override
     protected boolean handleClick(InventoryClickEvent event, ItemStack clicked) {

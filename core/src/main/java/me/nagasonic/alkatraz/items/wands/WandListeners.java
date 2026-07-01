@@ -2,7 +2,7 @@ package me.nagasonic.alkatraz.items.wands;
 
 import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
-import me.nagasonic.alkatraz.gui.implementation.research.ResearchGraphMenu;
+import me.nagasonic.alkatraz.gui.implementation.WandTableSelectionMenu;
 import me.nagasonic.alkatraz.playerdata.SpellHotbarManager;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
@@ -40,7 +40,7 @@ public class WandListeners implements Listener {
                 if (Wand.isWand(e.getItem())) {
                     if (e.getAction().isRightClick() && isEnchantingTable(e.getClickedBlock())) {
                         e.setCancelled(true);
-                        new ResearchGraphMenu(e.getPlayer()).open();
+                        new WandTableSelectionMenu(e.getPlayer()).open();
                         return;
                     }
                     MagicProfile data = ProfileManager.getProfile(e.getPlayer(), MagicProfile.class);

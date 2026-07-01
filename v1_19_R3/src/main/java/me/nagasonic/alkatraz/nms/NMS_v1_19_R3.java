@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.datafixers.util.Pair;
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.nms.entity.MagicEntitySpawner;
 import me.nagasonic.alkatraz.util.Skin;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.network.protocol.game.*;
@@ -128,7 +129,7 @@ public final class NMS_v1_19_R3 implements NMS {
 
     @Override
     public Optional<org.bukkit.entity.Entity> spawnMagicEntity(String key, Location location) {
-        return Optional.empty();
+        return MagicEntitySpawner.INSTANCE.spawnMagicEntity(key, location);
     }
 
     public void refresh(Player player){

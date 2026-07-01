@@ -10,12 +10,27 @@ options:
         icon: IRON_NUGGET
         value_type: double
         value: 2.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 2
+            description: "Requires Circle Level 2"
+        impacts:
+          - type: stat_modifier
+            stat: barrier_size
+            value: 2.0
+            modifier: SET
       normal:
         display_name: "Normal"
         description: "Default shield radius."
         icon: IRON_INGOT
         value_type: double
         value: 3.0
+        impacts:
+          - type: stat_modifier
+            stat: barrier_size
+            value: 3.0
+            modifier: SET
       wide:
         display_name: "Wide"
         description: "Larger shield radius."
@@ -27,6 +42,11 @@ options:
             stat: circleLevel
             minimum: 4
             description: "Requires Circle Level 4"
+        impacts:
+          - type: stat_modifier
+            stat: barrier_size
+            value: 4.0
+            modifier: SET
   barrier_duration:
     description: "Adjust how long the barrier lasts."
     icon: CLOCK
@@ -38,12 +58,29 @@ options:
         icon: CLOCK
         value_type: double
         value: 30.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 2
+            description: "Requires Circle Level 2"
+        impacts:
+          - type: stat_modifier
+            stat: barrier_duration
+            value: 30.0
+            modifier: SET
+          - type: mana_cost
+            change: -10
       standard:
         display_name: "Standard"
         description: "Default barrier duration."
         icon: COMPASS
         value_type: double
         value: 60.0
+        impacts:
+          - type: stat_modifier
+            stat: barrier_duration
+            value: 60.0
+            modifier: SET
       enduring:
         display_name: "Enduring"
         description: "Longer barrier duration."
@@ -55,6 +92,13 @@ options:
             stat: mastery_barrier
             minimum: 75
             description: "Requires 75 Barrier mastery"
+        impacts:
+          - type: stat_modifier
+            stat: barrier_duration
+            value: 90.0
+            modifier: SET
+          - type: mana_cost
+            change: 15
   barrier_hitpoints:
     description: "Adjust how much damage the barrier absorbs."
     icon: SHIELD
@@ -66,12 +110,29 @@ options:
         icon: CRACKED_STONE_BRICKS
         value_type: double
         value: 14.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 2
+            description: "Requires Circle Level 2"
+        impacts:
+          - type: stat_modifier
+            stat: barrier_hitpoints
+            value: 14.0
+            modifier: SET
+          - type: mana_cost
+            change: -5
       standard:
         display_name: "Standard"
         description: "Default barrier hitpoints."
         icon: SHIELD
         value_type: double
         value: 20.0
+        impacts:
+          - type: stat_modifier
+            stat: barrier_hitpoints
+            value: 20.0
+            modifier: SET
       reinforced:
         display_name: "Reinforced"
         description: "Higher barrier hitpoints."
@@ -83,3 +144,43 @@ options:
             stat: circleLevel
             minimum: 4
             description: "Requires Circle Level 4"
+        impacts:
+          - type: stat_modifier
+            stat: barrier_hitpoints
+            value: 28.0
+            modifier: SET
+          - type: mana_cost
+            change: 10
+
+  follow_player:
+    description: "Toggle whether the barrier moves with you."
+    icon: FEATHER
+    default_index: 0
+    values:
+      stationary:
+        display_name: "Stationary"
+        description: "Barrier stays in place after casting."
+        icon: ANVIL
+        value_type: double
+        value: 0.0
+        impacts:
+          - type: stat_modifier
+            stat: follow_player
+            value: 0.0
+            modifier: SET
+      mobile:
+        display_name: "Mobile"
+        description: "Barrier follows you as you move."
+        icon: FEATHER
+        value_type: double
+        value: 1.0
+        requirements:
+          - type: number_stat
+            stat: mastery_barrier
+            minimum: 150
+            description: "Requires max Barrier mastery"
+        impacts:
+          - type: stat_modifier
+            stat: follow_player
+            value: 1.0
+            modifier: SET

@@ -10,12 +10,31 @@ options:
         icon: ENDER_PEARL
         value_type: double
         value: 0.75
+        requirements:
+          - type: number_stat
+            stat: mastery_detect
+            minimum: 45
+            description: "Requires at least 45 mastery in Detect"
+        impacts:
+          - type: stat_modifier
+            stat: scan_range
+            value: 0.75
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 1.2
+            modifier: MULTIPLY
       normal:
         display_name: "Normal"
         description: "Default scan range."
         icon: SPYGLASS
         value_type: double
         value: 1.0
+        impacts:
+          - type: stat_modifier
+            stat: scan_range
+            value: 1.0
+            modifier: SET
       wide:
         display_name: "Wide"
         description: "Longer scan range."
@@ -27,6 +46,19 @@ options:
             stat: circleLevel
             minimum: 3
             description: "Requires Circle Level 3"
+          - type: number_stat
+            stat: mastery_detect
+            minimum: 30
+            description: "Requires 30 Detect mastery"
+        impacts:
+          - type: stat_modifier
+            stat: scan_range
+            value: 1.5
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 0.8
+            modifier: MULTIPLY
   glow_duration:
     description: "Adjust how long detected entities glow."
     icon: GLOWSTONE_DUST
@@ -38,12 +70,33 @@ options:
         icon: REDSTONE
         value_type: double
         value: 10.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 2
+            description: "Requires Circle Level 2"
+          - type: number_stat
+            stat: mastery_detect
+            minimum: 25
+            description: "Requires 25 Detect mastery"
+        impacts:
+          - type: stat_modifier
+            stat: glow_duration
+            value: 10.0
+            modifier: SET
+          - type: mana_cost
+            change: -5
       standard:
         display_name: "Standard"
         description: "Default glow duration."
         icon: GLOWSTONE_DUST
         value_type: double
         value: 15.0
+        impacts:
+          - type: stat_modifier
+            stat: glow_duration
+            value: 15.0
+            modifier: SET
       lingering:
         display_name: "Lingering"
         description: "Longer glow duration."
@@ -55,3 +108,10 @@ options:
             stat: mastery_detect
             minimum: 50
             description: "Requires 50 Detect mastery"
+        impacts:
+          - type: stat_modifier
+            stat: glow_duration
+            value: 25.0
+            modifier: SET
+          - type: mana_cost
+            change: 10

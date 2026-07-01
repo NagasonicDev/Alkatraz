@@ -14,6 +14,7 @@ import me.nagasonic.alkatraz.progression.requirement.RequirementContext;
 import me.nagasonic.alkatraz.progression.requirement.implementation.ArcaneKnowledgeRequirement;
 import me.nagasonic.alkatraz.progression.requirement.implementation.ResearchRequirement;
 import me.nagasonic.alkatraz.progression.requirement.implementation.SpellMasteryRequirement;
+import me.nagasonic.alkatraz.progression.research.ResearchPointService;
 import me.nagasonic.alkatraz.progression.research.ResearchProgressRegistry;
 import me.nagasonic.alkatraz.util.ColorFormat;
 import me.nagasonic.alkatraz.util.StringUtils;
@@ -55,6 +56,7 @@ public final class ProgressionService {
         autoAdvance = config.getBoolean("circle.auto_advance", true);
         loadArcaneKnowledge(config.getConfigurationSection("arcane_knowledge.sources"));
         loadCircles(config.getConfigurationSection("circle.levels"));
+        ResearchPointService.reload();
     }
 
     public static void addArcaneKnowledge(OfflinePlayer player, String sourceId) {
@@ -72,9 +74,6 @@ public final class ProgressionService {
         MagicProfile profile = ProfileManager.getProfile(player.getUniqueId(), MagicProfile.class);
         profile.setArcaneKnowledge(Math.max(0, profile.getArcaneKnowledge() + amount));
         showArcaneKnowledgeBar(player, profile);
-        if (autoAdvance && player.isOnline()) {
-            advanceWhileEligible(player.getPlayer());
-        }
     }
 
     public static boolean canAdvance(Player player) {
@@ -106,6 +105,7 @@ public final class ProgressionService {
         if (!canAdvance(player, target)) return false;
 
         applyCircleDefinition(profile, target);
+        ResearchPointService.addPoints(player, "circle_up_bonus");
         player.sendMessage(
                 ColorFormat.format("&e&lCIRCLE UP!"),
                 ColorFormat.format("&bReached the " + StringUtils.toOrdinal(target) + " circle."),
@@ -221,13 +221,17 @@ public final class ProgressionService {
         bar.setProgress(Math.max(0, Math.min(1, progress)));
         bar.addPlayer(player.getPlayer());
 
+        int prevTask = profile.getArcaneKnowledgeBarTaskId();
+        if (prevTask != -1) {
+            Bukkit.getScheduler().cancelTask(prevTask);
+        }
         BossBar finalBar = bar;
-        Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(Alkatraz.getInstance(), () -> {
-            BossBar current = profile.getArcaneKnowledgeBar();
-            if (current != null && finalBar.getProgress() == current.getProgress()) {
+        int taskId = Bukkit.getScheduler().scheduleSyncDelayedTask(Alkatraz.getInstance(), () -> {
+            if (player.isOnline()) {
                 finalBar.removePlayer(player.getPlayer());
             }
         }, 100L);
+        profile.setArcaneKnowledgeBarTaskId(taskId);
     }
 
     private static double nextArcaneKnowledgeRequirement(int circle) {

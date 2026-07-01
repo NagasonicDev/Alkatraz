@@ -13,8 +13,10 @@ import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.Listener;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Vector;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,6 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SpellComponentHandler implements Listener {
 
     private static final Map<UUID, SpellComponent> activeComponents = new ConcurrentHashMap<>();
+    private static int deflectTickCounter = 0;
 
     public static void register(SpellComponent component) {
         activeComponents.put(component.getComponentID(), component);
@@ -47,6 +50,11 @@ public class SpellComponentHandler implements Listener {
             @Override
             public void run() {
                 detectCollisions();
+                deflectTickCounter++;
+                if (deflectTickCounter >= 2) {
+                    deflectProjectiles();
+                    deflectTickCounter = 0;
+                }
                 for (SpellComponent comp : activeComponents.values()){
                     if (comp instanceof SpellParticleComponent p){
                         p.tick();
@@ -57,6 +65,38 @@ public class SpellComponentHandler implements Listener {
             }
         };
         task.runTaskTimer(Alkatraz.getInstance(), 0, 1);
+    }
+
+    private static void deflectProjectiles() {
+        for (SpellComponent comp : activeComponents.values()) {
+            if (comp.getType() != SpellComponentType.DEFENSE) continue;
+            if (!(comp.getProperties() instanceof BarrierProperties props)) continue;
+            if (props.getType() != BarrierType.PHYSICAL && props.getType() != BarrierType.COMBINED) continue;
+
+            Location center = props.getCastLocation();
+            double radius = props.getRadius();
+
+            for (Entity entity : center.getWorld().getNearbyEntities(center, radius, radius, radius)) {
+                if (!(entity instanceof Projectile projectile)) continue;
+
+                Vector vel = projectile.getVelocity();
+                if (!Double.isFinite(vel.getX()) || !Double.isFinite(vel.getY()) || !Double.isFinite(vel.getZ())) continue;
+
+                Vector fromCenter = projectile.getLocation().toVector().subtract(center.toVector());
+                if (fromCenter.lengthSquared() < 0.0001) continue;
+
+                if (vel.dot(fromCenter) > 0) continue;
+
+                double speed = Math.max(vel.length(), 0.5) * 1.2;
+
+                Vector deflected = fromCenter.normalize().multiply(speed);
+                deflected.setY(deflected.getY() + 0.3);
+
+                if (!Double.isFinite(deflected.getX()) || !Double.isFinite(deflected.getY()) || !Double.isFinite(deflected.getZ())) continue;
+
+                projectile.setVelocity(deflected);
+            }
+        }
     }
 
     public static void detectCollisions(){
@@ -151,6 +191,7 @@ public class SpellComponentHandler implements Listener {
         Spell sa = a.getSpell();
         Spell sb = b.getSpell();
         if (sa == sb) return;
+        if (a.getCaster() == b.getCaster()) return;
 
         SpellComponent offenseComp = null;
         SpellComponent defenseComp = null;

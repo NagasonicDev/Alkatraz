@@ -88,7 +88,11 @@ public final class ResearchService {
     public static boolean start(Player player, ResearchNode node) {
         ResearchState state = getState(player, node);
         if (state != ResearchState.AVAILABLE) return false;
-        ProfileManager.getProfile(player, MagicProfile.class).setResearchStarted(node.getId(), true);
+        MagicProfile profile = ProfileManager.getProfile(player, MagicProfile.class);
+        int cost = node.getResearchPointsCost();
+        if (cost > 0 && profile.getResearchPoints() < cost) return false;
+        if (cost > 0) profile.addResearchPoints(-cost);
+        profile.setResearchStarted(node.getId(), true);
         return true;
     }
 
@@ -197,7 +201,8 @@ public final class ResearchService {
                     config.getStringList(root + "unlocks"),
                     loadObjectives(config.getConfigurationSection(root + "objectives")),
                     loadRewards(config.getConfigurationSection(root + "rewards")),
-                    config.getBoolean(root + "visibility.hidden_until_available", false)
+                    config.getBoolean(root + "visibility.hidden_until_available", false),
+                    config.getInt(root + "research_points_cost", 0)
             );
             loaded.put(key, node);
         }

@@ -4,8 +4,6 @@ import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
-import me.nagasonic.alkatraz.events.CastEvent;
-import me.nagasonic.alkatraz.events.PlayerCastEvent;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
@@ -71,8 +69,6 @@ public class FireWall extends AttackSpell implements Listener {
     @Override
     public void castAction(Player player, ItemStack wand) {
         AttackProperties props = new AttackProperties(player, Utils.castLocation(player), getBasePower() * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")), AttackType.MAGIC);
-        PlayerCastEvent castEvent = new PlayerCastEvent(player, this, props, wand);
-        Bukkit.getPluginManager().callEvent(castEvent);
         Location start = player.getLocation();
 
         double spacing = 0.5;
@@ -111,7 +107,10 @@ public class FireWall extends AttackSpell implements Listener {
                     currentPos.add(currentDir.clone().multiply(spacing));
 
                     // Lock segment with age
-                    wallPoints.add(new WallSegment(currentPos.clone()));
+                    Location ground0 = Utils.findTopSolid(currentPos.clone().add(0, 3, 0), 10);
+                    if (ground0 != null) {
+                        wallPoints.add(new WallSegment(ground0));
+                    }
                 }
 
                 // === RENDER + DAMAGE PHASE ===
@@ -185,8 +184,6 @@ public class FireWall extends AttackSpell implements Listener {
         double power = getPower(caster, getBasePower())
                 * wandp;
         AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster), power, AttackType.MAGIC);
-        CastEvent castEvent = new CastEvent(caster, this, props, wand);
-        Bukkit.getPluginManager().callEvent(castEvent);
         Location start = caster.getLocation();
 
         double spacing = 0.5;
@@ -221,7 +218,10 @@ public class FireWall extends AttackSpell implements Listener {
                     currentPos.add(currentDir.clone().multiply(spacing));
 
                     // Lock segment with age
-                    wallPoints.add(new WallSegment(currentPos.clone()));
+                    Location ground1 = Utils.findTopSolid(currentPos.clone().add(0, 3, 0), 10);
+                    if (ground1 != null) {
+                        wallPoints.add(new WallSegment(ground1));
+                    }
                 }
 
                 // === RENDER + DAMAGE PHASE ===

@@ -16,3 +16,6 @@ mastery_bar_color: BLUE
 gui_item: BEACON
 base_duration: 30
 target_range: 20
+
+cast_sound: 'BLOCK_BEACON_ACTIVATE'
+cast_sound_pitch: 1.5

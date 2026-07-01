@@ -38,3 +38,6 @@ mastery_bar_color: 'YELLOW'
 
 #THE ITEM THAT APPEARS IN THE /SPELLS GUI
 gui_item: 'GOLD_INGOT'
+
+cast_sound: 'BLOCK_BEACON_ACTIVATE'
+cast_sound_pitch: 0.8

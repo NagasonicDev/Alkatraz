@@ -1,0 +1,21 @@
+id: 'whirlpool'
+display_name: '&9Whirlpool'
+description:
+  - '&7Summons a whirlpool at the'
+  - '&7target location that pulls'
+  - '&7enemies in and damages them.'
+enabled: true
+element: 'WATER'
+code: 'RLLSR'
+level: 4
+cooldown: 25
+cast_time: 1.5
+mana_cost: 55
+maximum_mastery: 200
+power: 3.0
+radius: 5.0
+duration: 8
+damage_per_tick: 1.0
+pull_strength: 0.4
+mastery_bar_color: 'BLUE'
+gui_item: 'WATER_BUCKET'

@@ -29,6 +29,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
+import me.nagasonic.alkatraz.nms.entity.MagicEntitySpawner;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -126,7 +127,7 @@ public final class NMS_v1_21_R1 implements NMS {
 
     @Override
     public Optional<org.bukkit.entity.Entity> spawnMagicEntity(String key, Location location) {
-        return Optional.empty();
+        return MagicEntitySpawner.INSTANCE.spawnMagicEntity(key, location);
     }
 
     public void refresh(Player player){

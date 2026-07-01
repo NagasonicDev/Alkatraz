@@ -3,8 +3,6 @@ package me.nagasonic.alkatraz.spells.implementation;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
-import me.nagasonic.alkatraz.events.CastEvent;
-import me.nagasonic.alkatraz.events.PlayerCastEvent;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
@@ -17,7 +15,9 @@ import me.nagasonic.alkatraz.spells.types.BarrierType;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.BarrierProperties;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
+import de.tr7zw.nbtapi.NBT;
 import org.bukkit.*;
+import org.bukkit.entity.Entity;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
@@ -56,17 +56,23 @@ public class Barrier extends BarrierSpell implements Listener {
         double activeRadius = (Double) getOption("barrier_size").getSelectedValue(p).getValue();
         double activeDuration = (Double) getOption("barrier_duration").getSelectedValue(p).getValue();
         double activeHitpoints = (Double) getOption("barrier_hitpoints").getSelectedValue(p).getValue();
-        BarrierProperties properties = new BarrierProperties(p, center, activeHitpoints, BarrierType.COMBINED);
-        PlayerCastEvent castEvent = new PlayerCastEvent(p, this, properties, wand);
-        Bukkit.getPluginManager().callEvent(castEvent);
+        boolean followPlayer = (Double) getOption("follow_player").getSelectedValue(p).getValue() > 0;
+        BarrierProperties properties = new BarrierProperties(p, center, activeHitpoints, BarrierType.COMBINED, activeRadius);
         properties.getHealthBar().addPlayer(p);
 
-        BukkitRunnable task = new BukkitRunnable() {
-
+        new BukkitRunnable() {
             int ticksPassed = 0;
 
             @Override
             public void run() {
+                if (followPlayer) {
+                    Location newCenter = p.getLocation().clone().add(0, 1, 0);
+                    center.setX(newCenter.getX());
+                    center.setY(newCenter.getY());
+                    center.setZ(newCenter.getZ());
+                    properties.setCastLocation(center);
+                }
+
                 if (properties.isBroken() || ticksPassed >= activeDuration * 5) {
                     onBarrierBreak(center, activeRadius);
                     properties.getHealthBar().removeAll();
@@ -74,10 +80,24 @@ public class Barrier extends BarrierSpell implements Listener {
                     return;
                 }
 
+                // Push nearby entities away (for PHYSICAL/COMBINED barriers)
+                if (properties.getType() == BarrierType.PHYSICAL || properties.getType() == BarrierType.COMBINED) {
+                    for (Entity entity : center.getWorld().getNearbyEntities(center, activeRadius, activeRadius, activeRadius)) {
+                        if (!(entity instanceof LivingEntity living)) continue;
+                        if (entity == p) continue;
+                        if (NBT.getPersistentData(entity, nbt -> nbt.getBoolean("summoned_zombie"))) continue;
+
+                        Vector push = entity.getLocation().toVector().subtract(center.toVector());
+                        push.setY(0);
+                        if (push.lengthSquared() < 0.01) continue;
+                        push.normalize().multiply(0.3);
+                        living.setVelocity(living.getVelocity().add(push));
+                    }
+                }
+
                 List<Location> particleLocations = ParticleUtils.sphere(center, activeRadius, 200);
 
                 for (Location loc : particleLocations) {
-
                     SpellParticleComponent particle =
                             new SpellParticleComponent(
                                     Barrier.this,
@@ -91,23 +111,18 @@ public class Barrier extends BarrierSpell implements Listener {
                             );
                     SpellComponentHandler.register(particle);
 
-                    // Spawn visual particle
                     loc.getWorld().spawnParticle(Particle.SPELL_WITCH, loc, 1, 0, 0, 0, 0);
                 }
 
                 ticksPassed++;
             }
-        };
-
-        task.runTaskTimer(Alkatraz.getInstance(), 0, 4);
+        }.runTaskTimer(Alkatraz.getInstance(), 0, 4);
     }
 
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
         Location center = caster.getLocation().clone().add(0, 1, 0);
-        BarrierProperties properties = new BarrierProperties(caster, center, getMaxHitpoints(), BarrierType.COMBINED);
-        CastEvent castEvent = new CastEvent(caster, this, properties, wand);
-        Bukkit.getPluginManager().callEvent(castEvent);
+        BarrierProperties properties = new BarrierProperties(caster, center, getMaxHitpoints(), BarrierType.COMBINED, radius);
 
         BukkitRunnable task = new BukkitRunnable() {
 

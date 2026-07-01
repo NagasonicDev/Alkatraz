@@ -20,6 +20,18 @@ arcane_knowledge:
         8: 179
         9: 340
 
+research_points:
+  sources:
+    mastery_max:
+      enabled: true
+      amount: 10
+    magic_mob_kill:
+      enabled: true
+      amount: 3
+    circle_up_bonus:
+      enabled: true
+      amount: 50
+
 circle:
   auto_advance: true
   levels:
@@ -66,7 +78,10 @@ circle:
         - type: mastered_spell_count
           circle: 3
           count: 3
-          description: "Requires 1 max-mastered 3rd circle spell"
+          description: "Requires 3 max-mastered 3rd circle spells"
+        - type: research
+          research: awakened_focus
+          description: "Requires Awakened Focus research"
     5:
       stat_points: 10
       max_mana: 2000
@@ -74,6 +89,13 @@ circle:
       requirements:
         - type: arcane_knowledge
           amount: 15566
+        - type: mastered_spell_count
+          circle: 4
+          count: 4
+          description: "Requires 4 max-mastered 4th circle spells"
+        - type: research
+          research: ritual_geometry
+          description: "Requires Ritual Geometry research"
     6:
       stat_points: 15
       max_mana: 2750
@@ -81,6 +103,12 @@ circle:
       requirements:
         - type: arcane_knowledge
           amount: 36916
+        - type: mastered_spell_count
+          count: 12
+          description: "Requires 12 max-mastered spells"
+        - type: research
+          research: spellcraft_field_notes
+          description: "Requires Spellcraft Field Notes research"
     7:
       stat_points: 15
       max_mana: 4000
@@ -88,6 +116,12 @@ circle:
       requirements:
         - type: arcane_knowledge
           amount: 86360
+        - type: mastered_spell_count
+          count: 16
+          description: "Requires 16 max-mastered spells"
+        - type: research
+          research: mana_conservation
+          description: "Requires Mana Conservation research"
     8:
       stat_points: 20
       max_mana: 7500
@@ -95,6 +129,12 @@ circle:
       requirements:
         - type: arcane_knowledge
           amount: 202531
+        - type: mastered_spell_count
+          count: 20
+          description: "Requires 20 max-mastered spells"
+        - type: research
+          research: disciplined_channel
+          description: "Requires Disciplined Channel research"
     9:
       stat_points: 25
       max_mana: 10000
@@ -102,3 +142,24 @@ circle:
       requirements:
         - type: arcane_knowledge
           amount: 474531
+        - type: mastered_spell_count
+          count: 30
+          description: "Requires all 30 spells max-mastered"
+        - type: research
+          research: fire_inferno_rite
+          description: "Requires Inferno Rite research"
+        - type: research
+          research: water_depth_oath
+          description: "Requires Depth Oath research"
+        - type: research
+          research: earth_bulwark_vow
+          description: "Requires Bulwark Vow research"
+        - type: research
+          research: air_storm_eye
+          description: "Requires Storm Eye research"
+        - type: research
+          research: light_radiant_oath
+          description: "Requires Radiant Oath research"
+        - type: research
+          research: dark_eclipse_compact
+          description: "Requires Eclipse Compact research"
