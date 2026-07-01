@@ -34,3 +34,7 @@ mastery_bar_color: 'BLUE'
 
 #THE ITEM THAT APPEARS IN THE /SPELLS GUI
 gui_item: 'HEART_OF_THE_SEA'
+
+prepare_sound: 'BLOCK_WATER_AMBIENT'
+prepare_sound_volume: 0.4
+cast_sound: 'ENTITY_FISHING_BOBBER_SPLASH'

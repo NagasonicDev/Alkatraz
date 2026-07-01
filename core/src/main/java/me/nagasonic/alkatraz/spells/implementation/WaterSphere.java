@@ -4,11 +4,11 @@ import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
-import me.nagasonic.alkatraz.events.PlayerCastEvent;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
 import me.nagasonic.alkatraz.spells.components.SpellParticleComponent;
+import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.AttackType;
@@ -18,6 +18,8 @@ import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Levelled;
 import org.bukkit.block.data.type.Farmland;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.*;
@@ -25,25 +27,26 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
-import java.util.List;
-
+import java.util.*;
 
 public class WaterSphere extends AttackSpell {
 
-    public WaterSphere(String type){
+    private double sphereRadius;
+    private double sphereRange;
+
+    public WaterSphere(String type) {
         super(type);
     }
 
     @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
-        location.getWorld().spawnParticle(Particle.WATER_SPLASH, location, 15);
+        splash(location, 0.8);
     }
 
     @Override
     public void onCountered(Location location) {
-        location.getWorld().spawnParticle(Particle.WATER_SPLASH, location, 30);
+        splash(location, 1.0);
     }
-
 
     @Override
     public void loadConfiguration() {
@@ -54,195 +57,225 @@ public class WaterSphere extends AttackSpell {
 
         loadCommonConfig(spellConfig);
         loadOptions();
+        this.sphereRadius = spellConfig.getDouble("sphere_radius", 3.0);
+        this.sphereRange = spellConfig.getDouble("sphere_range", 25.0);
     }
-    
+
     @Override
-    public void castAction(Player p, ItemStack wand) {
-        if (!p.isDead()){
-            AttackProperties props = new AttackProperties(p, Utils.castLocation(p), getBasePower() * getBasePower() * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")), AttackType.MAGIC);
-            PlayerCastEvent castEvent = new PlayerCastEvent(p, this, props, wand);
-            Bukkit.getPluginManager().callEvent(castEvent);
-            List<Location> lineLocs = ParticleUtils.line(
-                    2,
-                    p.getEyeLocation(),
-                    p.getEyeLocation().add(p.getEyeLocation().getDirection().multiply((Double) getOption("sphere_range").getSelectedValue(p).getValue()))
-            );
-            double size = (Double) getOption("sphere_size").getSelectedValue(p).getValue();
+    public void castAction(Player caster, ItemStack wand) {
+        if (caster.isDead()) return;
 
-            new BukkitRunnable() {
+        double wandPower = NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+        double power = getPower(caster, getBasePower()) * wandPower;
+        double radius = getModifiedStat(caster, "sphere_size", sphereRadius);
+        double range = getModifiedStat(caster, "sphere_range", sphereRange);
 
-                int index = 0;
+        AttackProperties props = new AttackProperties(
+                caster,
+                Utils.castLocation(caster),
+                power,
+                AttackType.MAGIC
+        );
 
-                @Override
-                public void run() {
-                    if (props.isCancelled() || props.isCountered()){
-                        cancel();
-                        return;
-                    }
-                    if (index >= lineLocs.size()) {
-                        cancel();
-                        return;
-                    }
+        Location targetLoc = caster.getTargetBlock(null, (int) Math.ceil(range))
+                .getLocation().add(0.5, 1, 0.5);
 
-                    Location a = lineLocs.get(index);
-
-                    List<Location> locs = ParticleUtils.sphere(a, size, 24);
-                    for (Location loc : locs) {
-                        loc.getWorld().spawnParticle(Particle.WATER_DROP, loc, 2, 0, 0, 0, 0);
-                        SpellParticleComponent comp = new SpellParticleComponent(
-                                WaterSphere.this,
-                                props,
-                                p,
-                                wand,
-                                SpellComponentType.OFFENSE,
-                                loc,
-                                0.25,
-                                1
-                        );
-                        SpellComponentHandler.register(comp);
-                        if (props.isCancelled() || props.isCountered()){
-                            cancel();
-                            return;
-                        }
-                        Block b = loc.getBlock();
-                        if (b.getType() == Material.FARMLAND) {
-                            if (!(b.getBlockData() instanceof Farmland farm)) return;
-                            farm.setMoisture(farm.getMaximumMoisture());
-                            b.setBlockData(farm);
-                        }
-                    }
-
-                    for (Entity entity : a.getNearbyEntities(size + 0.25, size + 0.25, size + 0.25)) {
-                        if (props.isCancelled() || props.isCountered()){
-                            cancel();
-                            return;
-                        }
-                        if (entity.isDead() || entity.equals(p)) continue;
-                        if (!(entity instanceof LivingEntity le)) continue;
-
-                        double wandPower = NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
-                        le.damage(props.getRemainingPower());
-
-                        Vector unitVector = entity.getLocation()
-                                .toVector()
-                                .subtract(p.getLocation().toVector())
-                                .normalize();
-
-                        entity.setVelocity(unitVector.multiply(0.1));
-                    }
-
-                    index++;
-                }
-
-            }.runTaskTimer(Alkatraz.getInstance(), 0L, 2L);
-        }
+        shootSphere(caster, wand, props, targetLoc, radius, range);
     }
 
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
-        if (!caster.isDead()){
-            double wandp = wand == null ? 1 : NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
-            double power = getPower(caster, getBasePower())
-                    * wandp;
-            AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster), power, AttackType.MAGIC);
-            List<Location> lineLocs = ParticleUtils.line(
-                    2,
-                    caster.getEyeLocation(),
-                    caster.getEyeLocation().add(caster.getTarget().getLocation().toVector().subtract(caster.getLocation().toVector()).normalize().multiply(40))
-            );
+        if (caster.isDead()) return;
 
-            new BukkitRunnable() {
+        double wandp = wand == null ? 1 : NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+        double power = getPower(caster, getBasePower()) * wandp;
 
-                int index = 0;
+        AttackProperties props = new AttackProperties(
+                caster,
+                Utils.castLocation(caster),
+                power,
+                AttackType.MAGIC
+        );
 
-                @Override
-                public void run() {
-                    if (props.isCancelled() || props.isCountered()){
+        Location targetLoc;
+        if (caster.getTarget() != null) {
+            targetLoc = caster.getTarget().getLocation();
+        } else {
+            targetLoc = caster.getEyeLocation()
+                    .add(caster.getEyeLocation().getDirection().multiply(sphereRange));
+        }
+
+        shootSphere(caster, wand, props, targetLoc, sphereRadius, sphereRange);
+    }
+
+    private void shootSphere(LivingEntity caster, ItemStack wand, AttackProperties props,
+                              Location targetLoc, double radius, double range) {
+        List<Location> path = ParticleUtils.line(1, caster.getEyeLocation(), targetLoc);
+        int totalSteps = path.size();
+
+        // Pre-compute fibonacci sphere points for even distribution
+        int spherePoints = (int) (radius * 32);
+        List<Location> baseSphere = ParticleUtils.fibonacciSphere(new Location(null, 0, 0, 0), radius, spherePoints);
+
+        Set<UUID> damaged = new HashSet<>();
+
+        new BukkitRunnable() {
+            int step = 0;
+            float rotation = 0;
+
+            @Override
+            public void run() {
+                if (props.isCancelled() || props.isCountered()) {
+                    splash(caster.getEyeLocation().add(caster.getEyeLocation().getDirection().multiply(step)), 0.6);
+                    cancel();
+                    return;
+                }
+
+                if (step >= totalSteps) {
+                    splash(targetLoc, 1.0);
+                    placeWater(targetLoc);
+                    cancel();
+                    return;
+                }
+
+                Location center = path.get(step);
+                rotation += 0.15f;
+
+                // Rotate sphere points for a swirling visual
+                for (Location point : baseSphere) {
+                    double x = point.getX();
+                    double z = point.getZ();
+                    double cos = Math.cos(rotation);
+                    double sin = Math.sin(rotation);
+                    double rx = x * cos - z * sin;
+                    double rz = x * sin + z * cos;
+
+                    Location worldLoc = center.clone().add(rx, point.getY(), rz);
+
+                    // Blue glow ring on the outer edge
+                    double dist = Math.sqrt(rx * rx + point.getY() * point.getY() + rz * rz);
+                    if (dist > radius * 0.85) {
+                        worldLoc.getWorld().spawnParticle(Utils.DUST, worldLoc, 0,
+                                new Particle.DustOptions(Color.fromRGB(60, 180, 255), 0.5F));
+                    }
+
+                    // Core water particles - fewer toward the center
+                    worldLoc.getWorld().spawnParticle(Particle.WATER_DROP, worldLoc, 1, 0, 0, 0, 0);
+                    if (step % 2 == 0 && dist > radius * 0.4) {
+                        worldLoc.getWorld().spawnParticle(Particle.WATER_SPLASH, worldLoc, 1,
+                                0.05, 0.05, 0.05, 0);
+                    }
+
+                    SpellParticleComponent comp = new SpellParticleComponent(
+                            WaterSphere.this,
+                            props,
+                            caster,
+                            wand,
+                            SpellComponentType.OFFENSE,
+                            worldLoc,
+                            0.5,
+                            1
+                    );
+                    SpellComponentHandler.register(comp);
+                }
+
+                // Water ambient sound
+                if (step % 3 == 0) {
+                    center.getWorld().playSound(center, Sound.BLOCK_WATER_AMBIENT, 0.3f, 1.2f);
+                }
+
+                // Damage and push entities in range
+                for (Entity entity : center.getNearbyEntities(radius + 0.5, radius + 0.5, radius + 0.5)) {
+                    if (props.isCancelled() || props.isCountered()) {
                         cancel();
                         return;
                     }
-                    if (index >= lineLocs.size()) {
-                        cancel();
-                        return;
-                    }
+                    if (entity.equals(caster)) continue;
+                    if (!(entity instanceof LivingEntity le)) continue;
+                    if (damaged.contains(entity.getUniqueId())) continue;
+                    damaged.add(entity.getUniqueId());
 
-                    Location a = lineLocs.get(index);
+                    le.damage(props.getRemainingPower(), caster);
 
-                    List<Location> locs = ParticleUtils.sphere(a, 0.75, 24);
-                    for (Location loc : locs) {
-                        loc.getWorld().spawnParticle(Particle.WATER_DROP, loc, 2, 0, 0, 0, 0);
-                        SpellParticleComponent comp = new SpellParticleComponent(
-                                WaterSphere.this,
-                                props,
-                                caster,
-                                wand,
-                                SpellComponentType.OFFENSE,
-                                loc,
-                                0.25,
-                                1
-                        );
-                        SpellComponentHandler.register(comp);
-                        if (props.isCancelled() || props.isCountered()){
-                            cancel();
-                            return;
-                        }
-                        Block b = loc.getBlock();
-                        if (b.getType() == Material.FARMLAND) {
-                            if (!(b.getBlockData() instanceof Farmland farm)) return;
+                    Vector push = le.getLocation().toVector()
+                            .subtract(center.toVector())
+                            .normalize();
+                    push.setY(Math.max(0.2, push.getY()));
+                    le.setVelocity(push.multiply(0.8));
+
+                    le.addPotionEffect(new org.bukkit.potion.PotionEffect(
+                            org.bukkit.potion.PotionEffectType.SLOW, 30, 0, false, true
+                    ));
+                }
+
+                // Hydrate nearby farmland
+                for (Block b : Utils.blocksInRadius(center, (int) Math.ceil(radius))) {
+                    if (b.getType() == Material.FARMLAND) {
+                        if (b.getBlockData() instanceof Farmland farm) {
                             farm.setMoisture(farm.getMaximumMoisture());
                             b.setBlockData(farm);
                         }
                     }
-
-                    for (Entity entity : a.getNearbyEntities(1, 1, 1)) {
-                        if (props.isCancelled() || props.isCountered()){
-                            cancel();
-                            return;
-                        }
-                        if (entity.isDead() || entity.equals(caster)) continue;
-                        if (!(entity instanceof LivingEntity le)) continue;
-
-                        double wandPower = NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
-                        le.damage(props.getRemainingPower());
-
-                        Vector unitVector = entity.getLocation()
-                                .toVector()
-                                .subtract(caster.getLocation().toVector())
-                                .normalize();
-
-                        entity.setVelocity(unitVector.multiply(0.1));
-                    }
-
-                    index++;
                 }
 
-            }.runTaskTimer(Alkatraz.getInstance(), 0L, 2L);
+                step++;
+            }
+        }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
+    }
+
+    private void splash(Location center, double sizeScale) {
+        World world = center.getWorld();
+        double r = sphereRadius * sizeScale;
+
+        world.spawnParticle(Particle.WATER_SPLASH, center, (int) (80 * sizeScale), r, r, r, 0.5);
+        world.spawnParticle(Particle.WATER_DROP, center, (int) (120 * sizeScale), r, r, r, 1);
+        world.spawnParticle(Particle.BUBBLE_POP, center, (int) (40 * sizeScale), r, r, r, 0.3);
+        world.playSound(center, Sound.ENTITY_FISHING_BOBBER_SPLASH, 1.5f, 0.8f);
+        world.playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 0.5f, 1.5f);
+    }
+
+    private void placeWater(Location center) {
+        Block centerBlock = center.getBlock();
+        if (centerBlock.getType() == Material.AIR) {
+            centerBlock.setType(Material.WATER);
+            if (centerBlock.getBlockData() instanceof Levelled water) {
+                water.setLevel(0);
+                centerBlock.setBlockData(water);
+            }
+            Bukkit.getScheduler().runTaskLater(Alkatraz.getInstance(), () -> {
+                if (centerBlock.getType() == Material.WATER) {
+                    centerBlock.setType(Material.AIR);
+                }
+            }, 100L);
+        }
+        // Also hydrate all farmland within the sphere
+        for (Block b : Utils.blocksInRadius(center, (int) Math.ceil(sphereRadius))) {
+            if (b.getType() == Material.FARMLAND && b.getBlockData() instanceof Farmland farm) {
+                farm.setMoisture(farm.getMaximumMoisture());
+                b.setBlockData(farm);
+            }
         }
     }
 
+    @Override
+    public boolean canMobCast(Mob mob) {
+        return mob.getTarget() != null;
+    }
 
     @Override
     public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
-        int d = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
+        return Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
             if (e.isCancelled()) return;
-            Location playerLoc = caster.getEyeLocation(); // Player eye location
+            Location playerLoc = caster.getEyeLocation();
             float yaw = playerLoc.getYaw();
             float pitch = playerLoc.getPitch();
-
-            // Calculate offset vector pointing forward relative to player orientation
-            Vector forward = playerLoc.getDirection().normalize().multiply(1.5); // 1.5 blocks in front
-
-            // Call magicCircle with proper center, yaw, pitch and offset
-            List<Location> magicCirclePoints = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 2, 0);
-
-            // Spawn particles at all calculated points
-            for (int i = 0; i < 100; i++){
-                for (Location loc : magicCirclePoints) {
-                    loc.getWorld().spawnParticle(Utils.DUST, loc, 0, new Particle.DustOptions(Color.BLUE, 0.4F));
-                }
+            Vector forward = playerLoc.getDirection().normalize().multiply(1.5);
+            List<Location> points = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 2, 0);
+            for (Location loc : points) {
+                loc.getWorld().spawnParticle(Utils.DUST, loc, 0,
+                        new Particle.DustOptions(Color.fromRGB(60, 180, 255), 0.4F));
             }
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());
-        return d;
     }
 
     @Override
@@ -252,6 +285,7 @@ public class WaterSphere extends AttackSpell {
                 .addCustomLoreLine("&8The first part of a trilogy, revealing")
                 .addCustomLoreLine("&8the basics of water magic.")
                 .addCustomLoreLine("")
+                .addRequirement(new NumberStatRequirement<>("circleLevel", 4))
                 .build();
     }
 }

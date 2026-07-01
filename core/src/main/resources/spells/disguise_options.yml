@@ -10,9 +10,28 @@ options:
         icon: ENDER_EYE
         value_type: double
         value: -1.0
+        impacts:
+          - type: stat_modifier
+            stat: target_scope
+            value: -1.0
+            modifier: SET
       nearby_players:
         display_name: "Nearby Players"
         description: "Only show nearby players."
         icon: SPYGLASS
         value_type: double
         value: 24.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 3
+            description: "Requires Circle Level 3"
+          - type: number_stat
+            stat: mastery_disguise
+            minimum: 50
+            description: "Requires 50 Disguise mastery"
+        impacts:
+          - type: stat_modifier
+            stat: target_scope
+            value: 24.0
+            modifier: SET

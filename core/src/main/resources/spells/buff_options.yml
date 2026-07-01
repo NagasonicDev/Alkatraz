@@ -57,6 +57,10 @@ options:
             stat: circleLevel
             minimum: 4
             description: "Requires Circle Level 4"
+          - type: number_stat
+            stat: mastery_buff
+            minimum: 60
+            description: "Requires 60 Buff mastery"
         impacts:
           - type: stat_modifier
             stat: duration
@@ -104,6 +108,10 @@ options:
             stat: circleLevel
             minimum: 3
             description: "Requires Circle Level 3"
+          - type: number_stat
+            stat: mastery_buff
+            minimum: 45
+            description: "Requires 45 Buff mastery"
         impacts:
           - type: cast_modifier
             kind: attribute
@@ -137,6 +145,10 @@ options:
             stat: circleLevel
             minimum: 3
             description: "Requires Circle Level 3"
+          - type: number_stat
+            stat: mastery_buff
+            minimum: 45
+            description: "Requires 45 Buff mastery"
         impacts:
           - type: cast_modifier
             kind: attribute
@@ -170,6 +182,10 @@ options:
             stat: circleLevel
             minimum: 3
             description: "Requires Circle Level 3"
+          - type: number_stat
+            stat: mastery_buff
+            minimum: 45
+            description: "Requires 45 Buff mastery"
         impacts:
           - type: cast_modifier
             kind: attribute
@@ -189,6 +205,10 @@ options:
             stat: circleLevel
             minimum: 2
             description: "Requires Circle Level 2"
+          - type: number_stat
+            stat: mastery_buff
+            minimum: 25
+            description: "Requires 25 Buff mastery"
         impacts:
           - type: cast_modifier
             kind: stat
@@ -207,6 +227,10 @@ options:
             stat: circleLevel
             minimum: 3
             description: "Requires Circle Level 3"
+          - type: number_stat
+            stat: mastery_buff
+            minimum: 45
+            description: "Requires 45 Buff mastery"
         impacts:
           - type: cast_modifier
             kind: stat
@@ -225,6 +249,10 @@ options:
             stat: circleLevel
             minimum: 4
             description: "Requires Circle Level 4"
+          - type: number_stat
+            stat: mastery_buff
+            minimum: 60
+            description: "Requires 60 Buff mastery"
         impacts:
           - type: cast_modifier
             kind: stat
@@ -243,6 +271,10 @@ options:
             stat: circleLevel
             minimum: 5
             description: "Requires Circle Level 5"
+          - type: number_stat
+            stat: mastery_buff
+            minimum: 80
+            description: "Requires 80 Buff mastery"
         impacts:
           - type: cast_modifier
             kind: stat
@@ -284,6 +316,10 @@ options:
         stat: circleLevel
         minimum: 3
         description: "Requires Circle Level 3"
+      - type: number_stat
+        stat: mastery_buff
+        minimum: 40
+        description: "Requires 40 Buff mastery"
 
     values:
       none:
@@ -308,6 +344,10 @@ options:
         stat: circleLevel
         minimum: 5
         description: "Requires Circle Level 5"
+      - type: number_stat
+        stat: mastery_buff
+        minimum: 75
+        description: "Requires 75 Buff mastery"
 
     values:
       none:

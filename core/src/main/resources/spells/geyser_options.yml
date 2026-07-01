@@ -80,6 +80,10 @@ options:
             stat: circleLevel
             minimum: 4
             description: "Requires Circle Level 4"
+          - type: number_stat
+            stat: mastery_geyser
+            minimum: 65
+            description: "Requires 65 Geyser mastery"
         impacts:
           - type: stat_modifier
             stat: height
@@ -145,6 +149,10 @@ options:
             stat: circleLevel
             minimum: 3
             description: "Requires Circle Level 3"
+          - type: number_stat
+            stat: mastery_geyser
+            minimum: 50
+            description: "Requires 50 Geyser mastery"
         impacts:
           - type: stat_modifier
             stat: launch_power
@@ -201,15 +209,19 @@ options:
 
       wide:
         display_name: "Wide"
-        description: "Broad eruption — 4.5 block radius, reduced damage (-25%)"
-        icon: GOLD_BLOCK
+        description: "3.5 block radius."
+        icon: IRON_BLOCK
         value_type: double
-        value: 4.5
+        value: 3.5
         requirements:
           - type: number_stat
             stat: circleLevel
             minimum: 4
             description: "Requires Circle Level 4"
+          - type: number_stat
+            stat: mastery_geyser
+            minimum: 65
+            description: "Requires 65 Geyser mastery"
         impacts:
           - type: stat_modifier
             stat: radius

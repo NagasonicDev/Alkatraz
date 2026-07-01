@@ -1,6 +1,8 @@
 package me.nagasonic.alkatraz.progression.research;
 
 import me.nagasonic.alkatraz.events.PlayerCastEvent;
+import me.nagasonic.alkatraz.mobs.MagicEntities;
+import me.nagasonic.alkatraz.progression.research.ResearchPointService;
 import me.nagasonic.alkatraz.spells.Spell;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -23,6 +25,8 @@ import org.bukkit.inventory.ItemStack;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
+import de.tr7zw.nbtapi.NBT;
 
 public final class ResearchObjectiveListener implements Listener {
 
@@ -52,6 +56,11 @@ public final class ResearchObjectiveListener implements Listener {
         LivingEntity victim = event.getEntity();
         Player killer = victim.getKiller();
         if (killer == null) return;
+
+        if (MagicEntities.isMagicEntity(victim)
+                || NBT.getPersistentData(victim, nbt -> nbt.getBoolean("summoned_zombie"))) {
+            ResearchPointService.addPoints(killer, "magic_mob_kill");
+        }
 
         Map<String, Object> context = baseContext(killer);
         addEntityContext(context, victim, "entity");

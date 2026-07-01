@@ -3,8 +3,6 @@ package me.nagasonic.alkatraz.spells.implementation;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
-import me.nagasonic.alkatraz.events.CastEvent;
-import me.nagasonic.alkatraz.events.PlayerCastEvent;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.modifier.AppliedModifier;
@@ -59,8 +57,6 @@ public class Debuff extends Spell {
     public void castAction(Player caster, ItemStack wand) {
         if (caster.isDead()) return;
 
-        PlayerCastEvent castEvent = new PlayerCastEvent(caster, this, null, wand);
-        Bukkit.getPluginManager().callEvent(castEvent);
         int range = (int) getModifiedStat(caster, "target_range", targetRange);
         LivingEntity target = PooledModifierSpellSupport.resolveDebuffTarget(caster, range);
 
@@ -85,8 +81,6 @@ public class Debuff extends Spell {
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
         LivingEntity target = PooledModifierSpellSupport.resolveMobDebuffTarget(caster, 16);
-        CastEvent castEvent = new CastEvent(caster, this, null, wand);
-        Bukkit.getPluginManager().callEvent(castEvent);
         if (target == null) return;
 
         int durationTicks = baseDuration * 20;

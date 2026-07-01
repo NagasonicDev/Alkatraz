@@ -10,12 +10,27 @@ options:
         icon: RABBIT_HIDE
         value_type: double
         value: 0.75
+        requirements:
+          - type: number_stat
+            stat: mastery_swift
+            minimum: 40
+            description: "Requires at least 40 mastery in Swift"
+        impacts:
+          - type: stat_modifier
+            stat: dash_style
+            value: 0.75
+            modifier: SET
       balanced:
         display_name: "Balanced"
         description: "Default dash strength."
         icon: FEATHER
         value_type: double
         value: 1.0
+        impacts:
+          - type: stat_modifier
+            stat: dash_style
+            value: 1.0
+            modifier: SET
       burst:
         display_name: "Burst"
         description: "Longer, faster dash."
@@ -27,3 +42,12 @@ options:
             stat: circleLevel
             minimum: 3
             description: "Requires Circle Level 3"
+          - type: number_stat
+            stat: mastery_swift
+            minimum: 50
+            description: "Requires 50 Swift mastery"
+        impacts:
+          - type: stat_modifier
+            stat: dash_style
+            value: 1.35
+            modifier: SET

@@ -17,6 +17,10 @@ public final class SpellMasteryRequirement implements ProgressionRequirement {
         this.mastery = mastery;
     }
 
+    public String getSpellId() { return spellId; }
+
+    public int getMastery() { return mastery; }
+
     public static ProgressionRequirement fromConfig(Map<String, Object> config) {
         String spell = String.valueOf(config.get("spell"));
         int mastery = readInt(config, "mastery", 0);

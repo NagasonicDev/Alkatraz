@@ -1,0 +1,18 @@
+id: 'wind_barrier'
+display_name: '&fWind Barrier'
+description:
+  - '&7Creates a barrier of wind that'
+  - '&7deflects incoming projectiles.'
+enabled: true
+element: 'AIR'
+code: 'RRSSR'
+level: 4
+cooldown: 25
+cast_time: 2.0
+mana_cost: 80
+maximum_mastery: 150
+radius: 3.0
+duration: 30
+max_hitpoints: 30
+mastery_bar_color: 'WHITE'
+gui_item: 'SHIELD'

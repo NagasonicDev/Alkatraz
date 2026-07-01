@@ -1,6 +1,7 @@
 package me.nagasonic.alkatraz.gui.implementation.research;
 
 import me.nagasonic.alkatraz.gui.Menu;
+import me.nagasonic.alkatraz.gui.implementation.WandTableSelectionMenu;
 import me.nagasonic.alkatraz.progression.research.ResearchService;
 import me.nagasonic.alkatraz.progression.research.ResearchState;
 import me.nagasonic.alkatraz.progression.research.definition.ResearchCategory;
@@ -36,6 +37,7 @@ public class ResearchGraphMenu extends Menu {
     private static final int SLOT_PAN_NW = 0;
     private static final int SLOT_PAN_NE = 8;
     private static final int SLOT_INFO       = 45;
+    private static final int SLOT_BACK_TABLE = 48;
     private static final int SLOT_CATEGORIES = 53;
 
     private static final int MAX_LEFT  = 10;
@@ -94,6 +96,10 @@ public class ResearchGraphMenu extends Menu {
         }
 
         String action = getStringData(clicked, "action");
+        if ("back_table".equals(action)) {
+            new WandTableSelectionMenu(viewer).open();
+            return true;
+        }
         if ("category".equals(action)) {
             new ResearchCategoriesMenu(viewer).open();
             return true;
@@ -157,8 +163,9 @@ public class ResearchGraphMenu extends Menu {
         inventory.setItem(SLOT_PAN_E,  button(Material.ARROW,     "&fPan Right",     "pan_e"));
         inventory.setItem(SLOT_PAN_NW, button(Material.ARROW,     "&fPan Up-Left",   "pan_nw"));
         inventory.setItem(SLOT_PAN_NE, button(Material.ARROW,     "&fPan Up-Right",  "pan_ne"));
-        inventory.setItem(SLOT_INFO,       infoItem());
-        inventory.setItem(SLOT_CATEGORIES, button(Material.BOOKSHELF, "&dCategories", "category"));
+        inventory.setItem(SLOT_INFO,          infoItem());
+        inventory.setItem(SLOT_BACK_TABLE,    button(Material.ARROW, "&fBack to Arcane Table", "back_table"));
+        inventory.setItem(SLOT_CATEGORIES,    button(Material.BOOKSHELF, "&dCategories", "category"));
     }
 
     private ItemStack createNodeItem(ResearchNode node, ResearchState state) {

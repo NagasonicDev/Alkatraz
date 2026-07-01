@@ -1,0 +1,17 @@
+id: 'light_buff'
+display_name: '&eLight Buff'
+description:
+  - '&7Blesses nearby allies with'
+  - '&7a short burst of power.'
+enabled: true
+element: 'LIGHT'
+code: 'RRRLS'
+level: 4
+cooldown: 20
+cast_time: 1.5
+mana_cost: 50
+maximum_mastery: 200
+buff_radius: 8.0
+base_duration: 15
+mastery_bar_color: 'YELLOW'
+gui_item: 'GLOWSTONE_DUST'

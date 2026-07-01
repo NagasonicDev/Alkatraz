@@ -71,15 +71,19 @@ options:
 
       fast:
         display_name: "Fast"
-        description: "Faster projectile, reduced damage (-20%)"
-        icon: SUGAR
+        description: "Shoots slightly faster."
+        icon: FEATHER
         value_type: double
-        value: 0.8
+        value: 0.03
         requirements:
           - type: number_stat
             stat: circleLevel
             minimum: 2
             description: "Requires Circle Level 2"
+          - type: number_stat
+            stat: mastery_fireball
+            minimum: 25
+            description: "Requires 25 Fireball mastery"
         impacts:
           - type: stat_modifier
             stat: projectile_speed
@@ -92,15 +96,19 @@ options:
 
       blazing:
         display_name: "Blazing"
-        description: "Extremely fast, heavy damage penalty (-40%)"
-        icon: BLAZE_POWDER
+        description: "Shoots blazingly fast."
+        icon: FEATHER
         value_type: double
-        value: 1.2
+        value: 0.01
         requirements:
           - type: number_stat
             stat: circleLevel
             minimum: 4
             description: "Requires Circle Level 4"
+          - type: number_stat
+            stat: mastery_fireball
+            minimum: 75
+            description: "Requires 75 Fireball mastery"
         impacts:
           - type: stat_modifier
             stat: projectile_speed
@@ -149,15 +157,19 @@ options:
 
       small_size:
         display_name: "Small Size"
-        description: "Small fireball explosion."
-        icon: IRON_NUGGET
+        description: "Smaller fireball."
+        icon: SNOWBALL
         value_type: double
-        value: 1.0
+        value: 0.5
         requirements:
           - type: number_stat
             stat: circleLevel
             minimum: 3
             description: "Requires Circle Level 3"
+          - type: number_stat
+            stat: mastery_fireball
+            minimum: 40
+            description: "Requires 40 Fireball mastery"
         impacts:
           - type: stat_modifier
             stat: size
@@ -195,6 +207,10 @@ options:
             stat: circleLevel
             minimum: 3
             description: "Requires Circle Level 3"
+          - type: number_stat
+            stat: mastery_fireball
+            minimum: 60
+            description: "Requires 60 Fireball mastery"
         impacts:
           - type: stat_modifier
             stat: size

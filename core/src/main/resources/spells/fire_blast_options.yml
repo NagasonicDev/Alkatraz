@@ -10,18 +10,55 @@ options:
         icon: MAGMA_CREAM
         value_type: double
         value: 0.35
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 2
+            description: "Requires Circle Level 2"
+        impacts:
+          - type: stat_modifier
+            stat: blast_speed
+            value: 0.35
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 1.2
+            modifier: MULTIPLY
       normal:
         display_name: "Normal"
         description: "Default fireball speed."
         icon: FIRE_CHARGE
         value_type: double
         value: 0.5
+        impacts:
+          - type: stat_modifier
+            stat: blast_speed
+            value: 0.5
+            modifier: SET
       fast:
         display_name: "Fast"
-        description: "Faster fireball."
-        icon: BLAZE_POWDER
+        description: "Shoots faster."
+        icon: FEATHER
         value_type: double
-        value: 0.75
+        value: 0.05
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 3
+            description: "Requires Circle Level 3"
+          - type: number_stat
+            stat: mastery_fire_blast
+            minimum: 50
+            description: "Requires 50 Fire Blast mastery"
+        impacts:
+          - type: stat_modifier
+            stat: blast_speed
+            value: 0.75
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 0.8
+            modifier: MULTIPLY
   fire_spread:
     description: "Adjust how much fire is created on impact."
     icon: FLINT_AND_STEEL
@@ -33,20 +70,52 @@ options:
         icon: CAMPFIRE
         value_type: double
         value: 1.5
+        requirements:
+          - type: number_stat
+            stat: mastery_fire_blast
+            minimum: 50
+            description: "Requires at least 50 mastery in Fire Blast"
+        impacts:
+          - type: stat_modifier
+            stat: fire_spread
+            value: 1.5
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 1.15
+            modifier: MULTIPLY
       normal:
         display_name: "Normal"
         description: "Default fire spread."
         icon: FLINT_AND_STEEL
         value_type: double
         value: 3.0
+        impacts:
+          - type: stat_modifier
+            stat: fire_spread
+            value: 3.0
+            modifier: SET
       wildfire:
         display_name: "Wildfire"
-        description: "Larger fire spread."
-        icon: FIRE_CHARGE
-        value_type: double
-        value: 4.5
+        description: "Sets the surrounding area on fire."
+        icon: FLINT_AND_STEEL
+        value_type: boolean
+        value: true
         requirements:
           - type: number_stat
             stat: circleLevel
-            minimum: 3
-            description: "Requires Circle Level 3"
+            minimum: 4
+            description: "Requires Circle Level 4"
+          - type: number_stat
+            stat: mastery_fire_blast
+            minimum: 75
+            description: "Requires 75 Fire Blast mastery"
+        impacts:
+          - type: stat_modifier
+            stat: fire_ignite
+            value: true
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 0.85
+            modifier: MULTIPLY

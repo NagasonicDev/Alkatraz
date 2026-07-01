@@ -1,0 +1,145 @@
+options:
+
+  wall_height:
+    description: "Height of the wall."
+    icon: OAK_FENCE
+    default_index: 0
+
+    values:
+
+      low:
+        display_name: "Low"
+        description: "5 blocks high."
+        icon: OAK_FENCE
+        value_type: double
+        value: 5.0
+        impacts:
+          - type: stat_modifier
+            stat: wall_height
+            value: 5.0
+            modifier: SET
+
+      medium:
+        display_name: "Medium"
+        description: "6 blocks high."
+        icon: OAK_FENCE
+        value_type: double
+        value: 6.0
+        impacts:
+          - type: stat_modifier
+            stat: wall_height
+            value: 6.0
+            modifier: SET
+
+      high:
+        display_name: "High"
+        description: "7 blocks high."
+        icon: OAK_FENCE
+        value_type: double
+        value: 7.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 4
+            description: "Requires Circle Level 4"
+          - type: number_stat
+            stat: mastery_earthen_wall
+            minimum: 100
+            description: "Requires 100 Earthen Wall mastery"
+        impacts:
+          - type: stat_modifier
+            stat: wall_height
+            value: 7.0
+            modifier: SET
+
+  wall_length:
+    description: "Length of the wall."
+    icon: BRICK
+    default_index: 0
+
+    values:
+
+      short:
+        display_name: "Short"
+        description: "15 blocks long."
+        icon: BRICK
+        value_type: double
+        value: 15.0
+        impacts:
+          - type: stat_modifier
+            stat: wall_length
+            value: 15.0
+            modifier: SET
+
+      medium:
+        display_name: "Medium"
+        description: "20 blocks long."
+        icon: BRICK
+        value_type: double
+        value: 20.0
+        impacts:
+          - type: stat_modifier
+            stat: wall_length
+            value: 20.0
+            modifier: SET
+
+      long:
+        display_name: "Long"
+        description: "25 blocks long."
+        icon: BRICK
+        value_type: double
+        value: 25.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 4
+            description: "Requires Circle Level 4"
+          - type: number_stat
+            stat: mastery_earthen_wall
+            minimum: 80
+            description: "Requires 80 Earthen Wall mastery"
+        impacts:
+          - type: stat_modifier
+            stat: wall_length
+            value: 25.0
+            modifier: SET
+
+  self_destruct:
+    description: "Whether wall undoes itself after a period."
+    icon: CLOCK
+    default_index: 0
+
+    values:
+
+      off:
+        display_name: "No Undo"
+        description: "Wall remains until naturally broken."
+        icon: BARRIER
+        value_type: boolean
+        value: false
+        impacts:
+          - type: stat_modifier
+            stat: self_destruct
+            value: false
+            modifier: SET
+
+      on:
+        display_name: "Self-Destruct"
+        description: "Wall crumbles after the set period."
+        icon: CLOCK
+        value_type: boolean
+        value: true
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 4
+            description: "Requires Circle Level 4"
+          - type: number_stat
+            stat: mastery_earthen_wall
+            minimum: 50
+            description: "Requires 50 Earthen Wall mastery"
+        impacts:
+          - type: stat_modifier
+            stat: self_destruct
+            value: true
+            modifier: SET

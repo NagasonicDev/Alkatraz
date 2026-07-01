@@ -25,6 +25,10 @@ public abstract class SpellProperties {
         return caster;
     }
 
+    public Location getCastLocation() {
+        return castLocation;
+    }
+
     public boolean isCancelled() {
         return cancelled;
     }

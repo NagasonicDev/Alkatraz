@@ -1,0 +1,105 @@
+options:
+
+  duration:
+    description: "How long the light buffs last."
+    icon: CLOCK
+    default_index: 1
+
+    values:
+
+      short:
+        display_name: "Short"
+        description: "Buffs last 8 seconds."
+        icon: CLOCK
+        value_type: int
+        value: 8
+        impacts:
+          - type: stat_modifier
+            stat: duration
+            value: 8
+            modifier: SET
+
+      normal:
+        display_name: "Normal"
+        description: "Buffs last 15 seconds."
+        icon: CLOCK
+        value_type: int
+        value: 15
+        impacts:
+          - type: stat_modifier
+            stat: duration
+            value: 15
+            modifier: SET
+
+      extended:
+        display_name: "Extended"
+        description: "Buffs last 30 seconds."
+        icon: CLOCK
+        value_type: int
+        value: 30
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 5
+            description: "Requires Circle Level 5"
+          - type: number_stat
+            stat: mastery_light_buff
+            minimum: 30
+            description: "Requires 30 Light Buff mastery"
+        impacts:
+          - type: stat_modifier
+            stat: duration
+            value: 30
+            modifier: SET
+
+  buff_radius:
+    description: "Radius of the blessing aura."
+    icon: BEACON
+    default_index: 0
+
+    values:
+
+      close:
+        display_name: "Close"
+        description: "5 block radius."
+        icon: BEACON
+        value_type: double
+        value: 5.0
+        impacts:
+          - type: stat_modifier
+            stat: buff_radius
+            value: 5.0
+            modifier: SET
+
+      standard:
+        display_name: "Standard"
+        description: "8 block radius."
+        icon: BEACON
+        value_type: double
+        value: 8.0
+        impacts:
+          - type: stat_modifier
+            stat: buff_radius
+            value: 8.0
+            modifier: SET
+
+      far:
+        display_name: "Far"
+        description: "12 block radius."
+        icon: BEACON
+        value_type: double
+        value: 12.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 5
+            description: "Requires Circle Level 5"
+          - type: number_stat
+            stat: mastery_light_buff
+            minimum: 30
+            description: "Requires 30 Light Buff mastery"
+        impacts:
+          - type: stat_modifier
+            stat: buff_radius
+            value: 12.0
+            modifier: SET

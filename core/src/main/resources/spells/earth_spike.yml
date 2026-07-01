@@ -35,4 +35,10 @@ mastery_bar_color: 'GREEN'
 #THE ITEM THAT APPEARS IN THE /SPELLS GUI
 gui_item: 'POINTED_DRIPSTONE'
 
+# SELF-DESTRUCT: Ticks after spike finishes rising before blocks are restored (20 ticks = 1 second)
+self_destruct_ticks: 100
+
+cast_sound: 'BLOCK_GRAVEL_BREAK'
+cast_sound_volume: 0.6
+
 

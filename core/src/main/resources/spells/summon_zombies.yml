@@ -1,0 +1,24 @@
+id: 'summon_zombies'
+display_name: '&2Summon Zombies'
+description:
+  - '&7Summons zombies from the ground'
+  - '&7to attack your enemies.'
+enabled: true
+element: 'DARK'
+code: 'SRSRS'
+level: 4
+cooldown: 30
+cast_time: 2.5
+mana_cost: 90
+maximum_mastery: 150
+zombie_count: 3
+zombie_duration: 30
+zombie_power: 2.0
+summon_range: 5.0
+mastery_bar_color: 'GREEN'
+gui_item: 'ROTTEN_FLESH'
+
+prepare_sound: 'ENTITY_ZOMBIE_VILLAGER_CURE'
+prepare_sound_volume: 0.4
+cast_sound: 'ENTITY_ZOMBIE_DEATH'
+cast_sound_pitch: 1.2

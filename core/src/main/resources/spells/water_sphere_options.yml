@@ -10,18 +10,59 @@ options:
         icon: PRISMARINE_SHARD
         value_type: double
         value: 25.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 2
+            description: "Requires Circle Level 2"
+          - type: number_stat
+            stat: mastery_water_sphere
+            minimum: 25
+            description: "Requires 25 Water Sphere mastery"
+        impacts:
+          - type: stat_modifier
+            stat: sphere_range
+            value: 25.0
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 1.15
+            modifier: MULTIPLY
       normal:
         display_name: "Normal"
         description: "Default travel distance."
         icon: NAUTILUS_SHELL
         value_type: double
         value: 40.0
+        impacts:
+          - type: stat_modifier
+            stat: sphere_range
+            value: 40.0
+            modifier: SET
       far:
         display_name: "Far"
         description: "Longer travel distance."
         icon: HEART_OF_THE_SEA
         value_type: double
         value: 55.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 4
+            description: "Requires Circle Level 4"
+          - type: number_stat
+            stat: mastery_water_sphere
+            minimum: 60
+            description: "Requires 60 Water Sphere mastery"
+        impacts:
+          - type: stat_modifier
+            stat: sphere_range
+            value: 55.0
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 0.85
+            modifier: MULTIPLY
   sphere_size:
     description: "Adjust Water Sphere size."
     icon: WATER_BUCKET
@@ -33,15 +74,52 @@ options:
         icon: BLUE_DYE
         value_type: double
         value: 0.5
+        requirements:
+          - type: number_stat
+            stat: mastery_water_sphere
+            minimum: 50
+            description: "Requires at least 50 mastery in Water Sphere"
+        impacts:
+          - type: stat_modifier
+            stat: sphere_size
+            value: 0.5
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 1.2
+            modifier: MULTIPLY
       standard:
         display_name: "Standard"
         description: "Default sphere size."
         icon: WATER_BUCKET
         value_type: double
         value: 0.75
+        impacts:
+          - type: stat_modifier
+            stat: sphere_size
+            value: 0.75
+            modifier: SET
       large:
         display_name: "Large"
         description: "Larger sphere."
         icon: PUFFERFISH_BUCKET
         value_type: double
         value: 1.1
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 3
+            description: "Requires Circle Level 3"
+          - type: number_stat
+            stat: mastery_water_sphere
+            minimum: 40
+            description: "Requires 40 Water Sphere mastery"
+        impacts:
+          - type: stat_modifier
+            stat: sphere_size
+            value: 1.1
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 0.8
+            modifier: MULTIPLY

@@ -9,7 +9,8 @@ public enum Configs {
     DEFAULT_RESET_TOKENS(Alkatraz.getPluginConfig().getInt("default_reset_tokens")),
     CIRCLE_TICKS(Alkatraz.getPluginConfig().getLong("circle_ticks")),
     AFFINITY_PER_POINT(Alkatraz.getPluginConfig().getInt("affinity_per_point")),
-    RESISTANCE_PER_POINT(Alkatraz.getPluginConfig().getInt("resistance_per_point"));
+    RESISTANCE_PER_POINT(Alkatraz.getPluginConfig().getInt("resistance_per_point")),
+    FIRST_JOIN_TUTORIAL(Alkatraz.getPluginConfig().getBoolean("first_join_tutorial"));
 
     private Object value;
     Configs(Object value){

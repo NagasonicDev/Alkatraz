@@ -15,3 +15,6 @@ mastery_bar_color: PURPLE
 gui_item: FERMENTED_SPIDER_EYE
 base_duration: 20
 target_range: 24
+
+cast_sound: 'ENTITY_WITCH_DRINK'
+cast_sound_volume: 0.6

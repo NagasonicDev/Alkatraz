@@ -19,6 +19,16 @@
         </dependency>
         <dependency>
             <groupId>me.nagasonic</groupId>
+            <artifactId>alkatraz-v26_R2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>me.nagasonic</groupId>
+            <artifactId>alkatraz-v26_R1</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>me.nagasonic</groupId>
             <artifactId>alkatraz-v1_21_R7</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -106,7 +116,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.5.1</version>
+                <version>3.6.2</version>
                 <configuration>
                     <minimizeJar>false</minimizeJar>
                     <filters>

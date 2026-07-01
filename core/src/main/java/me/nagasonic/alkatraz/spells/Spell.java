@@ -2,6 +2,8 @@ package me.nagasonic.alkatraz.spells;
 
 import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.events.CastEvent;
+import me.nagasonic.alkatraz.events.PlayerCastEvent;
 import me.nagasonic.alkatraz.events.PlayerSpellPrepareEvent;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.gui.Menu;
@@ -21,10 +23,7 @@ import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("unused")
@@ -48,10 +47,22 @@ public abstract class Spell {
     // Spell options (defined once per spell, selections stored per-player)
     protected Map<String, SpellOption> options = new HashMap<>();
 
+    // Tracks players whose cast was cancelled by the spell itself (e.g. invalid position)
+    // so the framework can refund mana and skip cooldown/mastery.
+    private final Set<UUID> castCancelledPlayers = new HashSet<>();
+
     public Spell(String type) {
         this.type = type;
         setupOptions();
     }
+
+    // Sound configuration
+    protected String prepareSound = "BLOCK_ENCHANTMENT_TABLE_USE";
+    protected float prepareSoundVolume = 0.5f;
+    protected float prepareSoundPitch = 0.8f;
+    protected String castSound = "ENTITY_EVOKER_CAST_SPELL";
+    protected float castSoundVolume = 1.0f;
+    protected float castSoundPitch = 1.0f;
 
     public final void loadOptions() {
         SpellOptionLoader.loadOptions(this, this.id);
@@ -119,12 +130,12 @@ public abstract class Spell {
 
         // Check if player is alive
         if (p.isDead()) return;
-        // Set casting state
-        profile.setCasting(true);
         // Create and fire spell prepare event
         PlayerSpellPrepareEvent castEvent = new PlayerSpellPrepareEvent(p, this, wand);
         Bukkit.getPluginManager().callEvent(castEvent);
         if (castEvent.isCancelled()) return;
+        // Set casting state
+        profile.setCasting(true);
 
 
 
@@ -140,6 +151,9 @@ public abstract class Spell {
         // Start circle animation
         int circleTaskId = circleAction(p, castEvent);
 
+        // Play the preparation sound
+        playSound(p, prepareSound, prepareSoundVolume, prepareSoundPitch);
+
         // Calculate cast time (affected by wand and mastery)
         float baseCastTime  = getFullCastTime(wand, getCastTime());
         long  finalCastTime = calculateFinalCastTime(profile, baseCastTime);
@@ -147,18 +161,28 @@ public abstract class Spell {
         // Schedule spell execution after cast time
         Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(
                 Alkatraz.getInstance(), () -> {
+                    Bukkit.getServer().getScheduler().cancelTask(circleTaskId);
+                    profile.setCasting(false);
                     if (!castEvent.isCancelled()) {
-                        profile.setCasting(false);
-                        profile.setCooldown(this, System.currentTimeMillis());
-                        Bukkit.getServer().getScheduler().cancelTask(circleTaskId);
-                        castAction(p, wand);
+                        PlayerCastEvent playerCastEvent = new PlayerCastEvent(p, Spell.this, wand);
+                        Bukkit.getPluginManager().callEvent(playerCastEvent);
+                        if (!playerCastEvent.isCancelled()) {
+                            playSound(p, castSound, castSoundVolume, castSoundPitch);
+                            castAction(p, wand);
+                            // Only grant cooldown/mastery if the spell didn't self-cancel
+                            UUID uuid = p.getUniqueId();
+                            if (castCancelledPlayers.remove(uuid)) {
+                                // Refund mana
+                                profile.setMana(profile.getMana() + manaCost);
+                            } else {
+                                profile.setCooldown(this, System.currentTimeMillis());
+                                if (profile.getSpellMastery(this) < getMaxMastery()) {
+                                    StatUtils.addSpellMastery(p, this, 1);
+                                }
+                            }
+                        }
                     }
                 }, finalCastTime);
-
-        // Add spell mastery
-        if (profile.getSpellMastery(this) < getMaxMastery()) {
-            StatUtils.addSpellMastery(p, this, 1);
-        }
     }
 
     /**
@@ -179,6 +203,44 @@ public abstract class Spell {
         this.cooldown      = spellConfig.getLong("cooldown");
         this.masteryBarColor = BarColor.valueOf(spellConfig.getString("mastery_bar_color"));
         this.guiItem       = Utils.materialFromString(spellConfig.getString("gui_item"));
+
+        loadSoundConfig(spellConfig);
+    }
+
+    private void loadSoundConfig(YamlConfiguration spellConfig) {
+        prepareSound       = spellConfig.getString("prepare_sound", "BLOCK_ENCHANTMENT_TABLE_USE");
+        prepareSoundVolume = (float) spellConfig.getDouble("prepare_sound_volume", 0.5);
+        prepareSoundPitch  = (float) spellConfig.getDouble("prepare_sound_pitch", 0.8);
+        castSound          = spellConfig.getString("cast_sound", "ENTITY_EVOKER_CAST_SPELL");
+        castSoundVolume    = (float) spellConfig.getDouble("cast_sound_volume", 1.0);
+        castSoundPitch     = (float) spellConfig.getDouble("cast_sound_pitch", 1.0);
+    }
+
+    private void playSound(Player p, String soundName, float volume, float pitch) {
+        try {
+            Sound sound = Sound.valueOf(soundName);
+            p.getWorld().playSound(p.getLocation(), sound, volume, pitch);
+        } catch (IllegalArgumentException ignored) {
+        }
+    }
+
+    /**
+     * Called by spell implementations when castAction() determines the spell
+     * cannot proceed (e.g. no valid teleport destination). This signals the
+     * framework to refund mana and skip cooldown/mastery for this cast.
+     */
+    protected final void cancelCast(Player p) {
+        castCancelledPlayers.add(p.getUniqueId());
+    }
+
+    /**
+     * Mob cast entry point — fires CastEvent, then delegates to mobCastAction if not cancelled.
+     */
+    public void mobCast(Mob caster, ItemStack wand) {
+        CastEvent castEvent = new CastEvent(caster, this, wand);
+        Bukkit.getPluginManager().callEvent(castEvent);
+        if (castEvent.isCancelled()) return;
+        mobCastAction(caster, wand);
     }
 
     public boolean canMobCast(Mob mob) {

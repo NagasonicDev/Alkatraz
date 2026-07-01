@@ -3,6 +3,8 @@ package me.nagasonic.alkatraz.dom;
 import me.nagasonic.alkatraz.Alkatraz;
 
 public enum MinecraftVersion {
+    MINECRAFT_26_2(26.2F, "26.2", "26.2", "v26_R2"),
+    MINECRAFT_26_1(26.1F, "26.1", "26.1.2", "v26_R1"),
     MINECRAFT_1_26(19, "1_26", "1.26", null),
     MINECRAFT_1_25(18, "1_25", "1.25", null),
     MINECRAFT_1_24(17, "1_24", "1.24", null),

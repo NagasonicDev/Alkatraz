@@ -5,7 +5,6 @@ import fr.skytasul.glowingentities.GlowingEntities;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
-import me.nagasonic.alkatraz.events.PlayerCastEvent;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
@@ -51,8 +50,6 @@ public class Detect extends Spell {
     @Override
     public void castAction(Player p, ItemStack wand) {
         if (!p.isDead()){
-            PlayerCastEvent castEvent = new PlayerCastEvent(p, this, null, wand);
-            Bukkit.getPluginManager().callEvent(castEvent);
             AtomicDouble l = new AtomicDouble(1);
             Location a = p.getLocation();
             MagicProfile data = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);

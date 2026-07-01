@@ -1,0 +1,84 @@
+options:
+
+  arrow_count:
+    description: "Number of arrows fired."
+    icon: ARROW
+    default_index: 0
+
+    values:
+
+      three:
+        display_name: "3 Arrows"
+        description: "Fire 3 arrows."
+        icon: BOW
+        value_type: double
+        value: 3.0
+        impacts:
+          - type: stat_modifier
+            stat: arrow_count
+            value: 3.0
+            modifier: SET
+
+      five:
+        display_name: "5 Arrows"
+        description: "Fire 5 arrows."
+        icon: BOW
+        value_type: double
+        value: 5.0
+        impacts:
+          - type: stat_modifier
+            stat: arrow_count
+            value: 5.0
+            modifier: SET
+
+      seven:
+        display_name: "7 Arrows"
+        description: "Fire 7 arrows."
+        icon: BOW
+        value_type: double
+        value: 7.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 5
+            description: "Requires Circle Level 5"
+          - type: number_stat
+            stat: mastery_flaming_volley
+            minimum: 80
+            description: "Requires 80 Flaming Volley mastery"
+        impacts:
+          - type: stat_modifier
+            stat: arrow_count
+            value: 7.0
+            modifier: SET
+
+  fire_blocks:
+    description: "Sets blocks on fire."
+    icon: FIRE_CHARGE
+    default_index: 0
+
+    values:
+
+      disabled:
+        display_name: "Disabled"
+        description: "Arrows do not set blocks on fire."
+        icon: GUNPOWDER
+        value_type: boolean
+        value: false
+        impacts:
+          - type: stat_modifier
+            stat: fire_blocks
+            value: false
+            modifier: SET
+
+      enabled:
+        display_name: "Enabled"
+        description: "Arrows set blocks on fire."
+        icon: FIRE_CHARGE
+        value_type: boolean
+        value: true
+        impacts:
+          - type: stat_modifier
+            stat: fire_blocks
+            value: true
+            modifier: SET

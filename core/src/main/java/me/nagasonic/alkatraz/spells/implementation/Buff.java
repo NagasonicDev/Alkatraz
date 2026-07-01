@@ -3,8 +3,6 @@ package me.nagasonic.alkatraz.spells.implementation;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
-import me.nagasonic.alkatraz.events.CastEvent;
-import me.nagasonic.alkatraz.events.PlayerCastEvent;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.modifier.AppliedModifier;
@@ -58,10 +56,7 @@ public class Buff extends Spell {
     @Override
     public void castAction(Player caster, ItemStack wand) {
         if (caster.isDead()) return;
-        PlayerCastEvent castEvent = new PlayerCastEvent(caster, this, null, wand);
-        Bukkit.getPluginManager().callEvent(castEvent);
 
-        if (castEvent.isCancelled()) return;
         int range = (int) getModifiedStat(caster, "target_range", targetRange);
         LivingEntity target = PooledModifierSpellSupport.resolveBuffTarget(caster, range);
 
@@ -86,8 +81,6 @@ public class Buff extends Spell {
 
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
-        CastEvent castEvent = new CastEvent(caster, this, null, wand);
-        Bukkit.getPluginManager().callEvent(castEvent);
         int durationTicks = baseDuration * 20;
         caster.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, durationTicks, 1, false, false));
         caster.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, durationTicks, 0, false, false));

@@ -4,8 +4,6 @@ import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
-import me.nagasonic.alkatraz.events.CastEvent;
-import me.nagasonic.alkatraz.events.PlayerCastEvent;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
@@ -57,8 +55,6 @@ public class Heal extends Spell {
     @Override
     public void castAction(Player p, ItemStack wand) {
         if (!p.isDead()){
-            PlayerCastEvent castEvent = new PlayerCastEvent(p, this, null, wand);
-            Bukkit.getPluginManager().callEvent(castEvent);
             if (p.isSneaking() || p.getTargetEntity((int) getModifiedStat(p, "target_range", 20)) == null || !(p.getTargetEntity((int) getModifiedStat(p, "target_range", 20)) instanceof Player)){
                 double wandPower = NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
                 double base = (baseHeal * wandPower) * (1 + ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class).getAffinity(Element.LIGHT) / 100);
@@ -116,8 +112,6 @@ public class Heal extends Spell {
 
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
-        CastEvent castEvent = new CastEvent(caster, this, null, wand);
-        Bukkit.getPluginManager().callEvent(castEvent);
         double wandp = wand == null ? 1 : NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
         double heal = (baseHeal * wandp) * (1 + Utils.getEntityAffinity(Element.LIGHT, caster) / 100);
         if (heal > maxHeal){

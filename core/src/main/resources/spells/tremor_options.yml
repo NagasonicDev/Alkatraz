@@ -10,18 +10,55 @@ options:
         icon: DIRT
         value_type: double
         value: 0.75
+        requirements:
+          - type: number_stat
+            stat: mastery_tremor
+            minimum: 45
+            description: "Requires at least 45 mastery in Tremor"
+        impacts:
+          - type: stat_modifier
+            stat: tremor_width
+            value: 0.75
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 1.15
+            modifier: MULTIPLY
       normal:
         display_name: "Normal"
         description: "Default tremor lanes."
         icon: DIRT_PATH
         value_type: double
         value: 1.0
+        impacts:
+          - type: stat_modifier
+            stat: tremor_width
+            value: 1.0
+            modifier: SET
       wide:
         display_name: "Wide"
         description: "Wider tremor lanes."
         icon: COARSE_DIRT
         value_type: double
         value: 1.4
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 3
+            description: "Requires Circle Level 3"
+          - type: number_stat
+            stat: mastery_tremor
+            minimum: 50
+            description: "Requires 50 Tremor mastery"
+        impacts:
+          - type: stat_modifier
+            stat: tremor_width
+            value: 1.4
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 0.85
+            modifier: MULTIPLY
   tremor_length:
     description: "Adjust how far Tremor travels."
     icon: SPYGLASS
@@ -33,12 +70,31 @@ options:
         icon: COBBLESTONE
         value_type: double
         value: 7.0
+        requirements:
+          - type: number_stat
+            stat: mastery_tremor
+            minimum: 40
+            description: "Requires at least 40 mastery in Tremor"
+        impacts:
+          - type: stat_modifier
+            stat: tremor_length
+            value: 7.0
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 1.1
+            modifier: MULTIPLY
       standard:
         display_name: "Standard"
         description: "Default tremor length."
         icon: STONE
         value_type: double
         value: 11.0
+        impacts:
+          - type: stat_modifier
+            stat: tremor_length
+            value: 11.0
+            modifier: SET
       long:
         display_name: "Long"
         description: "Longer tremor."
@@ -50,3 +106,16 @@ options:
             stat: circleLevel
             minimum: 4
             description: "Requires Circle Level 4"
+          - type: number_stat
+            stat: mastery_tremor
+            minimum: 65
+            description: "Requires 65 Tremor mastery"
+        impacts:
+          - type: stat_modifier
+            stat: tremor_length
+            value: 15.0
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 0.85
+            modifier: MULTIPLY

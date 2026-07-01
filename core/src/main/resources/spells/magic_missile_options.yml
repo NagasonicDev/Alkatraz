@@ -10,15 +10,56 @@ options:
         icon: ARROW
         value_type: double
         value: 12.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 2
+            description: "Requires Circle Level 2"
+          - type: number_stat
+            stat: mastery_magic_missile
+            minimum: 25
+            description: "Requires 25 Magic Missile mastery"
+        impacts:
+          - type: stat_modifier
+            stat: missile_range
+            value: 12.0
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 1.2
+            modifier: MULTIPLY
       normal:
         display_name: "Normal"
         description: "Default missile range."
         icon: SPECTRAL_ARROW
         value_type: double
         value: 20.0
+        impacts:
+          - type: stat_modifier
+            stat: missile_range
+            value: 20.0
+            modifier: SET
       long:
         display_name: "Long"
         description: "Longer missile range."
         icon: BOW
         value_type: double
         value: 30.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 4
+            description: "Requires Circle Level 4"
+          - type: number_stat
+            stat: mastery_magic_missile
+            minimum: 60
+            description: "Requires 60 Magic Missile mastery"
+        impacts:
+          - type: stat_modifier
+            stat: missile_range
+            value: 30.0
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 0.8
+            modifier: MULTIPLY

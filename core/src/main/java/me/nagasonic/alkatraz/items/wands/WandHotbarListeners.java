@@ -13,10 +13,12 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.server.PluginDisableEvent;
+import org.bukkit.inventory.ItemStack;
 
 /**
  * Blocks all inventory manipulation while a player is in wand hotbar mode,
@@ -181,6 +183,21 @@ public class WandHotbarListeners implements Listener {
                     spell.cast(e.getPlayer(), SpellHotbarManager.getWand(e.getPlayer()));
                 }
             }
+        }
+    }
+
+    @EventHandler
+    private void onDeath(PlayerDeathEvent e) {
+        Player p = e.getPlayer();
+        if (SpellHotbarManager.isActive(p)){
+            e.getDrops().clear();
+            SpellHotbarManager.exit(p);
+            for (ItemStack item : p.getInventory().getStorageContents()) {
+                if (item != null && !item.getType().isAir()) {
+                    e.getDrops().add(item);
+                }
+            }
+            p.getInventory().setStorageContents(new ItemStack[36]);
         }
     }
 

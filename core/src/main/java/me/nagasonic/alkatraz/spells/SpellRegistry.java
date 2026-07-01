@@ -14,13 +14,18 @@ public class SpellRegistry {
     private static Map<Class<?>, Spell> allSpells = Collections.unmodifiableMap(new HashMap<>());
     private static Map<String, Spell> allSpellsByID = Collections.unmodifiableMap(new HashMap<>());
 
+    private static int registeredCount = 0;
+
     public static void registerSpells(){
+        registeredCount = 0;
         registerIfEnabled("air_blades", new AirBlades("AIR_BLADES"));
         registerIfEnabled("air_burst", new AirBurst("AIR_BURST"));
         registerIfEnabled("barrier", new Barrier("BARRIER"));
+        registerIfEnabled("blink", new Blink("BLINK"));
         registerIfEnabled("buff", new Buff("BUFF"));
         registerIfEnabled("debuff", new Debuff("DEBUFF"));
         registerIfEnabled("dark_tendrils", new DarkTendrils("DARK_TENDRILS"));
+        registerIfEnabled("earthen_wall", new EarthenWall("EARTHEN_WALL"));
         registerIfEnabled("detect", new Detect("DETECT"));
         registerIfEnabled("disguise", new Disguise("DISGUISE"));
         registerIfEnabled("earth_spike", new EarthSpike("EARTH_SPIKE"));
@@ -28,21 +33,30 @@ public class SpellRegistry {
         registerIfEnabled("fireball", new Fireball("FIREBALL"));
         registerIfEnabled("fire_blast", new FireBlast("FIRE_BLAST"));
         registerIfEnabled("fire_wall", new FireWall("FIRE_WALL"));
+        registerIfEnabled("flaming_volley", new FlamingVolley("FLAMING_VOLLEY"));
         registerIfEnabled("geyser", new Geyser("GEYSER"));
         registerIfEnabled("heal", new Heal("HEAL"));
         registerIfEnabled("lesser_heal", new LesserHeal("LESSER_HEAL"));
+        registerIfEnabled("light_buff", new LightBuff("LIGHT_BUFF"));
         registerIfEnabled("magic_missile", new MagicMissile("MAGIC_MISSILE"));
         registerIfEnabled("stealth", new Stealth("STEALTH"));
+        registerIfEnabled("summon_zombies", new SummonZombies("SUMMON_ZOMBIES"));
         registerIfEnabled("swift", new Swift("SWIFT"));
         registerIfEnabled("tremor", new Tremor("TREMOR"));
+        registerIfEnabled("whirlpool", new Whirlpool("WHIRLPOOL"));
         registerIfEnabled("water_pulse", new WaterPulse("WATER_PULSE"));
         registerIfEnabled("water_sphere", new WaterSphere("WATER_SPHERE"));
+        registerIfEnabled("wind_barrier", new WindBarrier("WIND_BARRIER"));
         registerIfEnabled("wind_vortex", new WindVortex("WIND_VORTEX"));
+        Alkatraz.logInfo("Registered " + registeredCount + " spells.");
     }
 
     private static void registerIfEnabled(String key, Spell spell){
         YamlConfiguration spellConfig = ConfigManager.getConfig("spells/" + key + ".yml").get();
-        if (spellConfig.getBoolean("enabled")) registerSpell(spell);
+        if (spellConfig.getBoolean("enabled")) {
+            registerSpell(spell);
+            registeredCount++;
+        }
     }
 
     public static Map<Class<?>, Spell> getAllSpells() {
@@ -90,7 +104,6 @@ public class SpellRegistry {
         Map<String, Spell> spellsById = new HashMap<>(allSpellsByID);
         spellsById.put(spell.getId(), spell);
         allSpellsByID = Collections.unmodifiableMap(spellsById);
-        Alkatraz.logInfo("Registered spell: " + spell.getId());
     }
 
     public static boolean isRegistered(Class<? extends Spell> spell){

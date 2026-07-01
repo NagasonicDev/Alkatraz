@@ -21,3 +21,6 @@ circle_ticks: 10
 
 # Unused at the moment, but keep false, otherwise some names/titles will appear weird.
 resource_pack_override: false
+
+# Whether to show the first-join tutorial to new players
+first_join_tutorial: true

@@ -169,6 +169,9 @@ public class CastSpellGoal extends Goal {
         SpellPrepareEvent event =
                 new SpellPrepareEvent(bukkitMob, spell, wand);
 
+        Bukkit.getPluginManager().callEvent(event);
+        if (event.isCancelled()) return;
+
         int circleTaskId =
                 spell.circleAction(bukkitMob, event);
 
@@ -185,7 +188,7 @@ public class CastSpellGoal extends Goal {
                 () -> {
                     Bukkit.getScheduler().cancelTask(circleTaskId);
 
-                    spell.mobCastAction(
+                    spell.mobCast(
                             bukkitMob,
                             wand
                     );

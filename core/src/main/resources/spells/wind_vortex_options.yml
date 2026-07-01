@@ -74,6 +74,10 @@ options:
             stat: circleLevel
             minimum: 3
             description: "Requires Circle Level 3"
+          - type: number_stat
+            stat: mastery_wind_vortex
+            minimum: 50
+            description: "Requires 50 Wind Vortex mastery"
         impacts:
           - type: stat_modifier
             stat: pull_strength
@@ -133,6 +137,10 @@ options:
             stat: circleLevel
             minimum: 4
             description: "Requires Circle Level 4"
+          - type: number_stat
+            stat: mastery_wind_vortex
+            minimum: 75
+            description: "Requires 75 Wind Vortex mastery"
         impacts:
           - type: stat_modifier
             stat: radius
@@ -192,6 +200,10 @@ options:
             stat: circleLevel
             minimum: 3
             description: "Requires Circle Level 3"
+          - type: number_stat
+            stat: mastery_wind_vortex
+            minimum: 40
+            description: "Requires 40 Wind Vortex mastery"
         impacts:
           - type: stat_modifier
             stat: duration

@@ -73,6 +73,10 @@ options:
             stat: circleLevel
             minimum: 3
             description: "Requires Circle Level 3"
+          - type: number_stat
+            stat: mastery_heal
+            minimum: 80
+            description: "Requires 80 Heal mastery"
         impacts:
           - type: stat_modifier
             stat: heal
@@ -126,6 +130,10 @@ options:
             stat: circleLevel
             minimum: 3
             description: "Requires Circle Level 3"
+          - type: number_stat
+            stat: mastery_heal
+            minimum: 60
+            description: "Requires 60 Heal mastery"
         impacts:
           - type: stat_modifier
             stat: target_range

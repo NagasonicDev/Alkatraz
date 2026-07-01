@@ -7,6 +7,7 @@ import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.progression.ProgressionService;
 import me.nagasonic.alkatraz.progression.circle.CircleDefinition;
+import me.nagasonic.alkatraz.progression.research.ResearchPointService;
 import me.nagasonic.alkatraz.spells.Spell;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -67,19 +68,18 @@ public class StatUtils {
 
     public static void addSpellMastery(Player p, Spell spell, int mastery){
         MagicProfile profile = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
-        if (profile.getSpellMastery(spell) == -1 && mastery > 0){
-            profile.setSpellMastery(spell, 0);
-        }
         if (profile.getSpellMastery(spell) + mastery < 0){
             profile.setSpellMastery(spell, 0);
         }else if (profile.getSpellMastery(spell) + mastery >= spell.getMaxMastery()){
             profile.setSpellMastery(spell, spell.getMaxMastery());
             profile.setStatPoints(profile.getStatPoints() + getStatPointsMastery(spell.getLevel()));
+            ResearchPointService.addPoints(p, "mastery_max");
         }else {
             profile.setSpellMastery(spell, profile.getSpellMastery(spell) + mastery);
         }
         if (p.isOnline()){
             Map<Spell, BossBar> masteryBars = profile.getMasteryBars();
+            Map<Spell, Integer> taskIds = profile.getMasteryBarTaskIds();
             if (masteryBars.containsKey(spell)){
                 BossBar bar = masteryBars.get(spell);
                 bar.removePlayer(p.getPlayer());
@@ -92,11 +92,17 @@ public class StatUtils {
                 bar.addPlayer(p.getPlayer());
                 masteryBars.replace(spell, bar);
                 profile.setMasteryBars(masteryBars);
-                Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(Alkatraz.getInstance(), () -> {
-                    if (bar.getProgress() == profile.getMasteryBars().get(spell).getProgress()){
+                int prevTask = taskIds.getOrDefault(spell, -1);
+                if (prevTask != -1) {
+                    Bukkit.getScheduler().cancelTask(prevTask);
+                }
+                int taskId = Bukkit.getScheduler().scheduleSyncDelayedTask(Alkatraz.getInstance(), () -> {
+                    if (p.isOnline()) {
                         bar.removePlayer(p.getPlayer());
                     }
                 }, 100L);
+                taskIds.put(spell, taskId);
+                profile.setMasteryBarTaskIds(taskIds);
             }else{
                 BossBar bar = Bukkit.createBossBar(format(spell.getDisplayName() + ": " + profile.getSpellMastery(spell) + "/" + spell.getMaxMastery()), spell.getMasteryBarColor(), BarStyle.SOLID);
                 if (profile.getSpellMastery(spell) / spell.getMaxMastery() > 1){
@@ -107,11 +113,13 @@ public class StatUtils {
                 bar.addPlayer(p.getPlayer());
                 masteryBars.put(spell, bar);
                 profile.setMasteryBars(masteryBars);
-                Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(Alkatraz.getInstance(), () -> {
-                    if (bar.getProgress() == profile.getMasteryBars().get(spell).getProgress()){
+                int taskId = Bukkit.getScheduler().scheduleSyncDelayedTask(Alkatraz.getInstance(), () -> {
+                    if (p.isOnline()) {
                         bar.removePlayer(p.getPlayer());
                     }
                 }, 100L);
+                taskIds.put(spell, taskId);
+                profile.setMasteryBarTaskIds(taskIds);
             }
         }
     }
@@ -183,6 +191,10 @@ public class StatUtils {
                         - getMaxMana(previousCircle))
         );
 
+        if (profile.getMana() > profile.getMaxMana()) {
+            profile.setMana(profile.getMaxMana());
+        }
+
         profile.setManaRegeneration(
                 profile.getManaRegeneration()
                         + (getManaRegen(circle + previousCircle)
@@ -190,6 +202,18 @@ public class StatUtils {
         );
 
         profile.setCircleLevel(previousCircle + circle);
+
+        ItemStack item = p.getInventory().getItemInMainHand();
+        if (item.getType() != Material.AIR && item.getAmount() != 0) {
+            if (Wand.isWand(item) || SpellHotbarManager.isActive(p)) {
+                Alkatraz.getNms().fakeExp(
+                        p,
+                        (float) (profile.getMana() / profile.getMaxMana()),
+                        (int) profile.getMana(),
+                        1
+                );
+            }
+        }
     }
 
     private static double getManaRegen(int circle){

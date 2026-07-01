@@ -1,0 +1,53 @@
+options:
+
+  blink_distance:
+    description: "Teleport distance."
+    icon: ENDER_PEARL
+    default_index: 0
+
+    values:
+
+      short:
+        display_name: "Short"
+        description: "8 block teleport."
+        icon: ENDER_PEARL
+        value_type: double
+        value: 8.0
+        impacts:
+          - type: stat_modifier
+            stat: blink_distance
+            value: 8.0
+            modifier: SET
+
+      medium:
+        display_name: "Medium"
+        description: "12 block teleport."
+        icon: ENDER_PEARL
+        value_type: double
+        value: 12.0
+        impacts:
+          - type: stat_modifier
+            stat: blink_distance
+            value: 12.0
+            modifier: SET
+
+      long:
+        display_name: "Long"
+        description: "16 block teleport."
+        icon: ENDER_PEARL
+        value_type: double
+        value: 16.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 3
+            description: "Requires Circle Level 3"
+          - type: number_stat
+            stat: mastery_blink
+            minimum: 50
+            description: "Requires 50 Blink mastery"
+        impacts:
+          - type: stat_modifier
+            stat: blink_distance
+            value: 16.0
+            modifier: SET

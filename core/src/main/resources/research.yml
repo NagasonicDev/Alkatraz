@@ -29,6 +29,7 @@ nodes:
     display_name: '&dAwakened Focus'
     category: magic
     icon: AMETHYST_SHARD
+    research_points_cost: 0
     position: { x: 0, y: 0 }
     description:
       - 'Shape raw mana into a stable point of focus.'
@@ -59,6 +60,7 @@ nodes:
     display_name: '&bMana Conservation'
     category: magic
     icon: LAPIS_LAZULI
+    research_points_cost: 25
     position: { x: 0, y: -2 }
     description:
       - 'Learn to hold power without letting it leak away.'
@@ -84,6 +86,7 @@ nodes:
     display_name: '&5Ritual Geometry'
     category: magic
     icon: ENCHANTING_TABLE
+    research_points_cost: 25
     position: { x: -2, y: 0 }
     description:
       - 'Place symbols in patterns that mana can follow.'
@@ -109,6 +112,7 @@ nodes:
     display_name: '&aSpellcraft Field Notes'
     category: magic
     icon: WRITABLE_BOOK
+    research_points_cost: 25
     position: { x: 2, y: 0 }
     description:
       - 'Record how spells behave outside the safety of theory.'
@@ -134,6 +138,7 @@ nodes:
     display_name: '&dDisciplined Channel'
     category: magic
     icon: NETHER_STAR
+    research_points_cost: 75
     position: { x: 0, y: 2 }
     description:
       - 'Bring theory, field notes, and ritual discipline together.'
@@ -166,6 +171,7 @@ nodes:
     display_name: '&cKindled Spark'
     category: fire
     icon: BLAZE_POWDER
+    research_points_cost: 20
     position: { x: 0, y: 0 }
     description:
       - 'Find the first controlled heat within your mana.'
@@ -198,6 +204,7 @@ nodes:
     display_name: '&9First Tide'
     category: water
     icon: WATER_BUCKET
+    research_points_cost: 20
     position: { x: 0, y: 0 }
     description:
       - 'Let mana settle into flow, pressure, and patience.'
@@ -230,6 +237,7 @@ nodes:
     display_name: '&2Stone Memory'
     category: earth
     icon: MOSS_BLOCK
+    research_points_cost: 20
     position: { x: 0, y: 0 }
     description:
       - 'Listen to old stone until it answers through your hands.'
@@ -262,6 +270,7 @@ nodes:
     display_name: '&fOpen Breath'
     category: air
     icon: FEATHER
+    research_points_cost: 20
     position: { x: 0, y: 0 }
     description:
       - 'Make your mana light enough to move before thought.'
@@ -294,6 +303,7 @@ nodes:
     display_name: '&eFirst Lantern'
     category: light
     icon: LANTERN
+    research_points_cost: 20
     position: { x: 0, y: 0 }
     description:
       - 'Turn mana toward clarity, warmth, and repair.'
@@ -326,6 +336,7 @@ nodes:
     display_name: '&8Quiet Shadow'
     category: dark
     icon: ECHO_SHARD
+    research_points_cost: 20
     position: { x: 0, y: 0 }
     description:
       - 'Approach the hidden current beneath ordinary mana.'
@@ -358,6 +369,7 @@ nodes:
     display_name: '&6Ember Control'
     category: fire
     icon: CAMPFIRE
+    research_points_cost: 40
     position: { x: -2, y: 2 }
     description:
       - 'Keep flame alive without letting it spread.'
@@ -385,6 +397,7 @@ nodes:
     display_name: '&cInferno Rite'
     category: fire
     icon: BLAZE_ROD
+    research_points_cost: 100
     position: { x: 2, y: 2 }
     description:
       - 'Call heat through motion, breath, and violent intent.'
@@ -418,6 +431,7 @@ nodes:
     display_name: '&bRestorative Current'
     category: water
     icon: PRISMARINE_CRYSTALS
+    research_points_cost: 40
     position: { x: -2, y: 2 }
     description:
       - 'Study the way moving water carries wounds away.'
@@ -445,6 +459,7 @@ nodes:
     display_name: '&3Depth Oath'
     category: water
     icon: HEART_OF_THE_SEA
+    research_points_cost: 100
     position: { x: 2, y: 2 }
     description:
       - 'Swear patience to the deep and learn its pressure.'
@@ -472,6 +487,7 @@ nodes:
     display_name: '&aQuarry Signs'
     category: earth
     icon: IRON_PICKAXE
+    research_points_cost: 40
     position: { x: -2, y: 2 }
     description:
       - 'Break stone and read the pressure lines it leaves behind.'
@@ -499,6 +515,7 @@ nodes:
     display_name: '&2Bulwark Vow'
     category: earth
     icon: SHIELD
+    research_points_cost: 100
     position: { x: 2, y: 2 }
     description:
       - 'Hold your ground while mana settles into your bones.'
@@ -531,6 +548,7 @@ nodes:
     display_name: '&bKinetic Step'
     category: air
     icon: RABBIT_FOOT
+    research_points_cost: 40
     position: { x: 2, y: -2 }
     description:
       - 'Study motion until the body wastes less effort.'
@@ -559,6 +577,7 @@ nodes:
     display_name: '&fStorm Eye'
     category: air
     icon: PHANTOM_MEMBRANE
+    research_points_cost: 100
     position: { x: -2, y: 2 }
     description:
       - 'Stand calmly inside violent motion.'
@@ -586,6 +605,7 @@ nodes:
     display_name: '&eMending Script'
     category: light
     icon: GOLDEN_APPLE
+    research_points_cost: 40
     position: { x: -2, y: 2 }
     description:
       - 'Write restorative intent into a repeatable form.'
@@ -613,6 +633,7 @@ nodes:
     display_name: '&eRadiant Oath'
     category: light
     icon: GLOWSTONE
+    research_points_cost: 100
     position: { x: 2, y: 2 }
     description:
       - 'Carry enough light that fear has less room to grow.'
@@ -645,6 +666,7 @@ nodes:
     display_name: '&5Tethered Whisper'
     category: dark
     icon: SCULK
+    research_points_cost: 40
     position: { x: 2, y: -2 }
     description:
       - 'Bind intention to silence and let the target feel it late.'
@@ -672,6 +694,7 @@ nodes:
     display_name: '&8Eclipse Compact'
     category: dark
     icon: BLACK_CANDLE
+    research_points_cost: 100
     position: { x: -2, y: 2 }
     description:
       - 'Accept the cost of hidden power and name it clearly.'

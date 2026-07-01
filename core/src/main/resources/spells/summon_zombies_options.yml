@@ -1,0 +1,53 @@
+options:
+
+  zombie_count:
+    description: "Number of zombies to summon."
+    icon: ROTTEN_FLESH
+    default_index: 0
+
+    values:
+
+      two:
+        display_name: "Two"
+        description: "Summon 2 zombies."
+        icon: ROTTEN_FLESH
+        value_type: double
+        value: 2.0
+        impacts:
+          - type: stat_modifier
+            stat: zombie_count
+            value: 2.0
+            modifier: SET
+
+      three:
+        display_name: "Three"
+        description: "Summon 3 zombies."
+        icon: ROTTEN_FLESH
+        value_type: double
+        value: 3.0
+        impacts:
+          - type: stat_modifier
+            stat: zombie_count
+            value: 3.0
+            modifier: SET
+
+      four:
+        display_name: "Four"
+        description: "Summon 4 zombies."
+        icon: ROTTEN_FLESH
+        value_type: double
+        value: 4.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 5
+            description: "Requires Circle Level 5"
+          - type: number_stat
+            stat: mastery_summon_zombies
+            minimum: 100
+            description: "Requires 100 Summon Zombies mastery"
+        impacts:
+          - type: stat_modifier
+            stat: zombie_count
+            value: 4.0
+            modifier: SET

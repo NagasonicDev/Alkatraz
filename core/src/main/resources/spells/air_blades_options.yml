@@ -74,6 +74,10 @@ options:
             stat: circleLevel
             minimum: 3
             description: "Requires Circle Level 3"
+          - type: number_stat
+            stat: mastery_air_blades
+            minimum: 50
+            description: "Requires 50 Air Blades mastery"
         impacts:
           - type: stat_modifier
             stat: blade_count
