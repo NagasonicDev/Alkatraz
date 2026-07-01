@@ -1,0 +1,23 @@
+# mobs/squid.yml
+fire_affinity:    0.0
+fire_resistance:  -10.0
+
+water_affinity:   30.0
+water_resistance: 20.0
+
+earth_affinity:   0.0
+earth_resistance: 0.0
+
+air_affinity:     0.0
+air_resistance:   -10.0
+
+light_affinity: 0.0
+light_resistance: 0.0
+
+dark_affinity: 5.0
+dark_resistance: 5.0
+
+magic_affinity:   5.0
+magic_resistance: 5.0
+
+spells: []

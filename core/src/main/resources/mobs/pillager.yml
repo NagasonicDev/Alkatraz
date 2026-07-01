@@ -1,0 +1,23 @@
+# mobs/pillager.yml
+fire_affinity:    0.0
+fire_resistance:  0.0
+
+water_affinity:   0.0
+water_resistance: 0.0
+
+earth_affinity:   10.0
+earth_resistance: 10.0
+
+air_affinity:     10.0
+air_resistance:   10.0
+
+light_affinity: -10.0
+light_resistance: -10.0
+
+dark_affinity: 10.0
+dark_resistance: 20.0
+
+magic_affinity:   0.0
+magic_resistance: 10.0
+
+spells: []

@@ -1,0 +1,23 @@
+# mobs/illusioner.yml
+fire_affinity:    0.0
+fire_resistance:  0.0
+
+water_affinity:   0.0
+water_resistance: 0.0
+
+earth_affinity:   0.0
+earth_resistance: 5.0
+
+air_affinity:     10.0
+air_resistance:   10.0
+
+light_affinity: -20.0
+light_resistance: -10.0
+
+dark_affinity: 30.0
+dark_resistance: 30.0
+
+magic_affinity:   30.0
+magic_resistance: 40.0
+
+spells: []
