@@ -102,11 +102,13 @@ public abstract class Menu {
     }
 
     protected int getIntData(ItemStack item, String key) {
-        return NBT.get(item, nbt -> (Integer) nbt.getInteger(key));
+        Integer result = NBT.get(item, nbt -> (Integer) nbt.getInteger(key));
+        return result != null ? result : 0;
     }
 
     protected boolean getBoolData(ItemStack item, String key) {
-        return NBT.get(item, nbt -> (Boolean) nbt.getBoolean(key));
+        Boolean result = NBT.get(item, nbt -> (Boolean) nbt.getBoolean(key));
+        return result != null && result;
     }
 
     // Getters
