@@ -29,7 +29,7 @@ import java.util.*;
  * <p>On exiting hotbar mode the saved inventory is restored exactly as it was.
  *
  * <p>Inventory interaction is fully blocked while in hotbar mode; enforcement is
- * done in {@link me.nagasonic.alkatraz.items.wands.WandHotbarListeners}.
+ * done in {@link me.nagasonic.alkatraz.items.magic.listener.CastEventListener}.
  */
 public class SpellHotbarManager {
 
@@ -44,6 +44,7 @@ public class SpellHotbarManager {
     private static final Map<UUID, Integer> savedHeldSlot = new HashMap<>();
 
     private static final Map<UUID, ItemStack> hotbarActive = new HashMap<>();
+    private static final Map<UUID, Long> justEntered = new HashMap<>();
 
     // -------------------------------------------------------------------------
     // Public API
@@ -81,6 +82,8 @@ public class SpellHotbarManager {
                 player.getInventory().getHeldItemSlot()
         );
 
+        justEntered.put(uuid, System.currentTimeMillis() + 500);
+
         player.getInventory().setStorageContents(new ItemStack[36]);
 
         // Place configured spells into slots 0-7
@@ -98,6 +101,7 @@ public class SpellHotbarManager {
 
         // Place the wand in slot 8
         player.getInventory().setItem(EXIT_SLOT, wand != null ? wand.clone() : null);
+        player.getInventory().setHeldItemSlot(0);
         player.updateInventory();
         Bukkit.getScheduler().scheduleSyncDelayedTask(Alkatraz.getInstance(), () -> {
             profile.setCanCast(true);
@@ -115,6 +119,7 @@ public class SpellHotbarManager {
         UUID uuid = player.getUniqueId();
 
         hotbarActive.remove(uuid);
+        justEntered.remove(uuid);
 
         ItemStack[] storage = savedInventories.remove(uuid);
         ItemStack offhand = savedOffhand.remove(uuid);
@@ -148,6 +153,15 @@ public class SpellHotbarManager {
     }
 
     /**
+     * Returns true if the player entered hotbar mode within the last 500ms.
+     * Used to prevent the entry click from immediately triggering exit.
+     */
+    public static boolean isJustEntered(Player player) {
+        Long deadline = justEntered.get(player.getUniqueId());
+        return deadline != null && System.currentTimeMillis() < deadline;
+    }
+
+    /**
      * Refreshes the hotbar spell items without touching the saved snapshot.
      * Call this after the player reconfigures their hotbar spells.
      */
@@ -165,6 +179,19 @@ public class SpellHotbarManager {
             player.getInventory().setItem(slot, buildEmptySlotItem(slot + 1));
         }
         player.updateInventory();
+    }
+
+    /**
+     * Exits hotbar mode for all currently active players.
+     * Called on plugin disable to ensure no inventories are left in a broken state.
+     */
+    public static void exitAll() {
+        for (UUID uuid : List.copyOf(hotbarActive.keySet())) {
+            Player player = Bukkit.getPlayer(uuid);
+            if (player != null) {
+                exit(player);
+            }
+        }
     }
 
     // -------------------------------------------------------------------------
