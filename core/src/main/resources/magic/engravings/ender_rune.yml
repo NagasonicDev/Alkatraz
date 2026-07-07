@@ -1,0 +1,28 @@
+key: alkatraz:ender_rune
+allowed_item_types:
+  - wand
+  - sword
+  - bow
+item:
+  material: ENDER_PEARL
+  display_name: '&5Ender Rune'
+  lore:
+    - '&7&oA warped rune that bends space itself.'
+    - '&7&oTeleports the user a short distance.'
+conditions:
+  - type: random
+    chance: 0.3
+  - type: circle_level
+    min_circle: 2
+effects:
+  - type: teleport
+    distance: 8
+recipe:
+  shape:
+    - " E "
+    - " M "
+    - " C "
+  ingredients:
+    M: AMETHYST_SHARD
+    E: ENDER_PEARL
+    C: CHORUS_FRUIT

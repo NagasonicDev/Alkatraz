@@ -1,0 +1,30 @@
+key: alkatraz:feather_fall_rune
+allowed_item_types:
+  - boots
+item:
+  material: FEATHER
+  display_name: '&fFeather Fall Rune'
+  lore:
+    - '&7&oA weightless rune that softens falls.'
+    - '&7&oGrants Slow Falling when taking damage.'
+conditions:
+  - type: event_parameter
+    parameter: cause
+    value: FALL
+  - type: random
+    chance: 0.4
+  - type: circle_level
+    min_circle: 1
+effects:
+  - type: potion_effect
+    effect: SLOW_FALLING
+    duration_ticks: 100
+    amplifier: 0
+recipe:
+  shape:
+    - " F "
+    - "FMF"
+    - "   "
+  ingredients:
+    M: AMETHYST_SHARD
+    F: FEATHER

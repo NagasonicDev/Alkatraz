@@ -1,15 +1,17 @@
 package me.nagasonic.alkatraz.items.magic.effect;
 
-import me.nagasonic.alkatraz.items.magic.trigger.TriggerContext;
+import me.nagasonic.alkatraz.api.magic.effect.Effect;
+
+import me.nagasonic.alkatraz.api.magic.trigger.TriggerContext;
 import org.bukkit.entity.LivingEntity;
 
 import java.util.Map;
 
-final class IgniteEffect implements Effect {
+public final class IgniteEffect implements Effect {
 
     private final int durationTicks;
 
-    IgniteEffect(int durationTicks) {
+    public IgniteEffect(int durationTicks) {
         this.durationTicks = durationTicks;
     }
 
@@ -21,7 +23,7 @@ final class IgniteEffect implements Effect {
         }
     }
 
-    static Effect fromConfig(Map<String, Object> config) {
+    public static Effect fromConfig(Map<String, Object> config) {
         int duration = Integer.parseInt(String.valueOf(config.getOrDefault("duration_ticks", 60)));
         return new IgniteEffect(duration);
     }

@@ -1,0 +1,26 @@
+key: alkatraz:mana_font_rune
+allowed_item_types:
+  - ring
+  - robe
+  - artifact
+item:
+  material: DRAGON_BREATH
+  display_name: '&dMana Font Rune'
+  lore:
+    - '&7&oA rune that channels an endless well of mana.'
+    - '&7&oGreatly increases mana regeneration and maximum mana.'
+attributes:
+  alkatraz:mana_regeneration: 5
+  alkatraz:max_mana: 100
+conditions:
+  - type: circle_level
+    min_circle: 2
+recipe:
+  shape:
+    - " R "
+    - "GMG"
+    - "   "
+  ingredients:
+    M: AMETHYST_SHARD
+    R: REDSTONE
+    G: GLOWSTONE

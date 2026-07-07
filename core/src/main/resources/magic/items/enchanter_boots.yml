@@ -1,0 +1,13 @@
+key: alkatraz:enchanter_boots
+material: LEATHER_BOOTS
+dye_color: 'AA3333'
+display_name: '&r&cEnchanter Boots'
+lore:
+  - '&7Enchanted boots for the master enchanter.'
+components:
+  - alkatraz:equipment
+attributes:
+  alkatraz:max_mana: 75
+max_engravings: 0
+vanilla_attributes:
+  GENERIC_ARMOR: 2

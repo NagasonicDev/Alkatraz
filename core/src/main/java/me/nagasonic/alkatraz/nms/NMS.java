@@ -2,12 +2,15 @@ package me.nagasonic.alkatraz.nms;
 
 import me.nagasonic.alkatraz.mobs.MagicEntityType;
 import me.nagasonic.alkatraz.util.Skin;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,5 +30,45 @@ public interface NMS extends Listener {
     }
     default void onEnable(){
         // default: do nothing
+    }
+
+    // -----------------------------------------------------------------------
+    // Per-player coloured glowing
+    // -----------------------------------------------------------------------
+
+    /**
+     * Makes an entity appear with a coloured glow outline for a specific player.
+     * Uses a per-viewer scoreboard team for colour and a raw entity metadata
+     * packet to set the glowing flag on only the viewer's client.
+     */
+    default void setGlowing(Entity entity, Player viewer, ChatColor color) {
+        Scoreboard scoreboard = viewer.getScoreboard();
+        String teamName = "ge-" + viewer.getUniqueId() + "-" + entity.getUniqueId();
+        Team team = scoreboard.getTeam(teamName);
+        if (team != null) team.unregister();
+        team = scoreboard.registerNewTeam(teamName);
+        team.setColor(color);
+        team.addEntry(entity.getUniqueId().toString());
+        sendGlowingPacket(entity, viewer, true);
+    }
+
+    /**
+     * Removes the per-player glow effect from an entity for a specific viewer.
+     */
+    default void unsetGlowing(Entity entity, Player viewer) {
+        String teamName = "ge-" + viewer.getUniqueId() + "-" + entity.getUniqueId();
+        Team team = viewer.getScoreboard().getTeam(teamName);
+        if (team != null) team.unregister();
+        sendGlowingPacket(entity, viewer, false);
+    }
+
+    /**
+     * Sends a {@code ClientboundSetEntityDataPacket} to the viewer to toggle
+     * the glowing flag on the given entity. The default implementation uses
+     * the global Bukkit API; individual NMS modules may override this with
+     * a per-player packet for stealthier glow.
+     */
+    default void sendGlowingPacket(Entity entity, Player viewer, boolean glowing) {
+        entity.setGlowing(glowing);
     }
 }

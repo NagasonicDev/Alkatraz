@@ -19,7 +19,7 @@ public enum Ground {
     SAND(Material.SAND),
     RED_SAND(Material.RED_SAND),
     GRAVEL(Material.GRAVEL),
-    SUSPICIOUS_SAND(Material.SUSPICIOUS_SAND),
+    // SUSPICIOUS_SAND removed — requires Minecraft 1.20+, project targets 1.19
 
     // --- Clay & Terracotta ---------------------------------------------------
     CLAY(Material.CLAY),
@@ -235,8 +235,7 @@ public enum Ground {
                  BAMBOO_JUNGLE,
                  SAVANNA,
                  SAVANNA_PLATEAU,
-                 WINDSWEPT_SAVANNA,
-                 CHERRY_GROVE          -> GRASS.getType();
+                  WINDSWEPT_SAVANNA       -> GRASS.getType();
             case STONY_PEAKS,
                  JAGGED_PEAKS,
                  FROZEN_PEAKS          -> STONE.getType();

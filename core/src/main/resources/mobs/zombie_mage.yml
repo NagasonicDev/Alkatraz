@@ -2,7 +2,7 @@
 
 # Natural spawn replacement — when a zombie spawns, this chance is rolled.
 replaces: zombie
-spawn_chance: 5
+spawn_chance: 7.5
 spawn_reasons:
   - NATURAL
 

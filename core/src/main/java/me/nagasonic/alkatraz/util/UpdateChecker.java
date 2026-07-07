@@ -29,11 +29,8 @@ public class UpdateChecker implements Listener {
             String tag_name = jsonObject.get("version_number").getAsString();
             consumer.accept(tag_name);
         } catch (IOException e) {
-            if (Alkatraz.getPluginConfig().getBoolean("debug")) {
-                Alkatraz.getInstance().getLogger().info("Checking for updates failed:" + e.getMessage());
-            }else {
-                Alkatraz.getInstance().getLogger().info("Checking for updates failed");
-            }
+            Alkatraz.logDebug("Checking for updates failed: " + e.getMessage());
+            Alkatraz.logInfo("Checking for updates failed");
         }
     }
 

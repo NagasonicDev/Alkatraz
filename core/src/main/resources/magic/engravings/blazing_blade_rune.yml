@@ -1,0 +1,22 @@
+key: alkatraz:blazing_blade_rune
+allowed_item_types:
+  - sword
+  - axe
+item:
+  material: BLAZE_ROD
+  display_name: '&6Blazing Blade Rune'
+  lore:
+    - '&7&oA searing rune that sets the battlefield ablaze.'
+    - '&7&oIgnites targets for a duration.'
+effects:
+  - type: ignite
+    duration_ticks: 100
+recipe:
+  shape:
+    - " B "
+    - "FMF"
+    - "   "
+  ingredients:
+    M: AMETHYST_SHARD
+    B: BLAZE_POWDER
+    F: FLINT_AND_STEEL

@@ -1,0 +1,26 @@
+key: alkatraz:thorns_rune
+allowed_item_types:
+  - chestplate
+  - leggings
+item:
+  material: CACTUS
+  display_name: '&aThorns Rune'
+  lore:
+    - '&7&oA prickly rune that retaliates against attackers.'
+    - '&7&oDeals damage to attackers.'
+conditions:
+  - type: circle_level
+    min_circle: 1
+effects:
+  - type: damage
+    damage: 2
+    bypass_armor: true
+recipe:
+  shape:
+    - " C "
+    - "IMI"
+    - "   "
+  ingredients:
+    M: AMETHYST_SHARD
+    C: CACTUS
+    I: IRON_BARS

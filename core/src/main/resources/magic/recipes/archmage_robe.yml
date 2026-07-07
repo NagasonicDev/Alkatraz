@@ -1,0 +1,13 @@
+definition: alkatraz:archmage_robe
+shape:
+  - "L L"
+  - "LLL"
+  - "LNL"
+ingredients:
+  L: LEATHER
+  N: NETHER_STAR
+requirements:
+  - type: number_stat
+    stat: circleLevel
+    minimum: 5
+    description: "Requires Circle Level 5"

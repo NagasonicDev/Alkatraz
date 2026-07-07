@@ -1,0 +1,7 @@
+definition: alkatraz:apprentice_leggings
+shape:
+  - "LLL"
+  - "L L"
+  - "L L"
+ingredients:
+  L: LEATHER

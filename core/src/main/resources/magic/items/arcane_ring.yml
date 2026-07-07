@@ -1,0 +1,10 @@
+key: alkatraz:arcane_ring
+material: GOLD_NUGGET
+display_name: '&r&bArcane Ring'
+lore:
+  - '&7A ring infused with arcane energy.'
+components:
+  - alkatraz:equipment
+attributes:
+  alkatraz:max_mana: 50
+  alkatraz:mana_regeneration: 2

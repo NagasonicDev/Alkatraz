@@ -112,9 +112,7 @@ public abstract class PagedMenu<T> extends Menu {
             List<String> lore = new ArrayList<>();
             lore.add(ColorFormat.format("&ePage " + (currentPage + 1)));
             meta.setLore(lore);
-            if (meta.hasCustomModelData()) {
-                meta.setCustomModelData(32112);
-            }
+            meta.setCustomModelData(32112);
             nextPage.setItemMeta(meta);
             setMenuData(nextPage, "action", "next_page");
             inventory.setItem(nextPageSlot, nextPage);
@@ -128,9 +126,7 @@ public abstract class PagedMenu<T> extends Menu {
             List<String> lore = new ArrayList<>();
             lore.add(ColorFormat.format("&ePage " + (currentPage - 1)));
             meta.setLore(lore);
-            if (meta.hasCustomModelData()) {
-                meta.setCustomModelData(32111);
-            }
+            meta.setCustomModelData(32111);
             prevPage.setItemMeta(meta);
             setMenuData(prevPage, "action", "previous_page");
             inventory.setItem(previousPageSlot, prevPage);
@@ -174,7 +170,7 @@ public abstract class PagedMenu<T> extends Menu {
         }
         
         // Check if click is on a content slot
-        int slot = event.getSlot();
+        int slot = event.getRawSlot();
         for (int contentSlot : contentSlots) {
             if (slot == contentSlot) {
                 int pageIndex = (currentPage - 1) * itemsPerPage;

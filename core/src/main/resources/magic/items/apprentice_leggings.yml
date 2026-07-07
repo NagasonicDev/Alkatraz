@@ -1,0 +1,11 @@
+key: alkatraz:apprentice_leggings
+material: LEATHER_LEGGINGS
+dye_color: '3344AA'
+display_name: '&r&bApprentice Leggings'
+lore:
+  - '&7Simple leggings for the aspiring wizard.'
+components:
+  - alkatraz:equipment
+attributes:
+  alkatraz:max_mana: 25
+max_engravings: 0

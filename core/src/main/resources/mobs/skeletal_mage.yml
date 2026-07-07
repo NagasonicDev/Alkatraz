@@ -1,7 +1,7 @@
 # mobs/skeletal_mage.yml
 
 replaces: skeleton
-spawn_chance: 4
+spawn_chance: 10
 spawn_reasons:
   - NATURAL
 

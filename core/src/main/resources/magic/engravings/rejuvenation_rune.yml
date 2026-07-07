@@ -1,0 +1,28 @@
+key: alkatraz:rejuvenation_rune
+allowed_item_types:
+  - ring
+  - robe
+  - artifact
+item:
+  material: POPPY
+  display_name: '&dRejuvenation Rune'
+  lore:
+    - '&7&oA vibrant rune blooming with life energy.'
+    - '&7&oGrants regeneration effect.'
+conditions:
+  - type: circle_level
+    min_circle: 2
+effects:
+  - type: potion_effect
+    effect: REGENERATION
+    duration_ticks: 100
+    amplifier: 0
+recipe:
+  shape:
+    - " G "
+    - "SMS"
+    - "   "
+  ingredients:
+    M: AMETHYST_SHARD
+    G: GOLDEN_CARROT
+    S: SUGAR

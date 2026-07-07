@@ -1,6 +1,8 @@
 package me.nagasonic.alkatraz.items.magic.effect;
 
-import me.nagasonic.alkatraz.items.magic.registry.MagicItemRegistries;
+import me.nagasonic.alkatraz.api.magic.effect.Effect;
+
+import me.nagasonic.alkatraz.api.magic.registry.MagicItemRegistries;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.util.ArrayList;

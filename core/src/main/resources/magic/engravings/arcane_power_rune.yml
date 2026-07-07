@@ -1,0 +1,27 @@
+key: alkatraz:arcane_power_rune
+allowed_item_types:
+  - wand
+  - sword
+item:
+  material: BOOK
+  display_name: '&dArcane Power Rune'
+  lore:
+    - '&7&oA rune pulsing with focused arcane power.'
+    - '&7&oIncreases spell power and heals the caster.'
+attributes:
+  alkatraz:spell_power: 5
+conditions:
+  - type: circle_level
+    min_circle: 2
+effects:
+  - type: heal
+    amount: 2
+recipe:
+  shape:
+    - " B "
+    - "LML"
+    - "   "
+  ingredients:
+    M: AMETHYST_SHARD
+    B: BOOK
+    L: LAPIS_LAZULI

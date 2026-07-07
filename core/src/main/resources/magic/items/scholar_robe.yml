@@ -1,0 +1,14 @@
+key: alkatraz:scholar_robe
+material: LEATHER_CHESTPLATE
+dye_color: '8833AA'
+display_name: '&r&dScholar Robe'
+lore:
+  - '&7A refined robe for the scholarly wizard.'
+components:
+  - alkatraz:equipment
+attributes:
+  alkatraz:max_mana: 90
+  alkatraz:mana_regeneration: 2
+max_engravings: 1
+vanilla_attributes:
+  GENERIC_ARMOR: 3

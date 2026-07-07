@@ -1,0 +1,13 @@
+definition: alkatraz:scholar_robe
+shape:
+  - "L L"
+  - "LLL"
+  - "LBL"
+ingredients:
+  L: LEATHER
+  B: BOOK
+requirements:
+  - type: number_stat
+    stat: circleLevel
+    minimum: 1
+    description: "Requires Circle Level 1"

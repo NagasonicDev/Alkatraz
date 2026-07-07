@@ -1,0 +1,13 @@
+key: alkatraz:scholar_leggings
+material: LEATHER_LEGGINGS
+dye_color: '8833AA'
+display_name: '&r&dScholar Leggings'
+lore:
+  - '&7Refined leggings for the scholarly wizard.'
+components:
+  - alkatraz:equipment
+attributes:
+  alkatraz:max_mana: 65
+max_engravings: 1
+vanilla_attributes:
+  GENERIC_ARMOR: 2

@@ -80,6 +80,7 @@ public class ProfileManager implements Listener {
         }
         
         // Load from disk
+        Alkatraz.logHigh("Loading profile " + profileClass.getSimpleName() + " for " + uuid);
         profile = ProfilePersistence.loadProfile(uuid, profileClass);
         cache.cacheProfile(uuid, profile);
         

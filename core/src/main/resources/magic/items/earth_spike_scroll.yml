@@ -1,0 +1,9 @@
+key: alkatraz:earth_spike_scroll
+material: PAPER
+display_name: '&6Scroll of Earth Spike'
+lore:
+  - '&7A sturdy scroll etched with'
+  - '&7the strength of the earth.'
+components:
+  - alkatraz:scroll
+spell_id: earth_spike

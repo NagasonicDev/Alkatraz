@@ -1,0 +1,27 @@
+key: alkatraz:marksman_rune
+allowed_item_types:
+  - bow
+  - crossbow
+item:
+  material: ARROW
+  display_name: '&aMarksman Rune'
+  lore:
+    - '&7&oA precision rune that guides projectiles true.'
+    - '&7&oIncreases projectile damage.'
+conditions:
+  - type: random
+    chance: 0.35
+  - type: circle_level
+    min_circle: 1
+effects:
+  - type: damage
+    damage: 4
+recipe:
+  shape:
+    - " A "
+    - "FMF"
+    - "   "
+  ingredients:
+    M: AMETHYST_SHARD
+    A: ARROW
+    F: FLINT

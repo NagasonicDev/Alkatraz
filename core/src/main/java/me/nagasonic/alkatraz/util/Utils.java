@@ -3,7 +3,8 @@ package me.nagasonic.alkatraz.util;
 import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.dom.*;
-import me.nagasonic.alkatraz.items.wands.WandRegistry;
+import me.nagasonic.alkatraz.items.magic.MagicItemServices;
+import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
 import me.nagasonic.alkatraz.spells.Element;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
 import net.md_5.bungee.api.ChatColor;
@@ -15,6 +16,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.util.RayTraceResult;
 
 import java.text.DecimalFormat;
 import java.util.*;
@@ -24,7 +26,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.lang3.StringUtils;
+
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -209,7 +211,14 @@ public class Utils {
                 String subtitle = "";
                 int titleDuration = 40;
                 int fadeDuration = 5;
-                String subString = StringUtils.substringBetween(message, "TITLE(", ")");
+                String subString = null;
+                int titleStart = message.indexOf("TITLE(");
+                if (titleStart >= 0) {
+                    int parenEnd = message.indexOf(")", titleStart + 6);
+                    if (parenEnd >= 0) {
+                        subString = message.substring(titleStart + 6, parenEnd);
+                    }
+                }
                 if (subString != null){
                     String[] args = subString.split(";");
                     if (args.length > 0) title = args[0];
@@ -270,7 +279,7 @@ public class Utils {
             if (item.contains("$")){
                 String[] aitem = item.split("$");
                 if (aitem[0] == "WAND"){
-                    def = WandRegistry.getWand(aitem[1]).getItem();
+                    def = MagicItemServices.get().createItem(MagicKeys.alkatraz(aitem[1].toLowerCase()));
                 }
             }else{
                 def.setType(Material.valueOf(item));
@@ -301,6 +310,45 @@ public class Utils {
     /**
      * @return the amount of experience gained per spell based on circle level
      */
+    /**
+     * Paper's Player.getTargetEntity(int) replacement.
+     * Ray-traces for an entity the player is looking at within the given range.
+     */
+    public static Entity getTargetEntity(Player player, int range) {
+        if (player == null) return null;
+        RayTraceResult result = player.getWorld().rayTraceEntities(
+                player.getEyeLocation(),
+                player.getEyeLocation().getDirection(),
+                range,
+                e -> e != player
+        );
+        return result != null ? result.getHitEntity() : null;
+    }
+
+    /**
+     * Paper's Location.getNearbyLivingEntities(double) replacement.
+     */
+    public static List<LivingEntity> getNearbyLivingEntities(Location location, double rangeX, double rangeY, double rangeZ) {
+        return location.getWorld().getNearbyEntities(location, rangeX, rangeY, rangeZ).stream()
+                .filter(e -> e instanceof LivingEntity)
+                .map(e -> (LivingEntity) e)
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    /**
+     * Paper's Location.getNearbyLivingEntities(int) replacement.
+     */
+    public static List<LivingEntity> getNearbyLivingEntities(Location location, int range) {
+        return getNearbyLivingEntities(location, (double) range, (double) range, (double) range);
+    }
+
+    /**
+     * Paper's Location.getNearbyLivingEntities(double) replacement.
+     */
+    public static List<LivingEntity> getNearbyLivingEntities(Location location, double range) {
+        return getNearbyLivingEntities(location, range, range, range);
+    }
+
     public static double getExp(int circle){
         return switch (circle) {
             case 0 -> 1;
@@ -380,7 +428,7 @@ public class Utils {
         int z = block.getZ();
 
         for (int step = 0; step < raiseAmount; step++) {
-            // Move blocks top → bottom
+            // Move blocks top â†’ bottom
             for (int i = 0; i <= depth; i++) {
                 Block from = world.getBlockAt(x, y - i + step, z);
                 Block to   = world.getBlockAt(x, y - i + step + 1, z);

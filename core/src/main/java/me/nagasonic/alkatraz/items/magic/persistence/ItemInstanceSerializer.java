@@ -1,7 +1,8 @@
 package me.nagasonic.alkatraz.items.magic.persistence;
 
-import me.nagasonic.alkatraz.items.magic.instance.MagicItemInstance;
-import me.nagasonic.alkatraz.items.magic.registry.MagicKeys;
+import me.nagasonic.alkatraz.api.magic.instance.Engraving;
+import me.nagasonic.alkatraz.api.magic.instance.MagicItemInstance;
+import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -26,7 +27,7 @@ public final class ItemInstanceSerializer {
         yaml.set(ROOT + ".instance-id", instance.instanceId().toString());
         yaml.set(ROOT + ".definition-key", MagicKeys.format(instance.definitionKey()));
         yaml.set(ROOT + ".modifiers", formatKeys(instance.modifiers()));
-        yaml.set(ROOT + ".sockets", formatKeys(instance.sockets()));
+        yaml.set(ROOT + ".engravings", serializeEngravings(instance.engravings()));
         yaml.set(ROOT + ".progression", instance.progression());
         yaml.set(ROOT + ".custom-data", instance.customData());
         return yaml.saveToString();
@@ -57,11 +58,11 @@ public final class ItemInstanceSerializer {
         UUID instanceId = UUID.fromString(yaml.getString(ROOT + ".instance-id"));
         NamespacedKey definitionKey = MagicKeys.require(yaml.getString(ROOT + ".definition-key"));
         List<NamespacedKey> modifiers = parseKeys(yaml.getStringList(ROOT + ".modifiers"));
-        List<NamespacedKey> sockets = parseKeys(yaml.getStringList(ROOT + ".sockets"));
+        List<Engraving> engravings = parseEngravings(yaml.getMapList(ROOT + ".engravings"));
         Map<String, Object> progression = sectionToMap(yaml.getConfigurationSection(ROOT + ".progression"));
         Map<String, Object> customData = sectionToMap(yaml.getConfigurationSection(ROOT + ".custom-data"));
 
-        return new MagicItemInstance(instanceId, definitionKey, modifiers, sockets, progression, customData);
+        return new MagicItemInstance(instanceId, definitionKey, modifiers, engravings, progression, customData);
     }
 
     private static MagicItemInstance migrateForward(MagicItemInstance instance, int fromVersion) {
@@ -70,6 +71,33 @@ public final class ItemInstanceSerializer {
         }
         // Placeholder for chained migrations as the schema evolves.
         return instance;
+    }
+
+    private static List<Map<String, String>> serializeEngravings(List<Engraving> engravings) {
+        List<Map<String, String>> list = new ArrayList<>();
+        for (Engraving eng : engravings) {
+            Map<String, String> entry = new LinkedHashMap<>();
+            entry.put("engraving_key", MagicKeys.format(eng.engravingKey()));
+            entry.put("trigger_key", MagicKeys.format(eng.triggerKey()));
+            list.add(entry);
+        }
+        return list;
+    }
+
+    private static List<Engraving> parseEngravings(List<Map<?, ?>> raw) {
+        if (raw == null || raw.isEmpty()) {
+            return List.of();
+        }
+        List<Engraving> engravings = new ArrayList<>();
+        for (Map<?, ?> entry : raw) {
+            Object engravingKeyObj = entry.get("engraving_key");
+            Object triggerKeyObj = entry.get("trigger_key");
+            if (engravingKeyObj == null || triggerKeyObj == null) continue;
+            MagicKeys.parse(String.valueOf(engravingKeyObj)).ifPresent(ek ->
+                    MagicKeys.parse(String.valueOf(triggerKeyObj)).ifPresent(tk ->
+                            engravings.add(new Engraving(ek, tk))));
+        }
+        return engravings;
     }
 
     private static List<String> formatKeys(List<NamespacedKey> keys) {

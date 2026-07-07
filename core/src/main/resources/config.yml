@@ -1,8 +1,9 @@
 # Update Checker
 check_updates: true
 
-# Additional Debugging messages
-debug: true
+# Determines how much info is logged.
+# Allowed values: low, normal, high, very high, debug
+verbose: normal
 
 # The amount of stat points a player starts with. DEFAULT: 5
 default_stat_points: 5

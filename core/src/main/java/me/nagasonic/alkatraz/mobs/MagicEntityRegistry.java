@@ -30,8 +30,16 @@ public final class MagicEntityRegistry {
         Alkatraz.logInfo("Registering magic mob profiles");
         profileCache.clear();
         replacementsByBaseType.clear();
+        int count = 0;
         for (MagicEntityType type : MagicEntityType.values()) {
             register(type);
+            count++;
+        }
+        Alkatraz.logInfo("Loaded " + count + " magic mob type(s) into registry");
+        Alkatraz.logHigh("Total cached profiles: " + profileCache.size());
+        Alkatraz.logVeryHigh("Replacement base types: " + replacementsByBaseType.size());
+        for (var entry : replacementsByBaseType.entrySet()) {
+            Alkatraz.logVeryHigh("  " + entry.getKey() + " -> " + entry.getValue().size() + " replacement(s)");
         }
     }
 
@@ -43,10 +51,16 @@ public final class MagicEntityRegistry {
         }
         MobProfile profile = new MobProfile(cfg.get());
         profileCache.put(type.getId(), profile);
+        Alkatraz.logHigh("Registered profile '" + type.getId() + "' (" + profile.getReplaces() + ")");
         if (profile.canReplaceNaturally()) {
             replacementsByBaseType
                     .computeIfAbsent(profile.getReplaces(), ignored -> new ArrayList<>())
                     .add(new SpawnReplacement(type, profile.getSpawnChance(), profile.getSpawnReasons()));
+            Alkatraz.logVeryHigh("  Natural replacement: " + profile.getReplaces()
+                    + " @ chance=" + profile.getSpawnChance()
+                    + " reasons=" + profile.getSpawnReasons());
+        } else {
+            Alkatraz.logVeryHigh("  No natural replacement configured");
         }
     }
 
@@ -58,8 +72,10 @@ public final class MagicEntityRegistry {
             EntityType baseType,
             CreatureSpawnEvent.SpawnReason spawnReason
     ) {
+        Alkatraz.logHigh("Rolling for replacement: " + baseType + " reason=" + spawnReason);
         List<SpawnReplacement> candidates = replacementsByBaseType.get(baseType);
         if (candidates == null || candidates.isEmpty()) {
+            Alkatraz.logVeryHigh("No candidates for " + baseType);
             return Optional.empty();
         }
 
@@ -67,18 +83,23 @@ public final class MagicEntityRegistry {
         double totalChance = 0.0;
         for (SpawnReplacement candidate : candidates) {
             if (!candidate.spawnReasons().contains(spawnReason)) {
+                Alkatraz.logVeryHigh("  skip " + candidate.type().getId() + " (wrong reason)");
                 continue;
             }
             eligible.add(candidate);
             totalChance += candidate.chance();
+            Alkatraz.logVeryHigh("  eligible " + candidate.type().getId() + " chance=" + candidate.chance());
         }
 
         if (eligible.isEmpty() || totalChance <= 0.0) {
+            Alkatraz.logHigh("No eligible replacements for " + baseType + " (totalChance=" + totalChance + ")");
             return Optional.empty();
         }
 
         double roll = ThreadLocalRandom.current().nextDouble();
+        Alkatraz.logHigh("Roll for " + baseType + ": totalChance=" + totalChance + " roll=" + roll);
         if (roll >= totalChance) {
+            Alkatraz.logHigh("  roll failed");
             return Optional.empty();
         }
 
@@ -86,10 +107,10 @@ public final class MagicEntityRegistry {
         for (SpawnReplacement candidate : eligible) {
             cumulative += candidate.chance();
             if (roll < cumulative) {
+                Alkatraz.logHigh("  selected: " + candidate.type().getId());
                 return Optional.of(candidate.type());
             }
         }
-
         return Optional.empty();
     }
 

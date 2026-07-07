@@ -1,0 +1,32 @@
+key: alkatraz:veil_rune
+allowed_item_types:
+  - helmet
+  - chestplate
+  - leggings
+  - boots
+  - ring
+  - robe
+  - artifact
+item:
+  material: PHANTOM_MEMBRANE
+  display_name: '&7Veil Rune'
+  lore:
+    - '&7&oA ghostly rune that shrouds the wearer in shadow.'
+    - '&7&oGrants invisibility for a short duration.'
+conditions:
+  - type: circle_level
+    min_circle: 2
+effects:
+  - type: potion_effect
+    effect: INVISIBILITY
+    duration_ticks: 100
+    amplifier: 0
+recipe:
+  shape:
+    - " P "
+    - "FMF"
+    - "   "
+  ingredients:
+    M: AMETHYST_SHARD
+    P: PHANTOM_MEMBRANE
+    F: FEATHER

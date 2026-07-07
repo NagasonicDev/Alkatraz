@@ -1,0 +1,9 @@
+key: alkatraz:air_burst_scroll
+material: PAPER
+display_name: '&fScroll of Air Burst'
+lore:
+  - '&7A crackling scroll holding'
+  - '&7the force of the wind.'
+components:
+  - alkatraz:scroll
+spell_id: air_burst

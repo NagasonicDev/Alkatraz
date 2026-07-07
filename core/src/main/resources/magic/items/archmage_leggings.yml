@@ -1,0 +1,20 @@
+key: alkatraz:archmage_leggings
+material: LEATHER_LEGGINGS
+dye_color: 'FFCC88'
+display_name: '&r&6Archmage Leggings'
+lore:
+  - '&7Legendary leggings of an archmage.'
+components:
+  - alkatraz:equipment
+attributes:
+  alkatraz:max_mana: 250
+  alkatraz:mana_regeneration: 3
+  alkatraz:fire_affinity: 5
+  alkatraz:water_affinity: 5
+  alkatraz:light_affinity: 5
+  alkatraz:dark_affinity: 5
+  alkatraz:earth_affinity: 5
+  alkatraz:air_affinity: 5
+max_engravings: 1
+vanilla_attributes:
+  GENERIC_ARMOR: 5

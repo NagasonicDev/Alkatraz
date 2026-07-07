@@ -1,0 +1,21 @@
+key: alkatraz:archmage_hat
+material: LEATHER_HELMET
+dye_color: 'FFCC88'
+display_name: '&r&6Archmage Hat'
+lore:
+  - '&7The legendary hat of an archmage.'
+components:
+  - alkatraz:equipment
+attributes:
+  alkatraz:max_mana: 250
+  alkatraz:mana_regeneration: 3
+  alkatraz:cast_time_multiplier: 0.95
+  alkatraz:fire_affinity: 5
+  alkatraz:water_affinity: 5
+  alkatraz:light_affinity: 5
+  alkatraz:dark_affinity: 5
+  alkatraz:earth_affinity: 5
+  alkatraz:air_affinity: 5
+max_engravings: 2
+vanilla_attributes:
+  GENERIC_ARMOR: 6

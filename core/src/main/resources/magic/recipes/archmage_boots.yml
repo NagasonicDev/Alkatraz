@@ -1,0 +1,12 @@
+definition: alkatraz:archmage_boots
+shape:
+  - "L L"
+  - "L D"
+ingredients:
+  L: LEATHER
+  D: DIAMOND
+requirements:
+  - type: number_stat
+    stat: circleLevel
+    minimum: 5
+    description: "Requires Circle Level 5"

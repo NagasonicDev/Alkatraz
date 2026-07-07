@@ -1,20 +1,23 @@
 package me.nagasonic.alkatraz.items.magic.config;
 
-import me.nagasonic.alkatraz.items.magic.condition.Condition;
+import me.nagasonic.alkatraz.api.magic.condition.Condition;
 import me.nagasonic.alkatraz.items.magic.condition.ConditionLoader;
-import me.nagasonic.alkatraz.items.magic.definition.ItemDefinition;
-import me.nagasonic.alkatraz.items.magic.definition.ItemVisual;
-import me.nagasonic.alkatraz.items.magic.effect.Effect;
+import me.nagasonic.alkatraz.api.magic.definition.ItemDefinition;
+import me.nagasonic.alkatraz.api.magic.definition.ItemVisual;
+import me.nagasonic.alkatraz.api.magic.effect.Effect;
 import me.nagasonic.alkatraz.items.magic.effect.EffectLoader;
-import me.nagasonic.alkatraz.items.magic.modifier.ModifierDefinition;
-import me.nagasonic.alkatraz.items.magic.registry.MagicItemRegistries;
-import me.nagasonic.alkatraz.items.magic.registry.MagicKeys;
-import me.nagasonic.alkatraz.items.magic.trigger.TriggerBinding;
+import me.nagasonic.alkatraz.api.magic.modifier.EngravingDefinition;
+import me.nagasonic.alkatraz.api.magic.registry.MagicItemRegistries;
+import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
+import me.nagasonic.alkatraz.api.magic.trigger.TriggerBinding;
 import me.nagasonic.alkatraz.util.Utils;
+import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -36,22 +39,42 @@ public final class MagicItemConfigLoader {
         int customModelData = config.getInt("custom_model_data", 0);
         boolean unbreakable = config.getBoolean("unbreakable", false);
         boolean hideAttributes = config.getBoolean("hide_attributes", true);
+        Color dyeColor = parseDyeColor(config.getString("dye_color"));
 
-        ItemVisual visual = new ItemVisual(material, displayName, lore, customModelData, unbreakable, hideAttributes);
+        ItemVisual visual = new ItemVisual(material, displayName, lore, customModelData, unbreakable, hideAttributes, dyeColor);
         List<NamespacedKey> components = parseKeyList(config.getStringList("components"));
         Map<NamespacedKey, Double> attributes = parseAttributeSection(config.getConfigurationSection("attributes"));
+        Map<Attribute, Double> vanillaAttributes = parseVanillaAttributes(config.getConfigurationSection("vanilla_attributes"));
         List<TriggerBinding> triggers = parseTriggerBindings(config.getMapList("triggers"));
         Map<String, Object> staticConfig = sectionToMap(config);
 
-        return new ItemDefinition(key, visual, components, attributes, triggers, staticConfig);
+        return new ItemDefinition(key, visual, components, attributes, vanillaAttributes, triggers, staticConfig);
     }
 
-    public static ModifierDefinition loadModifierDefinition(YamlConfiguration config) {
+    public static EngravingDefinition loadEngravingDefinition(YamlConfiguration config) {
         NamespacedKey key = MagicKeys.require(config.getString("key"));
+
+        // Parse optional item: section for physical engraving item
+        ItemVisual visual;
+        if (config.contains("item")) {
+            ConfigurationSection itemSection = config.getConfigurationSection("item");
+            Material material = Utils.materialFromString(itemSection.getString("material", "STONE")).getType();
+            String displayName = itemSection.getString("display_name", key.getKey());
+            List<String> lore = itemSection.getStringList("lore");
+            int customModelData = itemSection.getInt("custom_model_data", 0);
+            boolean unbreakable = itemSection.getBoolean("unbreakable", false);
+            boolean hideAttributes = itemSection.getBoolean("hide_attributes", true);
+            visual = new ItemVisual(material, displayName, lore, customModelData, unbreakable, hideAttributes, null);
+        } else {
+            visual = ItemVisual.of(Material.ENCHANTED_BOOK, key.getKey(), List.of());
+        }
+
         Map<NamespacedKey, Double> attributes = parseAttributeSection(config.getConfigurationSection("attributes"));
-        List<TriggerBinding> triggers = parseTriggerBindings(config.getMapList("triggers"));
+        List<String> allowedItemTypes = config.getStringList("allowed_item_types");
+        List<Condition> conditions = ConditionLoader.fromSectionList(castList(config.get("conditions")));
+        List<Effect> effects = EffectLoader.fromSectionList(castList(config.get("effects")));
         Map<String, Object> staticConfig = sectionToMap(config);
-        return new ModifierDefinition(key, attributes, triggers, staticConfig);
+        return new EngravingDefinition(key, visual, attributes, conditions, effects, allowedItemTypes, staticConfig);
     }
 
     public static List<TriggerBinding> parseTriggerBindings(List<Map<?, ?>> rawBindings) {
@@ -117,5 +140,30 @@ public final class MagicItemConfigLoader {
             return list;
         }
         return List.of();
+    }
+
+    @Nullable
+    private static Color parseDyeColor(String hex) {
+        if (hex == null || hex.isBlank()) return null;
+        try {
+            String clean = hex.startsWith("#") ? hex.substring(1) : hex;
+            int rgb = Integer.parseInt(clean, 16);
+            return Color.fromRGB(rgb);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private static Map<Attribute, Double> parseVanillaAttributes(ConfigurationSection section) {
+        Map<Attribute, Double> result = new LinkedHashMap<>();
+        if (section == null) return result;
+        for (String rawKey : section.getKeys(false)) {
+            try {
+                Attribute attr = Attribute.valueOf(rawKey);
+                result.put(attr, section.getDouble(rawKey));
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
+        return result;
     }
 }

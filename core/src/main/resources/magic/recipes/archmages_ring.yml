@@ -1,0 +1,8 @@
+definition: alkatraz:archmages_ring
+shape:
+  - " G "
+  - "GDG"
+  - " G "
+ingredients:
+  G: GOLD_NUGGET
+  D: DIAMOND

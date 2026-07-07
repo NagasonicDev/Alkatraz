@@ -1,0 +1,31 @@
+key: alkatraz:fortification_rune
+allowed_item_types:
+  - helmet
+  - chestplate
+  - leggings
+  - boots
+item:
+  material: SHIELD
+  display_name: '&7Fortification Rune'
+  lore:
+    - '&7&oA sturdy rune that hardens the wearer''s defences.'
+    - '&7&oGrants resistance effect when hit.'
+conditions:
+  - type: random
+    chance: 0.4
+  - type: circle_level
+    min_circle: 1
+effects:
+  - type: potion_effect
+    effect: RESISTANCE
+    duration_ticks: 100
+    amplifier: 0
+recipe:
+  shape:
+    - " O "
+    - "IMI"
+    - "   "
+  ingredients:
+    M: AMETHYST_SHARD
+    O: OBSIDIAN
+    I: IRON_INGOT

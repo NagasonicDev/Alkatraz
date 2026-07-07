@@ -1,0 +1,29 @@
+key: alkatraz:explosive_rune
+allowed_item_types:
+  - bow
+  - crossbow
+  - trident
+item:
+  material: TNT
+  display_name: '&cExplosive Rune'
+  lore:
+    - '&7&oA volatile rune packed with blast energy.'
+    - '&7&oCreates an explosion on impact.'
+conditions:
+  - type: random
+    chance: 0.25
+  - type: circle_level
+    min_circle: 2
+effects:
+  - type: explosion
+    power: 2.5
+    set_fire: true
+recipe:
+  shape:
+    - " T "
+    - "FMF"
+    - "   "
+  ingredients:
+    M: AMETHYST_SHARD
+    T: TNT
+    F: FLINT_AND_STEEL

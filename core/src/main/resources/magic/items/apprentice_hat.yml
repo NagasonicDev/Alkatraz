@@ -1,0 +1,11 @@
+key: alkatraz:apprentice_hat
+material: LEATHER_HELMET
+dye_color: '3344AA'
+display_name: '&r&bApprentice Hat'
+lore:
+  - '&7A simple hat for the aspiring wizard.'
+components:
+  - alkatraz:equipment
+attributes:
+  alkatraz:max_mana: 25
+max_engravings: 0

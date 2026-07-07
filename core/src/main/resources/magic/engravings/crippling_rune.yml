@@ -1,0 +1,23 @@
+key: alkatraz:crippling_rune
+allowed_item_types:
+  - sword
+  - axe
+item:
+  material: COBWEB
+  display_name: '&7Crippling Rune'
+  lore:
+    - '&7&oA sticky rune woven from ensnaring webs.'
+    - '&7&oApplies slowness effect to targets.'
+effects:
+  - type: potion_effect
+    effect: SLOWNESS
+    duration_ticks: 200
+    amplifier: 1
+recipe:
+  shape:
+    - " S "
+    - "SMS"
+    - "   "
+  ingredients:
+    M: AMETHYST_SHARD
+    S: STRING

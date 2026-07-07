@@ -102,7 +102,11 @@ public final class ProgressionService {
     public static boolean advance(Player player) {
         MagicProfile profile = ProfileManager.getProfile(player.getUniqueId(), MagicProfile.class);
         int target = profile.getCircleLevel() + 1;
-        if (!canAdvance(player, target)) return false;
+        if (!canAdvance(player, target)) {
+            Alkatraz.logHigh("Circle advance failed for " + player.getName() + " to circle " + target);
+            return false;
+        }
+        Alkatraz.logHigh("Circle advance: " + player.getName() + " -> circle " + target);
 
         applyCircleDefinition(profile, target);
         ResearchPointService.addPoints(player, "circle_up_bonus");

@@ -1,0 +1,12 @@
+definition: alkatraz:enchanter_hat
+shape:
+  - "LLL"
+  - "LPL"
+ingredients:
+  L: LEATHER
+  P: BLAZE_POWDER
+requirements:
+  - type: number_stat
+    stat: circleLevel
+    minimum: 3
+    description: "Requires Circle Level 3"

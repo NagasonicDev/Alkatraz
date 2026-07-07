@@ -1,0 +1,13 @@
+key: alkatraz:archmage_boots
+material: LEATHER_BOOTS
+dye_color: 'FFCC88'
+display_name: '&r&6Archmage Boots'
+lore:
+  - '&7Legendary boots of an archmage.'
+components:
+  - alkatraz:equipment
+attributes:
+  alkatraz:max_mana: 150
+max_engravings: 1
+vanilla_attributes:
+  GENERIC_ARMOR: 3

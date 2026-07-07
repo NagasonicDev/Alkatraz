@@ -7,6 +7,7 @@ import me.nagasonic.alkatraz.spells.Element;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.util.StatUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.boss.BossBar;
 
 import java.util.*;
@@ -676,9 +677,10 @@ public class MagicProfile extends Profile {
 
     public void addManaPerSecond(){
         Bukkit.getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
-            if (getMana() < getMaxMana()){
-                StatUtils.addMana(Bukkit.getPlayer(getOwner()), getManaRegeneration());
-            }
+            if (getMana() >= getMaxMana()) return;
+            Player player = Bukkit.getPlayer(getOwner());
+            if (player == null) return;
+            StatUtils.addMana(player, getManaRegeneration());
         }, 0L, 20L);
     }
 

@@ -1,7 +1,9 @@
 package me.nagasonic.alkatraz.gui.implementation;
 
 import me.nagasonic.alkatraz.gui.Menu;
+import me.nagasonic.alkatraz.gui.implementation.engraving.EngravingTableMenu;
 import me.nagasonic.alkatraz.gui.implementation.research.ResearchGraphMenu;
+import me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack;
 import me.nagasonic.alkatraz.util.ColorFormat;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -16,6 +18,7 @@ public class WandTableSelectionMenu extends Menu {
 
     private static final int SLOT_RESEARCH = 11;
     private static final int SLOT_PROGRESSION = 15;
+    private static final int SLOT_ENGINEERING = 14;
 
     public WandTableSelectionMenu(Player viewer) {
         super(viewer, ColorFormat.format("&5Arcane Table"), 27);
@@ -47,6 +50,15 @@ public class WandTableSelectionMenu extends Menu {
                 "",
                 "&eClick to open"
         ));
+
+        inventory.setItem(SLOT_ENGINEERING, createButton(
+                Material.SMITHING_TABLE,
+                "&dMagic Engineering",
+                "&7Install engravings on your",
+                "&7wand or equipment items.",
+                "",
+                "&eClick to open"
+        ));
     }
 
     @Override
@@ -62,6 +74,10 @@ public class WandTableSelectionMenu extends Menu {
             new ProgressionMenu(viewer).open();
             return true;
         }
+        if (slot == SLOT_ENGINEERING) {
+            new EngravingTableMenu(viewer).open();
+            return true;
+        }
         return true;
     }
 
@@ -73,6 +89,7 @@ public class WandTableSelectionMenu extends Menu {
         lore.add(ColorFormat.format("&7Choose your path:"));
         lore.add(ColorFormat.format("&7  Research &8- &7Unlock new knowledge"));
         lore.add(ColorFormat.format("&7  Progression &8- &7Advance your circle"));
+        lore.add(ColorFormat.format("&7  Engineering &8- &7Modify your equipment"));
         meta.setLore(lore);
         item.setItemMeta(meta);
         return item;
