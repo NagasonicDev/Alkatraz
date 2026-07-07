@@ -13,7 +13,7 @@
 
     <properties>
         <spigotVersion>26.2</spigotVersion>
-        <javaVersion>25</javaVersion>
+        <javaVersion>17</javaVersion>
     </properties>
 
     <dependencies>
