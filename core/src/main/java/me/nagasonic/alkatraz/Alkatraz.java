@@ -1,16 +1,19 @@
 package me.nagasonic.alkatraz;
-import fr.skytasul.glowingentities.GlowingEntities;
 import me.nagasonic.alkatraz.commands.AlkatrazCommand;
+import me.nagasonic.alkatraz.commands.RecipesCommand;
 import me.nagasonic.alkatraz.commands.SpellsCommand;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.ConfigUpdater;
 import me.nagasonic.alkatraz.config.Configs;
+import me.nagasonic.alkatraz.config.VerbosityLevel;
 import me.nagasonic.alkatraz.dom.MinecraftVersion;
 import me.nagasonic.alkatraz.gui.MenuListener;
-import me.nagasonic.alkatraz.items.wands.Wand;
-import me.nagasonic.alkatraz.items.wands.WandHotbarListeners;
-import me.nagasonic.alkatraz.items.wands.WandListeners;
-import me.nagasonic.alkatraz.items.wands.WandRegistry;
+import me.nagasonic.alkatraz.items.magic.MagicItemBootstrap;
+import me.nagasonic.alkatraz.items.magic.adapter.MagicItemTriggerAdapter;
+import me.nagasonic.alkatraz.items.magic.adapter.MagicItemComponentListener;
+import me.nagasonic.alkatraz.items.magic.listener.CastEventListener;
+import me.nagasonic.alkatraz.items.magic.listener.RecipeCraftListener;
+import me.nagasonic.alkatraz.items.magic.listener.MagicStoneDropListener;
 import me.nagasonic.alkatraz.loot.LootInjector;
 import me.nagasonic.alkatraz.loot.MobLootInjector;
 import me.nagasonic.alkatraz.loot.implementation.SpellbookLoot;
@@ -42,16 +45,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static me.nagasonic.alkatraz.items.wands.WandListeners.switchFrom;
+import static me.nagasonic.alkatraz.items.magic.listener.CastEventListener.switchFrom;
 
 public final class Alkatraz extends JavaPlugin {
 
-    private static GlowingEntities glowingEntities;
     private static Alkatraz instance;
     private static YamlConfiguration pluginConfig;
     private static NMS nms = null;
     private static boolean enabled = true;
     private static boolean resourcePackForced = false;
+    private static VerbosityLevel verbosity = VerbosityLevel.NORMAL;
 
     {
         instance = this;
@@ -64,10 +67,9 @@ public final class Alkatraz extends JavaPlugin {
         saveConfig("progression.yml");
         saveConfig("research.yml");
 
+        verbosity = VerbosityLevel.fromString(pluginConfig.getString("verbose"));
         saveSpellConfigs();
         saveMobConfigs();
-        saveConfig("wands/wooden_wand.yml");
-        saveConfig("wands/reinforced_wand.yml");
         if (!setupNMS()){
             enabled = false;
             return;
@@ -78,6 +80,8 @@ public final class Alkatraz extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        long enableStart = System.nanoTime();
+        logVeryHigh("Alkatraz enabling...");
         // Plugin startup logic
         if ((boolean) Configs.CHECK_UPDATES.get()) UpdateChecker.checkUpdate();
         if (!enabled){
@@ -87,33 +91,43 @@ public final class Alkatraz extends JavaPlugin {
         } else nms.onEnable();
         resourcePackForced = pluginConfig.getBoolean("resource_pack_override");
         Metrics metrics = new Metrics(this, 27657);
-        glowingEntities = new GlowingEntities(instance);
+        logVeryHigh("Registering profiles...");
         ProfileRegistry.registerProfiles();
         MagicEntities.registerProfiles();
         nms.registerMagicEntities();
+        logVeryHigh("Initializing ProfileManager...");
         ProfileManager.initialize();
+        logVeryHigh("Initializing ProgressionService...");
         ProgressionService.initialize();
+        logVeryHigh("Initializing ResearchService...");
         ResearchService.initialize();
-        //MagicItemBootstrap.initialize();
-        WandRegistry.registerWands();
+        logVeryHigh("Initializing MagicItemBootstrap...");
+        MagicItemBootstrap.initialize();
+        logVeryHigh("Registering spells...");
         SpellRegistry.registerSpells();
+        logVeryHigh("Registering listeners...");
         registerListener(new SpellbookListener());
         LootInjector.register(this);
         registerListener(new MagicEntitySpawnListener());
         registerListener(new MobModifier());
         MobLootInjector.register(this);
         SpellbookLoot.registerAll();
-        registerListener(new WandListeners());
-        registerListener(new WandHotbarListeners());
+        registerListener(new CastEventListener());
         registerListener(new ResearchObjectiveListener());
         registerListener(new FirstJoinTutorial());
-        //registerListener(new MagicItemTriggerAdapter());
+        registerListener(new MagicItemTriggerAdapter());
+        registerListener(new MagicItemComponentListener());
+        registerListener(new RecipeCraftListener());
+        registerListener(new MagicStoneDropListener());
         Bukkit.getPluginManager().registerEvents(new MenuListener(), this);
         logInfo("NMS version " + nms.getClass().getSimpleName() + " registered!");
         getCommand("spells").setExecutor(new SpellsCommand());
+        getCommand("recipes").setExecutor(new RecipesCommand());
         getCommand("alkatraz").setExecutor(new AlkatrazCommand());
         getCommand("alkatraz").setTabCompleter(new AlkatrazCommand());
         SpellComponentHandler.tick();
+        long elapsed = (System.nanoTime() - enableStart) / 1_000_000;
+        logVeryHigh("Alkatraz enabled in " + elapsed + "ms");
     }
 
     @Override
@@ -121,18 +135,24 @@ public final class Alkatraz extends JavaPlugin {
         ProfileManager.shutdown();
         for (Player p : Bukkit.getOnlinePlayers()){
             ItemStack wand = p.getInventory().getItem(p.getInventory().getHeldItemSlot());
-            if (wand != null){
-                if (wand.getType() != Material.AIR && wand.getAmount() != 0){
-                    if (Wand.isWand(wand)){
-                        switchFrom(p);
-                    }
-                }
+            if (wand != null && !wand.getType().isAir()){
+                switchFrom(p);
             }
         }
     }
 
     public static Alkatraz getInstance() {
         return instance;
+    }
+
+    public static VerbosityLevel getVerbosity() {
+        return verbosity;
+    }
+
+    public static void log(VerbosityLevel level, String message) {
+        if (verbosity.isAtLeast(level)) {
+            instance.getServer().getLogger().info("[Alkatraz][" + level.name() + "] " + message);
+        }
     }
 
     public static void logInfo(String message){
@@ -142,9 +162,23 @@ public final class Alkatraz extends JavaPlugin {
     public static void logWarning(String warning){
         instance.getServer().getLogger().warning("[Alkatraz] " + warning);
     }
-    public static void logFine(String warning){
-        instance.getServer().getLogger().fine("[Alkatraz] " + warning);
-        Utils.sendMessage(instance.getServer().getConsoleSender(), "&a[Alkatraz] " + warning);
+
+    public static void logDebug(String message){
+        if (verbosity.isAtLeast(VerbosityLevel.DEBUG)) {
+            instance.getServer().getLogger().info("[Alkatraz][DEBUG] " + message);
+        }
+    }
+
+    public static void logHigh(String message){
+        if (verbosity.isAtLeast(VerbosityLevel.HIGH)) {
+            instance.getServer().getLogger().info("[Alkatraz] " + message);
+        }
+    }
+
+    public static void logVeryHigh(String message){
+        if (verbosity.isAtLeast(VerbosityLevel.VERY_HIGH)) {
+            instance.getServer().getLogger().info("[Alkatraz] " + message);
+        }
     }
 
     public static void logSevere(String help){
@@ -159,7 +193,7 @@ public final class Alkatraz extends JavaPlugin {
         try {
             String nmsVersion = MinecraftVersion.getServerVersion().getNmsVersion();
             if (nmsVersion == null) return false;
-            Class<?> clazz = Class.forName("me.nagasonic.alkatraz.nms.NMS_" + nmsVersion);
+            Class<?> clazz = Class.forName("me.nagasonic.alkatraz.nms_" + nmsVersion + ".NMS_" + nmsVersion);
 
             if (NMS.class.isAssignableFrom(clazz)) {
                 nms = (NMS) clazz.getDeclaredConstructor().newInstance();
@@ -242,6 +276,7 @@ public final class Alkatraz extends JavaPlugin {
         saveConfig("spells/earthen_wall.yml");
         saveConfig("spells/earth_spike.yml");
         saveConfig("spells/earth_throw.yml");
+        saveConfig("spells/earthsplitter.yml");
         saveConfig("spells/fireball.yml");
         saveConfig("spells/fire_blast.yml");
         saveConfig("spells/fire_wall.yml");
@@ -251,9 +286,14 @@ public final class Alkatraz extends JavaPlugin {
         saveConfig("spells/lesser_heal.yml");
         saveConfig("spells/light_buff.yml");
         saveConfig("spells/magic_missile.yml");
+        saveConfig("spells/meteor_shower.yml");
+        saveConfig("spells/radiance.yml");
+        saveConfig("spells/shadow_realm.yml");
         saveConfig("spells/stealth.yml");
         saveConfig("spells/summon_zombies.yml");
         saveConfig("spells/swift.yml");
+        saveConfig("spells/tornado.yml");
+        saveConfig("spells/tsunami.yml");
         saveConfig("spells/tremor.yml");
         saveConfig("spells/water_pulse.yml");
         saveConfig("spells/water_sphere.yml");
@@ -346,9 +386,5 @@ public final class Alkatraz extends JavaPlugin {
         saveConfig("mobs/zombie_mage.yml");
         saveConfig("mobs/zombie_villager.yml");
         saveConfig("mobs/zombified_piglin.yml");
-    }
-
-    public static GlowingEntities getGlowingEntities() {
-        return glowingEntities;
     }
 }
