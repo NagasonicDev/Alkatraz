@@ -1,0 +1,9 @@
+definition: alkatraz:wooden_wand
+shape:
+  - "  M"
+  - " W "
+  - "S  "
+ingredients:
+  M: MAGIC_STONE
+  W: OAK_WOOD
+  S: STICK

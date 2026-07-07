@@ -1,6 +1,6 @@
 package me.nagasonic.alkatraz.items.magic;
 
-import me.nagasonic.alkatraz.items.magic.attribute.AttributeService;
+import me.nagasonic.alkatraz.api.magic.attribute.AttributeService;
 import me.nagasonic.alkatraz.items.magic.equipment.EquipmentService;
 
 /**

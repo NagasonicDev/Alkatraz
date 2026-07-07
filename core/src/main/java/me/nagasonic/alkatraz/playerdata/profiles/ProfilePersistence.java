@@ -25,7 +25,7 @@ public class ProfilePersistence {
      * @return File object for player's folder
      */
     private static File getPlayerFolder(UUID uuid) {
-        File folder = new File(Bukkit.getPluginsFolder(), "Alkatraz/" + PLAYERDATA_FOLDER + "/" + uuid);
+        File folder = new File(Alkatraz.getInstance().getDataFolder().getParentFile(), "Alkatraz/" + PLAYERDATA_FOLDER + "/" + uuid);
         if (!folder.exists()) {
             folder.mkdirs();
         }

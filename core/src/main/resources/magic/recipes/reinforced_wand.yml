@@ -1,0 +1,14 @@
+definition: alkatraz:reinforced_wand
+shape:
+  - "  I"
+  - " M "
+  - "S  "
+ingredients:
+  I: IRON_INGOT
+  M: MAGIC_STONE
+  S: STICK
+requirements:
+  - type: number_stat
+    stat: circleLevel
+    minimum: 1
+    description: "Requires Circle Level 1"

@@ -1,0 +1,6 @@
+key: alkatraz:magic_stone
+material: AMETHYST_SHARD
+display_name: '&dMagic Stone'
+lore:
+  - '&7A shimmering stone infused with raw'
+  - '&7arcane energy. Used in wand crafting.'

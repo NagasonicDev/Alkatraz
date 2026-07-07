@@ -1,0 +1,9 @@
+key: alkatraz:fireball_scroll
+material: PAPER
+display_name: '&6Scroll of Fireball'
+lore:
+  - '&7A blazing scroll containing'
+  - '&7the secrets of fire magic.'
+components:
+  - alkatraz:scroll
+spell_id: fireball

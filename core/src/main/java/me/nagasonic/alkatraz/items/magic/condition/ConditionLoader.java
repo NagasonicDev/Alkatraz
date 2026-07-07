@@ -1,7 +1,9 @@
 package me.nagasonic.alkatraz.items.magic.condition;
 
-import me.nagasonic.alkatraz.items.magic.registry.MagicItemRegistries;
-import me.nagasonic.alkatraz.items.magic.registry.MagicKeys;
+import me.nagasonic.alkatraz.api.magic.condition.Condition;
+
+import me.nagasonic.alkatraz.items.magic.condition.implementation.AlwaysCondition;
+import me.nagasonic.alkatraz.api.magic.registry.MagicItemRegistries;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.util.ArrayList;

@@ -1,6 +1,9 @@
 package me.nagasonic.alkatraz.items.magic.equipment;
 
-import me.nagasonic.alkatraz.items.magic.instance.MagicItemInstance;
+import me.nagasonic.alkatraz.api.magic.equipment.EquipmentSlot;
+import me.nagasonic.alkatraz.api.magic.equipment.EquipmentProfile;
+import me.nagasonic.alkatraz.api.magic.equipment.VirtualSlotResolver;
+import me.nagasonic.alkatraz.api.magic.instance.MagicItemInstance;
 import me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -15,11 +18,6 @@ import java.util.Map;
 public final class EquipmentService {
 
     private final Map<EquipmentSlot, VirtualSlotResolver> virtualResolvers = new HashMap<>();
-
-    @FunctionalInterface
-    public interface VirtualSlotResolver {
-        ItemStack resolve(Player player);
-    }
 
     public void registerVirtualSlot(EquipmentSlot slot, VirtualSlotResolver resolver) {
         virtualResolvers.put(slot, resolver);
@@ -58,21 +56,21 @@ public final class EquipmentService {
         if (stack == null || stack.getType().isAir()) {
             return;
         }
-        MagicItemStack.readInstance(stack).ifPresent(instance -> {
-            items.put(slot, stack);
-            instances.put(slot, instance);
-        });
+        items.put(slot, stack);
+        MagicItemStack.readInstance(stack).ifPresent(instance ->
+            instances.put(slot, instance)
+        );
     }
 
     private static EquipmentSlot mapVanilla(org.bukkit.inventory.EquipmentSlot slot) {
-        return switch (slot) {
-            case HEAD -> EquipmentSlot.HEAD;
-            case CHEST -> EquipmentSlot.CHEST;
-            case LEGS -> EquipmentSlot.LEGS;
-            case FEET -> EquipmentSlot.FEET;
-            case HAND -> EquipmentSlot.MAIN_HAND;
-            case OFF_HAND -> EquipmentSlot.OFF_HAND;
-            default -> null;
-        };
+        switch (slot) {
+            case HEAD: return EquipmentSlot.HEAD;
+            case CHEST: return EquipmentSlot.CHEST;
+            case LEGS: return EquipmentSlot.LEGS;
+            case FEET: return EquipmentSlot.FEET;
+            case HAND: return EquipmentSlot.MAIN_HAND;
+            case OFF_HAND: return EquipmentSlot.OFF_HAND;
+            default: return null;
+        }
     }
 }

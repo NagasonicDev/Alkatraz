@@ -1,0 +1,30 @@
+key: alkatraz:frost_rune
+allowed_item_types:
+  - sword
+  - axe
+  - wand
+item:
+  material: ICE
+  display_name: '&bFrost Rune'
+  lore:
+    - '&7&oA shard of eternal ice, humming with cold.'
+    - '&7&oApplies slowness effect to targets.'
+attributes:
+  alkatraz:water_affinity: 10
+conditions:
+  - type: spell_element
+    element: WATER
+effects:
+  - type: potion_effect
+    effect: SLOWNESS
+    duration_ticks: 100
+    amplifier: 1
+recipe:
+  shape:
+    - " I "
+    - "SMS"
+    - " M "
+  ingredients:
+    M: AMETHYST_SHARD
+    I: ICE
+    S: SNOWBALL

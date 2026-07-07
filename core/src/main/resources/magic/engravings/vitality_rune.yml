@@ -1,0 +1,32 @@
+key: alkatraz:vitality_rune
+allowed_item_types:
+  - helmet
+  - chestplate
+  - leggings
+  - boots
+  - ring
+  - robe
+  - artifact
+item:
+  material: GOLDEN_APPLE
+  display_name: '&6Vitality Rune'
+  lore:
+    - '&7&oA life-giving rune that mends wounds.'
+    - '&7&oHeals for a small amount.'
+attributes:
+  alkatraz:max_mana: 25
+conditions:
+  - type: circle_level
+    min_circle: 1
+effects:
+  - type: heal
+    amount: 2
+recipe:
+  shape:
+    - " G "
+    - " M "
+    - " R "
+  ingredients:
+    M: AMETHYST_SHARD
+    G: GOLDEN_APPLE
+    R: RED_MUSHROOM

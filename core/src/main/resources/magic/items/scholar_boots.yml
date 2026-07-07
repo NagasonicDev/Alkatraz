@@ -1,0 +1,13 @@
+key: alkatraz:scholar_boots
+material: LEATHER_BOOTS
+dye_color: '8833AA'
+display_name: '&r&dScholar Boots'
+lore:
+  - '&7Refined boots for the scholarly wizard.'
+components:
+  - alkatraz:equipment
+attributes:
+  alkatraz:max_mana: 30
+max_engravings: 0
+vanilla_attributes:
+  GENERIC_ARMOR: 1

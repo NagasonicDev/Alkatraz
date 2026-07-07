@@ -3,11 +3,11 @@ material: BLAZE_ROD
 display_name: '&r&fReinforced Wand'
 lore:
   - '&7A reinforced wand capable of'
-  - '&7holding socketed upgrades.'
+  - '&7holding engraved upgrades.'
+max_engravings: 2
 components:
   - alkatraz:wand
   - alkatraz:mana_container
-  - alkatraz:socket_holder
 attributes:
   alkatraz:spell_power: 10
   alkatraz:max_circle: 5

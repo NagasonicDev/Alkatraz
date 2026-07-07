@@ -1,0 +1,28 @@
+key: alkatraz:phoenix_rune
+allowed_item_types:
+  - chestplate
+  - leggings
+  - boots
+item:
+  material: MAGMA_CREAM
+  display_name: '&cPhoenix Rune'
+  lore:
+    - '&7&oA smouldering rune wreathed in rebirth flame.'
+    - '&7&oGrants fire resistance for a long duration.'
+conditions:
+  - type: circle_level
+    min_circle: 1
+effects:
+  - type: potion_effect
+    effect: FIRE_RESISTANCE
+    duration_ticks: 600
+    amplifier: 0
+recipe:
+  shape:
+    - " M "
+    - "NWN"
+    - "   "
+  ingredients:
+    M: AMETHYST_SHARD
+    N: MAGMA_CREAM
+    W: NETHER_WART

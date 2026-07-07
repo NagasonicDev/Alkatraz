@@ -1,0 +1,11 @@
+key: alkatraz:apprentice_boots
+material: LEATHER_BOOTS
+dye_color: '3344AA'
+display_name: '&r&bApprentice Boots'
+lore:
+  - '&7Simple boots for the aspiring wizard.'
+components:
+  - alkatraz:equipment
+attributes:
+  alkatraz:max_mana: 10
+max_engravings: 0

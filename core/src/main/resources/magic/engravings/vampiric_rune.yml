@@ -1,0 +1,25 @@
+key: alkatraz:vampiric_rune
+allowed_item_types:
+  - sword
+  - axe
+item:
+  material: NETHERRACK
+  display_name: '&4Vampiric Rune'
+  lore:
+    - '&7&oA sinister rune that drinks the life of foes.'
+    - '&7&oHeals the wearer when attacking.'
+conditions:
+  - type: circle_level
+    min_circle: 1
+effects:
+  - type: heal
+    amount: 4
+recipe:
+  shape:
+    - " N "
+    - "FMF"
+    - "   "
+  ingredients:
+    M: AMETHYST_SHARD
+    N: NETHERRACK
+    F: ROTTEN_FLESH

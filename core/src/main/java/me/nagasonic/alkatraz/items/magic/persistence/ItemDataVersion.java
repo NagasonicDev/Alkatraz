@@ -5,7 +5,7 @@ package me.nagasonic.alkatraz.items.magic.persistence;
  */
 public final class ItemDataVersion {
 
-    public static final int CURRENT = 1;
+    public static final int CURRENT = 2;
 
     private ItemDataVersion() {}
 }

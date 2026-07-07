@@ -1,0 +1,28 @@
+key: alkatraz:radiance_rune
+allowed_item_types:
+  - wand
+item:
+  material: GLOWSTONE_DUST
+  display_name: '&eRadiance Rune'
+  lore:
+    - '&7&oA brilliant rune shimmering with holy light.'
+    - '&7&oHeals the caster for a moderate amount.'
+attributes:
+  alkatraz:light_affinity: 10
+conditions:
+  - type: spell_element
+    element: LIGHT
+  - type: circle_level
+    min_circle: 2
+effects:
+  - type: heal
+    amount: 4
+recipe:
+  shape:
+    - " G "
+    - " M "
+    - " L "
+  ingredients:
+    M: AMETHYST_SHARD
+    G: GLOWSTONE_DUST
+    L: GOLD_NUGGET

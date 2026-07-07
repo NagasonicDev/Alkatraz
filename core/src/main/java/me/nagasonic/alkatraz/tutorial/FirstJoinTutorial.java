@@ -30,6 +30,7 @@ public class FirstJoinTutorial implements Listener {
         if (profile.getBool("tutorialSeen")) return;
 
         profile.setBool("tutorialSeen", true);
+        Alkatraz.logHigh("Starting first-join tutorial for " + player.getName());
         scheduleSteps(player);
     }
 

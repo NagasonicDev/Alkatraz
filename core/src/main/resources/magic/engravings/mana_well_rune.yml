@@ -1,0 +1,26 @@
+key: alkatraz:mana_well_rune
+allowed_item_types:
+  - wand
+  - ring
+  - robe
+item:
+  material: LAPIS_LAZULI
+  display_name: '&9Mana Well Rune'
+  lore:
+    - '&7&oA crystalline rune that deepens one''s mana reserves.'
+    - '&7&oIncreases maximum mana and regeneration.'
+attributes:
+  alkatraz:max_mana: 50
+  alkatraz:mana_regeneration: 3
+conditions:
+  - type: circle_level
+    min_circle: 1
+recipe:
+  shape:
+    - "   "
+    - "LML"
+    - " R "
+  ingredients:
+    M: AMETHYST_SHARD
+    L: LAPIS_BLOCK
+    R: REDSTONE

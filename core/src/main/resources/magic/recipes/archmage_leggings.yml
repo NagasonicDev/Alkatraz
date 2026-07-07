@@ -1,0 +1,13 @@
+definition: alkatraz:archmage_leggings
+shape:
+  - "LLL"
+  - "LDL"
+  - "L L"
+ingredients:
+  L: LEATHER
+  D: DIAMOND
+requirements:
+  - type: number_stat
+    stat: circleLevel
+    minimum: 5
+    description: "Requires Circle Level 5"

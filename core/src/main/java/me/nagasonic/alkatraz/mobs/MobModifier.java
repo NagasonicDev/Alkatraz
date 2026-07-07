@@ -124,7 +124,7 @@ public class MobModifier implements Listener {
      */
     private void applyProfile(LivingEntity entity, MobProfile profile) {
         // Count nearby players outside the NBT lambda — cleaner and safer.
-        Collection<LivingEntity> nearby = entity.getLocation().getNearbyLivingEntities(50);
+        List<LivingEntity> nearby = me.nagasonic.alkatraz.util.Utils.getNearbyLivingEntities(entity.getLocation(), 50);
         int playerCount = 0;
         for (Entity e : nearby) {
             if (e instanceof Player) {

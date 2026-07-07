@@ -1,0 +1,8 @@
+definition: alkatraz:arcane_ring
+shape:
+  - " G "
+  - "GMG"
+  - " G "
+ingredients:
+  G: GOLD_NUGGET
+  M: MAGIC_STONE

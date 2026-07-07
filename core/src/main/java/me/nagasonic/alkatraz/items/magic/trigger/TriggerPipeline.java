@@ -1,14 +1,19 @@
 package me.nagasonic.alkatraz.items.magic.trigger;
 
+import me.nagasonic.alkatraz.api.magic.trigger.InternalTriggerEvent;
+import me.nagasonic.alkatraz.api.magic.trigger.TriggerContext;
+import me.nagasonic.alkatraz.api.magic.trigger.TriggerBinding;
+
 import me.nagasonic.alkatraz.items.magic.condition.ConditionEvaluator;
-import me.nagasonic.alkatraz.items.magic.definition.ItemDefinition;
+import me.nagasonic.alkatraz.api.magic.definition.ItemDefinition;
 import me.nagasonic.alkatraz.items.magic.effect.EffectExecutor;
-import me.nagasonic.alkatraz.items.magic.equipment.EquipmentProfile;
+import me.nagasonic.alkatraz.api.magic.equipment.EquipmentProfile;
 import me.nagasonic.alkatraz.items.magic.equipment.EquipmentService;
-import me.nagasonic.alkatraz.items.magic.equipment.EquipmentSlot;
-import me.nagasonic.alkatraz.items.magic.instance.MagicItemInstance;
-import me.nagasonic.alkatraz.items.magic.modifier.ModifierDefinition;
-import me.nagasonic.alkatraz.items.magic.registry.MagicItemRegistries;
+import me.nagasonic.alkatraz.api.magic.equipment.EquipmentSlot;
+import me.nagasonic.alkatraz.api.magic.instance.Engraving;
+import me.nagasonic.alkatraz.api.magic.instance.MagicItemInstance;
+import me.nagasonic.alkatraz.api.magic.modifier.EngravingDefinition;
+import me.nagasonic.alkatraz.api.magic.registry.MagicItemRegistries;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
@@ -17,7 +22,7 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Event → context → relevant items → modifiers → conditions → effects.
+ * Event Ã¢â€ â€™ context Ã¢â€ â€™ relevant items Ã¢â€ â€™ modifiers Ã¢â€ â€™ conditions Ã¢â€ â€™ effects.
  */
 public final class TriggerPipeline {
 
@@ -77,13 +82,18 @@ public final class TriggerPipeline {
                 collectFromDefinition(definition, instance, slot, triggerType, resolved));
 
         for (org.bukkit.NamespacedKey modifierKey : instance.modifiers()) {
-            MagicItemRegistries.MODIFIER_DEFINITIONS.get(modifierKey).ifPresent(modifier ->
-                    collectFromModifier(modifier, instance, slot, triggerType, resolved));
+            MagicItemRegistries.ENGRAVING_DEFINITIONS.get(modifierKey).ifPresent(modifier ->
+                    collectFromEngraving(modifier, instance, slot, triggerType, resolved));
         }
 
-        for (org.bukkit.NamespacedKey socketKey : instance.sockets()) {
-            MagicItemRegistries.MODIFIER_DEFINITIONS.get(socketKey).ifPresent(modifier ->
-                    collectFromModifier(modifier, instance, slot, triggerType, resolved));
+        for (Engraving engraving : instance.engravings()) {
+            if (engraving.triggerKey().equals(triggerType)) {
+                MagicItemRegistries.ENGRAVING_DEFINITIONS.get(engraving.engravingKey()).ifPresent(engDef -> {
+                    resolved.add(new ResolvedBinding(
+                            new TriggerBinding(engraving.triggerKey(), engDef.conditions(), engDef.effects(), 0),
+                            instance, slot));
+                });
+            }
         }
     }
 
@@ -101,18 +111,15 @@ public final class TriggerPipeline {
         }
     }
 
-    private void collectFromModifier(
-            ModifierDefinition modifier,
+    private void collectFromEngraving(
+            EngravingDefinition engraving,
             MagicItemInstance instance,
             EquipmentSlot slot,
             org.bukkit.NamespacedKey triggerType,
             List<ResolvedBinding> resolved
     ) {
-        for (TriggerBinding binding : modifier.triggers()) {
-            if (binding.triggerType().equals(triggerType)) {
-                resolved.add(new ResolvedBinding(binding, instance, slot));
-            }
-        }
+        // Legacy: old modifiers may have baked-in trigger bindings
+        // New engravings are handled via instance.engravings() loop above
     }
 
     private record ResolvedBinding(TriggerBinding binding, MagicItemInstance instance, EquipmentSlot slot) {

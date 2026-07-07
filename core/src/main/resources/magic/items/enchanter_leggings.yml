@@ -1,0 +1,20 @@
+key: alkatraz:enchanter_leggings
+material: LEATHER_LEGGINGS
+dye_color: 'AA3333'
+display_name: '&r&cEnchanter Leggings'
+lore:
+  - '&7Enchanted leggings for the master enchanter.'
+components:
+  - alkatraz:equipment
+attributes:
+  alkatraz:max_mana: 125
+  alkatraz:mana_regeneration: 2
+  alkatraz:fire_affinity: 2
+  alkatraz:water_affinity: 2
+  alkatraz:light_affinity: 2
+  alkatraz:dark_affinity: 2
+  alkatraz:earth_affinity: 2
+  alkatraz:air_affinity: 2
+max_engravings: 1
+vanilla_attributes:
+  GENERIC_ARMOR: 4

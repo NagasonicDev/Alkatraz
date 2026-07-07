@@ -1,0 +1,15 @@
+key: alkatraz:scholar_hat
+material: LEATHER_HELMET
+dye_color: '8833AA'
+display_name: '&r&dScholar Hat'
+lore:
+  - '&7A refined hat for the scholarly wizard.'
+components:
+  - alkatraz:equipment
+attributes:
+  alkatraz:max_mana: 65
+  alkatraz:mana_regeneration: 1
+  alkatraz:cast_time_multiplier: 0.98
+max_engravings: 1
+vanilla_attributes:
+  GENERIC_ARMOR: 2

@@ -1,0 +1,25 @@
+key: alkatraz:barrier_rune
+allowed_item_types:
+  - helmet
+  - chestplate
+  - leggings
+  - boots
+item:
+  material: SHIELD
+  display_name: '&bBarrier Rune'
+  lore:
+    - '&7&oAn energy shield that absorbs incoming damage.'
+    - '&7&oConsumes the item''s durability instead of health.'
+barrier_config:
+  durability_cost: 1.0
+conditions:
+  - type: circle_level
+    min_circle: 2
+recipe:
+  shape:
+    - " O "
+    - "OMO"
+    - "   "
+  ingredients:
+    M: AMETHYST_SHARD
+    O: OBSIDIAN

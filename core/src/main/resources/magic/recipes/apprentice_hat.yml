@@ -1,0 +1,7 @@
+definition: alkatraz:apprentice_hat
+shape:
+  - "LLL"
+  - "LML"
+ingredients:
+  L: LEATHER
+  M: MAGIC_STONE

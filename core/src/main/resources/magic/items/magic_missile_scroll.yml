@@ -1,0 +1,9 @@
+key: alkatraz:magic_missile_scroll
+material: PAPER
+display_name: '&dScroll of Magic Missile'
+lore:
+  - '&7A basic scroll for the'
+  - '&7aspiring arcane archer.'
+components:
+  - alkatraz:scroll
+spell_id: magic_missile

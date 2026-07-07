@@ -1,0 +1,12 @@
+key: alkatraz:apprentice_robe
+material: LEATHER_CHESTPLATE
+dye_color: '3344AA'
+display_name: '&r&bApprentice Robe'
+lore:
+  - '&7A simple robe for the aspiring wizard.'
+components:
+  - alkatraz:equipment
+attributes:
+  alkatraz:max_mana: 40
+  alkatraz:mana_regeneration: 1
+max_engravings: 0

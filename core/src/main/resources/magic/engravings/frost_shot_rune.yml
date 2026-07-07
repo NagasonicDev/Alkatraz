@@ -1,0 +1,27 @@
+key: alkatraz:frost_shot_rune
+allowed_item_types:
+  - bow
+  - crossbow
+item:
+  material: SNOWBALL
+  display_name: '&bFrost Shot Rune'
+  lore:
+    - '&7&oA frigid rune that chills arrows mid-flight.'
+    - '&7&oApplies slowness effect to targets.'
+conditions:
+  - type: circle_level
+    min_circle: 1
+effects:
+  - type: potion_effect
+    effect: SLOWNESS
+    duration_ticks: 160
+    amplifier: 1
+recipe:
+  shape:
+    - " S "
+    - "IMI"
+    - "   "
+  ingredients:
+    M: AMETHYST_SHARD
+    S: SNOWBALL
+    I: ICE

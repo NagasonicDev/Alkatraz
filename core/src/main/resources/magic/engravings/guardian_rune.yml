@@ -1,0 +1,30 @@
+key: alkatraz:guardian_rune
+allowed_item_types:
+  - ring
+  - robe
+  - artifact
+  - helmet
+  - chestplate
+item:
+  material: IRON_BLOCK
+  display_name: '&bGuardian Rune'
+  lore:
+    - '&7&oA protective rune that watches over the bearer.'
+    - '&7&oGrants resistance effect for a moderate duration.'
+conditions:
+  - type: circle_level
+    min_circle: 2
+effects:
+  - type: potion_effect
+    effect: RESISTANCE
+    duration_ticks: 200
+    amplifier: 0
+recipe:
+  shape:
+    - " I "
+    - "DMD"
+    - "   "
+  ingredients:
+    M: AMETHYST_SHARD
+    I: IRON_INGOT
+    D: DIAMOND

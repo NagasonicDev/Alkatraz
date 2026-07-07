@@ -4,7 +4,7 @@ import me.nagasonic.alkatraz.Alkatraz;
 
 public enum Configs {
     CHECK_UPDATES(Alkatraz.getPluginConfig().getBoolean("check_updates")),
-    DEBUG(Alkatraz.getPluginConfig().getBoolean("debug")),
+    VERBOSE(VerbosityLevel.fromString(Alkatraz.getPluginConfig().getString("verbose"))),
     DEFAULT_STAT_POINTS(Alkatraz.getPluginConfig().getInt("default_stat_points")),
     DEFAULT_RESET_TOKENS(Alkatraz.getPluginConfig().getInt("default_reset_tokens")),
     CIRCLE_TICKS(Alkatraz.getPluginConfig().getLong("circle_ticks")),

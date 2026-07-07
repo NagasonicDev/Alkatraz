@@ -1,0 +1,20 @@
+key: alkatraz:enchanter_robe
+material: LEATHER_CHESTPLATE
+dye_color: 'AA3333'
+display_name: '&r&cEnchanter Robe'
+lore:
+  - '&7A powerful robe imbued with enchantments.'
+components:
+  - alkatraz:equipment
+attributes:
+  alkatraz:max_mana: 175
+  alkatraz:mana_regeneration: 3
+  alkatraz:fire_affinity: 2
+  alkatraz:water_affinity: 2
+  alkatraz:light_affinity: 2
+  alkatraz:dark_affinity: 2
+  alkatraz:earth_affinity: 2
+  alkatraz:air_affinity: 2
+max_engravings: 1
+vanilla_attributes:
+  GENERIC_ARMOR: 5

@@ -5,6 +5,7 @@ lore:
   - '&7A plain old wand.'
   - '&7Can only do basic spells, will likely'
   - '&7break soon.'
+max_engravings: 1
 components:
   - alkatraz:wand
   - alkatraz:mana_container

@@ -2,12 +2,12 @@ package me.nagasonic.alkatraz.items.magic;
 
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
-import me.nagasonic.alkatraz.items.magic.definition.ItemDefinition;
-import me.nagasonic.alkatraz.items.magic.instance.MagicItemInstance;
+import me.nagasonic.alkatraz.api.magic.definition.ItemDefinition;
+import me.nagasonic.alkatraz.api.magic.instance.MagicItemInstance;
 import me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack;
-import me.nagasonic.alkatraz.items.magic.modifier.ModifierDefinition;
-import me.nagasonic.alkatraz.items.magic.registry.MagicItemRegistries;
-import me.nagasonic.alkatraz.items.magic.trigger.InternalTriggerEvent;
+import me.nagasonic.alkatraz.api.magic.modifier.EngravingDefinition;
+import me.nagasonic.alkatraz.api.magic.registry.MagicItemRegistries;
+import me.nagasonic.alkatraz.api.magic.trigger.InternalTriggerEvent;
 import me.nagasonic.alkatraz.items.magic.trigger.TriggerPipeline;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
@@ -30,8 +30,8 @@ public final class MagicItemService {
         return MagicItemRegistries.ITEM_DEFINITIONS.get(key);
     }
 
-    public Optional<ModifierDefinition> getModifier(NamespacedKey key) {
-        return MagicItemRegistries.MODIFIER_DEFINITIONS.get(key);
+    public Optional<EngravingDefinition> getModifier(NamespacedKey key) {
+        return MagicItemRegistries.ENGRAVING_DEFINITIONS.get(key);
     }
 
     public ItemStack createItem(NamespacedKey definitionKey) {

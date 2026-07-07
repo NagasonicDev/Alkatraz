@@ -1,0 +1,28 @@
+key: alkatraz:sage_rune
+allowed_item_types:
+  - ring
+  - robe
+  - artifact
+item:
+  material: BOOK
+  display_name: '&5Sage Rune'
+  lore:
+    - '&7&oA rune inscribed with ancient cosmic wisdom.'
+    - '&7&oIncreases maximum magic circle.'
+attributes:
+  alkatraz:max_circle: 1
+conditions:
+  - type: circle_level
+    min_circle: 3
+effects:
+  - type: message
+    message: '&dYour wisdom grows...'
+recipe:
+  shape:
+    - " B "
+    - "EME"
+    - "   "
+  ingredients:
+    M: AMETHYST_SHARD
+    B: BOOK
+    E: EXPERIENCE_BOTTLE

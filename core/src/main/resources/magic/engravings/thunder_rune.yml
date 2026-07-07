@@ -1,0 +1,29 @@
+key: alkatraz:thunder_rune
+allowed_item_types:
+  - sword
+  - axe
+  - wand
+item:
+  material: GUNPOWDER
+  display_name: '&eThunder Rune'
+  lore:
+    - '&7&oCrackling with raw electric energy.'
+    - '&7&oDeals lightning damage to foes.'
+attributes:
+  alkatraz:air_affinity: 10
+conditions:
+  - type: spell_element
+    element: AIR
+effects:
+  - type: damage
+    damage: 4
+    bypass_armor: true
+recipe:
+  shape:
+    - " G "
+    - "FMF"
+    - "   "
+  ingredients:
+    M: AMETHYST_SHARD
+    G: GUNPOWDER
+    F: FEATHER

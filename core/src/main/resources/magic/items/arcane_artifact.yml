@@ -1,0 +1,15 @@
+key: alkatraz:arcane_artifact
+material: NETHER_STAR
+display_name: '&r&dArcane Artifact'
+lore:
+  - '&7A mysterious artifact pulsing with raw magic.'
+components:
+  - alkatraz:equipment
+attributes:
+  alkatraz:fire_affinity: 5
+  alkatraz:water_affinity: 5
+  alkatraz:light_affinity: 5
+  alkatraz:dark_affinity: 5
+  alkatraz:earth_affinity: 5
+  alkatraz:air_affinity: 5
+  alkatraz:max_circle: 0.05

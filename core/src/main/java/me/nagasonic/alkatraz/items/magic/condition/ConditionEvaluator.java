@@ -1,6 +1,8 @@
 package me.nagasonic.alkatraz.items.magic.condition;
 
-import me.nagasonic.alkatraz.items.magic.trigger.TriggerContext;
+import me.nagasonic.alkatraz.api.magic.condition.Condition;
+
+import me.nagasonic.alkatraz.api.magic.trigger.TriggerContext;
 
 import java.util.List;
 

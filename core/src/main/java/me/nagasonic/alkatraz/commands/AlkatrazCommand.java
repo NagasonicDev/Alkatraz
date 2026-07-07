@@ -5,9 +5,19 @@ import me.nagasonic.alkatraz.mobs.MagicEntities;
 import me.nagasonic.alkatraz.mobs.MagicEntityType;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.dom.Permission;
+import me.nagasonic.alkatraz.gui.implementation.EquipmentMenu;
 import me.nagasonic.alkatraz.gui.implementation.StatsMenu;
-import me.nagasonic.alkatraz.items.wands.Wand;
-import me.nagasonic.alkatraz.items.wands.WandRegistry;
+import me.nagasonic.alkatraz.gui.implementation.editor.ItemEditorMenu;
+import me.nagasonic.alkatraz.api.magic.definition.ItemDefinition;
+import me.nagasonic.alkatraz.api.magic.instance.MagicItemInstance;
+import me.nagasonic.alkatraz.api.magic.modifier.EngravingDefinition;
+import me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack;
+import me.nagasonic.alkatraz.api.magic.registry.MagicItemRegistries;
+import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
+import de.tr7zw.nbtapi.NBT;
+import org.bukkit.NamespacedKey;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.progression.ProgressionService;
@@ -15,6 +25,7 @@ import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
 import me.nagasonic.alkatraz.util.StatUtils;
 import me.nagasonic.alkatraz.util.Utils;
+import me.nagasonic.alkatraz.util.WandUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -54,6 +65,10 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
             case "reload" -> handleReload(sender, args);
             case "castmode", "mode" -> handleCastMode(sender, args);
             case "spawnmob" -> handleSpawnMob(sender, args);
+            case "equipment", "eq" -> handleEquipment(sender, args);
+            case "convert" -> handleConvert(sender, args);
+            case "profile" -> handleProfile(sender, args);
+            case "editor" -> handleEditor(sender, args);
             case "gencode" -> sender.sendMessage(Utils.genCode());
         }
 
@@ -87,19 +102,89 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
             return;
         }
         if (args.length < 2 || args.length > 3) {
-            sender.sendMessage(format("&cUsage: /alkatraz give <wand> [player]"));
+            sender.sendMessage(format("&cUsage: /alkatraz give <item> [player]"));
             return;
         }
-        Wand wand = WandRegistry.getWand(args[1].toUpperCase());
-        if (wand == null) {
-            sender.sendMessage(format("&cThere is no wand named " + args[1]));
+
+        NamespacedKey parsedKey = MagicKeys.parse(args[1].toLowerCase()).orElse(null);
+        if (parsedKey == null) {
+            sender.sendMessage(format("&cThere is no item named " + args[1]));
             return;
         }
+
         Player p = resolvePlayer(sender, args, 2);
         if (p == null) return;
 
-        p.getInventory().addItem(wand.getItem());
-        sender.sendMessage(format("&aGave " + wand.getName() + " to " + p.getName()));
+        // Try magic item definition first
+        ItemDefinition itemDef = MagicItemRegistries.ITEM_DEFINITIONS.get(parsedKey).orElse(null);
+        if (itemDef != null) {
+            MagicItemInstance instance = MagicItemInstance.createDefault(itemDef.getKey());
+            ItemStack stack = MagicItemStack.create(itemDef, instance);
+            p.getInventory().addItem(stack);
+            sender.sendMessage(format("&aGave " + itemDef.getKey().getKey() + " to " + p.getName()));
+            return;
+        }
+
+        // Try engraving definition
+        EngravingDefinition engravingDef = MagicItemRegistries.ENGRAVING_DEFINITIONS.get(parsedKey).orElse(null);
+        if (engravingDef != null) {
+            ItemStack stack = MagicItemStack.createEngravingItem(engravingDef);
+            p.getInventory().addItem(stack);
+            sender.sendMessage(format("&aGave " + engravingDef.getKey().getKey() + " to " + p.getName()));
+            return;
+        }
+
+        sender.sendMessage(format("&cThere is no item or engraving named " + args[1]));
+    }
+
+    private void handleConvert(CommandSender sender, String[] args) {
+        if (!Permission.hasPermission(sender, Permission.COMMAND_CONVERT)) {
+            sender.sendMessage(format(NO_PERMISSION));
+            return;
+        }
+        Player target = resolvePlayer(sender, args, 1);
+        if (target == null) return;
+
+        PlayerInventory inv = target.getInventory();
+        int converted = 0;
+        for (int i = 0; i < inv.getSize(); i++) {
+            ItemStack stack = inv.getItem(i);
+            if (stack == null || stack.getType().isAir()) continue;
+            if (!WandUtils.isWand(stack)) continue;
+
+            double magicPower = NBT.get(stack, nbt -> (Double) nbt.getDouble("magic_power"));
+            int circleLimit = NBT.get(stack, nbt -> (Integer) nbt.getInteger("circle_limit"));
+            double castTime = NBT.get(stack, nbt -> (Double) nbt.getDouble("casting_time"));
+
+            NamespacedKey defKey;
+            if (circleLimit >= 5 && magicPower >= 10) {
+                defKey = MagicKeys.alkatraz("reinforced_wand");
+            } else {
+                defKey = MagicKeys.alkatraz("wooden_wand");
+            }
+            MagicItemInstance instance = MagicItemInstance.createDefault(defKey);
+            instance.putCustomData("mana", NBT.get(stack, nbt -> (Double) nbt.getDouble("mana")));
+
+            MagicItemStack.writeInstance(stack, instance);
+
+            NBT.modify(stack, nbt -> {
+                nbt.removeKey("wand");
+                nbt.removeKey("cast_code");
+                nbt.removeKey("circle_limit");
+                nbt.removeKey("magic_power");
+                nbt.removeKey("casting_time");
+                nbt.removeKey("fire_damage");
+                nbt.removeKey("air_damage");
+                nbt.removeKey("earth_damage");
+                nbt.removeKey("water_damage");
+                nbt.removeKey("light_damage");
+                nbt.removeKey("dark_damage");
+            });
+
+            inv.setItem(i, stack);
+            converted++;
+        }
+        sender.sendMessage(format("&aConverted " + converted + " legacy wand(s) to magic items for " + target.getName() + "."));
     }
 
     private void handleArcaneKnowledge(CommandSender sender, String[] args) {
@@ -245,7 +330,6 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
         SpellRegistry.reload();
         ProgressionService.reload();
         MagicEntities.registerProfiles();
-        WandRegistry.reload();
         sender.sendMessage(format("&aReloaded configs."));
     }
 
@@ -270,7 +354,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
         MagicEntities.spawn(type, target.getLocation()).ifPresentOrElse(
                 spawned -> sender.sendMessage(format("&aSpawned &f" + type.getId() + "&a at &f" + target.getName() + "&a.")),
                 () -> sender.sendMessage(format("&cFailed to spawn &f" + type.getId()
-                        + "&c — not implemented on this server version."))
+                        + "&c â€” not implemented on this server version."))
         );
     }
 
@@ -286,6 +370,78 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
         String mode = args[1].toLowerCase();
         ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class).setString("castMode", mode);
         sender.sendMessage(format("&aCast mode set to &f" + mode + "&a."));
+    }
+
+    private void handleProfile(CommandSender sender, String[] args) {
+        if (args.length > 2) {
+            sender.sendMessage(format("&cUsage: /alkatraz profile [player]"));
+            return;
+        }
+
+        Player target = resolvePlayer(sender, args, 1);
+        if (target == null) return;
+
+        boolean isSelf = sender == target;
+        if (!isSelf && !Permission.hasPermission(sender, Permission.COMMAND_PROFILE)) {
+            sender.sendMessage(format(NO_PERMISSION));
+            return;
+        }
+
+        MagicProfile profile = ProfileManager.getProfile(target.getUniqueId(), MagicProfile.class);
+
+        String affinities = format(String.format("&6Fire: &f%.1f  &bWater: &f%.1f  &aAir: &f%.1f  &2Earth: &f%.1f  &eLight: &f%.1f  &5Dark: &f%.1f",
+                profile.getFireAffinity(), profile.getWaterAffinity(), profile.getAirAffinity(),
+                profile.getEarthAffinity(), profile.getLightAffinity(), profile.getDarkAffinity()));
+
+        String resistances = format(String.format("&6Fire: &f%.1f  &bWater: &f%.1f  &aAir: &f%.1f  &2Earth: &f%.1f  &eLight: &f%.1f  &5Dark: &f%.1f",
+                profile.getFireResistance(), profile.getWaterResistance(), profile.getAirResistance(),
+                profile.getEarthResistance(), profile.getLightResistance(), profile.getDarkResistance()));
+
+        sender.sendMessage(format("&8&m&l---&r &d" + target.getName() + "'s Profile &8&m&l---"));
+        sender.sendMessage(format("&7Circle: &f" + profile.getCircleLevel()));
+        sender.sendMessage(format("&7Arcane Knowledge: &f" + (int) profile.getArcaneKnowledge()));
+        sender.sendMessage(format("&7Research Points: &f" + profile.getResearchPoints()));
+        sender.sendMessage(format("&7Stat Points: &f" + profile.getStatPoints() + "  &7Reset Tokens: &f" + profile.getResetTokens()));
+        sender.sendMessage("");
+        sender.sendMessage(format("&7Mana: &b" + (int) profile.getMana() + "&7/&b" + (int) profile.getMaxMana()));
+        sender.sendMessage(format("&7Mana Regen: &b" + String.format("%.1f", profile.getManaRegeneration()) + " &7per second"));
+        sender.sendMessage("");
+        sender.sendMessage(format("&7Affinities:"));
+        sender.sendMessage(affinities);
+        sender.sendMessage(format("&7Resistances:"));
+        sender.sendMessage(resistances);
+        if (profile.canCast()) {
+            sender.sendMessage("");
+            sender.sendMessage(format("&7Element Points: &6" + profile.getFirePoints() + " &b" + profile.getWaterPoints()
+                    + " &a" + profile.getAirPoints() + " &2" + profile.getEarthPoints()
+                    + " &e" + profile.getLightPoints() + " &5" + profile.getDarkPoints()));
+            sender.sendMessage(format("&7Discovered Spells: &f" + profile.getAllDiscoveredSpellTypes().size()));
+        }
+        sender.sendMessage(format("&8&m&l---&r &8&m&l---&r"));
+    }
+
+    private void handleEditor(CommandSender sender, String[] args) {
+        if (!(sender instanceof Player p)) {
+            sender.sendMessage(format("&cThis command can only be used by players."));
+            return;
+        }
+        if (!Permission.hasPermission(p, Permission.COMMAND_EDITOR)) {
+            p.sendMessage(format(NO_PERMISSION));
+            return;
+        }
+        new ItemEditorMenu(p).open();
+    }
+
+    private void handleEquipment(CommandSender sender, String[] args) {
+        if (!(sender instanceof Player p)) {
+            sender.sendMessage(format("&cThis command can only be used by players."));
+            return;
+        }
+        if (!Permission.hasPermission(p, Permission.COMMAND_EQUIPMENT)) {
+            p.sendMessage(format(NO_PERMISSION));
+            return;
+        }
+        new EquipmentMenu(p).open();
     }
 
     private Player resolvePlayer(CommandSender sender, String[] args, int argIndex) {
@@ -319,6 +475,10 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
             case "stats" -> tabStats(sender, args);
             case "castmode", "mode" -> tabCastMode(sender, args);
             case "spawnmob" -> tabSpawnMob(sender, args);
+            case "equipment", "eq" -> List.of();
+            case "profile" -> tabProfile(sender, args);
+            case "convert" -> tabConvert(sender, args);
+            case "editor" -> List.of();
             default -> List.of();
         };
     }
@@ -333,9 +493,14 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
         if (Permission.hasPermission(sender, Permission.COMMAND_MASTERY)) list.add("mastery");
         if (Permission.hasPermission(sender, Permission.COMMAND_RELOAD)) list.add("reload");
         if (Permission.hasPermission(sender, Permission.COMMAND_SPAWN_MOB)) list.add("spawnmob");
+        if (Permission.hasPermission(sender, Permission.COMMAND_CONVERT)) list.add("convert");
+        if (Permission.hasPermission(sender, Permission.COMMAND_EDITOR)) list.add("editor");
         list.add("stats");
+        list.add("profile");
         list.add("castmode");
         list.add("mode");
+        list.add("equipment");
+        list.add("eq");
         return list;
     }
 
@@ -351,10 +516,21 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
     private List<String> tabGive(CommandSender sender, String[] args) {
         if (!Permission.hasPermission(sender, Permission.COMMAND_GIVE)) return List.of();
         return switch (args.length) {
-            case 2 -> WandRegistry.getAllWands().values().stream().map(Wand::getId).collect(Collectors.toList());
+            case 2 -> {
+                java.util.List<String> ids = new java.util.ArrayList<>();
+                ids.addAll(MagicItemRegistries.ITEM_DEFINITIONS.values().stream().map(def -> def.getKey().getKey()).collect(Collectors.toList()));
+                ids.addAll(MagicItemRegistries.ENGRAVING_DEFINITIONS.values().stream().map(def -> def.getKey().getKey()).collect(Collectors.toList()));
+                yield ids;
+            }
             case 3 -> playerNames();
             default -> List.of();
         };
+    }
+
+    private List<String> tabConvert(CommandSender sender, String[] args) {
+        if (!Permission.hasPermission(sender, Permission.COMMAND_CONVERT)) return List.of();
+        if (args.length == 2) return playerNames();
+        return List.of();
     }
 
     private List<String> tabSetAdd(CommandSender sender, String[] args, Permission perm, int playerArgIndex) {
@@ -376,6 +552,11 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
             case 5 -> playerNames();
             default -> List.of();
         };
+    }
+
+    private List<String> tabProfile(CommandSender sender, String[] args) {
+        if (args.length == 2) return playerNames();
+        return List.of();
     }
 
     private List<String> tabStats(CommandSender sender, String[] args) {

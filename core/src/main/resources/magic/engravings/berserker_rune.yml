@@ -1,0 +1,27 @@
+key: alkatraz:berserker_rune
+allowed_item_types:
+  - sword
+  - axe
+item:
+  material: REDSTONE_BLOCK
+  display_name: '&cBerserker Rune'
+  lore:
+    - '&7&oA furious rune that feeds on kills.'
+    - '&7&oDeals additional damage in combat.'
+conditions:
+  - type: random
+    chance: 0.3
+  - type: circle_level
+    min_circle: 1
+effects:
+  - type: damage
+    damage: 4
+recipe:
+  shape:
+    - " R "
+    - "IMI"
+    - "   "
+  ingredients:
+    M: AMETHYST_SHARD
+    R: REDSTONE_BLOCK
+    I: IRON_INGOT

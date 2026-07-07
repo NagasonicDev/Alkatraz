@@ -1,0 +1,21 @@
+key: alkatraz:enchanter_hat
+material: LEATHER_HELMET
+dye_color: 'AA3333'
+display_name: '&r&cEnchanter Hat'
+lore:
+  - '&7A powerful hat imbued with enchantments.'
+components:
+  - alkatraz:equipment
+attributes:
+  alkatraz:max_mana: 125
+  alkatraz:mana_regeneration: 2
+  alkatraz:cast_time_multiplier: 0.97
+  alkatraz:fire_affinity: 2
+  alkatraz:water_affinity: 2
+  alkatraz:light_affinity: 2
+  alkatraz:dark_affinity: 2
+  alkatraz:earth_affinity: 2
+  alkatraz:air_affinity: 2
+max_engravings: 1
+vanilla_attributes:
+  GENERIC_ARMOR: 4
