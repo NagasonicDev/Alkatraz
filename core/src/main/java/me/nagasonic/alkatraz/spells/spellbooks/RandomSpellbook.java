@@ -244,13 +244,17 @@ public class RandomSpellbook {
             player.sendMessage(ColorFormat.format("&cSelected spell not found!"));
             return;
         }
-        player.getInventory().getItemInMainHand().setAmount(player.getInventory().getItemInMainHand().getAmount() - 1);
-        
         // Play transformation animation
         playTransformationAnimation(player, selectedSpell, () -> {
             
             // Replace item in player's hand
             player.getInventory().addItem(selectedSpell.getSpellBook());
+            
+            // Consume the original spellbook after reward is safely delivered
+            ItemStack handItem = player.getInventory().getItemInMainHand();
+            if (handItem != null && isRandomSpellbook(handItem) && handItem.getAmount() > 0) {
+                handItem.setAmount(handItem.getAmount() - 1);
+            }
             
             // Message
             player.sendMessage(ColorFormat.format("&aThe spellbook transforms into " + selectedSpell.getDisplayName() + "&a!"));
