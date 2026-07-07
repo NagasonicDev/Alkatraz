@@ -110,3 +110,12 @@ buildNumber.properties
 
 # Common working directory
 run/
+
+# IDE module files
+*.iml
+
+# Temporary and generated files
+wiki/
+.omo/
+.opencode/
+rename_nms_packages.ps1
