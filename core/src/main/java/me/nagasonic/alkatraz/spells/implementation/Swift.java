@@ -1,6 +1,5 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
-import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
@@ -31,6 +30,7 @@ public class Swift extends Spell {
     }
     private double strength;
     private int taskID;
+    private static final double MAX_DASH_SPEED = 2.0;
 
     @Override
     public void loadConfiguration() {
@@ -45,9 +45,13 @@ public class Swift extends Spell {
     @Override
     public void castAction(Player p, ItemStack wand) {
         if (!p.isDead()){
-            double wandPower = NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+            double wandPower = getWandPower(wand);
             double dashMultiplier = (Double) getOption("dash_style").getSelectedValue(p).getValue();
-            p.setVelocity(p.getEyeLocation().getDirection().normalize().multiply(wandPower * strength * dashMultiplier));
+            double speed = wandPower * strength * dashMultiplier;
+            if (speed > MAX_DASH_SPEED) speed = MAX_DASH_SPEED;
+            Vector velocity = p.getEyeLocation().getDirection().normalize().multiply(speed);
+            if (velocity.getY() > 0.5) velocity.setY(0.5);
+            p.setVelocity(velocity);
             AtomicInteger i = new AtomicInteger(0);
             taskID = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
                 if (i.get() < 8){
@@ -63,8 +67,12 @@ public class Swift extends Spell {
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
         if (!caster.isDead()){
-            double wandPower = wand == null ? 1 : NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
-            caster.setVelocity(caster.getEyeLocation().getDirection().normalize().multiply(wandPower * strength));
+            double wandPower = getWandPowerOrDefault(wand);
+            double speed = wandPower * strength;
+            if (speed > MAX_DASH_SPEED) speed = MAX_DASH_SPEED;
+            Vector velocity = caster.getEyeLocation().getDirection().normalize().multiply(speed);
+            if (velocity.getY() > 0.5) velocity.setY(0.5);
+            caster.setVelocity(velocity);
             AtomicInteger i = new AtomicInteger(0);
             taskID = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
                 if (i.get() < 8){

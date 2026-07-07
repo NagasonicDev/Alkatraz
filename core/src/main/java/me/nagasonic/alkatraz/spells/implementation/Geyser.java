@@ -1,6 +1,5 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
-import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
@@ -16,6 +15,7 @@ import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.util.ParticleUtils;
+import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -109,7 +109,7 @@ public class Geyser extends AttackSpell {
         double radius = getModifiedStat(caster, "radius",        2.5);
         double launchPower = getModifiedStat(caster, "launch_power",  1.0);
         double basePower = getPower(caster, getBasePower())
-                * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+                * getWandPower(wand);
 
         AttackProperties props = new AttackProperties(
                 caster,
@@ -127,7 +127,7 @@ public class Geyser extends AttackSpell {
         );
 
         // Phase 1 — warning spiral, then erupt
-        playWarningThenErupt(caster, epicentre, height, radius, launchPower, props);
+        playWarningThenErupt(caster, wand, epicentre, height, radius, launchPower, props);
     }
 
     @Override
@@ -137,7 +137,7 @@ public class Geyser extends AttackSpell {
         double height = 10.0;
         double radius = 2.5;
         double launchPower = 1;
-        double wandp = wand == null ? 1 : NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+        double wandp = getWandPowerOrDefault(wand);
         double power = getPower(caster, getBasePower())
                 * wandp;
 
@@ -155,7 +155,7 @@ public class Geyser extends AttackSpell {
         );
 
         // Phase 1 — warning spiral, then erupt
-        playWarningThenErupt(caster, epicentre, height, radius, launchPower, props);
+        playWarningThenErupt(caster, wand, epicentre, height, radius, launchPower, props);
     }
 
     // -------------------------------------------------------------------------
@@ -169,7 +169,7 @@ public class Geyser extends AttackSpell {
      * The spiral goes from radius→0 (inward) so it looks like energy
      * converging toward the epicentre just before it blows.
      */
-    private void playWarningThenErupt(LivingEntity caster, Location epicentre,
+    private void playWarningThenErupt(LivingEntity caster, ItemStack wand, Location epicentre,
                                       double height, double radius,
                                       double launchPower, AttackProperties props) {
 
@@ -205,7 +205,7 @@ public class Geyser extends AttackSpell {
             // When the warning is done, erupt
             if (tick[0] >= WARN_TICKS) {
                 Bukkit.getScheduler().cancelTask(taskId[0]);
-                playEruption(caster, epicentre, height, radius, launchPower, props);
+                playEruption(caster, wand, epicentre, height, radius, launchPower, props);
             }
 
         }, 0L, 1L);
@@ -224,7 +224,7 @@ public class Geyser extends AttackSpell {
      * Damage and launch are applied on the first tick so entities are hit
      * the moment the eruption begins.
      */
-    private void playEruption(LivingEntity caster, Location epicentre,
+    private void playEruption(LivingEntity caster, ItemStack wand, Location epicentre,
                               double height, double radius,
                               double launchPower, AttackProperties props) {
 
@@ -260,13 +260,13 @@ public class Geyser extends AttackSpell {
 
             // Damage + launch on the very first eruption tick
             if (tick[0] == 1) {
-                for (LivingEntity target : epicentre.getNearbyLivingEntities(radius, height, radius)) {
+                for (LivingEntity target : me.nagasonic.alkatraz.util.Utils.getNearbyLivingEntities(epicentre, radius, height, radius)) {
                     if (target.equals(caster)) continue;
                     if (damaged.contains(target.getUniqueId())) continue;
                     damaged.add(target.getUniqueId());
 
                     double dmg = getPower(caster, target, props.getRemainingPower());
-                    target.damage(dmg, caster);
+                    SpellDamageUtil.damageWithSpell(target, dmg, caster, wand, Geyser.this);
 
                     // Launch straight up — launchPower scales with the height option
                     // so a taller geyser actually carries enemies higher

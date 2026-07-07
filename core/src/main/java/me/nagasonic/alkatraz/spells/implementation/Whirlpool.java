@@ -1,6 +1,5 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
-import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
@@ -15,6 +14,7 @@ import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.util.ParticleUtils;
+import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -56,7 +56,7 @@ public class Whirlpool extends AttackSpell {
     public void castAction(Player caster, ItemStack wand) {
         if (caster.isDead()) return;
 
-        double power = getPower(caster, getBasePower()) * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+        double power = getPower(caster, getBasePower()) * getWandPower(wand);
         AttackProperties props = new AttackProperties(
                 caster,
                 Utils.castLocation(caster),
@@ -133,7 +133,7 @@ public class Whirlpool extends AttackSpell {
                     le.setVelocity(le.getVelocity().add(pull));
 
                     if (dist < 1.5) {
-                        le.damage(activeDamage, caster);
+                        SpellDamageUtil.damageWithSpell(le, activeDamage, caster, wand, Whirlpool.this);
                         if (Math.random() < 0.3) {
                             le.getWorld().spawnParticle(Particle.WATER_SPLASH, le.getLocation().add(0, 1, 0), 5, 0.3, 0.3, 0.3, 0);
                         }
@@ -150,7 +150,7 @@ public class Whirlpool extends AttackSpell {
     public void mobCastAction(Mob caster, ItemStack wand) {
         if (caster.isDead()) return;
 
-        double wandp = wand == null ? 1 : NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+        double wandp = getWandPowerOrDefault(wand);
         double power = getPower(caster, getBasePower()) * wandp;
         AttackProperties props = new AttackProperties(
                 caster,
@@ -199,7 +199,7 @@ public class Whirlpool extends AttackSpell {
                     le.setVelocity(le.getVelocity().add(pull));
 
                     if (dist < 1.5) {
-                        le.damage(damagePerTick, caster);
+                        SpellDamageUtil.damageWithSpell(le, damagePerTick, caster, wand, Whirlpool.this);
                     }
                 }
 

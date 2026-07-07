@@ -1,6 +1,5 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
-import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
@@ -15,6 +14,7 @@ import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.util.ParticleUtils;
+import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -69,7 +69,7 @@ public class FlamingVolley extends AttackSpell implements Listener {
         int arrowCount = (int) getModifiedStat(caster, "arrow_count",
                 ((Number) getOption("arrow_count").getSelectedValue(caster).getValue()).intValue());
         double power = getPower(caster, getBasePower())
-                * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+                * getWandPower(wand);
         AttackProperties props = new AttackProperties(
                 caster,
                 caster.getEyeLocation(),
@@ -82,7 +82,7 @@ public class FlamingVolley extends AttackSpell implements Listener {
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
         int arrowCount = 3;
-        double wandp = wand == null ? 1 : NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+        double wandp = getWandPowerOrDefault(wand);
         double power = getPower(caster, getBasePower()) * wandp;
         AttackProperties props = new AttackProperties(
                 caster,
@@ -144,7 +144,7 @@ public class FlamingVolley extends AttackSpell implements Listener {
                     return;
                 }
 
-                if (!position.getBlock().getType().isAir()) {
+                if (position.getBlock().isLiquid() || (!position.getBlock().isPassable() && position.getBlock().getType().isOccluding())) {
                     spawnImpact(position, caster);
                     cancel();
                     return;
@@ -171,7 +171,7 @@ public class FlamingVolley extends AttackSpell implements Listener {
 
                     hit.add(entity.getUniqueId());
                     double damage = getPower(caster, target, props.getRemainingPower());
-                    target.damage(damage, caster);
+                    SpellDamageUtil.damageWithSpell(target, damage, caster, wand, FlamingVolley.this);
                     target.setFireTicks(100);
 
                     spawnImpact(position, caster);

@@ -97,7 +97,7 @@ public class DarkTendrils extends AttackSpell implements Listener {
         int count = (int) getModifiedStat(caster, "tendril_count", 1);
 
         // Create attack properties
-        double power = getPower(caster, getBasePower()) * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+        double power = getPower(caster, getBasePower()) * getWandPower(wand);
         AttackProperties props = new AttackProperties(
                 caster,
                 Utils.castLocation(caster),
@@ -156,7 +156,7 @@ public class DarkTendrils extends AttackSpell implements Listener {
         int duration = tendrilDuration;
 
         // Create attack properties
-        double wandp = wand == null ? 1 : NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+        double wandp = getWandPowerOrDefault(wand);
         double power = getPower(caster, getBasePower())
                 * wandp;
         AttackProperties props = new AttackProperties(
@@ -388,7 +388,7 @@ public class DarkTendrils extends AttackSpell implements Listener {
             target = null;
             double closestDistance = lockRange;
 
-            for (LivingEntity entity : tendril.getLocation().getNearbyLivingEntities(lockRange)) {
+            for (LivingEntity entity : me.nagasonic.alkatraz.util.Utils.getNearbyLivingEntities(tendril.getLocation(), lockRange)) {
                 // Skip invalid targets
                 if (entity == caster) continue;
                 if (entity instanceof ArmorStand) continue;

@@ -1,6 +1,5 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
-import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
@@ -99,7 +98,7 @@ public class WindVortex extends AttackSpell implements Listener {
         int duration = (int) getModifiedStat(caster, "duration", vortexDuration);
 
         // Create attack properties
-        double power = getPower(caster, getBasePower()) * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+        double power = getPower(caster, getBasePower()) * getWandPower(wand);
         AttackProperties props = new AttackProperties(
                 caster,
                 caster.getLocation(),
@@ -125,7 +124,7 @@ public class WindVortex extends AttackSpell implements Listener {
         int duration = vortexDuration;
 
         // Create attack properties
-        double wandp = wand == null ? 1 : NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+        double wandp = getWandPowerOrDefault(wand);
         double power = getPower(caster, getBasePower())
                 * wandp;
         AttackProperties props = new AttackProperties(

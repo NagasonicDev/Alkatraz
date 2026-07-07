@@ -1,0 +1,21 @@
+id: 'tornado'
+display_name: '&bTornado'
+description:
+  - '&7Creates a violent vortex that pulls in'
+  - '&7and tears apart nearby enemies.'
+enabled: true
+element: 'AIR'
+code: 'RRSRR'
+level: 5
+cooldown: 35
+cast_time: 1.5
+mana_cost: 110
+maximum_mastery: 100
+mastery_bar_color: 'WHITE'
+gui_item: 'FEATHER'
+cast_sound: 'ENTITY_BLAZE_SHOOT'
+radius: 6.0
+duration: 5.0
+damage_per_tick: 2.0
+pull_strength: 0.5
+speed: 0.4

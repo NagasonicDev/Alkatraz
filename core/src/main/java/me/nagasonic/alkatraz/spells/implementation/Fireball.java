@@ -20,6 +20,7 @@ import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.util.ParticleUtils;
+import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -72,7 +73,7 @@ public class Fireball extends AttackSpell implements Listener {
         AttackProperties props = new AttackProperties(
                 caster,
                 Utils.castLocation(caster),
-                getPower(caster, getBasePower()) * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")),
+                getPower(caster, getBasePower()) * getWandPower(wand),
                 AttackType.MAGIC
         );
 
@@ -94,7 +95,7 @@ public class Fireball extends AttackSpell implements Listener {
     @Override
     public void mobCastAction(@UnknownNullability Mob caster, ItemStack wand) {
         if (caster.isDead()) return;
-        double wandp = wand == null ? 1 : NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+        double wandp = getWandPowerOrDefault(wand);
         double power = getPower(caster, getBasePower())
                 * wandp;
 
@@ -187,8 +188,8 @@ public class Fireball extends AttackSpell implements Listener {
         } else{
             size = (double) getOption("size").getOptionValues().get(getOption("size").getDefIndex()).getValue();
         }
-        for (LivingEntity entity : fireball.getLocation().getNearbyLivingEntities(size)){
-            entity.damage(getPower(comp.getCaster(), entity, props.getRemainingPower()));
+        for (LivingEntity entity : me.nagasonic.alkatraz.util.Utils.getNearbyLivingEntities(fireball.getLocation(), size)){
+            SpellDamageUtil.damageWithSpell(entity, getPower(comp.getCaster(), entity, props.getRemainingPower()), comp.getCaster(), comp.getWand(), Fireball.this);
         }
     }
 }

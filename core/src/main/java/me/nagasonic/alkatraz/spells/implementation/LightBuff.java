@@ -54,9 +54,16 @@ public class LightBuff extends Spell {
 
         int durationTicks = duration * 20;
 
-        Collection<Player> nearbyPlayers = caster.getWorld().getNearbyPlayers(
-                caster.getLocation(), radius, radius, radius
-        );
+        Location cl = caster.getLocation();
+        Collection<Player> nearbyPlayers = caster.getWorld().getPlayers().stream()
+                .filter(p -> {
+                    Location pl = p.getLocation();
+                    return pl.getWorld().equals(cl.getWorld()) &&
+                            Math.abs(pl.getX() - cl.getX()) <= radius &&
+                            Math.abs(pl.getY() - cl.getY()) <= radius &&
+                            Math.abs(pl.getZ() - cl.getZ()) <= radius;
+                })
+                .collect(java.util.stream.Collectors.toList());
 
         for (Player target : nearbyPlayers) {
             if (target.isDead() || !target.isValid()) continue;
@@ -84,9 +91,16 @@ public class LightBuff extends Spell {
 
         int durationTicks = baseDuration * 20;
 
-        Collection<Player> nearbyPlayers = caster.getWorld().getNearbyPlayers(
-                caster.getLocation(), buffRadius, buffRadius, buffRadius
-        );
+        Location cl2 = caster.getLocation();
+        Collection<Player> nearbyPlayers = caster.getWorld().getPlayers().stream()
+                .filter(p -> {
+                    Location pl = p.getLocation();
+                    return pl.getWorld().equals(cl2.getWorld()) &&
+                            Math.abs(pl.getX() - cl2.getX()) <= buffRadius &&
+                            Math.abs(pl.getY() - cl2.getY()) <= buffRadius &&
+                            Math.abs(pl.getZ() - cl2.getZ()) <= buffRadius;
+                })
+                .collect(java.util.stream.Collectors.toList());
 
         for (Player target : nearbyPlayers) {
             target.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, durationTicks, 0, false, true));

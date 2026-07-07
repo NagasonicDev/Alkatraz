@@ -1,6 +1,5 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
-import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
@@ -15,6 +14,7 @@ import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.util.ParticleUtils;
+import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -65,7 +65,7 @@ public class WaterSphere extends AttackSpell {
     public void castAction(Player caster, ItemStack wand) {
         if (caster.isDead()) return;
 
-        double wandPower = NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+        double wandPower = getWandPower(wand);
         double power = getPower(caster, getBasePower()) * wandPower;
         double radius = getModifiedStat(caster, "sphere_size", sphereRadius);
         double range = getModifiedStat(caster, "sphere_range", sphereRange);
@@ -87,7 +87,7 @@ public class WaterSphere extends AttackSpell {
     public void mobCastAction(Mob caster, ItemStack wand) {
         if (caster.isDead()) return;
 
-        double wandp = wand == null ? 1 : NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+        double wandp = getWandPowerOrDefault(wand);
         double power = getPower(caster, getBasePower()) * wandp;
 
         AttackProperties props = new AttackProperties(
@@ -185,7 +185,7 @@ public class WaterSphere extends AttackSpell {
                 }
 
                 // Damage and push entities in range
-                for (Entity entity : center.getNearbyEntities(radius + 0.5, radius + 0.5, radius + 0.5)) {
+                for (Entity entity : center.getWorld().getNearbyEntities(center, radius + 0.5, radius + 0.5, radius + 0.5)) {
                     if (props.isCancelled() || props.isCountered()) {
                         cancel();
                         return;
@@ -195,7 +195,7 @@ public class WaterSphere extends AttackSpell {
                     if (damaged.contains(entity.getUniqueId())) continue;
                     damaged.add(entity.getUniqueId());
 
-                    le.damage(props.getRemainingPower(), caster);
+                    SpellDamageUtil.damageWithSpell(le, props.getRemainingPower(), caster, wand, WaterSphere.this);
 
                     Vector push = le.getLocation().toVector()
                             .subtract(center.toVector())

@@ -1,0 +1,39 @@
+options:
+  radius:
+    description: "Adjust tornado pull radius"
+    icon: FEATHER
+    default_index: 1
+    values:
+      small:
+        display_name: "Small"
+        description: "Tighter vortex"
+        icon: FEATHER
+        value_type: double
+        value: 4.0
+        impacts:
+          - type: stat_modifier
+            stat: radius
+            value: 4.0
+            modifier: SET
+      normal:
+        display_name: "Normal"
+        description: "Standard vortex radius"
+        icon: FEATHER
+        value_type: double
+        value: 6.0
+        impacts:
+          - type: stat_modifier
+            stat: radius
+            value: 6.0
+            modifier: SET
+      large:
+        display_name: "Large"
+        description: "Wider vortex"
+        icon: PHANTOM_MEMBRANE
+        value_type: double
+        value: 8.0
+        impacts:
+          - type: stat_modifier
+            stat: radius
+            value: 8.0
+            modifier: SET

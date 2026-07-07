@@ -1,6 +1,5 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
-import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
@@ -60,7 +59,7 @@ public class WaterPulse extends AttackSpell implements Listener {
 
     @Override
     public void castAction(Player p, ItemStack wand) {
-        AttackProperties props = new AttackProperties(p, Utils.castLocation(p), getBasePower() * getBasePower() * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")), AttackType.MAGIC);
+        AttackProperties props = new AttackProperties(p, Utils.castLocation(p), getBasePower() * getBasePower() * getWandPower(wand), AttackType.MAGIC);
         Location centre = p.getLocation();
         double maxRadius = (Double) getOption("pulse_radius").getSelectedValue(p).getValue();
         double step = (Double) getOption("pulse_speed").getSelectedValue(p).getValue();
@@ -127,7 +126,7 @@ public class WaterPulse extends AttackSpell implements Listener {
 
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
-        double wandp = wand == null ? 1 : NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+        double wandp = getWandPowerOrDefault(wand);
         double power = getPower(caster, getBasePower())
                 * wandp;
         AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster), power, AttackType.MAGIC);

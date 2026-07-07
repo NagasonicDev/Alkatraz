@@ -1,6 +1,5 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
-import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent;
 import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
@@ -200,19 +199,6 @@ public class Stealth extends Spell implements Listener {
 
     private void stop(){
         Bukkit.getServer().getScheduler().cancelTask(taskID);
-    }
-
-    @EventHandler
-    private void onArmorEquip(PlayerArmorChangeEvent e){
-        Player p = e.getPlayer();
-        MagicProfile data = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
-        if (data.isStealth()){
-            for (Player player : Bukkit.getOnlinePlayers()){
-                if ((boolean) getOption("armor_invis").getSelectedValue(p).getValue()){
-                    Alkatraz.getNms().fakeArmor(p, player, null, null, null, null);
-                }else Alkatraz.getNms().fakeArmor(p, player, p.getInventory().getHelmet(), p.getInventory().getChestplate(), p.getInventory().getLeggings(), p.getInventory().getBoots());
-            }
-        }
     }
 
     @EventHandler

@@ -1,0 +1,39 @@
+options:
+  radius:
+    description: "Adjust shadow realm radius"
+    icon: ENDER_PEARL
+    default_index: 1
+    values:
+      small:
+        display_name: "Small"
+        description: "Smaller darkness zone"
+        icon: ENDER_PEARL
+        value_type: double
+        value: 5.0
+        impacts:
+          - type: stat_modifier
+            stat: radius
+            value: 5.0
+            modifier: SET
+      normal:
+        display_name: "Normal"
+        description: "Standard zone radius"
+        icon: ENDER_PEARL
+        value_type: double
+        value: 7.0
+        impacts:
+          - type: stat_modifier
+            stat: radius
+            value: 7.0
+            modifier: SET
+      large:
+        display_name: "Large"
+        description: "Wider corruption zone"
+        icon: DRAGON_BREATH
+        value_type: double
+        value: 9.0
+        impacts:
+          - type: stat_modifier
+            stat: radius
+            value: 9.0
+            modifier: SET

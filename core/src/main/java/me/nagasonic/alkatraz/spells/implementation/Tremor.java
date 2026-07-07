@@ -15,6 +15,7 @@ import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.util.ParticleUtils;
+import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.block.data.BlockData;
@@ -63,7 +64,7 @@ public class Tremor extends AttackSpell implements Listener {
     @Override
     public void castAction(Player p, ItemStack wand) {
         if (!p.isDead()){
-            AttackProperties props = new AttackProperties(p, Utils.castLocation(p), getBasePower() * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")), AttackType.PHYSICAL);
+            AttackProperties props = new AttackProperties(p, Utils.castLocation(p), getBasePower() * getWandPower(wand), AttackType.PHYSICAL);
             final Location base = p.getLocation().subtract(0, 0.5, 0);
             Vector dir = p.getEyeLocation().getDirection();
             Vector perp = dir.clone().rotateAroundY(90);
@@ -122,10 +123,10 @@ public class Tremor extends AttackSpell implements Listener {
                             for (Location l : locs){
                                 l.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, l, 1);
                             }
-                            for (LivingEntity entity : loc.getNearbyLivingEntities(2)) {
+                            for (LivingEntity entity : me.nagasonic.alkatraz.util.Utils.getNearbyLivingEntities(loc, 2)) {
                                 if (entity != p && !props.hasHit(entity)) {
                                     entity.setVelocity(new Vector(0, 1, 0));
-                                    entity.damage(getPower(p, entity, props.getRemainingPower()));
+                                    SpellDamageUtil.damageWithSpell(entity, getPower(p, entity, props.getRemainingPower()), p, wand, Tremor.this);
                                     props.hit(entity);
                                 }
                             }
@@ -149,7 +150,7 @@ public class Tremor extends AttackSpell implements Listener {
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
         if (!caster.isDead()){
-            double wandp = wand == null ? 1 : NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+            double wandp = getWandPowerOrDefault(wand);
             double power = getPower(caster, getBasePower())
                     * wandp;
             AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster), power, AttackType.PHYSICAL);
@@ -209,10 +210,10 @@ public class Tremor extends AttackSpell implements Listener {
                             for (Location l : locs){
                                 l.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, l, 1);
                             }
-                            for (LivingEntity entity : loc.getNearbyLivingEntities(2)) {
+                            for (LivingEntity entity : me.nagasonic.alkatraz.util.Utils.getNearbyLivingEntities(loc, 2)) {
                                 if (entity != caster && !props.hasHit(entity)) {
                                     entity.setVelocity(new Vector(0, 1, 0));
-                                    entity.damage(getPower(caster, entity, props.getRemainingPower()));
+                                    SpellDamageUtil.damageWithSpell(entity, getPower(caster, entity, props.getRemainingPower()), caster, wand, Tremor.this);
                                     props.hit(entity);
                                 }
                             }

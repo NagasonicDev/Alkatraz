@@ -1,6 +1,5 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
-import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
@@ -13,6 +12,7 @@ import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.util.ParticleUtils;
+import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
@@ -60,7 +60,7 @@ public class MagicMissile extends AttackSpell {
     @Override
     public void castAction(Player p, ItemStack wand) {
         if (!p.isDead()){
-            AttackProperties props = new AttackProperties(p, Utils.castLocation(p), getBasePower() * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")), AttackType.MAGIC);
+            AttackProperties props = new AttackProperties(p, Utils.castLocation(p), getBasePower() * getWandPower(wand), AttackType.MAGIC);
             Location loc1 = p.getEyeLocation();
             Vector direction = p.getEyeLocation().getDirection();
             Location loc2 = p.getEyeLocation().add(direction.multiply((Double) getOption("missile_range").getSelectedValue(p).getValue()));
@@ -87,7 +87,7 @@ public class MagicMissile extends AttackSpell {
                     Location loc = locs.get(index++);
                     Block b = loc.getBlock();
 
-                    if (!b.isPassable() && !b.isLiquid() && b.isCollidable() && b.isSolid()) {
+                    if (!b.isPassable() && !b.isLiquid() && b.getType().isOccluding()) {
                         cancel();
                         return;
                     }
@@ -110,11 +110,11 @@ public class MagicMissile extends AttackSpell {
                     );
                     SpellComponentHandler.register(comp);
 
-                    for (Entity entity : loc.getNearbyEntities(1, 1, 1)) {
+                    for (Entity entity : loc.getWorld().getNearbyEntities(loc, 1, 1, 1)) {
                         if (entity.isDead() || entity.equals(p)) break;
                         if (!(entity instanceof LivingEntity le)) break;
                         if (props.isCancelled() || props.isCountered() || props.hasHit(le)) break;
-                        le.damage(props.getRemainingPower());
+                        SpellDamageUtil.damageWithSpell(le, props.getRemainingPower(), p, wand, MagicMissile.this);
                         props.hit(le);
 
                         Vector unitVector = entity.getLocation()
@@ -134,7 +134,7 @@ public class MagicMissile extends AttackSpell {
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
         if (!caster.isDead()){
-            double wandp = wand == null ? 1 : NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+            double wandp = getWandPowerOrDefault(wand);
             double power = getPower(caster, getBasePower())
                     * wandp;
             AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster), power, AttackType.MAGIC);
@@ -164,7 +164,7 @@ public class MagicMissile extends AttackSpell {
                     Location loc = locs.get(index++);
                     Block b = loc.getBlock();
 
-                    if (!b.isPassable() && !b.isLiquid() && b.isCollidable() && b.isSolid()) {
+                    if (!b.isPassable() && !b.isLiquid() && b.getType().isOccluding()) {
                         cancel();
                         return;
                     }
@@ -187,11 +187,11 @@ public class MagicMissile extends AttackSpell {
                     );
                     SpellComponentHandler.register(comp);
 
-                    for (Entity entity : loc.getNearbyEntities(1, 1, 1)) {
+                    for (Entity entity : loc.getWorld().getNearbyEntities(loc, 1, 1, 1)) {
                         if (entity.isDead() || entity.equals(caster)) break;
                         if (!(entity instanceof LivingEntity le)) break;
                         if (props.isCancelled() || props.isCountered() || props.hasHit(le)) break;
-                        le.damage(props.getRemainingPower());
+                        SpellDamageUtil.damageWithSpell(le, props.getRemainingPower(), caster, wand, MagicMissile.this);
                         props.hit(le);
 
                         Vector unitVector = entity.getLocation()
