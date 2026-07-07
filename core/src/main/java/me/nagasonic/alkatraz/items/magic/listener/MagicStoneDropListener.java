@@ -26,8 +26,8 @@ public class MagicStoneDropListener implements Listener {
         if (!MagicEntities.isMagicEntity(entity)) return;
 
         // Exclude summoned mobs (e.g. from SummonZombies spell)
-        boolean summoned = NBT.get(entity, nbt -> (Boolean) nbt.getBoolean("summoned_zombie"));
-        if (summoned) return;
+        Boolean summoned = NBT.get(entity, nbt -> (Boolean) nbt.getBoolean("summoned_zombie"));
+        if (Boolean.TRUE.equals(summoned)) return;
 
         Enchantment looting = Enchantment.getByKey(NamespacedKey.minecraft("looting"));
         int lootingLevel = event.getEntity().getKiller() != null && looting != null

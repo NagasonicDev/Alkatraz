@@ -29,6 +29,7 @@ public final class WandUtils {
      */
     public static boolean isLegacyWand(ItemStack item) {
         if (item == null) return false;
-        return NBT.get(item, nbt -> (Boolean) nbt.getBoolean("wand"));
+        Boolean result = NBT.get(item, nbt -> (Boolean) nbt.getBoolean("wand"));
+        return result != null && result;
     }
 }
