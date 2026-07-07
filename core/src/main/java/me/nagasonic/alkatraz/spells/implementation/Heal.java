@@ -1,6 +1,5 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
-import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
@@ -55,8 +54,8 @@ public class Heal extends Spell {
     @Override
     public void castAction(Player p, ItemStack wand) {
         if (!p.isDead()){
-            if (p.isSneaking() || p.getTargetEntity((int) getModifiedStat(p, "target_range", 20)) == null || !(p.getTargetEntity((int) getModifiedStat(p, "target_range", 20)) instanceof Player)){
-                double wandPower = NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+            if (p.isSneaking() || me.nagasonic.alkatraz.util.Utils.getTargetEntity(p, (int) getModifiedStat(p, "target_range", 20)) == null || !(me.nagasonic.alkatraz.util.Utils.getTargetEntity(p, (int) getModifiedStat(p, "target_range", 20)) instanceof Player)){
+                double wandPower = getWandPower(wand);
                 double base = (baseHeal * wandPower) * (1 + ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class).getAffinity(Element.LIGHT) / 100);
                 double heal = getModifiedStat(p, "heal", base);
                 if (heal > maxHeal){
@@ -81,8 +80,8 @@ public class Heal extends Spell {
                     }else{ stopCast();}
                 }, 0L, 1L);
             }else{
-                Player target = (Player) p.getTargetEntity((int) getModifiedStat(p, "target_range", 20));
-                double wandPower = NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+                Player target = (Player) me.nagasonic.alkatraz.util.Utils.getTargetEntity(p, (int) getModifiedStat(p, "target_range", 20));
+                double wandPower = getWandPower(wand);
                 double base = (baseHeal * wandPower) * (1 + ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class).getAffinity(Element.LIGHT) / 100);
                 double heal = getModifiedStat(p, "heal", base);
                 if (heal > maxHeal){
@@ -112,7 +111,7 @@ public class Heal extends Spell {
 
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
-        double wandp = wand == null ? 1 : NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+        double wandp = getWandPowerOrDefault(wand);
         double heal = (baseHeal * wandp) * (1 + Utils.getEntityAffinity(Element.LIGHT, caster) / 100);
         if (heal > maxHeal){
             heal = maxHeal;
@@ -146,7 +145,7 @@ public class Heal extends Spell {
         int d = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
             if (e.isCancelled()) return;
             if (caster instanceof Player p){
-                if (p.isSneaking() || p.getTargetEntity((int) getModifiedStat(p, "target_range", 20)) == null || !(p.getTargetEntity((int) getModifiedStat(p, "target_range", 20)) instanceof Player)){
+                if (p.isSneaking() || me.nagasonic.alkatraz.util.Utils.getTargetEntity(p, (int) getModifiedStat(p, "target_range", 20)) == null || !(me.nagasonic.alkatraz.util.Utils.getTargetEntity(p, (int) getModifiedStat(p, "target_range", 20)) instanceof Player)){
                     Location playerLoc = p.getLocation();
                     float yaw = playerLoc.getYaw();
                     float pitch = 0;
@@ -162,7 +161,7 @@ public class Heal extends Spell {
                         }
                     }
                 }else{
-                    Location playerLoc = p.getTargetEntity((int) getModifiedStat(p, "target_range", 20)).getLocation();
+                    Location playerLoc = me.nagasonic.alkatraz.util.Utils.getTargetEntity(p, (int) getModifiedStat(p, "target_range", 20)).getLocation();
                     float yaw = playerLoc.getYaw();
                     float pitch = 0;
 

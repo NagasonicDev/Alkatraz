@@ -1,6 +1,5 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
-import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
@@ -17,6 +16,7 @@ import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.util.ParticleUtils;
+import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -68,7 +68,7 @@ public class FireWall extends AttackSpell implements Listener {
     @SuppressWarnings("deprecation")
     @Override
     public void castAction(Player player, ItemStack wand) {
-        AttackProperties props = new AttackProperties(player, Utils.castLocation(player), getBasePower() * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")), AttackType.MAGIC);
+        AttackProperties props = new AttackProperties(player, Utils.castLocation(player), getBasePower() * getWandPower(wand), AttackType.MAGIC);
         Location start = player.getLocation();
 
         double spacing = 0.5;
@@ -162,7 +162,7 @@ public class FireWall extends AttackSpell implements Listener {
                             if (entity.equals(player)) continue;
 
                             LivingEntity target = (LivingEntity) entity;
-                            target.damage(props.getRemainingPower());
+                            SpellDamageUtil.damageWithSpell(target, props.getRemainingPower(), player, wand, FireWall.this);
                             target.setFireTicks(40);
                         }
                     }
@@ -180,7 +180,7 @@ public class FireWall extends AttackSpell implements Listener {
 
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
-        double wandp = wand == null ? 1 : NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+        double wandp = getWandPowerOrDefault(wand);
         double power = getPower(caster, getBasePower())
                 * wandp;
         AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster), power, AttackType.MAGIC);
@@ -273,7 +273,7 @@ public class FireWall extends AttackSpell implements Listener {
                             if (entity.equals(caster)) continue;
 
                             LivingEntity target = (LivingEntity) entity;
-                            target.damage(props.getRemainingPower());
+                            SpellDamageUtil.damageWithSpell(target, props.getRemainingPower(), caster, wand, FireWall.this);
                             target.setFireTicks(40);
                         }
                     }

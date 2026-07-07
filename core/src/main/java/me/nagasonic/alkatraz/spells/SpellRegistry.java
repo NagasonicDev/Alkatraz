@@ -48,6 +48,12 @@ public class SpellRegistry {
         registerIfEnabled("water_sphere", new WaterSphere("WATER_SPHERE"));
         registerIfEnabled("wind_barrier", new WindBarrier("WIND_BARRIER"));
         registerIfEnabled("wind_vortex", new WindVortex("WIND_VORTEX"));
+        registerIfEnabled("meteor_shower", new MeteorShower("METEOR_SHOWER"));
+        registerIfEnabled("tsunami", new Tsunami("TSUNAMI"));
+        registerIfEnabled("earthsplitter", new Fissure("EARTHSPLITTER"));
+        registerIfEnabled("tornado", new Tornado("TORNADO"));
+        registerIfEnabled("radiance", new Radiance("RADIANCE"));
+        registerIfEnabled("shadow_realm", new ShadowRealm("SHADOW_REALM"));
         Alkatraz.logInfo("Registered " + registeredCount + " spells.");
     }
 
@@ -97,6 +103,7 @@ public class SpellRegistry {
     }
 
     public static void registerSpell(Spell spell){
+        long start = System.nanoTime();
         Map<Class<?>, Spell> spells = new HashMap<>(allSpells);
         spells.put(spell.getClass(), spell);
         allSpells = Collections.unmodifiableMap(spells);
@@ -104,6 +111,8 @@ public class SpellRegistry {
         Map<String, Spell> spellsById = new HashMap<>(allSpellsByID);
         spellsById.put(spell.getId(), spell);
         allSpellsByID = Collections.unmodifiableMap(spellsById);
+        Alkatraz.logHigh("Registered spell: " + spell.getId() + " (" + spell.getElement() + ") in "
+                + (System.nanoTime() - start) / 1_000_000 + "ms");
     }
 
     public static boolean isRegistered(Class<? extends Spell> spell){

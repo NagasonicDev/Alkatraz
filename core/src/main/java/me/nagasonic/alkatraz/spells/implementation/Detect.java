@@ -1,7 +1,6 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
 import com.google.common.util.concurrent.AtomicDouble;
-import fr.skytasul.glowingentities.GlowingEntities;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
@@ -53,7 +52,6 @@ public class Detect extends Spell {
             AtomicDouble l = new AtomicDouble(1);
             Location a = p.getLocation();
             MagicProfile data = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
-            GlowingEntities ge = Alkatraz.getGlowingEntities();
             double range = ranges.get(data.getCircleLevel()) * (Double) getOption("scan_range").getSelectedValue(p).getValue();
             long activeDuration = Math.round((Double) getOption("glow_duration").getSelectedValue(p).getValue());
             int r = 20;
@@ -65,35 +63,31 @@ public class Detect extends Spell {
                     }
                     l.addAndGet(0.5);
                     if (l.get() == (double) r /2){
-                        for (Entity entity : a.getNearbyEntities(range, range, range)){
+                        for (Entity entity : a.getWorld().getNearbyEntities(a, range, range, range)){
                             if (!entity.isDead() && entity != p && entity instanceof LivingEntity le){
-                                try {
-                                    ChatColor color = ChatColor.WHITE;
-                                    if (le instanceof Monster){
-                                        color = ChatColor.RED;
-                                    } else if (le instanceof Player) {
-                                        color = ChatColor.YELLOW;
-                                    }
-                                    if (le instanceof Player target){
-                                        MagicProfile tdata = ProfileManager.getProfile(target.getUniqueId(), MagicProfile.class);
-                                        if (data.getCircleLevel() >= tdata.getCircleLevel()){
-                                            if (tdata.isStealth()){
-                                                ge.setGlowing(target, p, ChatColor.DARK_GRAY);
-                                            }else{
-                                                ge.setGlowing(target, p, color);
-                                            }
-                                            if (!entities.contains(le)){
-                                                entities.add(le);
-                                            }
+                                ChatColor color = ChatColor.WHITE;
+                                if (le instanceof Monster){
+                                    color = ChatColor.RED;
+                                } else if (le instanceof Player) {
+                                    color = ChatColor.YELLOW;
+                                }
+                                if (le instanceof Player target){
+                                    MagicProfile tdata = ProfileManager.getProfile(target.getUniqueId(), MagicProfile.class);
+                                    if (data.getCircleLevel() >= tdata.getCircleLevel()){
+                                        if (tdata.isStealth()){
+                                            Alkatraz.getNms().setGlowing(target, p, ChatColor.DARK_GRAY);
+                                        }else{
+                                            Alkatraz.getNms().setGlowing(target, p, color);
                                         }
-                                    }else{
-                                        ge.setGlowing(le, p, color);
                                         if (!entities.contains(le)){
                                             entities.add(le);
                                         }
                                     }
-                                } catch (ReflectiveOperationException e) {
-                                    throw new RuntimeException(e);
+                                }else{
+                                    Alkatraz.getNms().setGlowing(le, p, color);
+                                    if (!entities.contains(le)){
+                                        entities.add(le);
+                                    }
                                 }
                             }
                         }
@@ -102,11 +96,7 @@ public class Detect extends Spell {
             }, 0L, 1L);
             Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(Alkatraz.getInstance(), () -> {
                 for (LivingEntity le : entities){
-                    try {
-                        ge.unsetGlowing(le, p);
-                    } catch (ReflectiveOperationException e) {
-                        throw new RuntimeException(e);
-                    }
+                    Alkatraz.getNms().unsetGlowing(le, p);
                 }
             }, activeDuration * 20);
         }

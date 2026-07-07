@@ -1,6 +1,5 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
-import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
@@ -19,6 +18,7 @@ import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.util.ParticleUtils;
+import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -81,7 +81,7 @@ public class AirBlades extends AttackSpell implements Listener {
                  (int) getOption("blade_count").getSelectedValue(caster).getValue());
 
         double power = getPower(caster, getBasePower())
-                * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+                * getWandPower(wand);
         double size = getModifiedStat(caster, "blade_size", 0.6);
         AttackProperties props = new AttackProperties(
                 caster,
@@ -95,7 +95,7 @@ public class AirBlades extends AttackSpell implements Listener {
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
         int bladeCount = 2;
-        double wandp = wand == null ? 1 : NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+        double wandp = getWandPowerOrDefault(wand);
         double power = getPower(caster, getBasePower())
                 * wandp;
         AttackProperties props = new AttackProperties(
@@ -174,8 +174,8 @@ public class AirBlades extends AttackSpell implements Listener {
                     return;
                 }
 
-                // Stop if the blade enters a solid block
-                if (!position.getBlock().getType().isAir()) {
+                // Stop if the blade enters liquid or a solid block
+                if (position.getBlock().isLiquid() || (!position.getBlock().isPassable() && position.getBlock().getType().isOccluding())) {
                     spawnDisperse(position);
                     cancel();
                     return;
@@ -205,7 +205,7 @@ public class AirBlades extends AttackSpell implements Listener {
 
                     hit.add(entity.getUniqueId());
                     double damage = getPower(caster, target, props.getRemainingPower());
-                    target.damage(damage, caster);
+                    SpellDamageUtil.damageWithSpell(target, damage, caster, wand, AirBlades.this);
 
                     // Hit sound & particles
                     position.getWorld().spawnParticle(Particle.SWEEP_ATTACK, position, 3, 0.2, 0.2, 0.2, 0);

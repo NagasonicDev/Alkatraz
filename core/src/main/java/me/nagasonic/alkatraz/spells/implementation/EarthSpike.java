@@ -1,6 +1,5 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
-import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
@@ -19,6 +18,7 @@ import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.util.ParticleUtils;
+import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -81,7 +81,7 @@ public class EarthSpike extends AttackSpell implements Listener {
             cancelCast(player);
             return;
         }
-        AttackProperties props = new AttackProperties(player, Utils.castLocation(player), getBasePower() * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")), AttackType.PHYSICAL);
+        AttackProperties props = new AttackProperties(player, Utils.castLocation(player), getBasePower() * getWandPower(wand), AttackType.PHYSICAL);
         double heightMultiplier = (Double) getOption("spike_height").getSelectedValue(player).getValue();
         boolean selfDestruct = (boolean) getOption("self_destruct").getSelectedValue(player).getValue();
 
@@ -156,7 +156,7 @@ public class EarthSpike extends AttackSpell implements Listener {
                             return;
                         }
                         if (entity instanceof LivingEntity le && !le.equals(player)) {
-                            le.damage(getPower(player, le, props.getRemainingPower()), player);
+                            SpellDamageUtil.damageWithSpell(le, getPower(player, le, props.getRemainingPower()), player, wand, EarthSpike.this);
                             le.setVelocity(new Vector(0, 1, 0));
                         }
                     }
@@ -191,7 +191,7 @@ public class EarthSpike extends AttackSpell implements Listener {
             return;
         }
         if (target == null || !target.getType().isSolid()) return;
-        double wandp = wand == null ? 1 : NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+        double wandp = getWandPowerOrDefault(wand);
         double power = getPower(caster, getBasePower())
                 * wandp;
         AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster), power, AttackType.PHYSICAL);
@@ -262,7 +262,7 @@ public class EarthSpike extends AttackSpell implements Listener {
                             return;
                         }
                         if (entity instanceof LivingEntity le && !le.equals(caster)) {
-                            le.damage(getPower(caster, le, props.getRemainingPower()), caster);
+                            SpellDamageUtil.damageWithSpell(le, getPower(caster, le, props.getRemainingPower()), caster, wand, EarthSpike.this);
                             le.setVelocity(new Vector(0, 1, 0));
                         }
                     }

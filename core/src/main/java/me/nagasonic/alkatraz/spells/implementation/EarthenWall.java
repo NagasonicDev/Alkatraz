@@ -1,6 +1,5 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
-import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
@@ -16,6 +15,7 @@ import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.util.ParticleUtils;
+import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -73,7 +73,7 @@ public class EarthenWall extends AttackSpell implements Listener {
     @Override
     public void castAction(Player player, ItemStack wand) {
         AttackProperties props = new AttackProperties(player, Utils.castLocation(player),
-                getBasePower() * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")), AttackType.MAGIC);
+                getBasePower() * getWandPower(wand), AttackType.MAGIC);
         Location start = player.getLocation();
 
         double spacing = 0.5;
@@ -119,7 +119,7 @@ public class EarthenWall extends AttackSpell implements Listener {
                         if (selfDestruct) {
                             for (int dy = -heightBlocks; dy <= heightBlocks; dy++) {
                                 Location l = ground.clone().add(0, dy, 0);
-                                originals.putIfAbsent(l.toBlockLocation(), l.getBlock().getType());
+                                originals.putIfAbsent(l.getBlock().getLocation(), l.getBlock().getType());
                             }
                         }
                     }
@@ -154,7 +154,7 @@ public class EarthenWall extends AttackSpell implements Listener {
                             for (Entity entity : topBlock.getWorld().getNearbyEntities(topBlock.getLocation(), 0.5, 0.5, 0.5)) {
                                 if (!(entity instanceof LivingEntity)) continue;
                                 if (entity.equals(player)) continue;
-                                ((LivingEntity) entity).damage(props.getRemainingPower());
+                                SpellDamageUtil.damageWithSpell((LivingEntity) entity, props.getRemainingPower(), player, wand, EarthenWall.this);
                                 ((LivingEntity) entity).setVelocity(new Vector(0, 0.5, 0));
                             }
 
@@ -171,7 +171,7 @@ public class EarthenWall extends AttackSpell implements Listener {
                             if (h >= visibleHeight) {
                                 Block block = loc.getBlock();
                                 if (block.getType() == segment.wallMat) {
-                                    Location key = loc.toBlockLocation();
+                                    Location key = loc.getBlock().getLocation();
                                     if (originals.containsKey(key)) {
                                         block.setType(originals.get(key), false);
                                     } else {
@@ -235,7 +235,7 @@ public class EarthenWall extends AttackSpell implements Listener {
 
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
-        double wandp = wand == null ? 1 : NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+        double wandp = getWandPowerOrDefault(wand);
         double power = getPower(caster, getBasePower()) * wandp;
         AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster), power, AttackType.MAGIC);
         Location start = caster.getLocation();
@@ -268,7 +268,7 @@ public class EarthenWall extends AttackSpell implements Listener {
                         wallPoints.add(new WallSegment(ground));
                         for (int dy = -heightBlocks; dy <= heightBlocks; dy++) {
                             Location l = ground.clone().add(0, dy, 0);
-                            originals.putIfAbsent(l.toBlockLocation(), l.getBlock().getType());
+                            originals.putIfAbsent(l.getBlock().getLocation(), l.getBlock().getType());
                         }
                     }
                     if (wallPoints.size() >= totalSegments) {
@@ -297,7 +297,7 @@ public class EarthenWall extends AttackSpell implements Listener {
                             for (Entity entity : topBlock.getWorld().getNearbyEntities(topBlock.getLocation(), 0.5, 0.5, 0.5)) {
                                 if (!(entity instanceof LivingEntity)) continue;
                                 if (entity.equals(caster)) continue;
-                                ((LivingEntity) entity).damage(props.getRemainingPower());
+                                SpellDamageUtil.damageWithSpell((LivingEntity) entity, props.getRemainingPower(), caster, wand, EarthenWall.this);
                                 ((LivingEntity) entity).setVelocity(new Vector(0, 0.5, 0));
                             }
 
@@ -314,7 +314,7 @@ public class EarthenWall extends AttackSpell implements Listener {
                             if (h >= visibleHeight) {
                                 Block block = loc.getBlock();
                                 if (block.getType() == segment.wallMat) {
-                                    Location key = loc.toBlockLocation();
+                                    Location key = loc.getBlock().getLocation();
                                     if (originals.containsKey(key)) {
                                         block.setType(originals.get(key), false);
                                     } else {

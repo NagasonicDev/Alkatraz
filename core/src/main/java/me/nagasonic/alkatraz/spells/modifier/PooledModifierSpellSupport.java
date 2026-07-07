@@ -26,7 +26,7 @@ public final class PooledModifierSpellSupport {
 
     public static LivingEntity resolveBuffTarget(Player caster, int range) {
         if (caster.isSneaking()) {
-            var entity = caster.getTargetEntity(range);
+            var entity = me.nagasonic.alkatraz.util.Utils.getTargetEntity(caster, range);
             if (entity instanceof Player target
                     && target.isValid()
                     && !target.isDead()
@@ -39,7 +39,7 @@ public final class PooledModifierSpellSupport {
     }
 
     public static LivingEntity resolveDebuffTarget(Player caster, int range) {
-        var entity = caster.getTargetEntity(range);
+        var entity = me.nagasonic.alkatraz.util.Utils.getTargetEntity(caster, range);
         if (entity instanceof LivingEntity living
                 && living.isValid()
                 && !living.isDead()

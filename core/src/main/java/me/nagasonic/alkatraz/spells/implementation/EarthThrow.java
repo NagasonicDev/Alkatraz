@@ -19,6 +19,7 @@ import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.SpellProperties;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.util.ParticleUtils;
+import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -69,7 +70,7 @@ public class EarthThrow extends AttackSpell implements Listener {
     @Override
     public void castAction(Player p, ItemStack wand) {
         if (!p.isDead()){
-            AttackProperties props = new AttackProperties(p, Utils.castLocation(p), getBasePower() * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")), AttackType.PHYSICAL);
+            AttackProperties props = new AttackProperties(p, Utils.castLocation(p), getBasePower() * getWandPower(wand), AttackType.PHYSICAL);
             Location loc = p.getEyeLocation();
             Vector direction = loc.getDirection();
             if (p.isOnGround()){
@@ -99,7 +100,7 @@ public class EarthThrow extends AttackSpell implements Listener {
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
         if (!caster.isDead()){
-            double wandp = wand == null ? 1 : NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+            double wandp = getWandPowerOrDefault(wand);
             double power = getPower(caster, getBasePower())
                     * wandp;
             AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster), power, AttackType.PHYSICAL);
@@ -184,8 +185,8 @@ public class EarthThrow extends AttackSpell implements Listener {
                 for (Location l : locs){
                     l.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, l, 1);
                 }
-                for (LivingEntity le : loc.getNearbyLivingEntities(radius)){
-                    le.damage(props.getRemainingPower());
+                for (LivingEntity le : me.nagasonic.alkatraz.util.Utils.getNearbyLivingEntities(loc, radius)){
+                    SpellDamageUtil.damageWithSpell(le, props.getRemainingPower(), comp.getCaster(), comp.getWand(), EarthThrow.this);
                     Vector direction = le.getLocation().toVector().subtract(loc.toVector());
                     direction.normalize().multiply(1);
                     direction.setY(1.25);
@@ -215,8 +216,8 @@ public class EarthThrow extends AttackSpell implements Listener {
                     for (Location l : locs){
                         l.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, l, 5);
                     }
-                    for (LivingEntity le : loc.getNearbyLivingEntities(radius)){
-                        le.damage(props.getRemainingPower());
+                    for (LivingEntity le : me.nagasonic.alkatraz.util.Utils.getNearbyLivingEntities(loc, radius)){
+                        SpellDamageUtil.damageWithSpell(le, props.getRemainingPower(), comp.getCaster(), comp.getWand(), EarthThrow.this);
                         Vector direction = le.getLocation().toVector().subtract(loc.toVector());
                         direction.normalize().multiply(1);
                         direction.setY(1.25);

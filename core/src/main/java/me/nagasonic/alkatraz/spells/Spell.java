@@ -7,6 +7,9 @@ import me.nagasonic.alkatraz.events.PlayerCastEvent;
 import me.nagasonic.alkatraz.events.PlayerSpellPrepareEvent;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.gui.Menu;
+import me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack;
+import me.nagasonic.alkatraz.api.magic.registry.MagicItemRegistries;
+import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.configuration.SpellOption;
@@ -92,10 +95,12 @@ public abstract class Spell {
     public abstract ItemStack getSpellBook();
 
     /**
-     * Main spell casting method — handles validation, mana consumption, and
+     * Main spell casting method â€” handles validation, mana consumption, and
      * timing.
      */
     public void cast(Player p, ItemStack wand) {
+        long startTime = System.nanoTime();
+        Alkatraz.logHigh("Spell cast started: " + getId() + " by " + p.getName());
         MagicProfile profile = ProfileManager.getProfile(p, MagicProfile.class);
 
         // Check circle level requirement
@@ -162,12 +167,13 @@ public abstract class Spell {
         Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(
                 Alkatraz.getInstance(), () -> {
                     Bukkit.getServer().getScheduler().cancelTask(circleTaskId);
-                    profile.setCasting(false);
                     if (!castEvent.isCancelled()) {
                         PlayerCastEvent playerCastEvent = new PlayerCastEvent(p, Spell.this, wand);
                         Bukkit.getPluginManager().callEvent(playerCastEvent);
                         if (!playerCastEvent.isCancelled()) {
                             playSound(p, castSound, castSoundVolume, castSoundPitch);
+                            long castEnd = System.nanoTime();
+                            Alkatraz.logVeryHigh("Spell cast completed: " + getId() + " by " + p.getName() + " in " + ((castEnd - startTime) / 1_000_000) + "ms");
                             castAction(p, wand);
                             // Only grant cooldown/mastery if the spell didn't self-cancel
                             UUID uuid = p.getUniqueId();
@@ -182,6 +188,7 @@ public abstract class Spell {
                             }
                         }
                     }
+                    profile.setCasting(false);
                 }, finalCastTime);
     }
 
@@ -234,7 +241,7 @@ public abstract class Spell {
     }
 
     /**
-     * Mob cast entry point — fires CastEvent, then delegates to mobCastAction if not cancelled.
+     * Mob cast entry point â€” fires CastEvent, then delegates to mobCastAction if not cancelled.
      */
     public void mobCast(Mob caster, ItemStack wand) {
         CastEvent castEvent = new CastEvent(caster, this, wand);
@@ -326,13 +333,20 @@ public abstract class Spell {
     }
 
     public float getFullCastTime(ItemStack wand, double spellCastTime) {
-        Double wandCastTime;
+        double wandCastTime;
         if (wand != null){
-            wandCastTime = NBT.get(wand, nbt -> (Double) nbt.getDouble("casting_time"));
+            if (MagicItemStack.isMagicItem(wand)) {
+                wandCastTime = MagicItemStack.readDefinition(wand)
+                        .map(def -> def.attributes().getOrDefault(MagicKeys.alkatraz("cast_time_multiplier"), 1.0))
+                        .orElse(1.0);
+            } else {
+                wandCastTime = NBT.get(wand, nbt -> (Double) nbt.getDouble("casting_time"));
+                if (wandCastTime == 0.0) wandCastTime = 1.0;
+            }
         }else{
             wandCastTime = 1.0;
         }
-        return wandCastTime.floatValue() * (float) spellCastTime;
+        return (float) wandCastTime * (float) spellCastTime;
     }
 
     public double calcPower(double base, LivingEntity target, Player caster) {
@@ -369,4 +383,39 @@ public abstract class Spell {
     public BarColor getMasteryBarColor() { return masteryBarColor; }
     public ItemStack getGuiItem()    { return guiItem; }
     public boolean isEnabled()       { return enabled; }
+
+    /**
+     * Reads magic power from a wand, supporting both new PDC magic items and legacy NBT wands.
+     * For new PDC items, reads from the item definition's spell_power attribute.
+     * For legacy wands, reads from NBT magic_power key.
+     * Returns 0.0 if wand is null or has no power data.
+     * <p>
+     * The returned value is a percentage-based multiplier:
+     * a stored spell_power of 10 yields a 10% bonus (1.10x total multiplier).
+     */
+    public static double getWandPower(ItemStack wand) {
+        if (wand == null) return 0.0;
+        double raw;
+        if (MagicItemStack.isMagicItem(wand)) {
+            raw = MagicItemStack.readInstance(wand)
+                    .flatMap(instance -> MagicItemRegistries.ITEM_DEFINITIONS.get(instance.definitionKey()))
+                    .map(def -> def.attributes().getOrDefault(MagicKeys.alkatraz("spell_power"), 0.0))
+                    .orElse(0.0);
+        } else {
+            raw = NBT.get(wand, nbt -> {
+                if (nbt.hasTag("magic_power")) return nbt.getDouble("magic_power");
+                return 0.0;
+            });
+        }
+        return 1.0 + raw / 100.0;
+    }
+
+    /**
+     * Reads spell power from a wand, accounting for player-attributed bonuses.
+     * Returns 1.0 for null wand (neutral multiplier).
+     */
+    public static double getWandPowerOrDefault(ItemStack wand) {
+        double power = getWandPower(wand);
+        return power == 0.0 && wand != null ? 1.0 : power;
+    }
 }

@@ -1,0 +1,19 @@
+id: 'shadow_realm'
+display_name: '&5Shadow Realm'
+description:
+  - '&7Envelops an area in pure darkness,'
+  - '&7corrupting all who enter.'
+enabled: true
+element: 'DARK'
+code: 'SLLSR'
+level: 5
+cooldown: 35
+cast_time: 1.5
+mana_cost: 115
+maximum_mastery: 100
+mastery_bar_color: 'PURPLE'
+gui_item: 'ENDER_PEARL'
+cast_sound: 'ENTITY_ENDERMAN_TELEPORT'
+radius: 10.0
+duration: 5.0
+damage_per_tick: 3.0

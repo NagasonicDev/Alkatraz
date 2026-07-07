@@ -1,0 +1,39 @@
+options:
+  radius:
+    description: "Adjust radiance burst radius"
+    icon: GLOWSTONE_DUST
+    default_index: 1
+    values:
+      small:
+        display_name: "Small"
+        description: "Tighter burst radius"
+        icon: GLOWSTONE_DUST
+        value_type: double
+        value: 6.0
+        impacts:
+          - type: stat_modifier
+            stat: radius
+            value: 6.0
+            modifier: SET
+      normal:
+        display_name: "Normal"
+        description: "Standard burst radius"
+        icon: GLOWSTONE_DUST
+        value_type: double
+        value: 8.0
+        impacts:
+          - type: stat_modifier
+            stat: radius
+            value: 8.0
+            modifier: SET
+      large:
+        display_name: "Large"
+        description: "Wider burst radius"
+        icon: GLOWSTONE
+        value_type: double
+        value: 10.0
+        impacts:
+          - type: stat_modifier
+            stat: radius
+            value: 10.0
+            modifier: SET

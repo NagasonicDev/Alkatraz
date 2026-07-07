@@ -1,0 +1,39 @@
+options:
+  range:
+    description: "Adjust fissure travel distance"
+    icon: DIAMOND_PICKAXE
+    default_index: 1
+    values:
+      short:
+        display_name: "Short"
+        description: "Shorter fissure"
+        icon: IRON_PICKAXE
+        value_type: double
+        value: 10.0
+        impacts:
+          - type: stat_modifier
+            stat: range
+            value: 10.0
+            modifier: SET
+      normal:
+        display_name: "Normal"
+        description: "Standard fissure range"
+        icon: DIAMOND_PICKAXE
+        value_type: double
+        value: 15.0
+        impacts:
+          - type: stat_modifier
+            stat: range
+            value: 15.0
+            modifier: SET
+      long:
+        display_name: "Long"
+        description: "Extended fissure range"
+        icon: NETHERITE_PICKAXE
+        value_type: double
+        value: 20.0
+        impacts:
+          - type: stat_modifier
+            stat: range
+            value: 20.0
+            modifier: SET

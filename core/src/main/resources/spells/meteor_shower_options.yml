@@ -1,0 +1,39 @@
+options:
+  radius:
+    description: "Adjust meteor impact radius"
+    icon: FIRE_CHARGE
+    default_index: 1
+    values:
+      tight:
+        display_name: "Tight"
+        description: "Smaller radius, concentrated damage"
+        icon: TARGET
+        value_type: double
+        value: 4.0
+        impacts:
+          - type: stat_modifier
+            stat: radius
+            value: 4.0
+            modifier: SET
+      normal:
+        display_name: "Normal"
+        description: "Standard impact radius"
+        icon: FIRE_CHARGE
+        value_type: double
+        value: 6.0
+        impacts:
+          - type: stat_modifier
+            stat: radius
+            value: 6.0
+            modifier: SET
+      wide:
+        display_name: "Wide"
+        description: "Larger radius, spread out damage"
+        icon: NETHER_STAR
+        value_type: double
+        value: 8.0
+        impacts:
+          - type: stat_modifier
+            stat: radius
+            value: 8.0
+            modifier: SET

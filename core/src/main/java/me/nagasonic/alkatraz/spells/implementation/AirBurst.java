@@ -1,6 +1,5 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
-import de.tr7zw.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
@@ -61,7 +60,7 @@ public class AirBurst extends AttackSpell {
     public void castAction(Player caster, ItemStack wand) {
         if (caster.isDead()) return;
 
-        final AttackProperties properties = new AttackProperties(caster, Utils.castLocation(caster), getBasePower() * NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power")), AttackType.MAGIC);
+        final AttackProperties properties = new AttackProperties(caster, Utils.castLocation(caster), getBasePower() * getWandPower(wand), AttackType.MAGIC);
 
         final List<Location> lineLocs = ParticleUtils.line(
                 2,
@@ -118,7 +117,7 @@ public class AirBurst extends AttackSpell {
                             0.1
                     );
                 }
-                for (LivingEntity le : point.getNearbyLivingEntities(getModifiedStat(caster, "blast_size", 1))){
+                for (LivingEntity le : me.nagasonic.alkatraz.util.Utils.getNearbyLivingEntities(point, getModifiedStat(caster, "blast_size", 1))){
                     le.setVelocity(caster.getEyeLocation().getDirection().multiply(getPower(caster, le, properties.getRemainingPower())));
                 }
 
@@ -131,7 +130,7 @@ public class AirBurst extends AttackSpell {
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
         if (caster.isDead()) return;
-        double wandp = wand == null ? 1 : NBT.get(wand, nbt -> (Double) nbt.getDouble("magic_power"));
+        double wandp = getWandPowerOrDefault(wand);
         double power = getPower(caster, getBasePower())
                 * wandp;
         final AttackProperties properties = new AttackProperties(caster, Utils.castLocation(caster), power, AttackType.MAGIC);
@@ -192,7 +191,7 @@ public class AirBurst extends AttackSpell {
                             0.1
                     );
                 }
-                for (LivingEntity le : point.getNearbyLivingEntities(1)){
+                for (LivingEntity le : me.nagasonic.alkatraz.util.Utils.getNearbyLivingEntities(point, 1)){
                     le.setVelocity(caster.getEyeLocation().getDirection().multiply(getPower(caster, le, properties.getRemainingPower())));
                 }
 

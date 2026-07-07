@@ -1,0 +1,17 @@
+id: 'meteor_shower'
+display_name: '&6Meteor Shower'
+description:
+  - '&7Calls down a rain of fiery meteors'
+  - '&7from the sky, devastating a large area.'
+enabled: true
+element: 'FIRE'
+code: 'SSRLL'
+level: 5
+cooldown: 30
+cast_time: 1.5
+mana_cost: 100
+power: 8
+maximum_mastery: 100
+mastery_bar_color: 'RED'
+gui_item: 'FIREWORK_STAR'
+cast_sound: 'ENTITY_FIREWORK_ROCKET_BLAST'
