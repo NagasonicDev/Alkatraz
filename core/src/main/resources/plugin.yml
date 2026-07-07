@@ -9,3 +9,10 @@ commands:
   alkatraz:
     description: Alkatraz Command
     usage: /alkatraz
+  recipes:
+    description: Opens the Recipe Book
+    usage: /recipes
+permissions:
+  alkatraz.recipebook:
+    description: Access to the Recipe Book
+    default: true

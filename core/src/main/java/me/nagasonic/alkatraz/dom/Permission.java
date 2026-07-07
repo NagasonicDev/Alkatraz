@@ -14,6 +14,11 @@ public enum Permission {
     COMMAND_STATS_OTHER("alkatraz.command.stats.other"),
     COMMAND_RELOAD("alkatraz.command.reload"),
     COMMAND_SPAWN_MOB("alkatraz.command.spawnmob"),
+    COMMAND_EQUIPMENT("alkatraz.command.equipment"),
+    COMMAND_CONVERT("alkatraz.command.convert"),
+    COMMAND_PROFILE("alkatraz.command.profile"),
+    COMMAND_EDITOR("alkatraz.command.editor"),
+    RECIPE_BOOK("alkatraz.recipebook"),
     ALL_SPELLS("alkatraz.allspells");
 
 
