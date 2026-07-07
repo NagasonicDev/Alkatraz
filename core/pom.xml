@@ -33,10 +33,6 @@
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
         <repository>
-            <id>papermc</id>
-            <url>https://repo.papermc.io/repository/maven-public/</url>
-        </repository>
-        <repository>
             <id>repsy</id>
             <url>https://repo.repsy.io/mvn/athlaeos/valhallammo</url>
         </repository>
@@ -44,16 +40,16 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.papermc.paper</groupId>
-            <artifactId>paper-api</artifactId>
-            <version>1.19.4-R0.1-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
             <version>1.19-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>me.nagasonic</groupId>
+            <artifactId>alkatraz-api</artifactId>
+            <version>${revision}</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>de.tr7zw</groupId>
@@ -62,10 +58,11 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>fr.skytasul</groupId>
-            <artifactId>glowingentities</artifactId>
-            <version>1.4.9</version>
-            <scope>compile</scope>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>24.0.0</version>
+            <scope>provided</scope>
         </dependency>
+
     </dependencies>
 </project>

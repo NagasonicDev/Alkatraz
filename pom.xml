@@ -22,6 +22,7 @@
     </properties>
 
     <modules>
+        <module>api</module>
         <module>core</module>
         <module>dist</module>
         <module>v1_19_R1</module>
@@ -81,9 +82,9 @@
                 <configuration>
                     <source>${javaVersion}</source>
                     <target>${javaVersion}</target>
-                    <excludes>
+                    <!-- <excludes>
                         <exclude>**/me/nagasonic/alkatraz/items/magic/**</exclude>
-                    </excludes>
+                    </excludes> -->
                 </configuration>
             </plugin>
         </plugins>
