@@ -1,0 +1,203 @@
+# Centralized texture pack configuration for Alkatraz
+# This file manages all custom model data and ASCII codes used by the plugin
+
+# Resource pack configuration
+resource_pack:
+  enabled: false
+  url: ""  # URL for automatic resource pack download
+  hash: "" # SHA-1 hash for resource pack verification
+  prompt: "Alkatraz Texture Pack"
+  message: "&aPlease download and install the Alkatraz texture pack for full visual experience!"
+
+# ASCII codes for menu titles and special characters
+# These use Unicode Private Use Area (PUA) characters
+ascii_codes:
+  menu_titles:
+    spells: "\uF808\uF001"
+    equipment: "\uF808\uF002"
+    research: "\uF808\uF003"
+    recipes: "\uF808\uF004"
+    stats: "\uF808\uF005"
+    grimoire: "\uF808\uF006"
+  icons:
+    back: "\uF808\u1001"
+    confirm: "\uF808\u1002"
+    cancel: "\uF808\u1003"
+    info: "\uF808\u1004"
+
+# Custom model data for items
+custom_model_data:
+  items:
+    # Wands (1001-1099)
+    wooden_wand: 1001
+    reinforced_wand: 1002
+    runic_wand: 1003
+    blaze_wand: 1004
+    glacier_wand: 1005
+    mountain_wand: 1006
+    storm_wand: 1007
+    luminous_wand: 1008
+    void_wand: 1009
+    
+    # Scrolls (1101-1199)
+    magic_missile_scroll: 1101
+    heal_scroll: 1102
+    fireball_scroll: 1103
+    earth_spike_scroll: 1104
+    
+    # Jewelry (1201-2799)
+    # Rings (1201-1216)
+    zephyr_ring: 1201
+    void_ring: 1202
+    titan_ring: 1203
+    storm_ring: 1204
+    inferno_ring: 1205
+    abyss_ring: 1206
+    tempest_ring: 1207
+    divine_ring: 1208
+    nether_ring: 1209
+    mystic_ring: 1210
+    arcane_ring: 1211
+    ethereal_ring: 1212
+    ember_ring: 1213
+    frost_ring: 1214
+    boulder_ring: 1215
+    mountain_ring: 1216
+    
+    # Necklaces (1217-1232)
+    zephyr_necklace: 1217
+    void_necklace: 1218
+    titan_necklace: 1219
+    storm_necklace: 1220
+    inferno_necklace: 1221
+    abyss_necklace: 1222
+    tempest_necklace: 1223
+    divine_necklace: 1224
+    nether_necklace: 1225
+    mystic_necklace: 1226
+    arcane_necklace: 1227
+    ethereal_necklace: 1228
+    ember_necklace: 1229
+    frost_necklace: 1230
+    boulder_necklace: 1231
+    mountain_necklace: 1232
+    
+    # Pendants (1233-1248)
+    zephyr_pendant: 1233
+    void_pendant: 1234
+    titan_pendant: 1235
+    storm_pendant: 1236
+    inferno_pendant: 1237
+    abyss_pendant: 1238
+    tempest_pendant: 1239
+    divine_pendant: 1240
+    nether_pendant: 1241
+    mystic_pendant: 1242
+    arcane_pendant: 1243
+    ethereal_pendant: 1244
+    ember_pendant: 1245
+    frost_pendant: 1246
+    boulder_pendant: 1247
+    mountain_pendant: 1248
+    
+    # Bracelets (1249-1264)
+    zephyr_bracelet: 1249
+    void_bracelet: 1250
+    titan_bracelet: 1251
+    storm_bracelet: 1252
+    inferno_bracelet: 1253
+    abyss_bracelet: 1254
+    tempest_bracelet: 1255
+    divine_bracelet: 1256
+    nether_bracelet: 1257
+    mystic_bracelet: 1258
+    arcane_bracelet: 1259
+    ethereal_bracelet: 1260
+    ember_bracelet: 1261
+    frost_bracelet: 1262
+    boulder_bracelet: 1263
+    mountain_bracelet: 1264
+    
+    # Equipment (2801-2899)
+    scholar_hat: 2801
+    scholar_robe: 2802
+    scholar_leggings: 2803
+    scholar_boots: 2804
+    enchanter_hat: 2805
+    enchanter_robe: 2806
+    enchanter_leggings: 2807
+    enchanter_boots: 2808
+    archmage_hat: 2809
+    archmage_robe: 2810
+    archmage_leggings: 2811
+    archmage_boots: 2812
+    
+    # Miscellaneous (5001-5099)
+    magic_stone: 5001
+    leather_grimoire: 5002
+    runic_grimoire: 5003
+    blaze_grimoire: 5004
+    glacier_grimoire: 5005
+    mountain_grimoire: 5006
+    storm_grimoire: 5007
+    luminous_grimoire: 5008
+    void_grimoire: 5009
+    
+  gui:
+    # GUI Elements (4001-4999)
+    next_page: 4001
+    prev_page: 4002
+    back_button: 4003
+    blank_pane: 4004
+    border_pane: 4005
+    header_pane: 4006
+    
+    # Spell GUI items (4100-4199)
+    spell_magic_missile: 4101
+    spell_fireball: 4102
+    spell_heal: 4103
+    spell_tornado: 4104
+    spell_meteor_shower: 4105
+    spell_tsunami: 4106
+    spell_earthsplitter: 4107
+    spell_radiance: 4108
+    spell_shadow_realm: 4109
+    spell_buff: 4110
+    spell_light_buff: 4111
+    spell_debuff: 4112
+    spell_stealth: 4113
+    spell_air_blades: 4114
+    spell_air_burst: 4115
+    spell_barrier: 4116
+    spell_blink: 4117
+    spell_dark_tendrils: 4118
+    spell_detect: 4119
+    spell_disguise: 4120
+    spell_earthen_wall: 4121
+    spell_earth_spike: 4122
+    spell_earth_throw: 4123
+    spell_flaming_volley: 4124
+    spell_geyser: 4125
+    spell_summon_zombies: 4126
+    spell_swift: 4127
+    spell_tremor: 4128
+    spell_water_pulse: 4129
+    spell_water_sphere: 4130
+    spell_whirlpool: 4131
+    spell_wind_barrier: 4132
+    spell_wind_vortex: 4133
+
+# GUI item materials configuration
+gui_items:
+  # Default materials for GUI elements
+  decorative:
+    blank: "GRAY_STAINED_GLASS_PANE"
+    border: "BLACK_STAINED_GLASS_PANE"
+    header: "CYAN_STAINED_GLASS_PANE"
+  buttons:
+    back: "ARROW"
+    next_page: "PAPER"
+    prev_page: "PAPER"
+    confirm: "LIME_CONCRETE"
+    cancel: "RED_CONCRETE"
+    info: "KNOWLEDGE_BOOK"

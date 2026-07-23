@@ -12,6 +12,9 @@ commands:
   recipes:
     description: Opens the Recipe Book
     usage: /recipes
+  cast:
+    description: Cast a spell from the grimoire
+    usage: /cast <token>
 permissions:
   alkatraz.recipebook:
     description: Access to the Recipe Book
