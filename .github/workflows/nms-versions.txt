@@ -1,5 +1,5 @@
-# One Minecraft version per line - these are passed directly to
-# BuildTools as `--rev <version>`. Lines starting with # and blank
+# One Minecraft version per line, followed by the Java version needed
+# to run BuildTools for that version. Lines starting with # and blank
 # lines are ignored.
 #
 # Trim this down to only the versions where the NMS mappings actually
@@ -8,25 +8,25 @@
 # set. Add new ones here as Minecraft/Spigot release them; nothing
 # else in the workflow needs to change.
 
-1.19
-1.19.1
-1.19.2
-1.19.3
-1.19.4
-1.20
-1.20.1
-1.20.2
-1.20.4
-1.20.6
-1.21
-1.21.1
-1.21.3
-1.21.4
-1.21.5
-1.21.6
-1.21.7
-1.21.8
-1.21.11
-26.1
-26.1.2
-26.2
+1.19,17
+1.19.1,17
+1.19.2,17
+1.19.3,17
+1.19.4,17
+1.20,21
+1.20.1,21
+1.20.2,21
+1.20.4,21
+1.20.6,21
+1.21,21
+1.21.1,21
+1.21.3,21
+1.21.4,21
+1.21.5,21
+1.21.6,21
+1.21.7,21
+1.21.8,21
+1.21.11,21
+26.1,26
+26.1.2,26
+26.2,26

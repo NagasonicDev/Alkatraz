@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v4
       - id: set
         run: |
-          JSON=$(grep -v '^\s*#' .github/workflows/nms-versions.txt | grep -v '^\s*$' | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          JSON=$(grep -v '^\s*#' .github/workflows/nms-versions.txt | grep -v '^\s*$' | jq -R -s -c 'split("\n") | map(select(length > 0)) | map(split(",") | {version: .[0], java: .[1]})')
           echo "versions=$JSON" >> "$GITHUB_OUTPUT"
           echo "Versions: $JSON"
 
@@ -37,13 +37,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: ${{ fromJson(needs.load-versions.outputs.versions) }}
+        include: ${{ fromJson(needs.load-versions.outputs.versions) }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '21'
+          java-version: ${{ matrix.java }}
 
       - name: Cache remapped Spigot artifacts
         id: cache
@@ -160,10 +160,20 @@ jobs:
         #     loader: purpur
     steps:
       - uses: actions/checkout@v4
+      - name: Determine Java version
+        id: java
+        run: |
+          if [[ "${{ matrix.mc_version }}" == 26* ]]; then
+            echo "version=26" >> "$GITHUB_OUTPUT"
+          elif [[ "${{ matrix.mc_version }}" == 1.19* ]]; then
+            echo "version=17" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=21" >> "$GITHUB_OUTPUT"
+          fi
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '21'
+          java-version: ${{ steps.java.outputs.version }}
 
       - name: Download plugin artifact
         uses: actions/download-artifact@v4
