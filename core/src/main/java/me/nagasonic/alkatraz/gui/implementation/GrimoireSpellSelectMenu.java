@@ -23,6 +23,10 @@ import java.util.stream.Collectors;
 
 public class GrimoireSpellSelectMenu extends PagedMenu<Spell> {
 
+    private static me.nagasonic.alkatraz.lang.LangManager lang() {
+        return me.nagasonic.alkatraz.Alkatraz.getLangManager();
+    }
+
     private static final int[] SELECT_SLOTS = {
             10, 11, 12, 13, 14, 15, 16,
             19, 20, 21, 22, 23, 24, 25,
@@ -37,7 +41,7 @@ public class GrimoireSpellSelectMenu extends PagedMenu<Spell> {
 
     public GrimoireSpellSelectMenu(Player viewer, ItemStack grimoireStack, MagicItemInstance instance, ItemDefinition definition, int targetPageIndex) {
         super(viewer,
-                ColorFormat.format("&5Select a Spell"),
+                lang().get("grimoire.spell_select_title"),
                 54,
                 getDiscoverableSpells(viewer),
                 28);
@@ -71,7 +75,7 @@ public class GrimoireSpellSelectMenu extends PagedMenu<Spell> {
     protected void addBackButton() {
         ItemStack back = new ItemStack(Material.BARRIER);
         ItemMeta m = back.getItemMeta();
-        m.setDisplayName(ColorFormat.format("&cBack to Grimoire"));
+        m.setDisplayName(lang().get("grimoire.spell_select_back"));
         back.setItemMeta(m);
         setMenuData(back, "action", "back");
         inventory.setItem(backButtonSlot, back);
@@ -96,7 +100,7 @@ public class GrimoireSpellSelectMenu extends PagedMenu<Spell> {
         lore.add(ColorFormat.format("&bCast Time: &f" + spell.getCastTime() + "s"));
         lore.add(ColorFormat.format("&bCooldown:  &f" + spell.getCooldown() + "s"));
         lore.add("");
-        lore.add(ColorFormat.format("&eClick to assign to Page " + (targetPageIndex + 1)));
+        lore.add(lang().get("grimoire.spell_select_assign", "page", targetPageIndex + 1));
         meta.setLore(lore);
         item.setItemMeta(meta);
 
@@ -112,9 +116,8 @@ public class GrimoireSpellSelectMenu extends PagedMenu<Spell> {
             GrimoirePageMenu.savePages(viewer, grimoireStack, instance, pages);
 
             viewer.playSound(viewer.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1f);
-            viewer.sendMessage(ColorFormat.format(
-                    "&aAssigned &f" + spell.getDisplayName()
-                    + " &ato Page " + (targetPageIndex + 1) + "."));
+            viewer.sendMessage(lang().get("grimoire.spell_select_assigned",
+                    "spell", spell.getDisplayName(), "page", targetPageIndex + 1));
         }
 
         new GrimoirePageMenu(viewer, grimoireStack, instance, definition).open();

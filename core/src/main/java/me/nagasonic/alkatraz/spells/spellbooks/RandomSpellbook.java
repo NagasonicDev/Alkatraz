@@ -1,12 +1,12 @@
 package me.nagasonic.alkatraz.spells.spellbooks;
 
-import de.tr7zw.nbtapi.NBT;
+import de.tr7zw.changeme.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.Spell;
+import me.nagasonic.alkatraz.spells.Element;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
-import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.util.ColorFormat;
-import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -33,6 +33,10 @@ public class RandomSpellbook {
     private String displayName;
     private List<String> lore;
     private Material material;
+
+    private static LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
     
     /**
      * Creates a new random spellbook
@@ -59,10 +63,10 @@ public class RandomSpellbook {
      */
     private void generateDefaultLore() {
         lore.clear();
-        lore.add("&7This mysterious tome contains");
-        lore.add("&7unknown magical knowledge...");
+        lore.add(lang().get("spellbook.random_lore_line1"));
+        lore.add(lang().get("spellbook.random_lore_line2"));
         lore.add("");
-        lore.add("&dRight-click to reveal a random spell!");
+        lore.add(lang().get("spellbook.random_lore_line3"));
     }
     
     /**
@@ -132,28 +136,46 @@ public class RandomSpellbook {
         if (meta != null) {
             meta.setDisplayName(ColorFormat.format(displayName));
             
-            // Build lore with spell list
             List<String> finalLore = new ArrayList<>();
             
-            // Add custom lore
             for (String line : lore) {
                 finalLore.add(ColorFormat.format(line));
             }
             
-            // Add possible spells section
             if (!weightedSpells.isEmpty()) {
                 finalLore.add("");
-                finalLore.add(ColorFormat.format("&7Possible spells:"));
                 
-                // Sort by weight (highest first)
-                List<Map.Entry<String, Double>> sorted = new ArrayList<>(weightedSpells.entrySet());
-                sorted.sort((a, b) -> b.getValue().compareTo(a.getValue()));
+                List<String> sortedSpellIds = new ArrayList<>(weightedSpells.keySet());
+                sortedSpellIds.sort((a, b) -> {
+                    Spell sa = SpellRegistry.getSpell(a);
+                    Spell sb = SpellRegistry.getSpell(b);
+                    if (sa == null || sb == null) return 0;
+                    return Integer.compare(sa.getRequiredCircleLevel(), sb.getRequiredCircleLevel());
+                });
                 
-                for (Map.Entry<String, Double> entry : sorted) {
-                    Spell spell = SpellRegistry.getSpell(entry.getKey());
-                    if (spell != null) {
-                        finalLore.add(ColorFormat.format("&e- " + getRarity(spell.getId()) + " " + spell.getDisplayName()));
+                StringBuilder currentLine = new StringBuilder();
+                int count = 0;
+                for (String spellId : sortedSpellIds) {
+                    Spell spell = SpellRegistry.getSpell(spellId);
+                    if (spell == null) continue;
+                    
+                    String elementColor = spell.getElement().getColor();
+                    String cleanName = stripColorCodes(spell.getDisplayName());
+                    
+                    if (count > 0) {
+                        currentLine.append(" &7| ");
                     }
+                    currentLine.append(elementColor).append(cleanName);
+                    count++;
+                    
+                    if (count >= 3) {
+                        finalLore.add(ColorFormat.format(currentLine.toString()));
+                        currentLine = new StringBuilder();
+                        count = 0;
+                    }
+                }
+                if (count > 0) {
+                    finalLore.add(ColorFormat.format(currentLine.toString()));
                 }
             }
             
@@ -161,11 +183,9 @@ public class RandomSpellbook {
             item.setItemMeta(meta);
         }
         
-        // Add NBT data
         NBT.modify(item, nbt -> {
             nbt.setString("spellbook_type", "random");
             
-            // Store weighted spells
             int index = 0;
             for (Map.Entry<String, Double> entry : weightedSpells.entrySet()) {
                 nbt.setString("spell_" + index, entry.getKey());
@@ -178,24 +198,12 @@ public class RandomSpellbook {
         return item;
     }
 
-    /**
-     * Determines rarity display based on weight
-     */
-    private String getRarity(String spell) {
-        Map<String, Double> percentages = new HashMap<>();
-
-        // Calculate total weight
-        double totalWeight = 0;
-        for (double weight : weightedSpells.values()) {
-            totalWeight += weight;
-        }
-
-        // Convert each weight to percentage
-        for (Map.Entry<String, Double> entry : weightedSpells.entrySet()) {
-            double percent = (entry.getValue() / totalWeight) * 100.0;
-            percentages.put(entry.getKey(), percent);
-        }
-        return Utils.getDecimalFormat(2).format(percentages.get(spell));
+    private static String stripColorCodes(String str) {
+        if (str == null) return "";
+        return str.replaceAll("&[0-9a-fk-orA-FK-OR]", "")
+                  .replaceAll("§[0-9a-fk-orA-FK-OR]", "")
+                  .replaceAll("#[0-9a-fA-F]{6}", "")
+                  .trim();
     }
     
     /**
@@ -205,14 +213,22 @@ public class RandomSpellbook {
      * @param item The random spellbook item
      */
     public static void use(Player player, ItemStack item) {
-        if (!isRandomSpellbook(item)) return;
+        use(player, item, () -> {});
+    }
+
+    public static void use(Player player, ItemStack item, Runnable onComplete) {
+        if (!isRandomSpellbook(item)) {
+            onComplete.run();
+            return;
+        }
         
         // Load weighted spells from NBT
         Map<String, Double> weightedSpells = new HashMap<>();
         Integer spellCount = NBT.get(item, nbt -> (Integer) nbt.getInteger("spell_count"));
         
         if (spellCount == null || spellCount == 0) {
-            player.sendMessage(ColorFormat.format("&cThis spellbook appears to be empty!"));
+            player.sendMessage(ColorFormat.format(lang().get("spellbook.empty")));
+            onComplete.run();
             return;
         }
         
@@ -227,7 +243,8 @@ public class RandomSpellbook {
         }
         
         if (weightedSpells.isEmpty()) {
-            player.sendMessage(ColorFormat.format("&cThis spellbook appears to be corrupted!"));
+            player.sendMessage(ColorFormat.format(lang().get("spellbook.corrupted")));
+            onComplete.run();
             return;
         }
         
@@ -235,29 +252,32 @@ public class RandomSpellbook {
         String selectedSpellId = selectWeightedRandom(weightedSpells);
         
         if (selectedSpellId == null) {
-            player.sendMessage(ColorFormat.format("&cFailed to select a spell!"));
+            player.sendMessage(ColorFormat.format(lang().get("spellbook.selection_failed")));
+            onComplete.run();
             return;
         }
         
         Spell selectedSpell = SpellRegistry.getSpell(selectedSpellId);
         if (selectedSpell == null) {
-            player.sendMessage(ColorFormat.format("&cSelected spell not found!"));
+            player.sendMessage(ColorFormat.format(lang().get("spellbook.selection_not_found")));
+            onComplete.run();
             return;
         }
+
+        // Consume the spellbook immediately before animation
+        ItemStack handItem = player.getInventory().getItemInMainHand();
+        if (handItem != null && isRandomSpellbook(handItem) && handItem.getAmount() > 0) {
+            handItem.setAmount(handItem.getAmount() - 1);
+        }
+
         // Play transformation animation
         playTransformationAnimation(player, selectedSpell, () -> {
-            
-            // Replace item in player's hand
+            // Give the player the regular spellbook
             player.getInventory().addItem(selectedSpell.getSpellBook());
-            
-            // Consume the original spellbook after reward is safely delivered
-            ItemStack handItem = player.getInventory().getItemInMainHand();
-            if (handItem != null && isRandomSpellbook(handItem) && handItem.getAmount() > 0) {
-                handItem.setAmount(handItem.getAmount() - 1);
-            }
-            
+
             // Message
-            player.sendMessage(ColorFormat.format("&aThe spellbook transforms into " + selectedSpell.getDisplayName() + "&a!"));
+            player.sendMessage(ColorFormat.format(lang().get("spellbook.transformed", "spell", selectedSpell.getDisplayName())));
+            onComplete.run();
         });
     }
     
@@ -343,13 +363,5 @@ public class RandomSpellbook {
         
         String type = NBT.get(item, nbt -> (String) nbt.getString("spellbook_type"));
         return "random".equals(type);
-    }
-    
-    /**
-     * Helper to capitalize first letter
-     */
-    private static String capitalizeFirst(String str) {
-        if (str == null || str.isEmpty()) return str;
-        return str.substring(0, 1).toUpperCase() + str.substring(1);
     }
 }

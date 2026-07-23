@@ -1,6 +1,6 @@
 package me.nagasonic.alkatraz.spells.spellbooks;
 
-import de.tr7zw.nbtapi.NBT;
+import de.tr7zw.changeme.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
@@ -8,6 +8,7 @@ import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
 import me.nagasonic.alkatraz.spells.configuration.impact.ValueImpact;
 import me.nagasonic.alkatraz.spells.configuration.requirement.ValueRequirement;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.util.ColorFormat;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
@@ -46,6 +47,10 @@ public class Spellbook {
      * 
      * @param spellId The ID of the spell to unlock
      */
+    private static LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
+
     public Spellbook(String spellId) {
         this.spellId = spellId;
         this.spell = SpellRegistry.getSpell(spellId);
@@ -54,7 +59,7 @@ public class Spellbook {
         
         // Default appearance
         this.material = Material.KNOWLEDGE_BOOK;
-        this.displayName = spell != null ? "&6Spellbook: " + spell.getDisplayName() : "&6Unknown Spellbook";
+        this.displayName = spell != null ? lang().get("spellbook.display_name", "spell", spell.getDisplayName()) : lang().get("spellbook.unknown_name");
         this.lore = new ArrayList<>();
         this.clore = new ArrayList<>();
         generateDefaultLore();
@@ -65,11 +70,10 @@ public class Spellbook {
      */
     private void generateDefaultLore() {
         if (spell == null) {
-            lore.add("&7This spellbook appears to be corrupted.");
+            lore.add(lang().get("spellbook.corrupted_lore"));
             return;
         }
         
-        lore.add("&7Contains knowledge of:");
         lore.add(spell.getDisplayName());
         lore.add("");
         
@@ -79,9 +83,9 @@ public class Spellbook {
         }
         
         lore.add("");
-        lore.add("&eCircle " + spell.getRequiredCircleLevel() + " &7| &b" + spell.getElement().name());
+        lore.add(lang().get("spellbook.element_info", "circle", spell.getRequiredCircleLevel(), "element", spell.getElement().name()));
         lore.add("");
-        lore.add("&7Right-click to discover this spell!");
+        lore.add(lang().get("spellbook.right_click_discover"));
     }
     
     /**
@@ -177,7 +181,7 @@ public class Spellbook {
             // Add requirements section if any
             if (!requirements.isEmpty()) {
                 finalLore.add("");
-                finalLore.add(ColorFormat.format("&cRequirements:"));
+                finalLore.add(ColorFormat.format(lang().get("spellbook.requirements_header")));
                 for (ValueRequirement req : requirements) {
                     finalLore.add(ColorFormat.format("&7- " + req.getDescription()));
                 }
@@ -186,7 +190,7 @@ public class Spellbook {
             // Add impacts section if any
             if (!impacts.isEmpty()) {
                 finalLore.add("");
-                finalLore.add(ColorFormat.format("&aEffects:"));
+                finalLore.add(ColorFormat.format(lang().get("spellbook.effects_header")));
                 for (ValueImpact impact : impacts) {
                     finalLore.add(ColorFormat.format("&7- " + impact.getDescription()));
                 }
@@ -212,49 +216,50 @@ public class Spellbook {
      * @return true if successfully used, false otherwise
      */
     public boolean use(Player player, ItemStack item) {
+        return use(player, item, () -> {});
+    }
+
+    public boolean use(Player player, ItemStack item, Runnable onComplete) {
         if (spell == null) {
-            player.sendMessage(ColorFormat.format("&cThis spellbook appears to be corrupted!"));
+            player.sendMessage(ColorFormat.format(lang().get("spellbook.corrupted")));
+            onComplete.run();
             return false;
         }
         MagicProfile profile = ProfileManager.getProfile(player, MagicProfile.class);
-        
+
         // Check if spell is already discovered
         if (profile.hasDiscoveredSpell(spell)) {
-            player.sendMessage(ColorFormat.format("&eYou already know " + spell.getDisplayName() + "&e!"));
+            player.sendMessage(ColorFormat.format(lang().get("spellbook.already_known", "spell", spell.getDisplayName())));
+            onComplete.run();
             return false;
         }
-        
+
         // Check all requirements
         for (ValueRequirement requirement : requirements) {
             if (!requirement.isMet(player)) {
-                player.sendMessage(ColorFormat.format("&cRequirement not met: &7" + requirement.getDescription()));
+                player.sendMessage(ColorFormat.format(lang().get("spellbook.requirement_not_met", "description", requirement.getDescription())));
+                onComplete.run();
                 return false;
             }
         }
         player.getInventory().getItemInMainHand().setAmount(player.getInventory().getItemInMainHand().getAmount() - 1);
-        
+
         // All requirements met - begin discovery animation
         playDiscoveryAnimation(player, () -> {
             // Discover the spell
             profile.setDiscoveredSpell(spell, true);
-            
+
             // Apply all impacts
             for (ValueImpact impact : impacts) {
                 impact.apply(player);
             }
-            
+
             // Success message
-            player.sendMessage(ColorFormat.format("&aYou have discovered " + spell.getDisplayName() + "&a!"));
-            player.sendMessage(ColorFormat.format("&7Use &e/spells &7to view your discovered spells."));
-            
-            // Consume the item
-            if (item.getAmount() > 1) {
-                item.setAmount(item.getAmount() - 1);
-            } else {
-                player.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
-            }
+            player.sendMessage(ColorFormat.format(lang().get("spellbook.discovered", "spell", spell.getDisplayName())));
+            player.sendMessage(ColorFormat.format(lang().get("spellbook.view_spells_hint")));
+            onComplete.run();
         });
-        
+
         return true;
     }
     

@@ -1,5 +1,8 @@
 package me.nagasonic.alkatraz.spells.spellbooks;
 
+import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.config.SpellbookConfig;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.Element;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
@@ -18,6 +21,10 @@ import java.util.*;
  * You can customize requirements, impacts, and appearance here.
  */
 public class SpellbookFactory {
+
+    private static LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
     
     // ==========================================
     // REGULAR SPELLBOOKS
@@ -36,18 +43,7 @@ public class SpellbookFactory {
     // ==========================================
 
     public static int getWeight(int circle){
-        return switch (circle){
-            case 1 -> 10000;
-            case 2 -> 5000;
-            case 3 -> 2500;
-            case 4 -> 1250;
-            case 5 -> 750;
-            case 6 -> 375;
-            case 7 -> 150;
-            case 8 -> 75;
-            case 9 -> 30;
-            default -> 0;
-        };
+        return SpellbookConfig.getCircleWeight(circle);
     }
 
 
@@ -62,10 +58,8 @@ public class SpellbookFactory {
             }
             spellsByCircle.put(c, spells);
         }
-        RandomSpellbook random = new RandomSpellbook("Random Spellbook")
-                .setDisplayName("&7Random Spellbook")
-                .addLoreLine("")
-                .addLoreLine("&7Contains spells from " + Arrays.toString(circles) + " circle levels");
+        RandomSpellbook random = new RandomSpellbook(lang().get("spellbook.random_name"))
+                .setDisplayName(lang().get("spellbook.random_lore"));
         for (Integer circle : spellsByCircle.keySet()) {
             List<Spell> spells = spellsByCircle.get(circle);
             for (Spell spell : spells){
@@ -90,10 +84,8 @@ public class SpellbookFactory {
                 }
             }
         }
-        RandomSpellbook random = new RandomSpellbook(element.getName() + " Spellbook")
-                .setDisplayName(element.getColor() + element.getName() + " Spellbook")
-                .addLoreLine("")
-                .addLoreLine("&7Contains" + element.getName() + " spells.");
+        RandomSpellbook random = new RandomSpellbook(lang().get("spellbook_factory.element_name", "element", element.getName()))
+                .setDisplayName(lang().get("spellbook.element_lore", "element", element.getColor() + element.getName()));
         for (Integer circle : spellsByCircle.keySet()) {
             List<Spell> spells = spellsByCircle.get(circle);
             for (Spell spell : spells){

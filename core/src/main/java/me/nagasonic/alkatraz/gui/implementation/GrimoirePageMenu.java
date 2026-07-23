@@ -2,24 +2,29 @@ package me.nagasonic.alkatraz.gui.implementation;
 
 import me.nagasonic.alkatraz.api.magic.definition.ItemDefinition;
 import me.nagasonic.alkatraz.api.magic.instance.MagicItemInstance;
+import me.nagasonic.alkatraz.gui.ItemBuilder;
 import me.nagasonic.alkatraz.gui.Menu;
 import me.nagasonic.alkatraz.items.magic.component.handler.grimoire.GrimoireComponentHandler;
 import me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellCastValidator;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
-import me.nagasonic.alkatraz.util.ColorFormat;
-import me.nagasonic.alkatraz.util.Utils;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.LecternInventory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class GrimoirePageMenu extends Menu {
+
+    private static me.nagasonic.alkatraz.lang.LangManager lang() {
+        return me.nagasonic.alkatraz.Alkatraz.getLangManager();
+    }
 
     private static final int LEFT_PAGE_SLOT = 11;
     private static final int RIGHT_PAGE_SLOT = 15;
@@ -32,7 +37,7 @@ public class GrimoirePageMenu extends Menu {
     private int currentSpread;
 
     public GrimoirePageMenu(Player viewer, ItemStack grimoireStack, MagicItemInstance instance, ItemDefinition definition) {
-        super(viewer, ColorFormat.format("&6Grimoire"), 54);
+        super(viewer, lang().get("menu.grimoire"), 54);
         this.grimoireStack = grimoireStack;
         this.instance = instance;
         this.definition = definition;
@@ -42,12 +47,10 @@ public class GrimoirePageMenu extends Menu {
 
     @Override
     protected void build() {
-        ItemStack cover = createPaneItem(Material.BROWN_STAINED_GLASS_PANE, "");
-        ItemStack spine = createPaneItem(Material.BLACK_STAINED_GLASS_PANE, "");
+        ItemStack cover = ItemBuilder.of(Material.BROWN_STAINED_GLASS_PANE).rawName("").build();
+        ItemStack spine = ItemBuilder.of(Material.BLACK_STAINED_GLASS_PANE).rawName("").build();
 
-        for (int i = 0; i < 54; i++) {
-            inventory.setItem(i, Utils.getBlank());
-        }
+        fillAll();
 
         for (int i = 0; i < 9; i++) {
             inventory.setItem(i, cover.clone());
@@ -74,19 +77,17 @@ public class GrimoirePageMenu extends Menu {
         }
 
         if (currentSpread > 0) {
-            ItemStack prev = new ItemStack(Material.ARROW);
-            ItemMeta prevMeta = prev.getItemMeta();
-            prevMeta.setDisplayName(ColorFormat.format("&fPrevious Pages"));
-            prev.setItemMeta(prevMeta);
+            ItemStack prev = ItemBuilder.of(Material.ARROW)
+                    .name(lang().get("grimoire.previous_pages"))
+                    .build();
             setMenuData(prev, "action", "prev_spread");
             inventory.setItem(PREV_SPREAD_SLOT, prev);
         }
 
         if ((currentSpread + 1) * 2 < totalPages) {
-            ItemStack next = new ItemStack(Material.ARROW);
-            ItemMeta nextMeta = next.getItemMeta();
-            nextMeta.setDisplayName(ColorFormat.format("&fNext Pages"));
-            next.setItemMeta(nextMeta);
+            ItemStack next = ItemBuilder.of(Material.ARROW)
+                    .name(lang().get("grimoire.next_pages"))
+                    .build();
             setMenuData(next, "action", "next_spread");
             inventory.setItem(NEXT_SPREAD_SLOT, next);
         }
@@ -96,13 +97,10 @@ public class GrimoirePageMenu extends Menu {
         int pageNumber = pageIndex + 1;
 
         if (spellId == null || spellId.isEmpty()) {
-            ItemStack item = new ItemStack(Material.BOOK);
-            ItemMeta meta = item.getItemMeta();
-            meta.setDisplayName(ColorFormat.format("&6Page " + pageNumber + " &7- &fEmpty"));
-            List<String> lore = new ArrayList<>();
-            lore.add(ColorFormat.format("&7Click to assign a spell."));
-            meta.setLore(lore);
-            item.setItemMeta(meta);
+            ItemStack item = ItemBuilder.of(Material.BOOK)
+                    .name(lang().get("grimoire.page_empty", "page", pageNumber))
+                    .lore(lang().get("grimoire.page_empty_lore"))
+                    .build();
             setMenuData(item, "action", "assign_spell");
             setMenuData(item, "page_index", pageIndex);
             return item;
@@ -110,27 +108,25 @@ public class GrimoirePageMenu extends Menu {
 
         Spell spell = SpellRegistry.getSpell(spellId);
         if (spell == null) {
-            ItemStack item = new ItemStack(Material.BOOK);
-            ItemMeta meta = item.getItemMeta();
-            meta.setDisplayName(ColorFormat.format("&6Page " + pageNumber + " &7- &cUnknown"));
-            item.setItemMeta(meta);
-            return item;
+            return ItemBuilder.of(Material.BOOK)
+                    .name(lang().get("grimoire.page_unknown", "page", pageNumber))
+                    .build();
         }
 
         ItemStack item = spell.getGuiItem().clone();
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ColorFormat.format("&6Page " + pageNumber + ": &f" + spell.getDisplayName()));
-
         List<String> lore = new ArrayList<>();
-        lore.add(ColorFormat.format("&7" + spell.getElement().getName() + "  &eCircle " + spell.getRequiredCircleLevel()));
-        lore.add(ColorFormat.format("&bMana Cost: &f" + spell.getCost()));
-        lore.add(ColorFormat.format("&bCast Time: &f" + spell.getCastTime() + "s"));
-        lore.add(ColorFormat.format("&bCooldown:  &f" + spell.getCooldown() + "s"));
+        lore.add(lang().get("grimoire.spell_element_circle", "element", spell.getElement().getName(), "circle", spell.getRequiredCircleLevel()));
+        lore.add(lang().get("spells.mana_cost", "value", spell.getCost()));
+        lore.add(lang().get("spells.cast_time", "value", spell.getCastTime()));
+        lore.add(lang().get("spells.cooldown", "value", spell.getCooldown()));
         lore.add("");
-        lore.add(ColorFormat.format("&eLeft-click &7to cast this spell."));
-        lore.add(ColorFormat.format("&cRight-click &7to clear this page."));
-        meta.setLore(lore);
-        item.setItemMeta(meta);
+        lore.add(lang().get("grimoire.page_spell_left_click"));
+        lore.add(lang().get("grimoire.page_spell_right_click"));
+
+        item = ItemBuilder.of(item)
+                .rawName(lang().get("grimoire.page_title", "page", pageNumber, "spell", spell.getDisplayName()))
+                .rawLore(lore)
+                .build();
 
         setMenuData(item, "action", "cast_spell");
         setMenuData(item, "spell_id", spell.getId());
@@ -172,8 +168,8 @@ public class GrimoirePageMenu extends Menu {
                 if (spellId != null) {
                     close();
                     Spell spell = SpellRegistry.getSpell(spellId);
-                    if (spell != null && SpellCastValidator.canCast(viewer, grimoireStack, spell)) {
-                        spell.cast(viewer, grimoireStack);
+                    if (spell != null && SpellCastValidator.canCast(viewer, null, spell)) {
+                        spell.cast(viewer, null);
                     }
                 }
                 return true;
@@ -221,11 +217,4 @@ public class GrimoirePageMenu extends Menu {
         player.getInventory().setItem(player.getInventory().getHeldItemSlot(), stack);
     }
 
-    private ItemStack createPaneItem(Material material, String name) {
-        ItemStack item = new ItemStack(material);
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(name);
-        item.setItemMeta(meta);
-        return item;
-    }
 }
