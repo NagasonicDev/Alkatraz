@@ -1,0 +1,32 @@
+# One Minecraft version per line - these are passed directly to
+# BuildTools as `--rev <version>`. Lines starting with # and blank
+# lines are ignored.
+#
+# Trim this down to only the versions where the NMS mappings actually
+# changed and you maintain a distinct compat module - you don't need
+# every patch release, just the ones with a distinct revision/mapping
+# set. Add new ones here as Minecraft/Spigot release them; nothing
+# else in the workflow needs to change.
+
+1.19
+1.19.1
+1.19.2
+1.19.3
+1.19.4
+1.20
+1.20.1
+1.20.2
+1.20.4
+1.20.6
+1.21
+1.21.1
+1.21.3
+1.21.4
+1.21.5
+1.21.6
+1.21.7
+1.21.8
+1.21.11
+26.1
+26.1.2
+26.2

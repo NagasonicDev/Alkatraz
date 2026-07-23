@@ -1,22 +1,84 @@
 name: Test Plugin Compatibility
 
 on:
-  push:
-    branches: [main]
-  pull_request:
   workflow_dispatch:
-
-# Edit this list to control which MC versions and loaders you test.
-# Add/remove entries here — everything downstream reads from this.
-env:
-  MC_VERSIONS_JSON: '["1.20.1", "1.20.4", "1.21.1", "1.21.4"]'
-  LOADERS_JSON: '["paper", "purpur", "spigot"]'
 
 jobs:
   # ---------------------------------------------------------------------
-  # 1. Fast unit tests (MockBukkit or plain JUnit) - fail fast, no server boot
+  # 0. Turn nms-versions.txt into a JSON array for the build-nms matrix.
+  # ---------------------------------------------------------------------
+  load-versions:
+    runs-on: ubuntu-latest
+    outputs:
+      versions: ${{ steps.set.outputs.versions }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: set
+        run: |
+          JSON=$(grep -v '^\s*#' nms-versions.txt | grep -v '^\s*$' | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          echo "versions=$JSON" >> "$GITHUB_OUTPUT"
+          echo "Versions: $JSON"
+
+  # ---------------------------------------------------------------------
+  # 1. Build (or restore from cache) the remapped Spigot artifacts for
+  #    every version in nms-versions.txt. This is the ONLY job that ever
+  #    invokes BuildTools. Each version gets its own cache entry, so a
+  #    version is only ever rebuilt once, no matter how many times the
+  #    workflow runs afterwards.
+  #
+  #    Produces, per version, staged under ./nms-stage:
+  #      nms-stage/m2/org/spigotmc/...   -> compile-time Maven deps
+  #      nms-stage/m2/org/bukkit/...     -> compile-time Maven deps
+  #      nms-stage/jars/spigot-<v>.jar   -> runnable server jar
+  # ---------------------------------------------------------------------
+  build-nms:
+    needs: load-versions
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ${{ fromJson(needs.load-versions.outputs.versions) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Cache remapped Spigot artifacts
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: nms-stage
+          # Bump this suffix (-v1 -> -v2) to force a rebuild of every
+          # version, e.g. if Spigot re-patches something retroactively.
+          key: spigot-nms-${{ matrix.version }}-v1
+
+      - name: Build with BuildTools (cache miss only)
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p nms-stage/m2/org/spigotmc nms-stage/m2/org/bukkit nms-stage/jars
+          chmod +x scripts/build-spigot.sh
+          scripts/build-spigot.sh "${{ matrix.version }}" "nms-stage/jars/spigot-${{ matrix.version }}.jar"
+          # BuildTools installs spigot-api/spigot/craftbukkit into the
+          # local Maven repo as a side effect - pull that into the
+          # staged folder so it travels with the cache/artifact.
+          [ -d "$HOME/.m2/repository/org/spigotmc" ] && cp -r "$HOME/.m2/repository/org/spigotmc/." nms-stage/m2/org/spigotmc/
+          [ -d "$HOME/.m2/repository/org/bukkit" ] && cp -r "$HOME/.m2/repository/org/bukkit/." nms-stage/m2/org/bukkit/
+
+      - name: Upload artifact for this run
+        uses: actions/upload-artifact@v4
+        with:
+          name: nms-${{ matrix.version }}
+          path: nms-stage
+          retention-days: 1
+
+  # ---------------------------------------------------------------------
+  # 2. Unit tests - needs every version's compile artifacts present in
+  #    the local Maven repo before `mvn test` can even resolve deps.
   # ---------------------------------------------------------------------
   unit-tests:
+    needs: build-nms
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -25,14 +87,26 @@ jobs:
           distribution: temurin
           java-version: '21'
           cache: maven
+
+      - name: Download and install all NMS artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: nms-*
+          path: nms-merged
+          merge-multiple: true
+      - name: Install into local Maven repo
+        run: |
+          mkdir -p "$HOME/.m2/repository"
+          [ -d nms-merged/m2 ] && cp -r nms-merged/m2/. "$HOME/.m2/repository/"
+
       - name: Run unit tests
         run: mvn -B test
 
   # ---------------------------------------------------------------------
-  # 2. Build the plugin jar once, share it across every matrix job
+  # 3. Build the plugin jar once, share it across every integration test.
   # ---------------------------------------------------------------------
   build-plugin:
-    needs: unit-tests
+    needs: build-nms
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -41,15 +115,24 @@ jobs:
           distribution: temurin
           java-version: '21'
           cache: maven
+
+      - name: Download and install all NMS artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: nms-*
+          path: nms-merged
+          merge-multiple: true
+      - name: Install into local Maven repo
+        run: |
+          mkdir -p "$HOME/.m2/repository"
+          [ -d nms-merged/m2 ] && cp -r nms-merged/m2/. "$HOME/.m2/repository/"
+
       - name: Build plugin jar
         run: mvn -B package -DskipTests
       - name: Upload plugin artifact
         uses: actions/upload-artifact@v4
         with:
           name: plugin-jar
-          # Excludes the *-sources.jar / *-original.jar that shade/some
-          # plugins also drop in target/ - adjust the glob if your
-          # artifactId produces something these patterns don't match.
           path: |
             target/*.jar
             !target/*-sources.jar
@@ -57,56 +140,24 @@ jobs:
           retention-days: 1
 
   # ---------------------------------------------------------------------
-  # 3. Build Spigot jars via BuildTools - ONCE per MC version, then cached.
-  #    This is the only loader that needs NMS remapping; every other
-  #    loader fetches a prebuilt jar directly in the test job below.
-  #    Cache hits skip BuildTools entirely on every subsequent run.
-  # ---------------------------------------------------------------------
-  build-spigot-jars:
-    needs: unit-tests
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        mc_version: [1.20.1, 1.20.4, 1.21.1, 1.21.4]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '21'
-      - name: Cache Spigot jar
-        id: cache-spigot
-        uses: actions/cache@v4
-        with:
-          path: spigot-jars/spigot-${{ matrix.mc_version }}.jar
-          # bump the -v1 suffix if you ever need to force a rebuild
-          key: spigot-jar-${{ matrix.mc_version }}-v1
-      - name: Build Spigot via BuildTools (cache miss only)
-        if: steps.cache-spigot.outputs.cache-hit != 'true'
-        run: |
-          mkdir -p spigot-jars
-          chmod +x scripts/build-spigot.sh
-          scripts/build-spigot.sh "${{ matrix.mc_version }}" "spigot-jars/spigot-${{ matrix.mc_version }}.jar"
-
-  # ---------------------------------------------------------------------
   # 4. Integration test matrix: every MC version x every loader.
-  #    Paper/Purpur fetch prebuilt jars directly (fast, no build step).
-  #    Spigot restores the jar cached in the job above (no rebuild).
+  #    Paper/Purpur fetch prebuilt jars directly. Spigot pulls its
+  #    runnable jar out of the version's nms-<version> artifact - no
+  #    BuildTools invocation happens here.
   # ---------------------------------------------------------------------
   integration-test:
-    needs: [build-plugin, build-spigot-jars]
+    needs: [build-plugin, build-nms]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        mc_version: [1.20.1, 1.20.4, 1.21.1, 1.21.4]
+        mc_version: ["1.20.1", "1.20.4", "1.21.1", "1.21.4", "1.21.8", "26.1.2", "26.2"]
         loader: [paper, purpur, spigot]
         # Add exclusions here if a given loader doesn't publish a
-        # particular version yet, e.g.:
+        # particular version, e.g.:
         # exclude:
-        #   - mc_version: 1.21.4
-        #     loader: spigot
+        #   - mc_version: 26.2
+        #     loader: purpur
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -120,12 +171,12 @@ jobs:
           name: plugin-jar
           path: dist
 
-      - name: Restore cached Spigot jar
+      - name: Download Spigot server jar
         if: matrix.loader == 'spigot'
-        uses: actions/cache@v4
+        uses: actions/download-artifact@v4
         with:
-          path: spigot-jars/spigot-${{ matrix.mc_version }}.jar
-          key: spigot-jar-${{ matrix.mc_version }}-v1
+          name: nms-${{ matrix.mc_version }}
+          path: nms-download
 
       - name: Fetch server jar
         run: |
@@ -139,7 +190,7 @@ jobs:
               scripts/fetch-purpur.sh "${{ matrix.mc_version }}" servers/server.jar
               ;;
             spigot)
-              cp "spigot-jars/spigot-${{ matrix.mc_version }}.jar" servers/server.jar
+              cp "nms-download/jars/spigot-${{ matrix.mc_version }}.jar" servers/server.jar
               ;;
           esac
 
