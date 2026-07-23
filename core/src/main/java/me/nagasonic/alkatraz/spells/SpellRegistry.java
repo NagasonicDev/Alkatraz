@@ -13,6 +13,7 @@ import java.util.Objects;
 public class SpellRegistry {
     private static Map<Class<?>, Spell> allSpells = Collections.unmodifiableMap(new HashMap<>());
     private static Map<String, Spell> allSpellsByID = Collections.unmodifiableMap(new HashMap<>());
+    private static Map<String, Spell> allSpellsByIdFull = Collections.unmodifiableMap(new HashMap<>());
 
     private static int registeredCount = 0;
 
@@ -111,6 +112,9 @@ public class SpellRegistry {
         Map<String, Spell> spellsById = new HashMap<>(allSpellsByID);
         spellsById.put(spell.getId(), spell);
         allSpellsByID = Collections.unmodifiableMap(spellsById);
+        Map<String, Spell> combined = new HashMap<>(allSpellsByIdFull);
+        combined.put(spell.getId(), spell);
+        allSpellsByIdFull = Collections.unmodifiableMap(combined);
         Alkatraz.logHigh("Registered spell: " + spell.getId() + " (" + spell.getElement() + ") in "
                 + (System.nanoTime() - start) / 1_000_000 + "ms");
     }
@@ -119,8 +123,22 @@ public class SpellRegistry {
         return allSpells.containsKey(spell);
     }
 
+    public static void registerApiSpell(me.nagasonic.alkatraz.api.spells.Spell apiSpell) {
+        ApiSpellAdapter adapter = new ApiSpellAdapter(apiSpell);
+        adapter.loadConfiguration();
+        Map<String, Spell> combined = new HashMap<>(allSpellsByIdFull);
+        combined.put(adapter.getId(), adapter);
+        allSpellsByIdFull = Collections.unmodifiableMap(combined);
+        Alkatraz.logHigh("Registered API spell: " + adapter.getId());
+    }
+
+    public static Map<String, Spell> getAllSpellsByIdFull() {
+        return allSpellsByIdFull;
+    }
+
     public static void reload() {
         allSpells = Collections.unmodifiableMap(new HashMap<>());
+        allSpellsByIdFull = Collections.unmodifiableMap(new HashMap<>());
         registerSpells();
     }
 }
