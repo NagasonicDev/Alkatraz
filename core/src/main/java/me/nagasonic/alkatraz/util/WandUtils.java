@@ -1,6 +1,6 @@
 package me.nagasonic.alkatraz.util;
 
-import de.tr7zw.nbtapi.NBT;
+import de.tr7zw.changeme.nbtapi.NBT;
 import me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack;
 import org.bukkit.inventory.ItemStack;
 

@@ -102,84 +102,40 @@ public class SpellComponentHandler implements Listener {
     public static void detectCollisions(){
         List<SpellComponent> components = new ArrayList<>(activeComponents.values());
 
-        for (SpellComponent comp : components) {
-            // Handle entity collisions
-            if (comp instanceof SpellEntityComponent eComp) {
-                Entity entity = eComp.getEntity();
-                Location loc = entity.getLocation();
+        for (int i = 0; i < components.size(); i++) {
+            SpellComponent comp = components.get(i);
+            if (comp == null) continue;
+            Location loc = getLocation(comp);
+            if (loc == null) continue;
 
-                for (SpellComponent other : components) {
-                    if (other instanceof SpellEntityComponent otherE &&
-                            !otherE.equals(eComp)) {
+            for (int j = i + 1; j < components.size(); j++) {
+                SpellComponent other = components.get(j);
+                if (other == null) continue;
+                Location otherLoc = getLocation(other);
+                if (otherLoc == null) continue;
 
-                        Location otherLoc = otherE.getEntity().getLocation();
-                        if (loc.distance(otherLoc) <= eComp.getCollisionRadius()) {
-                            collide(comp, other, loc, otherLoc);
-                        }
-                    }else if (other instanceof SpellParticleComponent otherP){
-                        Location otherLoc = otherP.getLocation();
-                        if (loc.distance(otherLoc) <= eComp.getCollisionRadius()) {
-                            collide(comp, other, loc, otherLoc);
-                        }
-                    } else if (other instanceof SpellBlockComponent otherB) {
-                        Location otherLoc = otherB.getBlock().getLocation();
-                        if (loc.distance(otherLoc) <= eComp.getCollisionRadius()) {
-                            collide(comp, other, loc, otherLoc);
-                        }
-                    }
-                }
-            }
+                if (loc.getWorld() != otherLoc.getWorld()) continue;
 
-            // Handle particle collisions
-            if (comp instanceof SpellParticleComponent p1) {
-                Location loc1 = p1.getLocation();
-
-                for (SpellComponent other : components) {
-                    if (other instanceof SpellParticleComponent p2 &&
-                            !p1.equals(p2)) {
-
-                        Location loc2 = p2.getLocation();
-                        double distance = loc1.distance(loc2);
-
-                        if (distance <= (p1.getCollisionRadius())) {
-                            collide(p1, p2, loc1, loc2);
-                        }
-                    } else if (other instanceof SpellEntityComponent e) {
-                        Location loc2 = e.getEntity().getLocation();
-                        if (loc2.distance(loc1) <= p1.getCollisionRadius()){
-                            collide(p1, e, loc1, loc2);
-                        }
-                    } else if (other instanceof SpellBlockComponent b) {
-                        Location loc2 = b.getBlock().getLocation();
-                        if (loc2.distance(loc1) <= p1.getCollisionRadius()){
-                            collide(p1, b, loc1, loc2);
-                        }
-                    }
-                }
-            }
-
-            if (comp instanceof SpellBlockComponent bComp){
-                Location loc = bComp.getBlock().getLocation();
-                for (SpellComponent other : components) {
-                    if (other instanceof SpellBlockComponent b && !bComp.equals(b)){
-                        Location oLoc = b.getBlock().getLocation();
-                        if (loc.distance(oLoc) <= bComp.getCollisionRadius()){
-                            collide(bComp, b, loc, oLoc);
-                        }
-                    } else if (other instanceof SpellEntityComponent e) {
-                        Location loc1 = e.getEntity().getLocation();
-                        if (loc.distance(loc1) <= bComp.getCollisionRadius()){
-                            collide(bComp, e, loc, loc1);
-                        }
-                    } else if (other instanceof SpellParticleComponent p) {
-                        Location loc1 = p.getLocation();
-                        if (loc.distance(loc1) <= bComp.getCollisionRadius()){
-                            collide(bComp, p, loc, loc1);
-                        }
-                    }
+                double collisionRadius = Math.max(
+                        comp.getCollisionRadius(),
+                        other.getCollisionRadius()
+                );
+                if (loc.distance(otherLoc) <= collisionRadius) {
+                    collide(comp, other, loc, otherLoc);
                 }
             }
         }
+    }
+
+    private static Location getLocation(SpellComponent comp) {
+        if (comp instanceof SpellEntityComponent e) {
+            return e.getEntity().getLocation();
+        } else if (comp instanceof SpellParticleComponent p) {
+            return p.getLocation();
+        } else if (comp instanceof SpellBlockComponent b) {
+            return b.getBlock().getLocation();
+        }
+        return null;
     }
 
     /**
