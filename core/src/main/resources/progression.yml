@@ -39,6 +39,8 @@ circle:
       stat_points: 5
       max_mana: 200
       mana_regeneration: 2
+      magic_affinity: 2
+      magic_resistance: 1
       requirements:
         - type: arcane_knowledge
           amount: 300
@@ -50,6 +52,8 @@ circle:
       stat_points: 5
       max_mana: 400
       mana_regeneration: 2.5
+      magic_affinity: 3
+      magic_resistance: 2
       requirements:
         - type: arcane_knowledge
           amount: 1040
@@ -61,6 +65,8 @@ circle:
       stat_points: 7
       max_mana: 800
       mana_regeneration: 3
+      magic_affinity: 6
+      magic_resistance: 4
       requirements:
         - type: arcane_knowledge
           amount: 2636
@@ -72,6 +78,8 @@ circle:
       stat_points: 10
       max_mana: 1250
       mana_regeneration: 5
+      magic_affinity: 9
+      magic_resistance: 7
       requirements:
         - type: arcane_knowledge
           amount: 6570
@@ -86,6 +94,8 @@ circle:
       stat_points: 10
       max_mana: 2000
       mana_regeneration: 6.25
+      magic_affinity: 13
+      magic_resistance: 10
       requirements:
         - type: arcane_knowledge
           amount: 15566
@@ -100,6 +110,8 @@ circle:
       stat_points: 15
       max_mana: 2750
       mana_regeneration: 7.5
+      magic_affinity: 18
+      magic_resistance: 14
       requirements:
         - type: arcane_knowledge
           amount: 36916
@@ -113,6 +125,8 @@ circle:
       stat_points: 15
       max_mana: 4000
       mana_regeneration: 10
+      magic_affinity: 24
+      magic_resistance: 18
       requirements:
         - type: arcane_knowledge
           amount: 86360
@@ -126,6 +140,8 @@ circle:
       stat_points: 20
       max_mana: 7500
       mana_regeneration: 12.5
+      magic_affinity: 30
+      magic_resistance: 24
       requirements:
         - type: arcane_knowledge
           amount: 202531
@@ -139,6 +155,8 @@ circle:
       stat_points: 25
       max_mana: 10000
       mana_regeneration: 15
+      magic_affinity: 37
+      magic_resistance: 30
       requirements:
         - type: arcane_knowledge
           amount: 474531

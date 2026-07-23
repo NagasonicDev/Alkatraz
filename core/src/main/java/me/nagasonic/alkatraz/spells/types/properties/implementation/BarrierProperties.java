@@ -1,6 +1,7 @@
 package me.nagasonic.alkatraz.spells.types.properties.implementation;
 
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.types.BarrierType;
 import me.nagasonic.alkatraz.spells.types.properties.SpellProperties;
 import org.bukkit.Bukkit;
@@ -16,6 +17,10 @@ import static me.nagasonic.alkatraz.util.ColorFormat.format;
 
 public class BarrierProperties extends SpellProperties {
 
+    private static LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
+
     private double hitpoints;
     private final double initialHitpoints;
     private boolean broken;
@@ -29,9 +34,9 @@ public class BarrierProperties extends SpellProperties {
         this.initialHitpoints = hitpoints;
         this.type = type;
         this.radius = radius;
-        this.healthBar = Bukkit.createBossBar(format("&dBarrier: %health%/%initHealth%")
-                .replaceAll("%health%", String.valueOf(hitpoints))
-                .replaceAll("%initHealth%", String.valueOf(initialHitpoints)),
+        this.healthBar = Bukkit.createBossBar(lang().get("spells.barrier.health_bar",
+                        "%health%", String.valueOf(hitpoints),
+                        "%initHealth%", String.valueOf(initialHitpoints)),
                 BarColor.PINK,
                 BarStyle.SOLID
         );
@@ -44,9 +49,9 @@ public class BarrierProperties extends SpellProperties {
 
     public void damage(double amount) {
         hitpoints -= amount;
-        healthBar.setTitle(format("&dBarrier: %health%/%initHealth%")
-                        .replaceAll("%health%", String.valueOf(hitpoints))
-                        .replaceAll("%initHealth%", String.valueOf(initialHitpoints)));
+        healthBar.setTitle(lang().get("spells.barrier.health_bar",
+                        "%health%", String.valueOf(hitpoints),
+                        "%initHealth%", String.valueOf(initialHitpoints)));
         healthBar.setProgress(hitpoints <= 0 ? 0 : hitpoints / initialHitpoints);
         if (hitpoints <= 0) {
             hitpoints = 0;

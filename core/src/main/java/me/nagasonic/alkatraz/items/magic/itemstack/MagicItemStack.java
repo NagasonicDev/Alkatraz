@@ -1,8 +1,10 @@
 package me.nagasonic.alkatraz.items.magic.itemstack;
 
+import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.api.magic.definition.ItemDefinition;
 import me.nagasonic.alkatraz.api.magic.instance.Engraving;
 import me.nagasonic.alkatraz.api.magic.instance.MagicItemInstance;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.api.magic.modifier.EngravingDefinition;
 import me.nagasonic.alkatraz.api.magic.trigger.TriggerType;
 import me.nagasonic.alkatraz.items.magic.persistence.ItemDataKeys;
@@ -10,6 +12,7 @@ import me.nagasonic.alkatraz.items.magic.persistence.ItemInstanceSerializer;
 import me.nagasonic.alkatraz.api.magic.registry.MagicItemRegistries;
 import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
 import me.nagasonic.alkatraz.util.ColorFormat;
+import me.nagasonic.alkatraz.util.StringUtils;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -31,6 +34,8 @@ import java.util.Optional;
  * Reads and writes magic item data on Bukkit {@link ItemStack}s using PDC.
  */
 public final class MagicItemStack {
+
+    private static LangManager lang() { return Alkatraz.getLangManager(); }
 
     private MagicItemStack() {}
 
@@ -181,18 +186,6 @@ public final class MagicItemStack {
         return stack;
     }
 
-    private static String prettifyKey(String key) {
-        String[] parts = key.split("_");
-        StringBuilder sb = new StringBuilder();
-        for (String part : parts) {
-            if (sb.length() > 0) sb.append(" ");
-            if (part.isEmpty()) continue;
-            sb.append(Character.toUpperCase(part.charAt(0)));
-            sb.append(part.substring(1));
-        }
-        return sb.toString();
-    }
-
     private static String resolveTypeLabel(ItemDefinition definition) {
         if (definition.hasComponent(MagicKeys.alkatraz("wand"))) return "Wand";
         if (definition.hasComponent(MagicKeys.alkatraz("scroll"))) return "Scroll";
@@ -243,7 +236,7 @@ public final class MagicItemStack {
 
         if (hasAffinity) {
             lore.add("");
-            lore.add(ColorFormat.format("&7&m---&r &bElement Affinities &7&m---"));
+            lore.add(lang().get("magic_item.element_header"));
             for (String line : affinityLines) {
                 lore.add(ColorFormat.format(line));
             }
@@ -259,10 +252,10 @@ public final class MagicItemStack {
 
         for (Engraving eng : instance.engravings()) {
             String engName = MagicItemRegistries.ENGRAVING_DEFINITIONS.get(eng.engravingKey())
-                    .map(def -> prettifyKey(def.getKey().getKey()))
+                    .map(def -> StringUtils.prettifyKey(def.getKey().getKey()))
                     .orElse("?");
             String trigName = MagicItemRegistries.TRIGGER_TYPES.get(eng.triggerKey())
-                    .map(t -> prettifyKey(t.getKey().getKey()))
+                    .map(t -> StringUtils.prettifyKey(t.getKey().getKey()))
                     .orElse("?");
             lore.add(ColorFormat.format("&7" + engName + " &8(" + trigName + ")"));
         }

@@ -14,6 +14,7 @@ maximum_mastery: 100
 mastery_bar_color: 'PURPLE'
 gui_item: 'ENDER_PEARL'
 cast_sound: 'ENTITY_ENDERMAN_TELEPORT'
+wind_up_duration: 2
 radius: 10.0
 duration: 5.0
 damage_per_tick: 3.0

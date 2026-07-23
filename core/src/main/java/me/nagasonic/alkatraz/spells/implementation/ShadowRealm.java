@@ -4,6 +4,7 @@ import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
@@ -22,9 +23,14 @@ import org.bukkit.util.Vector;
 import java.util.List;
 
 public class ShadowRealm extends Spell {
+    private static LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
+
     private double radius;
     private double duration;
     private double damagePerTick;
+    private int windUpDuration;
 
     public ShadowRealm(String type) {
         super(type);
@@ -40,17 +46,107 @@ public class ShadowRealm extends Spell {
         this.radius = spellConfig.getDouble("radius");
         this.duration = spellConfig.getDouble("duration");
         this.damagePerTick = spellConfig.getDouble("damage_per_tick");
+        this.windUpDuration = spellConfig.getInt("wind_up_duration", 2) * 20;
     }
 
     @Override
     public void castAction(Player caster, ItemStack wand) {
         if (caster.isDead()) return;
 
-        Location targetLoc = caster.getTargetBlock(null, 30).getLocation().add(0.5, 0, 0.5);
+        Location targetLoc = Utils.resolveTarget(caster, 30);
         double activeRadius = getModifiedStat(caster, "radius", radius);
         double activeDamage = getModifiedStat(caster, "damage_per_tick", damagePerTick);
         World world = targetLoc.getWorld();
 
+        new BukkitRunnable() {
+            int ticks = 0;
+
+            @Override
+            public void run() {
+                if (ticks >= windUpDuration) {
+                    cancel();
+                    launchShadowRealm(caster, wand, targetLoc, activeRadius, activeDamage, world);
+                    return;
+                }
+
+                if (caster.isDead() || !caster.isOnline()) {
+                    cancel();
+                    return;
+                }
+
+                Location casterLoc = caster.getLocation();
+                double progress = (double) ticks / windUpDuration;
+                boolean phase1 = progress < 0.5;
+
+                if (phase1) {
+                    double phaseProgress = progress / 0.5;
+                    double sphereRadius = phaseProgress * activeRadius * 0.6;
+
+                    for (int i = 0; i < 20; i++) {
+                        double a = Math.random() * 2 * Math.PI;
+                        double b = Math.acos(2 * Math.random() - 1);
+                        double r = Math.random() * sphereRadius;
+                        double x = r * Math.sin(b) * Math.cos(a);
+                        double y = r * Math.sin(b) * Math.sin(a);
+                        double z = r * Math.cos(b);
+                        Location sphereLoc = targetLoc.clone().add(x, y, z);
+                        sphereLoc.getWorld().spawnParticle(Utils.DUST, sphereLoc, 0,
+                                new Particle.DustOptions(Color.fromRGB(20, 0, 40), (float)(0.3 + phaseProgress * 0.4)));
+                        if (Math.random() < 0.2) {
+                            sphereLoc.getWorld().spawnParticle(Particle.SMOKE_NORMAL, sphereLoc, 1, 0.1, 0.1, 0.1, 0);
+                        }
+                    }
+
+                    for (int i = 0; i < 5; i++) {
+                        double a = Math.random() * 2 * Math.PI;
+                        double r = Math.random() * 1.5;
+                        Location tendrilLoc = casterLoc.clone().add(Math.cos(a) * r, 0.5 + Math.random(), Math.sin(a) * r);
+                        tendrilLoc.getWorld().spawnParticle(Particle.SPELL_WITCH, tendrilLoc, 1, 0.1, 0.1, 0.1, 0);
+                    }
+
+                    if (ticks % 15 == 0) {
+                        world.playSound(targetLoc, Sound.ENTITY_ENDERMAN_TELEPORT, 0.4f, 0.3f + (float)(progress * 0.7f));
+                    }
+                } else {
+                    double phaseProgress = (progress - 0.5) / 0.5;
+                    double currentRadius = activeRadius * (0.3 + phaseProgress * 0.7);
+
+                    for (int i = 0; i < 30; i++) {
+                        double a = Math.random() * 2 * Math.PI;
+                        double b = Math.acos(2 * Math.random() - 1);
+                        double r = currentRadius * (0.7 + Math.random() * 0.3);
+                        double x = r * Math.sin(b) * Math.cos(a);
+                        double y = r * Math.sin(b) * Math.sin(a);
+                        double z = r * Math.cos(b);
+                        Location sphereLoc = targetLoc.clone().add(x, y, z);
+                        sphereLoc.getWorld().spawnParticle(Utils.DUST, sphereLoc, 0,
+                                new Particle.DustOptions(Color.fromRGB(40 + (int)(Math.random() * 20), 0, 60 + (int)(Math.random() * 20)), (float)(0.4 + phaseProgress * 0.3)));
+                        if (Math.random() < 0.15) {
+                            sphereLoc.getWorld().spawnParticle(Particle.DRAGON_BREATH, sphereLoc, 1, 0.1, 0.1, 0.1, 0, 0.0f);
+                        }
+                    }
+
+                    for (int i = 0; i < 8; i++) {
+                        double a = Math.random() * 2 * Math.PI;
+                        double r = currentRadius * (0.5 + Math.random() * 0.5);
+                        Location tendrilLoc = targetLoc.clone().add(Math.cos(a) * r, 0.1, Math.sin(a) * r);
+                        tendrilLoc.getWorld().spawnParticle(Particle.SPELL_WITCH, tendrilLoc, 1, 0.1, 0.1, 0.1, 0);
+                        if (Math.random() < 0.3) {
+                            tendrilLoc.getWorld().spawnParticle(Particle.PORTAL, tendrilLoc, 1, 0.1, 0.1, 0.1, 0.1);
+                        }
+                    }
+
+                    if (ticks % 10 == 0) {
+                        world.playSound(targetLoc, Sound.ENTITY_WITHER_AMBIENT, 0.5f, 0.4f + (float)(phaseProgress * 0.4f));
+                    }
+                }
+
+                ticks++;
+            }
+        }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
+    }
+
+    private void launchShadowRealm(Player caster, ItemStack wand, Location targetLoc, double activeRadius, double activeDamage, World world) {
         world.playSound(targetLoc, Sound.ENTITY_ENDERMAN_TELEPORT, 1.5f, 0.3f);
         world.playSound(targetLoc, Sound.ENTITY_WITHER_SPAWN, 1.0f, 0.2f);
 
@@ -163,6 +259,56 @@ public class ShadowRealm extends Spell {
         if (caster.isDead() || caster.getTarget() == null) return;
 
         Location targetLoc = caster.getTarget().getLocation();
+        double wandp = getWandPowerOrDefault(wand);
+
+        new BukkitRunnable() {
+            int ticks = 0;
+
+            @Override
+            public void run() {
+                if (ticks >= windUpDuration) {
+                    cancel();
+                    launchMobShadowRealm(caster, wand, targetLoc, wandp);
+                    return;
+                }
+
+                if (caster.isDead()) {
+                    cancel();
+                    return;
+                }
+
+                double progress = (double) ticks / windUpDuration;
+                double currentRadius = radius * (0.3 + progress * 0.7);
+
+                for (int i = 0; i < 15; i++) {
+                    double a = Math.random() * 2 * Math.PI;
+                    double b = Math.acos(2 * Math.random() - 1);
+                    double r = currentRadius * (0.7 + Math.random() * 0.3);
+                    double x = r * Math.sin(b) * Math.cos(a);
+                    double y = r * Math.sin(b) * Math.sin(a);
+                    double z = r * Math.cos(b);
+                    Location sphereLoc = targetLoc.clone().add(x, y, z);
+                    sphereLoc.getWorld().spawnParticle(Utils.DUST, sphereLoc, 0,
+                            new Particle.DustOptions(Color.fromRGB(30, 0, 50), 0.3F));
+                    if (Math.random() < 0.1) {
+                        sphereLoc.getWorld().spawnParticle(Particle.SMOKE_NORMAL, sphereLoc, 1, 0.1, 0.1, 0.1, 0);
+                    }
+                }
+
+                if (ticks % 15 == 0) {
+                    targetLoc.getWorld().playSound(targetLoc, Sound.ENTITY_ENDERMAN_TELEPORT, 0.4f, 0.3f);
+                }
+
+                ticks++;
+            }
+        }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
+    }
+
+    private void launchMobShadowRealm(Mob caster, ItemStack wand, Location targetLoc, double wandp) {
+        targetLoc.getWorld().playSound(targetLoc, Sound.ENTITY_ENDERMAN_TELEPORT, 1.5f, 0.3f);
+        targetLoc.getWorld().playSound(targetLoc, Sound.ENTITY_WITHER_SPAWN, 1.0f, 0.2f);
+
+        double power = damagePerTick * wandp;
 
         new BukkitRunnable() {
             int ticks = 0;
@@ -190,7 +336,7 @@ public class ShadowRealm extends Spell {
 
                     le.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 60, 1, false, true));
                     SpellDamageUtil.damageWithSpell(
-                            le, damagePerTick, caster, wand, ShadowRealm.this
+                            le, power, caster, wand, ShadowRealm.this
                     );
                 }
 
@@ -223,8 +369,8 @@ public class ShadowRealm extends Spell {
     @Override
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
-                .setDisplayName("&5Necronomicon of the Void")
-                .addCustomLoreLine("&8The abyss gazes back into you.")
+                .setDisplayName(lang().get("spells.shadowrealm.book_name"))
+                .addCustomLoreLine(lang().get("spells.shadowrealm.lore1"))
                 .addCustomLoreLine("")
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 5))
                 .build();

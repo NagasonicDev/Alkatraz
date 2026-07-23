@@ -15,6 +15,7 @@ import me.nagasonic.alkatraz.api.magic.registry.MagicItemRegistries;
 import me.nagasonic.alkatraz.api.magic.trigger.TriggerContext;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
+import me.nagasonic.alkatraz.items.magic.service.SetBonusService;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -44,6 +45,7 @@ public final class EquipmentAttributeSource implements AttributeSource {
     @Override
     public Collection<AttributeContribution> collect(LivingEntity entity, TriggerContext context) {
         List<AttributeContribution> contributions = new ArrayList<>();
+        if (entity == null) return contributions;
         if (!(entity instanceof Player player)) {
             for (NamespacedKey attr : MagicItemRegistries.ATTRIBUTE_TYPES.keySet()) {
                 MagicProfile profile = ProfileManager.getProfile(entity.getUniqueId(), MagicProfile.class);
@@ -69,6 +71,7 @@ public final class EquipmentAttributeSource implements AttributeSource {
             for (MagicItemInstance instance : profile.instances().values()) {
                 processInstance(contributions, instance);
             }
+            contributions.addAll(SetBonusService.getInstance().getSetBonuses(profile));
         } else {
             // Fallback: scan vanilla armor slots directly
             PlayerInventory inv = player.getInventory();

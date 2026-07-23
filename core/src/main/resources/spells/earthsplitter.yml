@@ -15,3 +15,4 @@ maximum_mastery: 100
 mastery_bar_color: 'GREEN'
 gui_item: 'DIAMOND_PICKAXE'
 cast_sound: 'BLOCK_GRINDSTONE_USE'
+wind_up_duration: 2
