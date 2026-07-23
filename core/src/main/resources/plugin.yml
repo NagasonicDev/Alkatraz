@@ -1,6 +1,8 @@
 name: Alkatraz
 version: '${project.version}'
 main: me.nagasonic.alkatraz.Alkatraz
+softdepend:
+  - PlaceholderAPI
 api-version: '1.19'
 commands:
   spells:
