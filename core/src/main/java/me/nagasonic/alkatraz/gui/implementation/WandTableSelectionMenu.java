@@ -1,64 +1,61 @@
 package me.nagasonic.alkatraz.gui.implementation;
 
+import me.nagasonic.alkatraz.gui.ItemBuilder;
 import me.nagasonic.alkatraz.gui.Menu;
 import me.nagasonic.alkatraz.gui.implementation.engraving.EngravingTableMenu;
 import me.nagasonic.alkatraz.gui.implementation.research.ResearchGraphMenu;
-import me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack;
-import me.nagasonic.alkatraz.util.ColorFormat;
+import me.nagasonic.alkatraz.lang.LangManager;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class WandTableSelectionMenu extends Menu {
 
+    private static LangManager lang() {
+        return me.nagasonic.alkatraz.Alkatraz.getLangManager();
+    }
+
     private static final int SLOT_RESEARCH = 11;
     private static final int SLOT_PROGRESSION = 15;
-    private static final int SLOT_ENGINEERING = 14;
+    private static final int SLOT_ENGINEERING = 13;
 
     public WandTableSelectionMenu(Player viewer) {
-        super(viewer, ColorFormat.format("&5Arcane Table"), 27);
+        super(viewer, lang().get("menu.arcane_table"), 27);
     }
 
     @Override
     protected void build() {
-        for (int i = 0; i < 27; i++) {
-            inventory.setItem(i, createPane(Material.GRAY_STAINED_GLASS_PANE, " "));
-        }
+        fillAll();
 
-        inventory.setItem(13, createInfoItem());
+        inventory.setItem(4, ItemBuilder.of(Material.ENCHANTING_TABLE)
+                .name(lang().get("menu.arcane_table"))
+                .lore(lang().get("arcane.choose_path"),
+                      lang().get("arcane.research_desc"),
+                      lang().get("arcane.progression_desc"),
+                      lang().get("arcane.engineering_desc"))
+                .build());
 
-        inventory.setItem(SLOT_RESEARCH, createButton(
-                Material.BOOKSHELF,
-                "&dResearch Library",
-                "&7Browse research trees, unlock new",
-                "&7spells and abilities through study.",
-                "",
-                "&eClick to open"
-        ));
+        inventory.setItem(SLOT_RESEARCH, ItemBuilder.of(Material.BOOKSHELF)
+                .name(lang().get("arcane.research"))
+                .lore(lang().get("arcane.research_lore"),
+                      "",
+                      lang().get("arcane.click_to_open"))
+                .build());
 
-        inventory.setItem(SLOT_PROGRESSION, createButton(
-                Material.NETHER_STAR,
-                "&dProgression",
-                "&7View your circle progression and",
-                "&7advance to the next circle when",
-                "&7requirements are met.",
-                "",
-                "&eClick to open"
-        ));
+        inventory.setItem(SLOT_PROGRESSION, ItemBuilder.of(Material.NETHER_STAR)
+                .name(lang().get("arcane.progression"))
+                .lore(lang().get("arcane.progression_lore"),
+                      "",
+                      lang().get("arcane.click_to_open"))
+                .build());
 
-        inventory.setItem(SLOT_ENGINEERING, createButton(
-                Material.SMITHING_TABLE,
-                "&dMagic Engineering",
-                "&7Install engravings on your",
-                "&7wand or equipment items.",
-                "",
-                "&eClick to open"
-        ));
+        inventory.setItem(SLOT_ENGINEERING, ItemBuilder.of(Material.SMITHING_TABLE)
+                .name(lang().get("arcane.engineering"))
+                .lore(lang().get("arcane.engineering_lore"),
+                      "",
+                      lang().get("arcane.click_to_open"))
+                .build());
     }
 
     @Override
@@ -79,40 +76,5 @@ public class WandTableSelectionMenu extends Menu {
             return true;
         }
         return true;
-    }
-
-    private ItemStack createInfoItem() {
-        ItemStack item = new ItemStack(Material.ENCHANTING_TABLE);
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ColorFormat.format("&dArcane Table"));
-        List<String> lore = new ArrayList<>();
-        lore.add(ColorFormat.format("&7Choose your path:"));
-        lore.add(ColorFormat.format("&7  Research &8- &7Unlock new knowledge"));
-        lore.add(ColorFormat.format("&7  Progression &8- &7Advance your circle"));
-        lore.add(ColorFormat.format("&7  Engineering &8- &7Modify your equipment"));
-        meta.setLore(lore);
-        item.setItemMeta(meta);
-        return item;
-    }
-
-    private ItemStack createButton(Material material, String name, String... loreLines) {
-        ItemStack item = new ItemStack(material);
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ColorFormat.format(name));
-        List<String> lore = new ArrayList<>();
-        for (String line : loreLines) {
-            lore.add(ColorFormat.format(line));
-        }
-        meta.setLore(lore);
-        item.setItemMeta(meta);
-        return item;
-    }
-
-    private ItemStack createPane(Material material, String name) {
-        ItemStack item = new ItemStack(material);
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ColorFormat.format(name));
-        item.setItemMeta(meta);
-        return item;
     }
 }

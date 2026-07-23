@@ -1,23 +1,21 @@
 package me.nagasonic.alkatraz.gui.implementation;
 
+import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.gui.ItemBuilder;
 import me.nagasonic.alkatraz.gui.PagedMenu;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.playerdata.SpellHotbarManager;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
 import me.nagasonic.alkatraz.util.ColorFormat;
-import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -40,6 +38,10 @@ import java.util.stream.Collectors;
  */
 public class HotbarSpellSelectionMenu extends PagedMenu<Spell> {
 
+    private static LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
+
     // Pool content slots: rows 3-4, skipping border columns
     private static final int[] POOL_SLOTS = {
             19, 20, 21, 22, 23, 24, 25,
@@ -53,7 +55,7 @@ public class HotbarSpellSelectionMenu extends PagedMenu<Spell> {
 
     public HotbarSpellSelectionMenu(Player viewer) {
         super(viewer,
-                ColorFormat.format("&5Configure Spell Hotbar"),
+                ColorFormat.format(lang().get("menu.hotbar_config")),
                 54,
                 getDiscoveredSpells(viewer),
                 14);
@@ -84,20 +86,19 @@ public class HotbarSpellSelectionMenu extends PagedMenu<Spell> {
 
     @Override
     protected void addDecorations() {
-        // Border: every slot not used by headers, pool, or nav buttons
+        ItemStack blank = Alkatraz.getGuiItemRegistry().getItem("blank");
         for (int i = 0; i < 54; i++) {
             if (isReserved(i)) continue;
-            inventory.setItem(i, Utils.getBlank());
+            inventory.setItem(i, blank.clone());
         }
         addSlotHeaders();
     }
 
     @Override
     protected void addBackButton() {
-        ItemStack back = new ItemStack(Material.BARRIER);
-        ItemMeta m = back.getItemMeta();
-        m.setDisplayName(ColorFormat.format("&cBack to Spells"));
-        back.setItemMeta(m);
+        ItemStack back = ItemBuilder.of(Material.BARRIER)
+                .name(lang().get("hotbar.back_to_spells"))
+                .build();
         setMenuData(back, "action", "back");
         inventory.setItem(backButtonSlot, back);
     }
@@ -128,33 +129,26 @@ public class HotbarSpellSelectionMenu extends PagedMenu<Spell> {
                 ? assigned.getGuiItem().getType()
                 : Material.LIME_STAINED_GLASS_PANE;
 
-        ItemStack item = new ItemStack(mat);
-        ItemMeta m = item.getItemMeta();
-
         String prefix  = focused ? "&b▶ " : "&e";
-        String content = (assigned != null) ? assigned.getDisplayName() : "&7Empty";
-        m.setDisplayName(ColorFormat.format(prefix + "Slot " + (slotIndex + 1) + ": &f" + content));
+        String content = (assigned != null) ? assigned.getDisplayName()
+                : lang().get("hotbar.slot_empty", "slot", String.valueOf(slotIndex + 1));
 
-        List<String> lore = new ArrayList<>();
+        ItemBuilder builder = ItemBuilder.of(mat)
+                .name(prefix + lang().get("hotbar.slot_header", "slot", String.valueOf(slotIndex + 1)) + ": &f" + content)
+                .glint(focused);
+
         if (focused) {
-            lore.add(ColorFormat.format("&bCurrently selected"));
-            lore.add(ColorFormat.format("&7Click a spell below to assign it."));
+            builder.lore(lang().get("hotbar.currently_selected"), lang().get("hotbar.click_assign_lore"));
         } else {
-            lore.add(ColorFormat.format("&eLeft-click &7to select this slot."));
+            builder.lore(lang().get("hotbar.left_click_select"));
         }
         if (assigned != null) {
-            lore.add(ColorFormat.format("&cRight-click &7to clear."));
+            builder.lore(lang().get("hotbar.right_click_clear"));
         }
-        m.setLore(lore);
 
-        if (focused) {
-            m.addEnchant(Enchantment.DURABILITY, 1, true);
-            m.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-        }
-        item.setItemMeta(m);
-
+        ItemStack item = builder.build();
         setMenuData(item, "action", "focus_slot");
-        setMenuData(item, "slot_num", slotIndex + 1); // 1-indexed for readability
+        setMenuData(item, "slot_num", slotIndex + 1);
         return item;
     }
 
@@ -170,32 +164,21 @@ public class HotbarSpellSelectionMenu extends PagedMenu<Spell> {
         boolean alreadyAssigned = spellIds.contains(spell.getId());
         boolean canAssign = !alreadyAssigned;
 
-        ItemStack item = spell.getGuiItem().clone();
-        ItemMeta m = item.getItemMeta();
-
-        m.setDisplayName(ColorFormat.format(canAssign
-                ? "&f" + spell.getDisplayName()
-                : "&7" + spell.getDisplayName()));
-
-        List<String> lore = new ArrayList<>();
-        lore.add(ColorFormat.format("&7" + spell.getElement().getName()
-                + "  &eCircle " + spell.getRequiredCircleLevel()));
-        lore.add(ColorFormat.format("&bMana Cost: &f" + spell.getCost()));
-        lore.add(ColorFormat.format("&bCast Time: &f" + spell.getCastTime() + "s"));
-        lore.add(ColorFormat.format("&bCooldown:  &f" + spell.getCooldown() + "s"));
-        lore.add("");
+        ItemBuilder builder = ItemBuilder.of(spell.getGuiItem().clone())
+                .name(canAssign ? "&f" + spell.getDisplayName() : "&7" + spell.getDisplayName())
+                .lore("&7" + spell.getElement().getName() + "  &eCircle " + spell.getRequiredCircleLevel(),
+                      "&bMana Cost: &f" + spell.getCost(),
+                      "&bCast Time: &f" + spell.getCastTime() + "s",
+                      "&bCooldown:  &f" + spell.getCooldown() + "s",
+                      "");
 
         if (alreadyAssigned) {
-            lore.add(ColorFormat.format("&7Already assigned to a slot."));
-            m.addEnchant(Enchantment.DURABILITY, 1, true);
-            m.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            builder.lore(lang().get("hotbar.already_assigned")).glint(true);
         } else {
-            lore.add(ColorFormat.format("&eClick to assign to Slot " + (focusedSlotIndex + 1)));
+            builder.lore(lang().get("hotbar.click_assign", "slot", String.valueOf(focusedSlotIndex + 1)));
         }
 
-        m.setLore(lore);
-        item.setItemMeta(m);
-
+        ItemStack item = builder.build();
         setMenuData(item, "spell_id", spell.getId());
         setMenuData(item, "can_assign", canAssign);
         return item;

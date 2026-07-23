@@ -1,6 +1,8 @@
 package me.nagasonic.alkatraz.gui.implementation.editor;
 
+import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.gui.Menu;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.util.ColorFormat;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -13,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LoreSubMenu extends Menu {
+
+    private static LangManager lang() { return Alkatraz.getLangManager(); }
 
     private static final int[] LORE_SLOTS = {10, 11, 12, 13, 14, 15, 16,
             19, 20, 21, 22, 23, 24, 25,
@@ -59,7 +63,7 @@ public class LoreSubMenu extends Menu {
         ItemStack item = new ItemStack(Material.PAPER);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(ColorFormat.format("&eLine " + (index + 1)));
+            meta.setDisplayName(lang().get("editor.line", "line", (index + 1)));
             List<String> lineLore = new ArrayList<>();
             lineLore.add(ColorFormat.format("&7" + lore.get(index)));
             lineLore.add("");
@@ -76,7 +80,7 @@ public class LoreSubMenu extends Menu {
         ItemStack item = new ItemStack(Material.LIME_DYE);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(ColorFormat.format("&a&lAdd Line"));
+            meta.setDisplayName(lang().get("editor.add_line"));
             List<String> lore = new ArrayList<>();
             lore.add(ColorFormat.format("&7Click to add a new lore line"));
             meta.setLore(lore);
@@ -90,7 +94,7 @@ public class LoreSubMenu extends Menu {
         ItemStack item = new ItemStack(Material.BARRIER);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(ColorFormat.format("&cBack"));
+            meta.setDisplayName(lang().get("common.back"));
             item.setItemMeta(meta);
         }
         setMenuData(item, "action", "back");

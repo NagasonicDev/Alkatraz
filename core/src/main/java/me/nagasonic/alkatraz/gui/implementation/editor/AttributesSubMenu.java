@@ -1,6 +1,8 @@
 package me.nagasonic.alkatraz.gui.implementation.editor;
 
+import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.gui.Menu;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.util.ColorFormat;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -15,6 +17,8 @@ import java.util.List;
 import java.util.Set;
 
 public class AttributesSubMenu extends Menu {
+
+    private static LangManager lang() { return Alkatraz.getLangManager(); }
 
     private static final int[] ATTR_SLOTS = {10, 11, 12, 13, 14, 15, 16,
             19, 20, 21, 22, 23, 24, 25,
@@ -80,12 +84,12 @@ public class AttributesSubMenu extends Menu {
         ItemStack item = new ItemStack(Material.GOLD_NUGGET);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(ColorFormat.format("&e" + key));
+            meta.setDisplayName(lang().get("editor.attr_key", "key", key));
             List<String> lore = new ArrayList<>();
-            lore.add(ColorFormat.format("&7Value: &f" + value));
+            lore.add(lang().get("editor.attr_value", "value", value));
             lore.add("");
-            lore.add(ColorFormat.format("&eLeft-click to edit value"));
-            lore.add(ColorFormat.format("&cRight-click to delete"));
+            lore.add(lang().get("editor.attr_edit"));
+            lore.add(lang().get("editor.attr_delete"));
             meta.setLore(lore);
             item.setItemMeta(meta);
         }
@@ -97,7 +101,7 @@ public class AttributesSubMenu extends Menu {
         ItemStack item = new ItemStack(Material.LIME_DYE);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(ColorFormat.format("&a&lAdd Attribute"));
+            meta.setDisplayName(lang().get("editor.add_attribute"));
             item.setItemMeta(meta);
         }
         setMenuData(item, "action", "add");
@@ -119,7 +123,7 @@ public class AttributesSubMenu extends Menu {
         ItemStack item = new ItemStack(Material.BARRIER);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(ColorFormat.format("&cBack"));
+            meta.setDisplayName(lang().get("common.back"));
             item.setItemMeta(meta);
         }
         setMenuData(item, "action", "back");

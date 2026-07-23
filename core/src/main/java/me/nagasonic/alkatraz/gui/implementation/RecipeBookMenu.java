@@ -1,15 +1,16 @@
 package me.nagasonic.alkatraz.gui.implementation;
 
+import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.gui.PagedMenu;
 import me.nagasonic.alkatraz.items.magic.recipe.MagicItemRecipeManager;
 import me.nagasonic.alkatraz.util.ColorFormat;
-import me.nagasonic.alkatraz.util.Utils;
+import me.nagasonic.alkatraz.util.StringUtils;
+import me.nagasonic.alkatraz.gui.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.RecipeChoice;
-import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -26,7 +27,7 @@ public class RecipeBookMenu extends PagedMenu<MagicItemRecipeManager.RecipeData>
     };
 
     public RecipeBookMenu(Player viewer) {
-        super(viewer, ColorFormat.format("&6Recipe Book"), 54, getSortedRecipes(), 28);
+        super(viewer, ColorFormat.format(Alkatraz.getLangManager().get("menu.recipe_book")), 54, getSortedRecipes(), 28);
         this.contentSlots = RECIPE_SLOTS;
         this.nextPageSlot = 53;
         this.previousPageSlot = 45;
@@ -39,29 +40,30 @@ public class RecipeBookMenu extends PagedMenu<MagicItemRecipeManager.RecipeData>
                 .collect(Collectors.toList());
     }
 
+    private static me.nagasonic.alkatraz.lang.LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
+
     @Override
     protected void addDecorations() {
-        for (int i = 0; i < 54; i++) {
-            inventory.setItem(i, Utils.getBlank());
-        }
+        fillAll();
 
-        ItemStack info = new ItemStack(Material.KNOWLEDGE_BOOK);
-        ItemMeta meta = info.getItemMeta();
-        meta.setDisplayName(ColorFormat.format("&6&lRecipe Book"));
-        List<String> lore = new ArrayList<>();
-        lore.add(ColorFormat.format("&7Browse all available"));
-        lore.add(ColorFormat.format("&7magic item recipes."));
-        meta.setLore(lore);
-        info.setItemMeta(meta);
+        List<String> loreLines = new ArrayList<>();
+        for (String line : lang().get("recipes.browse_lore").split("\\n")) {
+            loreLines.add(ColorFormat.format(line));
+        }
+        ItemStack info = ItemBuilder.of(Material.KNOWLEDGE_BOOK)
+                .name(lang().get("recipes.title"))
+                .rawLore(loreLines)
+                .build();
         inventory.setItem(4, info);
     }
 
     @Override
     protected void addBackButton() {
-        ItemStack close = new ItemStack(Material.BARRIER);
-        ItemMeta m = close.getItemMeta();
-        m.setDisplayName(ColorFormat.format("&cClose"));
-        close.setItemMeta(m);
+        ItemStack close = ItemBuilder.of(Material.BARRIER)
+                .name("&cClose")
+                .build();
         setMenuData(close, "action", "back");
         inventory.setItem(backButtonSlot, close);
     }
@@ -74,13 +76,10 @@ public class RecipeBookMenu extends PagedMenu<MagicItemRecipeManager.RecipeData>
     @Override
     protected ItemStack createDisplayItem(MagicItemRecipeManager.RecipeData recipe, int index) {
         ItemStack item = recipe.result().clone();
-        ItemMeta meta = item.getItemMeta();
-
-        meta.setDisplayName(ColorFormat.format("&f" + getItemDisplayName(recipe)));
 
         List<String> lore = new ArrayList<>();
 
-        lore.add(ColorFormat.format("&7&m---&r &6Ingredients &7&m---"));
+        lore.add(ColorFormat.format(lang().get("recipes.ingredients_header")));
         java.util.Set<Character> seen = new java.util.HashSet<>();
         for (String row : recipe.shape()) {
             for (int i = 0; i < row.length(); i++) {
@@ -94,17 +93,19 @@ public class RecipeBookMenu extends PagedMenu<MagicItemRecipeManager.RecipeData>
 
         if (!recipe.requirements().isEmpty()) {
             lore.add("");
-            lore.add(ColorFormat.format("&7&m---&r &cRequirements &7&m---"));
+            lore.add(ColorFormat.format(lang().get("recipes.requirements_header")));
             for (me.nagasonic.alkatraz.configuration.requirement.Requirement req : recipe.requirements()) {
                 lore.add(ColorFormat.format(" &7- " + req.getDescription()));
             }
         }
 
         lore.add("");
-        lore.add(ColorFormat.format("&eClick for details"));
+        lore.add(ColorFormat.format(lang().get("recipes.click_details")));
 
-        meta.setLore(lore);
-        item.setItemMeta(meta);
+        item = ItemBuilder.of(item)
+                .rawName(ColorFormat.format("&f" + getItemDisplayName(recipe)))
+                .rawLore(lore)
+                .build();
 
         return item;
     }
@@ -119,30 +120,25 @@ public class RecipeBookMenu extends PagedMenu<MagicItemRecipeManager.RecipeData>
         if (result.hasItemMeta() && result.getItemMeta().hasDisplayName()) {
             return result.getItemMeta().getDisplayName();
         }
-        return prettifyKey(recipe.key().getKey());
+        return StringUtils.prettifyKey(recipe.key().getKey());
     }
 
     private String getIngredientName(RecipeChoice choice) {
         if (choice instanceof RecipeChoice.MaterialChoice mc) {
             List<Material> materials = mc.getChoices();
             if (!materials.isEmpty()) {
-                return prettifyKey(materials.get(0).getKey().getKey());
+                return StringUtils.prettifyKey(materials.get(0).getKey().getKey());
+            }
+        } else if (choice instanceof RecipeChoice.ExactChoice ec) {
+            List<ItemStack> stacks = ec.getChoices();
+            if (!stacks.isEmpty()) {
+                ItemStack stack = stacks.get(0);
+                if (stack.hasItemMeta() && stack.getItemMeta().hasDisplayName()) {
+                    return stack.getItemMeta().getDisplayName();
+                }
+                return StringUtils.prettifyKey(stack.getType().getKey().getKey());
             }
         }
         return "???";
-    }
-
-    private static String prettifyKey(String key) {
-        int colon = key.indexOf(':');
-        if (colon >= 0) key = key.substring(colon + 1);
-        String[] parts = key.split("_");
-        StringBuilder sb = new StringBuilder();
-        for (String part : parts) {
-            if (sb.length() > 0) sb.append(" ");
-            if (part.isEmpty()) continue;
-            sb.append(Character.toUpperCase(part.charAt(0)));
-            sb.append(part.substring(1).toLowerCase());
-        }
-        return sb.toString();
     }
 }

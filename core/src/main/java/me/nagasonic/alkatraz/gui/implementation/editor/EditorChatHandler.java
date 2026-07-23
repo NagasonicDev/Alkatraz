@@ -1,6 +1,7 @@
 package me.nagasonic.alkatraz.gui.implementation.editor;
 
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.util.ColorFormat;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -13,6 +14,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
 public class EditorChatHandler implements Listener {
+
+    private static LangManager lang() { return Alkatraz.getLangManager(); }
 
     private static final Set<UUID> awaitingInput = ConcurrentHashMap.newKeySet();
     private static final Map<UUID, BiConsumer<Player, String>> callbacks = new ConcurrentHashMap<>();
@@ -37,7 +40,7 @@ public class EditorChatHandler implements Listener {
             callbacks.put(player.getUniqueId(), (p, msg) -> {
                 awaitingInput.remove(p.getUniqueId());
                 if (msg.equalsIgnoreCase("cancel")) {
-                    p.sendMessage(ColorFormat.format("&cCancelled."));
+                    p.sendMessage(lang().get("editor.chat_cancelled"));
                 } else {
                     String action = session.pendingChatAction();
                     if (action != null) {
@@ -50,7 +53,7 @@ public class EditorChatHandler implements Listener {
             });
         }
         player.sendMessage(ColorFormat.format("&7[Editor] " + message));
-        player.sendMessage(ColorFormat.format("&7Type your input in chat, or type &ccancel &7to abort."));
+        player.sendMessage(lang().get("editor.chat_prompt"));
     }
 
     @EventHandler

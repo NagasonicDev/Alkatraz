@@ -1,19 +1,18 @@
 package me.nagasonic.alkatraz.gui.implementation;
 
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.gui.ItemBuilder;
 import me.nagasonic.alkatraz.gui.PagedMenu;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
+import me.nagasonic.alkatraz.texturepack.TexturePackManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
 import me.nagasonic.alkatraz.util.ColorFormat;
-import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -21,6 +20,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class SpellsMenu extends PagedMenu<Spell> {
+
+    private static me.nagasonic.alkatraz.lang.LangManager lang() {
+        return me.nagasonic.alkatraz.Alkatraz.getLangManager();
+    }
 
     private static final int CONFIGURE_HOTBAR_SLOT = 49;
 
@@ -34,16 +37,18 @@ public class SpellsMenu extends PagedMenu<Spell> {
     }
 
     private static List<Spell> getSortedSpells() {
-        return SpellRegistry.getAllSpells().values().stream()
+        return SpellRegistry.getAllSpellsByIdFull().values().stream()
                 .sorted(Comparator.comparingInt(Spell::getLevel)
                         .thenComparing(Spell::getDisplayName))
                 .collect(Collectors.toList());
     }
 
     private static String getResourceTitle() {
-        return Alkatraz.isResourcePackForced()
-                ? ColorFormat.format("&f\uF808\uF001")
-                : ColorFormat.format("Spells");
+        String code = Alkatraz.getTexturePackManager().getMenuTitleCode("spells");
+        if (code == null || code.isEmpty() || !TexturePackManager.isResourcePackEnabled()) {
+            return lang().get("menu.spells");
+        }
+        return code;
     }
 
     private static int[] getInnerContentSlots() {
@@ -59,23 +64,16 @@ public class SpellsMenu extends PagedMenu<Spell> {
 
     @Override
     protected void addDecorations() {
-        if (!Alkatraz.isResourcePackForced()) {
-            for (int i = 0; i < 54; i++) {
-                inventory.setItem(i, Utils.getBlank());
-            }
-        }
+        fillAll();
         inventory.setItem(CONFIGURE_HOTBAR_SLOT, createConfigureHotbarItem());
     }
 
     private ItemStack createConfigureHotbarItem() {
-        ItemStack item = new ItemStack(Material.COMPARATOR);
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ColorFormat.format("&5Configure Spell Hotbar"));
-        List<String> lore = new ArrayList<>();
-        lore.add(ColorFormat.format("&7Assign spells to your wand hotbar slots."));
-        lore.add(ColorFormat.format("&7These appear when you hold a wand."));
-        meta.setLore(lore);
-        item.setItemMeta(meta);
+        ItemStack item = ItemBuilder.of(Material.COMPARATOR)
+                .name(lang().get("spells.configure_hotbar"))
+                .lore(lang().get("spells.configure_hotbar_lore"),
+                      "&7These appear when you hold a wand.")
+                .build();
         setMenuData(item, "action", "open_hotbar_config");
         return item;
     }
@@ -93,35 +91,32 @@ public class SpellsMenu extends PagedMenu<Spell> {
     }
 
     private ItemStack createDiscoveredSpellItem(Spell spell, MagicProfile profile) {
-        ItemStack item = spell.getGuiItem().clone();
-        ItemMeta meta = item.getItemMeta();
-
-        meta.setDisplayName(ColorFormat.format(spell.getDisplayName()));
-
         List<String> lore = new ArrayList<>();
         for (String line : spell.getDescription()) {
             lore.add(ColorFormat.format(line));
         }
-
         lore.add("");
-        lore.add(ColorFormat.format("&bCode: " + spell.getCode()));
-        lore.add(ColorFormat.format("&bMana Cost: " + spell.getCost()));
-        lore.add(ColorFormat.format("&bCooldown: " + spell.getCooldown() + "s"));
-        lore.add(ColorFormat.format("&bCast Time: " + spell.getCastTime() + "s"));
-        lore.add(ColorFormat.format("&bElement: " + spell.getElement().getName()));
-        lore.add(ColorFormat.format("&bMastery: " + profile.getSpellMastery(spell) + "/" + spell.getMaxMastery()));
+        lore.add(lang().get("spells.code", "value", spell.getCode()));
+        lore.add(lang().get("spells.mana_cost", "value", String.valueOf(spell.getCost())));
+        lore.add(lang().get("spells.cooldown", "value", spell.getCooldown() + "s"));
+        lore.add(lang().get("spells.cast_time", "value", spell.getCastTime() + "s"));
+        lore.add(lang().get("spells.element", "value", spell.getElement().getName()));
+        lore.add(lang().get("spells.mastery", "value", profile.getSpellMastery(spell) + "/" + spell.getMaxMastery()));
         lore.add("");
-        lore.add(ColorFormat.format("&eCircle: " + spell.getRequiredCircleLevel()));
+        lore.add(lang().get("spells.circle", "value", String.valueOf(spell.getRequiredCircleLevel())));
 
         if (!spell.getAllOptions().isEmpty()) {
             lore.add("");
-            lore.add(ColorFormat.format("&a✦ Has Spell Options"));
-            lore.add(ColorFormat.format("&7Click to configure"));
+            lore.add(lang().get("spells.has_options"));
+            lore.add(lang().get("spells.has_options_lore"));
         }
 
-        meta.setLore(lore);
-        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS);
-        item.setItemMeta(meta);
+        ItemStack item = ItemBuilder.of(spell.getGuiItem().clone())
+                .rawName(ColorFormat.format(spell.getDisplayName()))
+                .rawLore(lore)
+                .hideAttributes()
+                .glint(false)
+                .build();
 
         setMenuData(item, "spell_type", spell.getType());
         setMenuData(item, "has_options", !spell.getAllOptions().isEmpty());
@@ -130,16 +125,10 @@ public class SpellsMenu extends PagedMenu<Spell> {
     }
 
     private ItemStack createLockedSpellItem(Spell spell) {
-        ItemStack item = new ItemStack(Material.GRAY_DYE);
-        ItemMeta meta = item.getItemMeta();
-
-        meta.setDisplayName(ColorFormat.format("&8???"));
-        List<String> lore = new ArrayList<>();
-        lore.add(ColorFormat.format("&7&oCircle: " + spell.getRequiredCircleLevel()));
-        meta.setLore(lore);
-        item.setItemMeta(meta);
-
-        return item;
+        return ItemBuilder.of(Material.GRAY_DYE)
+                .name(lang().get("spells.locked_name"))
+                .rawLore(List.of(lang().get("spells.locked_lore", "circle", String.valueOf(spell.getRequiredCircleLevel()))))
+                .build();
     }
 
     @Override

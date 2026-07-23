@@ -1,17 +1,18 @@
 package me.nagasonic.alkatraz.gui.implementation;
 
+import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.gui.ItemBuilder;
 import me.nagasonic.alkatraz.gui.Menu;
 import me.nagasonic.alkatraz.gui.PagedMenu;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.configuration.SpellOption;
 import me.nagasonic.alkatraz.spells.configuration.SyntheticGroupOption;
 import me.nagasonic.alkatraz.util.ColorFormat;
-import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -28,11 +29,15 @@ import java.util.Map;
  */
 public class SpellOptionsMenu extends PagedMenu<SpellOption> {
 
+    private static LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
+
     private final Spell spell;
 
     public SpellOptionsMenu(Player viewer, Spell spell) {
         super(viewer,
-                ColorFormat.format("&6" + spell.getDisplayName() + " &7- Options"),
+                ColorFormat.format(lang().get("menu.spell_options", "spell", spell.getDisplayName())),
                 54,
                 buildDisplayOptions(viewer, spell),
                 28);
@@ -183,27 +188,20 @@ public class SpellOptionsMenu extends PagedMenu<SpellOption> {
 
     @Override
     protected void addDecorations() {
-        ItemStack spellInfo = spell.getGuiItem().clone();
-        ItemMeta meta = spellInfo.getItemMeta();
-        meta.setDisplayName(ColorFormat.format("&6" + spell.getDisplayName()));
-        List<String> lore = new ArrayList<>();
-        lore.add(ColorFormat.format("&7Configure spell options"));
-        lore.add("");
-        lore.add(ColorFormat.format("&eCircle: " + spell.getRequiredCircleLevel()));
-        meta.setLore(lore);
-        spellInfo.setItemMeta(meta);
-        inventory.setItem(4, spellInfo);
+        addStandardBorder();
 
-        int[] borders = {0,1,2,3,5,6,7,8,9,17,18,26,27,35,36,44,45,46,47,48,49,50,51,52,53};
-        for (int s : borders) inventory.setItem(s, Utils.getBlank());
+        inventory.setItem(4, ItemBuilder.of(spell.getGuiItem().clone())
+                .name("&6" + spell.getDisplayName())
+                .lore(lang().get("spell_options.configure"), "",
+                      lang().get("spell_options.circle", "circle", String.valueOf(spell.getRequiredCircleLevel())))
+                .build());
     }
 
     @Override
     protected void addBackButton() {
-        ItemStack back = new ItemStack(Material.BARRIER);
-        ItemMeta meta = back.getItemMeta();
-        meta.setDisplayName(ColorFormat.format("&cBack to Spells"));
-        back.setItemMeta(meta);
+        ItemStack back = ItemBuilder.of(Material.BARRIER)
+                .name(lang().get("spell_options.back_to_spells"))
+                .build();
         setMenuData(back, "action", "back");
         inventory.setItem(backButtonSlot, back);
     }
@@ -216,29 +214,19 @@ public class SpellOptionsMenu extends PagedMenu<SpellOption> {
         }
 
         // Normal option
-        ItemStack item = new ItemStack(option.getIcon());
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ColorFormat.format("&e" + option.getId()));
-
-        List<String> lore = new ArrayList<>();
-        lore.add(ColorFormat.format("&7" + option.getDescription()));
-        lore.add("");
+        ItemBuilder builder = ItemBuilder.of(option.getIcon())
+                .name("&e" + option.getId())
+                .lore("&7" + option.getDescription(), "");
 
         // Show currently selected value (only valid for options with values)
         if (!option.getOptionValues().isEmpty()) {
-            lore.add(ColorFormat.format("&aCurrent: &f"
-                    + option.getSelectedValue(viewer).getDisplayName()));
-            lore.add("");
+            builder.lore("&aCurrent: &f"
+                    + option.getSelectedValue(viewer).getDisplayName(), "");
         }
 
-        if (option.hasCustomMenu()) {
-            lore.add(ColorFormat.format("&eClick to configure"));
-        } else {
-            lore.add(ColorFormat.format("&eClick to configure"));
-        }
+        builder.lore(lang().get("spell_options.click_configure"));
 
-        meta.setLore(lore);
-        item.setItemMeta(meta);
+        ItemStack item = builder.build();
         setMenuData(item, "option_id", option.getId());
         return item;
     }
@@ -247,16 +235,14 @@ public class SpellOptionsMenu extends PagedMenu<SpellOption> {
      * Builds the display item for a {@link SyntheticGroupOption}.
      */
     private ItemStack buildSyntheticItem(SyntheticGroupOption synthetic) {
-        ItemStack item = new ItemStack(synthetic.getIcon());
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ColorFormat.format("&b" + synthetic.getSyntheticDisplayName()));
-
         List<String> lore = new ArrayList<>(synthetic.getPreviewLore());
         if (!lore.isEmpty()) lore.add("");
-        lore.add(ColorFormat.format("&eClick to configure"));
+        lore.add(ColorFormat.format(lang().get("spell_options.click_configure")));
 
-        meta.setLore(lore);
-        item.setItemMeta(meta);
+        ItemStack item = ItemBuilder.of(synthetic.getIcon())
+                .name("&b" + synthetic.getSyntheticDisplayName())
+                .rawLore(lore)
+                .build();
         setMenuData(item, "option_id", synthetic.getId());
         return item;
     }

@@ -1,21 +1,23 @@
 package me.nagasonic.alkatraz.gui.implementation.engraving;
 
+import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.api.magic.definition.ItemDefinition;
 import me.nagasonic.alkatraz.api.magic.instance.Engraving;
 import me.nagasonic.alkatraz.api.magic.instance.MagicItemInstance;
 import me.nagasonic.alkatraz.api.magic.modifier.EngravingDefinition;
 import me.nagasonic.alkatraz.api.magic.registry.MagicItemRegistries;
+import me.nagasonic.alkatraz.gui.ItemBuilder;
 import me.nagasonic.alkatraz.gui.Menu;
 import me.nagasonic.alkatraz.gui.implementation.WandTableSelectionMenu;
 import me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack;
 import me.nagasonic.alkatraz.util.ColorFormat;
+import me.nagasonic.alkatraz.util.StringUtils;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,14 +35,18 @@ public class EngravingTableMenu extends Menu {
     private int maxEngravings;
     private boolean selecting;
 
+    private static me.nagasonic.alkatraz.lang.LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
+
     public EngravingTableMenu(Player viewer) {
-        super(viewer, ColorFormat.format("&8Engraving Table"), 45);
+        super(viewer, ColorFormat.format(lang().get("menu.engraving_table")), 45);
         this.selecting = true;
         this.maxEngravings = 1;
     }
 
     public EngravingTableMenu(Player viewer, ItemStack stack, MagicItemInstance instance, ItemDefinition definition) {
-        super(viewer, ColorFormat.format("&8Engraving Table"), 45);
+        super(viewer, ColorFormat.format(lang().get("menu.engraving_table")), 45);
         this.targetStack = stack;
         this.targetInstance = instance;
         this.targetDefinition = definition;
@@ -52,9 +58,7 @@ public class EngravingTableMenu extends Menu {
 
     @Override
     protected void build() {
-        for (int i = 0; i < size; i++) {
-            inventory.setItem(i, createBackgroundPane());
-        }
+        fillAll();
 
         if (selecting) {
             buildSelectMode();
@@ -84,104 +88,63 @@ public class EngravingTableMenu extends Menu {
     }
 
     private ItemStack createSelectPrompt() {
-        ItemStack item = new ItemStack(Material.ENCHANTING_TABLE);
-        ItemMeta meta = item.getItemMeta();
-        if (meta != null) {
-            meta.setDisplayName(ColorFormat.format("&dSelect an Item"));
-            List<String> lore = new ArrayList<>();
-            lore.add(ColorFormat.format("&7Click any magic item in your"));
-            lore.add(ColorFormat.format("&7inventory below to engrave it."));
-            meta.setLore(lore);
-            item.setItemMeta(meta);
+        List<String> lore = new ArrayList<>();
+        for (String line : lang().get("engraving.select_item_lore").split("\\n")) {
+            lore.add(ColorFormat.format(line));
         }
-        return item;
-    }
-
-    private ItemStack createBackgroundPane() {
-        ItemStack item = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
-        ItemMeta meta = item.getItemMeta();
-        if (meta != null) {
-            meta.setDisplayName(ColorFormat.format("&7"));
-            item.setItemMeta(meta);
-        }
-        return item;
+        return ItemBuilder.of(Material.ENCHANTING_TABLE)
+                .name(lang().get("engraving.select_item"))
+                .rawLore(lore)
+                .build();
     }
 
     private ItemStack createItemDisplay() {
         ItemStack display = targetStack.clone();
-        ItemMeta meta = display.getItemMeta();
-        if (meta != null) {
-            List<String> lore = meta.getLore();
-            if (lore == null) lore = new ArrayList<>();
-            lore.add("");
-            lore.add(ColorFormat.format("&7Engravings: &f" + targetInstance.engravings().size() + "&7/&f" + maxEngravings));
-            meta.setLore(lore);
-            display.setItemMeta(meta);
-        }
-        return display;
+        List<String> lore = display.hasItemMeta() && display.getItemMeta().hasLore()
+                ? display.getItemMeta().getLore()
+                : new ArrayList<>();
+        lore.add("");
+        lore.add(ColorFormat.format(lang().get("engraving.engravings_header",
+                "current", targetInstance.engravings().size(), "max", maxEngravings)));
+        return ItemBuilder.of(display).rawLore(lore).build();
     }
 
     private ItemStack createEngravingDisplay(Engraving engraving, int index) {
         String engName = MagicItemRegistries.ENGRAVING_DEFINITIONS.get(engraving.engravingKey())
-                .map(def -> prettifyKey(def.getKey().getKey())).orElse("Unknown");
+                .map(def -> StringUtils.prettifyKey(def.getKey().getKey())).orElse("Unknown");
         String trigName = MagicItemRegistries.TRIGGER_TYPES.get(engraving.triggerKey())
-                .map(t -> prettifyKey(t.getKey().getKey())).orElse("Unknown");
+                .map(t -> StringUtils.prettifyKey(t.getKey().getKey())).orElse("Unknown");
 
-        ItemStack item = new ItemStack(Material.ENCHANTED_BOOK);
-        ItemMeta meta = item.getItemMeta();
-        if (meta == null) return item;
-
-        meta.setDisplayName(ColorFormat.format("&6" + engName));
-        List<String> lore = new ArrayList<>();
-        lore.add(ColorFormat.format("&7Trigger: &f" + trigName));
-        lore.add("");
-        lore.add(ColorFormat.format("&eClick to unequip this engraving"));
-        meta.setLore(lore);
-        item.setItemMeta(meta);
-
+        ItemStack item = ItemBuilder.of(Material.ENCHANTED_BOOK)
+                .name("&6" + engName)
+                .lore("&7Trigger: &f" + trigName,
+                      "",
+                      lang().get("engraving.unequip_click"))
+                .build();
         setMenuData(item, "engraving_index", index);
         setMenuData(item, "action", "remove");
         return item;
     }
 
     private ItemStack createEmptyEngravingSlot() {
-        ItemStack item = new ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE);
-        ItemMeta meta = item.getItemMeta();
-        if (meta != null) {
-            meta.setDisplayName(ColorFormat.format("&7Empty Slot"));
-            List<String> lore = new ArrayList<>();
-            lore.add(ColorFormat.format("&7Click a rune in your inventory"));
-            lore.add(ColorFormat.format("&7to equip it here."));
-            meta.setLore(lore);
-            item.setItemMeta(meta);
-        }
-        return item;
+        return ItemBuilder.of(Material.LIGHT_GRAY_STAINED_GLASS_PANE)
+                .name(lang().get("engraving.empty_slot"))
+                .lore(lang().get("engraving.empty_slot_lore"))
+                .build();
     }
 
     private ItemStack createLockedSlotIcon() {
-        ItemStack item = new ItemStack(Material.RED_STAINED_GLASS_PANE);
-        ItemMeta meta = item.getItemMeta();
-        if (meta != null) {
-            meta.setDisplayName(ColorFormat.format("&8Locked Slot"));
-            List<String> lore = new ArrayList<>();
-            lore.add(ColorFormat.format("&7Upgrade this item to unlock"));
-            lore.add(ColorFormat.format("&7additional engraving slots."));
-            meta.setLore(lore);
-            item.setItemMeta(meta);
-        }
-        return item;
+        return ItemBuilder.of(Material.RED_STAINED_GLASS_PANE)
+                .name(lang().get("engraving.locked_slot"))
+                .lore(lang().get("engraving.locked_slot_lore"))
+                .build();
     }
 
     private ItemStack createBackButton() {
-        ItemStack item = new ItemStack(Material.BARRIER);
-        ItemMeta meta = item.getItemMeta();
-        if (meta != null) {
-            meta.setDisplayName(ColorFormat.format("&cBack"));
-            List<String> lore = new ArrayList<>();
-            lore.add(ColorFormat.format("&7Return to Arcane Table"));
-            meta.setLore(lore);
-            item.setItemMeta(meta);
-        }
+        ItemStack item = ItemBuilder.of(Material.BARRIER)
+                .name(lang().get("common.back"))
+                .lore("&7Return to Arcane Table")
+                .build();
         setMenuData(item, "action", "back");
         return item;
     }
@@ -237,7 +200,7 @@ public class EngravingTableMenu extends Menu {
         Optional<ItemDefinition> def = MagicItemStack.readDefinition(clicked);
         Optional<MagicItemInstance> inst = MagicItemStack.readInstance(clicked);
         if (def.isEmpty() || inst.isEmpty()) {
-            viewer.sendMessage(ColorFormat.format("&cThis is not a valid magic item."));
+            viewer.sendMessage(ColorFormat.format(lang().get("engraving.invalid_item")));
             return true;
         }
 
@@ -310,17 +273,5 @@ public class EngravingTableMenu extends Menu {
         viewer.playSound(viewer.getLocation(), Sound.BLOCK_STONE_BUTTON_CLICK_ON, 1.0f, 1.0f);
         close();
         new WandTableSelectionMenu(viewer).open();
-    }
-
-    private static String prettifyKey(String key) {
-        String[] parts = key.split("_");
-        StringBuilder sb = new StringBuilder();
-        for (String part : parts) {
-            if (sb.length() > 0) sb.append(" ");
-            if (part.isEmpty()) continue;
-            sb.append(Character.toUpperCase(part.charAt(0)));
-            sb.append(part.substring(1));
-        }
-        return sb.toString();
     }
 }

@@ -130,6 +130,25 @@ public class StringUtils {
     }
 
     /**
+     * Converts a snake_case registry key to a human-readable Title Case string.
+     * Strips namespace prefix if present (e.g. "alkatraz:fire_bolt" → "Fire Bolt").
+     */
+    public static String prettifyKey(String key) {
+        if (key == null) return "";
+        int colon = key.indexOf(':');
+        if (colon >= 0) key = key.substring(colon + 1);
+        String[] parts = key.split("_");
+        StringBuilder sb = new StringBuilder();
+        for (String part : parts) {
+            if (sb.length() > 0) sb.append(" ");
+            if (part.isEmpty()) continue;
+            sb.append(Character.toUpperCase(part.charAt(0)));
+            if (part.length() > 1) sb.append(part.substring(1).toLowerCase());
+        }
+        return sb.toString();
+    }
+
+    /**
      * Returns a string with the appropriate English ordinal suffix
      * (e.g., 1 -> "1st", 2 -> "2nd", 3 -> "3rd", 4 -> "4th").
      */

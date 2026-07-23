@@ -2,6 +2,7 @@ package me.nagasonic.alkatraz.gui.implementation.editor;
 
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.api.magic.definition.ItemDefinition;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.api.magic.instance.MagicItemInstance;
 import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
 import me.nagasonic.alkatraz.gui.Menu;
@@ -18,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ItemDetailMenu extends Menu {
+
+    private static LangManager lang() { return Alkatraz.getLangManager(); }
 
     private static final int PREVIEW_SLOT = 22;
     private static final int[] FIELD_SLOTS = {10, 11, 12, 13, 14, 15, 16,
@@ -46,57 +49,57 @@ public class ItemDetailMenu extends Menu {
 
         inventory.setItem(PREVIEW_SLOT, createPreviewItem());
 
-        inventory.setItem(10, createFieldItem(Material.NAME_TAG, "&eDisplay Name",
+        inventory.setItem(10, createFieldItem(Material.NAME_TAG, lang().get("editor.display_name"),
                 "&7Current: &f" + getConfigString("display_name", definition.getKey().getKey()),
                 "&7Click to edit", "edit_display_name"));
-        inventory.setItem(11, createFieldItem(Material.WRITABLE_BOOK, "&eLore",
+        inventory.setItem(11, createFieldItem(Material.WRITABLE_BOOK, lang().get("editor.lore"),
                 "&7" + getConfigListSize("lore") + " line(s)", "&7Click to edit", "edit_lore"));
-        inventory.setItem(12, createFieldItem(Material.BRICK, "&eMaterial",
+        inventory.setItem(12, createFieldItem(Material.BRICK, lang().get("editor.material"),
                 "&7Current: &f" + getConfigString("material", definition.visual().material().name()),
                 "&7Click to edit", "edit_material"));
-        inventory.setItem(13, createFieldItem(Material.LEATHER, "&eDye Color",
+        inventory.setItem(13, createFieldItem(Material.LEATHER, lang().get("editor.dye_color"),
                 "&7Current: &f" + getConfigString("dye_color", "none"),
                 "&7Click to edit", "edit_dye_color"));
-        inventory.setItem(14, createFieldItem(Material.REPEATER, "&eCustom Model Data",
+        inventory.setItem(14, createFieldItem(Material.REPEATER, lang().get("editor.custom_model_data"),
                 "&7Current: &f" + getConfigInt("custom_model_data", 0),
                 "&7Click to edit", "edit_cmd"));
-        inventory.setItem(15, createFieldItem(Material.SHIELD, "&eUnbreakable",
+        inventory.setItem(15, createFieldItem(Material.SHIELD, lang().get("editor.unbreakable"),
                 "&7Current: &f" + getConfigBool("unbreakable", false),
                 "&7Click to toggle", "toggle_unbreakable"));
-        inventory.setItem(16, createFieldItem(Material.ENDER_EYE, "&eHide Attributes",
+        inventory.setItem(16, createFieldItem(Material.ENDER_EYE, lang().get("editor.hide_attributes"),
                 "&7Current: &f" + getConfigBool("hide_attributes", true),
                 "&7Click to toggle", "toggle_hide_attributes"));
 
-        inventory.setItem(19, createFieldItem(Material.CRAFTING_TABLE, "&eComponents",
+        inventory.setItem(19, createFieldItem(Material.CRAFTING_TABLE, lang().get("editor.components"),
                 "&7" + getConfigListSize("components") + " component(s)", "&7Click to edit", "edit_components"));
-        inventory.setItem(20, createFieldItem(Material.GOLD_NUGGET, "&eAttributes",
+        inventory.setItem(20, createFieldItem(Material.GOLD_NUGGET, lang().get("editor.attributes"),
                 "&7" + getConfigSectionSize("attributes") + " attribute(s)", "&7Click to edit", "edit_attributes"));
-        inventory.setItem(21, createFieldItem(Material.IRON_NUGGET, "&eVanilla Attributes",
+        inventory.setItem(21, createFieldItem(Material.IRON_NUGGET, lang().get("editor.vanilla_attributes"),
                 "&7" + getConfigSectionSize("vanilla_attributes") + " attribute(s)", "&7Click to edit", "edit_vanilla_attributes"));
-        inventory.setItem(23, createFieldItem(Material.ENCHANTED_BOOK, "&eMax Engravings",
+        inventory.setItem(23, createFieldItem(Material.ENCHANTED_BOOK, lang().get("editor.max_engravings"),
                 "&7Current: &f" + getConfigInt("max_engravings", 1),
                 "&7Click to edit", "edit_max_engravings"));
-        inventory.setItem(24, createFieldItem(Material.PAPER, "&eSpell ID",
+        inventory.setItem(24, createFieldItem(Material.PAPER, lang().get("editor.spell_id"),
                 "&7Current: &f" + getConfigString("spell_id", "none"),
                 "&7Click to edit", "edit_spell_id"));
-        inventory.setItem(25, createFieldItem(Material.REDSTONE, "&eTriggers",
+        inventory.setItem(25, createFieldItem(Material.REDSTONE, lang().get("editor.triggers"),
                 "&7" + getConfigListSize("triggers") + " trigger(s)", "&7Click to edit", "edit_triggers"));
 
-        inventory.setItem(28, createFieldItem(Material.CRAFTING_TABLE, "&eRecipe Shape",
+        inventory.setItem(28, createFieldItem(Material.CRAFTING_TABLE, lang().get("editor.recipe_shape"),
                 "&7Configure the crafting grid", "&7Click to edit", "edit_recipe_shape"));
-        inventory.setItem(29, createFieldItem(Material.HOPPER, "&eRecipe Ingredients",
+        inventory.setItem(29, createFieldItem(Material.HOPPER, lang().get("editor.recipe_ingredients"),
                 "&7Configure ingredient materials", "&7Click to edit", "edit_recipe_ingredients"));
-        inventory.setItem(30, createFieldItem(Material.BOOK, "&eRecipe Requirements",
+        inventory.setItem(30, createFieldItem(Material.BOOK, lang().get("editor.recipe_requirements"),
                 "&7" + getRecipeRequirementsCount() + " requirement(s)", "&7Click to edit", "edit_requirements"));
 
-        inventory.setItem(39, createActionItem(Material.LIME_DYE, "&a&lSave",
+        inventory.setItem(39, createActionItem(Material.LIME_DYE, lang().get("editor.save"),
                 "&7Save changes to config file",
                 needsSave ? "&eYou have unsaved changes!" : "", "save"));
-        inventory.setItem(40, createActionItem(Material.YELLOW_DYE, "&eReload",
+        inventory.setItem(40, createActionItem(Material.YELLOW_DYE, lang().get("editor.reload"),
                 "&7Discard changes and reload from file", "", "reload"));
-        inventory.setItem(41, createActionItem(Material.BARRIER, "&cBack",
+        inventory.setItem(41, createActionItem(Material.BARRIER, lang().get("common.back"),
                 "&7Return to item list", "", "back"));
-        inventory.setItem(43, createActionItem(Material.EMERALD, "&b&lGet Item",
+        inventory.setItem(43, createActionItem(Material.EMERALD, lang().get("editor.get_item"),
                 "&7Get a copy of this item", "", "get_item"));
     }
 
@@ -130,7 +133,7 @@ public class ItemDetailMenu extends Menu {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(ColorFormat.format(displayName));
+            meta.setDisplayName(displayName);
             List<String> lore = new ArrayList<>();
             for (String line : loreLines) {
                 if (line != null && !line.isEmpty()) {
@@ -147,7 +150,7 @@ public class ItemDetailMenu extends Menu {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(ColorFormat.format(displayName));
+            meta.setDisplayName(displayName);
             List<String> lore = new ArrayList<>();
             for (String line : loreLines) {
                 if (line != null && !line.isEmpty()) {

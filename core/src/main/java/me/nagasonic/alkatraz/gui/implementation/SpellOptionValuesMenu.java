@@ -1,21 +1,20 @@
 package me.nagasonic.alkatraz.gui.implementation;
 
+import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.gui.ItemBuilder;
 import me.nagasonic.alkatraz.gui.PagedMenu;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.configuration.OptionValue;
 import me.nagasonic.alkatraz.spells.configuration.SpellOption;
 import me.nagasonic.alkatraz.spells.configuration.impact.ValueImpact;
 import me.nagasonic.alkatraz.spells.configuration.requirement.ValueRequirement;
 import me.nagasonic.alkatraz.util.ColorFormat;
-import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,12 +23,17 @@ import java.util.List;
  * Paginated menu showing all values for a spell option with selection
  */
 public class SpellOptionValuesMenu extends PagedMenu<OptionValue<?>> {
+
+    private static LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
+
     private final Spell spell;
     private final SpellOption option;
 
     public SpellOptionValuesMenu(Player viewer, Spell spell, SpellOption option) {
         super(viewer,
-              ColorFormat.format("&6" + option.getId() + " &7- Select Value"),
+              ColorFormat.format(lang().get("menu.spell_option_values", "option", option.getId())),
               54,
               option.getOptionValues(),
               28);
@@ -52,93 +56,58 @@ public class SpellOptionValuesMenu extends PagedMenu<OptionValue<?>> {
 
     @Override
     protected void addDecorations() {
-        // Add option info at top
-        ItemStack optionInfo = new ItemStack(option.getIcon());
-        ItemMeta meta = optionInfo.getItemMeta();
-        meta.setDisplayName(ColorFormat.format("&e" + option.getId()));
-        
-        List<String> lore = new ArrayList<>();
-        lore.add(ColorFormat.format("&7" + option.getDescription()));
-        lore.add("");
-        lore.add(ColorFormat.format("&7Select a value below"));
-        meta.setLore(lore);
-        optionInfo.setItemMeta(meta);
-        inventory.setItem(4, optionInfo);
+        addStandardBorder();
 
-
-        int[] slots = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 17, 18, 26, 27, 35, 36, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53};
-        for (int i : slots){
-            inventory.setItem(i, Utils.getBlank());
-        }
+        inventory.setItem(4, ItemBuilder.of(option.getIcon())
+                .name("&e" + option.getId())
+                .lore("&7" + option.getDescription(), "",
+                      lang().get("option_values.select_value"))
+                .build());
     }
 
     @Override
     protected void addBackButton() {
-        ItemStack back = new ItemStack(Material.BARRIER);
-        ItemMeta meta = back.getItemMeta();
-        meta.setDisplayName(ColorFormat.format("&cBack to Options"));
-        back.setItemMeta(meta);
+        ItemStack back = ItemBuilder.of(Material.BARRIER)
+                .name(lang().get("pooled.back_to_options"))
+                .build();
         setMenuData(back, "action", "back");
         inventory.setItem(backButtonSlot, back);
     }
 
     @Override
     protected ItemStack createDisplayItem(OptionValue<?> value, int index) {
-        ItemStack item = new ItemStack(value.getIcon());
-        ItemMeta meta = item.getItemMeta();
-        
         boolean isSelected = value.equals(option.getSelectedValue(viewer));
         boolean meetsRequirements = value.meetsRequirements(viewer);
-        
-        // Display name with selection indicator
-        if (isSelected) {
-            meta.setDisplayName(ColorFormat.format("&a✓ " + value.getDisplayName()));
-        } else {
-            meta.setDisplayName(ColorFormat.format("&f" + value.getDisplayName()));
-        }
-        
-        List<String> lore = new ArrayList<>();
-        lore.add(ColorFormat.format("&7" + value.getDescription()));
-        lore.add("");
-        
+
+        ItemBuilder builder = ItemBuilder.of(value.getIcon())
+                .name(isSelected ? "&a✓ " + value.getDisplayName() : "&f" + value.getDisplayName())
+                .lore("&7" + value.getDescription(), "");
+
         // Show impacts
         if (!value.getImpacts().isEmpty()) {
-            lore.add(ColorFormat.format("&eEffects:"));
+            builder.lore(lang().get("option_values.effects_header"));
             for (ValueImpact impact : value.getImpacts()) {
-                lore.add(ColorFormat.format("&a  + " + impact.getDescription()));
+                builder.lore("&a  + " + impact.getDescription());
             }
-            lore.add("");
+            builder.lore("");
         }
-        
+
         // Show requirements
         if (meetsRequirements) {
-            if (isSelected) {
-                lore.add(ColorFormat.format("&a✓ Currently Selected"));
-            } else {
-                lore.add(ColorFormat.format("&eClick to select"));
-            }
+            builder.lore(isSelected ? "&a✓ Currently Selected" : lang().get("option_values.click_select"));
         } else {
-            lore.add(ColorFormat.format("&c&lLOCKED"));
-            lore.add(ColorFormat.format("&cRequirements:"));
+            builder.lore(lang().get("option_values.locked"), lang().get("option_values.requirements_header"));
             for (ValueRequirement req : value.getUnmetRequirements(viewer)) {
-                lore.add(ColorFormat.format("&c  • " + req.getDescription()));
+                builder.lore("&c  • " + req.getDescription());
             }
         }
-        
-        meta.setLore(lore);
-        
-        // Add enchant glint for locked items or selected items
-        if (!meetsRequirements || isSelected) {
-            meta.addEnchant(Enchantment.DURABILITY, 1, true);
-            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-        }
-        
-        item.setItemMeta(meta);
-        
+
+        ItemStack item = builder.glint(!meetsRequirements || isSelected).build();
+
         // Store value ID for click handling
         setMenuData(item, "value_id", value.getId());
         setMenuData(item, "meets_requirements", meetsRequirements);
-        
+
         return item;
     }
 
@@ -158,14 +127,14 @@ public class SpellOptionValuesMenu extends PagedMenu<OptionValue<?>> {
         if (option.selectValue(viewer, value.getId())) {
             // Play success sound
             viewer.playSound(viewer.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
-            viewer.sendMessage(ColorFormat.format("&aSelected: &f" + value.getDisplayName()));
+            viewer.sendMessage(ColorFormat.format(lang().get("option_values.selected") + " &f" + value.getDisplayName()));
             
             // Refresh the menu to update selection indicators
             refresh();
         } else {
             // Play error sound
             viewer.playSound(viewer.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
-            viewer.sendMessage(ColorFormat.format("&cFailed to select this option!"));
+            viewer.sendMessage(ColorFormat.format(lang().get("option_values.select_failed")));
         }
     }
 
