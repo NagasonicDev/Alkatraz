@@ -1,11 +1,12 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
-import de.tr7zw.nbtapi.NBT;
+import de.tr7zw.changeme.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.dom.Ground;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.Element;
 import me.nagasonic.alkatraz.spells.components.*;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
@@ -35,6 +36,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Tremor extends AttackSpell implements Listener {
+
+    private static LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
+
     public Tremor(String type) {
         super(type);
     }
@@ -149,13 +155,13 @@ public class Tremor extends AttackSpell implements Listener {
 
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
-        if (!caster.isDead()){
+        if (!caster.isDead() && caster.getTarget() != null){
             double wandp = getWandPowerOrDefault(wand);
             double power = getPower(caster, getBasePower())
                     * wandp;
             AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster), power, AttackType.PHYSICAL);
             final Location base = caster.getLocation().subtract(0, 0.5, 0);
-            Vector dir = caster.getTarget().getLocation().toVector().subtract(caster.getLocation().toVector()).normalize();
+            Vector dir = Utils.safeNormalize(caster.getTarget().getLocation().toVector().subtract(caster.getLocation().toVector()));
             Vector perp = dir.clone().rotateAroundY(90);
             List<Location> locations = new ArrayList<>();
             locations.add(base.clone());
@@ -259,9 +265,9 @@ public class Tremor extends AttackSpell implements Listener {
     @Override
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
-                .setDisplayName(Element.EARTH.getColor() + "Tome of the Blind Earthseer &oSection III")
-                .addCustomLoreLine("&8The 3rd lesson of the seeker of the")
-                .addCustomLoreLine("&8pinnacle of Earth magic")
+                .setDisplayName(lang().get("spells.tremor.book_name"))
+                .addCustomLoreLine(lang().get("spells.tremor.lore1"))
+                .addCustomLoreLine(lang().get("spells.tremor.lore2"))
                 .addCustomLoreLine("")
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 3))
                 .build();

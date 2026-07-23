@@ -4,6 +4,7 @@ import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
 import me.nagasonic.alkatraz.spells.components.SpellParticleComponent;
@@ -29,6 +30,10 @@ import org.bukkit.util.Vector;
 import java.util.List;
 
 public class Whirlpool extends AttackSpell {
+
+    private static LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
 
     private double radius;
     private double duration;
@@ -128,7 +133,7 @@ public class Whirlpool extends AttackSpell {
                     double dist = pull.length();
                     if (dist < 0.5) continue;
 
-                    pull.normalize().multiply(activePull * (1.0 - dist / activeRadius));
+                    pull = Utils.safeNormalize(pull).multiply(activePull * (1.0 - dist / activeRadius));
                     pull.setY(0.2);
                     le.setVelocity(le.getVelocity().add(pull));
 
@@ -194,7 +199,7 @@ public class Whirlpool extends AttackSpell {
                     double dist = pull.length();
                     if (dist < 0.5) continue;
 
-                    pull.normalize().multiply(pullStrength * (1.0 - dist / radius));
+                    pull = Utils.safeNormalize(pull).multiply(pullStrength * (1.0 - dist / radius));
                     pull.setY(0.2);
                     le.setVelocity(le.getVelocity().add(pull));
 
@@ -241,8 +246,8 @@ public class Whirlpool extends AttackSpell {
     @Override
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
-                .setDisplayName("&9Tome of the Maelstrom")
-                .addCustomLoreLine("&8&oThe depths rise to claim all.")
+                .setDisplayName(lang().get("spells.whirlpool.book_name"))
+                .addCustomLoreLine(lang().get("spells.whirlpool.lore1"))
                 .addCustomLoreLine("")
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 4))
                 .build();

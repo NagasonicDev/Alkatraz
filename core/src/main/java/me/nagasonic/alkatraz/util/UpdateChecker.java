@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.lang.LangManager;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -19,6 +20,8 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 public class UpdateChecker implements Listener {
+
+    private static LangManager lang() { return Alkatraz.getLangManager(); }
 
     private static void getVersion(Consumer<String> consumer) {
         try {
@@ -50,10 +53,9 @@ public class UpdateChecker implements Listener {
                         if (!e.getPlayer().isOp() || messagedOperators.contains(e.getPlayer().getUniqueId())) return;
                         messagedOperators.add(e.getPlayer().getUniqueId());
                         e.getPlayer().sendMessage(
-                                Utils.chat("&dA new version of Alkatraz is available: " + v),
-                                Utils.chat("&dI recommend you take a look at the update notes"),
-                                Utils.chat("&dto see the importance of this update."),
-                                Utils.chat("&5"));
+                                lang().get("update.new_version", "version", v),
+                                lang().get("update.recommend_notes"),
+                                lang().get("update.see_importance"));
                     }
                 }, Alkatraz.getInstance());
             }

@@ -1,9 +1,10 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
-import de.tr7zw.nbtapi.NBT;
+import de.tr7zw.changeme.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.components.SpellComponent;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
@@ -39,6 +40,10 @@ import java.util.List;
 import java.util.UUID;
 
 public class Fireball extends AttackSpell implements Listener {
+    private static LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
+
     public Fireball(String type) {
         super(type);
     }
@@ -94,7 +99,7 @@ public class Fireball extends AttackSpell implements Listener {
 
     @Override
     public void mobCastAction(@UnknownNullability Mob caster, ItemStack wand) {
-        if (caster.isDead()) return;
+        if (caster.isDead() || caster.getTarget() == null) return;
         double wandp = getWandPowerOrDefault(wand);
         double power = getPower(caster, getBasePower())
                 * wandp;
@@ -149,9 +154,9 @@ public class Fireball extends AttackSpell implements Listener {
     @Override
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
-                .setDisplayName("&eScroll of the Apollo &oI")
-                .addLoreLine("&8The first scroll, containing the basis of")
-                .addLoreLine("&8fire magic.")
+                .setDisplayName(lang().get("spells.fireball.book_name"))
+                .addLoreLine(lang().get("spells.fireball.lore1"))
+                .addLoreLine(lang().get("spells.fireball.lore2"))
                 .addCustomLoreLine("")
                 .build();
     }
@@ -175,8 +180,9 @@ public class Fireball extends AttackSpell implements Listener {
     private void onFireballExplode(EntityExplodeEvent e) {
         if (!(e.getEntity() instanceof org.bukkit.entity.Fireball fireball)) return;
         String idString = NBT.getPersistentData(fireball, nbt -> nbt.getString("component_id"));
-        if (idString == null) return;
+        if (idString == null || idString.isEmpty()) return;
         SpellComponent comp = SpellComponentHandler.getActiveComponent(UUID.fromString(idString));
+        if (comp == null) return;
         if (comp.getSpell().getClass() != Fireball.class) return;
         if (!(comp instanceof SpellEntityComponent ecomp)) return;
         if (!(ecomp.getProperties() instanceof AttackProperties props)) return;

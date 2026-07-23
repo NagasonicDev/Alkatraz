@@ -1,10 +1,11 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
-import de.tr7zw.nbtapi.NBT;
+import de.tr7zw.changeme.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.Element;
@@ -34,6 +35,11 @@ import java.util.List;
 import java.util.Map;
 
 public class Stealth extends Spell implements Listener {
+
+    private static LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
+
     public Stealth(String type){
         super(type);
     }
@@ -189,9 +195,9 @@ public class Stealth extends Spell implements Listener {
     @Override
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
-                .setDisplayName("&8A Beginners Guide to Assassination")
-                .addCustomLoreLine("&8A book written by a certain teacher")
-                .addCustomLoreLine("&8to help is students kill him.")
+                .setDisplayName(lang().get("spells.stealth.book_name"))
+                .addCustomLoreLine(lang().get("spells.stealth.lore1"))
+                .addCustomLoreLine(lang().get("spells.stealth.lore2"))
                 .addCustomLoreLine("")
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 2))
                 .build();

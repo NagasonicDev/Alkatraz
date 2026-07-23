@@ -3,6 +3,7 @@ package me.nagasonic.alkatraz.spells.implementation;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
@@ -30,6 +31,10 @@ import org.bukkit.util.Vector;
 import java.util.List;
 
 public class AirBurst extends AttackSpell {
+    private static LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
+
     public AirBurst(String type){
         super(type);
     }
@@ -129,7 +134,7 @@ public class AirBurst extends AttackSpell {
 
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
-        if (caster.isDead()) return;
+        if (caster.isDead() || caster.getTarget() == null) return;
         double wandp = getWandPowerOrDefault(wand);
         double power = getPower(caster, getBasePower())
                 * wandp;
@@ -228,8 +233,8 @@ public class AirBurst extends AttackSpell {
     @Override
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
-                .setDisplayName("&7Tome of Wind &oVol. 1")
-                .addCustomLoreLine("&8A beginners guide to wind magic.")
+                .setDisplayName(lang().get("spells.airburst.book_name"))
+                .addCustomLoreLine(lang().get("spells.airburst.lore1"))
                 .addCustomLoreLine("")
                 .build();
     }

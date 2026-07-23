@@ -1,6 +1,7 @@
 package me.nagasonic.alkatraz.items.magic.listener;
 
-import de.tr7zw.nbtapi.NBT;
+import de.tr7zw.changeme.nbtapi.NBT;
+import me.nagasonic.alkatraz.config.SpellbookConfig;
 import me.nagasonic.alkatraz.items.magic.MagicItemServices;
 import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
 import me.nagasonic.alkatraz.mobs.MagicEntities;
@@ -17,15 +18,11 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class MagicStoneDropListener implements Listener {
 
-    private static final double BASE_CHANCE = 0.75;
-    private static final double LOOTING_BONUS = 0.10;
-
     @EventHandler(priority = EventPriority.NORMAL)
     public void onEntityDeath(EntityDeathEvent event) {
         LivingEntity entity = event.getEntity();
         if (!MagicEntities.isMagicEntity(entity)) return;
 
-        // Exclude summoned mobs (e.g. from SummonZombies spell)
         Boolean summoned = NBT.get(entity, nbt -> (Boolean) nbt.getBoolean("summoned_zombie"));
         if (Boolean.TRUE.equals(summoned)) return;
 
@@ -34,7 +31,9 @@ public class MagicStoneDropListener implements Listener {
                 ? event.getEntity().getKiller().getInventory().getItemInMainHand().getEnchantmentLevel(looting)
                 : 0;
 
-        double chance = BASE_CHANCE + lootingLevel * LOOTING_BONUS;
+        double baseChance = SpellbookConfig.getMagicStoneBaseChance();
+        double lootingBonus = SpellbookConfig.getMagicStoneLootingBonus();
+        double chance = baseChance + lootingLevel * lootingBonus;
         if (ThreadLocalRandom.current().nextDouble() < chance) {
             ItemStack stone = MagicItemServices.get().createItem(MagicKeys.alkatraz("magic_stone"));
             if (stone != null) {

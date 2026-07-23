@@ -11,19 +11,25 @@ public final class CircleDefinition {
     private final int statPoints;
     private final double maxMana;
     private final double manaRegeneration;
+    private final double magicAffinity;
+    private final double magicResistance;
 
     public CircleDefinition(
             int circle,
             List<ProgressionRequirement> requirements,
             int statPoints,
             double maxMana,
-            double manaRegeneration
+            double manaRegeneration,
+            double magicAffinity,
+            double magicResistance
     ) {
         this.circle = circle;
         this.requirements = List.copyOf(requirements);
         this.statPoints = statPoints;
         this.maxMana = maxMana;
         this.manaRegeneration = manaRegeneration;
+        this.magicAffinity = magicAffinity;
+        this.magicResistance = magicResistance;
     }
 
     public int getCircle() {
@@ -44,5 +50,13 @@ public final class CircleDefinition {
 
     public double getManaRegeneration() {
         return manaRegeneration;
+    }
+
+    public double getMagicAffinity() {
+        return magicAffinity;
+    }
+
+    public double getMagicResistance() {
+        return magicResistance;
     }
 }

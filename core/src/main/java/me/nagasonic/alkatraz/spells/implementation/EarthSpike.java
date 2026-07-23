@@ -5,6 +5,7 @@ import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.dom.Ground;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.Element;
@@ -38,6 +39,10 @@ import java.util.List;
 import java.util.Map;
 
 public class EarthSpike extends AttackSpell implements Listener {
+
+    private static LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
 
     private long selfDestructTicks;
 
@@ -73,7 +78,7 @@ public class EarthSpike extends AttackSpell implements Listener {
     public void castAction(Player player, ItemStack wand) {
         Block target = player.getTargetBlockExact((int) Math.round((Double) getOption("spike_reach").getSelectedValue(player).getValue()));
         if (target == null || !Ground.isGround(target.getType())) {
-            Utils.sendActionBar(player, "&cMust be casted on earth.");
+            Utils.sendActionBar(player, lang().get("spells.earthspike.must_be_cast_on_earth"));
             cancelCast(player);
             return;
         }
@@ -186,6 +191,7 @@ public class EarthSpike extends AttackSpell implements Listener {
 
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
+        if (caster.getTarget() == null) return;
         Block target = caster.getTarget().getLocation().add(0, -0.5, 0).getBlock();
         if (!Ground.isGround(target.getType())) {
             return;
@@ -315,9 +321,9 @@ public class EarthSpike extends AttackSpell implements Listener {
     @Override
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
-                .setDisplayName(Element.EARTH.getColor() + "Tome of the Blind Earthseer &oSection II")
-                .addCustomLoreLine("&8The 2nd lesson of the seeker of the")
-                .addCustomLoreLine("&8pinnacle of Earth magic")
+                .setDisplayName(lang().get("spells.earthspike.book_name"))
+                .addCustomLoreLine(lang().get("spells.earthspike.lore1"))
+                .addCustomLoreLine(lang().get("spells.earthspike.lore2"))
                 .addCustomLoreLine("")
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 2))
                 .build();

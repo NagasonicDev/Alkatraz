@@ -4,6 +4,7 @@ import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
 import me.nagasonic.alkatraz.spells.components.SpellParticleComponent;
@@ -30,6 +31,10 @@ import org.bukkit.util.Vector;
 import java.util.*;
 
 public class FlamingVolley extends AttackSpell implements Listener {
+
+    private static LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
 
     private double arrowSpeed;
     private double arrowRange;
@@ -225,8 +230,8 @@ public class FlamingVolley extends AttackSpell implements Listener {
     @Override
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
-                .setDisplayName("&cInferno Volley Codex")
-                .addCustomLoreLine("&8&oA rain of fire upon thy enemies.")
+                .setDisplayName(lang().get("spells.flamingvolley.book_name"))
+                .addCustomLoreLine(lang().get("spells.flamingvolley.lore1"))
                 .addCustomLoreLine("")
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 4))
                 .build();

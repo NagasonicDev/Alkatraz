@@ -1,10 +1,11 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
-import de.tr7zw.nbtapi.NBT;
+import de.tr7zw.changeme.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
@@ -25,6 +26,10 @@ import org.bukkit.util.Vector;
 import java.util.*;
 
 public class SummonZombies extends AttackSpell implements Listener {
+
+    private static LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
 
     private int zombieCount;
     private int zombieDuration;
@@ -280,8 +285,8 @@ public class SummonZombies extends AttackSpell implements Listener {
     @Override
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
-                .setDisplayName("&2Necronomicon Ex Mortis")
-                .addCustomLoreLine("&8&oThe dead shall serve the living.")
+                .setDisplayName(lang().get("spells.summonzombies.book_name"))
+                .addCustomLoreLine(lang().get("spells.summonzombies.lore1"))
                 .addCustomLoreLine("")
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 4))
                 .build();

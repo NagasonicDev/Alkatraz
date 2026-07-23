@@ -4,6 +4,7 @@ import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
@@ -23,6 +24,10 @@ import java.util.List;
 import java.util.Set;
 
 public class Radiance extends Spell {
+    private static LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
+
     private double healAmount;
     private double radius;
     private double duration;
@@ -229,8 +234,8 @@ public class Radiance extends Spell {
     @Override
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
-                .setDisplayName("&eGospel of the Dawn")
-                .addCustomLoreLine("&8Light banishes the darkness.")
+                .setDisplayName(lang().get("spells.radiance.book_name"))
+                .addCustomLoreLine(lang().get("spells.radiance.lore1"))
                 .addCustomLoreLine("")
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 5))
                 .build();

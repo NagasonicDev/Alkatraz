@@ -1,11 +1,12 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
-import de.tr7zw.nbtapi.NBT;
+import de.tr7zw.changeme.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.dom.Ground;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.Element;
 import me.nagasonic.alkatraz.spells.components.SpellComponent;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
@@ -40,6 +41,10 @@ import java.util.List;
 import java.util.UUID;
 
 public class EarthThrow extends AttackSpell implements Listener {
+    private static LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
+
     public EarthThrow(String type){
         super(type);
     }
@@ -99,13 +104,13 @@ public class EarthThrow extends AttackSpell implements Listener {
 
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
-        if (!caster.isDead()){
+        if (!caster.isDead() && caster.getTarget() != null){
             double wandp = getWandPowerOrDefault(wand);
             double power = getPower(caster, getBasePower())
                     * wandp;
             AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster), power, AttackType.PHYSICAL);
             Location loc = caster.getEyeLocation();
-            Vector direction = caster.getTarget().getLocation().toVector().subtract(caster.getLocation().toVector()).normalize();
+            Vector direction = Utils.safeNormalize(caster.getTarget().getLocation().toVector().subtract(caster.getLocation().toVector()));
             if (caster.isOnGround()){
                 Block block = caster.getLocation().subtract(0,0.5,0).getBlock();
                 if (Ground.isGround(block.getType())) {
@@ -157,9 +162,9 @@ public class EarthThrow extends AttackSpell implements Listener {
     @Override
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
-                .setDisplayName(Element.EARTH.getColor() + "Tome of the Blind Earthseer &oSection I")
-                .addCustomLoreLine("&8The first of a series containing the knowledge")
-                .addCustomLoreLine("&8of the greatest earthbender in the world.")
+                .setDisplayName(lang().get("spells.earththrow.book_name"))
+                .addCustomLoreLine(lang().get("spells.earththrow.lore1"))
+                .addCustomLoreLine(lang().get("spells.earththrow.lore2"))
                 .addCustomLoreLine("")
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 2))
                 .build();
@@ -188,7 +193,7 @@ public class EarthThrow extends AttackSpell implements Listener {
                 for (LivingEntity le : me.nagasonic.alkatraz.util.Utils.getNearbyLivingEntities(loc, radius)){
                     SpellDamageUtil.damageWithSpell(le, props.getRemainingPower(), comp.getCaster(), comp.getWand(), EarthThrow.this);
                     Vector direction = le.getLocation().toVector().subtract(loc.toVector());
-                    direction.normalize().multiply(1);
+                    direction = Utils.safeNormalize(direction);
                     direction.setY(1.25);
                     le.setVelocity(direction);
                 }
@@ -219,7 +224,7 @@ public class EarthThrow extends AttackSpell implements Listener {
                     for (LivingEntity le : me.nagasonic.alkatraz.util.Utils.getNearbyLivingEntities(loc, radius)){
                         SpellDamageUtil.damageWithSpell(le, props.getRemainingPower(), comp.getCaster(), comp.getWand(), EarthThrow.this);
                         Vector direction = le.getLocation().toVector().subtract(loc.toVector());
-                        direction.normalize().multiply(1);
+                        direction = Utils.safeNormalize(direction);
                         direction.setY(1.25);
                         le.setVelocity(direction);
                     }

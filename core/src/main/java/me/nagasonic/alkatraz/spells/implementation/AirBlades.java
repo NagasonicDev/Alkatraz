@@ -3,6 +3,7 @@ package me.nagasonic.alkatraz.spells.implementation;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
@@ -47,6 +48,10 @@ public class AirBlades extends AttackSpell implements Listener {
     private double bladeSpeed;
     private double bladeRange;
     private double bladeSpread;
+
+    private static LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
 
     public AirBlades(String type) {
         super(type);
@@ -120,8 +125,8 @@ public class AirBlades extends AttackSpell implements Listener {
         caster.getWorld().playSound(caster.getLocation(), Sound.ENTITY_ENDER_DRAGON_FLAP, 0.9f, 1.6f);
 
         Vector aimDir;
-        if (caster instanceof Mob m) {
-            aimDir = m.getTarget().getLocation().toVector().subtract(m.getLocation().toVector()).normalize();
+        if (caster instanceof Mob m && m.getTarget() != null) {
+            aimDir = Utils.safeNormalize(m.getTarget().getLocation().toVector().subtract(m.getLocation().toVector()));
         }else aimDir = caster.getEyeLocation().getDirection().normalize();
 
         // Build the list of yaw offsets (in radians) for this volley
@@ -311,9 +316,9 @@ public class AirBlades extends AttackSpell implements Listener {
     @Override
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
-                .setDisplayName("&fThe Iron Fan Treatise")
-                .addCustomLoreLine("&8The discipline of the war-fan: a blade of wind")
-                .addCustomLoreLine("&8for each spoke of the iron ribs.")
+                .setDisplayName(lang().get("spells.airblades.book_name"))
+                .addCustomLoreLine(lang().get("spells.airblades.lore1"))
+                .addCustomLoreLine(lang().get("spells.airblades.lore2"))
                 .addCustomLoreLine("")
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 2))
                 .build();

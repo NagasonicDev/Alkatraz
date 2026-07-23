@@ -21,6 +21,10 @@ public enum Element {
         return color + name;
     }
 
+    public String getColorlessName() {
+        return name;
+    }
+
     public String getColor() {
         return color;
     }

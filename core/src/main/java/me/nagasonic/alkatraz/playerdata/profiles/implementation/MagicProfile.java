@@ -35,6 +35,7 @@ public class MagicProfile extends Profile {
         doubleStat("maxMana", 100);
         doubleStat("mana", 100);
         doubleStat("manaRegeneration", 1);
+
         doubleStat("experience", 0);
         doubleStat("arcaneKnowledge", 0);
         intStat("researchPoints", 0);
@@ -78,6 +79,7 @@ public class MagicProfile extends Profile {
         stringSetStat("researchCompleted");
         stringSetStat("researchObjectiveProgress");
         stringSetStat("researchRewardsApplied");
+        stringSetStat("hotbarSpells"); // Format: "slotIndex:spellId"
 
         // Note: Spell masteries are stored as dynamic int stats (see getSpellMastery/setSpellMastery)
     }
@@ -576,7 +578,7 @@ public class MagicProfile extends Profile {
      * Checks if a spell modifier exists
      */
     public boolean hasSpellModifier(Spell spell, String id) {
-        return getSpellModifiers(spell, id) != null;
+        return !getSpellModifiers(spell, id).isEmpty();
     }
 
     /**
@@ -685,22 +687,38 @@ public class MagicProfile extends Profile {
     }
 
     // ============================================
-    // Spell Hotbar stuff
+    // Spell Hotbar stuff (persisted via hotbarSpells stringSetStat)
     // ============================================
 
-    private Map<Integer, String> hotbarSpellIds = new HashMap<>();
-
     public Map<Integer, String> getHotbarSpellIds() {
-        return hotbarSpellIds;
+        Map<Integer, String> result = new HashMap<>();
+        for (String entry : getStringSet("hotbarSpells")) {
+            int colon = entry.indexOf(':');
+            if (colon > 0) {
+                try {
+                    int slot = Integer.parseInt(entry.substring(0, colon));
+                    String spellId = entry.substring(colon + 1);
+                    result.put(slot, spellId);
+                } catch (NumberFormatException ignored) {}
+            }
+        }
+        return result;
     }
 
     public void setHotbarSpell(int slotIndex, String spellId) {
         if (slotIndex < 0 || slotIndex >= SpellHotbarManager.SPELL_SLOT_COUNT) return;
-        hotbarSpellIds.put(slotIndex, spellId);
+        getStringSet("hotbarSpells").removeIf(entry -> entry.startsWith(slotIndex + ":"));
+        if (spellId != null) {
+            getStringSet("hotbarSpells").add(slotIndex + ":" + spellId);
+        }
     }
 
     public void removeHotbarSpell(String spellId) {
-        hotbarSpellIds.entrySet().removeIf(entry -> spellId.equals(entry.getValue()));
+        if (spellId == null) return;
+        getStringSet("hotbarSpells").removeIf(entry -> {
+            int colon = entry.indexOf(':');
+            return colon > 0 && spellId.equals(entry.substring(colon + 1));
+        });
     }
 
 

@@ -3,6 +3,7 @@ package me.nagasonic.alkatraz.spells.implementation;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
@@ -15,7 +16,7 @@ import me.nagasonic.alkatraz.spells.types.BarrierType;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.BarrierProperties;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
-import de.tr7zw.nbtapi.NBT;
+import de.tr7zw.changeme.nbtapi.NBT;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -30,6 +31,10 @@ import org.bukkit.util.Vector;
 import java.util.List;
 
 public class Barrier extends BarrierSpell implements Listener {
+
+    private static LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
 
     public Barrier(String type) {
         super(type);
@@ -90,7 +95,7 @@ public class Barrier extends BarrierSpell implements Listener {
                         Vector push = entity.getLocation().toVector().subtract(center.toVector());
                         push.setY(0);
                         if (push.lengthSquared() < 0.01) continue;
-                        push.normalize().multiply(0.3);
+                        push = Utils.safeNormalize(push).multiply(0.3);
                         living.setVelocity(living.getVelocity().add(push));
                     }
                 }
@@ -192,8 +197,8 @@ public class Barrier extends BarrierSpell implements Listener {
     @Override
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
-                .setDisplayName("&aAegis Codex &oPart I")
-                .addCustomLoreLine("&8&oDefense is the best Offense &r&7 - Barrier Master")
+                .setDisplayName(lang().get("spells.barrier.book_name"))
+                .addCustomLoreLine(lang().get("spells.barrier.lore1"))
                 .addCustomLoreLine("")
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 3))
                 .build();

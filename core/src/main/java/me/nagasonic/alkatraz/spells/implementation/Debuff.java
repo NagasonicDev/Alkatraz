@@ -3,6 +3,7 @@ package me.nagasonic.alkatraz.spells.implementation;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.modifier.AppliedModifier;
@@ -29,6 +30,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * Debuff — Applies configured negative modifiers to a targeted living entity.
  */
 public class Debuff extends Spell {
+
+    private static LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
 
     private static final String DEBUFF_GROUP_ID = "configure_debuffs";
     private static final Color PARTICLE_COLOR = Color.fromRGB(128, 0, 128);
@@ -61,21 +66,21 @@ public class Debuff extends Spell {
         LivingEntity target = PooledModifierSpellSupport.resolveDebuffTarget(caster, range);
 
         if (target == null) {
-            Utils.sendActionBar(caster, "&cNo valid target in sight.");
+            Utils.sendActionBar(caster, lang().get("spells.debuff.no_target"));
             return;
         }
 
         int duration = (int) getModifiedStat(caster, "duration", baseDuration);
         String targetName = target instanceof Player p ? p.getName() : target.getType().name();
 
-        String casterMsg = "&5Debuffs applied to &f" + targetName + " &5for &f" + duration + "&5 seconds!";
+        String casterMsg = lang().get("spells.debuff.applied", "%target%", targetName, "%duration%", String.valueOf(duration));
         String targetMsg = target instanceof Player
-                ? "&5You have been debuffed for &f" + duration + "&5 seconds!"
+                ? lang().get("spells.debuff.target_debuffed", "%duration%", String.valueOf(duration))
                 : "";
 
         PooledModifierSpellSupport.applyConfiguredModifiers(
                 caster, target, this, DEBUFF_GROUP_ID, duration, activeModifiers,
-                PARTICLE_COLOR, casterMsg, targetMsg, "&7The debuff on you has faded.");
+                PARTICLE_COLOR, casterMsg, targetMsg, lang().get("spells.debuff.faded"));
     }
 
     @Override
@@ -109,10 +114,10 @@ public class Debuff extends Spell {
     @Override
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
-                .setDisplayName("&5Tome of Enfeeblement")
-                .addCustomLoreLine("&8&oCurse those who stand against you.")
-                .addCustomLoreLine("&7Look at a target to apply your")
-                .addCustomLoreLine("&7configured debuffs.")
+                .setDisplayName(lang().get("spells.debuff.book_name"))
+                .addCustomLoreLine(lang().get("spells.debuff.lore1"))
+                .addCustomLoreLine(lang().get("spells.debuff.lore2"))
+                .addCustomLoreLine(lang().get("spells.debuff.lore3"))
                 .addCustomLoreLine("")
                 .build();
     }

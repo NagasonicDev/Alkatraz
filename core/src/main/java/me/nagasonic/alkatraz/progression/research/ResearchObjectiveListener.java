@@ -25,17 +25,24 @@ import org.bukkit.inventory.ItemStack;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import org.bukkit.event.player.PlayerQuitEvent;
 
-import de.tr7zw.nbtapi.NBT;
+import de.tr7zw.changeme.nbtapi.NBT;
 
 public final class ResearchObjectiveListener implements Listener {
 
     private static final long SPELL_CONTEXT_MILLIS = 8000L;
-    private final Map<UUID, RecentSpell> recentSpells = new HashMap<>();
+    private final Map<UUID, RecentSpell> recentSpells = new ConcurrentHashMap<>();
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerJoin(PlayerJoinEvent event) {
         ResearchService.applyCompletedRewards(event.getPlayer());
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent event) {
+        recentSpells.remove(event.getPlayer().getUniqueId());
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

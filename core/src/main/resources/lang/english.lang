@@ -1,0 +1,655 @@
+# ==============================
+# Alkatraz — English Language File
+# ==============================
+
+# --- Common ---
+common.back = &cBack
+common.back_white = &fBack
+common.close = &cClose
+common.confirm = &aConfirm
+common.cancel = &cCancel
+common.info = &eInfo
+common.next_page = &aNext Page
+common.previous_page = &aPrevious Page
+common.page_indicator = &ePage %current% / %total%
+common.empty = &8(empty)
+
+# --- Menu Titles ---
+menu.spells = &5Spells
+menu.spell_options = &6%spell% - Options
+menu.spell_option_values = &6%option% - Select Value
+menu.stats = &e%player%'s Stats
+menu.progression = &5Progression
+menu.arcane_table = &5Arcane Table
+menu.equipment = &8Equipment
+menu.grimoire = &6Grimoire
+menu.recipe_book = &6Recipe Book
+menu.recipe_details = &6Recipe Details
+menu.hotbar_config = &5Configure Spell Hotbar
+menu.pooled_slot = &6%slot_name%
+menu.research_library = &5Research Library
+menu.research_entry = &5Research: %name%
+menu.research_categories = &5Research Categories
+menu.engraving_table = &8Engraving Table
+menu.engraving_selector = &dEngraving Table
+menu.trigger_select = &6Select Trigger Type
+menu.item_editor = &8Item Editor
+menu.rune_editor = &b&lRune Editor
+menu.circle_up_confirm = &5&lConfirm Circle Up
+
+# --- Spells Menu ---
+spells.configure_hotbar = &5Configure Spell Hotbar
+spells.configure_hotbar_lore = &7Assign spells to your wand hotbar slots.
+spells.code = &bCode: %value%
+spells.mana_cost = &bMana Cost: %value%
+spells.cooldown = &bCooldown: %value%
+spells.cast_time = &bCast Time: %value%
+spells.element = &bElement: %value%
+spells.mastery = &bMastery: %value%
+spells.circle = &eCircle: %value%
+spells.has_options = &aHas Spell Options
+spells.has_options_lore = &7Click to configure
+spells.locked_name = &8???
+spells.locked_lore = &7&oCircle: &7&o%circle%
+
+# --- Stats Menu ---
+stats.circle_level = &eCircle Level
+stats.arcane_knowledge = &bArcane Knowledge
+stats.arcane_knowledge_lore = &7Current: &f%current%&7 / &f%max%
+stats.research_points = &dResearch Points
+stats.research_points_lore = &7Available: &f%current%
+stats.stat_points = &aStat Points
+stats.stat_points_lore = &7Available: &f%current%
+stats.mana = &bMana
+stats.mana_lore = &7Max: &f%current%
+stats.mana_regen = &bMana Regen
+stats.mana_regen_lore = &7Per second: &f%current%
+stats.affinity = &eAffinity: &f%value%
+stats.resistance = &eResistance: &f%value%
+stats.element_fire = &6Fire
+stats.element_water = &3Water
+stats.element_earth = &aEarth
+stats.element_air = &fAir
+stats.element_light = &eLight
+stats.element_dark = &5Dark
+stats.invested_points = &eInvested Points:
+stats.bonus = &eBonus:
+stats.invest_click = &eClick to invest &61 &epoint.
+stats.invest_insufficient = &cYou don't have any stat points available!
+stats.invest_wrong_player = &cYou can only modify your own stats!
+stats.invest_success = &aInvested 1 point into %element%!
+stats.reset_button = &d&lReset Stats
+stats.reset_button_lore = &dReset Tokens: &f%tokens%\n\n&eClick to reset all invested stats.\n&c&lTHIS IS NOT UNDOABLE
+stats.reset_confirm_title = &d&lReset All Stats?
+stats.reset_confirm_lore = &7This will refund all invested points\n&7and reset affinity/resistance to zero.\n\n&c&lThis action is NOT undoable!
+stats.reset_confirm_yes = &a&lConfirm Reset
+stats.reset_confirm_yes_lore = &7Click to reset all stats.
+stats.reset_confirm_no = &c&lCancel
+stats.reset_confirm_no_lore = &7Go back to stats.
+stats.reset_success = &aStats reset! Refunded %points% stat points.
+stats.reset_no_tokens = &cYou don't have any reset tokens!
+stats.reset_no_stats = &cYou have no invested stats to reset!
+
+# --- Progression Menu ---
+progression.title = &dCircle Progression
+progression.current_circle = &7Current Circle: &f%circle%
+progression.arcane_knowledge = &7Arcane Knowledge: &f%value%
+progression.legend_green = &aGreen &7= Completed
+progression.legend_yellow = &eYellow &7= Working towards
+progression.legend_red = &cRed &7= Locked
+progression.status_completed = &a&lCOMPLETED
+progression.status_working = &e&lWORKING TOWARDS
+progression.status_locked = &c&lLOCKED
+progression.already_mastered = &7You have already mastered this circle.
+progression.requirements_header = &e&lRequirements:
+progression.rewards_header = &e&lRewards:
+progression.reward_stat_points = &a  +%amount% Stat Points
+progression.reward_max_mana = &a  +%amount% Max Mana
+progression.reward_mana_regen = &a  +%amount% Mana Regen/s
+progression.click_to_advance = &e&lClick to advance!
+progression.requirement_met = &a✔
+progression.requirement_unmet = &c✘
+
+# --- Arcane Table ---
+arcane.research = &dResearch Library
+arcane.research_lore = &7Unlock new knowledge
+arcane.research_desc = &7  Research - &7Unlock new knowledge
+arcane.progression = &dProgression
+arcane.progression_lore = &7Advance your circle
+arcane.progression_desc = &7  Progression - &7Advance your circle
+arcane.engineering = &dMagic Engineering
+arcane.engineering_lore = &7Modify your equipment
+arcane.engineering_desc = &7  Engineering - &7Modify your equipment
+arcane.choose_path = &7Choose your path:
+arcane.click_to_open = &eClick to open
+
+# --- Equipment Menu ---
+equipment.slot_ring = Ring
+equipment.slot_necklace = Necklace
+equipment.slot_bracelet = Bracelet
+equipment.slot_pendant = Pendant
+equipment.empty_slot = &a%slot% (Empty)
+equipment.empty_slot_lore = &7Click then click an item in your inventory to equip it.
+equipment.click_unequip = &eClick to &cunequip
+equipment.equip_wrong_slot = &cThat item cannot be equipped in this slot.
+equipment.equip_instructions = &eClick an item in your inventory to equip it in the %slot%.
+
+# --- Grimoire ---
+grimoire.previous_pages = &fPrevious Pages
+grimoire.next_pages = &fNext Pages
+grimoire.page_empty = &6Page %page% &7- &fEmpty
+grimoire.page_empty_lore = &7Click to assign a spell.
+grimoire.page_unknown = &6Page %page% &7- &cUnknown
+grimoire.page_spell_left_click = &eLeft-click &7to cast this spell.
+grimoire.page_spell_right_click = &cRight-click &7to clear this page.
+grimoire.spell_select_title = &5Select a Spell
+grimoire.spell_select_back = &cBack to Grimoire
+grimoire.spell_select_assign = &eClick to assign to Page %page%
+grimoire.spell_select_assigned = &aAssigned %spell% to Page %page%.
+
+# --- Recipe Book ---
+recipes.title = &6&lRecipe Book
+recipes.browse_lore = &7Browse all available\n&7magic item recipes.
+recipes.ingredients_header = &7&m---&r &6Ingredients &7&m---
+recipes.requirements_header = &7&m---&r &cRequirements &7&m---
+recipes.has_requirements = &cRequirements
+recipes.click_details = &eClick for details
+recipes.back_to_recipes = &f← Back to Recipes
+recipes.unknown = &cUnknown
+
+# --- Spell Options ---
+spell_options.configure = &7Configure spell options
+spell_options.circle = &eCircle: &f%circle%
+spell_options.back_to_spells = &cBack to Spells
+spell_options.click_configure = &eClick to configure
+spell_options.description = &7%description%
+
+# --- Spell Option Values ---
+option_values.select_value = &7Select a value below
+option_values.effects_header = &eEffects:
+option_values.click_select = &eClick to select
+option_values.locked = &c&lLOCKED
+option_values.requirements_header = &cRequirements:
+option_values.selected = &aSelected:
+option_values.select_failed = &cFailed to select this option!
+
+# --- Hotbar Config ---
+hotbar.back_to_spells = &cBack to Spells
+hotbar.currently_selected = &bCurrently selected
+hotbar.click_assign_lore = &7Click a spell below to assign it.
+hotbar.slot_header = &6Slot %slot%
+hotbar.slot_empty = &8Spell Slot %slot% &7(empty)
+hotbar.slot_empty_lore = &7Configure in the Spells menu.
+hotbar.left_click_select = &eLeft-click &7to select this slot.
+hotbar.right_click_clear = &cRight-click &7to clear.
+hotbar.already_assigned = &7Already assigned to a slot.
+hotbar.click_assign = &eClick to assign to Slot %slot%
+
+# --- Pooled Slots ---
+pooled.back_to_options = &cBack to Options
+pooled.selected_assignment = &bSelected for assignment
+pooled.click_assign_lore = &7Click a value below to assign it.
+pooled.right_click_clear = &cRight-click &7to clear.
+pooled.slot_locked = &c&lSLOT LOCKED
+pooled.locked = &c&lLOCKED
+pooled.already_in_slot = &7Already in a slot.
+pooled.click_assign_slot = &eClick to assign to %name%
+pooled.already_assigned = &cThat option is already assigned to a slot.
+
+# --- Research ---
+research.back_to_graph = &fBack to Graph
+research.back_to_arcane = &fBack to Arcane Table
+research.pan_up = &fPan Up
+research.pan_up_left = &fPan Up-Left
+research.pan_up_right = &fPan Up-Right
+research.pan_down = &fPan Down
+research.pan_left = &fPan Left
+research.pan_right = &fPan Right
+research.categories = &6%category% &7Categories
+research.research_points = &bResearch Points: &f%points%
+research.unknown = &8Unknown Research
+research.click_inspect = &eClick to inspect
+research.link_completed = &aCompleted
+research.link_active = &eActive Link
+research.link_inactive = &7Inactive Link
+research.entry_requirements = &eRequirements
+research.entry_tasks = &bResearch Tasks
+research.entry_rewards = &aRewards
+research.entry_unlocks = &dUnlocks
+research.entry_start = &eStart Research
+research.entry_complete = &bComplete Research
+research.entry_completed = &aCompleted
+research.entry_locked = &cLocked
+research.entry_hidden = &8Hidden
+research.no_prior = &aNo prior research required.
+research.no_tasks = &aNo tasks required.
+research.insufficient_points = &cYou need %points% Research Points
+research.linked_research = &dLinked Research
+research.objective = &7- %description% &e(%current%/%target%)
+
+# --- Engraving ---
+engraving.engravings_header = &7Engravings: &f%current%&7/&f%max%
+engraving.unequip_click = &eClick to unequip this engraving
+engraving.empty_slot = &7Empty Slot
+engraving.empty_slot_lore = &7Click a rune in your inventory to equip it here.
+engraving.locked_slot = &8Locked Slot
+engraving.locked_slot_lore = &7Upgrade this item to unlock additional engraving slots.
+engraving.back = &cBack
+engraving.invalid_item = &cThis is not a valid magic item.
+engraving.select_item = &dSelect an Item
+engraving.select_item_lore = &7Click any magic item in your inventory to select it for engraving.\n\n&7Hold an item in your hand and click on its slot to select it.
+engraving.rune_installed = &a%rune% installed
+engraving.rune_empty = &7No rune installed
+engraving.trigger_prefix = &e%trigger%
+
+# --- Circle Up Confirmation ---
+circleup.info_item_name = &d&lCircle Up
+circleup.rewards_header = &e&lRewards:
+circleup.confirm_lore = &7Advance to the %ordinal% circle.
+circleup.reward_stat_points = &a+%amount% Stat Points
+circleup.reward_max_mana = &a+%amount% Max Mana
+circleup.reward_mana_regen = &a+%amount% Mana Regen/s
+circleup.about_to_advance = &7You are about to advance to the
+circleup.confirm_question = &7Are you sure you want to proceed?
+circleup.confirm_yes = &a&lConfirm Circle Up
+circleup.confirm_no = &c&lCancel
+circleup.requirements_met = &aRequirements Met
+circleup.requirements_not_met = &cYou no longer meet the requirements!
+
+# --- Editor ---
+editor.rune_editor_title = &b&lRune Editor
+editor.item_editor_title = &6&lItem Editor
+editor.switch_to_items = &7Click to switch to Items view
+editor.switch_to_runes = &7Click to switch to Runes view
+editor.click_edit_item = &7Click to edit this item
+editor.not_supported = &eRune editing is not yet supported in the editor.
+editor.display_name = &eDisplay Name
+editor.lore = &eLore
+editor.material = &eMaterial
+editor.dye_color = &eDye Color
+editor.custom_model_data = &eCustom Model Data
+editor.unbreakable = &eUnbreakable
+editor.hide_attributes = &eHide Attributes
+editor.components = &eComponents
+editor.attributes = &eAttributes
+editor.vanilla_attributes = &eVanilla Attributes
+editor.max_engravings = &eMax Engravings
+editor.spell_id = &eSpell ID
+editor.triggers = &eTriggers
+editor.recipe_shape = &eRecipe Shape
+editor.recipe_ingredients = &eRecipe Ingredients
+editor.recipe_requirements = &eRecipe Requirements
+editor.save = &a&lSave
+editor.reload = &eReload
+editor.get_item = &b&lGet Item
+editor.enter_display_name = Enter new display name...
+editor.enter_material = Enter new material name...
+editor.line = &eLine %line%
+editor.add_line = &a&lAdd Line
+editor.attr_key = &e%key%
+editor.attr_value = &7Value: &f%value%
+editor.attr_edit = &eLeft-click to edit value
+editor.attr_delete = &cRight-click to delete
+editor.add_attribute = &a&lAdd Attribute
+editor.component_enabled = &aEnabled
+editor.component_disabled = &7Disabled
+editor.component_click_toggle = &7Click to toggle
+editor.add_component = &a&lAdd Component
+editor.recipe_empty = &7Empty
+editor.recipe_char = &e'%char%'
+editor.recipe_item = &6Item: &f%key%
+editor.save_recipe = &a&lSave Recipe
+editor.requirement_display = &eRequirement %num% (%type%)
+editor.add_requirement = &a&lAdd Requirement
+editor.chat_prompt = &7Type your input in chat, or type &ccancel &7to abort.
+editor.chat_cancelled = &cCancelled.
+
+# --- Commands ---
+commands.reload_success = &aReloaded configs.
+commands.no_permission = &cYou do not have permission to use this command.
+commands.player_only = &cOnly players can use this command.
+commands.usage_header = &cUsage:
+commands.spell_not_found = &cThere is no spell named &f%name%&c.
+commands.item_not_found = &cThere is no item named &f%name%&c.
+commands.gave_item = &aGave %item% to %player%.
+commands.ak_usage = &cUsage: /alkatraz arcaneknowledge set|add <player> <amount>
+commands.ak_negative = &cArcane Knowledge cannot be negative.
+commands.ak_set = &aSet Arcane Knowledge of %player% to %amount%.
+commands.ak_add = &aAdded %amount% Arcane Knowledge to %player%.
+commands.ak_invalid_op = &cPlease choose a valid operator: set/add.
+commands.give_usage = &cUsage: /alkatraz give <item> [player]
+commands.reload_usage = &cUsage: /alkatraz reload
+commands.main_usage = &cPlease add an argument.
+commands.cast_mode_set = &aCast mode set to %mode%.
+commands.converted_wands = &aConverted %count% legacy wand(s).
+commands.spawnmob_usage = &cUsage: /alkatraz spawnmob <mob> [player]
+commands.spawnmob_success = &aSpawned %mob% at %player%.
+commands.spells_usage = &cUsage: /spells [<player>]
+commands.recipes_permission = &cYou don't have permission to view recipes.
+commands.cast_no_session = &cNo active grimoire session.
+commands.cast_invalid_token = &cInvalid cast token.
+commands.discover_usage = &cUsage: /alkatraz %command% <spell> [player]
+commands.circle_usage = &cUsage: /alkatraz circle set|add <number> [player]
+commands.circle_set = &aSet circle level of %player% to %amount%.
+commands.circle_add = &aAdded %amount% to circle level of %player%. (New: %new%)
+commands.circle_cannot_set = &cCannot set beyond the circle threshold (0-9).
+commands.circle_cannot_add = &cCannot add beyond the circle threshold (0-9).
+commands.mastery_usage = &cUsage: /alkatraz mastery <spell> set|add <number> [player]
+commands.mastery_added = &aAdded %amount% to %player%'s mastery of %spell%.
+commands.mastery_set = &a%player%'s spell mastery of %spell% is now %value%.
+commands.mastery_negative = &cSpell Mastery cannot be less than 0.
+commands.stats_no_permission = &cYou do not have permission to see another player's stats.
+commands.castmode_usage = &cUsage: /alkatraz castmode <code|hotbar>
+commands.profile_usage = &cUsage: /alkatraz profile [player]
+commands.player_not_found = &cCouldn't find a player named %name%. Make sure they are online.
+commands.console_require_player = &cYou must specify a player when running this from console.
+commands.converted_wands_for = &aConverted %count% legacy wand(s) to magic items for %player%.
+commands.spawnmob_invalid_type = &cUnknown magic mob &f%type%&c. Valid types: &f%valid%
+commands.item_not_found_or_engraving = &cThere is no item or engraving named %name%.
+
+# --- Spell Casting ---
+spells.cast.too_low_circle = &cToo low Magic Circle
+spells.cast.cannot_cast_now = &cYou cannot cast right now
+spells.cast.not_enough_mana = &cNot Enough Mana
+spells.cast.please_wait = &cPlease wait %time%s
+spells.cast.casted = Casted:
+spells.cast.need_tool = &cYou need a better tool to cast this.
+spells.cast.not_discovered = &cYou have not discovered this spell.
+spells.cast.buffs_applied = &bBuffs applied to %target%!
+spells.cast.debuffs_applied = &5Debuffs applied to %target%!
+spells.cast.buffs_faded = &eThe buff on you has faded.
+spells.cast.debuffs_faded = &5The debuff on you has faded.
+spells.cast.blessed_by = &eYou have been blessed by %spell%!
+
+# --- Spellbook ---
+spellbook.corrupted = &cThis spellbook appears to be corrupted!
+spellbook.corrupted_lore = &7This spellbook appears to be corrupted.
+spellbook.already_known = &eYou already know %spell%!
+spellbook.requirement_not_met = &cRequirement not met: &7%description%
+spellbook.discovered = &aYou have discovered %spell%!
+spellbook.view_spells_hint = &7Use &e/spells &7to view your discovered spells.
+spellbook.requirements_header = &cRequirements:
+spellbook.effects_header = &aEffects:
+spellbook.display_name = &6Spellbook: %spell%
+spellbook.unknown_name = &6Unknown Spellbook
+spellbook.element_info = &eCircle %circle% &7| &b%element%
+spellbook.right_click_discover = &7Right-click to discover this spell!
+spellbook.empty = &cThis spellbook appears to be empty!
+spellbook.selection_failed = &cFailed to select a spell!
+spellbook.selection_not_found = &cSelected spell not found!
+spellbook.transformed = &aThe spellbook transforms into %spell%!
+spellbook.random_lore = &7Random Spellbook
+spellbook.random_lore_line1 = &7This mysterious tome contains
+spellbook.random_lore_line2 = &7unknown magical knowledge...
+spellbook.random_lore_line3 = &dRight-click to reveal a random spell!
+spellbook.element_lore = &7%element% Spellbook
+
+# --- Tutorial ---
+tutorial.welcome_title = &d&lAlkatraz
+tutorial.welcome_subtitle = &fYour magical journey begins...
+tutorial.step1_title = &e&lStep 1: The Grimoire
+tutorial.step1_subtitle = &7Your book of spells
+tutorial.step1_chat = &eLeft-click &7with the Grimoire to open it. This is where you'll manage your spells.
+tutorial.step2_title = &e&lStep 2: Magic Circle
+tutorial.step2_subtitle = &7Your progression system
+tutorial.step2_chat = &7Invest stat points using the &e/spells &7command. Then click &eCircle Up &7to advance!
+tutorial.step3_title = &e&lStep 3: Arcane Table
+tutorial.step3_subtitle = &7Research & Engineering
+tutorial.step3_chat = &7Use &e/wandtable &7to access the Arcane Table for research and equipment modification.
+tutorial.step4_title = &e&lStep 4: Spell Options
+tutorial.step4_subtitle = &7Customize your spells
+tutorial.step4_chat = &7Click a spell in &e/spells &7to configure its options and hotbar assignment.
+tutorial.step5_title = &e&lStep 5: Equipment
+tutorial.step5_subtitle = &7Magic items
+tutorial.step5_chat = &7Equip magic items in your inventory to gain their effects.
+tutorial.done_title = &a&lYou're Ready!
+tutorial.done_subtitle = &7Type &e/spells &7to begin your journey.
+
+# --- Progression Messages ---
+progression.circle_up_title = &e&lCIRCLE UP!
+progression.circle_up_subtitle = &bReached the %ordinal% circle.
+progression.circle_up_spell_rank = &bYou are now able to use spells up to the %rank% rank.
+progression.circle_up_ak = &bArcane Knowledge: %current%/%max%
+
+# --- MagicItemStack ---
+magic_item.element_header = Elements:
+magic_item.element_fire = &6Fire: %value%
+magic_item.element_water = &3Water: %value%
+magic_item.element_earth = &aEarth: %value%
+magic_item.element_air = &fAir: %value%
+magic_item.element_light = &eLight: %value%
+magic_item.element_dark = &5Dark: %value%
+magic_item.trigger_header = Triggers:
+
+# --- Spellbook Factory ---
+spellbook_factory.random_name = &7Random Spellbook
+spellbook_factory.element_name = &7%element% Spellbook
+
+# --- Update Checker ---
+update.new_version = &dA new version of Alkatraz is available: %version%
+update.recommend_notes = &dI recommend you take a look at the update notes
+update.see_importance = &dto see the importance of this update.
+
+# --- No Config ---
+pooled.no_effects = &cNo effects configured! Open the spell options menu.
+
+# --- Fireball ---
+spells.fireball.book_name = &eScroll of the Apollo &oI
+spells.fireball.lore1 = &8The first scroll, containing the basis of
+spells.fireball.lore2 = &8fire magic.
+
+# --- AirBlades ---
+spells.airblades.book_name = &fThe Iron Fan Treatise
+spells.airblades.lore1 = &8The discipline of the war-fan: a blade of wind
+spells.airblades.lore2 = &8for each spoke of the iron ribs.
+
+# --- AirBurst ---
+spells.airburst.book_name = &7Tome of Wind &oVol. 1
+spells.airburst.lore1 = &8A beginners guide to wind magic.
+spells.airburst.lore2 = &8compressed air.
+
+# --- Barrier ---
+spells.barrier.book_name = &aAegis Codex &oPart I
+spells.barrier.lore1 = &8&oDefense is the best Offense &r&7 - Barrier Master
+spells.barrier.lore2 = &8air-based defense.
+spells.barrier.health_bar = &dBarrier: %health%/%initHealth%
+
+# --- Blink ---
+spells.blink.book_name = &5Voidwalk Codex
+spells.blink.lore1 = &8&oStep between the folds of reality.
+spells.blink.lore2 = &8short-range teleportation.
+spells.blink.no_valid_location = &cNo valid teleport location found!
+
+# --- Buff ---
+spells.buff.book_name = &bTome of Fortification
+spells.buff.lore1 = &8&oStrength flows to those who seek it.
+spells.buff.lore2 = &7Sneak to buff another player you
+spells.buff.lore3 = &7are looking at.
+spells.buff.no_target = &cNo player target in sight. Look at an ally while sneaking.
+spells.buff.applied_to_target = &bBuffs applied to &f%target% &bfor &f%duration%&b seconds!
+spells.buff.active_self = &bBuffs active for &f%duration%&b seconds!
+spells.buff.target_buffed = &bYou have been buffed for &f%duration%&b seconds!
+spells.buff.expired = &7Your buffs have expired.
+
+# --- DarkTendrils ---
+spells.darktendrils.book_name = &8Grimoire of Shadows &oChapter 1
+spells.darktendrils.lore1 = &8&oDarkness is the light of the dusk.
+spells.darktendrils.lore2 = &8the void.
+
+# --- Debuff ---
+spells.debuff.book_name = &5Tome of Enfeeblement
+spells.debuff.lore1 = &8&oCurse those who stand against you.
+spells.debuff.lore2 = &7Look at a target to apply your
+spells.debuff.lore3 = &7configured debuffs.
+spells.debuff.no_target = &cNo valid target in sight.
+spells.debuff.applied = &5Debuffs applied to &f%target% &5for &f%duration%&5 seconds!
+spells.debuff.target_debuffed = &5You have been debuffed for &f%duration%&5 seconds!
+spells.debuff.faded = &7The debuff on you has faded.
+
+# --- Detect ---
+spells.detect.book_name = &fCypher's First Manual
+spells.detect.lore1 = &8A book containing the info of a Moroccan Agent.
+spells.detect.lore2 = &8hidden entities.
+
+# --- Disguise ---
+spells.disguise.book_name = &dIllusionist's Guide &oI
+spells.disguise.lore1 = &8The first step in mastering the art of illusions.
+spells.disguise.lore2 = &8magical transformation.
+spells.disguise.player_not_found = &cCouldn't find this player. Player must be online.
+spells.disguise.already_disguised = &cYou are already disguised as this player.
+spells.disguise.no_player_chosen = &cNo player was chosen, cancelling casting...
+spells.disguise.next_page = &fNext Page
+spells.disguise.previous_page = &fPrevious Page
+spells.disguise.page_number = &ePage %page%
+spells.disguise.click_disguise = &aClick to disguise as %target%
+
+# --- EarthSpike ---
+spells.earthspike.book_name = &aTome of the Blind Earthseer &oSection II
+spells.earthspike.lore1 = &8The 2nd lesson of the seeker of the
+spells.earthspike.lore2 = &8pinnacle of Earth magic
+spells.earthspike.must_be_cast_on_earth = &cMust be casted on earth.
+
+# --- EarthThrow ---
+spells.earththrow.book_name = &aTome of the Blind Earthseer &oSection I
+spells.earththrow.lore1 = &8The first of a series containing the knowledge
+spells.earththrow.lore2 = &8of the greatest earthbender in the world.
+
+# --- EarthenWall ---
+spells.earthenwall.book_name = &6Gaia's Bulwark
+spells.earthenwall.lore1 = &8&oThe earth rises to meet your call.
+spells.earthenwall.lore2 = &8earth barriers.
+
+# --- Fissure ---
+spells.fissure.book_name = &aTerra Fissure Tome
+spells.fissure.lore1 = &8The ground itself obeys the earth mage.
+spells.fissure.lore2 = &8the ground.
+
+# --- FireBlast ---
+spells.fireblast.book_name = &eScroll of Apollo &oII
+spells.fireblast.lore1 = &8A scroll containing the knowledge to enhance
+spells.fireblast.lore2 = &8fireball.
+
+# --- FireWall ---
+spells.firewall.book_name = &cRecord of Brunhild
+spells.firewall.lore1 = &8The record of the punishment of the Valkyrie Brunhild
+spells.firewall.lore2 = &8walls of fire.
+
+# --- FlamingVolley ---
+spells.flamingvolley.book_name = &cInferno Volley Codex
+spells.flamingvolley.lore1 = &8&oA rain of fire upon thy enemies.
+spells.flamingvolley.lore2 = &8fiery projectiles.
+
+# --- Geyser ---
+spells.geyser.book_name = &3Scroll of the Tidal Arts
+spells.geyser.lore1 = &8The third part of a trilogy, containing
+spells.geyser.lore2 = &8the ultimate expression of water magic.
+spells.geyser.lore3 = &8summoning water from the earth.
+
+# --- Heal ---
+spells.heal.book_name = &eAsclepius' Pharmacopoeia &o2nd Edition
+spells.heal.lore1 = &8The knowledge of the god of medicine.
+
+# --- LesserHeal ---
+spells.lesserheal.book_name = &eAsclepius' Pharmacopoeia &o1st Edition
+spells.lesserheal.lore1 = &8The knowledge of the god of medicine.
+
+# --- LightBuff ---
+spells.lightbuff.book_name = &eCodex of Celestial Radiance
+spells.lightbuff.lore1 = &8&oLet there be light.
+spells.lightbuff.blessed_by_target = &eYou have been blessed by &f%caster%&e's light!
+spells.lightbuff.blessed_count = &eBlessed &f%count% &eplayers with light for &f%duration%&e seconds!
+
+# --- MagicMissile ---
+# (no spellbook — getSpellBook returns null)
+
+# --- MeteorShower ---
+spells.meteorshower.book_name = &6Codex of Falling Stars
+spells.meteorshower.lore1 = &8The heavens answer the caller's will.
+
+# --- Radiance ---
+spells.radiance.book_name = &eGospel of the Dawn
+spells.radiance.lore1 = &8Light banishes the darkness.
+
+# --- ShadowRealm ---
+spells.shadowrealm.book_name = &5Necronomicon of the Void
+spells.shadowrealm.lore1 = &8The abyss gazes back into you.
+
+# --- Stealth ---
+spells.stealth.book_name = &8A Beginners Guide to Assassination
+spells.stealth.lore1 = &8A book written by a certain teacher
+spells.stealth.lore2 = &8to help is students kill him.
+
+# --- SummonZombies ---
+spells.summonzombies.book_name = &2Necronomicon Ex Mortis
+spells.summonzombies.lore1 = &8&oThe dead shall serve the living.
+
+# --- Swift ---
+spells.swift.book_name = &fHermes' Tachys Manual
+spells.swift.lore1 = &8The secret to Hermes' instant deliveries.
+
+# --- Tremor ---
+spells.tremor.book_name = &aTome of the Blind Earthseer &oSection III
+spells.tremor.lore1 = &8The 3rd lesson of the seeker of the
+spells.tremor.lore2 = &8pinnacle of Earth magic
+
+# --- Tornado ---
+spells.tornado.book_name = &bScroll of the Endless Gyre
+spells.tornado.lore1 = &8The winds spiral into an unstoppable force.
+spells.tornado.no_ground = &cNo valid ground found for the tornado!
+
+# --- Tsunami ---
+spells.tsunami.book_name = &9Tidal Scroll of the Deep
+spells.tsunami.lore1 = &8The ocean bends to the caster's command.
+
+# --- WaterPulse ---
+spells.waterpulse.book_name = &9Water Sutra &oVol. II
+spells.waterpulse.lore1 = &8The second part of a trilogy, containing
+spells.waterpulse.lore2 = &8the area potential of water magic.
+
+# --- WaterSphere ---
+spells.watersphere.book_name = &9Water Sutra &oVol. I
+spells.watersphere.lore1 = &8The first part of a trilogy, revealing
+spells.watersphere.lore2 = &8the basics of water magic.
+
+# --- Whirlpool ---
+spells.whirlpool.book_name = &9Tome of the Maelstrom
+spells.whirlpool.lore1 = &8&oThe depths rise to claim all.
+
+# --- WindBarrier ---
+spells.windbarrier.book_name = &fAegis of the Zephyr
+spells.windbarrier.lore1 = &8&oThe wind shall shield thee.
+
+# --- WindVortex ---
+spells.windvortex.book_name = &fTome of Wind &oVol. 2
+spells.windvortex.lore1 = &8Demonstrates the influence of wind on surroundings.
+
+# --- Equipment ---
+equipment.slot_occupied = &cThat slot is already occupied!
+equipment.cannot_equip = &cThat item cannot be equipped in any slot.
+equipment.cancelled = &cEquipment cancelled.
+equipment.equipped = &aEquipped item in the %slot%.
+equipment.inventory_full_dropped = &eInventory full! Item dropped on the ground.
+equipment.unequipped = &cUnequipped item from the %slot%.
+
+# --- Grimoire extras ---
+grimoire.spell_element_circle = &7%element%  &eCircle %circle%
+grimoire.page_title = &6Page %page%: &f%spell%
+
+# --- Progression extras ---
+progression.click_for_details = &eClick for details
+progression.complete_previous_circle = &cComplete the previous circle first
+progression.circle_name = %circle%
+progression.requirement_arcane_knowledge = Arcane Knowledge: %current%/%needed%
+progression.requirement_spell_mastery = Spell Mastery (%spell%): %current%/%needed%
+
+# ==============================
+# YAML Overrides (optional)
+# Uncomment or add keys here to override YAML-defined display strings.
+# If a key is missing, the YAML value is used unchanged.
+# Format: override.<type>.<id>.<field>
+# ==============================
+# override.spells.fireball.name = &6Fireball
+# override.spells.fireball.description = &7A small ball of fire that can be shot at enemies.
+# override.research.nodes.<id>.name = &aCustom Name
+# override.research.nodes.<id>.description = &7Custom description line 1\nCustom description line 2
+# override.research.categories.<id>.name = &aCustom Category Name

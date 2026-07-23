@@ -2,6 +2,7 @@ package me.nagasonic.alkatraz.progression;
 
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.progression.arcane.ArcaneKnowledgeRegistry;
@@ -40,6 +41,8 @@ public final class ProgressionService {
 
     private static final Map<Integer, CircleDefinition> circles = new LinkedHashMap<>();
     private static boolean autoAdvance;
+
+    private static LangManager lang() { return Alkatraz.getLangManager(); }
 
     private ProgressionService() {}
 
@@ -111,9 +114,9 @@ public final class ProgressionService {
         applyCircleDefinition(profile, target);
         ResearchPointService.addPoints(player, "circle_up_bonus");
         player.sendMessage(
-                ColorFormat.format("&e&lCIRCLE UP!"),
-                ColorFormat.format("&bReached the " + StringUtils.toOrdinal(target) + " circle."),
-                ColorFormat.format("&bYou are now able to use spells up to the " + StringUtils.toOrdinal(target) + " rank.")
+                lang().get("progression.circle_up_title"),
+                lang().get("progression.circle_up_subtitle", "ordinal", StringUtils.toOrdinal(target)),
+                lang().get("progression.circle_up_spell_rank", "rank", StringUtils.toOrdinal(target))
         );
         return true;
     }
@@ -158,7 +161,11 @@ public final class ProgressionService {
         Map<Integer, Double> amounts = new LinkedHashMap<>();
         if (section == null) return amounts;
         for (String key : section.getKeys(false)) {
-            amounts.put(Integer.parseInt(key), section.getDouble(key));
+            try {
+                amounts.put(Integer.parseInt(key), section.getDouble(key));
+            } catch (NumberFormatException e) {
+                Alkatraz.logWarning("Skipping non-integer key '" + key + "' in circle_amounts");
+            }
         }
         return amounts;
     }
@@ -166,7 +173,13 @@ public final class ProgressionService {
     private static void loadCircles(ConfigurationSection section) {
         if (section == null) return;
         for (String key : section.getKeys(false)) {
-            int circle = Integer.parseInt(key);
+            int circle;
+            try {
+                circle = Integer.parseInt(key);
+            } catch (NumberFormatException e) {
+                Alkatraz.logWarning("Skipping non-integer key '" + key + "' in circle.levels");
+                continue;
+            }
             if (!CircleLevel.isValid(circle)) continue;
             ConfigurationSection circleSection = section.getConfigurationSection(key);
             if (circleSection == null) continue;
@@ -176,7 +189,9 @@ public final class ProgressionService {
                     requirements,
                     circleSection.getInt("stat_points", 0),
                     circleSection.getDouble("max_mana", 100),
-                    circleSection.getDouble("mana_regeneration", 1)
+                    circleSection.getDouble("mana_regeneration", 1),
+                    circleSection.getDouble("magic_affinity", 0),
+                    circleSection.getDouble("magic_resistance", 0)
             ));
         }
     }
@@ -196,9 +211,13 @@ public final class ProgressionService {
 
         double previousMaxMana = previous != null ? previous.getMaxMana() : 100;
         double previousManaRegen = previous != null ? previous.getManaRegeneration() : 1;
+        double previousMagicAffinity = previous != null ? previous.getMagicAffinity() : 0;
+        double previousMagicResistance = previous != null ? previous.getMagicResistance() : 0;
 
         profile.setMaxMana(profile.getMaxMana() + (next.getMaxMana() - previousMaxMana));
         profile.setManaRegeneration(profile.getManaRegeneration() + (next.getManaRegeneration() - previousManaRegen));
+        profile.setMagicAffinity(profile.getMagicAffinity() + (next.getMagicAffinity() - previousMagicAffinity));
+        profile.setMagicResistance(profile.getMagicResistance() + (next.getMagicResistance() - previousMagicResistance));
         profile.setCircleLevel(circle);
         profile.setStatPoints(profile.getStatPoints() + next.getStatPoints());
     }

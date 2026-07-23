@@ -1,6 +1,6 @@
 package me.nagasonic.alkatraz.mobs;
 
-import de.tr7zw.nbtapi.NBT;
+import de.tr7zw.changeme.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.Config;
 import me.nagasonic.alkatraz.config.ConfigManager;

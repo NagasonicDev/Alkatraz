@@ -4,6 +4,7 @@ import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
 import me.nagasonic.alkatraz.spells.components.SpellParticleComponent;
@@ -33,6 +34,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FireWall extends AttackSpell implements Listener {
+    private static LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
+
     public FireWall(String type) {
         super(type);
     }
@@ -180,6 +185,7 @@ public class FireWall extends AttackSpell implements Listener {
 
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
+        if (caster.getTarget() == null) return;
         double wandp = getWandPowerOrDefault(wand);
         double power = getPower(caster, getBasePower())
                 * wandp;
@@ -192,7 +198,7 @@ public class FireWall extends AttackSpell implements Listener {
         List<WallSegment> wallPoints = new ArrayList<>();
 
         Location currentPos = start.clone();
-        Vector currentDir = caster.getTarget().getLocation().toVector().subtract(caster.getLocation().toVector()).normalize();
+        Vector currentDir = Utils.safeNormalize(caster.getTarget().getLocation().toVector().subtract(caster.getLocation().toVector()));
 
         float[] lastYaw = { -caster.getTarget().getLocation().subtract(caster.getLocation().toVector()).getYaw() };
         double turnStrength = 0.015;
@@ -316,8 +322,8 @@ public class FireWall extends AttackSpell implements Listener {
     @Override
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
-                .setDisplayName("&cRecord of Brunhild")
-                .addLoreLine("&8The record of the punishment of the Valkyrie Brunhild")
+                .setDisplayName(lang().get("spells.firewall.book_name"))
+                .addLoreLine(lang().get("spells.firewall.lore1"))
                 .addCustomLoreLine("")
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 3))
                 .build();
