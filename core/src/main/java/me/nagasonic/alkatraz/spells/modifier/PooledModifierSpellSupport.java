@@ -1,6 +1,7 @@
 package me.nagasonic.alkatraz.spells.modifier;
 
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.util.ColorFormat;
 import me.nagasonic.alkatraz.util.Utils;
@@ -23,6 +24,10 @@ import java.util.UUID;
 public final class PooledModifierSpellSupport {
 
     private PooledModifierSpellSupport() {}
+
+    private static LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
 
     public static LivingEntity resolveBuffTarget(Player caster, int range) {
         if (caster.isSneaking()) {
@@ -78,7 +83,7 @@ public final class PooledModifierSpellSupport {
                 CastModifierCollector.fromGroup(spell, caster, groupId);
 
         if (modifiers.isEmpty()) {
-            Utils.sendActionBar(caster, "&cNo effects configured! Open the spell options menu.");
+            Utils.sendActionBar(caster, lang().get("pooled.no_effects"));
             return false;
         }
 

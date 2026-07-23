@@ -1,9 +1,10 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
-import de.tr7zw.nbtapi.NBT;
+import de.tr7zw.changeme.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
@@ -41,6 +42,10 @@ import java.util.*;
  * - Can be hit/destroyed by other spells via SpellComponents
  */
 public class DarkTendrils extends AttackSpell implements Listener {
+
+    private static LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
     
     // Configuration values
     private int tendrilDuration;
@@ -231,8 +236,8 @@ public class DarkTendrils extends AttackSpell implements Listener {
     @Override
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
-                .setDisplayName("&8Grimoire of Shadows &oChapter 1")
-                .addCustomLoreLine("&8&oDarkness is the light of the dusk.")
+                .setDisplayName(lang().get("spells.darktendrils.book_name"))
+                .addCustomLoreLine(lang().get("spells.darktendrils.lore1"))
                 .addCustomLoreLine("")
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 3))
                 .build();
@@ -412,10 +417,9 @@ public class DarkTendrils extends AttackSpell implements Listener {
          * Moves tendril toward locked target
          */
         private void moveTowardTarget() {
-            Vector direction = target.getEyeLocation()
+            Vector direction = Utils.safeNormalize(target.getEyeLocation()
                     .toVector()
-                    .subtract(tendril.getLocation().toVector())
-                    .normalize()
+                    .subtract(tendril.getLocation().toVector()))
                     .multiply(lockSpeed);
 
             tendril.teleport(tendril.getLocation().add(direction));
@@ -483,7 +487,8 @@ public class DarkTendrils extends AttackSpell implements Listener {
                 // Draw a line toward target
                 Vector toTarget = target.getEyeLocation().toVector().subtract(loc.toVector());
                 double distance = toTarget.length();
-                toTarget.normalize().multiply(0.5);
+                toTarget = Utils.safeNormalize(toTarget);
+                toTarget.multiply(0.5);
                 
                 for (int i = 0; i < Math.min(distance * 2, 10); i++) {
                     Location particleLoc = loc.clone().add(toTarget.clone().multiply(i));

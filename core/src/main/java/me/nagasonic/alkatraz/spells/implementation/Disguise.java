@@ -1,6 +1,6 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
-import de.tr7zw.nbtapi.NBT;
+import de.tr7zw.changeme.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
@@ -9,6 +9,7 @@ import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.spells.types.properties.SpellProperties;
@@ -34,6 +35,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import static me.nagasonic.alkatraz.util.ColorFormat.format;
 
 public class Disguise extends Spell implements Listener {
+
+    private static LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
 
     public Disguise(String type) {
         super(type);
@@ -99,8 +104,8 @@ public class Disguise extends Spell implements Listener {
     @Override
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
-                .setDisplayName("&dIllusionist's Guide &oI")
-                .addCustomLoreLine("&8The first step in mastering the art of illusions.")
+                .setDisplayName(lang().get("spells.disguise.book_name"))
+                .addCustomLoreLine(lang().get("spells.disguise.lore1"))
                 .addCustomLoreLine("")
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 3))
                 .build();
@@ -165,8 +170,8 @@ public class Disguise extends Spell implements Listener {
         if (page < totalPages) {
             ItemStack next = new ItemStack(Material.ARROW);
             ItemMeta  meta = next.getItemMeta();
-            meta.setDisplayName(format("&fNext Page"));
-            meta.setLore(List.of(format("&ePage " + (page + 1))));
+            meta.setDisplayName(format(lang().get("spells.disguise.next_page")));
+            meta.setLore(List.of(format(lang().get("spells.disguise.page_number", "%page%", String.valueOf(page + 1)))));
             next.setItemMeta(meta);
             NBT.modify(next, nbt -> {
                 nbt.setInteger("page", page + 1);
@@ -180,8 +185,8 @@ public class Disguise extends Spell implements Listener {
         if (page > 1) {
             ItemStack prev = new ItemStack(Material.ARROW);
             ItemMeta  meta = prev.getItemMeta();
-            meta.setDisplayName(format("&fPrevious Page"));
-            meta.setLore(List.of(format("&ePage " + (page - 1))));
+            meta.setDisplayName(format(lang().get("spells.disguise.previous_page")));
+            meta.setLore(List.of(format(lang().get("spells.disguise.page_number", "%page%", String.valueOf(page - 1)))));
             prev.setItemMeta(meta);
             NBT.modify(prev, nbt -> {
                 nbt.setInteger("page", page - 1);
@@ -199,7 +204,7 @@ public class Disguise extends Spell implements Listener {
             ItemStack item = ItemUtils.headFromUuid(target.getUniqueId().toString());
             ItemMeta  meta = item.getItemMeta();
             meta.setDisplayName(target.getName());
-            meta.setLore(List.of(format("&aClick to disguise as " + target.getName())));
+            meta.setLore(List.of(format(lang().get("spells.disguise.click_disguise", "%target%", target.getName()))));
             item.setItemMeta(meta);
             inv.setItem(i, item);
         }
@@ -231,7 +236,7 @@ public class Disguise extends Spell implements Listener {
 
         String displayName = meta.getDisplayName();
 
-        if (displayName.equals(format("&fNext Page")) || displayName.equals(format("&fPrevious Page"))) {
+        if (displayName.equals(format(lang().get("spells.disguise.next_page"))) || displayName.equals(format(lang().get("spells.disguise.previous_page")))) {
             int  newPage    = NBT.get(item, nbt -> (Integer) nbt.getInteger("page"));
             UUID ownerUuid  = UUID.fromString(NBT.get(item, nbt -> (String) nbt.getString("player")));
             int  totalPages = NBT.get(item, nbt -> (Integer) nbt.getInteger("total_pages"));
@@ -250,12 +255,12 @@ public class Disguise extends Spell implements Listener {
             MagicProfile data = ProfileManager.getProfile(clicker.getUniqueId(), MagicProfile.class);
 
             if (target == null) {
-                clicker.sendMessage(format("&cCouldn't find this player. Player must be online."));
+                clicker.sendMessage(format(lang().get("spells.disguise.player_not_found")));
                 return;
             }
 
             if (Objects.equals(target.getUniqueId().toString(), data.getDisguise())) {
-                clicker.sendMessage(format("&cYou are already disguised as this player."));
+                clicker.sendMessage(format(lang().get("spells.disguise.already_disguised")));
                 return;
             }
 
@@ -287,7 +292,7 @@ public class Disguise extends Spell implements Listener {
         if (props == null || !e.getInventory().equals(props.gui)) return;
 
         if (!props.selected) {
-            closer.sendMessage(format("&cNo player was chosen, cancelling casting..."));
+            closer.sendMessage(format(lang().get("spells.disguise.no_player_chosen")));
             StatUtils.addMana(closer, getCost());
         }
     }

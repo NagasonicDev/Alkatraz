@@ -4,6 +4,7 @@ import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.Element;
@@ -29,6 +30,10 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class LesserHeal extends Spell {
+
+    private static LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
 
     public LesserHeal(String type){
         super(type);
@@ -202,8 +207,8 @@ public class LesserHeal extends Spell {
     @Override
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
-                .setDisplayName("&eAsclepius' Pharmacopoeia &o1st Edition")
-                .addLoreLine("&8The knowledge of the god of medicine.")
+                .setDisplayName(lang().get("spells.lesserheal.book_name"))
+                .addLoreLine(lang().get("spells.lesserheal.lore1"))
                 .addCustomLoreLine("")
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 2))
                 .build();

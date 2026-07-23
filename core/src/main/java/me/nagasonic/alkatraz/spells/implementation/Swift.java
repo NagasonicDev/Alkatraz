@@ -4,6 +4,7 @@ import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
@@ -25,12 +26,17 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Swift extends Spell {
+
+    private static LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
+
     public Swift(String type) {
         super(type);
     }
     private double strength;
     private int taskID;
-    private static final double MAX_DASH_SPEED = 2.0;
+    private static final double MAX_DASH_SPEED = 4.0;
 
     @Override
     public void loadConfiguration() {
@@ -112,8 +118,8 @@ public class Swift extends Spell {
     @Override
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
-                .setDisplayName("&fHermes' Tachys Manual")
-                .addCustomLoreLine("&8The secret to Hermes' instant deliveries.")
+                .setDisplayName(lang().get("spells.swift.book_name"))
+                .addCustomLoreLine(lang().get("spells.swift.lore1"))
                 .addCustomLoreLine("")
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 2))
                 .build();

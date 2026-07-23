@@ -4,6 +4,7 @@ import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.configuration.OptionValue;
 import me.nagasonic.alkatraz.spells.configuration.SpellOption;
 import me.nagasonic.alkatraz.spells.configuration.impact.implementation.ManaCostImpact;
@@ -47,6 +48,10 @@ import java.util.UUID;
  */
 public class Geyser extends AttackSpell {
 
+    private static LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
+
     // Warn duration in ticks before eruption fires
     private static final int WARN_TICKS = 20;
 
@@ -88,10 +93,10 @@ public class Geyser extends AttackSpell {
     @Override
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
-                .setDisplayName("&9Water Sutra &oVol. III")
-                .addCustomLoreLine("&8The final part of a trilogy, containing")
-                .addCustomLoreLine("&8the final step of mastering the basics of")
-                .addCustomLoreLine("&8water magic.")
+                .setDisplayName(lang().get("spells.geyser.book_name"))
+                .addCustomLoreLine(lang().get("spells.geyser.lore1"))
+                .addCustomLoreLine(lang().get("spells.geyser.lore2"))
+                .addCustomLoreLine(lang().get("spells.geyser.lore3"))
                 .addCustomLoreLine("")
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 3))
                 .build();
@@ -121,10 +126,11 @@ public class Geyser extends AttackSpell {
         // Target: ~6 blocks in front of the caster on the ground
         Location epicentre = Utils.findTopSolid(
                 caster.getLocation().add(
-                        caster.getLocation().getDirection().setY(0).normalize().multiply(6)
+                        Utils.safeNormalize(caster.getLocation().getDirection().setY(0)).multiply(6)
                 ),
                 10
         );
+        if (epicentre == null) epicentre = caster.getLocation();
 
         // Phase 1 — warning spiral, then erupt
         playWarningThenErupt(caster, wand, epicentre, height, radius, launchPower, props);
@@ -132,7 +138,7 @@ public class Geyser extends AttackSpell {
 
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
-        if (caster.isDead()) return;
+        if (caster.isDead() || caster.getTarget() == null) return;
 
         double height = 10.0;
         double radius = 2.5;
@@ -153,6 +159,7 @@ public class Geyser extends AttackSpell {
                 caster.getTarget().getLocation(),
                 10
         );
+        if (epicentre == null) epicentre = caster.getLocation();
 
         // Phase 1 — warning spiral, then erupt
         playWarningThenErupt(caster, wand, epicentre, height, radius, launchPower, props);

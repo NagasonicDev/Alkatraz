@@ -1,6 +1,6 @@
 package me.nagasonic.alkatraz.util;
 
-import de.tr7zw.nbtapi.NBT;
+import de.tr7zw.changeme.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.dom.*;
 import me.nagasonic.alkatraz.items.magic.MagicItemServices;
@@ -29,6 +29,7 @@ import java.util.regex.Pattern;
 
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.util.Vector;
 
 public class Utils {
     public static final Particle DUST = Particle.valueOf(oldOrNew("REDSTONE", "DUST"));
@@ -46,7 +47,37 @@ public class Utils {
         return random;
     }
 
+    public static Vector safeNormalize(Vector vec) {
+        double length = vec.length();
+        if (length < 1e-10) {
+            return new Vector(0, 0, 0);
+        }
+        return vec.multiply(1.0 / length);
+    }
+
+    public static void safeNormalizeInPlace(Vector vec) {
+        double length = vec.length();
+        if (length < 1e-10) {
+            vec.setX(0);
+            vec.setY(0);
+            vec.setZ(0);
+            return;
+        }
+        vec.multiply(1.0 / length);
+    }
+
     public static ItemStack getBlank(){
+        // Use the GUI item registry if available
+        try {
+            me.nagasonic.alkatraz.gui.GUIItemRegistry registry = me.nagasonic.alkatraz.Alkatraz.getGuiItemRegistry();
+            if (registry != null) {
+                return registry.getItem("blank").clone();
+            }
+        } catch (Exception e) {
+            // Fallback to original implementation if registry is not available
+        }
+        
+        // Original implementation as fallback
         ItemStack blank = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
         ItemMeta meta = blank.getItemMeta();
         meta.setDisplayName("");
@@ -467,5 +498,20 @@ public class Utils {
             check.subtract(0, 1, 0);
         }
         return null;
+    }
+
+    public static Location resolveTarget(Player player, int maxDistance) {
+        Block targetBlock = player.getTargetBlockExact(maxDistance);
+        if (targetBlock != null) {
+            return targetBlock.getLocation().add(0.5, 0, 0.5);
+        }
+        Location forward = player.getEyeLocation().add(
+                player.getEyeLocation().getDirection().normalize().multiply(maxDistance)
+        );
+        Location ground = findTopSolid(forward, maxDistance);
+        if (ground != null) {
+            return ground.add(0.5, 1, 0.5);
+        }
+        return forward;
     }
 }

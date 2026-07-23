@@ -4,6 +4,7 @@ import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
 import me.nagasonic.alkatraz.spells.components.SpellParticleComponent;
@@ -31,6 +32,11 @@ import org.bukkit.util.Vector;
 import java.util.List;
 
 public class WaterPulse extends AttackSpell implements Listener {
+
+    private static LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
+
     public WaterPulse(String type) {
         super(type);
     }
@@ -109,8 +115,8 @@ public class WaterPulse extends AttackSpell implements Listener {
                         if (entity.equals(p)) continue;
 
                         LivingEntity target = (LivingEntity) entity;
-                        Vector direction = target.getLocation().toVector().subtract(loc.toVector());
-                        direction.normalize().multiply(props.getRemainingPower());
+                        Vector direction = Utils.safeNormalize(target.getLocation().toVector().subtract(loc.toVector()));
+                        direction.multiply(props.getRemainingPower());
                         direction.setY(0.5);
                         target.setVelocity(direction);
                     }
@@ -177,8 +183,8 @@ public class WaterPulse extends AttackSpell implements Listener {
                         if (entity.equals(caster)) continue;
 
                         LivingEntity target = (LivingEntity) entity;
-                        Vector direction = target.getLocation().toVector().subtract(loc.toVector());
-                        direction.normalize().multiply(props.getRemainingPower());
+                        Vector direction = Utils.safeNormalize(target.getLocation().toVector().subtract(loc.toVector()));
+                        direction.multiply(props.getRemainingPower());
                         direction.setY(0.5);
                         target.setVelocity(direction);
                     }
@@ -219,9 +225,9 @@ public class WaterPulse extends AttackSpell implements Listener {
     @Override
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
-                .setDisplayName("&9Water Sutra &oVol. II")
-                .addCustomLoreLine("&8The second part of a trilogy, containing")
-                .addCustomLoreLine("&8the area potential of water magic.")
+                .setDisplayName(lang().get("spells.waterpulse.book_name"))
+                .addCustomLoreLine(lang().get("spells.waterpulse.lore1"))
+                .addCustomLoreLine(lang().get("spells.waterpulse.lore2"))
                 .addCustomLoreLine("")
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 2))
                 .build();

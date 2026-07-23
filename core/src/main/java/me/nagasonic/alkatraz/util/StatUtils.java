@@ -201,6 +201,18 @@ public class StatUtils {
                         - getManaRegen(previousCircle))
         );
 
+        profile.setMagicAffinity(
+                profile.getMagicAffinity()
+                        + (getMagicAffinity(circle + previousCircle)
+                        - getMagicAffinity(previousCircle))
+        );
+
+        profile.setMagicResistance(
+                profile.getMagicResistance()
+                        + (getMagicResistance(circle + previousCircle)
+                        - getMagicResistance(previousCircle))
+        );
+
         profile.setCircleLevel(previousCircle + circle);
 
         ItemStack item = p.getInventory().getItemInMainHand();
@@ -216,7 +228,7 @@ public class StatUtils {
         }
     }
 
-    private static double getManaRegen(int circle){
+    public static double getManaRegen(int circle){
         CircleDefinition definition = ProgressionService.getCircleDefinition(circle);
         if (definition != null) return definition.getManaRegeneration();
         return switch (circle){
@@ -234,7 +246,7 @@ public class StatUtils {
         };
     }
 
-    private static int getMaxMana(int circle){
+    public static int getMaxMana(int circle){
         CircleDefinition definition = ProgressionService.getCircleDefinition(circle);
         if (definition != null) return (int) definition.getMaxMana();
         return switch (circle){
@@ -248,6 +260,42 @@ public class StatUtils {
             case 7 -> 4000;
             case 8 -> 7500;
             case 9 -> 10000;
+            default -> 0;
+        };
+    }
+
+    public static double getMagicAffinity(int circle){
+        CircleDefinition definition = ProgressionService.getCircleDefinition(circle);
+        if (definition != null) return definition.getMagicAffinity();
+        return switch (circle){
+            case 0 -> 0;
+            case 1 -> 2;
+            case 2 -> 3;
+            case 3 -> 6;
+            case 4 -> 9;
+            case 5 -> 13;
+            case 6 -> 18;
+            case 7 -> 24;
+            case 8 -> 30;
+            case 9 -> 37;
+            default -> 0;
+        };
+    }
+
+    public static double getMagicResistance(int circle){
+        CircleDefinition definition = ProgressionService.getCircleDefinition(circle);
+        if (definition != null) return definition.getMagicResistance();
+        return switch (circle){
+            case 0 -> 0;
+            case 1 -> 1;
+            case 2 -> 2;
+            case 3 -> 4;
+            case 4 -> 7;
+            case 5 -> 10;
+            case 6 -> 14;
+            case 7 -> 18;
+            case 8 -> 24;
+            case 9 -> 30;
             default -> 0;
         };
     }

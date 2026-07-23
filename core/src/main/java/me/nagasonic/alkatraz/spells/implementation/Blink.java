@@ -3,6 +3,7 @@ package me.nagasonic.alkatraz.spells.implementation;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
@@ -23,6 +24,10 @@ import java.util.List;
 public class Blink extends Spell {
 
     private double blinkDistance;
+
+    private static LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
 
     public Blink(String type) {
         super(type);
@@ -50,7 +55,7 @@ public class Blink extends Spell {
         Location target = findTeleportLocation(start, direction, distance);
 
         if (target == null) {
-            Utils.sendActionBar(caster, "&cNo valid teleport location found!");
+            Utils.sendActionBar(caster, lang().get("spells.blink.no_valid_location"));
             cancelCast(caster);
             return;
         }
@@ -69,8 +74,8 @@ public class Blink extends Spell {
 
         if (caster.getTarget() == null) return;
 
-        Vector direction = caster.getTarget().getLocation().toVector()
-                .subtract(caster.getLocation().toVector()).normalize();
+        Vector direction = Utils.safeNormalize(caster.getTarget().getLocation().toVector()
+                .subtract(caster.getLocation().toVector()));
         Location start = caster.getLocation();
         Location target = findTeleportLocation(start, direction, blinkDistance);
 
@@ -137,8 +142,8 @@ public class Blink extends Spell {
     @Override
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
-                .setDisplayName("&5Voidwalk Codex")
-                .addCustomLoreLine("&8&oStep between the folds of reality.")
+                .setDisplayName(lang().get("spells.blink.book_name"))
+                .addCustomLoreLine(lang().get("spells.blink.lore1"))
                 .addCustomLoreLine("")
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 4))
                 .build();

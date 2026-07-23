@@ -1,6 +1,9 @@
 package me.nagasonic.alkatraz.playerdata.profiles;
 
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
+import me.nagasonic.alkatraz.spells.Spell;
+import me.nagasonic.alkatraz.spells.SpellRegistry;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -286,6 +289,17 @@ public class ProfileManager implements Listener {
         } catch (Exception e) {
             Alkatraz.getInstance().getLogger().log(Level.SEVERE, 
                 "Failed to load profiles for player: " + player.getName(), e);
+        }
+
+        // Grant starter spells to new players
+        MagicProfile magicProfile = getProfile(player.getUniqueId(), MagicProfile.class);
+        if (magicProfile.getAllDiscoveredSpellTypes().isEmpty()) {
+            Spell magicMissile = SpellRegistry.getSpell("magic_missile");
+            if (magicMissile != null) {
+                magicProfile.setDiscoveredSpell(magicMissile, true);
+                Alkatraz.getInstance().getLogger().log(Level.FINE,
+                    "Granted starter spell 'magic_missile' to new player: " + player.getName());
+            }
         }
     }
 

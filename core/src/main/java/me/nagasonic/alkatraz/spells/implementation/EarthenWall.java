@@ -5,6 +5,7 @@ import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.dom.Ground;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
 import me.nagasonic.alkatraz.spells.components.SpellParticleComponent;
@@ -35,6 +36,10 @@ import java.util.List;
 import java.util.Map;
 
 public class EarthenWall extends AttackSpell implements Listener {
+
+    private static LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
 
     private double duration;
     private double height;
@@ -85,7 +90,7 @@ public class EarthenWall extends AttackSpell implements Listener {
         Location currentPos = start.clone();
         Vector currentDir = player.getEyeLocation().getDirection().normalize();
         currentDir.setY(0);
-        currentDir.normalize();
+        Utils.safeNormalizeInPlace(currentDir);
 
         float[] lastYaw = {-player.getEyeLocation().getYaw()};
         double turnStrength = 0.015;
@@ -235,6 +240,7 @@ public class EarthenWall extends AttackSpell implements Listener {
 
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
+        if (caster.getTarget() == null) return;
         double wandp = getWandPowerOrDefault(wand);
         double power = getPower(caster, getBasePower()) * wandp;
         AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster), power, AttackType.MAGIC);
@@ -247,9 +253,9 @@ public class EarthenWall extends AttackSpell implements Listener {
         Map<Location, Material> originals = new HashMap<>();
 
         Location currentPos = start.clone();
-        Vector currentDir = caster.getTarget().getLocation().toVector().subtract(caster.getLocation().toVector()).normalize();
+        Vector currentDir = caster.getTarget().getLocation().toVector().subtract(caster.getLocation().toVector());
         currentDir.setY(0);
-        currentDir.normalize();
+        Utils.safeNormalizeInPlace(currentDir);
 
         new BukkitRunnable() {
             int ticks = 0;
@@ -384,8 +390,8 @@ public class EarthenWall extends AttackSpell implements Listener {
     @Override
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
-                .setDisplayName("&6Gaia's Bulwark")
-                .addCustomLoreLine("&8&oThe earth rises to meet your call.")
+                .setDisplayName(lang().get("spells.earthenwall.book_name"))
+                .addCustomLoreLine(lang().get("spells.earthenwall.lore1"))
                 .addCustomLoreLine("")
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 4))
                 .build();

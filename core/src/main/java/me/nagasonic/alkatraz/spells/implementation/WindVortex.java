@@ -4,6 +4,7 @@ import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
 import me.nagasonic.alkatraz.spells.components.SpellParticleComponent;
@@ -46,6 +47,10 @@ import java.util.*;
  */
 public class WindVortex extends AttackSpell implements Listener {
     
+    private static LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
+
     // Configuration values
     private int vortexDuration;
     private double vortexRadius;
@@ -167,8 +172,8 @@ public class WindVortex extends AttackSpell implements Listener {
     @Override
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
-                .setDisplayName("&fTome of Wind &oVol. 2")
-                .addCustomLoreLine("&8Demonstrates the influence of wind on surroundings.")
+                .setDisplayName(lang().get("spells.windvortex.book_name"))
+                .addCustomLoreLine(lang().get("spells.windvortex.lore1"))
                 .addCustomLoreLine("")
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 2))
                 .build();
@@ -367,9 +372,8 @@ public class WindVortex extends AttackSpell implements Listener {
                 if (distance > radius) continue;
 
                 // Calculate pull direction (toward caster's feet)
-                Vector pullDirection = center.toVector()
-                        .subtract(entity.getLocation().toVector())
-                        .normalize();
+                Vector pullDirection = Utils.safeNormalize(center.toVector()
+                        .subtract(entity.getLocation().toVector()));
 
                 // Scale pull strength by distance (closer = stronger pull)
                 double distanceFactor = 1.0 - (distance / radius);
@@ -412,8 +416,7 @@ public class WindVortex extends AttackSpell implements Listener {
             // Pull line effect
             double distance = entityLoc.distance(center);
             if (distance > 2) {
-                Vector direction = center.toVector().subtract(entityLoc.toVector());
-                direction.normalize();
+                Vector direction = Utils.safeNormalize(center.toVector().subtract(entityLoc.toVector()));
                 
                 int segments = 5;
                 for (int i = 0; i < segments; i++) {

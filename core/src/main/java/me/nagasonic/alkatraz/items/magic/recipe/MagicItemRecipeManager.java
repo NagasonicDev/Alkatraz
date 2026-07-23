@@ -32,7 +32,8 @@ public final class MagicItemRecipeManager {
 
     private MagicItemRecipeManager() {}
 
-    public static void registerRecipes() {
+    public static int registerRecipes() {
+        int count = 0;
         for (Map.Entry<NamespacedKey, RecipeData> entry : RECIPES.entrySet()) {
             NamespacedKey key = entry.getKey();
             RecipeData data = entry.getValue();
@@ -44,8 +45,9 @@ public final class MagicItemRecipeManager {
                 recipe.setIngredient(ingredient.getKey(), ingredient.getValue());
             }
             Bukkit.addRecipe(recipe);
-            Alkatraz.logInfo("Registered recipe: " + key);
+            count++;
         }
+        return count;
     }
 
     public static void registerEngravingRecipe(EngravingDefinition definition, ConfigurationSection config) {
@@ -143,10 +145,17 @@ public final class MagicItemRecipeManager {
             if (material != null) {
                 ingredients.put(c, new RecipeChoice.MaterialChoice(material));
             } else {
-                NamespacedKey itemKey = MagicKeys.alkatraz(value.toLowerCase(Locale.ROOT));
+                NamespacedKey itemKey = value.contains(":")
+                        ? MagicKeys.parse(value.toLowerCase(Locale.ROOT)).orElse(null)
+                        : MagicKeys.alkatraz(value.toLowerCase(Locale.ROOT));
+                if (itemKey == null) {
+                    Alkatraz.logWarning("Invalid key '" + value + "' in recipe " + defKeyStr);
+                    continue;
+                }
                 Optional<ItemDefinition> itemDef = MagicItemRegistries.ITEM_DEFINITIONS.get(itemKey);
                 if (itemDef.isPresent()) {
-                    ingredients.put(c, new RecipeChoice.MaterialChoice(itemDef.get().visual().material()));
+                    ItemStack exactStack = MagicItemStack.create(itemDef.get(), MagicItemInstance.createDefault(itemDef.get().getKey()));
+                    ingredients.put(c, new RecipeChoice.ExactChoice(exactStack));
                 } else {
                     Alkatraz.logWarning("Unknown ingredient '" + value + "' in recipe " + defKeyStr);
                 }
@@ -163,7 +172,6 @@ public final class MagicItemRecipeManager {
         }
 
         RECIPES.put(recipeKey, new RecipeData(recipeKey, result, shapeLines.toArray(new String[0]), ingredients, requirements));
-        Alkatraz.logInfo("Loaded recipe: " + defKeyStr);
     }
 
     public static List<Requirement> getRequirements(NamespacedKey recipeKey) {

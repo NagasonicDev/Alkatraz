@@ -3,6 +3,7 @@ package me.nagasonic.alkatraz.spells.implementation;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.modifier.AppliedModifier;
@@ -29,6 +30,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * Buff — Applies configured modifiers to the caster, or to another player while sneaking.
  */
 public class Buff extends Spell {
+
+    private static LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
 
     private static final String BUFF_GROUP_ID = "configure_buffs";
     private static final Color PARTICLE_COLOR = Color.fromRGB(0, 191, 255);
@@ -62,7 +67,7 @@ public class Buff extends Spell {
 
 
         if (target == null) {
-            Utils.sendActionBar(caster, "&cNo player target in sight. Look at an ally while sneaking.");
+            Utils.sendActionBar(caster, lang().get("spells.buff.no_target"));
             return;
         }
 
@@ -70,13 +75,13 @@ public class Buff extends Spell {
         boolean onOther = target instanceof Player p && !p.getUniqueId().equals(caster.getUniqueId());
 
         String casterMsg = onOther
-                ? "&bBuffs applied to &f" + target.getName() + " &bfor &f" + duration + "&b seconds!"
-                : "&bBuffs active for &f" + duration + "&b seconds!";
-        String targetMsg = "&bYou have been buffed for &f" + duration + "&b seconds!";
+                ? lang().get("spells.buff.applied_to_target", "%target%", target.getName(), "%duration%", String.valueOf(duration))
+                : lang().get("spells.buff.active_self", "%duration%", String.valueOf(duration));
+        String targetMsg = lang().get("spells.buff.target_buffed", "%duration%", String.valueOf(duration));
 
         PooledModifierSpellSupport.applyConfiguredModifiers(
                 caster, target, this, BUFF_GROUP_ID, duration, activeModifiers,
-                PARTICLE_COLOR, casterMsg, targetMsg, "&7Your buffs have expired.");
+                PARTICLE_COLOR, casterMsg, targetMsg, lang().get("spells.buff.expired"));
     }
 
     @Override
@@ -107,10 +112,10 @@ public class Buff extends Spell {
     @Override
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
-                .setDisplayName("&bTome of Fortification")
-                .addCustomLoreLine("&8&oStrength flows to those who seek it.")
-                .addCustomLoreLine("&7Sneak to buff another player you")
-                .addCustomLoreLine("&7are looking at.")
+                .setDisplayName(lang().get("spells.buff.book_name"))
+                .addCustomLoreLine(lang().get("spells.buff.lore1"))
+                .addCustomLoreLine(lang().get("spells.buff.lore2"))
+                .addCustomLoreLine(lang().get("spells.buff.lore3"))
                 .addCustomLoreLine("")
                 .build();
     }

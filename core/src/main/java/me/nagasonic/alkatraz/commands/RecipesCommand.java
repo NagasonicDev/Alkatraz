@@ -1,7 +1,8 @@
 package me.nagasonic.alkatraz.commands;
 
+import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.gui.implementation.RecipeBookMenu;
-import me.nagasonic.alkatraz.util.ColorFormat;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -9,14 +10,17 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class RecipesCommand implements CommandExecutor {
+
+    private static LangManager lang() { return Alkatraz.getLangManager(); }
+
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player p)) {
-            sender.sendMessage(ColorFormat.format("&cOnly players can use this command."));
+            sender.sendMessage(lang().get("commands.player_only"));
             return true;
         }
         if (!p.hasPermission("alkatraz.recipebook")) {
-            p.sendMessage(ColorFormat.format("&cYou don't have permission to view the recipe book."));
+            p.sendMessage(lang().get("commands.recipes_permission"));
             return true;
         }
         new RecipeBookMenu(p).open();

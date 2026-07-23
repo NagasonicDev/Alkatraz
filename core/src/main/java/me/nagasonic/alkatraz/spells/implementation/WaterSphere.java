@@ -4,6 +4,7 @@ import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
 import me.nagasonic.alkatraz.spells.components.SpellParticleComponent;
@@ -30,6 +31,10 @@ import org.bukkit.util.Vector;
 import java.util.*;
 
 public class WaterSphere extends AttackSpell {
+
+    private static LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
 
     private double sphereRadius;
     private double sphereRange;
@@ -197,9 +202,8 @@ public class WaterSphere extends AttackSpell {
 
                     SpellDamageUtil.damageWithSpell(le, props.getRemainingPower(), caster, wand, WaterSphere.this);
 
-                    Vector push = le.getLocation().toVector()
-                            .subtract(center.toVector())
-                            .normalize();
+                    Vector push = Utils.safeNormalize(le.getLocation().toVector()
+                            .subtract(center.toVector()));
                     push.setY(Math.max(0.2, push.getY()));
                     le.setVelocity(push.multiply(0.8));
 
@@ -281,9 +285,9 @@ public class WaterSphere extends AttackSpell {
     @Override
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
-                .setDisplayName("&9Water Sutra &oVol. I")
-                .addCustomLoreLine("&8The first part of a trilogy, revealing")
-                .addCustomLoreLine("&8the basics of water magic.")
+                .setDisplayName(lang().get("spells.watersphere.book_name"))
+                .addCustomLoreLine(lang().get("spells.watersphere.lore1"))
+                .addCustomLoreLine(lang().get("spells.watersphere.lore2"))
                 .addCustomLoreLine("")
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 4))
                 .build();

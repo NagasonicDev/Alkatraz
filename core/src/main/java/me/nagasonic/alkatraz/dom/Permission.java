@@ -19,7 +19,8 @@ public enum Permission {
     COMMAND_PROFILE("alkatraz.command.profile"),
     COMMAND_EDITOR("alkatraz.command.editor"),
     RECIPE_BOOK("alkatraz.recipebook"),
-    ALL_SPELLS("alkatraz.allspells");
+    ALL_SPELLS("alkatraz.allspells"),
+    NO_COOLDOWN("alkatraz.nocooldown");
 
 
     private final String permission;

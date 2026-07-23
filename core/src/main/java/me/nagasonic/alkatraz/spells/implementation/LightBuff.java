@@ -4,6 +4,7 @@ import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
@@ -23,6 +24,10 @@ import java.util.Collection;
 import java.util.List;
 
 public class LightBuff extends Spell {
+
+    private static LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
 
     private double buffRadius;
     private int baseDuration;
@@ -72,11 +77,11 @@ public class LightBuff extends Spell {
             target.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, durationTicks, 0, false, true));
             target.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, durationTicks, 0, false, true));
 
-            target.sendMessage(ChatColor.translateAlternateColorCodes('&', "&eYou have been blessed by &f" + caster.getName() + "&e's light!"));
+            target.sendMessage(ChatColor.translateAlternateColorCodes('&', lang().get("spells.lightbuff.blessed_by_target", "%caster%", caster.getName())));
         }
 
         caster.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                "&eBlessed &f" + nearbyPlayers.size() + " &eplayers with light for &f" + duration + "&e seconds!"));
+                lang().get("spells.lightbuff.blessed_count", "%count%", String.valueOf(nearbyPlayers.size()), "%duration%", String.valueOf((int) duration))));
 
         caster.getWorld().playSound(caster.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 0.8f, 1.5f);
         caster.getWorld().playSound(caster.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.6f, 1.8f);
@@ -155,8 +160,8 @@ public class LightBuff extends Spell {
     @Override
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
-                .setDisplayName("&eCodex of Celestial Radiance")
-                .addCustomLoreLine("&8&oLet there be light.")
+                .setDisplayName(lang().get("spells.lightbuff.book_name"))
+                .addCustomLoreLine(lang().get("spells.lightbuff.lore1"))
                 .addCustomLoreLine("")
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 4))
                 .build();

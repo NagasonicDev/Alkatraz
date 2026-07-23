@@ -4,6 +4,7 @@ import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
 import me.nagasonic.alkatraz.spells.components.SpellParticleComponent;
@@ -32,6 +33,11 @@ import java.util.List;
 
 
 public class MagicMissile extends AttackSpell {
+
+    private static LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
+
     public MagicMissile(String type) {
         super(type);
     }
@@ -133,13 +139,13 @@ public class MagicMissile extends AttackSpell {
 
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
-        if (!caster.isDead()){
+        if (!caster.isDead() && caster.getTarget() != null){
             double wandp = getWandPowerOrDefault(wand);
             double power = getPower(caster, getBasePower())
                     * wandp;
             AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster), power, AttackType.MAGIC);
             Location loc1 = caster.getEyeLocation();
-            Vector direction = caster.getTarget().getLocation().toVector().subtract(caster.getLocation().toVector()).normalize();
+            Vector direction = Utils.safeNormalize(caster.getTarget().getLocation().toVector().subtract(caster.getLocation().toVector()));
             Location loc2 = caster.getEyeLocation().add(direction.multiply(20));
             List<Location> locs = ParticleUtils.line(0.5, loc1, loc2);
             locs.remove(0); //Function puts loc2 as the first index, so if it is a solid block, the missile will not fire.

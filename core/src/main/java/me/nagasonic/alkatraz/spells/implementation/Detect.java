@@ -4,6 +4,7 @@ import com.google.common.util.concurrent.AtomicDouble;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
@@ -24,6 +25,10 @@ import java.util.List;
 import java.util.Map;
 
 public class Detect extends Spell {
+    private static LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
+
     public Detect(String type){
         super(type);
     }
@@ -138,8 +143,8 @@ public class Detect extends Spell {
     @Override
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
-                .setDisplayName("&fCypher's First Manual")
-                .addCustomLoreLine("&8A book containing the info of a Moroccan Agent.")
+                .setDisplayName(lang().get("spells.detect.book_name"))
+                .addCustomLoreLine(lang().get("spells.detect.lore1"))
                 .addCustomLoreLine("")
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 2))
                 .build();

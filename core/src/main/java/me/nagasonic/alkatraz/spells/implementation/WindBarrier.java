@@ -4,6 +4,7 @@ import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
 import me.nagasonic.alkatraz.spells.components.SpellParticleComponent;
@@ -15,7 +16,7 @@ import me.nagasonic.alkatraz.spells.types.BarrierType;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.BarrierProperties;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
-import de.tr7zw.nbtapi.NBT;
+import de.tr7zw.changeme.nbtapi.NBT;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -31,6 +32,10 @@ import org.bukkit.util.Vector;
 import java.util.List;
 
 public class WindBarrier extends BarrierSpell implements Listener {
+
+    private static LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
 
     public WindBarrier(String type) {
         super(type);
@@ -91,7 +96,7 @@ public class WindBarrier extends BarrierSpell implements Listener {
                         Vector push = entity.getLocation().toVector().subtract(center.toVector());
                         push.setY(0);
                         if (push.lengthSquared() < 0.01) continue;
-                        push.normalize().multiply(0.3);
+                        push = Utils.safeNormalize(push).multiply(0.3);
                         living.setVelocity(living.getVelocity().add(push));
                     }
                 }
@@ -183,8 +188,8 @@ public class WindBarrier extends BarrierSpell implements Listener {
     @Override
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
-                .setDisplayName("&fAegis of the Zephyr")
-                .addCustomLoreLine("&8&oThe wind shall shield thee.")
+                .setDisplayName(lang().get("spells.windbarrier.book_name"))
+                .addCustomLoreLine(lang().get("spells.windbarrier.lore1"))
                 .addCustomLoreLine("")
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 4))
                 .build();
