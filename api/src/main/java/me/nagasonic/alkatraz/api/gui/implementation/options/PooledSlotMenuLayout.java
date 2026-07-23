@@ -19,7 +19,10 @@ import java.util.Set;
  */
 public final class PooledSlotMenuLayout {
 
+    /** Number of columns in a single Minecraft inventory row. */
     public static final int ROW_WIDTH = 9;
+
+    /** Maximum number of pooled slot headers that can be displayed in a single menu. */
     public static final int MAX_MENU_SLOTS = 7;
 
     /** Maximum slots that fit on one inventory row with border gaps. */
@@ -28,8 +31,12 @@ public final class PooledSlotMenuLayout {
     private PooledSlotMenuLayout() {}
 
     /**
-     * @param slotCount Number of slot headers (1–{@link #MAX_MENU_SLOTS})
-     * @return Inventory indices for each slot header, in display order
+     * Computes the inventory slot indices where slot headers should be placed,
+     * centering them symmetrically across one or two rows as needed.
+     *
+     * @param slotCount Number of slot headers to lay out (1–{@link #MAX_MENU_SLOTS}).
+     *                  Values outside this range are clamped automatically.
+     * @return An array of inventory slot indices for each header, in display order
      */
     public static int[] computeHeaderSlots(int slotCount) {
         slotCount = clampSlotCount(slotCount);
@@ -48,7 +55,12 @@ public final class PooledSlotMenuLayout {
     }
 
     /**
-     * All inventory indices that should show border panes, excluding reserved slots.
+     * Returns all inventory indices (0–53) that should display border panes,
+     * excluding the given reserved slots.
+     *
+     * @param reserved A set of inventory indices that are already occupied
+     *                 and should not receive border panes
+     * @return A set of inventory indices available for border pane placement
      */
     public static Set<Integer> borderSlotsExcluding(Set<Integer> reserved) {
         Set<Integer> borders = new HashSet<>();
@@ -60,12 +72,23 @@ public final class PooledSlotMenuLayout {
         return borders;
     }
 
+    /**
+     * Clamps the given slot count to the valid range of 1–{@link #MAX_MENU_SLOTS}.
+     *
+     * @param slotCount The raw slot count to clamp
+     * @return A value between 1 and {@link #MAX_MENU_SLOTS}, inclusive
+     */
     public static int clampSlotCount(int slotCount) {
         return Math.max(1, Math.min(slotCount, MAX_MENU_SLOTS));
     }
 
     /**
-     * Centered {@code X S X S ...} positions for {@code slotCount} headers in one row.
+     * Computes centered {@code X S X S ...} positions for a given number of
+     * slot headers in a single inventory row.
+     *
+     * @param slotCount Number of slot headers to place in this row
+     * @param row       The zero-indexed row number (0–4) within the inventory
+     * @return An array of inventory slot indices for the computed positions
      */
     static int[] positionsInRow(int slotCount, int row) {
         int span = 2 * slotCount - 1;

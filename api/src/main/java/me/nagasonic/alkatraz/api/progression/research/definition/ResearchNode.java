@@ -4,6 +4,10 @@ import org.bukkit.Material;
 
 import java.util.List;
 
+/**
+ * Defines a single node in the research tree, including its position,
+ * prerequisites, objectives, rewards, and display properties.
+ */
 public class ResearchNode {
 
     private final String id;
@@ -20,6 +24,23 @@ public class ResearchNode {
     private final boolean hiddenUntilAvailable;
     private final int researchPointsCost;
 
+    /**
+     * Constructs a new research node.
+     *
+     * @param id the unique identifier for this node
+     * @param displayName the display name shown in the GUI
+     * @param description the multi-line description text
+     * @param category the ID of the {@link ResearchCategory} this node belongs to
+     * @param icon the Minecraft material used as the node icon
+     * @param x the X position on the research tree grid
+     * @param y the Y position on the research tree grid
+     * @param parents the IDs of prerequisite research nodes
+     * @param unlocks the IDs of research nodes unlocked by completing this one
+     * @param objectives the objectives that must be completed
+     * @param rewards the rewards granted upon completion
+     * @param hiddenUntilAvailable whether this node is hidden until all prerequisites are met
+     * @param researchPointsCost the research point cost to begin this research
+     */
     public ResearchNode(
             String id,
             String displayName,
@@ -50,54 +71,119 @@ public class ResearchNode {
         this.researchPointsCost = researchPointsCost;
     }
 
+    /**
+     * Returns the unique identifier for this node.
+     *
+     * @return the node ID
+     */
     public String getId() {
         return id;
     }
 
+    /**
+     * Returns the display name shown in the research GUI.
+     *
+     * @return the display name
+     */
     public String getDisplayName() {
         return displayName;
     }
 
+    /**
+     * Returns the multi-line description text for this node.
+     *
+     * @return an unmodifiable list of description lines
+     */
     public List<String> getDescription() {
         return description;
     }
 
+    /**
+     * Returns the ID of the category this node belongs to.
+     *
+     * @return the category ID
+     */
     public String getCategory() {
         return category;
     }
 
+    /**
+     * Returns the Minecraft material used as the node icon.
+     *
+     * @return the icon material
+     */
     public Material getIcon() {
         return icon;
     }
 
+    /**
+     * Returns the X position on the research tree grid.
+     *
+     * @return the X coordinate
+     */
     public int getX() {
         return x;
     }
 
+    /**
+     * Returns the Y position on the research tree grid.
+     *
+     * @return the Y coordinate
+     */
     public int getY() {
         return y;
     }
 
+    /**
+     * Returns the IDs of prerequisite research nodes.
+     *
+     * @return an unmodifiable list of parent node IDs
+     */
     public List<String> getParents() {
         return parents;
     }
 
+    /**
+     * Returns the IDs of research nodes unlocked by completing this node.
+     *
+     * @return an unmodifiable list of unlocked node IDs
+     */
     public List<String> getUnlocks() {
         return unlocks;
     }
 
+    /**
+     * Returns the objectives that must be completed to finish this research.
+     *
+     * @return an unmodifiable list of objectives
+     */
     public List<ResearchObjective> getObjectives() {
         return objectives;
     }
 
+    /**
+     * Returns the rewards granted upon completing this research.
+     *
+     * @return an unmodifiable list of rewards
+     */
     public List<ResearchReward> getRewards() {
         return rewards;
     }
 
+    /**
+     * Returns whether this node is hidden until all prerequisites are met.
+     *
+     * @return {@code true} if hidden until available
+     */
     public boolean isHiddenUntilAvailable() {
         return hiddenUntilAvailable;
     }
 
+    /**
+     * Returns the research point cost to begin this research.
+     *
+     * @return the cost in research points
+     */
     public int getResearchPointsCost() {
         return researchPointsCost;
     }

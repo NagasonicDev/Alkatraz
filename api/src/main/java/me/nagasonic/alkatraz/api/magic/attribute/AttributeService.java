@@ -12,37 +12,89 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Central service that collects {@link AttributeContribution contributions} from all
+ * registered {@link AttributeSource sources}, resolves them into final attribute values,
+ * and produces {@link AttributeSnapshot snapshots} for any given entity.
+ *
+ * <p>Use {@link #get(LivingEntity, NamespacedKey)} to retrieve a single attribute value,
+ * or {@link #snapshot(LivingEntity, TriggerContext)} to obtain a full snapshot of all
+ * resolved attributes for an entity.</p>
+ */
 public final class AttributeService {
 
     private static AttributeService instance;
 
+    /**
+     * Returns the singleton instance, creating one if it does not yet exist.
+     *
+     * @return the current {@link AttributeService} instance
+     */
     public static AttributeService getInstance() {
         if (instance == null) instance = new AttributeService();
         return instance;
     }
 
+    /**
+     * Replaces the current singleton instance with the provided service.
+     * Intended for plugin initialisation and testing.
+     *
+     * @param service the service instance to set as the singleton
+     */
     public static void setInstance(AttributeService service) {
         instance = service;
     }
 
     private final List<AttributeSource> sources = new ArrayList<>();
 
+    /**
+     * Registers an {@link AttributeSource} whose contributions will be included in
+     * all future snapshot calculations.
+     *
+     * @param source the attribute source to register
+     */
     public void registerSource(AttributeSource source) {
         sources.add(source);
     }
 
+    /**
+     * Removes all previously registered {@link AttributeSource sources}.
+     */
     public void clearSources() {
         sources.clear();
     }
 
+    /**
+     * Resolves the final value of an attribute for an entity using an empty trigger context.
+     *
+     * @param entity    the living entity to query attributes for
+     * @param attribute the {@link NamespacedKey} of the attribute to retrieve
+     * @return the resolved attribute value, or the attribute's default if not present
+     */
     public double get(LivingEntity entity, NamespacedKey attribute) {
         return snapshot(entity, TriggerContext.empty(entity)).get(attribute, defaultFor(attribute));
     }
 
+    /**
+     * Resolves the final value of an attribute for an entity within the given trigger context.
+     *
+     * @param entity    the living entity to query attributes for
+     * @param attribute the {@link NamespacedKey} of the attribute to retrieve
+     * @param context   the trigger context that may influence attribute collection
+     * @return the resolved attribute value, or the attribute's default if not present
+     */
     public double get(LivingEntity entity, NamespacedKey attribute, TriggerContext context) {
         return snapshot(entity, context).get(attribute, defaultFor(attribute));
     }
 
+    /**
+     * Builds a complete {@link AttributeSnapshot} for the given entity by collecting
+     * contributions from all registered sources and resolving each attribute.
+     *
+     * @param entity  the living entity to snapshot attributes for
+     * @param context the trigger context that may influence attribute collection
+     * @return an immutable snapshot of all resolved attribute values
+     */
     public AttributeSnapshot snapshot(LivingEntity entity, TriggerContext context) {
         Map<NamespacedKey, List<AttributeContribution>> grouped = new HashMap<>();
 
