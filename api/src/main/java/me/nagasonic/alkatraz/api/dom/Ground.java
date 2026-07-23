@@ -12,129 +12,230 @@ import org.bukkit.block.Biome;
 public enum Ground {
 
     // --- Soil & Dirt ---------------------------------------------------------
+    /** Dirt block. */
     DIRT(Material.DIRT),
+    /** Grass block. */
     GRASS(Material.GRASS_BLOCK),
+    /** Coarse dirt block. */
     COARSE_DIRT(Material.COARSE_DIRT),
+    /** Rooted dirt block. */
     ROOTED_DIRT(Material.ROOTED_DIRT),
+    /** Podzol block. */
     PODZOL(Material.PODZOL),
+    /** Mud block. */
     MUD(Material.MUD),
+    /** Muddy mangrove roots block. */
     MUDDY_MANGROVE_ROOTS(Material.MUDDY_MANGROVE_ROOTS),
+    /** Mycelium block. */
     MYCELIUM(Material.MYCELIUM),
 
     // --- Sand & Gravel -------------------------------------------------------
+    /** Sand block. */
     SAND(Material.SAND),
+    /** Red sand block. */
     RED_SAND(Material.RED_SAND),
+    /** Gravel block. */
     GRAVEL(Material.GRAVEL),
 
 
     // --- Clay & Terracotta ---------------------------------------------------
+    /** Clay block. */
     CLAY(Material.CLAY),
+    /** Terracotta block. */
     TERRACOTTA(Material.TERRACOTTA),
+    /** White terracotta block. */
     WHITE_TERRACOTTA(Material.WHITE_TERRACOTTA),
+    /** Orange terracotta block. */
     ORANGE_TERRACOTTA(Material.ORANGE_TERRACOTTA),
+    /** Magenta terracotta block. */
     MAGENTA_TERRACOTTA(Material.MAGENTA_TERRACOTTA),
+    /** Light blue terracotta block. */
     LIGHT_BLUE_TERRACOTTA(Material.LIGHT_BLUE_TERRACOTTA),
+    /** Yellow terracotta block. */
     YELLOW_TERRACOTTA(Material.YELLOW_TERRACOTTA),
+    /** Lime terracotta block. */
     LIME_TERRACOTTA(Material.LIME_TERRACOTTA),
+    /** Pink terracotta block. */
     PINK_TERRACOTTA(Material.PINK_TERRACOTTA),
+    /** Gray terracotta block. */
     GRAY_TERRACOTTA(Material.GRAY_TERRACOTTA),
+    /** Light gray terracotta block. */
     LIGHT_GRAY_TERRACOTTA(Material.LIGHT_GRAY_TERRACOTTA),
+    /** Cyan terracotta block. */
     CYAN_TERRACOTTA(Material.CYAN_TERRACOTTA),
+    /** Purple terracotta block. */
     PURPLE_TERRACOTTA(Material.PURPLE_TERRACOTTA),
+    /** Blue terracotta block. */
     BLUE_TERRACOTTA(Material.BLUE_TERRACOTTA),
+    /** Brown terracotta block. */
     BROWN_TERRACOTTA(Material.BROWN_TERRACOTTA),
+    /** Green terracotta block. */
     GREEN_TERRACOTTA(Material.GREEN_TERRACOTTA),
+    /** Red terracotta block. */
     RED_TERRACOTTA(Material.RED_TERRACOTTA),
+    /** Black terracotta block. */
     BLACK_TERRACOTTA(Material.BLACK_TERRACOTTA),
 
     // --- Stone & Variants ----------------------------------------------------
+    /** Stone block. */
     STONE(Material.STONE),
+    /** Cobblestone block. */
     COBBLESTONE(Material.COBBLESTONE),
+    /** Mossy cobblestone block. */
     MOSSY_COBBLESTONE(Material.MOSSY_COBBLESTONE),
+    /** Stone bricks block. */
     STONE_BRICKS(Material.STONE_BRICKS),
+    /** Mossy stone bricks block. */
     MOSSY_STONE_BRICKS(Material.MOSSY_STONE_BRICKS),
+    /** Cracked stone bricks block. */
     CRACKED_STONE_BRICKS(Material.CRACKED_STONE_BRICKS),
+    /** Chiseled stone bricks block. */
     CHISELED_STONE_BRICKS(Material.CHISELED_STONE_BRICKS),
+    /** Smooth stone block. */
     SMOOTH_STONE(Material.SMOOTH_STONE),
+    /** Infested stone block. */
     INFESTED_STONE(Material.INFESTED_STONE),
+    /** Infested cobblestone block. */
     INFESTED_COBBLESTONE(Material.INFESTED_COBBLESTONE),
+    /** Infested stone bricks block. */
     INFESTED_STONE_BRICKS(Material.INFESTED_STONE_BRICKS),
 
     // --- Deepslate & Variants ------------------------------------------------
+    /** Deepslate block. */
     DEEPSLATE(Material.DEEPSLATE),
+    /** Cobbled deepslate block. */
     COBBLED_DEEPSLATE(Material.COBBLED_DEEPSLATE),
+    /** Polished deepslate block. */
     POLISHED_DEEPSLATE(Material.POLISHED_DEEPSLATE),
+    /** Deepslate bricks block. */
     DEEPSLATE_BRICKS(Material.DEEPSLATE_BRICKS),
+    /** Cracked deepslate bricks block. */
     CRACKED_DEEPSLATE_BRICKS(Material.CRACKED_DEEPSLATE_BRICKS),
+    /** Deepslate tiles block. */
     DEEPSLATE_TILES(Material.DEEPSLATE_TILES),
+    /** Cracked deepslate tiles block. */
     CRACKED_DEEPSLATE_TILES(Material.CRACKED_DEEPSLATE_TILES),
+    /** Chiseled deepslate block. */
     CHISELED_DEEPSLATE(Material.CHISELED_DEEPSLATE),
+    /** Infested deepslate block. */
     INFESTED_DEEPSLATE(Material.INFESTED_DEEPSLATE),
 
     // --- Granite, Diorite & Andesite -----------------------------------------
+    /** Granite block. */
     GRANITE(Material.GRANITE),
+    /** Polished granite block. */
     POLISHED_GRANITE(Material.POLISHED_GRANITE),
+    /** Diorite block. */
     DIORITE(Material.DIORITE),
+    /** Polished diorite block. */
     POLISHED_DIORITE(Material.POLISHED_DIORITE),
+    /** Andesite block. */
     ANDESITE(Material.ANDESITE),
+    /** Polished andesite block. */
     POLISHED_ANDESITE(Material.POLISHED_ANDESITE),
 
     // --- Ts is so tuff ----------------------------------------------------------------
+    /** Tuff block. */
     TUFF(Material.TUFF),
 
     // --- Calcite & Dripstone -------------------------------------------------
+    /** Calcite block. */
     CALCITE(Material.CALCITE),
+    /** Dripstone block. */
     DRIPSTONE_BLOCK(Material.DRIPSTONE_BLOCK),
+    /** Pointed dripstone block. */
     POINTED_DRIPSTONE(Material.POINTED_DRIPSTONE),
 
     // --- Sandstone -----------------------------------------------------------
+    /** Sandstone block. */
     SANDSTONE(Material.SANDSTONE),
+    /** Chiseled sandstone block. */
     CHISELED_SANDSTONE(Material.CHISELED_SANDSTONE),
+    /** Cut sandstone block. */
     CUT_SANDSTONE(Material.CUT_SANDSTONE),
+    /** Smooth sandstone block. */
     SMOOTH_SANDSTONE(Material.SMOOTH_SANDSTONE),
+    /** Red sandstone block. */
     RED_SANDSTONE(Material.RED_SANDSTONE),
+    /** Chiseled red sandstone block. */
     CHISELED_RED_SANDSTONE(Material.CHISELED_RED_SANDSTONE),
+    /** Cut red sandstone block. */
     CUT_RED_SANDSTONE(Material.CUT_RED_SANDSTONE),
+    /** Smooth red sandstone block. */
     SMOOTH_RED_SANDSTONE(Material.SMOOTH_RED_SANDSTONE),
 
     // --- Ores ----------------------------------------------------------------
+    /** Coal ore block. */
     COAL_ORE(Material.COAL_ORE),
+    /** Deepslate coal ore block. */
     DEEPSLATE_COAL_ORE(Material.DEEPSLATE_COAL_ORE),
+    /** Iron ore block. */
     IRON_ORE(Material.IRON_ORE),
+    /** Deepslate iron ore block. */
     DEEPSLATE_IRON_ORE(Material.DEEPSLATE_IRON_ORE),
+    /** Copper ore block. */
     COPPER_ORE(Material.COPPER_ORE),
+    /** Deepslate copper ore block. */
     DEEPSLATE_COPPER_ORE(Material.DEEPSLATE_COPPER_ORE),
+    /** Gold ore block. */
     GOLD_ORE(Material.GOLD_ORE),
+    /** Deepslate gold ore block. */
     DEEPSLATE_GOLD_ORE(Material.DEEPSLATE_GOLD_ORE),
+    /** Nether gold ore block. */
     NETHER_GOLD_ORE(Material.NETHER_GOLD_ORE),
+    /** Redstone ore block. */
     REDSTONE_ORE(Material.REDSTONE_ORE),
+    /** Deepslate redstone ore block. */
     DEEPSLATE_REDSTONE_ORE(Material.DEEPSLATE_REDSTONE_ORE),
+    /** Lapis ore block. */
     LAPIS_ORE(Material.LAPIS_ORE),
+    /** Deepslate lapis ore block. */
     DEEPSLATE_LAPIS_ORE(Material.DEEPSLATE_LAPIS_ORE),
+    /** Diamond ore block. */
     DIAMOND_ORE(Material.DIAMOND_ORE),
+    /** Deepslate diamond ore block. */
     DEEPSLATE_DIAMOND_ORE(Material.DEEPSLATE_DIAMOND_ORE),
+    /** Emerald ore block. */
     EMERALD_ORE(Material.EMERALD_ORE),
+    /** Deepslate emerald ore block. */
     DEEPSLATE_EMERALD_ORE(Material.DEEPSLATE_EMERALD_ORE),
+    /** Nether quartz ore block. */
     NETHER_QUARTZ_ORE(Material.NETHER_QUARTZ_ORE),
+    /** Ancient debris block. */
     ANCIENT_DEBRIS(Material.ANCIENT_DEBRIS),
 
     // --- Nether Ground -------------------------------------------------------
+    /** Netherrack block. */
     NETHERRACK(Material.NETHERRACK),
+    /** Soul sand block. */
     SOUL_SAND(Material.SOUL_SAND),
+    /** Soul soil block. */
     SOUL_SOIL(Material.SOUL_SOIL),
+    /** Basalt block. */
     BASALT(Material.BASALT),
+    /** Smooth basalt block. */
     SMOOTH_BASALT(Material.SMOOTH_BASALT),
+    /** Polished basalt block. */
     POLISHED_BASALT(Material.POLISHED_BASALT),
+    /** Blackstone block. */
     BLACKSTONE(Material.BLACKSTONE),
+    /** Gilded blackstone block. */
     GILDED_BLACKSTONE(Material.GILDED_BLACKSTONE),
+    /** Polished blackstone block. */
     POLISHED_BLACKSTONE(Material.POLISHED_BLACKSTONE),
+    /** Chiseled polished blackstone block. */
     CHISELED_POLISHED_BLACKSTONE(Material.CHISELED_POLISHED_BLACKSTONE),
+    /** Polished blackstone bricks block. */
     POLISHED_BLACKSTONE_BRICKS(Material.POLISHED_BLACKSTONE_BRICKS),
+    /** Cracked polished blackstone bricks block. */
     CRACKED_POLISHED_BLACKSTONE_BRICKS(Material.CRACKED_POLISHED_BLACKSTONE_BRICKS),
+    /** Magma block. */
     MAGMA_BLOCK(Material.MAGMA_BLOCK),
 
     // --- End Ground ----------------------------------------------------------
+    /** End stone block. */
     END_STONE(Material.END_STONE),
+    /** End stone bricks block. */
     END_STONE_BRICKS(Material.END_STONE_BRICKS);
 
     // -------------------------------------------------------------------------
@@ -170,6 +271,9 @@ public enum Ground {
     /**
      * Returns true only for loose, unstable ground that would realistically
      * shift or crumble — useful for spells that scatter or sink terrain.
+     *
+     * @param material the material to check
+     * @return {@code true} if the material is a loose ground type
      */
     public static boolean isLoose(Material material) {
         return switch (material) {
@@ -183,6 +287,9 @@ public enum Ground {
     /**
      * Returns true for stone-tier and harder blocks — useful for spells that
      * should only affect solid rock, like a fissure or boulder throw.
+     *
+     * @param material the material to check
+     * @return {@code true} if the material is a rock-type ground block
      */
     public static boolean isRock(Material material) {
         return switch (material) {
@@ -202,6 +309,9 @@ public enum Ground {
     /**
      * Returns true for ore-bearing blocks — useful for spells that interact
      * with the earth's mineral content, like a divination or vein-burst effect.
+     *
+     * @param material the material to check
+     * @return {@code true} if the material is an ore-type ground block
      */
     public static boolean isOre(Material material) {
         return switch (material) {

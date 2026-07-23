@@ -12,7 +12,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Utility class for updating YAML configuration files while preserving user comments.
+ * Supports both excluding sections from update ({@link #update}) and including only
+ * specific sections ({@link #updateWithFilter}).
+ */
 public class ConfigUpdater {
+
+    /** Private utility constructor. */
+    private ConfigUpdater() {}
     /**
      * Update a yaml file from a resource inside your plugin jar
      * @param plugin You plugin
@@ -39,6 +47,16 @@ public class ConfigUpdater {
         write(newConfig, oldConfig, comments, ignoredSectionsArrayList, writer, yaml);
     }
 
+    /**
+     * Update a YAML file from a plugin resource, updating only the specified sections
+     * and leaving all other sections untouched.
+     *
+     * @param plugin                  the plugin instance providing the resource
+     * @param resourceName            the YAML file name inside the plugin jar
+     * @param toUpdate                the YAML file on disk to update
+     * @param onlyUpdateTheseSections list of top-level section keys to update
+     * @throws IOException if an I/O error occurs while reading or writing
+     */
     public static void updateWithFilter(Plugin plugin, String resourceName, File toUpdate, List<String> onlyUpdateTheseSections) throws IOException {
         BufferedReader newReader = new BufferedReader(new InputStreamReader(plugin.getResource(resourceName), StandardCharsets.UTF_8));
         List<String> newLines = newReader.lines().collect(Collectors.toList());

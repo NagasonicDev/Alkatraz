@@ -72,6 +72,9 @@ public final class ComponentType implements Keyed {
      * Fluent builder for constructing {@link ComponentType} instances.
      */
     public static class Builder {
+
+        /** Creates a new empty Builder. */
+        public Builder() {}
         private NamespacedKey key;
         private String description;
         private Map<String, Object> defaultConfig = Map.of();

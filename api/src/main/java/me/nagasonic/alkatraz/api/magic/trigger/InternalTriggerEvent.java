@@ -34,6 +34,11 @@ public class InternalTriggerEvent {
         return triggerType;
     }
 
+    /**
+     * Returns the {@link TriggerContext} carrying execution details.
+     *
+     * @return the trigger context
+     */
     public TriggerContext context() {
         return context;
     }

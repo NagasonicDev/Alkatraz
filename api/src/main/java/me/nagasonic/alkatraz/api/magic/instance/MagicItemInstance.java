@@ -12,7 +12,7 @@ import java.util.UUID;
 /**
  * A concrete instance of a magic item, carrying a unique identity and mutable state.
  * Each instance tracks its own modifiers, engravings, progression data, and arbitrary
- * custom data. An instance is linked to an {@link me.nagasonic.alkatraz.api.magic.definition.MagicItemDefinition}
+ * custom data. An instance is linked to an {@link me.nagasonic.alkatraz.api.magic.definition.ItemDefinition}
  * via {@link #definitionKey()}.
  */
 public final class MagicItemInstance {

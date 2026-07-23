@@ -25,6 +25,9 @@ public final class AttributeService {
 
     private static AttributeService instance;
 
+    /** Private constructor; use {@link #getInstance()}. */
+    private AttributeService() {}
+
     /**
      * Returns the singleton instance, creating one if it does not yet exist.
      *
