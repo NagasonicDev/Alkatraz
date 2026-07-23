@@ -5,19 +5,40 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.datafixers.util.Pair;
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.commands.CastCommand;
+import me.nagasonic.alkatraz.gui.grimoire.GrimoireLecternState;
 import me.nagasonic.alkatraz.nms_v26_R1.entity.MagicEntitySpawner;
 import me.nagasonic.alkatraz.util.Skin;
 import net.minecraft.network.protocol.game.*;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.inventory.LecternMenu;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.PositionMoveRotation;
 import net.minecraft.world.entity.Relative;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.server.network.Filterable;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.WrittenBookContent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LecternBlock;
+import net.minecraft.world.level.block.entity.LecternBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
+import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.entity.*;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -163,6 +184,154 @@ public final class NMS_v26_R1 implements NMS {
             player.showPlayer(other);
         }
     }
+    @Override
+    public boolean openGrimoireLectern(Player player, org.bukkit.inventory.ItemStack writtenBook, String title,
+                                       int startPage, int totalPages, java.util.function.Consumer<Integer> onPageChange) {
+        try {
+            ServerPlayer sp = ((CraftPlayer) player).getHandle();
+
+            org.bukkit.inventory.meta.BookMeta meta = (org.bukkit.inventory.meta.BookMeta) writtenBook.getItemMeta();
+            java.util.List<String> rawPages = (meta != null && meta.hasPages()) ? meta.getPages() : java.util.Collections.emptyList();
+
+            List<Filterable<Component>> bookPages = new ArrayList<>();
+            for (String rawPage : rawPages) {
+                try {
+                    JsonElement json = JsonParser.parseString(rawPage);
+                    Component component = ComponentSerialization.CODEC
+                            .parse(com.mojang.serialization.JsonOps.INSTANCE, json)
+                            .result()
+                            .orElse(Component.literal(rawPage));
+                    bookPages.add(Filterable.passThrough(component));
+                } catch (Exception ex) {
+                    bookPages.add(Filterable.passThrough(Component.literal(rawPage)));
+                }
+            }
+
+            WrittenBookContent bookContent = new WrittenBookContent(
+                    Filterable.passThrough(title),
+                    meta != null && meta.getAuthor() != null ? meta.getAuthor() : "Alkatraz",
+                    0,
+                    bookPages,
+                    true
+            );
+
+            ItemStack nmsBook = new ItemStack(Items.WRITTEN_BOOK);
+            nmsBook.set(DataComponents.WRITTEN_BOOK_CONTENT, bookContent);
+
+            SimpleContainer lecternContainer = new SimpleContainer(1);
+            lecternContainer.setItem(0, nmsBook);
+
+            SimpleContainerData pageData = new SimpleContainerData(1);
+            pageData.set(0, startPage);
+
+            int containerId = sp.containerMenu.containerId;
+            if (containerId == 0) {
+                containerId = 1;
+            } else {
+                containerId = (containerId + 1) % 100;
+                if (containerId == 0) containerId = 1;
+            }
+            final int pages = totalPages;
+            final Player bkPlayer = player;
+
+            LecternMenu menu = new LecternMenu(containerId, lecternContainer, pageData, sp.getInventory()) {
+                private int trackedPage = startPage;
+
+                @Override
+                public boolean clickMenuButton(net.minecraft.world.entity.player.Player nmsPlayer, int buttonId) {
+                    if (buttonId == 0) {
+                        CastCommand.castFromGrimoire(bkPlayer);
+                        bkPlayer.closeInventory();
+                        return true;
+                    }
+                    if (buttonId == 3) {
+                        CastCommand.castFromGrimoire(bkPlayer);
+                        bkPlayer.closeInventory();
+                        return true;
+                    }
+                    boolean result = super.clickMenuButton(nmsPlayer, buttonId);
+                    if (result) {
+                        if (buttonId == 1) trackedPage = Math.max(0, trackedPage - 1);
+                        else if (buttonId == 2) trackedPage = Math.min(pages - 1, trackedPage + 1);
+                        else if (buttonId >= 100) trackedPage = Math.min(pages - 1, buttonId - 100);
+                        onPageChange.accept(trackedPage);
+                    }
+                    return result;
+                }
+            };
+            menu.checkReachable = false;
+
+            sp.containerMenu = menu;
+            sp.initMenu(menu);
+            sp.connection.send(new ClientboundOpenScreenPacket(containerId, MenuType.LECTERN, Component.literal(title)));
+            menu.sendAllDataToRemote();
+
+            return true;
+        } catch (Exception e) {
+            Alkatraz.logWarning("Failed to open fake lectern: " + e.getMessage());
+            return false;
+        }
+    }
+
+    private final java.util.Map<java.util.UUID, BlockPos> fakeLecternPositions = new java.util.HashMap<>();
+
+    @Override
+    public void spawnGrimoireLectern(Player player) {
+        try {
+            ServerPlayer sp = ((CraftPlayer) player).getHandle();
+            Direction playerFacing = Direction.fromYRot(player.getLocation().getYaw());
+            BlockPos pos = sp.blockPosition().relative(playerFacing, 2);
+
+            Direction lecternFacing = playerFacing.getOpposite();
+            BlockState lecternState = Blocks.LECTERN.defaultBlockState()
+                    .setValue(LecternBlock.FACING, lecternFacing)
+                    .setValue(LecternBlock.HAS_BOOK, true);
+
+            sp.connection.send(new ClientboundBlockUpdatePacket(pos, lecternState));
+
+            ItemStack nmsBook = new ItemStack(Items.WRITTEN_BOOK);
+            WrittenBookContent bookContent = new WrittenBookContent(
+                    Filterable.passThrough("Grimoire"),
+                    "Alkatraz",
+                    0,
+                    List.of(
+                            Filterable.passThrough(Component.literal("\u00A7lPage 1\n\u00A7rThis is a test grimoire page.")),
+                            Filterable.passThrough(Component.literal("\u00A7lPage 2\n\u00A7rSecond test page."))
+                    ),
+                    true
+            );
+            nmsBook.set(DataComponents.WRITTEN_BOOK_CONTENT, bookContent);
+
+            LecternBlockEntity blockEntity = new LecternBlockEntity(pos, lecternState);
+            blockEntity.setBook(nmsBook);
+            blockEntity.setPage(0);
+
+            sp.connection.send(blockEntity.getUpdatePacket());
+            fakeLecternPositions.put(player.getUniqueId(), pos);
+
+            player.sendMessage("\u00A7aSpawned fake lectern in front of you!");
+        } catch (Exception e) {
+            Alkatraz.logWarning("Failed to spawn fake lectern: " + e.getMessage());
+            player.sendMessage("\u00A7cFailed to spawn fake lectern: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void removeGrimoireLectern(Player player) {
+        try {
+            ServerPlayer sp = ((CraftPlayer) player).getHandle();
+            BlockPos pos = fakeLecternPositions.remove(player.getUniqueId());
+            if (pos != null) {
+                sp.connection.send(new ClientboundBlockUpdatePacket(pos, Blocks.AIR.defaultBlockState()));
+                player.sendMessage("\u00A7cRemoved fake lectern.");
+            } else {
+                player.sendMessage("\u00A7cNo fake lectern to remove.");
+            }
+        } catch (Exception e) {
+            Alkatraz.logWarning("Failed to remove fake lectern: " + e.getMessage());
+        }
+    }
+
 
     @Override
     public void onEnable() {

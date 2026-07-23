@@ -83,4 +83,12 @@
             </plugin>
         </plugins>
     </build>
+
+    <distributionManagement>
+        <repository>
+            <id>repsy</id>
+            <name>Alkatraz</name>
+            <url>https://repo.repsy.io/nagasonic/alkatrazapi</url>
+        </repository>
+    </distributionManagement>
 </project>
