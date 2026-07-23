@@ -12,8 +12,11 @@ import org.bukkit.event.Listener;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
+import org.bukkit.inventory.ItemStack;
+
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public interface NMS extends Listener {
     void setInvisible(org.bukkit.entity.Entity e, boolean invis);
@@ -31,6 +34,41 @@ public interface NMS extends Listener {
     default void onEnable(){
         // default: do nothing
     }
+
+    /**
+     * Opens a fake lectern with a written book for the player.
+     *
+     * @param player      the player to open the lectern for
+     * @param writtenBook the written book item to display
+     * @param title       the title shown in the lectern UI
+     * @param startPage   the initial page index (0-based)
+     * @param totalPages  total number of pages in the book
+     * @param onPageChange callback invoked with the new page index when the player navigates
+     * @return true if the lectern was opened, false if unsupported (caller should use fallback)
+     */
+    default boolean openGrimoireLectern(Player player, ItemStack writtenBook, String title,
+                                         int startPage, int totalPages, Consumer<Integer> onPageChange) {
+        return false;
+    }
+
+    // -----------------------------------------------------------------------
+    // Fake lectern block entity (per-player visual)
+    // -----------------------------------------------------------------------
+
+    /**
+     * Spawns a fake lectern block with a book in front of the player,
+     * visible only to that player via client-side packets.
+     *
+     * @param player the player to show the fake lectern to
+     */
+    default void spawnGrimoireLectern(Player player) {}
+
+    /**
+     * Removes the fake lectern block that was previously spawned for the player.
+     *
+     * @param player the player whose fake lectern should be removed
+     */
+    default void removeGrimoireLectern(Player player) {}
 
     // -----------------------------------------------------------------------
     // Per-player coloured glowing

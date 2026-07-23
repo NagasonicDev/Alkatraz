@@ -7,7 +7,14 @@ import com.mojang.datafixers.util.Pair;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.nms_v1_20_R2.entity.MagicEntitySpawner;
 import me.nagasonic.alkatraz.util.Skin;
+import me.nagasonic.alkatraz.commands.CastCommand;
+import me.nagasonic.alkatraz.gui.grimoire.GrimoireLecternState;
 import net.minecraft.network.protocol.game.*;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.inventory.LecternMenu;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -18,6 +25,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_20_R2.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_20_R2.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_20_R2.inventory.CraftItemStack;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
@@ -168,6 +176,60 @@ public final class NMS_v1_20_R2 implements NMS {
             player.showPlayer(other);
         }
     }
+    @Override
+    public boolean openGrimoireLectern(Player player, org.bukkit.inventory.ItemStack writtenBook, String title,
+                                       int startPage, int totalPages, java.util.function.Consumer<Integer> onPageChange) {
+        try {
+            ServerPlayer sp = ((CraftPlayer) player).getHandle();
+
+            SimpleContainer lecternContainer = new SimpleContainer(1);
+            lecternContainer.setItem(0, CraftItemStack.asNMSCopy(writtenBook));
+
+            SimpleContainerData pageData = new SimpleContainerData(1);
+            pageData.set(0, startPage);
+
+            int containerId = sp.containerMenu.containerId;
+            final int pages = totalPages;
+            final Player bkPlayer = player;
+
+            LecternMenu menu = new LecternMenu(containerId, lecternContainer, pageData, sp.getInventory()) {
+                private int trackedPage = startPage;
+
+                @Override
+                public boolean clickMenuButton(net.minecraft.world.entity.player.Player nmsPlayer, int buttonId) {
+                    if (buttonId == 0) {
+                        CastCommand.castFromGrimoire(bkPlayer);
+                        bkPlayer.closeInventory();
+                        return true;
+                    }
+                    if (buttonId == 3) {
+                        CastCommand.castFromGrimoire(bkPlayer);
+                        bkPlayer.closeInventory();
+                        return true;
+                    }
+                    boolean result = super.clickMenuButton(nmsPlayer, buttonId);
+                    if (result) {
+                        if (buttonId == 1) trackedPage = Math.max(0, trackedPage - 1);
+                        else if (buttonId == 2) trackedPage = Math.min(pages - 1, trackedPage + 1);
+                        else if (buttonId >= 100) trackedPage = Math.min(pages - 1, buttonId - 100);
+                        onPageChange.accept(trackedPage);
+                    }
+                    return result;
+                }
+            };
+            menu.checkReachable = false;
+
+            sp.containerMenu = menu;
+            sp.connection.send(new ClientboundOpenScreenPacket(containerId, MenuType.LECTERN, Component.literal(title)));
+            menu.sendAllDataToRemote();
+
+            return true;
+        } catch (Exception e) {
+            Alkatraz.logWarning("Failed to open fake lectern: " + e.getMessage());
+            return false;
+        }
+    }
+
 
     @Override
     public void onEnable() {

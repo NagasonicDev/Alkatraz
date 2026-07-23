@@ -118,4 +118,6 @@ run/
 wiki/
 .omo/
 .opencode/
+.superpowers/
 rename_nms_packages.ps1
+/.superpowers/

@@ -129,8 +129,8 @@
                     <relocations>
                         <!-- NBT-API start -->
                         <relocation>
-                            <pattern>me.nagasonic.alkatraz.nbtapi</pattern>
-                            <shadedPattern>me.nagasonic.alkatraz.nbtapi</shadedPattern>
+                            <pattern>de.tr7zw.changeme.nbtapi</pattern>
+                            <shadedPattern>me.nagasonic.alkatraz.libs.nbtapi</shadedPattern>
                         </relocation>
                         <!-- NBT-API end -->
                     </relocations>
