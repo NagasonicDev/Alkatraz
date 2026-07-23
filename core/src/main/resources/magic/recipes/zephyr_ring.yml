@@ -1,0 +1,13 @@
+definition: alkatraz:zephyr_ring
+shape:
+  - " B "
+  - "BEB"
+  - " B "
+ingredients:
+  B: GOLD_NUGGET
+  E: FEATHER
+requirements:
+  - type: number_stat
+    stat: circleLevel
+    minimum: 1
+    description: "Requires Circle Level 1"

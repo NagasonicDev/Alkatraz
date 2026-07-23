@@ -1,0 +1,20 @@
+key: alkatraz:void_grimoire
+material: BOOK
+display_name: '&r&8Void Grimoire'
+lore:
+  - '&7A grimoire bound in shadow, its'
+  - '&7pages filled with dark whispers.'
+max_engravings: 2
+components:
+  - alkatraz:grimoire
+attributes:
+  alkatraz:spell_power: 10
+  alkatraz:max_circle: 5
+  alkatraz:cast_time_multiplier: 0.7
+  alkatraz:fire_affinity: 0
+  alkatraz:air_affinity: 0
+  alkatraz:water_affinity: 0
+  alkatraz:earth_affinity: 0
+  alkatraz:light_affinity: 0
+  alkatraz:dark_affinity: 15
+page_count: 5

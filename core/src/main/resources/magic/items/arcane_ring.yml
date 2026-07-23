@@ -1,10 +1,12 @@
 key: alkatraz:arcane_ring
 material: GOLD_NUGGET
-display_name: '&r&bArcane Ring'
+display_name: '&r&dArcane Ring'
 lore:
-  - '&7A ring infused with arcane energy.'
+  - 'A powerful Magic accessory.'
 components:
   - alkatraz:equipment
 attributes:
-  alkatraz:max_mana: 50
-  alkatraz:mana_regeneration: 2
+  alkatraz:magic_affinity: 5
+  alkatraz:max_mana: 40
+  alkatraz:mana_regeneration: 1
+max_engravings: 1

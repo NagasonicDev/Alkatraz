@@ -1,0 +1,15 @@
+definition: alkatraz:luminous_grimoire
+shape:
+  - "A G"
+  - " R "
+  - "Q  "
+ingredients:
+  A: AMETHYST_SHARD
+  G: GLOWSTONE_DUST
+  R: alkatraz:runic_grimoire
+  Q: QUARTZ
+requirements:
+  - type: number_stat
+    stat: circleLevel
+    minimum: 5
+    description: "Requires Circle Level 5"

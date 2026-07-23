@@ -1,0 +1,13 @@
+definition: alkatraz:radiant_bracelet
+shape:
+  - " B "
+  - "BEB"
+  - " B "
+ingredients:
+  B: IRON_NUGGET
+  E: GLOWSTONE_DUST
+requirements:
+  - type: number_stat
+    stat: circleLevel
+    minimum: 1
+    description: "Requires Circle Level 1"

@@ -1,0 +1,11 @@
+key: alkatraz:boulder_necklace
+material: STRING
+display_name: '&r&aBoulder Necklace'
+lore:
+  - 'A simple piece of Earth jewelry.'
+components:
+  - alkatraz:equipment
+attributes:
+  alkatraz:earth_affinity: 3
+  alkatraz:max_mana: 20
+max_engravings: 0

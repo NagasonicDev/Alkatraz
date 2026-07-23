@@ -1,0 +1,12 @@
+key: alkatraz:blaze_necklace
+material: IRON_CHAIN
+display_name: '&r&6Blaze Necklace'
+lore:
+  - 'A powerful Fire accessory.'
+components:
+  - alkatraz:equipment
+attributes:
+  alkatraz:fire_affinity: 5
+  alkatraz:max_mana: 40
+  alkatraz:mana_regeneration: 1
+max_engravings: 1

@@ -1,10 +1,11 @@
 definition: alkatraz:scholar_hat
 shape:
-  - "LLL"
   - "LBL"
+  - "LAL"
 ingredients:
   L: LEATHER
   B: BOOK
+  A: APPRENTICE_HAT
 requirements:
   - type: number_stat
     stat: circleLevel

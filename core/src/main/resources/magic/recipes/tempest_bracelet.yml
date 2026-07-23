@@ -1,0 +1,13 @@
+definition: alkatraz:tempest_bracelet
+shape:
+  - "EEE"
+  - "EUE"
+  - "EEE"
+ingredients:
+  E: GHAST_TEAR
+  U: storm_bracelet
+requirements:
+  - type: number_stat
+    stat: circleLevel
+    minimum: 3
+    description: "Requires Circle Level 3"

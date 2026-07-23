@@ -1,0 +1,11 @@
+key: alkatraz:radiant_necklace
+material: STRING
+display_name: '&r&eRadiant Necklace'
+lore:
+  - 'A simple piece of Light jewelry.'
+components:
+  - alkatraz:equipment
+attributes:
+  alkatraz:light_affinity: 3
+  alkatraz:max_mana: 20
+max_engravings: 0

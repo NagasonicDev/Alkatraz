@@ -1,0 +1,14 @@
+definition: alkatraz:arcane_necklace
+shape:
+  - "BMB"
+  - "BUB"
+  - "BMB"
+ingredients:
+  B: IRON_CHAIN
+  M: MAGIC_STONE
+  U: mystic_necklace
+requirements:
+  - type: number_stat
+    stat: circleLevel
+    minimum: 2
+    description: "Requires Circle Level 2"

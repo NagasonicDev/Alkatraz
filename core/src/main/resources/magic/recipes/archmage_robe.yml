@@ -1,11 +1,12 @@
 definition: alkatraz:archmage_robe
 shape:
-  - "L L"
-  - "LLL"
-  - "LNL"
+  - "D D"
+  - "LEL"
+  - "LDL"
 ingredients:
   L: LEATHER
-  N: NETHER_STAR
+  D: DIAMOND
+  E: ENCHANTER_ROBE
 requirements:
   - type: number_stat
     stat: circleLevel

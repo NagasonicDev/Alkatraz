@@ -1,10 +1,12 @@
 definition: alkatraz:archmage_leggings
 shape:
-  - "LLL"
-  - "LDL"
-  - "L L"
+  - "LNL"
+  - "LEL"
+  - "D D"
 ingredients:
   L: LEATHER
+  N: NETHER_STAR
+  E: ENCHANTER_LEGGINGS
   D: DIAMOND
 requirements:
   - type: number_stat

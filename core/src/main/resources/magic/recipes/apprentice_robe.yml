@@ -1,8 +1,8 @@
 definition: alkatraz:apprentice_robe
 shape:
   - "L L"
-  - "LLL"
   - "LML"
+  - "LLL"
 ingredients:
   L: LEATHER
   M: MAGIC_STONE

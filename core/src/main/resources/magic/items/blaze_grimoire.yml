@@ -1,0 +1,20 @@
+key: alkatraz:blaze_grimoire
+material: BOOK
+display_name: '&r&6Blaze Grimoire'
+lore:
+  - '&7A grimoire wreathed in embers,'
+  - '&7its pages smolder with fiery secrets.'
+max_engravings: 2
+components:
+  - alkatraz:grimoire
+attributes:
+  alkatraz:spell_power: 10
+  alkatraz:max_circle: 5
+  alkatraz:cast_time_multiplier: 0.7
+  alkatraz:fire_affinity: 15
+  alkatraz:air_affinity: 0
+  alkatraz:water_affinity: 0
+  alkatraz:earth_affinity: 0
+  alkatraz:light_affinity: 0
+  alkatraz:dark_affinity: 0
+page_count: 5

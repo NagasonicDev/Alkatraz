@@ -1,0 +1,13 @@
+definition: alkatraz:mystic_necklace
+shape:
+  - " B "
+  - "BEB"
+  - " B "
+ingredients:
+  B: STRING
+  E: AMETHYST_SHARD
+requirements:
+  - type: number_stat
+    stat: circleLevel
+    minimum: 1
+    description: "Requires Circle Level 1"

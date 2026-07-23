@@ -1,10 +1,12 @@
 definition: alkatraz:archmage_hat
 shape:
-  - "LLL"
   - "LNL"
+  - "LEL"
+  - "   "
 ingredients:
   L: LEATHER
   N: NETHER_STAR
+  E: ENCHANTER_HAT
 requirements:
   - type: number_stat
     stat: circleLevel

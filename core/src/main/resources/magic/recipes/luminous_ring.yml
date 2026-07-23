@@ -1,0 +1,14 @@
+definition: alkatraz:luminous_ring
+shape:
+  - "BMB"
+  - "BUB"
+  - "BMB"
+ingredients:
+  B: GOLD_INGOT
+  M: MAGIC_STONE
+  U: radiant_ring
+requirements:
+  - type: number_stat
+    stat: circleLevel
+    minimum: 2
+    description: "Requires Circle Level 2"

@@ -1,11 +1,12 @@
 definition: alkatraz:scholar_robe
 shape:
-  - "L L"
+  - "B B"
+  - "LAL"
   - "LLL"
-  - "LBL"
 ingredients:
   L: LEATHER
   B: BOOK
+  A: APPRENTICE_ROBE
 requirements:
   - type: number_stat
     stat: circleLevel

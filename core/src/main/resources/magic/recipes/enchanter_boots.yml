@@ -1,10 +1,13 @@
 definition: alkatraz:enchanter_boots
 shape:
-  - "L L"
-  - "L P"
+  - "P P"
+  - "LSL"
+  - " R "
 ingredients:
   L: LEATHER
   P: BLAZE_POWDER
+  S: SCHOLAR_BOOTS
+  R: ARCANE_RING
 requirements:
   - type: number_stat
     stat: circleLevel

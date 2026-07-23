@@ -1,0 +1,11 @@
+key: alkatraz:mystic_pendant
+material: AMETHYST_SHARD
+display_name: '&r&bMystic Pendant'
+lore:
+  - 'A simple piece of Magic jewelry.'
+components:
+  - alkatraz:equipment
+attributes:
+  alkatraz:magic_affinity: 3
+  alkatraz:max_mana: 20
+max_engravings: 0

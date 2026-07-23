@@ -1,0 +1,13 @@
+definition: alkatraz:frost_pendant
+shape:
+  - " B "
+  - "BEB"
+  - " B "
+ingredients:
+  B: AMETHYST_SHARD
+  E: PRISMARINE_CRYSTALS
+requirements:
+  - type: number_stat
+    stat: circleLevel
+    minimum: 1
+    description: "Requires Circle Level 1"

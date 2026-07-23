@@ -1,0 +1,13 @@
+definition: alkatraz:radiant_pendant
+shape:
+  - " B "
+  - "BEB"
+  - " B "
+ingredients:
+  B: AMETHYST_SHARD
+  E: GLOWSTONE_DUST
+requirements:
+  - type: number_stat
+    stat: circleLevel
+    minimum: 1
+    description: "Requires Circle Level 1"

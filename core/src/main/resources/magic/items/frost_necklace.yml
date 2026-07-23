@@ -1,0 +1,11 @@
+key: alkatraz:frost_necklace
+material: STRING
+display_name: '&r&bFrost Necklace'
+lore:
+  - 'A simple piece of Water jewelry.'
+components:
+  - alkatraz:equipment
+attributes:
+  alkatraz:water_affinity: 3
+  alkatraz:max_mana: 20
+max_engravings: 0

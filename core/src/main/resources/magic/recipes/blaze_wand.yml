@@ -1,0 +1,15 @@
+definition: alkatraz:blaze_wand
+shape:
+  - "N B"
+  - " R "
+  - "F  "
+ingredients:
+  N: NETHERRACK
+  B: BLAZE_POWDER
+  R: alkatraz:runic_wand
+  F: FIRE_CHARGE
+requirements:
+  - type: number_stat
+    stat: circleLevel
+    minimum: 5
+    description: "Requires Circle Level 5"

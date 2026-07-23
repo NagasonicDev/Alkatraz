@@ -1,0 +1,15 @@
+definition: alkatraz:mountain_grimoire
+shape:
+  - "D P"
+  - " R "
+  - "B  "
+ingredients:
+  D: DEEPSLATE
+  P: POINTED_DRIPSTONE
+  R: alkatraz:runic_grimoire
+  B: DRAGON_BREATH
+requirements:
+  - type: number_stat
+    stat: circleLevel
+    minimum: 5
+    description: "Requires Circle Level 5"

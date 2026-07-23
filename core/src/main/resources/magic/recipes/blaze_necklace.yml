@@ -1,0 +1,14 @@
+definition: alkatraz:blaze_necklace
+shape:
+  - "BMB"
+  - "BUB"
+  - "BMB"
+ingredients:
+  B: IRON_CHAIN
+  M: MAGIC_STONE
+  U: ember_necklace
+requirements:
+  - type: number_stat
+    stat: circleLevel
+    minimum: 2
+    description: "Requires Circle Level 2"

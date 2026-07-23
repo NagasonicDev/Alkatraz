@@ -1,0 +1,15 @@
+definition: alkatraz:mountain_wand
+shape:
+  - "D P"
+  - " R "
+  - "B  "
+ingredients:
+  D: DEEPSLATE
+  P: POINTED_DRIPSTONE
+  R: alkatraz:runic_wand
+  B: DRAGON_BREATH
+requirements:
+  - type: number_stat
+    stat: circleLevel
+    minimum: 5
+    description: "Requires Circle Level 5"
