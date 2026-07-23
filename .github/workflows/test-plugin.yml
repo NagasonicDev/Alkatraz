@@ -60,11 +60,8 @@ jobs:
           mkdir -p nms-stage/m2/org/spigotmc nms-stage/m2/org/bukkit nms-stage/jars
           chmod +x scripts/build-spigot.sh
           scripts/build-spigot.sh "${{ matrix.version }}" "nms-stage/jars/spigot-${{ matrix.version }}.jar"
-          # BuildTools installs spigot-api/spigot/craftbukkit into the
-          # local Maven repo as a side effect - pull that into the
-          # staged folder so it travels with the cache/artifact.
-          [ -d "$HOME/.m2/repository/org/spigotmc" ] && cp -r "$HOME/.m2/repository/org/spigotmc/." nms-stage/m2/org/spigotmc/
-          [ -d "$HOME/.m2/repository/org/bukkit" ] && cp -r "$HOME/.m2/repository/org/bukkit/." nms-stage/m2/org/bukkit/
+          if [ -d "$HOME/.m2/repository/org/spigotmc" ]; then cp -r "$HOME/.m2/repository/org/spigotmc/." nms-stage/m2/org/spigotmc/; fi
+          if [ -d "$HOME/.m2/repository/org/bukkit" ]; then cp -r "$HOME/.m2/repository/org/bukkit/." nms-stage/m2/org/bukkit/; fi
 
       - name: Upload artifact for this run
         uses: actions/upload-artifact@v4
@@ -97,7 +94,7 @@ jobs:
       - name: Install into local Maven repo
         run: |
           mkdir -p "$HOME/.m2/repository"
-          [ -d nms-merged/m2 ] && cp -r nms-merged/m2/. "$HOME/.m2/repository/"
+          if [ -d nms-merged/m2 ]; then cp -r nms-merged/m2/. "$HOME/.m2/repository/"; fi
 
       - name: Run unit tests
         run: mvn -B test
@@ -125,7 +122,7 @@ jobs:
       - name: Install into local Maven repo
         run: |
           mkdir -p "$HOME/.m2/repository"
-          [ -d nms-merged/m2 ] && cp -r nms-merged/m2/. "$HOME/.m2/repository/"
+          if [ -d nms-merged/m2 ]; then cp -r nms-merged/m2/. "$HOME/.m2/repository/"; fi
 
       - name: Build plugin jar
         run: mvn -B package -DskipTests
