@@ -1,8 +1,0 @@
-definition: alkatraz:arcane_artifact
-shape:
-  - " B "
-  - "BNB"
-  - " B "
-ingredients:
-  B: BLAZE_ROD
-  N: NETHER_STAR

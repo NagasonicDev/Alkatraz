@@ -47,8 +47,13 @@ public final class AttributeService {
         Map<NamespacedKey, List<AttributeContribution>> grouped = new HashMap<>();
 
         for (AttributeSource source : sources) {
-            for (AttributeContribution contribution : source.collect(entity, context)) {
-                grouped.computeIfAbsent(contribution.attribute(), k -> new ArrayList<>()).add(contribution);
+            try {
+                for (AttributeContribution contribution : source.collect(entity, context)) {
+                    grouped.computeIfAbsent(contribution.attribute(), k -> new ArrayList<>()).add(contribution);
+                }
+            } catch (Exception e) {
+                java.util.logging.Logger.getLogger("Alkatraz").warning(
+                    "AttributeSource " + source.getClass().getSimpleName() + " failed for " + entity.getName() + ": " + e.getMessage());
             }
         }
 
