@@ -58,7 +58,7 @@ public class LootInjector implements Listener {
          * Main event handler for loot generation
          */
         @EventHandler(priority = EventPriority.HIGH)
-        public static void onLootGenerate(LootGenerateEvent event) {
+        public void onLootGenerate(LootGenerateEvent event) {
             LootTable table = event.getLootTable();
 
             // Check each registered injector

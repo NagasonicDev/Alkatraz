@@ -1,5 +1,6 @@
 package me.nagasonic.alkatraz.loot.implementation;
 
+import me.nagasonic.alkatraz.config.SpellbookConfig;
 import me.nagasonic.alkatraz.loot.LootInjector;
 import me.nagasonic.alkatraz.loot.MobLootInjector;
 import me.nagasonic.alkatraz.spells.Element;
@@ -8,20 +9,14 @@ import me.nagasonic.alkatraz.spells.SpellRegistry;
 import me.nagasonic.alkatraz.spells.spellbooks.SpellbookFactory;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Mob;
 import org.bukkit.inventory.ItemStack;
 
 /**
- * Pre-configured loot injections for spellbooks
- * 
- * This class sets up all spellbook drops in various locations.
- * You can easily modify weights and locations here.
+ * Pre-configured loot injections for spellbooks.
+ * All values are read from config.yml via SpellbookConfig.
  */
 public class SpellbookLoot {
-    
-    /**
-     * Registers all spellbook loot injections
-     */
+
     public static void registerAll() {
         registerChestLoot();
         registerMobDrops();
@@ -29,238 +24,408 @@ public class SpellbookLoot {
         registerFishingLoot();
         registerPiglinBartering();
     }
-    
-    /**
-     * Chest loot - general chests in various structures
-     */
+
     private static void registerChestLoot() {
-        // Common chests - common spellbooks only
-        LootInjector.builder()
-                .forLootTable(
-                        "minecraft:chests/village",
-                        "chests/shipwreck_map",
-                        "chests/buried_treasure",
-                        "chests/igloo_chest"
-                )
-                .addItem(SpellbookFactory.createRandomSpellBook(1), 100)
-                .addItem(SpellbookFactory.createRandomSpellBook(1, 2), 30)
-                .addItem(new ItemStack(Material.REDSTONE_LAMP), 100)
-                .maxItems(5)
-                .register();
-        
-        // Dungeon chests - mix of common and uncommon
-        LootInjector.builder()
-                .forLootTable(
-                        "chests/simple_dungeon",
-                        "chests/abandoned_mineshaft"
-                )
-                .addItem(SpellbookFactory.createRandomSpellBook(1, 2), 80)
-                .addItem(SpellbookFactory.createRandomSpellBook(1, 2, 3), 60)
-                .addItem(SpellbookFactory.createRandomSpellBook(2, 3, 4), 20)
-                .maxItems(1)
-                .register();
-        
-        // Nether structures - fire spells more common
-        LootInjector.builder()
-                .forLootTable(
-                        "chests/nether_bridge",
-                        "chests/bastion"
-                )
-                .addItem(SpellbookFactory.createRandomElementSpellBook(Element.FIRE), 100)
-                .addItem(SpellbookFactory.createRandomSpellBook(2, 3, 4), 50)
-                .addItem(SpellbookFactory.createRandomSpellBook(4, 5, 6), 20)
-                .maxItems(1)
-                .register();
-        
-        // End structures - rare/epic spellbooks
-        LootInjector.builder()
-                .forLootTable(
-                        "chests/end_city_treasure"
-                )
-                .addItem(SpellbookFactory.createRandomSpellBook(2, 3, 4), 100)
-                .addItem(SpellbookFactory.createRandomSpellBook(4, 5, 6), 80)
-                .addItem(SpellbookFactory.createRandomSpellBook(6, 7, 8, 9), 40)
-                .addItem(SpellbookFactory.createRandomElementSpellBook(Element.AIR), 60)
-                .maxItems(2) // Up to 2 spellbooks
-                .register();
+        if (!SpellbookConfig.isChestLootEnabled()) return;
+        double m = SpellbookConfig.getLootMultiplier();
+
+        if (SpellbookConfig.isChestCategoryEnabled("common")) {
+            int sbW = (int)(SpellbookConfig.getChestInt("common", "spellbook_weight", 100) * m);
+            int sb12W = (int)(SpellbookConfig.getChestInt("common", "spellbook_1_2_weight", 30) * m);
+            int filler = SpellbookConfig.getChestInt("common", "filler_weight", 100);
+            int max = SpellbookConfig.getChestInt("common", "max_items", 5);
+            LootInjector.builder()
+                    .forLootTable("minecraft:chests/village", "chests/shipwreck_map", "chests/buried_treasure", "chests/igloo_chest")
+                    .addItem(SpellbookFactory.createRandomSpellBook(1), sbW)
+                    .addItem(SpellbookFactory.createRandomSpellBook(1, 2), sb12W)
+                    .addItem(new ItemStack(Material.REDSTONE_LAMP), filler)
+                    .maxItems(max)
+                    .register();
+        }
+
+        if (SpellbookConfig.isChestCategoryEnabled("dungeon")) {
+            int sb12W = (int)(SpellbookConfig.getChestInt("dungeon", "spellbook_1_2_weight", 80) * m);
+            int sb13W = (int)(SpellbookConfig.getChestInt("dungeon", "spellbook_1_3_weight", 60) * m);
+            int sb24W = (int)(SpellbookConfig.getChestInt("dungeon", "spellbook_2_4_weight", 20) * m);
+            int max = SpellbookConfig.getChestInt("dungeon", "max_items", 1);
+            LootInjector.builder()
+                    .forLootTable("chests/simple_dungeon", "chests/abandoned_mineshaft")
+                    .addItem(SpellbookFactory.createRandomSpellBook(1, 2), sb12W)
+                    .addItem(SpellbookFactory.createRandomSpellBook(1, 2, 3), sb13W)
+                    .addItem(SpellbookFactory.createRandomSpellBook(2, 3, 4), sb24W)
+                    .maxItems(max)
+                    .register();
+        }
+
+        if (SpellbookConfig.isChestCategoryEnabled("nether")) {
+            int fireW = (int)(SpellbookConfig.getChestInt("nether", "fire_element_weight", 100) * m);
+            int sb24W = (int)(SpellbookConfig.getChestInt("nether", "spellbook_2_4_weight", 50) * m);
+            int sb46W = (int)(SpellbookConfig.getChestInt("nether", "spellbook_4_6_weight", 20) * m);
+            int max = SpellbookConfig.getChestInt("nether", "max_items", 1);
+            LootInjector.builder()
+                    .forLootTable("chests/nether_bridge", "chests/bastion")
+                    .addItem(SpellbookFactory.createRandomElementSpellBook(Element.FIRE), fireW)
+                    .addItem(SpellbookFactory.createRandomSpellBook(2, 3, 4), sb24W)
+                    .addItem(SpellbookFactory.createRandomSpellBook(4, 5, 6), sb46W)
+                    .maxItems(max)
+                    .register();
+        }
+
+        if (SpellbookConfig.isChestCategoryEnabled("end")) {
+            int sb24W = (int)(SpellbookConfig.getChestInt("end", "spellbook_2_4_weight", 100) * m);
+            int sb46W = (int)(SpellbookConfig.getChestInt("end", "spellbook_4_6_weight", 80) * m);
+            int sb69W = (int)(SpellbookConfig.getChestInt("end", "spellbook_6_9_weight", 40) * m);
+            int airW = (int)(SpellbookConfig.getChestInt("end", "air_element_weight", 60) * m);
+            int max = SpellbookConfig.getChestInt("end", "max_items", 2);
+            LootInjector.builder()
+                    .forLootTable("chests/end_city_treasure")
+                    .addItem(SpellbookFactory.createRandomSpellBook(2, 3, 4), sb24W)
+                    .addItem(SpellbookFactory.createRandomSpellBook(4, 5, 6), sb46W)
+                    .addItem(SpellbookFactory.createRandomSpellBook(6, 7, 8, 9), sb69W)
+                    .addItem(SpellbookFactory.createRandomElementSpellBook(Element.AIR), airW)
+                    .maxItems(max)
+                    .register();
+        }
     }
-    
-    /**
-     * Structure-specific loot with themed spellbooks
-     */
+
     private static void registerStructureLoot() {
-        // Desert Pyramid - fire spells
-        LootInjector.builder()
-                .forLootTable("chests/desert_pyramid")
-                .addItem(SpellbookFactory.createRandomElementSpellBook(Element.FIRE), 100)
-                .addItem(SpellbookFactory.createRandomSpellBook(2, 3, 4), 40)
-                .maxItems(1)
-                .register();
-        
-        // Ocean Monument - water spells
-        LootInjector.builder()
-                .forLootTable("chests/underwater_ruin")
-                .addItem(SpellbookFactory.createRandomElementSpellBook(Element.WATER), 100)
-                .addItem(SpellbookFactory.createRandomSpellBook(1, 2, 3), 50)
-                .maxItems(1)
-                .register();
-        
-        // Stronghold - rare and epic
-        LootInjector.builder()
-                .forLootTable(
-                        "chests/stronghold_library",
-                        "chests/stronghold_corridor"
-                )
-                .addItem(SpellbookFactory.createRandomSpellBook(2, 3, 4), 100)
-                .addItem(SpellbookFactory.createRandomSpellBook(4, 5, 6), 60)
-                .addItem(SpellbookFactory.createRandomElementSpellBook(Element.DARK), 40)
-                .maxItems(1)
-                .register();
-        
-        // Woodland Mansion - dark spells
-        LootInjector.builder()
-                .forLootTable("chests/woodland_mansion")
-                .addItem(SpellbookFactory.createRandomElementSpellBook(Element.DARK), 100)
-                .addItem(SpellbookFactory.createRandomSpellBook(2, 3, 4), 80)
-                .maxItems(1)
-                .register();
+        if (!SpellbookConfig.isStructureLootEnabled()) return;
+        double m = SpellbookConfig.getLootMultiplier();
+
+        if (SpellbookConfig.isStructureCategoryEnabled("desert_pyramid")) {
+            int fireW = (int)(SpellbookConfig.getStructureInt("desert_pyramid", "fire_element_weight", 100) * m);
+            int sbW = (int)(SpellbookConfig.getStructureInt("desert_pyramid", "spellbook_2_4_weight", 40) * m);
+            int max = SpellbookConfig.getStructureInt("desert_pyramid", "max_items", 1);
+            LootInjector.builder()
+                    .forLootTable("chests/desert_pyramid")
+                    .addItem(SpellbookFactory.createRandomElementSpellBook(Element.FIRE), fireW)
+                    .addItem(SpellbookFactory.createRandomSpellBook(2, 3, 4), sbW)
+                    .maxItems(max)
+                    .register();
+        }
+
+        if (SpellbookConfig.isStructureCategoryEnabled("ocean_ruins")) {
+            int waterW = (int)(SpellbookConfig.getStructureInt("ocean_ruins", "water_element_weight", 100) * m);
+            int sbW = (int)(SpellbookConfig.getStructureInt("ocean_ruins", "spellbook_1_3_weight", 50) * m);
+            int max = SpellbookConfig.getStructureInt("ocean_ruins", "max_items", 1);
+            LootInjector.builder()
+                    .forLootTable("chests/underwater_ruin")
+                    .addItem(SpellbookFactory.createRandomElementSpellBook(Element.WATER), waterW)
+                    .addItem(SpellbookFactory.createRandomSpellBook(1, 2, 3), sbW)
+                    .maxItems(max)
+                    .register();
+        }
+
+        if (SpellbookConfig.isStructureCategoryEnabled("stronghold")) {
+            int sb24W = (int)(SpellbookConfig.getStructureInt("stronghold", "spellbook_2_4_weight", 100) * m);
+            int sb46W = (int)(SpellbookConfig.getStructureInt("stronghold", "spellbook_4_6_weight", 60) * m);
+            int darkW = (int)(SpellbookConfig.getStructureInt("stronghold", "dark_element_weight", 40) * m);
+            int max = SpellbookConfig.getStructureInt("stronghold", "max_items", 1);
+            LootInjector.builder()
+                    .forLootTable("chests/stronghold_library", "chests/stronghold_corridor")
+                    .addItem(SpellbookFactory.createRandomSpellBook(2, 3, 4), sb24W)
+                    .addItem(SpellbookFactory.createRandomSpellBook(4, 5, 6), sb46W)
+                    .addItem(SpellbookFactory.createRandomElementSpellBook(Element.DARK), darkW)
+                    .maxItems(max)
+                    .register();
+        }
+
+        if (SpellbookConfig.isStructureCategoryEnabled("woodland_mansion")) {
+            int darkW = (int)(SpellbookConfig.getStructureInt("woodland_mansion", "dark_element_weight", 100) * m);
+            int sbW = (int)(SpellbookConfig.getStructureInt("woodland_mansion", "spellbook_2_4_weight", 80) * m);
+            int max = SpellbookConfig.getStructureInt("woodland_mansion", "max_items", 1);
+            LootInjector.builder()
+                    .forLootTable("chests/woodland_mansion")
+                    .addItem(SpellbookFactory.createRandomElementSpellBook(Element.DARK), darkW)
+                    .addItem(SpellbookFactory.createRandomSpellBook(2, 3, 4), sbW)
+                    .maxItems(max)
+                    .register();
+        }
     }
-    
-    /**
-     * Mob drops - creatures drop spellbooks
-     */
+
     private static void registerMobDrops() {
-        // Zombie - common spellbooks (5% chance)
-        MobLootInjector.builder()
-                .forEntity(EntityType.ZOMBIE)
-                .addItem(SpellbookFactory.createRandomSpellBook(1, 2), 100)
-                .addItem(new ItemStack(Material.AIR), 1900) // 95% chance of nothing
-                .maxItems(1)
-                .register();
-        
-        // Skeleton - common/uncommon (5% chance)
-        MobLootInjector.builder()
-                .forEntity(EntityType.SKELETON)
-                .addItem(SpellbookFactory.createRandomSpellBook(1, 2), 60)
-                .addItem(SpellbookFactory.createRandomSpellBook(1, 2, 3), 40)
-                .addItem(new ItemStack(Material.AIR), 1900)
-                .maxItems(1)
-                .register();
-        
-        // Witch - uncommon/rare (15% chance)
-        MobLootInjector.builder()
-                .forEntity(EntityType.WITCH)
-                .addItem(SpellbookFactory.createRandomSpellBook(1, 2, 3), 80)
-                .addItem(SpellbookFactory.createRandomSpellBook(2, 3, 4), 60)
-                .addItem(SpellbookFactory.createRandomElementSpellBook(Element.DARK), 40)
-                .addItem(new ItemStack(Material.AIR), 520) // 85% nothing
-                .maxItems(1)
-                .register();
-        
-        // Evoker - rare/epic (50% chance)
-        MobLootInjector.builder()
-                .forEntity(EntityType.EVOKER)
-                .addItem(SpellbookFactory.createRandomSpellBook(2, 3, 4), 70)
-                .addItem(SpellbookFactory.createRandomSpellBook(4, 5, 6), 50)
-                .addItem(SpellbookFactory.createRandomElementSpellBook(Element.DARK), 30)
-                .addItem(new ItemStack(Material.AIR), 150) // 50% nothing
-                .maxItems(1)
-                .register();
-        
-        // Blaze - fire spellbooks (20% chance)
-        MobLootInjector.builder()
-                .forEntity(EntityType.BLAZE)
-                .addItem(SpellbookFactory.createRandomElementSpellBook(Element.FIRE), 100)
-                .addItem(SpellbookFactory.createSpellBook(SpellRegistry.getSpell("fire_blast")), 50)
-                .addItem(new ItemStack(Material.AIR), 350) // 80% nothing
-                .maxItems(1)
-                .register();
-        
-        // Drowned - water spellbooks (10% chance)
-        MobLootInjector.builder()
-                .forEntity(EntityType.DROWNED)
-                .addItem(SpellbookFactory.createRandomElementSpellBook(Element.WATER), 100)
-                .addItem(SpellbookFactory.createSpellBook(SpellRegistry.getSpell("water_pulse")), 40)
-                .addItem(new ItemStack(Material.AIR), 860) // 90% nothing
-                .maxItems(1)
-                .register();
-        
-        // Enderman - dark/air spellbooks (8% chance)
-        MobLootInjector.builder()
-                .forEntity(EntityType.ENDERMAN)
-                .addItem(SpellbookFactory.createRandomElementSpellBook(Element.DARK), 70)
-                .addItem(SpellbookFactory.createRandomElementSpellBook(Element.AIR), 50)
-                .addItem(SpellbookFactory.createSpellBook(SpellRegistry.getSpell("dark_tendrils")), 30)
-                .addItem(new ItemStack(Material.AIR), 1150) // 92% nothing
-                .maxItems(1)
-                .register();
-        
-        // Wither Skeleton - rare/dark (12% chance)
-        MobLootInjector.builder()
-                .forEntity(EntityType.WITHER_SKELETON)
-                .addItem(SpellbookFactory.createRandomSpellBook(2, 3, 4), 70)
-                .addItem(SpellbookFactory.createRandomElementSpellBook(Element.DARK), 80)
-                .addItem(new ItemStack(Material.AIR), 683) // 88% nothing
-                .maxItems(1)
-                .register();
-        
-        // Elder Guardian - epic/water (100% chance - boss mob)
-        MobLootInjector.builder()
-                .forEntity(EntityType.ELDER_GUARDIAN)
-                .addItem(SpellbookFactory.createRandomSpellBook(4, 5, 6), 60)
-                .addItem(SpellbookFactory.createRandomElementSpellBook(Element.WATER), 40)
-                .maxItems(1)
-                .register();
-        
-        // Ender Dragon - guaranteed epic (100% chance)
-        MobLootInjector.builder()
-                .forEntity(EntityType.ENDER_DRAGON)
-                .addItem(SpellbookFactory.createRandomSpellBook(4, 5, 6), 80)
-                .addItem(SpellbookFactory.createRandomSpellBook(7, 8, 9), 20)
-                .maxItems(2) // 2 spellbooks!
-                .register();
-        
-        // Wither - guaranteed epic (100% chance)
-        MobLootInjector.builder()
-                .forEntity(EntityType.WITHER)
-                .addItem(SpellbookFactory.createRandomSpellBook(4, 5, 6), 80)
-                .addItem(SpellbookFactory.createRandomSpellBook(7, 8, 9), 20)
-                .addItem(SpellbookFactory.createRandomElementSpellBook(Element.DARK), 60)
-                .maxItems(2) // 2 spellbooks!
-                .register();
+        if (!SpellbookConfig.isMobDropsEnabled()) return;
+        double m = SpellbookConfig.getLootMultiplier();
+
+        registerSimpleMob("zombie", EntityType.ZOMBIE, m,
+                new String[][]{ new String[]{"1,2", "spellbook_weight"} });
+        registerSimpleMob("stray", EntityType.STRAY, m,
+                new String[][]{ new String[]{"1,2", "spellbook_weight"} });
+
+        if (SpellbookConfig.isMobEnabled("skeleton")) {
+            int w12 = (int)(SpellbookConfig.getMobInt("skeleton", "spellbook_1_2_weight", 60) * m);
+            int w13 = (int)(SpellbookConfig.getMobInt("skeleton", "spellbook_1_3_weight", 40) * m);
+            int filler = SpellbookConfig.getMobInt("skeleton", "filler_weight", 1900);
+            MobLootInjector.builder()
+                    .forEntity(EntityType.SKELETON)
+                    .addItem(SpellbookFactory.createRandomSpellBook(1, 2), w12)
+                    .addItem(SpellbookFactory.createRandomSpellBook(1, 2, 3), w13)
+                    .addItem(new ItemStack(Material.AIR), filler)
+                    .maxItems(1)
+                    .register();
+        }
+
+        if (SpellbookConfig.isMobEnabled("witch")) {
+            int w13 = (int)(SpellbookConfig.getMobInt("witch", "spellbook_1_3_weight", 80) * m);
+            int w24 = (int)(SpellbookConfig.getMobInt("witch", "spellbook_2_4_weight", 60) * m);
+            int dark = (int)(SpellbookConfig.getMobInt("witch", "dark_element_weight", 40) * m);
+            int filler = SpellbookConfig.getMobInt("witch", "filler_weight", 520);
+            MobLootInjector.builder()
+                    .forEntity(EntityType.WITCH)
+                    .addItem(SpellbookFactory.createRandomSpellBook(1, 2, 3), w13)
+                    .addItem(SpellbookFactory.createRandomSpellBook(2, 3, 4), w24)
+                    .addItem(SpellbookFactory.createRandomElementSpellBook(Element.DARK), dark)
+                    .addItem(new ItemStack(Material.AIR), filler)
+                    .maxItems(1)
+                    .register();
+        }
+
+        if (SpellbookConfig.isMobEnabled("piglin")) {
+            int fire = (int)(SpellbookConfig.getMobInt("piglin", "fire_element_weight", 80) * m);
+            int w23 = (int)(SpellbookConfig.getMobInt("piglin", "spellbook_2_3_weight", 60) * m);
+            int filler = SpellbookConfig.getMobInt("piglin", "filler_weight", 1360);
+            MobLootInjector.builder()
+                    .forEntity(EntityType.PIGLIN)
+                    .addItem(SpellbookFactory.createRandomElementSpellBook(Element.FIRE), fire)
+                    .addItem(SpellbookFactory.createRandomSpellBook(2, 3), w23)
+                    .addItem(new ItemStack(Material.AIR), filler)
+                    .maxItems(1)
+                    .register();
+        }
+
+        if (SpellbookConfig.isMobEnabled("hoglin")) {
+            int w23 = (int)(SpellbookConfig.getMobInt("hoglin", "spellbook_2_3_weight", 100) * m);
+            int filler = SpellbookConfig.getMobInt("hoglin", "filler_weight", 900);
+            MobLootInjector.builder()
+                    .forEntity(EntityType.HOGLIN)
+                    .addItem(SpellbookFactory.createRandomSpellBook(2, 3), w23)
+                    .addItem(new ItemStack(Material.AIR), filler)
+                    .maxItems(1)
+                    .register();
+        }
+
+        if (SpellbookConfig.isMobEnabled("phantom")) {
+            int air = (int)(SpellbookConfig.getMobInt("phantom", "air_element_weight", 80) * m);
+            int w12 = (int)(SpellbookConfig.getMobInt("phantom", "spellbook_1_2_weight", 50) * m);
+            int filler = SpellbookConfig.getMobInt("phantom", "filler_weight", 1370);
+            MobLootInjector.builder()
+                    .forEntity(EntityType.PHANTOM)
+                    .addItem(SpellbookFactory.createRandomElementSpellBook(Element.AIR), air)
+                    .addItem(SpellbookFactory.createRandomSpellBook(1, 2), w12)
+                    .addItem(new ItemStack(Material.AIR), filler)
+                    .maxItems(1)
+                    .register();
+        }
+
+        if (SpellbookConfig.isMobEnabled("guardian")) {
+            int water = (int)(SpellbookConfig.getMobInt("guardian", "water_element_weight", 100) * m);
+            int w23 = (int)(SpellbookConfig.getMobInt("guardian", "spellbook_2_3_weight", 60) * m);
+            int filler = SpellbookConfig.getMobInt("guardian", "filler_weight", 1040);
+            MobLootInjector.builder()
+                    .forEntity(EntityType.GUARDIAN)
+                    .addItem(SpellbookFactory.createRandomElementSpellBook(Element.WATER), water)
+                    .addItem(SpellbookFactory.createRandomSpellBook(2, 3), w23)
+                    .addItem(new ItemStack(Material.AIR), filler)
+                    .maxItems(1)
+                    .register();
+        }
+
+        if (SpellbookConfig.isMobEnabled("evoker")) {
+            int w24 = (int)(SpellbookConfig.getMobInt("evoker", "spellbook_2_4_weight", 70) * m);
+            int w46 = (int)(SpellbookConfig.getMobInt("evoker", "spellbook_4_6_weight", 50) * m);
+            int dark = (int)(SpellbookConfig.getMobInt("evoker", "dark_element_weight", 30) * m);
+            int filler = SpellbookConfig.getMobInt("evoker", "filler_weight", 150);
+            MobLootInjector.builder()
+                    .forEntity(EntityType.EVOKER)
+                    .addItem(SpellbookFactory.createRandomSpellBook(2, 3, 4), w24)
+                    .addItem(SpellbookFactory.createRandomSpellBook(4, 5, 6), w46)
+                    .addItem(SpellbookFactory.createRandomElementSpellBook(Element.DARK), dark)
+                    .addItem(new ItemStack(Material.AIR), filler)
+                    .maxItems(1)
+                    .register();
+        }
+
+        if (SpellbookConfig.isMobEnabled("vindicator")) {
+            int dark = (int)(SpellbookConfig.getMobInt("vindicator", "dark_element_weight", 80) * m);
+            int w23 = (int)(SpellbookConfig.getMobInt("vindicator", "spellbook_2_3_weight", 60) * m);
+            int filler = SpellbookConfig.getMobInt("vindicator", "filler_weight", 340);
+            MobLootInjector.builder()
+                    .forEntity(EntityType.VINDICATOR)
+                    .addItem(SpellbookFactory.createRandomElementSpellBook(Element.DARK), dark)
+                    .addItem(SpellbookFactory.createRandomSpellBook(2, 3), w23)
+                    .addItem(new ItemStack(Material.AIR), filler)
+                    .maxItems(1)
+                    .register();
+        }
+
+        if (SpellbookConfig.isMobEnabled("ravager")) {
+            int earth = (int)(SpellbookConfig.getMobInt("ravager", "earth_element_weight", 100) * m);
+            int w34 = (int)(SpellbookConfig.getMobInt("ravager", "spellbook_3_4_weight", 70) * m);
+            int filler = SpellbookConfig.getMobInt("ravager", "filler_weight", 203);
+            MobLootInjector.builder()
+                    .forEntity(EntityType.RAVAGER)
+                    .addItem(SpellbookFactory.createRandomElementSpellBook(Element.EARTH), earth)
+                    .addItem(SpellbookFactory.createRandomSpellBook(3, 4), w34)
+                    .addItem(new ItemStack(Material.AIR), filler)
+                    .maxItems(1)
+                    .register();
+        }
+
+        if (SpellbookConfig.isMobEnabled("blaze")) {
+            int fire = (int)(SpellbookConfig.getMobInt("blaze", "fire_element_weight", 100) * m);
+            int specific = (int)(SpellbookConfig.getMobInt("blaze", "specific_spellbook_weight", 50) * m);
+            int filler = SpellbookConfig.getMobInt("blaze", "filler_weight", 350);
+            MobLootInjector.builder()
+                    .forEntity(EntityType.BLAZE)
+                    .addItem(SpellbookFactory.createRandomElementSpellBook(Element.FIRE), fire)
+                    .addItem(SpellbookFactory.createSpellBook(SpellRegistry.getSpell("fire_blast")), specific)
+                    .addItem(new ItemStack(Material.AIR), filler)
+                    .maxItems(1)
+                    .register();
+        }
+
+        if (SpellbookConfig.isMobEnabled("drowned")) {
+            int water = (int)(SpellbookConfig.getMobInt("drowned", "water_element_weight", 100) * m);
+            int specific = (int)(SpellbookConfig.getMobInt("drowned", "specific_spellbook_weight", 40) * m);
+            int filler = SpellbookConfig.getMobInt("drowned", "filler_weight", 860);
+            MobLootInjector.builder()
+                    .forEntity(EntityType.DROWNED)
+                    .addItem(SpellbookFactory.createRandomElementSpellBook(Element.WATER), water)
+                    .addItem(SpellbookFactory.createSpellBook(SpellRegistry.getSpell("water_pulse")), specific)
+                    .addItem(new ItemStack(Material.AIR), filler)
+                    .maxItems(1)
+                    .register();
+        }
+
+        if (SpellbookConfig.isMobEnabled("enderman")) {
+            int dark = (int)(SpellbookConfig.getMobInt("enderman", "dark_element_weight", 70) * m);
+            int air = (int)(SpellbookConfig.getMobInt("enderman", "air_element_weight", 50) * m);
+            int specific = (int)(SpellbookConfig.getMobInt("enderman", "specific_spellbook_weight", 20) * m);
+            int filler = SpellbookConfig.getMobInt("enderman", "filler_weight", 1150);
+            MobLootInjector.builder()
+                    .forEntity(EntityType.ENDERMAN)
+                    .addItem(SpellbookFactory.createRandomElementSpellBook(Element.DARK), dark)
+                    .addItem(SpellbookFactory.createRandomElementSpellBook(Element.AIR), air)
+                    .addItem(SpellbookFactory.createSpellBook(SpellRegistry.getSpell("blink")), specific)
+                    .addItem(new ItemStack(Material.AIR), filler)
+                    .maxItems(1)
+                    .register();
+        }
+
+        if (SpellbookConfig.isMobEnabled("wither_skeleton")) {
+            int w24 = (int)(SpellbookConfig.getMobInt("wither_skeleton", "spellbook_2_4_weight", 70) * m);
+            int dark = (int)(SpellbookConfig.getMobInt("wither_skeleton", "dark_element_weight", 80) * m);
+            int filler = SpellbookConfig.getMobInt("wither_skeleton", "filler_weight", 683);
+            MobLootInjector.builder()
+                    .forEntity(EntityType.WITHER_SKELETON)
+                    .addItem(SpellbookFactory.createRandomSpellBook(2, 3, 4), w24)
+                    .addItem(SpellbookFactory.createRandomElementSpellBook(Element.DARK), dark)
+                    .addItem(new ItemStack(Material.AIR), filler)
+                    .maxItems(1)
+                    .register();
+        }
+
+        if (SpellbookConfig.isMobEnabled("elder_guardian")) {
+            int water = (int)(SpellbookConfig.getMobInt("elder_guardian", "water_element_weight", 100) * m);
+            int w46 = (int)(SpellbookConfig.getMobInt("elder_guardian", "spellbook_4_6_weight", 60) * m);
+            int max = SpellbookConfig.getMobInt("elder_guardian", "max_items", 2);
+            MobLootInjector.builder()
+                    .forEntity(EntityType.ELDER_GUARDIAN)
+                    .addItem(SpellbookFactory.createRandomElementSpellBook(Element.WATER), water)
+                    .addItem(SpellbookFactory.createRandomSpellBook(4, 5, 6), w46)
+                    .maxItems(max)
+                    .register();
+        }
+
+        if (SpellbookConfig.isMobEnabled("ender_dragon")) {
+            int air = (int)(SpellbookConfig.getMobInt("ender_dragon", "air_element_weight", 100) * m);
+            int w46 = (int)(SpellbookConfig.getMobInt("ender_dragon", "spellbook_4_6_weight", 80) * m);
+            int w79 = (int)(SpellbookConfig.getMobInt("ender_dragon", "spellbook_7_9_weight", 20) * m);
+            int max = SpellbookConfig.getMobInt("ender_dragon", "max_items", 2);
+            MobLootInjector.builder()
+                    .forEntity(EntityType.ENDER_DRAGON)
+                    .addItem(SpellbookFactory.createRandomElementSpellBook(Element.AIR), air)
+                    .addItem(SpellbookFactory.createRandomSpellBook(4, 5, 6), w46)
+                    .addItem(SpellbookFactory.createRandomSpellBook(7, 8, 9), w79)
+                    .maxItems(max)
+                    .register();
+        }
+
+        if (SpellbookConfig.isMobEnabled("wither")) {
+            int dark = (int)(SpellbookConfig.getMobInt("wither", "dark_element_weight", 100) * m);
+            int w46 = (int)(SpellbookConfig.getMobInt("wither", "spellbook_4_6_weight", 80) * m);
+            int w79 = (int)(SpellbookConfig.getMobInt("wither", "spellbook_7_9_weight", 20) * m);
+            int max = SpellbookConfig.getMobInt("wither", "max_items", 2);
+            MobLootInjector.builder()
+                    .forEntity(EntityType.WITHER)
+                    .addItem(SpellbookFactory.createRandomElementSpellBook(Element.DARK), dark)
+                    .addItem(SpellbookFactory.createRandomSpellBook(4, 5, 6), w46)
+                    .addItem(SpellbookFactory.createRandomSpellBook(7, 8, 9), w79)
+                    .maxItems(max)
+                    .register();
+        }
     }
-    
-    /**
-     * Fishing loot
-     */
+
+    private static void registerSimpleMob(String configKey, EntityType entityType, double multiplier, String[][] spellbookEntries) {
+        if (!SpellbookConfig.isMobEnabled(configKey)) return;
+        MobLootInjector.Builder builder = MobLootInjector.builder().forEntity(entityType);
+        for (String[] entry : spellbookEntries) {
+            String circles = entry[0];
+            int weight = (int)(SpellbookConfig.getMobInt(configKey, entry[1], 100) * multiplier);
+            int[] circleArr = parseCircles(circles);
+            builder.addItem(SpellbookFactory.createRandomSpellBook(circleArr), weight);
+        }
+        int filler = SpellbookConfig.getMobInt(configKey, "filler_weight", 1900);
+        builder.addItem(new ItemStack(Material.AIR), filler).maxItems(1).register();
+    }
+
+    private static int[] parseCircles(String csv) {
+        String[] parts = csv.split(",");
+        int[] result = new int[parts.length];
+        for (int i = 0; i < parts.length; i++) {
+            result[i] = Integer.parseInt(parts[i].trim());
+        }
+        return result;
+    }
+
     private static void registerFishingLoot() {
-        // Treasure while fishing - rare spellbooks (very low chance)
+        if (!SpellbookConfig.isFishingEnabled()) return;
+        double m = SpellbookConfig.getLootMultiplier();
+
+        int sbW = (int)(SpellbookConfig.getFishingInt("random_spellbook_weight", 40) * m);
+        int waterW = (int)(SpellbookConfig.getFishingInt("water_element_weight", 50) * m);
+        int airW = (int)(SpellbookConfig.getFishingInt("air_element_weight", 30) * m);
+        int lightW = (int)(SpellbookConfig.getFishingInt("light_element_weight", 20) * m);
+        int max = SpellbookConfig.getFishingInt("max_items", 2);
+
         LootInjector.builder()
                 .forLootTable("gameplay/fishing/treasure")
-                .addItem(SpellbookFactory.createRandomSpellBook(1, 2, 3, 4, 5, 6), 30)
-                .addItem(SpellbookFactory.createRandomElementSpellBook(Element.WATER), 50)
-                .addItem(new ItemStack(Material.AIR), 920) // 92% nothing
-                .maxItems(1)
+                .addItem(SpellbookFactory.createRandomSpellBook(1, 2, 3, 4, 5, 6), sbW)
+                .addItem(SpellbookFactory.createRandomElementSpellBook(Element.WATER), waterW)
+                .addItem(SpellbookFactory.createRandomElementSpellBook(Element.AIR), airW)
+                .addItem(SpellbookFactory.createRandomElementSpellBook(Element.LIGHT), lightW)
+                .maxItems(max)
                 .register();
     }
-    
-    /**
-     * Piglin bartering
-     */
+
     private static void registerPiglinBartering() {
-        // Piglin barter - fire spellbooks (10% chance)
+        if (!SpellbookConfig.isPiglinBarteringEnabled()) return;
+        double m = SpellbookConfig.getLootMultiplier();
+
+        int fireW = (int)(SpellbookConfig.getPiglinInt("fire_element_weight", 60) * m);
+        int sbW = (int)(SpellbookConfig.getPiglinInt("random_spellbook_weight", 40) * m);
+        int nothingW = SpellbookConfig.getPiglinInt("nothing_weight", 900);
+        int max = SpellbookConfig.getPiglinInt("max_items", 1);
+
         LootInjector.builder()
                 .forLootTable("gameplay/piglin_bartering")
-                .addItem(SpellbookFactory.createRandomElementSpellBook(Element.FIRE), 60)
-                .addItem(SpellbookFactory.createRandomSpellBook(3, 4, 5, 6), 40)
-                .addItem(new ItemStack(Material.AIR), 900) // 90% nothing
-                .maxItems(1)
+                .addItem(SpellbookFactory.createRandomElementSpellBook(Element.FIRE), fireW)
+                .addItem(SpellbookFactory.createRandomSpellBook(3, 4, 5, 6), sbW)
+                .addItem(new ItemStack(Material.AIR), nothingW)
+                .maxItems(max)
                 .register();
     }
-    
-    /**
-     * Unregisters all spellbook loot
-     */
+
     public static void unregisterAll() {
         LootInjector.unregisterAll();
     }

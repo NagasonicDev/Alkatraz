@@ -40,7 +40,7 @@ public class MobLootInjector implements Listener {
          * Main event handler for loot generation
          */
         @EventHandler(priority = EventPriority.HIGH)
-        public static void onMobDeath(EntityDeathEvent event) {
+        public void onMobDeath(EntityDeathEvent event) {
             Entity entity = event.getEntity();
             // Check each registered injector
             for (MobLootInjector injector : REGISTERED_INJECTORS) {
