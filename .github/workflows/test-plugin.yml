@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v4
       - id: set
         run: |
-          JSON=$(grep -v '^\s*#' nms-versions.txt | grep -v '^\s*$' | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          JSON=$(grep -v '^\s*#' .github/workflows/nms-versions.txt | grep -v '^\s*$' | jq -R -s -c 'split("\n") | map(select(length > 0))')
           echo "versions=$JSON" >> "$GITHUB_OUTPUT"
           echo "Versions: $JSON"
 
