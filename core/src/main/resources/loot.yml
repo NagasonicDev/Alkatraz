@@ -1,0 +1,176 @@
+# ==============================
+# Spellbook Loot Configuration
+# Controls all spellbook drops from chests, mobs, fishing, etc.
+# ==============================
+loot:
+  # Global multiplier for loot weights. 1.0 = default, 0.5 = half as common, 2.0 = twice as common.
+  loot_multiplier: 1.0
+
+  # --- Chest Loot ---
+  chest_loot:
+    enabled: true
+    common:
+      enabled: true
+      spellbook_weight: 100
+      spellbook_1_2_weight: 30
+      filler_weight: 100
+      max_items: 5
+    dungeon:
+      enabled: true
+      spellbook_1_2_weight: 80
+      spellbook_1_3_weight: 60
+      spellbook_2_4_weight: 20
+      max_items: 1
+    nether:
+      enabled: true
+      fire_element_weight: 100
+      spellbook_2_4_weight: 50
+      spellbook_4_6_weight: 20
+      max_items: 1
+    end:
+      enabled: true
+      spellbook_2_4_weight: 100
+      spellbook_4_6_weight: 80
+      spellbook_6_9_weight: 40
+      air_element_weight: 60
+      max_items: 2
+
+  # --- Structure Loot ---
+  structure_loot:
+    enabled: true
+    desert_pyramid:
+      enabled: true
+      fire_element_weight: 100
+      spellbook_2_4_weight: 40
+      max_items: 1
+    ocean_ruins:
+      enabled: true
+      water_element_weight: 100
+      spellbook_1_3_weight: 50
+      max_items: 1
+    stronghold:
+      enabled: true
+      spellbook_2_4_weight: 100
+      spellbook_4_6_weight: 60
+      dark_element_weight: 40
+      max_items: 1
+    woodland_mansion:
+      enabled: true
+      dark_element_weight: 100
+      spellbook_2_4_weight: 80
+      max_items: 1
+
+  # --- Mob Drops ---
+  # Drop chance formula: spellbook_weight / (spellbook_weight + filler_weight)
+  # Example: 100 / (100 + 1900) = 5% drop chance
+  mob_drops:
+    enabled: true
+    zombie:
+      enabled: true
+      spellbook_weight: 100
+      filler_weight: 1900
+    stray:
+      enabled: true
+      spellbook_weight: 100
+      filler_weight: 1900
+    skeleton:
+      enabled: true
+      spellbook_1_2_weight: 60
+      spellbook_1_3_weight: 40
+      filler_weight: 1900
+    witch:
+      enabled: true
+      spellbook_1_3_weight: 80
+      spellbook_2_4_weight: 60
+      dark_element_weight: 40
+      filler_weight: 520
+    piglin:
+      enabled: true
+      fire_element_weight: 80
+      spellbook_2_3_weight: 60
+      filler_weight: 1360
+    hoglin:
+      enabled: true
+      spellbook_2_3_weight: 100
+      filler_weight: 900
+    phantom:
+      enabled: true
+      air_element_weight: 80
+      spellbook_1_2_weight: 50
+      filler_weight: 1370
+    guardian:
+      enabled: true
+      water_element_weight: 100
+      spellbook_2_3_weight: 60
+      filler_weight: 1040
+    evoker:
+      enabled: true
+      spellbook_2_4_weight: 70
+      spellbook_4_6_weight: 50
+      dark_element_weight: 30
+      filler_weight: 150
+    vindicator:
+      enabled: true
+      dark_element_weight: 80
+      spellbook_2_3_weight: 60
+      filler_weight: 340
+    ravager:
+      enabled: true
+      earth_element_weight: 100
+      spellbook_3_4_weight: 70
+      filler_weight: 203
+    blaze:
+      enabled: true
+      fire_element_weight: 100
+      specific_spellbook_weight: 50
+      filler_weight: 350
+    drowned:
+      enabled: true
+      water_element_weight: 100
+      specific_spellbook_weight: 40
+      filler_weight: 860
+    enderman:
+      enabled: true
+      dark_element_weight: 70
+      air_element_weight: 50
+      specific_spellbook_weight: 20
+      filler_weight: 1150
+    wither_skeleton:
+      enabled: true
+      spellbook_2_4_weight: 70
+      dark_element_weight: 80
+      filler_weight: 683
+    elder_guardian:
+      enabled: true
+      water_element_weight: 100
+      spellbook_4_6_weight: 60
+      max_items: 2
+    ender_dragon:
+      enabled: true
+      air_element_weight: 100
+      spellbook_4_6_weight: 80
+      spellbook_7_9_weight: 20
+      max_items: 2
+    wither:
+      enabled: true
+      dark_element_weight: 100
+      spellbook_4_6_weight: 80
+      spellbook_7_9_weight: 20
+      max_items: 2
+
+  # --- Fishing ---
+  fishing:
+    enabled: true
+    random_spellbook_weight: 40
+    water_element_weight: 50
+    air_element_weight: 30
+    light_element_weight: 20
+    max_items: 2
+
+  # --- Piglin Bartering ---
+  piglin_bartering:
+    enabled: true
+    fire_element_weight: 60
+    random_spellbook_weight: 40
+    nothing_weight: 900
+    max_items: 1
