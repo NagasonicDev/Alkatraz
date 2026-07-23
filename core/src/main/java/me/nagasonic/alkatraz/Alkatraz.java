@@ -1,5 +1,6 @@
 package me.nagasonic.alkatraz;
 import me.nagasonic.alkatraz.commands.AlkatrazCommand;
+import me.nagasonic.alkatraz.commands.CastCommand;
 import me.nagasonic.alkatraz.commands.RecipesCommand;
 import me.nagasonic.alkatraz.commands.SpellsCommand;
 import me.nagasonic.alkatraz.config.ConfigManager;
@@ -21,15 +22,20 @@ import me.nagasonic.alkatraz.mobs.MagicEntities;
 import me.nagasonic.alkatraz.mobs.MagicEntitySpawnListener;
 import me.nagasonic.alkatraz.mobs.MobModifier;
 import me.nagasonic.alkatraz.nms.NMS;
+import me.nagasonic.alkatraz.hooks.PlaceholderAPIHook;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileRegistry;
 import me.nagasonic.alkatraz.progression.ProgressionService;
 import me.nagasonic.alkatraz.progression.research.ResearchObjectiveListener;
 import me.nagasonic.alkatraz.progression.research.ResearchService;
+import me.nagasonic.alkatraz.spells.CoreSpellRegistryProvider;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
+import me.nagasonic.alkatraz.playerdata.profiles.CoreProfileProvider;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.spellbooks.SpellbookListener;
+import me.nagasonic.alkatraz.spells.spellbooks.SpellbookVillagerListener;
 import me.nagasonic.alkatraz.tutorial.FirstJoinTutorial;
+import me.nagasonic.alkatraz.api.SpellAPI;
 import me.nagasonic.alkatraz.util.UpdateChecker;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.Bukkit;
@@ -51,10 +57,16 @@ public final class Alkatraz extends JavaPlugin {
 
     private static Alkatraz instance;
     private static YamlConfiguration pluginConfig;
+    private static YamlConfiguration lootConfig;
     private static NMS nms = null;
     private static boolean enabled = true;
     private static boolean resourcePackForced = false;
     private static VerbosityLevel verbosity = VerbosityLevel.NORMAL;
+    
+    // Texture pack system
+    private static me.nagasonic.alkatraz.texturepack.TexturePackManager texturePackManager = null;
+    private static me.nagasonic.alkatraz.gui.GUIItemRegistry guiItemRegistry = null;
+    private static me.nagasonic.alkatraz.lang.LangManager langManager = null;
 
     {
         instance = this;
@@ -63,9 +75,11 @@ public final class Alkatraz extends JavaPlugin {
     @Override
     public void onLoad() {
         pluginConfig = saveAndUpdateConfig("config.yml");
+        lootConfig = saveAndUpdateConfig("loot.yml");
         saveConfig("playerdata/playerdata.yml");
         saveConfig("progression.yml");
         saveConfig("research.yml");
+        saveConfig("texturepack.yml"); // Save texture pack config
 
         verbosity = VerbosityLevel.fromString(pluginConfig.getString("verbose"));
         saveSpellConfigs();
@@ -75,7 +89,6 @@ public final class Alkatraz extends JavaPlugin {
             return;
         }
 
-        String lang = pluginConfig.getString("language", "en-us");
     }
 
     @Override
@@ -83,6 +96,7 @@ public final class Alkatraz extends JavaPlugin {
         long enableStart = System.nanoTime();
         logVeryHigh("Alkatraz enabling...");
         // Plugin startup logic
+        Configs.reload();
         if ((boolean) Configs.CHECK_UPDATES.get()) UpdateChecker.checkUpdate();
         if (!enabled){
             logSevere("This version of Minecraft is not compatible with Alkatraz.");
@@ -90,6 +104,22 @@ public final class Alkatraz extends JavaPlugin {
             return;
         } else nms.onEnable();
         resourcePackForced = pluginConfig.getBoolean("resource_pack_override");
+        
+        // Initialize texture pack system
+        logVeryHigh("Initializing TexturePackManager...");
+        texturePackManager = new me.nagasonic.alkatraz.texturepack.TexturePackManager();
+        texturePackManager.load();
+        
+        // Initialize GUI item registry
+        logVeryHigh("Initializing GUIItemRegistry...");
+        guiItemRegistry = new me.nagasonic.alkatraz.gui.GUIItemRegistry();
+        guiItemRegistry.init();
+
+        // Initialize LangManager
+        logVeryHigh("Initializing LangManager...");
+        langManager = new me.nagasonic.alkatraz.lang.LangManager(
+            pluginConfig.getString("language", "english"));
+        
         Metrics metrics = new Metrics(this, 27657);
         logVeryHigh("Registering profiles...");
         ProfileRegistry.registerProfiles();
@@ -105,8 +135,11 @@ public final class Alkatraz extends JavaPlugin {
         MagicItemBootstrap.initialize();
         logVeryHigh("Registering spells...");
         SpellRegistry.registerSpells();
+        SpellAPI.setSpellRegistryProvider(new CoreSpellRegistryProvider());
+        SpellAPI.setProfileProvider(new CoreProfileProvider());
         logVeryHigh("Registering listeners...");
         registerListener(new SpellbookListener());
+        registerListener(new SpellbookVillagerListener());
         LootInjector.register(this);
         registerListener(new MagicEntitySpawnListener());
         registerListener(new MobModifier());
@@ -123,9 +156,15 @@ public final class Alkatraz extends JavaPlugin {
         logInfo("NMS version " + nms.getClass().getSimpleName() + " registered!");
         getCommand("spells").setExecutor(new SpellsCommand());
         getCommand("recipes").setExecutor(new RecipesCommand());
+        getCommand("cast").setExecutor(new CastCommand());
         getCommand("alkatraz").setExecutor(new AlkatrazCommand());
         getCommand("alkatraz").setTabCompleter(new AlkatrazCommand());
         SpellComponentHandler.tick();
+        logVeryHigh("Initializing PlaceholderAPI hook...");
+        PlaceholderAPIHook placeholderHook = new PlaceholderAPIHook();
+        if (placeholderHook.isPresent()) {
+            placeholderHook.ifPresent();
+        }
         long elapsed = (System.nanoTime() - enableStart) / 1_000_000;
         logVeryHigh("Alkatraz enabled in " + elapsed + "ms");
     }
@@ -147,6 +186,26 @@ public final class Alkatraz extends JavaPlugin {
 
     public static VerbosityLevel getVerbosity() {
         return verbosity;
+    }
+    
+    /**
+     * Get the TexturePackManager instance.
+     * @return The texture pack manager
+     */
+    public static me.nagasonic.alkatraz.texturepack.TexturePackManager getTexturePackManager() {
+        return texturePackManager;
+    }
+    
+    /**
+     * Get the GUIItemRegistry instance.
+     * @return The GUI item registry
+     */
+    public static me.nagasonic.alkatraz.gui.GUIItemRegistry getGuiItemRegistry() {
+        return guiItemRegistry;
+    }
+
+    public static me.nagasonic.alkatraz.lang.LangManager getLangManager() {
+        return langManager;
     }
 
     public static void log(VerbosityLevel level, String message) {
@@ -260,6 +319,10 @@ public final class Alkatraz extends JavaPlugin {
 
     public static YamlConfiguration getPluginConfig() {
         return pluginConfig;
+    }
+
+    public static YamlConfiguration getLootConfig() {
+        return lootConfig;
     }
 
     private void saveSpellConfigs(){

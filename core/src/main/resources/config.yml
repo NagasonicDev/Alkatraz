@@ -25,3 +25,81 @@ resource_pack_override: false
 
 # Whether to show the first-join tutorial to new players
 first_join_tutorial: true
+
+# ==============================
+# Spellbook Rarity Weights
+# Controls how common each circle level is in random spellbooks.
+# Higher weight = more common. DEFAULT values shown.
+# ==============================
+spellbook:
+  circle_weights:
+    circle_1: 10000
+    circle_2: 5000
+    circle_3: 2500
+    circle_4: 1250
+    circle_5: 750
+    circle_6: 375
+    circle_7: 150
+    circle_8: 75
+    circle_9: 30
+
+# ==============================
+# Magic Stone Drops
+# Controls drops from magic mobs.
+# ==============================
+magic_stone:
+  # Base drop chance (0.0 = never, 1.0 = always). DEFAULT: 0.75
+  base_drop_chance: 0.75
+  # Extra chance per Looting level. DEFAULT: 0.10
+  looting_bonus: 0.10
+
+# ==============================
+# Villager Spellbook Trading
+# Librarian villagers may sell random spellbooks.
+# ==============================
+villager_trading:
+  enabled: true
+  # Chance (out of 100) for 2 spellbook trades. Remaining chance is split between 1 trade and 0 trades.
+  chance_two_trades: 20
+  # Chance (out of 100, after subtracting chance_two_trades) for 1 spellbook trade.
+  chance_one_trade: 40
+  max_trades_per_villager: 2
+  trade_max_uses: 3
+  # Trade costs by tier. Costs are randomized within the min-max range.
+  # Tier 1 = Circle 1, Tier 2 = Circle 1-2, etc.
+  tiers:
+    1:
+      emerald_min: 4
+      emerald_max: 7
+      stone_min: 1
+      stone_max: 1
+    2:
+      emerald_min: 8
+      emerald_max: 13
+      stone_min: 1
+      stone_max: 2
+    3:
+      emerald_min: 14
+      emerald_max: 21
+      stone_min: 2
+      stone_max: 3
+    4:
+      emerald_min: 22
+      emerald_max: 31
+      stone_min: 3
+      stone_max: 5
+    5:
+      emerald_min: 32
+      emerald_max: 47
+      stone_min: 5
+      stone_max: 8
+
+# PlaceholderAPI integration settings
+placeholders:
+  leaderboard:
+    # Enable the leaderboard placeholders (%alkatraz_leaderboard_*)
+    enabled: true
+    # How often to refresh the leaderboard cache (in minutes)
+    refresh_interval_minutes: 5
+    # Maximum number of entries on the leaderboard
+    max_entries: 10
