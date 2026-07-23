@@ -3,6 +3,7 @@ package me.nagasonic.alkatraz.items.magic.adapter;
 import me.nagasonic.alkatraz.events.PlayerSpellPrepareEvent;
 import me.nagasonic.alkatraz.items.magic.MagicItemServices;
 import me.nagasonic.alkatraz.items.magic.equipment.EquipmentService;
+import me.nagasonic.alkatraz.items.magic.equipment.EquipmentStatService;
 import me.nagasonic.alkatraz.api.magic.equipment.EquipmentSlot;
 import me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack;
 import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
@@ -284,6 +285,8 @@ public final class MagicItemTriggerAdapter implements Listener {
                 MagicItemServices.get().dispatchTrigger(new EquipTriggerEvent(scoped));
             });
         }
+
+        EquipmentStatService.getInstance().syncEquipmentStats(player);
     }
 
     /**
@@ -310,10 +313,10 @@ public final class MagicItemTriggerAdapter implements Listener {
         // Fire on_equip for all virtual slots
         EquipmentService service = MagicItemServices.equipment();
         for (EquipmentSlot slot : java.util.List.of(
-                EquipmentSlot.RING_1,
-                EquipmentSlot.RING_2,
-                EquipmentSlot.ROBE,
-                EquipmentSlot.ARTIFACT
+                EquipmentSlot.RING,
+                EquipmentSlot.NECKLACE,
+                EquipmentSlot.BRACELET,
+                EquipmentSlot.PENDANT
         )) {
             var itemStack = service.profile(player).items().get(slot);
             if (itemStack != null) {

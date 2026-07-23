@@ -1,7 +1,8 @@
 package me.nagasonic.alkatraz.playerdata;
 
-import de.tr7zw.nbtapi.NBT;
+import de.tr7zw.changeme.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.Spell;
@@ -33,6 +34,8 @@ import java.util.*;
  */
 public class SpellHotbarManager {
 
+    private static LangManager lang() { return Alkatraz.getLangManager(); }
+
     /** Slot index of the exit-casting item (rightmost hotbar slot, where the wand sits). */
     public static final int EXIT_SLOT = 8;
 
@@ -45,6 +48,7 @@ public class SpellHotbarManager {
 
     private static final Map<UUID, ItemStack> hotbarActive = new HashMap<>();
     private static final Map<UUID, Long> justEntered = new HashMap<>();
+    private static final Map<UUID, Long> justExited = new HashMap<>();
 
     // -------------------------------------------------------------------------
     // Public API
@@ -59,6 +63,8 @@ public class SpellHotbarManager {
      */
     public static void enter(Player player, ItemStack wand) {
         if (hotbarActive.containsKey(player.getUniqueId())) return;
+        Long exitDeadline = justExited.get(player.getUniqueId());
+        if (exitDeadline != null && System.currentTimeMillis() < exitDeadline) return;
         hotbarActive.put(player.getUniqueId(), wand);
         MagicProfile profile = ProfileManager.getProfile(player, MagicProfile.class);
         profile.setCanCast(false);
@@ -120,6 +126,7 @@ public class SpellHotbarManager {
 
         hotbarActive.remove(uuid);
         justEntered.remove(uuid);
+        justExited.put(uuid, System.currentTimeMillis() + 500);
 
         ItemStack[] storage = savedInventories.remove(uuid);
         ItemStack offhand = savedOffhand.remove(uuid);
@@ -227,9 +234,9 @@ public class SpellHotbarManager {
     private static ItemStack buildEmptySlotItem(int slotNumber) {
         ItemStack item = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ColorFormat.format("&8Spell Slot " + slotNumber + " &7(empty)"));
+        meta.setDisplayName(lang().get("hotbar.slot_empty", "slot", String.valueOf(slotNumber)));
         List<String> lore = new ArrayList<>();
-        lore.add(ColorFormat.format("&7Configure in the Spells menu."));
+        lore.add(lang().get("hotbar.slot_empty_lore"));
         meta.setLore(lore);
         item.setItemMeta(meta);
         return item;

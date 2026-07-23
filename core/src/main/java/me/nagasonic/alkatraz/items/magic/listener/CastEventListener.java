@@ -1,11 +1,7 @@
 package me.nagasonic.alkatraz.items.magic.listener;
 
-import de.tr7zw.nbtapi.NBT;
+import de.tr7zw.changeme.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
-import me.nagasonic.alkatraz.gui.implementation.GrimoirePageMenu;
-import me.nagasonic.alkatraz.gui.implementation.WandTableSelectionMenu;
-import me.nagasonic.alkatraz.items.magic.component.handler.grimoire.GrimoireComponentHandler;
-import me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack;
 import me.nagasonic.alkatraz.playerdata.SpellHotbarManager;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
@@ -13,16 +9,13 @@ import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellCastValidator;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
 import me.nagasonic.alkatraz.util.WandUtils;
-import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -52,156 +45,9 @@ public class CastEventListener implements Listener {
         spellDamageTargets.add(target.getUniqueId());
     }
 
-    // ============================
-    // CAST CODE BUILDING EVENTS
-    // ============================
-
-    @EventHandler
-    private void onClick(PlayerInteractEvent e){
-        if (SpellHotbarManager.isActive(e.getPlayer())) return;
-        if (e.getItem() != null) {
-            if (e.getItem().getType() != Material.AIR && e.getItem().getAmount() != 0) {
-                if (WandUtils.isWand(e.getItem())) {
-                    if ((e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) && isEnchantingTable(e.getClickedBlock())) {
-                        e.setCancelled(true);
-                        new WandTableSelectionMenu(e.getPlayer()).open();
-                        return;
-                    }
-                    MagicProfile data = ProfileManager.getProfile(e.getPlayer(), MagicProfile.class);
-                    if (data.getCastMode().equals("hotbar") && !data.isCasting()){
-                        SpellHotbarManager.enter(e.getPlayer(), e.getItem());
-                        return;
-                    }
-                    if (!data.isCasting()){
-                        String code = NBT.get(e.getItem(), nbt -> (String) nbt.getString("cast_code"));
-                        if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
-                            NBT.modify(e.getItem(), nbt -> { nbt.setString("cast_code", code + "R"); });
-                        } else if (e.getAction() == Action.LEFT_CLICK_AIR || e.getAction() == Action.LEFT_CLICK_BLOCK) {
-                            NBT.modify(e.getItem(), nbt -> { nbt.setString("cast_code", code + "L"); });
-                        }
-                        String code2 = NBT.get(e.getItem(), nbt -> (String) nbt.getString("cast_code"));
-                        String message = code2.replace("R", "\u25C6");
-                        message = message.replace("L", "\u25C8");
-                        message = message.replace("S", "\u2756");
-                        Utils.sendActionBar(e.getPlayer(), message);
-                        if (code2.length() >= 5){
-                            Spell spell = SpellRegistry.getSpellByCode(code2);
-                            tryCast(e.getPlayer(), e.getItem(), spell);
-                        }
-                    }
-                } else if (MagicItemStack.isGrimoireDefinition(e.getItem())) {
-                    if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
-                        e.setCancelled(true);
-                        ItemStack stack = e.getItem();
-                        MagicItemStack.readInstance(stack).ifPresent(instance -> {
-                            me.nagasonic.alkatraz.api.magic.definition.ItemDefinition def = me.nagasonic.alkatraz.api.magic.registry.MagicItemRegistries.ITEM_DEFINITIONS.get(instance.definitionKey()).orElse(null);
-                            if (def == null) return;
-                            GrimoireComponentHandler.ensurePagesInitialized(instance, def);
-                            new GrimoirePageMenu(e.getPlayer(), stack, instance, def).open();
-                        });
-                    }
-                }
-            }
-        }
-    }
-
     @EventHandler
     private void onAttack(EntityDamageByEntityEvent e) {
-        if (spellDamageTargets.remove(e.getEntity().getUniqueId())) return;
-        if (e.getDamager() instanceof Player p) {
-            if (SpellHotbarManager.isActive(p)) return;
-            ItemStack wand = p.getItemInHand();
-            if (wand.getType() != Material.AIR && wand.getAmount() != 0) {
-                if (WandUtils.isWand(wand)) {
-                    MagicProfile data = ProfileManager.getProfile(p, MagicProfile.class);
-                    if (data.getCastMode().equals("hotbar") && !data.isCasting()){
-                        SpellHotbarManager.enter(p, wand);
-                        return;
-                    }
-                    if (!data.isCasting()){
-                        String code = NBT.get(wand, nbt -> (String) nbt.getString("cast_code"));
-                        NBT.modify(wand, nbt -> { nbt.setString("cast_code", code + "L"); });
-                        String code2 = NBT.get(wand, nbt -> (String) nbt.getString("cast_code"));
-                        String message = code2.replace("R", "\u25C6");
-                        message = message.replace("L", "\u25C8");
-                        message = message.replace("S", "\u2756");
-                        Utils.sendActionBar(p, message);
-                        if (code2.length() >= 5){
-                            Spell spell = SpellRegistry.getSpellByCode(code2);
-                            tryCast(p, wand, spell);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    @EventHandler
-    private void onClickEntity(PlayerInteractEntityEvent e) {
-        ItemStack wand = e.getPlayer().getInventory().getItem(e.getHand());
-        Player p = e.getPlayer();
-        if (SpellHotbarManager.isActive(p)) return;
-        if (wand.getType() != Material.AIR && wand.getAmount() != 0){
-            if (WandUtils.isWand(wand)) {
-                e.setCancelled(true);
-                MagicProfile data = ProfileManager.getProfile(e.getPlayer(), MagicProfile.class);
-                if (data.getCastMode().equals("hotbar") && !data.isCasting()){
-                    SpellHotbarManager.enter(e.getPlayer(), wand);
-                    return;
-                }
-                if (!data.isCasting()){
-                    String code = NBT.get(wand, nbt -> (String) nbt.getString("cast_code"));
-                    NBT.modify(wand, nbt -> { nbt.setString("cast_code", code + "R"); });
-                    String code2 = NBT.get(wand, nbt -> (String) nbt.getString("cast_code"));
-                    String message = code2.replace("R", "\u25C6");
-                    message = message.replace("L", "\u25C8");
-                    message = message.replace("S", "\u2756");
-                    Utils.sendActionBar(p, message);
-                    if (code2.length() >= 5){
-                        Spell spell = SpellRegistry.getSpellByCode(code2);
-                        tryCast(p, wand, spell);
-                    }
-                }
-            }
-        }
-    }
-
-    @EventHandler
-    private void onSwap(PlayerSwapHandItemsEvent e){
-        ItemStack wand = e.getOffHandItem();
-        Player p = e.getPlayer();
-        if (SpellHotbarManager.isActive(p)) return;
-        if (wand != null){
-            if (wand.getType() != Material.AIR && wand.getAmount() != 0){
-                if (WandUtils.isWand(wand)) {
-                    e.setCancelled(true);
-                    if (!ProfileManager.getProfile(e.getPlayer().getUniqueId(), MagicProfile.class).isCasting()){
-                        String code = NBT.get(wand, nbt -> (String) nbt.getString("cast_code"));
-                        NBT.modify(wand, nbt -> { nbt.setString("cast_code", code + "S"); });
-                        String code2 = NBT.get(wand, nbt -> (String) nbt.getString("cast_code"));
-                        String message = code2.replace("R", "\u25C6");
-                        message = message.replace("L", "\u25C8");
-                        message = message.replace("S", "\u2756");
-                        Utils.sendActionBar(p, message);
-                        if (code2.length() >= 5){
-                            Spell spell = SpellRegistry.getSpellByCode(code2);
-                            tryCast(p, wand, spell);
-                        }
-                        p.setItemInHand(wand);
-                    }
-                }
-            }
-        }
-    }
-
-    @EventHandler
-    private void onClickAtEntity(PlayerInteractAtEntityEvent e) {
-        ItemStack wand = e.getPlayer().getInventory().getItem(e.getHand());
-        if (wand.getType() != Material.AIR && wand.getAmount() != 0){
-            if (WandUtils.isWand(wand)) {
-                e.setCancelled(true);
-            }
-        }
+        spellDamageTargets.remove(e.getEntity().getUniqueId());
     }
 
     // ============================
@@ -443,7 +289,7 @@ public class CastEventListener implements Listener {
     private void onHotbarItemHeld(PlayerItemHeldEvent e) {
         Player p = e.getPlayer();
         if (!SpellHotbarManager.isActive(p)) return;
-        if (e.getNewSlot() < SpellHotbarManager.SPELL_SLOT_COUNT) return;
+        if (e.getNewSlot() <= SpellHotbarManager.SPELL_SLOT_COUNT) return;
         e.setCancelled(true);
     }
 
@@ -473,6 +319,7 @@ public class CastEventListener implements Listener {
         Player p = e.getPlayer();
         if (!SpellHotbarManager.isActive(p)) return;
         e.setCancelled(true);
+        if (ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class).isCasting()) return;
         ItemStack wand = SpellHotbarManager.getWand(p);
         if (wand == null) return;
         ItemStack item = e.getItem();
@@ -499,6 +346,7 @@ public class CastEventListener implements Listener {
         Player p = e.getPlayer();
         if (!SpellHotbarManager.isActive(p)) return;
         e.setCancelled(true);
+        if (ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class).isCasting()) return;
         ItemStack wand = SpellHotbarManager.getWand(p);
         if (wand == null) return;
         ItemStack item = p.getInventory().getItem(p.getInventory().getHeldItemSlot());
@@ -531,7 +379,6 @@ public class CastEventListener implements Listener {
     private void onHotbarDeath(PlayerDeathEvent e) {
         Player p = e.getEntity();
         if (SpellHotbarManager.isActive(p)) {
-            e.getDrops().clear();
             SpellHotbarManager.exit(p);
         }
     }
@@ -567,26 +414,5 @@ public class CastEventListener implements Listener {
     public static void switchFrom(Player p) {
         Alkatraz.getNms().fakeExp(p, p.getExp(), p.getLevel(), p.getTotalExperience());
         SpellHotbarManager.exit(p);
-    }
-
-    // ============================
-    // CAST HELPERS
-    // ============================
-
-    private void tryCast(Player p, ItemStack wand, Spell spell){
-        if (spell != null) {
-            Alkatraz.logVeryHigh("Cast attempt: " + spell.getId() + " by " + p.getName());
-            if (SpellCastValidator.canCast(p, wand, spell)){
-                Alkatraz.logVeryHigh("Cast validated, executing: " + spell.getId());
-                spell.cast(p, wand);
-            } else {
-                Alkatraz.logHigh("Cast validation failed for " + (spell != null ? spell.getId() : "null") + " by " + p.getName());
-            }
-        }
-        NBT.modify(wand, nbt -> { nbt.setString("cast_code", ""); });
-    }
-
-    private boolean isEnchantingTable(Block block) {
-        return block != null && block.getType() == Material.ENCHANTING_TABLE;
     }
 }
