@@ -1,0 +1,14 @@
+definition: alkatraz:storm_pendant
+shape:
+  - "BMB"
+  - "BUB"
+  - "BMB"
+ingredients:
+  B: AMETHYST_BLOCK
+  M: MAGIC_STONE
+  U: zephyr_pendant
+requirements:
+  - type: number_stat
+    stat: circleLevel
+    minimum: 2
+    description: "Requires Circle Level 2"

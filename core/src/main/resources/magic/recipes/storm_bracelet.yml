@@ -1,0 +1,14 @@
+definition: alkatraz:storm_bracelet
+shape:
+  - "BMB"
+  - "BUB"
+  - "BMB"
+ingredients:
+  B: IRON_INGOT
+  M: MAGIC_STONE
+  U: zephyr_bracelet
+requirements:
+  - type: number_stat
+    stat: circleLevel
+    minimum: 2
+    description: "Requires Circle Level 2"

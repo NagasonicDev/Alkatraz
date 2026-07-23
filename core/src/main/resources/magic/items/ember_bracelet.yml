@@ -1,0 +1,11 @@
+key: alkatraz:ember_bracelet
+material: IRON_NUGGET
+display_name: '&r&cEmber Bracelet'
+lore:
+  - 'A simple piece of Fire jewelry.'
+components:
+  - alkatraz:equipment
+attributes:
+  alkatraz:fire_affinity: 3
+  alkatraz:max_mana: 20
+max_engravings: 0

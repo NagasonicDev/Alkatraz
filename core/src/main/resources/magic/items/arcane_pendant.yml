@@ -1,0 +1,12 @@
+key: alkatraz:arcane_pendant
+material: AMETHYST_SHARD
+display_name: '&r&dArcane Pendant'
+lore:
+  - 'A powerful Magic accessory.'
+components:
+  - alkatraz:equipment
+attributes:
+  alkatraz:magic_affinity: 5
+  alkatraz:max_mana: 40
+  alkatraz:mana_regeneration: 1
+max_engravings: 1

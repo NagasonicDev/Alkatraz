@@ -13,10 +13,10 @@ public final class EquipmentSlot implements Keyed {
     public static final EquipmentSlot LEGS = of("legs");
     public static final EquipmentSlot FEET = of("feet");
     public static final EquipmentSlot BODY = of("body");
-    public static final EquipmentSlot RING_1 = of("ring_1");
-    public static final EquipmentSlot RING_2 = of("ring_2");
-    public static final EquipmentSlot ARTIFACT = of("artifact");
-    public static final EquipmentSlot ROBE = of("robe");
+    public static final EquipmentSlot RING = of("ring");
+    public static final EquipmentSlot NECKLACE = of("necklace");
+    public static final EquipmentSlot BRACELET = of("bracelet");
+    public static final EquipmentSlot PENDANT = of("pendant");
 
     private final NamespacedKey key;
     private final org.bukkit.inventory.EquipmentSlot vanillaSlot;

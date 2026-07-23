@@ -1,11 +1,13 @@
 definition: alkatraz:enchanter_robe
 shape:
-  - "L L"
-  - "LLL"
-  - "LPL"
+  - "P P"
+  - "LSL"
+  - "LRL"
 ingredients:
   L: LEATHER
   P: BLAZE_POWDER
+  S: SCHOLAR_ROBE
+  R: ARCANE_RING
 requirements:
   - type: number_stat
     stat: circleLevel

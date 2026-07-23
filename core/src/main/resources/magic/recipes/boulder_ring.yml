@@ -1,0 +1,13 @@
+definition: alkatraz:boulder_ring
+shape:
+  - " B "
+  - "BEB"
+  - " B "
+ingredients:
+  B: GOLD_NUGGET
+  E: COBBLESTONE
+requirements:
+  - type: number_stat
+    stat: circleLevel
+    minimum: 1
+    description: "Requires Circle Level 1"

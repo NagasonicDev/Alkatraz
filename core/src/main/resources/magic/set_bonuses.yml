@@ -1,0 +1,199 @@
+set_bonuses:
+  ember:
+    2:
+      alkatraz:fire_affinity: 2
+      alkatraz:max_mana: 15
+    4:
+      alkatraz:fire_affinity: 5
+      alkatraz:spell_power: 0.5
+      alkatraz:max_mana: 30
+  blaze:
+    2:
+      alkatraz:fire_affinity: 4
+      alkatraz:max_mana: 30
+    4:
+      alkatraz:fire_affinity: 10
+      alkatraz:spell_power: 1
+      alkatraz:max_mana: 60
+  inferno:
+    2:
+      alkatraz:fire_affinity: 8
+      alkatraz:max_mana: 50
+    4:
+      alkatraz:fire_affinity: 20
+      alkatraz:spell_power: 2
+      alkatraz:max_mana: 100
+  frost:
+    2:
+      alkatraz:water_affinity: 2
+      alkatraz:max_mana: 15
+    4:
+      alkatraz:water_affinity: 5
+      alkatraz:spell_power: 0.5
+      alkatraz:max_mana: 30
+  glacier:
+    2:
+      alkatraz:water_affinity: 4
+      alkatraz:max_mana: 30
+    4:
+      alkatraz:water_affinity: 8
+      alkatraz:spell_power: 1
+      alkatraz:max_mana: 60
+  abyss:
+    2:
+      alkatraz:water_affinity: 12
+      alkatraz:max_mana: 50
+    4:
+      alkatraz:water_affinity: 25
+      alkatraz:spell_power: 2
+      alkatraz:max_mana: 100
+  zephyr:
+    2:
+      alkatraz:air_affinity: 2
+      alkatraz:max_mana: 15
+    4:
+      alkatraz:air_affinity: 5
+      alkatraz:spell_power: 0.5
+      alkatraz:max_mana: 30
+  storm:
+    2:
+      alkatraz:air_affinity: 4
+      alkatraz:max_mana: 30
+    4:
+      alkatraz:air_affinity: 10
+      alkatraz:spell_power: 1
+      alkatraz:max_mana: 60
+  tempest:
+    2:
+      alkatraz:air_affinity: 12
+      alkatraz:max_mana: 50
+    4:
+      alkatraz:air_affinity: 25
+      alkatraz:spell_power: 2
+      alkatraz:max_mana: 100
+  boulder:
+    2:
+      alkatraz:earth_affinity: 2
+      alkatraz:max_mana: 15
+    4:
+      alkatraz:earth_affinity: 5
+      alkatraz:spell_power: 0.5
+      alkatraz:max_mana: 30
+  mountain:
+    2:
+      alkatraz:earth_affinity: 4
+      alkatraz:max_mana: 30
+    4:
+      alkatraz:earth_affinity: 10
+      alkatraz:spell_power: 1
+      alkatraz:max_mana: 60
+  titan:
+    2:
+      alkatraz:earth_affinity: 12
+      alkatraz:max_mana: 50
+    4:
+      alkatraz:earth_affinity: 25
+      alkatraz:spell_power: 2
+      alkatraz:max_mana: 100
+  radiant:
+    2:
+      alkatraz:light_affinity: 2
+      alkatraz:max_mana: 15
+    4:
+      alkatraz:light_affinity: 5
+      alkatraz:spell_power: 0.5
+      alkatraz:max_mana: 30
+  luminous:
+    2:
+      alkatraz:light_affinity: 4
+      alkatraz:max_mana: 30
+    4:
+      alkatraz:light_affinity: 10
+      alkatraz:spell_power: 1
+      alkatraz:max_mana: 60
+  divine:
+    2:
+      alkatraz:light_affinity: 12
+      alkatraz:max_mana: 50
+    4:
+      alkatraz:light_affinity: 25
+      alkatraz:spell_power: 2
+      alkatraz:max_mana: 100
+  shadow:
+    2:
+      alkatraz:dark_affinity: 2
+      alkatraz:max_mana: 15
+    4:
+      alkatraz:dark_affinity: 5
+      alkatraz:spell_power: 0.5
+      alkatraz:max_mana: 30
+  void:
+    2:
+      alkatraz:dark_affinity: 4
+      alkatraz:max_mana: 30
+    4:
+      alkatraz:dark_affinity: 10
+      alkatraz:spell_power: 1
+      alkatraz:max_mana: 60
+  nether:
+    2:
+      alkatraz:dark_affinity: 12
+      alkatraz:max_mana: 50
+    4:
+      alkatraz:dark_affinity: 25
+      alkatraz:spell_power: 2
+      alkatraz:max_mana: 100
+  mystic:
+    2:
+      alkatraz:magic_affinity: 2
+      alkatraz:max_mana: 10
+    4:
+      alkatraz:magic_affinity: 3
+      alkatraz:max_mana: 20
+  arcane:
+    2:
+      alkatraz:magic_affinity: 3
+      alkatraz:max_mana: 20
+    4:
+      alkatraz:magic_affinity: 6
+      alkatraz:max_mana: 40
+  ethereal:
+    2:
+      alkatraz:magic_affinity: 5
+      alkatraz:max_mana: 30
+    4:
+      alkatraz:magic_affinity: 10
+      alkatraz:spell_power: 0.5
+      alkatraz:max_mana: 75
+  apprentice:
+    2:
+      alkatraz:max_mana: 10
+      alkatraz:mana_regeneration: 0.5
+    4:
+      alkatraz:max_mana: 25
+      alkatraz:mana_regeneration: 1
+      alkatraz:cast_time_multiplier: -0.02
+  scholar:
+    2:
+      alkatraz:max_mana: 20
+      alkatraz:mana_regeneration: 1
+    4:
+      alkatraz:max_mana: 50
+      alkatraz:mana_regeneration: 2
+      alkatraz:cast_time_multiplier: -0.04
+  enchanter:
+    2:
+      alkatraz:max_mana: 30
+      alkatraz:mana_regeneration: 1.5
+    4:
+      alkatraz:max_mana: 75
+      alkatraz:mana_regeneration: 3
+      alkatraz:cast_time_multiplier: -0.06
+  archmage:
+    2:
+      alkatraz:max_mana: 50
+      alkatraz:mana_regeneration: 2
+    4:
+      alkatraz:max_mana: 100
+      alkatraz:mana_regeneration: 4
+      alkatraz:cast_time_multiplier: -0.08

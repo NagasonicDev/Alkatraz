@@ -1,0 +1,12 @@
+key: alkatraz:luminous_ring
+material: GOLD_NUGGET
+display_name: '&r&fLuminous Ring'
+lore:
+  - 'A powerful Light accessory.'
+components:
+  - alkatraz:equipment
+attributes:
+  alkatraz:light_affinity: 5
+  alkatraz:max_mana: 40
+  alkatraz:mana_regeneration: 1
+max_engravings: 1

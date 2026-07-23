@@ -1,0 +1,13 @@
+key: alkatraz:ethereal_pendant
+material: ECHO_SHARD
+display_name: '&r&6Ethereal Pendant'
+lore:
+  - 'A legendary Magic artifact of immense power.'
+components:
+  - alkatraz:equipment
+attributes:
+  alkatraz:magic_affinity: 10
+  alkatraz:max_mana: 75
+  alkatraz:mana_regeneration: 1
+  alkatraz:spell_power: 0.5
+max_engravings: 2

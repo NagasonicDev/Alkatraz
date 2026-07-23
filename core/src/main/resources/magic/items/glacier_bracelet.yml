@@ -1,0 +1,12 @@
+key: alkatraz:glacier_bracelet
+material: IRON_NUGGET
+display_name: '&r&3Glacier Bracelet'
+lore:
+  - 'A powerful Water accessory.'
+components:
+  - alkatraz:equipment
+attributes:
+  alkatraz:water_affinity: 5
+  alkatraz:max_mana: 40
+  alkatraz:mana_regeneration: 1
+max_engravings: 1

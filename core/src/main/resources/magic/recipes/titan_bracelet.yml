@@ -1,0 +1,13 @@
+definition: alkatraz:titan_bracelet
+shape:
+  - "EEE"
+  - "EUE"
+  - "EEE"
+ingredients:
+  E: OBSIDIAN
+  U: mountain_bracelet
+requirements:
+  - type: number_stat
+    stat: circleLevel
+    minimum: 3
+    description: "Requires Circle Level 3"

@@ -1,10 +1,12 @@
 definition: alkatraz:archmage_boots
 shape:
-  - "L L"
-  - "L D"
+  - "D D"
+  - "LEL"
+  - "   "
 ingredients:
   L: LEATHER
   D: DIAMOND
+  E: ENCHANTER_BOOTS
 requirements:
   - type: number_stat
     stat: circleLevel

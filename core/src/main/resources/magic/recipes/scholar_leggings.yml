@@ -1,11 +1,12 @@
 definition: alkatraz:scholar_leggings
 shape:
-  - "LLL"
-  - "L B"
+  - "LBL"
+  - "LAL"
   - "L L"
 ingredients:
   L: LEATHER
   B: BOOK
+  A: APPRENTICE_LEGGINGS
 requirements:
   - type: number_stat
     stat: circleLevel

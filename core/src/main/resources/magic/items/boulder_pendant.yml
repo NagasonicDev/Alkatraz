@@ -1,0 +1,11 @@
+key: alkatraz:boulder_pendant
+material: AMETHYST_SHARD
+display_name: '&r&aBoulder Pendant'
+lore:
+  - 'A simple piece of Earth jewelry.'
+components:
+  - alkatraz:equipment
+attributes:
+  alkatraz:earth_affinity: 3
+  alkatraz:max_mana: 20
+max_engravings: 0

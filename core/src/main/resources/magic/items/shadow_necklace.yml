@@ -1,0 +1,11 @@
+key: alkatraz:shadow_necklace
+material: STRING
+display_name: '&r&8Shadow Necklace'
+lore:
+  - 'A simple piece of Dark jewelry.'
+components:
+  - alkatraz:equipment
+attributes:
+  alkatraz:dark_affinity: 3
+  alkatraz:max_mana: 20
+max_engravings: 0

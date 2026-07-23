@@ -1,0 +1,20 @@
+key: alkatraz:void_wand
+material: END_ROD
+display_name: '&r&8Void Wand'
+lore:
+  - '&7A wand born from the abyss,'
+  - '&7whispering forbidden knowledge.'
+max_engravings: 2
+components:
+  - alkatraz:wand
+  - alkatraz:mana_container
+attributes:
+  alkatraz:spell_power: 10
+  alkatraz:max_circle: 5
+  alkatraz:cast_time_multiplier: 0.7
+  alkatraz:fire_affinity: 0
+  alkatraz:air_affinity: 0
+  alkatraz:water_affinity: 0
+  alkatraz:earth_affinity: 0
+  alkatraz:light_affinity: 0
+  alkatraz:dark_affinity: 15

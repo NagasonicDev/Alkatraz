@@ -1,0 +1,11 @@
+key: alkatraz:shadow_pendant
+material: AMETHYST_SHARD
+display_name: '&r&8Shadow Pendant'
+lore:
+  - 'A simple piece of Dark jewelry.'
+components:
+  - alkatraz:equipment
+attributes:
+  alkatraz:dark_affinity: 3
+  alkatraz:max_mana: 20
+max_engravings: 0

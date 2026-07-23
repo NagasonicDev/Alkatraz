@@ -1,0 +1,13 @@
+definition: alkatraz:ethereal_ring
+shape:
+  - "EEE"
+  - "EUE"
+  - "EEE"
+ingredients:
+  E: ECHO_SHARD
+  U: arcane_ring
+requirements:
+  - type: number_stat
+    stat: circleLevel
+    minimum: 3
+    description: "Requires Circle Level 3"

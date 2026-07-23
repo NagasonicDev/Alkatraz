@@ -1,0 +1,13 @@
+definition: alkatraz:nether_pendant
+shape:
+  - "EEE"
+  - "EUE"
+  - "EEE"
+ingredients:
+  E: ENDER_PEARL
+  U: void_pendant
+requirements:
+  - type: number_stat
+    stat: circleLevel
+    minimum: 3
+    description: "Requires Circle Level 3"

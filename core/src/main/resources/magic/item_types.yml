@@ -72,9 +72,20 @@ types:
   wand:
     - STICK
     - BLAZE_ROD
+    - END_ROD
   ring:
     - GOLD_NUGGET
-  robe:
-    - AIR
-  artifact:
-    - NETHER_STAR
+    - DIAMOND
+  necklace:
+    - STRING
+    - IRON_CHAIN
+    - GOLD_INGOT
+  bracelet:
+    - IRON_NUGGET
+    - IRON_INGOT
+    - GOLD_INGOT
+  pendant:
+    - AMETHYST_SHARD
+    - AMETHYST_BLOCK
+    - ECHO_SHARD
+    - DIAMOND

@@ -1,10 +1,11 @@
 definition: alkatraz:scholar_boots
 shape:
-  - "L L"
-  - "L B"
+  - "B B"
+  - "LAL"
 ingredients:
   L: LEATHER
   B: BOOK
+  A: APPRENTICE_BOOTS
 requirements:
   - type: number_stat
     stat: circleLevel

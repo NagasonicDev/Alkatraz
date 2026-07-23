@@ -1,7 +1,7 @@
 definition: alkatraz:apprentice_boots
 shape:
   - "L L"
-  - "L M"
+  - "LML"
 ingredients:
   L: LEATHER
   M: MAGIC_STONE

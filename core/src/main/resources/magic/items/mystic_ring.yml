@@ -1,0 +1,11 @@
+key: alkatraz:mystic_ring
+material: GOLD_NUGGET
+display_name: '&r&bMystic Ring'
+lore:
+  - 'A simple piece of Magic jewelry.'
+components:
+  - alkatraz:equipment
+attributes:
+  alkatraz:magic_affinity: 3
+  alkatraz:max_mana: 20
+max_engravings: 0

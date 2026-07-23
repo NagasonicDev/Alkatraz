@@ -1,8 +1,14 @@
 definition: alkatraz:arcane_ring
 shape:
-  - " G "
-  - "GMG"
-  - " G "
+  - "BMB"
+  - "BUB"
+  - "BMB"
 ingredients:
-  G: GOLD_NUGGET
+  B: GOLD_INGOT
   M: MAGIC_STONE
+  U: mystic_ring
+requirements:
+  - type: number_stat
+    stat: circleLevel
+    minimum: 2
+    description: "Requires Circle Level 2"

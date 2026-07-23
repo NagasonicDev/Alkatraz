@@ -1,0 +1,12 @@
+key: alkatraz:mountain_pendant
+material: AMETHYST_SHARD
+display_name: '&r&2Mountain Pendant'
+lore:
+  - 'A powerful Earth accessory.'
+components:
+  - alkatraz:equipment
+attributes:
+  alkatraz:earth_affinity: 5
+  alkatraz:max_mana: 40
+  alkatraz:mana_regeneration: 1
+max_engravings: 1

@@ -1,0 +1,20 @@
+key: alkatraz:runic_grimoire
+material: BOOK
+display_name: '&r&5Runic Grimoire'
+lore:
+  - '&7A grimoire bound in runic leather,'
+  - '&7saturated with raw magical power.'
+max_engravings: 2
+components:
+  - alkatraz:grimoire
+attributes:
+  alkatraz:spell_power: 15
+  alkatraz:max_circle: 5
+  alkatraz:cast_time_multiplier: 0.7
+  alkatraz:fire_affinity: 3
+  alkatraz:air_affinity: 3
+  alkatraz:water_affinity: 3
+  alkatraz:earth_affinity: 3
+  alkatraz:light_affinity: 3
+  alkatraz:dark_affinity: 3
+page_count: 5

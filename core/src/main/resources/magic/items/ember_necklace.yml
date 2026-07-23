@@ -1,0 +1,11 @@
+key: alkatraz:ember_necklace
+material: STRING
+display_name: '&r&cEmber Necklace'
+lore:
+  - 'A simple piece of Fire jewelry.'
+components:
+  - alkatraz:equipment
+attributes:
+  alkatraz:fire_affinity: 3
+  alkatraz:max_mana: 20
+max_engravings: 0

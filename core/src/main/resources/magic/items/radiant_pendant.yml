@@ -1,0 +1,11 @@
+key: alkatraz:radiant_pendant
+material: AMETHYST_SHARD
+display_name: '&r&eRadiant Pendant'
+lore:
+  - 'A simple piece of Light jewelry.'
+components:
+  - alkatraz:equipment
+attributes:
+  alkatraz:light_affinity: 3
+  alkatraz:max_mana: 20
+max_engravings: 0

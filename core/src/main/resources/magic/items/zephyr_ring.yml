@@ -1,0 +1,11 @@
+key: alkatraz:zephyr_ring
+material: GOLD_NUGGET
+display_name: '&r&fZephyr Ring'
+lore:
+  - 'A simple piece of Air jewelry.'
+components:
+  - alkatraz:equipment
+attributes:
+  alkatraz:air_affinity: 3
+  alkatraz:max_mana: 20
+max_engravings: 0

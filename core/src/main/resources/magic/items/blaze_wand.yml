@@ -1,0 +1,20 @@
+key: alkatraz:blaze_wand
+material: END_ROD
+display_name: '&r&6Blaze Wand'
+lore:
+  - '&7A wand forged in living flame,'
+  - '&7harnessing the fury of fire.'
+max_engravings: 2
+components:
+  - alkatraz:wand
+  - alkatraz:mana_container
+attributes:
+  alkatraz:spell_power: 10
+  alkatraz:max_circle: 5
+  alkatraz:cast_time_multiplier: 0.7
+  alkatraz:fire_affinity: 15
+  alkatraz:air_affinity: 0
+  alkatraz:water_affinity: 0
+  alkatraz:earth_affinity: 0
+  alkatraz:light_affinity: 0
+  alkatraz:dark_affinity: 0
