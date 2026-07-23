@@ -1,6 +1,9 @@
 package me.nagasonic.alkatraz.progression.research;
 
+import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
+import me.nagasonic.alkatraz.lang.LangManager;
+import me.nagasonic.alkatraz.util.ColorFormat;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.progression.research.definition.ResearchCategory;
@@ -18,6 +21,7 @@ import org.bukkit.entity.Player;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -166,12 +170,19 @@ public final class ResearchService {
         ConfigurationSection section = config.getConfigurationSection("categories");
         if (section == null) return loaded;
 
+        LangManager lang = Alkatraz.getLangManager();
         for (String id : section.getKeys(false)) {
             String root = "categories." + id + ".";
             Material icon = material(config.getString(root + "icon"), Material.BOOK);
+            String displayName = config.getString(root + "display_name", id);
+            String nameKey = "override.research.categories." + id.toLowerCase() + ".name";
+            String langName = lang.get(nameKey);
+            if (!langName.equals(nameKey)) {
+                displayName = langName;
+            }
             loaded.put(id.toLowerCase(), new ResearchCategory(
                     id.toLowerCase(),
-                    config.getString(root + "display_name", id),
+                    displayName,
                     icon
             ));
         }
@@ -183,16 +194,32 @@ public final class ResearchService {
         ConfigurationSection section = config.getConfigurationSection("nodes");
         if (section == null) return loaded;
 
+        LangManager lang = Alkatraz.getLangManager();
         for (String id : section.getKeys(false)) {
             String key = id.toLowerCase();
             String root = "nodes." + id + ".";
             List<String> parents = config.getStringList(root + "parents").stream()
                     .map(String::toLowerCase)
                     .toList();
+
+            String displayName = config.getString(root + "display_name", id);
+            String nameKey = "override.research.nodes." + key + ".name";
+            String langName = lang.get(nameKey);
+            if (!langName.equals(nameKey)) {
+                displayName = langName;
+            }
+
+            List<String> description = config.getStringList(root + "description");
+            String descKey = "override.research.nodes." + key + ".description";
+            String langDesc = lang.get(descKey);
+            if (!langDesc.equals(descKey)) {
+                description = Arrays.asList(ColorFormat.format(langDesc).split("\\n"));
+            }
+
             ResearchNode node = new ResearchNode(
                     key,
-                    config.getString(root + "display_name", id),
-                    config.getStringList(root + "description"),
+                    displayName,
+                    description,
                     config.getString(root + "category", "general").toLowerCase(),
                     material(config.getString(root + "icon"), Material.PAPER),
                     config.getInt(root + "position.x"),

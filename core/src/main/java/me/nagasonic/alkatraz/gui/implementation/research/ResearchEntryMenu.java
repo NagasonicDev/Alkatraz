@@ -1,6 +1,11 @@
 package me.nagasonic.alkatraz.gui.implementation.research;
 
+import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.gui.ItemBuilder;
 import me.nagasonic.alkatraz.gui.Menu;
+import me.nagasonic.alkatraz.lang.LangManager;
+import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
+import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.progression.research.ResearchService;
 import me.nagasonic.alkatraz.progression.research.ResearchState;
 import me.nagasonic.alkatraz.progression.research.definition.ResearchNode;
@@ -11,12 +16,20 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ResearchEntryMenu extends Menu {
+
+    private static LangManager lang() { return Alkatraz.getLangManager(); }
+
+    private static final int SLOT_SUMMARY = 4;
+    private static final int SLOT_TASKS = 13;
+    private static final int SLOT_REWARDS_ACTION = 22;
+    private static final int SLOT_LINKED_START = 36;
+    private static final int SLOT_BACK = 49;
+    private static final int MAX_LINKED = 9;
 
     private final ResearchNode node;
     private final String category;
@@ -24,7 +37,7 @@ public class ResearchEntryMenu extends Menu {
     private final int offsetY;
 
     public ResearchEntryMenu(Player viewer, ResearchNode node, String category, int offsetX, int offsetY) {
-        super(viewer, ColorFormat.format("&5Research: " + node.getDisplayName()), 54);
+        super(viewer, lang().get("menu.research_entry", "name", node.getDisplayName()), 54);
         this.node = node;
         this.category = category;
         this.offsetX = offsetX;
@@ -35,13 +48,11 @@ public class ResearchEntryMenu extends Menu {
     protected void build() {
         inventory.clear();
         ResearchState state = ResearchService.getState(viewer, node);
-        inventory.setItem(4, summaryItem(state));
-        inventory.setItem(19, requirementsItem(state));
-        inventory.setItem(22, tasksItem());
-        inventory.setItem(25, rewardsItem());
-        inventory.setItem(31, actionItem(state));
-        inventory.setItem(45, backItem());
+        inventory.setItem(SLOT_SUMMARY, summaryItem(state));
+        inventory.setItem(SLOT_TASKS, tasksItem());
+        inventory.setItem(SLOT_REWARDS_ACTION, rewardsActionItem(state));
         addLinkedResearch();
+        inventory.setItem(SLOT_BACK, backItem());
     }
 
     @Override
@@ -58,7 +69,7 @@ public class ResearchEntryMenu extends Menu {
             if (!started) {
                 int cost = node.getResearchPointsCost();
                 if (cost > 0) {
-                    viewer.sendMessage(ColorFormat.format("&cYou need " + cost + " Research Points to start this research."));
+                    viewer.sendMessage(ColorFormat.format(lang().get("research.insufficient_points", "points", String.valueOf(cost))));
                 }
             }
             refresh();
@@ -71,56 +82,57 @@ public class ResearchEntryMenu extends Menu {
         }
         if ("linked_research".equals(action)) {
             String id = getStringData(clicked, "research_id");
-            ResearchService.getNode(id).ifPresent(next -> new ResearchEntryMenu(viewer, next, category, offsetX, offsetY).open());
+            ResearchService.getNode(id).ifPresent(next ->
+                    new ResearchEntryMenu(viewer, next, category, offsetX, offsetY).open());
             return true;
         }
         return true;
     }
 
     private ItemStack summaryItem(ResearchState state) {
-        ItemStack item = new ItemStack(state == ResearchState.COMPLETED ? Material.ENCHANTED_BOOK : node.getIcon());
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ColorFormat.format("&d" + node.getDisplayName()));
+        Material material = state == ResearchState.COMPLETED ? Material.ENCHANTED_BOOK : node.getIcon();
+        String name = state == ResearchState.HIDDEN ? lang().get("research.unknown") : "&d" + node.getDisplayName();
         List<String> lore = new ArrayList<>();
-        lore.add(ColorFormat.format("&7State: " + stateColor(state) + formatState(state)));
-        lore.add(ColorFormat.format("&7Category: &f" + node.getCategory()));
-        lore.add(ColorFormat.format("&7"));
-        for (String line : node.getDescription()) {
-            lore.add(ColorFormat.format("&7" + line));
-        }
-        meta.setLore(lore);
-        item.setItemMeta(meta);
-        return item;
-    }
 
-    private ItemStack requirementsItem(ResearchState state) {
-        ItemStack item = new ItemStack(state == ResearchState.LOCKED ? Material.REDSTONE_TORCH : Material.TORCH);
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ColorFormat.format("&eRequirements"));
-        List<String> lore = new ArrayList<>();
-        if (node.getParents().isEmpty()) {
-            lore.add(ColorFormat.format("&aNo prior research required."));
-        } else {
+        lore.add(ColorFormat.format("&7State: " + stateColor(state) + formatState(state)));
+
+        int cost = node.getResearchPointsCost();
+        if (cost > 0) {
+            lore.add(ColorFormat.format("&7Cost: &b" + cost + " Research Points"));
+        }
+
+        if (!node.getDescription().isEmpty()) {
+            lore.add(ColorFormat.format(""));
+            for (String line : node.getDescription()) {
+                lore.add(ColorFormat.format("&7" + line));
+            }
+        }
+
+        if (!node.getParents().isEmpty()) {
+            lore.add(ColorFormat.format(""));
+            lore.add(ColorFormat.format(lang().get("research.entry_requirements") + ":"));
             for (String parentId : node.getParents()) {
                 ResearchService.getNode(parentId).ifPresent(parent -> {
                     ResearchState parentState = ResearchService.getState(viewer, parent);
                     String mark = parentState == ResearchState.COMPLETED ? "&a[Done] " : "&c[Missing] ";
-                    lore.add(ColorFormat.format(mark + stateColor(parentState) + parent.getDisplayName()));
+                    lore.add(ColorFormat.format("  " + mark + stateColor(parentState) + parent.getDisplayName()));
                 });
             }
         }
-        meta.setLore(lore);
-        item.setItemMeta(meta);
-        return item;
+
+        return ItemBuilder.of(material)
+                .rawName(ColorFormat.format(name))
+                .rawLore(lore)
+                .build();
     }
 
     private ItemStack tasksItem() {
-        ItemStack item = new ItemStack(ResearchService.objectivesComplete(viewer, node) ? Material.FILLED_MAP : Material.MAP);
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ColorFormat.format("&bResearch Tasks"));
+        boolean allComplete = ResearchService.objectivesComplete(viewer, node);
+        Material material = allComplete ? Material.FILLED_MAP : Material.MAP;
         List<String> lore = new ArrayList<>();
+
         if (node.getObjectives().isEmpty()) {
-            lore.add(ColorFormat.format("&aNo tasks required."));
+            lore.add(ColorFormat.format(lang().get("research.no_tasks")));
         } else {
             for (ResearchObjective objective : node.getObjectives()) {
                 int progress = ResearchService.getObjectiveProgress(viewer, node, objective);
@@ -129,133 +141,131 @@ public class ResearchEntryMenu extends Menu {
                 lore.add(ColorFormat.format("&8  " + progress + "/" + objective.getAmount()));
             }
         }
-        meta.setLore(lore);
-        item.setItemMeta(meta);
-        return item;
+
+        return ItemBuilder.of(material)
+                .rawName(ColorFormat.format(lang().get("research.entry_tasks")))
+                .rawLore(lore)
+                .build();
     }
 
-    private ItemStack rewardsItem() {
-        ItemStack item = new ItemStack(Material.CHEST);
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ColorFormat.format("&aRewards"));
+    private ItemStack rewardsActionItem(ResearchState state) {
         List<String> lore = new ArrayList<>();
-        if (node.getRewards().isEmpty()) {
-            lore.add(ColorFormat.format("&7No configured rewards."));
-        } else {
+
+        if (!node.getRewards().isEmpty()) {
+            lore.add(ColorFormat.format(lang().get("research.entry_rewards") + ":"));
             for (ResearchReward reward : node.getRewards()) {
                 lore.add(ColorFormat.format("&7" + rewardText(reward)));
             }
         }
-        if (node.getUnlocks().isEmpty()) {
-            lore.add(ColorFormat.format("&7"));
-            lore.add(ColorFormat.format("&7No connected unlock text."));
-        } else {
-            lore.add(ColorFormat.format("&7"));
-            lore.add(ColorFormat.format("&dUnlocks:"));
+
+        if (!node.getUnlocks().isEmpty()) {
+            if (!lore.isEmpty()) lore.add(ColorFormat.format(""));
+            lore.add(ColorFormat.format(lang().get("research.entry_unlocks") + ":"));
             for (String unlock : node.getUnlocks()) {
                 lore.add(ColorFormat.format("&7" + unlock));
             }
         }
-        List<ResearchNode> children = ResearchService.getChildren(node.getId());
-        if (!children.isEmpty()) {
-            lore.add(ColorFormat.format("&7"));
-            lore.add(ColorFormat.format("&dConnected research:"));
-            for (ResearchNode child : children) {
-                lore.add(ColorFormat.format("&8-> &7" + child.getDisplayName()));
-            }
-        }
-        meta.setLore(lore);
-        item.setItemMeta(meta);
-        return item;
-    }
 
-    private ItemStack actionItem(ResearchState state) {
-        Material material = switch (state) {
-            case AVAILABLE -> Material.WRITABLE_BOOK;
-            case IN_PROGRESS -> Material.EXPERIENCE_BOTTLE;
-            case COMPLETED -> Material.LIME_DYE;
-            default -> Material.BARRIER;
-        };
-        String name = switch (state) {
-            case AVAILABLE -> "&eStart Research";
-            case IN_PROGRESS -> "&bComplete Research";
-            case COMPLETED -> "&aCompleted";
-            case LOCKED -> "&cLocked";
-            case HIDDEN -> "&8Hidden";
-        };
-        ItemStack item = new ItemStack(material);
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ColorFormat.format(name));
-        List<String> lore = new ArrayList<>();
-        if (state == ResearchState.AVAILABLE) {
-            int cost = node.getResearchPointsCost();
-            if (cost > 0) {
-                int balance = me.nagasonic.alkatraz.playerdata.profiles.ProfileManager
-                        .getProfile(viewer, me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile.class)
-                        .getResearchPoints();
-                boolean canAfford = balance >= cost;
-                lore.add(ColorFormat.format("&7Cost: &b" + cost + " Research Points"));
-                lore.add(ColorFormat.format("&7Balance: &f" + balance));
-                if (!canAfford) {
-                    lore.add(ColorFormat.format("&cNot enough Research Points!"));
+        if (!lore.isEmpty()) lore.add(ColorFormat.format(""));
+        String actionName;
+        Material actionMat;
+        String actionTag = null;
+
+        switch (state) {
+            case AVAILABLE -> {
+                actionMat = Material.WRITABLE_BOOK;
+                actionName = lang().get("research.entry_start");
+                int cost = node.getResearchPointsCost();
+                if (cost > 0) {
+                    int balance = ProfileManager.getProfile(viewer, MagicProfile.class).getResearchPoints();
+                    boolean canAfford = balance >= cost;
+                    lore.add(ColorFormat.format("&7Cost: &b" + cost + " RP &7| Balance: &f" + balance));
+                    if (!canAfford) {
+                        lore.add(ColorFormat.format(lang().get("research.insufficient_points", "points", String.valueOf(cost))));
+                    }
                 }
-                lore.add(ColorFormat.format(""));
+                lore.add(ColorFormat.format("&7Click to begin studying."));
+                actionTag = "start";
             }
-            lore.add(ColorFormat.format("&7Begin studying this research."));
-        } else if (state == ResearchState.IN_PROGRESS) {
-            if (ResearchService.objectivesComplete(viewer, node)) {
-                lore.add(ColorFormat.format("&7Record your findings and claim rewards."));
-            } else {
-                lore.add(ColorFormat.format("&7Complete all research tasks first."));
+            case IN_PROGRESS -> {
+                actionMat = Material.EXPERIENCE_BOTTLE;
+                actionName = lang().get("research.entry_complete");
+                if (ResearchService.objectivesComplete(viewer, node)) {
+                    lore.add(ColorFormat.format("&7Click to record findings and claim rewards."));
+                } else {
+                    lore.add(ColorFormat.format("&7Complete all research tasks first."));
+                }
+                actionTag = "complete";
             }
-        } else {
-            lore.add(ColorFormat.format("&7No action available."));
+            case COMPLETED -> {
+                actionMat = Material.LIME_DYE;
+                actionName = lang().get("research.entry_completed");
+                lore.add(ColorFormat.format("&7This research is finished."));
+            }
+            case LOCKED -> {
+                actionMat = Material.BARRIER;
+                actionName = lang().get("research.entry_locked");
+                String firstName = node.getParents().stream()
+                        .map(id -> ResearchService.getNode(id).map(ResearchNode::getDisplayName).orElse(null))
+                        .filter(java.util.Objects::nonNull)
+                        .findFirst().orElse(null);
+                if (firstName != null) {
+                    lore.add(ColorFormat.format("&7Complete &c" + firstName + " &7first."));
+                } else {
+                    lore.add(ColorFormat.format("&7Requirements not yet met."));
+                }
+            }
+            default -> {
+                actionMat = Material.BARRIER;
+                actionName = lang().get("research.entry_hidden");
+                lore.add(ColorFormat.format("&7Complete more research to reveal this."));
+            }
         }
-        meta.setLore(lore);
-        item.setItemMeta(meta);
-        if (state == ResearchState.AVAILABLE) {
-            setMenuData(item, "action", "start");
-        } else if (state == ResearchState.IN_PROGRESS) {
-            setMenuData(item, "action", "complete");
-        }
-        return item;
-    }
 
-    private ItemStack backItem() {
-        ItemStack item = new ItemStack(Material.ARROW);
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ColorFormat.format("&fBack to Graph"));
-        item.setItemMeta(meta);
-        setMenuData(item, "action", "back");
+        ItemStack item = ItemBuilder.of(actionMat)
+                .rawName(ColorFormat.format(actionName))
+                .rawLore(lore)
+                .build();
+
+        if (actionTag != null) {
+            setMenuData(item, "action", actionTag);
+        }
         return item;
     }
 
     private void addLinkedResearch() {
-        int slot = 37;
-        for (String parentId : node.getParents()) {
-            if (slot > 43) break;
-            int finalSlot = slot;
-            ResearchService.getNode(parentId).ifPresent(parent -> inventory.setItem(finalSlot, linkedItem(parent, "&7Requires")));
-            slot++;
+        List<String> parents = node.getParents();
+        List<ResearchNode> children = ResearchService.getChildren(node.getId());
+
+        List<ResearchNode> allLinked = new ArrayList<>();
+        for (String parentId : parents) {
+            ResearchService.getNode(parentId).ifPresent(allLinked::add);
         }
-        for (ResearchNode child : ResearchService.getChildren(node.getId())) {
-            if (slot > 43) break;
-            inventory.setItem(slot++, linkedItem(child, "&8->"));
+        for (ResearchNode child : children) {
+            allLinked.add(child);
+        }
+
+        for (int i = 0; i < Math.min(allLinked.size(), MAX_LINKED); i++) {
+            ResearchNode linked = allLinked.get(i);
+            ResearchState state = ResearchService.getState(viewer, linked);
+            boolean isParent = parents.contains(linked.getId());
+            String color = isParent ? "&7" : "&8";
+            String name = color + linked.getDisplayName();
+
+            ItemStack item = ItemBuilder.of(state == ResearchState.COMPLETED ? Material.ENCHANTED_BOOK : linked.getIcon())
+                    .rawName(ColorFormat.format(name))
+                    .build();
+            setMenuData(item, "action", "linked_research");
+            setMenuData(item, "research_id", linked.getId());
+            inventory.setItem(SLOT_LINKED_START + i, item);
         }
     }
 
-    private ItemStack linkedItem(ResearchNode linked, String prefix) {
-        ResearchState state = ResearchService.getState(viewer, linked);
-        ItemStack item = new ItemStack(state == ResearchState.COMPLETED ? Material.ENCHANTED_BOOK : linked.getIcon());
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ColorFormat.format(prefix + " " + linked.getDisplayName()));
-        List<String> lore = new ArrayList<>();
-        lore.add(ColorFormat.format("&7State: " + stateColor(state) + formatState(state)));
-        lore.add(ColorFormat.format("&eClick to inspect"));
-        meta.setLore(lore);
-        item.setItemMeta(meta);
-        setMenuData(item, "action", "linked_research");
-        setMenuData(item, "research_id", linked.getId());
+    private ItemStack backItem() {
+        ItemStack item = ItemBuilder.of(Material.ARROW)
+                .name(lang().get("research.back_to_graph"))
+                .build();
+        setMenuData(item, "action", "back");
         return item;
     }
 
