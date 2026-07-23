@@ -33,5 +33,5 @@ mastery_bar_color: 'WHITE'
 #THE ITEM THAT APPEARS IN THE /SPELLS GUI
 gui_item: 'RABBIT_FOOT'
 
-#THE STRENGTH OF THE DASH. DEFAULT: 0.5
-dash_strength: 0.5
+#THE STRENGTH OF THE DASH. DEFAULT: 1.5
+dash_strength: 1.5

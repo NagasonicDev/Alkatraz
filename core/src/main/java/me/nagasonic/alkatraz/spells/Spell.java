@@ -1,6 +1,6 @@
 package me.nagasonic.alkatraz.spells;
 
-import de.tr7zw.nbtapi.NBT;
+import de.tr7zw.changeme.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.events.CastEvent;
 import me.nagasonic.alkatraz.events.PlayerCastEvent;
@@ -15,6 +15,8 @@ import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.configuration.SpellOption;
 import me.nagasonic.alkatraz.spells.configuration.SpellOptionLoader;
 import me.nagasonic.alkatraz.spells.configuration.impact.implementation.StatModifierImpact;
+import me.nagasonic.alkatraz.dom.Permission;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.util.ColorFormat;
 import me.nagasonic.alkatraz.util.StatUtils;
 import me.nagasonic.alkatraz.util.Utils;
@@ -105,7 +107,7 @@ public abstract class Spell {
 
         // Check circle level requirement
         if (profile.getCircleLevel() < getRequiredCircleLevel()) {
-            Utils.sendActionBar(p, "&cToo low Magic Circle");
+            Utils.sendActionBar(p, lang().get("spells.cast.too_low_circle"));
             return;
         }
 
@@ -113,22 +115,21 @@ public abstract class Spell {
         int manaCost = getModifiedManaCost(p);
 
         if (!profile.canCast()) {
-            Utils.sendActionBar(p, "&cYou cannot cast right now");
+            Utils.sendActionBar(p, lang().get("spells.cast.cannot_cast_now"));
             return;
         }
         // Check mana
         if (profile.getMana() < manaCost) {
-            Utils.sendActionBar(p, "&cNot Enough Mana");
+            Utils.sendActionBar(p, lang().get("spells.cast.not_enough_mana"));
             return;
         }
 
         // Check Cooldown
-        if (profile.getCooldown(this) != null) {
+        if (!Permission.hasPermission(p, Permission.NO_COOLDOWN) && profile.getCooldown(this) != null) {
             long timePassed = System.currentTimeMillis() - profile.getCooldown(this);
             if (TimeUnit.MILLISECONDS.toSeconds(timePassed) < getCooldown()) {
-                Utils.sendActionBar(p, "&cPlease wait "
-                        + TimeUnit.MILLISECONDS.toSeconds(getCooldown() * 1000 - timePassed)
-                        + " seconds before casting this spell.");
+                Utils.sendActionBar(p, lang().get("spells.cast.please_wait",
+                        "time", TimeUnit.MILLISECONDS.toSeconds(getCooldown() * 1000 - timePassed)));
                 return;
             }
         }
@@ -151,7 +152,7 @@ public abstract class Spell {
         StatUtils.addArcaneKnowledge(p, "spell_cast", getRequiredCircleLevel());
 
         // Send action bar message
-        Utils.sendActionBar(p, ColorFormat.format("Casted: " + getDisplayName()));
+        Utils.sendActionBar(p, ColorFormat.format(lang().get("spells.cast.casted") + " " + getDisplayName()));
 
         // Start circle animation
         int circleTaskId = circleAction(p, castEvent);
@@ -200,6 +201,23 @@ public abstract class Spell {
         this.displayName   = spellConfig.getString("display_name");
         this.description   = spellConfig.getStringList("description");
         this.element       = Element.valueOf(spellConfig.getString("element"));
+
+        LangManager lang = Alkatraz.getLangManager();
+        String nameKey = "override.spells." + this.id + ".name";
+        String langName = lang.get(nameKey);
+        if (!langName.equals(nameKey)) {
+            this.displayName = langName;
+        } else {
+            this.displayName = ColorFormat.format(spellConfig.getString("display_name"));
+        }
+
+        String descKey = "override.spells." + this.id + ".description";
+        String langDesc = lang.get(descKey);
+        if (!langDesc.equals(descKey)) {
+            this.description = Arrays.asList(ColorFormat.format(langDesc).split("\\n"));
+        } else {
+            this.description = spellConfig.getStringList("description");
+        }
         this.code          = spellConfig.getString("code");
         this.castTime      = spellConfig.getDouble("cast_time");
         this.cost          = spellConfig.getInt("mana_cost");
@@ -221,6 +239,10 @@ public abstract class Spell {
         castSound          = spellConfig.getString("cast_sound", "ENTITY_EVOKER_CAST_SPELL");
         castSoundVolume    = (float) spellConfig.getDouble("cast_sound_volume", 1.0);
         castSoundPitch     = (float) spellConfig.getDouble("cast_sound_pitch", 1.0);
+    }
+
+    private static LangManager lang() {
+        return Alkatraz.getLangManager();
     }
 
     private void playSound(Player p, String soundName, float volume, float pitch) {
@@ -298,13 +320,18 @@ public abstract class Spell {
                     if (type == StatModifierImpact.ModifierType.MULTIPLY) mults.add(modifier);
                     if (type == StatModifierImpact.ModifierType.SET)      sets.add(modifier);
                 }
-                double val = 0;
+            }
+            double val;
+            if (!sets.isEmpty()) {
+                val = 0;
                 for (MagicProfile.SpellModifier setmod : sets) val += setmod.value();
                 val /= sets.size();
-                for (MagicProfile.SpellModifier mult   : mults) val *= mult.value();
-                for (MagicProfile.SpellModifier addmod : adds)  val += addmod.value();
-                return val;
+            } else {
+                val = baseValue;
             }
+            for (MagicProfile.SpellModifier mult   : mults) val *= mult.value();
+            for (MagicProfile.SpellModifier addmod : adds)  val += addmod.value();
+            return Double.isFinite(val) ? val : baseValue;
         }
 
         return baseValue;
@@ -340,7 +367,7 @@ public abstract class Spell {
                         .map(def -> def.attributes().getOrDefault(MagicKeys.alkatraz("cast_time_multiplier"), 1.0))
                         .orElse(1.0);
             } else {
-                wandCastTime = NBT.get(wand, nbt -> (Double) nbt.getDouble("casting_time"));
+                wandCastTime = NBT.get(wand, nbt -> (Double) nbt.getDouble("cast_time_multiplier"));
                 if (wandCastTime == 0.0) wandCastTime = 1.0;
             }
         }else{
@@ -394,7 +421,7 @@ public abstract class Spell {
      * a stored spell_power of 10 yields a 10% bonus (1.10x total multiplier).
      */
     public static double getWandPower(ItemStack wand) {
-        if (wand == null) return 0.0;
+        if (wand == null) return 1.0;
         double raw;
         if (MagicItemStack.isMagicItem(wand)) {
             raw = MagicItemStack.readInstance(wand)

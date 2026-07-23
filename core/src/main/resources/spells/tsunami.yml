@@ -15,3 +15,4 @@ maximum_mastery: 100
 mastery_bar_color: 'BLUE'
 gui_item: 'WATER_BUCKET'
 cast_sound: 'ENTITY_DROWNED_SWIM'
+wind_up_duration: 2

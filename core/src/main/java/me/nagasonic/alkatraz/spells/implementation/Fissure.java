@@ -5,6 +5,7 @@ import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.dom.Ground;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.spells.types.AttackSpell;
@@ -28,6 +29,11 @@ import org.bukkit.util.Vector;
 import java.util.List;
 
 public class Fissure extends AttackSpell {
+    private static LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
+
+    private int windUpDuration;
 
     public Fissure(String type) {
         super(type);
@@ -40,26 +46,11 @@ public class Fissure extends AttackSpell {
         YamlConfiguration spellConfig = ConfigManager.getConfig("spells/earthsplitter.yml").get();
         loadCommonConfig(spellConfig);
         loadOptions();
+        this.windUpDuration = spellConfig.getInt("wind_up_duration", 6) * 20;
     }
 
-    @Override
-    public void castAction(Player caster, ItemStack wand) {
-        if (caster.isDead()) return;
-
+    private void launchFissureAttack(Player caster, ItemStack wand, AttackProperties props, double range, Vector direction, Vector perpendicular, Location startLoc, double maxWidth) {
         double totalPower = getPower(caster, getBasePower()) * getWandPower(wand);
-        AttackProperties props = new AttackProperties(
-                caster,
-                Utils.castLocation(caster),
-                totalPower,
-                AttackType.MAGIC
-        );
-
-        double range = getModifiedStat(caster, "range", 15);
-        Vector direction = caster.getEyeLocation().getDirection().setY(0).normalize();
-        Vector perpendicular = new Vector(-direction.getZ(), 0, direction.getX()).normalize();
-        Location startLoc = caster.getLocation().clone();
-        double maxWidth = 4.0;
-
         caster.getWorld().playSound(caster.getLocation(), Sound.BLOCK_GRINDSTONE_USE, 1.2f, 0.4f);
         caster.getWorld().playSound(caster.getLocation(), Sound.BLOCK_STONE_BREAK, 1.0f, 0.6f);
 
@@ -83,11 +74,14 @@ public class Fissure extends AttackSpell {
                 for (double w = -fissureWidth; w <= fissureWidth; w += 0.5) {
                     Location groundCheck = startLoc.clone().add(direction.clone().multiply(distance))
                             .add(perpendicular.clone().multiply(w));
-                    groundCheck.setY(groundCheck.getWorld().getMaxHeight());
+                    groundCheck.setY(startLoc.getY());
                     Block foundation = groundCheck.getWorld().getBlockAt(groundCheck);
-                    while (!foundation.getType().isSolid() && foundation.getY() > groundCheck.getWorld().getMinHeight()) {
+                    int blocksDown = 0;
+                    while (!foundation.getType().isSolid() && blocksDown < 3) {
                         foundation = foundation.getRelative(0, -1, 0);
+                        blocksDown++;
                     }
+                    if (!foundation.getType().isSolid()) continue;
                     for (int depth = 0; depth < 2; depth++) {
                         Block target = foundation.getRelative(0, -depth, 0);
                         if (Ground.isGround(target.getType())) {
@@ -183,19 +177,8 @@ public class Fissure extends AttackSpell {
         }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
     }
 
-    @Override
-    public void mobCastAction(Mob caster, ItemStack wand) {
-        if (caster.isDead() || caster.getTarget() == null) return;
-
-        double wandp = getWandPowerOrDefault(wand);
-        double power = getPower(caster, getBasePower()) * wandp;
-        AttackProperties props = new AttackProperties(
-                caster,
-                Utils.castLocation(caster),
-                power,
-                AttackType.MAGIC
-        );
-
+    private void launchMobFissureAttack(Mob caster, ItemStack wand, AttackProperties props) {
+        double power = getPower(caster, getBasePower()) * getWandPowerOrDefault(wand);
         Vector direction = caster.getLocation().getDirection().setY(0).normalize();
         Vector perpendicular = new Vector(-direction.getZ(), 0, direction.getX()).normalize();
         Location startLoc = caster.getLocation().clone();
@@ -245,6 +228,205 @@ public class Fissure extends AttackSpell {
     }
 
     @Override
+    public void castAction(Player caster, ItemStack wand) {
+        if (caster.isDead()) return;
+
+        double totalPower = getPower(caster, getBasePower()) * getWandPower(wand);
+        AttackProperties props = new AttackProperties(
+                caster,
+                Utils.castLocation(caster),
+                totalPower,
+                AttackType.MAGIC
+        );
+
+        double range = getModifiedStat(caster, "range", 15);
+        Vector direction = caster.getEyeLocation().getDirection().setY(0).normalize();
+        Vector perpendicular = new Vector(-direction.getZ(), 0, direction.getX()).normalize();
+        Location startLoc = caster.getLocation().clone();
+        double maxWidth = 4.0;
+
+        new BukkitRunnable() {
+            int ticks = 0;
+
+            @Override
+            public void run() {
+                if (ticks >= windUpDuration) {
+                    cancel();
+                    launchFissureAttack(caster, wand, props, range, direction, perpendicular, startLoc, maxWidth);
+                    return;
+                }
+
+                if (caster.isDead() || (caster instanceof Player && !((Player) caster).isOnline())) {
+                    cancel();
+                    return;
+                }
+
+                Location casterLoc = caster.getLocation();
+                double progress = (double) ticks / windUpDuration;
+                boolean phase1 = progress < 0.67;
+
+                if (phase1) {
+                    double phaseProgress = progress / 0.67;
+                    int crackCount = (int)(phaseProgress * 12);
+                    for (int i = 0; i < crackCount; i++) {
+                        double angle = (2 * Math.PI * i / crackCount) + (ticks * 0.03);
+                        double crackLen = 1.0 + phaseProgress * 2.0;
+                        for (double d = 0; d < crackLen; d += 0.4) {
+                            Location crackLoc = casterLoc.clone().add(
+                                    Math.cos(angle) * d,
+                                    0.05,
+                                    Math.sin(angle) * d
+                            );
+                            crackLoc.getWorld().spawnParticle(Utils.DUST, crackLoc, 0,
+                                    new Particle.DustOptions(Color.fromRGB(50, 30, 10), 0.8F));
+                        }
+                    }
+
+                    for (int i = 0; i < 6; i++) {
+                        double a = Math.random() * 2 * Math.PI;
+                        double r = Math.random() * 2.0;
+                        Location tremorLoc = casterLoc.clone().add(Math.cos(a) * r, 0.1, Math.sin(a) * r);
+                        tremorLoc.getWorld().spawnParticle(Particle.FALLING_DUST, tremorLoc, 2, 0.2, 0.1, 0.2, 0,
+                                Material.DIRT.createBlockData());
+                    }
+
+                    for (int i = 0; i < 4; i++) {
+                        double a = Math.random() * 2 * Math.PI;
+                        double r = Math.random() * 1.5;
+                        Location stoneLoc = casterLoc.clone().add(Math.cos(a) * r, 0.5 + Math.random() * 1.5, Math.sin(a) * r);
+                        stoneLoc.getWorld().spawnParticle(Particle.BLOCK_CRACK, stoneLoc, 2, 0.1, 0.1, 0.1, 0.1,
+                                Material.STONE.createBlockData());
+                    }
+
+                    if (ticks % 20 == 0) {
+                        casterLoc.getWorld().playSound(casterLoc, Sound.BLOCK_STONE_BREAK, 0.4f, 0.5f + (float)(progress * 0.6f));
+                    }
+                } else {
+                    double phaseProgress = (progress - 0.67) / 0.33;
+                    double crackExtend = phaseProgress * 8.0;
+
+                    for (int i = 0; i < 8; i++) {
+                        double angle = Math.random() * 2 * Math.PI;
+                        double r = Math.random() * (1.0 * (1.0 - phaseProgress));
+                        Location crackLoc = casterLoc.clone().add(
+                                Math.cos(angle) * r,
+                                0.05,
+                                Math.sin(angle) * r
+                        );
+                        crackLoc.getWorld().spawnParticle(Utils.DUST, crackLoc, 0,
+                                new Particle.DustOptions(Color.fromRGB(30, 15, 0), 1.0F));
+                    }
+
+                    for (double d = 0; d < crackExtend; d += 0.6) {
+                        for (int side = -1; side <= 1; side += 2) {
+                            Location crackLoc = casterLoc.clone().add(
+                                    direction.clone().multiply(d)
+                            ).add(perpendicular.clone().multiply(side * 0.3 * (d / crackExtend)));
+                            crackLoc.getWorld().spawnParticle(Utils.DUST, crackLoc, 0,
+                                    new Particle.DustOptions(Color.fromRGB(80, 50, 20), 0.6F));
+                        }
+                    }
+
+                    if (ticks % 15 == 0) {
+                        casterLoc.getWorld().playSound(casterLoc, Sound.ENTITY_IRON_GOLEM_ATTACK, 0.3f, 0.3f);
+                    }
+                }
+
+                ticks++;
+            }
+        }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
+    }
+
+    @Override
+    public void mobCastAction(Mob caster, ItemStack wand) {
+        if (caster.isDead() || caster.getTarget() == null) return;
+
+        double wandp = getWandPowerOrDefault(wand);
+        double power = getPower(caster, getBasePower()) * wandp;
+        AttackProperties props = new AttackProperties(
+                caster,
+                Utils.castLocation(caster),
+                power,
+                AttackType.MAGIC
+        );
+
+        Vector direction = caster.getLocation().getDirection().setY(0).normalize();
+        Vector perpendicular = new Vector(-direction.getZ(), 0, direction.getX()).normalize();
+        World world = caster.getWorld();
+
+        new BukkitRunnable() {
+            int ticks = 0;
+
+            @Override
+            public void run() {
+                if (ticks >= windUpDuration) {
+                    cancel();
+                    launchMobFissureAttack(caster, wand, props);
+                    return;
+                }
+
+                if (caster.isDead()) {
+                    cancel();
+                    return;
+                }
+
+                Location casterLoc = caster.getLocation();
+                double progress = (double) ticks / windUpDuration;
+                boolean phase1 = progress < 0.67;
+
+                if (phase1) {
+                    double phaseProgress = progress / 0.67;
+                    int crackCount = (int)(phaseProgress * 12);
+                    for (int i = 0; i < crackCount; i++) {
+                        double angle = (2 * Math.PI * i / crackCount) + (ticks * 0.03);
+                        double crackLen = 1.0 + phaseProgress * 2.0;
+                        for (double d = 0; d < crackLen; d += 0.4) {
+                            Location crackLoc = casterLoc.clone().add(
+                                    Math.cos(angle) * d,
+                                    0.05,
+                                    Math.sin(angle) * d
+                            );
+                            crackLoc.getWorld().spawnParticle(Utils.DUST, crackLoc, 0,
+                                    new Particle.DustOptions(Color.fromRGB(50, 30, 10), 0.8F));
+                        }
+                    }
+
+                    for (int i = 0; i < 6; i++) {
+                        double a = Math.random() * 2 * Math.PI;
+                        double r = Math.random() * 2.0;
+                        Location tremorLoc = casterLoc.clone().add(Math.cos(a) * r, 0.1, Math.sin(a) * r);
+                        tremorLoc.getWorld().spawnParticle(Particle.FALLING_DUST, tremorLoc, 2, 0.2, 0.1, 0.2, 0,
+                                Material.DIRT.createBlockData());
+                    }
+
+                    if (ticks % 20 == 0) {
+                        casterLoc.getWorld().playSound(casterLoc, Sound.BLOCK_STONE_BREAK, 0.4f, 0.5f + (float)(progress * 0.6f));
+                    }
+                } else {
+                    double phaseProgress = (progress - 0.67) / 0.33;
+                    double crackExtend = phaseProgress * 8.0;
+
+                    for (double d = 0; d < crackExtend; d += 0.6) {
+                        for (int side = -1; side <= 1; side += 2) {
+                            Location crackLoc = casterLoc.clone().add(
+                                    direction.clone().multiply(d)
+                            ).add(perpendicular.clone().multiply(side * 0.3 * (d / crackExtend)));
+                            crackLoc.getWorld().spawnParticle(Utils.DUST, crackLoc, 0,
+                                    new Particle.DustOptions(Color.fromRGB(80, 50, 20), 0.6F));
+                        }
+                    }
+
+                    if (ticks % 15 == 0) {
+                        casterLoc.getWorld().playSound(casterLoc, Sound.ENTITY_IRON_GOLEM_ATTACK, 0.3f, 0.3f);
+                    }
+                }
+
+                ticks++;
+            }
+        }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
+    }
+
+    @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
         location.getWorld().spawnParticle(Particle.BLOCK_CRACK, location, 30, 0.5, 0.5, 0.5, 0.5,
                 Material.STONE.createBlockData());
@@ -280,8 +462,8 @@ public class Fissure extends AttackSpell {
     @Override
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
-                .setDisplayName("&aTerra Fissure Tome")
-                .addCustomLoreLine("&8The ground itself obeys the earth mage.")
+                .setDisplayName(lang().get("spells.fissure.book_name"))
+                .addCustomLoreLine(lang().get("spells.fissure.lore1"))
                 .addCustomLoreLine("")
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 5))
                 .build();
