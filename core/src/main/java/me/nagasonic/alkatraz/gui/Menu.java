@@ -1,14 +1,18 @@
 package me.nagasonic.alkatraz.gui;
 
-import de.tr7zw.nbtapi.NBT;
+import de.tr7zw.changeme.nbtapi.NBT;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import me.nagasonic.alkatraz.Alkatraz;
+
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -48,6 +52,7 @@ public abstract class Menu {
         build();
         viewer.openInventory(inventory);
         activeMenus.put(viewer.getUniqueId(), this);
+        playOpenSound();
     }
 
     /**
@@ -64,6 +69,28 @@ public abstract class Menu {
     public void close() {
         viewer.closeInventory();
         activeMenus.remove(viewer.getUniqueId());
+    }
+
+    protected void fillAll() {
+        ItemStack blank = Alkatraz.getGuiItemRegistry().getItem("blank");
+        for (int i = 0; i < size; i++) {
+            inventory.setItem(i, blank.clone());
+        }
+    }
+
+    protected void fillBorders(int... excludeSlots) {
+        Set<Integer> excluded = new HashSet<>();
+        for (int s : excludeSlots) excluded.add(s);
+        ItemStack blank = Alkatraz.getGuiItemRegistry().getItem("blank");
+        for (int i = 0; i < size; i++) {
+            if (!excluded.contains(i)) {
+                inventory.setItem(i, blank.clone());
+            }
+        }
+    }
+
+    protected void playOpenSound() {
+        viewer.playSound(viewer.getLocation(), org.bukkit.Sound.UI_BUTTON_CLICK, 0.5f, 1.2f);
     }
 
     /**

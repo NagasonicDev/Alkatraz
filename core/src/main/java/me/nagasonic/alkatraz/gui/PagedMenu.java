@@ -1,6 +1,7 @@
 package me.nagasonic.alkatraz.gui;
 
-import me.nagasonic.alkatraz.util.ColorFormat;
+import me.nagasonic.alkatraz.Alkatraz;
+
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -8,7 +9,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Abstract base for paginated menus
@@ -70,6 +73,20 @@ public abstract class PagedMenu<T> extends Menu {
         // Default: no decorations
     }
 
+    protected void addStandardBorder() {
+        Set<Integer> reserved = new HashSet<>();
+        for (int s : contentSlots) reserved.add(s);
+        reserved.add(nextPageSlot);
+        reserved.add(previousPageSlot);
+        reserved.add(backButtonSlot);
+        ItemStack blank = Alkatraz.getGuiItemRegistry().getItem("blank");
+        for (int i = 0; i < size; i++) {
+            if (!reserved.contains(i)) {
+                inventory.setItem(i, blank.clone());
+            }
+        }
+    }
+
     /**
      * Adds items for the current page
      */
@@ -106,13 +123,11 @@ public abstract class PagedMenu<T> extends Menu {
     protected void addNavigationButtons() {
         // Next page button
         if (currentPage < totalPages) {
-            ItemStack nextPage = new ItemStack(Material.ARROW);
+            ItemStack nextPage = Alkatraz.getGuiItemRegistry().getItem("next_page").clone();
             ItemMeta meta = nextPage.getItemMeta();
-            meta.setDisplayName(ColorFormat.format("&fNext Page"));
             List<String> lore = new ArrayList<>();
-            lore.add(ColorFormat.format("&ePage " + (currentPage + 1)));
+            lore.add(Alkatraz.getLangManager().get("common.page_indicator", "current", String.valueOf(currentPage + 1), "total", String.valueOf(totalPages)));
             meta.setLore(lore);
-            meta.setCustomModelData(32112);
             nextPage.setItemMeta(meta);
             setMenuData(nextPage, "action", "next_page");
             inventory.setItem(nextPageSlot, nextPage);
@@ -120,13 +135,11 @@ public abstract class PagedMenu<T> extends Menu {
         
         // Previous page button
         if (currentPage > 1) {
-            ItemStack prevPage = new ItemStack(Material.ARROW);
+            ItemStack prevPage = Alkatraz.getGuiItemRegistry().getItem("prev_page").clone();
             ItemMeta meta = prevPage.getItemMeta();
-            meta.setDisplayName(ColorFormat.format("&fPrevious Page"));
             List<String> lore = new ArrayList<>();
-            lore.add(ColorFormat.format("&ePage " + (currentPage - 1)));
+            lore.add(Alkatraz.getLangManager().get("common.page_indicator", "current", String.valueOf(currentPage - 1), "total", String.valueOf(totalPages)));
             meta.setLore(lore);
-            meta.setCustomModelData(32111);
             prevPage.setItemMeta(meta);
             setMenuData(prevPage, "action", "previous_page");
             inventory.setItem(previousPageSlot, prevPage);

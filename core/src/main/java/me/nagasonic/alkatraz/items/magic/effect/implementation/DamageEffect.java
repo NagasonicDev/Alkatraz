@@ -1,8 +1,9 @@
-package me.nagasonic.alkatraz.items.magic.effect;
+package me.nagasonic.alkatraz.items.magic.effect.implementation;
 
 import me.nagasonic.alkatraz.api.magic.effect.Effect;
 
 import me.nagasonic.alkatraz.api.magic.trigger.TriggerContext;
+import me.nagasonic.alkatraz.items.magic.effect.EffectExecutor;
 import org.bukkit.entity.LivingEntity;
 
 import java.util.Map;

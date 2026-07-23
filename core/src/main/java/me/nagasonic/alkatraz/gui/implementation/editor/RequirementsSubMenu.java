@@ -1,6 +1,8 @@
 package me.nagasonic.alkatraz.gui.implementation.editor;
 
+import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.gui.Menu;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.util.ColorFormat;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -14,6 +16,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.*;
 
 public class RequirementsSubMenu extends Menu {
+
+    private static LangManager lang() { return Alkatraz.getLangManager(); }
 
     private static final int[] REQ_SLOTS = {10, 11, 12, 13, 14, 15, 16,
             19, 20, 21, 22, 23, 24, 25,
@@ -90,7 +94,7 @@ public class RequirementsSubMenu extends Menu {
         ItemStack item = new ItemStack(Material.BOOK);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(ColorFormat.format("&eRequirement " + (index + 1) + " &8(" + type + ")"));
+            meta.setDisplayName(lang().get("editor.requirement_display", "num", String.valueOf(index + 1), "type", type));
             List<String> lore = new ArrayList<>();
         for (Map.Entry<String, Object> e : req.entrySet()) {
                 lore.add(ColorFormat.format("&7" + e.getKey() + ": &f" + e.getValue()));
@@ -109,7 +113,7 @@ public class RequirementsSubMenu extends Menu {
         ItemStack item = new ItemStack(Material.LIME_DYE);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(ColorFormat.format("&a&lAdd Requirement"));
+            meta.setDisplayName(lang().get("editor.add_requirement"));
             List<String> lore = new ArrayList<>();
             lore.add(ColorFormat.format("&7Click to add a new requirement"));
             meta.setLore(lore);
@@ -134,7 +138,7 @@ public class RequirementsSubMenu extends Menu {
         ItemStack item = new ItemStack(Material.BARRIER);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(ColorFormat.format("&cBack"));
+            meta.setDisplayName(lang().get("common.back"));
             item.setItemMeta(meta);
         }
         setMenuData(item, "action", "back");

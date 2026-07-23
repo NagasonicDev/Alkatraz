@@ -2,7 +2,9 @@ package me.nagasonic.alkatraz.gui.implementation.editor;
 
 import me.nagasonic.alkatraz.api.magic.registry.MagicItemRegistries;
 import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
+import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.gui.Menu;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.util.ColorFormat;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -15,6 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ComponentsSubMenu extends Menu {
+
+    private static LangManager lang() { return Alkatraz.getLangManager(); }
 
     private static final int[] COMP_SLOTS = {10, 11, 12, 13, 14, 15, 16,
             19, 20, 21, 22, 23, 24, 25,
@@ -66,8 +70,8 @@ public class ComponentsSubMenu extends Menu {
         if (meta != null) {
             meta.setDisplayName(ColorFormat.format((enabled ? "&a" : "&7") + key));
             List<String> lore = new ArrayList<>();
-            lore.add(ColorFormat.format(enabled ? "&aEnabled" : "&7Disabled"));
-            lore.add(ColorFormat.format("&7Click to toggle"));
+            lore.add(lang().get(enabled ? "editor.component_enabled" : "editor.component_disabled"));
+            lore.add(lang().get("editor.component_click_toggle"));
             meta.setLore(lore);
             item.setItemMeta(meta);
         }
@@ -79,7 +83,7 @@ public class ComponentsSubMenu extends Menu {
         ItemStack item = new ItemStack(Material.BARRIER);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(ColorFormat.format("&cBack"));
+            meta.setDisplayName(lang().get("common.back"));
             item.setItemMeta(meta);
         }
         setMenuData(item, "action", "back");

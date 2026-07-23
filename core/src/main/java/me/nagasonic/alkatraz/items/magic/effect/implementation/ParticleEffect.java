@@ -1,4 +1,4 @@
-package me.nagasonic.alkatraz.items.magic.effect;
+package me.nagasonic.alkatraz.items.magic.effect.implementation;
 
 import me.nagasonic.alkatraz.api.magic.effect.Effect;
 

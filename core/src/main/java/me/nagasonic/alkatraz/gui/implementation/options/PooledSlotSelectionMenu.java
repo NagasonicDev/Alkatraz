@@ -1,22 +1,20 @@
 package me.nagasonic.alkatraz.gui.implementation.options;
 
+import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.gui.ItemBuilder;
 import me.nagasonic.alkatraz.gui.PagedMenu;
 import me.nagasonic.alkatraz.gui.implementation.SpellOptionsMenu;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.configuration.OptionValue;
 import me.nagasonic.alkatraz.spells.configuration.SpellOption;
 import me.nagasonic.alkatraz.util.ColorFormat;
-import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -31,6 +29,10 @@ import java.util.Set;
  * option (see {@link PooledSlotMenuLayout}).
  */
 public class PooledSlotSelectionMenu extends PagedMenu<OptionValue<?>> {
+
+    private static LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
 
     private static final int[] POOL_CONTENT_SLOTS = {
             28, 29, 30, 31, 32, 33, 34,
@@ -125,8 +127,9 @@ public class PooledSlotSelectionMenu extends PagedMenu<OptionValue<?>> {
         reserved.add(previousPageSlot);
         reserved.add(nextPageSlot);
 
+        ItemStack blank = Alkatraz.getGuiItemRegistry().getItem("blank");
         for (int borderSlot : PooledSlotMenuLayout.borderSlotsExcluding(reserved)) {
-            inventory.setItem(borderSlot, Utils.getBlank());
+            inventory.setItem(borderSlot, blank.clone());
         }
 
         addSlotHeaders();
@@ -134,10 +137,9 @@ public class PooledSlotSelectionMenu extends PagedMenu<OptionValue<?>> {
 
     @Override
     protected void addBackButton() {
-        ItemStack back = new ItemStack(Material.BARRIER);
-        ItemMeta m = back.getItemMeta();
-        m.setDisplayName(ColorFormat.format("&cBack to Options"));
-        back.setItemMeta(m);
+        ItemStack back = ItemBuilder.of(Material.BARRIER)
+                .name(lang().get("pooled.back_to_options"))
+                .build();
         setMenuData(back, "action", "back");
         inventory.setItem(backButtonSlot, back);
     }
@@ -220,20 +222,18 @@ public class PooledSlotSelectionMenu extends PagedMenu<OptionValue<?>> {
     // =========================================================================
 
     private ItemStack buildLockedSlotItem(SpellOption slotOption) {
-        ItemStack item = new ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE);
-        ItemMeta m = item.getItemMeta();
-        m.setDisplayName(ColorFormat.format("&8" + slotOption.getDisplayName() + " &7(Locked)"));
-        List<String> lore = new ArrayList<>();
+        ItemBuilder builder = ItemBuilder.of(Material.LIGHT_GRAY_STAINED_GLASS_PANE)
+                .name("&8" + slotOption.getDisplayName() + " &7(Locked)");
+
         if (!slotOption.getUnmetRequirements(viewer).isEmpty()) {
-            lore.add(ColorFormat.format("&c&lRequirements:"));
+            builder.lore("&c&lRequirements:");
             slotOption.getUnmetRequirements(viewer).forEach(req ->
-                    lore.add(ColorFormat.format("&c  • " + req.getDescription())));
+                    builder.lore("&c  • " + req.getDescription()));
         } else {
-            lore.add(ColorFormat.format("&7Unlock by meeting the"));
-            lore.add(ColorFormat.format("&7requirements for this slot."));
+            builder.lore("&7Unlock by meeting the", "&7requirements for this slot.");
         }
-        m.setLore(lore);
-        item.setItemMeta(m);
+
+        ItemStack item = builder.build();
         setMenuData(item, "action", "locked_slot");
         return item;
     }
@@ -244,92 +244,71 @@ public class PooledSlotSelectionMenu extends PagedMenu<OptionValue<?>> {
                 ? assigned.getIcon()
                 : Material.LIME_STAINED_GLASS_PANE;
 
-        ItemStack item = new ItemStack(mat);
-        ItemMeta m = item.getItemMeta();
-
         String prefix = focused ? "&b▶ " : "&e";
         String label = assigned != null && !assigned.getId().equals("none")
                 ? assigned.getDisplayName()
                 : "&7Empty";
 
-        m.setDisplayName(ColorFormat.format(prefix + slotOption.getDisplayName() + ": &f" + label));
+        ItemBuilder builder = ItemBuilder.of(mat)
+                .name(prefix + slotOption.getDisplayName() + ": &f" + label)
+                .glint(focused);
 
-        List<String> lore = new ArrayList<>();
         if (focused) {
-            lore.add(ColorFormat.format("&bSelected for assignment"));
-            lore.add(ColorFormat.format("&7Click a value below to assign it."));
+            builder.lore(lang().get("pooled.selected_assignment"), lang().get("pooled.click_assign_lore"));
         } else {
-            lore.add(ColorFormat.format("&eLeft-click &7to select this slot."));
+            builder.lore("&eLeft-click &7to select this slot.");
         }
         if (assigned != null && !assigned.getId().equals("none")) {
-            lore.add(ColorFormat.format("&cRight-click &7to clear."));
+            builder.lore(lang().get("pooled.right_click_clear"));
         }
 
-        if (focused) {
-            m.addEnchant(Enchantment.DURABILITY, 1, true);
-            m.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-        }
-
-        m.setLore(lore);
-        item.setItemMeta(m);
+        ItemStack item = builder.build();
         setMenuData(item, "action", "focus_slot");
         setMenuData(item, "slot_num", slotNum);
         return item;
     }
 
     private ItemStack buildPoolValueItem(OptionValue<?> value) {
-        ItemStack item = new ItemStack(value.getIcon());
-        ItemMeta m = item.getItemMeta();
-
         boolean focusedSlotUsable = focusedSlotIndex >= 0
                 && focusedSlotIndex < slotOptions.size()
                 && slotOptions.get(focusedSlotIndex).meetsRequirements(viewer);
         boolean canSelect = focusedSlotUsable && value.meetsRequirements(viewer);
         boolean alreadyAssigned = isAssignedToAnySlot(value.getId());
 
-        m.setDisplayName(ColorFormat.format(canSelect ? "&f" + value.getDisplayName()
-                : "&7" + value.getDisplayName()));
-
-        List<String> lore = new ArrayList<>();
-        lore.add(ColorFormat.format("&8" + value.getDescription()));
-        lore.add("");
+        ItemBuilder builder = ItemBuilder.of(value.getIcon())
+                .name(canSelect ? "&f" + value.getDisplayName() : "&7" + value.getDisplayName())
+                .lore("&8" + value.getDescription(), "");
 
         if (!value.getImpacts().isEmpty()) {
-            lore.add(ColorFormat.format("&eEffects:"));
+            builder.lore("&eEffects:");
             value.getImpacts().forEach(impact ->
-                    lore.add(ColorFormat.format("&a  + " + impact.getDescription())));
-            lore.add("");
+                    builder.lore("&a  + " + impact.getDescription()));
+            builder.lore("");
         }
 
         if (!focusedSlotUsable && focusedSlotIndex < slotOptions.size()) {
-            lore.add(ColorFormat.format("&c&lSLOT LOCKED"));
+            builder.lore(lang().get("pooled.slot_locked"));
             slotOptions.get(focusedSlotIndex).getUnmetRequirements(viewer).forEach(req ->
-                    lore.add(ColorFormat.format("&c  • " + req.getDescription())));
-            lore.add("");
+                    builder.lore("&c  • " + req.getDescription()));
+            builder.lore("");
         }
 
         if (!canSelect && !"none".equals(value.getId())) {
-            lore.add(ColorFormat.format("&c&lLOCKED"));
+            builder.lore(lang().get("pooled.locked"));
             value.getUnmetRequirements(viewer).forEach(req ->
-                    lore.add(ColorFormat.format("&c  • " + req.getDescription())));
+                    builder.lore("&c  • " + req.getDescription()));
         } else if (alreadyAssigned) {
-            lore.add(ColorFormat.format("&7Already in a slot."));
+            builder.lore(lang().get("pooled.already_in_slot"));
         } else if (!"none".equals(value.getId())) {
             if (focusedSlotIndex < slotOptions.size()) {
-                lore.add(ColorFormat.format("&eClick to assign to "
-                        + slotOptions.get(focusedSlotIndex).getDisplayName()));
+                builder.lore("&eClick to assign to "
+                        + slotOptions.get(focusedSlotIndex).getDisplayName());
             } else {
-                lore.add(ColorFormat.format("&eClick to assign to slot " + (focusedSlotIndex + 1)));
+                builder.lore("&eClick to assign to slot " + (focusedSlotIndex + 1));
             }
         }
 
-        if (!canSelect || alreadyAssigned) {
-            m.addEnchant(Enchantment.DURABILITY, 1, true);
-            m.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-        }
-
-        m.setLore(lore);
-        item.setItemMeta(m);
+        ItemStack item = builder.glint(!canSelect || alreadyAssigned).build();
         setMenuData(item, "can_select", canSelect && !alreadyAssigned && !"none".equals(value.getId()));
         return item;
     }

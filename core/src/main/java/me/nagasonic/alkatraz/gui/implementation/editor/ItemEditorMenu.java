@@ -1,12 +1,15 @@
 package me.nagasonic.alkatraz.gui.implementation.editor;
 
+import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.api.magic.definition.ItemDefinition;
 import me.nagasonic.alkatraz.api.magic.instance.MagicItemInstance;
 import me.nagasonic.alkatraz.api.magic.modifier.EngravingDefinition;
 import me.nagasonic.alkatraz.api.magic.registry.MagicItemRegistries;
 import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
+import me.nagasonic.alkatraz.gui.ItemBuilder;
 import me.nagasonic.alkatraz.gui.PagedMenu;
 import me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.util.ColorFormat;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -20,6 +23,8 @@ import java.util.List;
 
 public class ItemEditorMenu extends PagedMenu<Object> {
 
+    private static LangManager lang() { return Alkatraz.getLangManager(); }
+
     private static final int[] CONTENT_SLOTS = {10, 11, 12, 13, 14, 15, 16,
             19, 20, 21, 22, 23, 24, 25,
             28, 29, 30, 31, 32, 33, 34,
@@ -28,7 +33,7 @@ public class ItemEditorMenu extends PagedMenu<Object> {
     private boolean showingRunes = false;
 
     public ItemEditorMenu(Player viewer) {
-        super(viewer, ColorFormat.format("&8Item Editor"), 54, getSortedItems(), 28);
+        super(viewer, lang().get("menu.item_editor"), 54, getSortedItems(), 28);
         this.contentSlots = CONTENT_SLOTS;
         this.nextPageSlot = 53;
         this.previousPageSlot = 45;
@@ -49,45 +54,24 @@ public class ItemEditorMenu extends PagedMenu<Object> {
 
     @Override
     protected void addDecorations() {
-        for (int i = 0; i < 9; i++) {
-            inventory.setItem(i, createBorderPane());
-            inventory.setItem(i + 45, createBorderPane());
-        }
-        // Vertical borders for the content area
-        for (int slot : new int[]{9, 18, 27, 36, 17, 26, 35, 44}) {
-            inventory.setItem(slot, createBorderPane());
-        }
+        fillAll();
         inventory.setItem(4, createHeaderItem());
     }
 
-    private ItemStack createBorderPane() {
-        ItemStack item = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
-        ItemMeta meta = item.getItemMeta();
-        if (meta != null) {
-            meta.setDisplayName(ColorFormat.format("&7"));
-            item.setItemMeta(meta);
-        }
-        return item;
-    }
-
     private ItemStack createHeaderItem() {
-        ItemStack item = new ItemStack(Material.COMMAND_BLOCK);
-        ItemMeta meta = item.getItemMeta();
-        if (meta != null) {
-            if (showingRunes) {
-                meta.setDisplayName(ColorFormat.format("&b&lRune Editor"));
-                List<String> lore = new ArrayList<>();
-                lore.add(ColorFormat.format("&7Click to switch to Items view"));
-                meta.setLore(lore);
-            } else {
-                meta.setDisplayName(ColorFormat.format("&6&lItem Editor"));
-                List<String> lore = new ArrayList<>();
-                lore.add(ColorFormat.format("&7Click an item to edit its config and recipe."));
-                lore.add(ColorFormat.format("&7Click here to switch to Rune view"));
-                meta.setLore(lore);
-            }
-            item.setItemMeta(meta);
+        if (showingRunes) {
+            ItemStack item = ItemBuilder.of(Material.COMMAND_BLOCK)
+                    .name(lang().get("editor.rune_editor_title"))
+                    .lore(lang().get("editor.switch_to_items"))
+                    .build();
+            setMenuData(item, "action", "toggle_mode");
+            return item;
         }
+        ItemStack item = ItemBuilder.of(Material.COMMAND_BLOCK)
+                .name(lang().get("editor.item_editor_title"))
+                .lore("&7Click an item to edit its config and recipe.",
+                      lang().get("editor.switch_to_runes"))
+                .build();
         setMenuData(item, "action", "toggle_mode");
         return item;
     }
@@ -120,7 +104,7 @@ public class ItemEditorMenu extends PagedMenu<Object> {
                 if (lore == null) lore = new ArrayList<>();
                 lore.add(ColorFormat.format(""));
                 lore.add(ColorFormat.format("&8" + MagicKeys.format(def.getKey())));
-                lore.add(ColorFormat.format("&7Click to edit this item"));
+                lore.add(lang().get("editor.click_edit_item"));
                 meta.setLore(lore);
                 display.setItemMeta(meta);
             }
@@ -133,7 +117,7 @@ public class ItemEditorMenu extends PagedMenu<Object> {
     @Override
     protected void handleContentClick(Object item, InventoryClickEvent event) {
         if (item instanceof EngravingDefinition) {
-            viewer.sendMessage(ColorFormat.format("&eRune editing is not yet supported in the editor."));
+            viewer.sendMessage(lang().get("editor.not_supported"));
             viewer.playSound(viewer.getLocation(), org.bukkit.Sound.BLOCK_STONE_BUTTON_CLICK_ON, 1.0f, 1.0f);
             return;
         }
@@ -170,12 +154,9 @@ public class ItemEditorMenu extends PagedMenu<Object> {
 
     @Override
     protected void addBackButton() {
-        ItemStack back = new ItemStack(Material.BARRIER);
-        ItemMeta meta = back.getItemMeta();
-        if (meta != null) {
-            meta.setDisplayName(ColorFormat.format("&cClose"));
-            back.setItemMeta(meta);
-        }
+        ItemStack back = ItemBuilder.of(Material.BARRIER)
+                .name("&cClose")
+                .build();
         setMenuData(back, "action", "back");
         inventory.setItem(backButtonSlot, back);
     }

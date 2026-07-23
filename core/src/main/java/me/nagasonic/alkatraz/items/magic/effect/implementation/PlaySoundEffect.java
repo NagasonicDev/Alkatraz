@@ -1,10 +1,9 @@
-package me.nagasonic.alkatraz.items.magic.effect;
+package me.nagasonic.alkatraz.items.magic.effect.implementation;
 
 import me.nagasonic.alkatraz.api.magic.effect.Effect;
 
 import me.nagasonic.alkatraz.api.magic.trigger.TriggerContext;
 import org.bukkit.Sound;
-import org.bukkit.entity.Player;
 
 import java.util.Locale;
 import java.util.Map;

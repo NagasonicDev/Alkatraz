@@ -1,34 +1,38 @@
 package me.nagasonic.alkatraz.gui.implementation;
 
 import me.nagasonic.alkatraz.config.Configs;
+import me.nagasonic.alkatraz.gui.ItemBuilder;
 import me.nagasonic.alkatraz.gui.Menu;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.Element;
 import me.nagasonic.alkatraz.util.ColorFormat;
-import me.nagasonic.alkatraz.util.ItemUtils;
-import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class StatsMenu extends Menu {
+
+    private static LangManager lang() {
+        return me.nagasonic.alkatraz.Alkatraz.getLangManager();
+    }
     private final Player target;
     private final int affinityIncrease;
     private final int resistanceIncrease;
+    private boolean confirmingReset = false;
 
     private static final int[] DISPLAY_SLOTS = {19, 20, 21, 23, 24, 25};
     private static final Element[] DISPLAY_ELEMENTS = {Element.FIRE, Element.WATER, Element.EARTH, Element.AIR, Element.LIGHT, Element.DARK};
 
     public StatsMenu(Player viewer, Player target) {
-        super(viewer, target.getName() + " Stats", 54);
+        super(viewer, lang().get("menu.stats", "player", target.getName()), 54);
         this.target = target;
         this.affinityIncrease = (Integer) Configs.AFFINITY_PER_POINT.get();
         this.resistanceIncrease = (Integer) Configs.RESISTANCE_PER_POINT.get();
@@ -38,21 +42,26 @@ public class StatsMenu extends Menu {
     protected void build() {
         MagicProfile profile = ProfileManager.getProfile(target, MagicProfile.class);
 
-        fillBorders();
+        fillAll();
 
-        inventory.setItem(1, createStatItem(Material.BEACON, "&eCircle Level",
+        if (confirmingReset) {
+            buildResetConfirmation(profile);
+            return;
+        }
+
+        inventory.setItem(1, createStatItem(Material.BEACON, lang().get("stats.circle_level"),
                 "&f" + profile.getCircleLevel()));
-        inventory.setItem(2, createStatItem(Material.KNOWLEDGE_BOOK, "&bArcane Knowledge",
-                "&f" + String.format("%.0f", profile.getArcaneKnowledge())));
-        inventory.setItem(3, createStatItem(Material.AMETHYST_SHARD, "&dResearch Points",
-                "&f" + profile.getResearchPoints()));
+        inventory.setItem(2, createStatItem(Material.KNOWLEDGE_BOOK, lang().get("stats.arcane_knowledge"),
+                lang().get("stats.arcane_knowledge_lore", "current", String.format("%.0f", profile.getArcaneKnowledge()), "max", String.format("%.0f", profile.getArcaneKnowledge()))));
+        inventory.setItem(3, createStatItem(Material.AMETHYST_SHARD, lang().get("stats.research_points"),
+                lang().get("stats.research_points_lore", "current", String.valueOf(profile.getResearchPoints()))));
         inventory.setItem(4, createPlayerHead());
-        inventory.setItem(5, createStatItem(Material.EXPERIENCE_BOTTLE, "&aStat Points",
-                "&f" + profile.getStatPoints()));
-        inventory.setItem(6, createStatItem(Material.POTION, "&bMana",
-                "&f" + String.format("%.0f", profile.getMana()) + "/" + String.format("%.0f", profile.getMaxMana())));
-        inventory.setItem(7, createStatItem(Material.SUGAR, "&bMana Regen",
-                "&f" + profile.getManaRegeneration() + "/s"));
+        inventory.setItem(5, createStatItem(Material.EXPERIENCE_BOTTLE, lang().get("stats.stat_points"),
+                lang().get("stats.stat_points_lore", "current", String.valueOf(profile.getStatPoints()))));
+        inventory.setItem(6, createStatItem(Material.POTION, lang().get("stats.mana"),
+                lang().get("stats.mana_lore", "current", String.format("%.0f", profile.getMana()) + "/" + String.format("%.0f", profile.getMaxMana()))));
+        inventory.setItem(7, createStatItem(Material.SUGAR, lang().get("stats.mana_regen"),
+                lang().get("stats.mana_regen_lore", "current", profile.getManaRegeneration() + "/s")));
 
         for (int i = 0; i < 6; i++) {
             inventory.setItem(DISPLAY_SLOTS[i], createElementDisplay(profile, DISPLAY_ELEMENTS[i]));
@@ -65,21 +74,32 @@ public class StatsMenu extends Menu {
         inventory.setItem(49, createResetButton(profile));
     }
 
-    private void fillBorders() {
-        for (int i = 0; i < 54; i++) {
-            inventory.setItem(i, Utils.getBlank());
-        }
+    private void buildResetConfirmation(MagicProfile profile) {
+        inventory.setItem(13, ItemBuilder.of(Material.NETHER_STAR)
+                .name(lang().get("stats.reset_confirm_title"))
+                .rawLore(List.of(lang().get("stats.reset_confirm_lore").split("\\n")))
+                .build());
+
+        inventory.setItem(11, ItemBuilder.of(Material.LIME_WOOL)
+                .name(lang().get("stats.reset_confirm_yes"))
+                .lore(lang().get("stats.reset_confirm_yes_lore"))
+                .build());
+
+        setMenuData(inventory.getItem(11), "action", "confirm_reset");
+
+        inventory.setItem(15, ItemBuilder.of(Material.RED_WOOL)
+                .name(lang().get("stats.reset_confirm_no"))
+                .lore(lang().get("stats.reset_confirm_no_lore"))
+                .build());
+
+        setMenuData(inventory.getItem(15), "action", "cancel_reset");
     }
 
     private ItemStack createStatItem(Material material, String label, String value) {
-        ItemStack item = new ItemStack(material);
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ColorFormat.format(label));
-        List<String> lore = new ArrayList<>();
-        lore.add(ColorFormat.format(value));
-        meta.setLore(lore);
-        item.setItemMeta(meta);
-        return item;
+        return ItemBuilder.of(material)
+                .name(label)
+                .lore(value)
+                .build();
     }
 
     private ItemStack createPlayerHead() {
@@ -101,16 +121,11 @@ public class StatsMenu extends Menu {
             case DARK -> Material.ECHO_SHARD;
             default -> Material.BARRIER;
         };
-        ItemStack item = new ItemStack(material);
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ColorFormat.format(element.getName()));
-
-        List<String> lore = new ArrayList<>();
-        lore.add(ColorFormat.format(element.getColor() + "Affinity: &f" + String.format("%.1f", profile.getAffinity(element))));
-        lore.add(ColorFormat.format(element.getColor() + "Resistance: &f" + String.format("%.1f", profile.getResistance(element))));
-        meta.setLore(lore);
-        item.setItemMeta(meta);
-        return item;
+        return ItemBuilder.of(material)
+                .name(lang().get("stats.element_" + element.name().toLowerCase()))
+                .lore(lang().get("stats.affinity", "value", String.format("%.1f", profile.getAffinity(element))),
+                      lang().get("stats.resistance", "value", String.format("%.1f", profile.getResistance(element))))
+                .build();
     }
 
     private ItemStack createElementInvestItem(MagicProfile profile, Element element) {
@@ -123,17 +138,14 @@ public class StatsMenu extends Menu {
             case DARK -> Material.ECHO_SHARD;
             default -> Material.BARRIER;
         };
-        ItemStack item = new ItemStack(material);
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ColorFormat.format(element.getName()));
 
         List<String> lore = new ArrayList<>();
         int points = profile.getPoints(element);
-        lore.add(ColorFormat.format("&eInvested Points: &6" + points));
+        lore.add(lang().get("stats.invested_points") + " &6" + points);
 
         if (points > 0) {
             lore.add("");
-            lore.add(ColorFormat.format("&eBonus:"));
+            lore.add(lang().get("stats.bonus"));
             lore.add(ColorFormat.format("&7 - " + element.getColor() + "+" +
                 (affinityIncrease * points) + " " + element.getName() + " Affinity"));
             lore.add(ColorFormat.format("&7 - " + element.getColor() + "+" +
@@ -142,35 +154,25 @@ public class StatsMenu extends Menu {
 
         if (profile.getStatPoints() > 0) {
             lore.add("");
-            lore.add(ColorFormat.format("&eClick to invest &61 &epoint."));
+            lore.add(lang().get("stats.invest_click"));
         }
 
-        meta.setLore(lore);
-        item.setItemMeta(meta);
-
-        int amount = points > 0 ? points : 1;
-        item.setAmount(amount);
+        ItemStack item = ItemBuilder.of(material)
+                .name(lang().get("stats.element_" + element.name().toLowerCase()))
+                .rawLore(lore)
+                .amount(points > 0 ? points : 1)
+                .build();
 
         setMenuData(item, "element", element.name().toLowerCase());
-
         return item;
     }
 
     private ItemStack createResetButton(MagicProfile profile) {
-        ItemStack item = new ItemStack(Material.BARRIER);
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ColorFormat.format("&dReset Stats"));
-
-        List<String> lore = new ArrayList<>();
-        lore.add(ColorFormat.format("&dReset Tokens: &f" + profile.getResetTokens()));
-        lore.add("");
-        lore.add(ColorFormat.format("&eClick to reset all invested stats."));
-        lore.add(ColorFormat.format("&c&lTHIS IS NOT UNDOABLE"));
-        meta.setLore(lore);
-        item.setItemMeta(meta);
-
+        ItemStack item = ItemBuilder.of(Material.BARRIER)
+                .name(lang().get("stats.reset_button"))
+                .rawLore(List.of(lang().get("stats.reset_button_lore", "tokens", String.valueOf(profile.getResetTokens())).split("\\n")))
+                .build();
         setMenuData(item, "action", "reset");
-
         return item;
     }
 
@@ -181,22 +183,35 @@ public class StatsMenu extends Menu {
         }
 
         if (!viewer.equals(target)) {
-            viewer.sendMessage(ColorFormat.format("&cYou can only modify your own stats!"));
+            viewer.sendMessage(lang().get("stats.invest_wrong_player"));
             return true;
         }
 
         MagicProfile profile = ProfileManager.getProfile(target, MagicProfile.class);
         String action = getStringData(clicked, "action");
 
-        if ("reset".equals(action)) {
+        if ("confirm_reset".equals(action)) {
+            confirmingReset = false;
             handleStatsReset(profile);
+            refresh();
+            return true;
+        }
+
+        if ("cancel_reset".equals(action)) {
+            confirmingReset = false;
+            refresh();
+            return true;
+        }
+
+        if ("reset".equals(action)) {
+            confirmingReset = true;
+            refresh();
             return true;
         }
 
         String elementName = getStringData(clicked, "element");
         if (elementName != null && !elementName.isEmpty()) {
             handleElementInvestment(profile, elementName);
-            return true;
         }
 
         return true;
@@ -204,7 +219,7 @@ public class StatsMenu extends Menu {
 
     private void handleElementInvestment(MagicProfile profile, String elementName) {
         if (profile.getStatPoints() <= 0) {
-            viewer.sendMessage(ColorFormat.format("&cYou don't have any stat points available!"));
+            viewer.sendMessage(lang().get("stats.invest_insufficient"));
             viewer.playSound(viewer.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
             return;
         }
@@ -253,7 +268,7 @@ public class StatsMenu extends Menu {
             }
         }
 
-        viewer.sendMessage(ColorFormat.format("&aInvested 1 point into " + element.getName() + "!"));
+        viewer.sendMessage(lang().get("stats.invest_success", "element", lang().get("stats.element_" + element.name().toLowerCase())));
         viewer.playSound(viewer.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
 
         refresh();
@@ -261,7 +276,7 @@ public class StatsMenu extends Menu {
 
     private void handleStatsReset(MagicProfile profile) {
         if (profile.getResetTokens() <= 0) {
-            viewer.sendMessage(ColorFormat.format("&cYou don't have any reset tokens!"));
+            viewer.sendMessage(lang().get("stats.reset_no_tokens"));
             viewer.playSound(viewer.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
             return;
         }
@@ -274,7 +289,7 @@ public class StatsMenu extends Menu {
         }
 
         if (totalPoints <= 0) {
-            viewer.sendMessage(ColorFormat.format("&cYou have no stats to reset!"));
+            viewer.sendMessage(lang().get("stats.reset_no_stats"));
             viewer.playSound(viewer.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
             return;
         }
@@ -303,9 +318,7 @@ public class StatsMenu extends Menu {
 
         profile.setStatPoints(profile.getStatPoints() + totalPoints);
 
-        viewer.sendMessage(ColorFormat.format("&aStats reset! Refunded " + totalPoints + " stat points."));
+        viewer.sendMessage(lang().get("stats.reset_success", "points", String.valueOf(totalPoints)));
         viewer.playSound(viewer.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
-
-        refresh();
     }
 }

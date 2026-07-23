@@ -1,8 +1,10 @@
 package me.nagasonic.alkatraz.gui.implementation.editor;
 
 import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
+import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.gui.Menu;
 import me.nagasonic.alkatraz.items.magic.recipe.MagicItemRecipeManager;
+import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.util.ColorFormat;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -18,6 +20,8 @@ import java.util.*;
 import java.util.Arrays;
 
 public class RecipeSubMenu extends Menu {
+
+    private static LangManager lang() { return Alkatraz.getLangManager(); }
 
     private static final int[] GRID_SLOTS = {10, 11, 12, 19, 20, 21, 28, 29, 30};
     private static final int DEF_SLOT = 32;
@@ -124,7 +128,7 @@ public class RecipeSubMenu extends Menu {
             item = new ItemStack(Material.BARRIER);
             ItemMeta meta = item.getItemMeta();
             if (meta != null) {
-                meta.setDisplayName(ColorFormat.format("&7Empty"));
+                meta.setDisplayName(lang().get("editor.recipe_empty"));
                 List<String> lore = new ArrayList<>();
                 lore.add(ColorFormat.format("&7Click to set ingredient"));
                 meta.setLore(lore);
@@ -137,7 +141,7 @@ public class RecipeSubMenu extends Menu {
             item = new ItemStack(mat);
             ItemMeta meta = item.getItemMeta();
             if (meta != null) {
-                meta.setDisplayName(ColorFormat.format("&e'" + c + "'"));
+                meta.setDisplayName(lang().get("editor.recipe_char", "char", String.valueOf(c)));
                 List<String> lore = new ArrayList<>();
                 lore.add(ColorFormat.format("&7Material: &f" + matName));
                 lore.add("");
@@ -156,7 +160,7 @@ public class RecipeSubMenu extends Menu {
         ItemStack item = new ItemStack(Material.NAME_TAG);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(ColorFormat.format("&6Item: &f" + defKey));
+            meta.setDisplayName(lang().get("editor.recipe_item", "key", defKey));
             List<String> lore = new ArrayList<>();
             lore.add(ColorFormat.format("&7This is the result of the recipe."));
             lore.add("");
@@ -174,7 +178,7 @@ public class RecipeSubMenu extends Menu {
         ItemStack item = new ItemStack(Material.LIME_DYE);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(ColorFormat.format("&a&lSave Recipe"));
+            meta.setDisplayName(lang().get("editor.save_recipe"));
             List<String> lore = new ArrayList<>();
             lore.add(ColorFormat.format("&7Save recipe to config file"));
             meta.setLore(lore);
@@ -188,7 +192,7 @@ public class RecipeSubMenu extends Menu {
         ItemStack item = new ItemStack(Material.BARRIER);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(ColorFormat.format("&cBack"));
+            meta.setDisplayName(lang().get("common.back"));
             item.setItemMeta(meta);
         }
         setMenuData(item, "action", "back");

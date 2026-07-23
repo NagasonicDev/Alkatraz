@@ -1,5 +1,6 @@
 package me.nagasonic.alkatraz.gui.implementation.engraving;
 
+import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.gui.Menu;
 import me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack;
 import me.nagasonic.alkatraz.util.ColorFormat;
@@ -16,8 +17,12 @@ public class EngravingTableMenuSelector extends Menu {
 
     private static final int ENGRVING_TABLE_SLOT = 22;
 
+    private static me.nagasonic.alkatraz.lang.LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
+
     public EngravingTableMenuSelector(Player viewer) {
-        super(viewer, ColorFormat.format("&8Engraving Table"), 27);
+        super(viewer, ColorFormat.format(lang().get("menu.engraving_selector")), 27);
     }
 
     @Override
@@ -52,7 +57,7 @@ public class EngravingTableMenuSelector extends Menu {
         var def = MagicItemStack.readDefinition(magicItem);
         var inst = MagicItemStack.readInstance(magicItem);
         if (def.isEmpty() || inst.isEmpty()) {
-            viewer.sendMessage(ColorFormat.format("&cThis is not a valid magic item."));
+            viewer.sendMessage(ColorFormat.format(lang().get("engraving.invalid_item")));
             return;
         }
 
@@ -73,13 +78,11 @@ public class EngravingTableMenuSelector extends Menu {
         ItemStack item = new ItemStack(Material.ENCHANTING_TABLE);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(ColorFormat.format("&dEngraving Table"));
+            meta.setDisplayName(ColorFormat.format(lang().get("engraving.select_item")));
             List<String> lore = new ArrayList<>();
-            lore.add(ColorFormat.format("&7Click any magic item in your inventory"));
-            lore.add(ColorFormat.format("&7to select it for engraving."));
-            lore.add("");
-            lore.add(ColorFormat.format("&7Hold an item in your hand and click"));
-            lore.add(ColorFormat.format("&7on its slot to select it."));
+            for (String line : lang().get("engraving.select_item_lore").split("\\n")) {
+                lore.add(ColorFormat.format(line));
+            }
             meta.setLore(lore);
             item.setItemMeta(meta);
         }

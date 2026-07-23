@@ -1,5 +1,6 @@
 package me.nagasonic.alkatraz.gui.implementation.engraving;
 
+import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.api.magic.instance.Engraving;
 import me.nagasonic.alkatraz.api.magic.registry.MagicItemRegistries;
 import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
@@ -29,9 +30,13 @@ public class TriggerSelectionMenu extends PagedMenu<TriggerType> {
 
     private static final int[] CONTENT_SLOTS = {19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34};
 
+    private static me.nagasonic.alkatraz.lang.LangManager lang() {
+        return Alkatraz.getLangManager();
+    }
+
     public TriggerSelectionMenu(Player viewer) {
         super(viewer,
-                ColorFormat.format("&8Select Trigger"),
+                ColorFormat.format(lang().get("menu.trigger_select")),
                 54,
                 getFilteredTriggers(viewer),
                 14);
@@ -83,7 +88,7 @@ public class TriggerSelectionMenu extends PagedMenu<TriggerType> {
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return item;
 
-        meta.setDisplayName(ColorFormat.format("&e" + trigger.getKey().getKey()));
+        meta.setDisplayName(lang().get("engraving.trigger_prefix", "trigger", trigger.getKey().getKey()));
         List<String> lore = new ArrayList<>();
         lore.add(ColorFormat.format("&7" + trigger.description()));
         lore.add("");
@@ -166,7 +171,7 @@ public class TriggerSelectionMenu extends PagedMenu<TriggerType> {
         ItemStack back = new ItemStack(Material.BARRIER);
         ItemMeta meta = back.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(ColorFormat.format("&cBack"));
+            meta.setDisplayName(ColorFormat.format(lang().get("common.back")));
             back.setItemMeta(meta);
         }
         setMenuData(back, "action", "back");

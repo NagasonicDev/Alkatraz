@@ -1,5 +1,6 @@
 package me.nagasonic.alkatraz.gui;
 
+import me.nagasonic.alkatraz.gui.grimoire.GrimoireLecternState;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -19,10 +20,8 @@ public class MenuListener implements Listener {
         Menu menu = Menu.getActiveMenu(player);
         if (menu == null) return;
         
-        // Check if the clicked inventory belongs to this menu
         if (!menu.matches(event.getView().getTitle())) return;
         
-        // Let the menu handle the click
         ItemStack clicked = event.getCurrentItem();
         boolean shouldCancel = menu.handleClick(event, clicked);
         
@@ -38,6 +37,10 @@ public class MenuListener implements Listener {
         Menu menu = Menu.getActiveMenu(player);
         if (menu != null && menu.matches(event.getView().getTitle())) {
             Menu.removeActiveMenu(player);
+        }
+
+        if (GrimoireLecternState.isActive(player)) {
+            GrimoireLecternState.remove(player);
         }
     }
 }
