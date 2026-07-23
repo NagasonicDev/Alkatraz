@@ -20,10 +20,21 @@ public enum CircleLevel {
         this.value = value;
     }
 
+    /**
+     * Returns the integer value of this Circle level.
+     *
+     * @return the Circle level number (1-9)
+     */
     public int getValue() {
         return value;
     }
 
+    /**
+     * Checks whether the given integer is a valid Circle level (1-9).
+     *
+     * @param value the value to check
+     * @return {@code true} if within range
+     */
     public static boolean isValid(int value) {
         return value >= I.value && value <= IX.value;
     }

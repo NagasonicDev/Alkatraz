@@ -3,6 +3,12 @@ package me.nagasonic.alkatraz.api.dom;
 import org.bukkit.Material;
 import org.bukkit.block.Biome;
 
+/**
+ * Enum representing natural ground block types used by the spell system.
+ * Each constant maps to a Bukkit {@link Material} and the enum provides
+ * utility methods for classifying ground materials (loose, rock, ore)
+ * and for resolving a representative ground material from a {@link Biome}.
+ */
 public enum Ground {
 
     // --- Soil & Dirt ---------------------------------------------------------
@@ -139,10 +145,21 @@ public enum Ground {
         this.type = type;
     }
 
+    /**
+     * Returns the Bukkit {@link Material} associated with this ground type.
+     *
+     * @return the material type
+     */
     public Material getType() {
         return this.type;
     }
 
+    /**
+     * Checks whether the given material is a recognized ground material.
+     *
+     * @param material the material to check
+     * @return {@code true} if the material is a known ground type, {@code false} otherwise
+     */
     public static boolean isGround(Material material) {
         for (Ground ground : Ground.values()) {
             if (ground.type.equals(material)) return true;
@@ -201,6 +218,13 @@ public enum Ground {
         };
     }
 
+    /**
+     * Returns the representative ground {@link Material} for the given biome.
+     * Maps each biome to its most characteristic natural ground block.
+     *
+     * @param biome the biome to resolve
+     * @return the default ground material for that biome, or {@link Material#DIRT} if no specific mapping exists
+     */
     public static Material getGround(Biome biome) {
         return switch (biome) {
             case DESERT                -> SAND.getType();
