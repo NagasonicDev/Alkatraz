@@ -146,7 +146,7 @@ public abstract class Spell {
 
 
         // Consume mana
-        profile.setMana(profile.getMana() - manaCost);
+        StatUtils.subMana(p, manaCost);
 
         // Add Arcane Knowledge through the configurable progression source.
         StatUtils.addArcaneKnowledge(p, "spell_cast", getRequiredCircleLevel());
@@ -180,7 +180,7 @@ public abstract class Spell {
                             UUID uuid = p.getUniqueId();
                             if (castCancelledPlayers.remove(uuid)) {
                                 // Refund mana
-                                profile.setMana(profile.getMana() + manaCost);
+                                StatUtils.addMana(p, manaCost);
                             } else {
                                 profile.setCooldown(this, System.currentTimeMillis());
                                 if (profile.getSpellMastery(this) < getMaxMastery()) {

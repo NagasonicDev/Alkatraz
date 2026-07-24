@@ -378,8 +378,24 @@ public class CastEventListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     private void onHotbarDeath(PlayerDeathEvent e) {
         Player p = e.getEntity();
-        if (SpellHotbarManager.isActive(p)) {
-            SpellHotbarManager.exit(p);
+        if (!SpellHotbarManager.isActive(p)) return;
+
+        UUID uuid = p.getUniqueId();
+        ItemStack[] savedStorage = SpellHotbarManager.peekSavedContents(uuid);
+        ItemStack savedOffhand = SpellHotbarManager.peekSavedOffhand(uuid);
+
+        SpellHotbarManager.exit(p);
+
+        e.getDrops().clear();
+        if (savedStorage != null) {
+            for (ItemStack item : savedStorage) {
+                if (item != null && item.getType() != Material.AIR) {
+                    e.getDrops().add(item.clone());
+                }
+            }
+        }
+        if (savedOffhand != null && savedOffhand.getType() != Material.AIR) {
+            e.getDrops().add(savedOffhand.clone());
         }
     }
 

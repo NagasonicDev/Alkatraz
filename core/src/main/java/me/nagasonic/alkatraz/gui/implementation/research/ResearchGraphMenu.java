@@ -26,30 +26,19 @@ public class ResearchGraphMenu extends Menu {
 
     private static LangManager lang() { return Alkatraz.getLangManager(); }
 
-    private static final int GRAPH_ROWS = 4;
-    private static final int GRAPH_COLUMNS = 7;
-    private static final int GRAPH_LEFT = 1;
-    private static final int GRAPH_TOP = 1;
+    private static final int SLOT_PAN_NW = 0;
+    private static final int SLOT_PAN_N = 4;
+    private static final int SLOT_PAN_NE = 8;
+    private static final int SLOT_PAN_W = 18;
+    private static final int SLOT_PAN_E = 26;
+    private static final int SLOT_PAN_SW = 36;
+    private static final int SLOT_PAN_S = 40;
+    private static final int SLOT_PAN_SE = 44;
 
-    private static final int GRAPH_CENTRE_COL = GRAPH_LEFT + GRAPH_COLUMNS / 2;
-    private static final int GRAPH_CENTRE_ROW = GRAPH_TOP + GRAPH_ROWS / 2;
+    private static final int SCROLLBAR_SIZE = 9;
+    private static final int SCROLLBAR_CENTER = 49;
 
-    private static final int SLOT_PAN_BACK = 45;
-    private static final int SLOT_PAN_NW = 46;
-    private static final int SLOT_PAN_S = 48;
-    private static final int SLOT_PAN_N = 49;
-    private static final int SLOT_PAN_NE = 50;
-    private static final int SLOT_RESEARCH_POINTS = 52;
-
-    private static final int[] SLOTS_PAN_LEFT = {9, 18, 27, 36};
-    private static final int[] SLOTS_PAN_RIGHT = {17, 26, 35, 44};
-
-    private static final int MAX_LEFT = 10;
-    private static final int MAX_RIGHT = 10;
-    private static final int MAX_UP = 10;
-    private static final int MAX_DOWN = 10;
-
-    private static final int TAB_SLOT_COUNT = 7;
+    private static final int MAX_PAN = 10;
 
     private String category;
     private int viewCenterX;
@@ -62,55 +51,46 @@ public class ResearchGraphMenu extends Menu {
     public ResearchGraphMenu(Player viewer, String category, int viewCenterX, int viewCenterY) {
         super(viewer, lang().get("menu.research_library"), 54);
         this.category = category;
-        this.viewCenterX = clampX(viewCenterX);
-        this.viewCenterY = clampY(viewCenterY);
+        this.viewCenterX = clamp(viewCenterX);
+        this.viewCenterY = clamp(viewCenterY);
     }
 
     @Override
     protected void build() {
         fillAll();
-        drawTabs();
-        drawProgressSummary();
-        drawCategoryName();
-        List<ResearchNode> nodes = ResearchService.getNodes(category);
-        drawEdges(nodes);
-        drawNodes(nodes);
-        drawControls();
+        drawEdges();
+        drawNodes();
+        drawNavigationArrows();
+        drawScrollbar();
     }
 
     @Override
     protected boolean handleClick(InventoryClickEvent event, ItemStack clicked) {
         if (clicked == null || clicked.getType() == Material.AIR) return true;
-
         int s = event.getSlot();
 
-        if (s >= 0 && s < TAB_SLOT_COUNT) {
-            List<ResearchCategory> cats = sortedCategories();
-            if (s < cats.size()) {
-                String newCategory = cats.get(s).getId();
-                if (!newCategory.equals(category)) {
-                    new ResearchGraphMenu(viewer, newCategory, 0, 0).open();
-                }
-            }
+        if (s >= 45 && s < 54) {
+            handleScrollbarClick(s);
             return true;
         }
 
-        boolean panLeft = false;
-        boolean panRight = false;
-        for (int slot : SLOTS_PAN_LEFT) {
-            if (s == slot) { panLeft = true; break; }
+        if (s == SLOT_PAN_NW || s == SLOT_PAN_N || s == SLOT_PAN_NE) {
+            viewCenterY = clamp(viewCenterY - 1);
+            refresh();
+            return true;
         }
-        for (int slot : SLOTS_PAN_RIGHT) {
-            if (s == slot) { panRight = true; break; }
+        if (s == SLOT_PAN_SW || s == SLOT_PAN_S || s == SLOT_PAN_SE) {
+            viewCenterY = clamp(viewCenterY + 1);
+            refresh();
+            return true;
         }
-        boolean panUp = (s == SLOT_PAN_N || s == SLOT_PAN_NW || s == SLOT_PAN_NE);
-        boolean panDown = (s == SLOT_PAN_S);
-
-        if (panLeft || panRight || panUp || panDown) {
-            if (panLeft) viewCenterX = clampX(viewCenterX - 1);
-            if (panRight) viewCenterX = clampX(viewCenterX + 1);
-            if (panUp) viewCenterY = clampY(viewCenterY - 1);
-            if (panDown) viewCenterY = clampY(viewCenterY + 1);
+        if (s == SLOT_PAN_W) {
+            viewCenterX = clamp(viewCenterX - 1);
+            refresh();
+            return true;
+        }
+        if (s == SLOT_PAN_E) {
+            viewCenterX = clamp(viewCenterX + 1);
             refresh();
             return true;
         }
@@ -130,51 +110,65 @@ public class ResearchGraphMenu extends Menu {
         return true;
     }
 
-    private void drawTabs() {
-        List<ResearchCategory> cats = sortedCategories();
-        for (int i = 0; i < TAB_SLOT_COUNT; i++) {
-            if (i >= cats.size()) break;
-            ResearchCategory cat = cats.get(i);
-            boolean active = cat.getId().equals(category);
-            Material mat = active ? Material.ENCHANTED_BOOK : cat.getIcon();
-            String name = ColorFormat.format(active ? "&d" + cat.getDisplayName() : "&7" + cat.getDisplayName());
-            ItemStack item = ItemBuilder.of(mat)
-                    .rawName(name)
-                    .glint(active)
-                    .build();
-            inventory.setItem(i, item);
+    private void handleScrollbarClick(int slot) {
+        if (slot == 45) {
+            new WandTableSelectionMenu(viewer).open();
+            return;
         }
-    }
-
-    private void drawProgressSummary() {
-        List<ResearchNode> nodes = ResearchService.getNodes(category);
-        int total = nodes.size();
-        int completed = 0;
-        for (ResearchNode node : nodes) {
-            if (ResearchService.getState(viewer, node) == ResearchState.COMPLETED) {
-                completed++;
+        List<ResearchCategory> cats = sortedCategories();
+        int activeIndex = findActiveCategoryIndex(cats);
+        int offset = slot - SCROLLBAR_CENTER;
+        int targetIndex = activeIndex + offset;
+        if (targetIndex >= 0 && targetIndex < cats.size()) {
+            String newCategory = cats.get(targetIndex).getId();
+            if (!newCategory.equals(category)) {
+                new ResearchGraphMenu(viewer, newCategory, 0, 0).open();
             }
         }
-        String progressText = total == 0 ? "&7No research" : "&a" + completed + "&7/&a" + total;
-        ItemStack item = ItemBuilder.of(Material.PAPER)
-                .name("&bProgress")
-                .rawLore(List.of(ColorFormat.format(progressText)))
-                .build();
-        inventory.setItem(7, item);
     }
 
-    private void drawCategoryName() {
-        String displayName = ResearchService.getCategories().stream()
-                .filter(c -> c.getId().equals(category))
-                .map(ResearchCategory::getDisplayName)
-                .findFirst().orElse(category);
-        ItemStack item = ItemBuilder.of(Material.BOOK)
-                .rawName(ColorFormat.format("&d" + displayName))
-                .build();
-        inventory.setItem(8, item);
+    private void drawNavigationArrows() {
+        inventory.setItem(SLOT_PAN_NW, panArrow("research.pan_up_left"));
+        inventory.setItem(SLOT_PAN_N, panArrow("research.pan_up"));
+        inventory.setItem(SLOT_PAN_NE, panArrow("research.pan_up_right"));
+        inventory.setItem(SLOT_PAN_W, panArrow("research.pan_left"));
+        inventory.setItem(SLOT_PAN_E, panArrow("research.pan_right"));
+        inventory.setItem(SLOT_PAN_SW, panArrow("research.pan_down_left"));
+        inventory.setItem(SLOT_PAN_S, panArrow("research.pan_down"));
+        inventory.setItem(SLOT_PAN_SE, panArrow("research.pan_down_right"));
     }
 
-    private void drawNodes(List<ResearchNode> nodes) {
+    private void drawScrollbar() {
+        inventory.setItem(45, button(Material.ARROW, lang().get("research.back_to_arcane"), "back_table"));
+
+        List<ResearchCategory> cats = sortedCategories();
+        int activeIndex = findActiveCategoryIndex(cats);
+
+        for (int i = 0; i < SCROLLBAR_SIZE; i++) {
+            int slot = 45 + i;
+            if (slot == 45 || slot == 53) continue;
+            int catIndex = activeIndex + (i - 4);
+            if (catIndex >= 0 && catIndex < cats.size()) {
+                ResearchCategory cat = cats.get(catIndex);
+                boolean active = cat.getId().equals(category);
+                Material mat = active ? Material.ENCHANTED_BOOK : cat.getIcon();
+                String name = ColorFormat.format(active ? "&d" + cat.getDisplayName() : "&7" + cat.getDisplayName());
+                ItemStack item = ItemBuilder.of(mat)
+                        .rawName(name)
+                        .glint(active)
+                        .build();
+                inventory.setItem(slot, item);
+            }
+        }
+
+        int points = ProfileManager.getProfile(viewer, MagicProfile.class).getResearchPoints();
+        inventory.setItem(53, ItemBuilder.of(Material.PAPER)
+                .rawName(ColorFormat.format(lang().get("research.research_points", "points", String.valueOf(points))))
+                .build());
+    }
+
+    private void drawNodes() {
+        List<ResearchNode> nodes = ResearchService.getNodes(category);
         for (ResearchNode node : nodes) {
             Optional<Integer> slot = slotFor(node.getX(), node.getY());
             if (slot.isEmpty()) continue;
@@ -183,7 +177,8 @@ public class ResearchGraphMenu extends Menu {
         }
     }
 
-    private void drawEdges(List<ResearchNode> nodes) {
+    private void drawEdges() {
+        List<ResearchNode> nodes = ResearchService.getNodes(category);
         for (ResearchNode child : nodes) {
             for (String parentId : child.getParents()) {
                 ResearchService.getNode(parentId).ifPresent(parent -> drawEdge(parent, child));
@@ -215,24 +210,6 @@ public class ResearchGraphMenu extends Menu {
             if (x != cx) x += dx;
             if (y != cy) y += dy;
         }
-    }
-
-    private void drawControls() {
-        for (int slot : SLOTS_PAN_LEFT) {
-            inventory.setItem(slot, panButton(Material.ARROW, lang().get("research.pan_left")));
-        }
-        for (int slot : SLOTS_PAN_RIGHT) {
-            inventory.setItem(slot, panButton(Material.ARROW, lang().get("research.pan_right")));
-        }
-        inventory.setItem(SLOT_PAN_NW, panButton(Material.ARROW, lang().get("research.pan_up_left")));
-        inventory.setItem(SLOT_PAN_S, panButton(Material.ARROW, lang().get("research.pan_down")));
-        inventory.setItem(SLOT_PAN_N, panButton(Material.ARROW, lang().get("research.pan_up")));
-        inventory.setItem(SLOT_PAN_NE, panButton(Material.ARROW, lang().get("research.pan_up_right")));
-        inventory.setItem(SLOT_PAN_BACK, button(Material.ARROW, lang().get("research.back_to_arcane"), "back_table"));
-        int points = ProfileManager.getProfile(viewer, MagicProfile.class).getResearchPoints();
-        inventory.setItem(SLOT_RESEARCH_POINTS, ItemBuilder.of(Material.PAPER)
-                .rawName(ColorFormat.format(lang().get("research.research_points", "points", String.valueOf(points))))
-                .build());
     }
 
     private ItemStack createNodeItem(ResearchNode node, ResearchState state) {
@@ -270,22 +247,12 @@ public class ResearchGraphMenu extends Menu {
     private ItemStack createEdgeItem(ResearchNode parent, ResearchNode child) {
         ResearchState parentState = ResearchService.getState(viewer, parent);
         ResearchState childState = ResearchService.getState(viewer, child);
-
-        boolean parentDone = parentState == ResearchState.COMPLETED;
-        boolean childDone = childState == ResearchState.COMPLETED;
-
-        Material material;
-        if (parentDone && childDone) {
-            material = Material.LIME_STAINED_GLASS_PANE;
-        } else {
-            material = Material.GRAY_STAINED_GLASS_PANE;
-        }
-
-        return ItemBuilder.of(material).build();
+        boolean bothDone = parentState == ResearchState.COMPLETED && childState == ResearchState.COMPLETED;
+        return ItemBuilder.of(bothDone ? Material.LIME_STAINED_GLASS_PANE : Material.GRAY_STAINED_GLASS_PANE).build();
     }
 
-    private ItemStack panButton(Material material, String name) {
-        return ItemBuilder.of(material).rawName(ColorFormat.format(name)).build();
+    private ItemStack panArrow(String nameKey) {
+        return ItemBuilder.of(Material.ARROW).rawName(ColorFormat.format(lang().get(nameKey))).build();
     }
 
     private ItemStack button(Material material, String name, String action) {
@@ -295,27 +262,20 @@ public class ResearchGraphMenu extends Menu {
     }
 
     private Optional<Integer> slotFor(int x, int y) {
-        int halfCols = GRAPH_COLUMNS / 2;
-        int halfRows = GRAPH_ROWS / 2;
-
         int viewX = x - viewCenterX;
         int viewY = y - viewCenterY;
 
-        if (viewX < -halfCols || viewX > halfCols || viewY < -halfRows || viewY > halfRows) {
+        if (viewX < -4 || viewX > 4 || viewY < -2 || viewY > 2) {
             return Optional.empty();
         }
 
-        int slotCol = GRAPH_CENTRE_COL + viewX;
-        int slotRow = GRAPH_CENTRE_ROW + viewY;
-        return Optional.of(slotRow * 9 + slotCol);
+        int col = 4 + viewX;
+        int row = 2 + viewY;
+        return Optional.of(row * 9 + col);
     }
 
-    private static int clampX(int x) {
-        return Math.max(-MAX_LEFT, Math.min(MAX_RIGHT, x));
-    }
-
-    private static int clampY(int y) {
-        return Math.max(-MAX_UP, Math.min(MAX_DOWN, y));
+    private static int clamp(int value) {
+        return Math.max(-MAX_PAN, Math.min(MAX_PAN, value));
     }
 
     private String formatState(ResearchState state) {
@@ -337,6 +297,13 @@ public class ResearchGraphMenu extends Menu {
         return ResearchService.getCategories().stream()
                 .sorted(Comparator.comparing(ResearchCategory::getDisplayName))
                 .toList();
+    }
+
+    private int findActiveCategoryIndex(List<ResearchCategory> cats) {
+        for (int i = 0; i < cats.size(); i++) {
+            if (cats.get(i).getId().equals(category)) return i;
+        }
+        return 0;
     }
 
     private static String firstCategory() {

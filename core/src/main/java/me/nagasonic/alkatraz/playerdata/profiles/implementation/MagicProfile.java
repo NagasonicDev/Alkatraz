@@ -16,6 +16,7 @@ public class MagicProfile extends Profile {
 
     private transient List<SpellModifier> spellModifiers;
     private transient Map<SpellModifier, String> spellModifierTypes;
+    private transient int manaRegenTaskId = -1;
 
     {
         // Core stats
@@ -678,12 +679,23 @@ public class MagicProfile extends Profile {
     }
 
     public void addManaPerSecond(){
-        Bukkit.getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
-            if (getMana() >= getMaxMana()) return;
+        if (manaRegenTaskId != -1) return;
+        manaRegenTaskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
             Player player = Bukkit.getPlayer(getOwner());
-            if (player == null) return;
+            if (player == null || !player.isOnline()) {
+                cancelManaRegenTask();
+                return;
+            }
+            if (getMana() >= getMaxMana()) return;
             StatUtils.addMana(player, getManaRegeneration());
-        }, 0L, 20L);
+        }, 20L, 20L);
+    }
+
+    public void cancelManaRegenTask(){
+        if (manaRegenTaskId != -1) {
+            Bukkit.getScheduler().cancelTask(manaRegenTaskId);
+            manaRegenTaskId = -1;
+        }
     }
 
     // ============================================

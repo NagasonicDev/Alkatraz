@@ -136,13 +136,15 @@ public final class MagicItemComponentListener implements Listener {
     public void onPlayerSwap(PlayerSwapHandItemsEvent event) {
         Player player = event.getPlayer();
 
-        ItemStack mainHand = event.getMainHandItem();
-        ItemStack offHand = event.getOffHandItem();
+        // Use inventory references instead of event copies so NBT modifications persist
+        ItemStack mainHand = player.getInventory().getItemInMainHand();
+        ItemStack offHand = player.getInventory().getItemInOffHand();
 
+        // Find the magic item between the two hands
         ItemStack stack = null;
-        if (mainHand != null && !mainHand.getType().isAir()) {
+        if (mainHand != null && !mainHand.getType().isAir() && MagicItemStack.readInstance(mainHand).isPresent()) {
             stack = mainHand;
-        } else if (offHand != null && !offHand.getType().isAir()) {
+        } else if (offHand != null && !offHand.getType().isAir() && MagicItemStack.readInstance(offHand).isPresent()) {
             stack = offHand;
         }
 
