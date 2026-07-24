@@ -110,15 +110,15 @@ public final class Alkatraz extends JavaPlugin {
         texturePackManager = new me.nagasonic.alkatraz.texturepack.TexturePackManager();
         texturePackManager.load();
         
+        // Initialize LangManager (must be before GUIItemRegistry, which uses lang strings)
+        logVeryHigh("Initializing LangManager...");
+        langManager = new me.nagasonic.alkatraz.lang.LangManager(
+            pluginConfig.getString("language", "english"));
+        
         // Initialize GUI item registry
         logVeryHigh("Initializing GUIItemRegistry...");
         guiItemRegistry = new me.nagasonic.alkatraz.gui.GUIItemRegistry();
         guiItemRegistry.init();
-
-        // Initialize LangManager
-        logVeryHigh("Initializing LangManager...");
-        langManager = new me.nagasonic.alkatraz.lang.LangManager(
-            pluginConfig.getString("language", "english"));
         
         Metrics metrics = new Metrics(this, 27657);
         logVeryHigh("Registering profiles...");

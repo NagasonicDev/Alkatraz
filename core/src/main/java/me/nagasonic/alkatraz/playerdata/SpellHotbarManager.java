@@ -160,6 +160,22 @@ public class SpellHotbarManager {
     }
 
     /**
+     * Returns the saved storage contents for the given player without removing them,
+     * or {@code null} if no inventory is saved.
+     */
+    public static ItemStack[] peekSavedContents(UUID uuid) {
+        return savedInventories.get(uuid);
+    }
+
+    /**
+     * Returns the saved offhand item for the given player without removing it,
+     * or {@code null} if nothing is saved.
+     */
+    public static ItemStack peekSavedOffhand(UUID uuid) {
+        return savedOffhand.get(uuid);
+    }
+
+    /**
      * Returns true if the player entered hotbar mode within the last 500ms.
      * Used to prevent the entry click from immediately triggering exit.
      */

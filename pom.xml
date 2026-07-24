@@ -108,7 +108,12 @@
             <id>repsy</id>
             <name>Alkatraz</name>
             <url>https://repo.repsy.io/nagasonic/alkatrazapi</url>
-        </repository> 
+        </repository>
+        <repository>
+            <id>loohpjames</id>
+            <name>LoohpJames Mirror</name>
+            <url>https://repo.loohpjames.com/repository/</url>
+        </repository>
     </repositories>
 
     <dependencies>

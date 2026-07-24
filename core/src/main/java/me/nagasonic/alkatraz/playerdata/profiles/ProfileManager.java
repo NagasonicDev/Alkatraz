@@ -306,8 +306,10 @@ public class ProfileManager implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
-        
+
         try {
+            MagicProfile magicProfile = getProfile(player.getUniqueId(), MagicProfile.class);
+            magicProfile.cancelManaRegenTask();
             unloadPlayer(player);
             Alkatraz.getInstance().getLogger().log(Level.FINE, 
                 "Saved and unloaded profiles for player: " + player.getName());
