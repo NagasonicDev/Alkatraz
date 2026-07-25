@@ -31,6 +31,7 @@ public class Radiance extends Spell {
     private double healAmount;
     private double radius;
     private double duration;
+    private int windUpDuration;
 
     private static final Set<EntityType> UNDEAD_TYPES = new HashSet<>();
 
@@ -64,10 +65,108 @@ public class Radiance extends Spell {
         this.healAmount = spellConfig.getDouble("heal_amount");
         this.radius = spellConfig.getDouble("radius");
         this.duration = spellConfig.getDouble("duration", 5.0);
+        this.windUpDuration = spellConfig.getInt("wind_up_duration", 3) * 20;
     }
 
     @Override
     public void castAction(Player caster, ItemStack wand) {
+        if (caster.isDead()) return;
+
+        new BukkitRunnable() {
+            int ticks = 0;
+
+            @Override
+            public void run() {
+                if (ticks >= windUpDuration) {
+                    cancel();
+                    launchRadiance(caster, wand);
+                    return;
+                }
+
+                if (caster.isDead() || !caster.isOnline()) {
+                    cancel();
+                    return;
+                }
+
+                Location casterLoc = caster.getLocation();
+                double progress = (double) ticks / windUpDuration;
+                boolean phase1 = progress < 0.5;
+
+                if (phase1) {
+                    double phaseProgress = progress / 0.5;
+                    double maxDistance = 6.0;
+                    double currentDistance = maxDistance * (1.0 - phaseProgress);
+
+                    for (int i = 0; i < 8; i++) {
+                        double angle = (2 * Math.PI * i / 8) + (ticks * 0.05);
+                        double x = Math.cos(angle) * currentDistance;
+                        double z = Math.sin(angle) * currentDistance;
+                        Location rayLoc = casterLoc.clone().add(x, 0.5 + Math.sin(ticks * 0.15 + i) * 1.0, z);
+                        rayLoc.getWorld().spawnParticle(Particle.GLOW, rayLoc, 2, 0.1, 0.1, 0.1, 0);
+
+                        Vector inward = casterLoc.toVector().subtract(rayLoc.toVector()).normalize().multiply(0.3);
+                        Location trailLoc = rayLoc.clone().add(inward);
+                        trailLoc.getWorld().spawnParticle(Particle.GLOW, trailLoc, 1, 0.05, 0.05, 0.05, 0);
+                    }
+
+                    for (int i = 0; i < 5; i++) {
+                        double a = Math.random() * 2 * Math.PI;
+                        double r = Math.random() * 1.5;
+                        Location hazeLoc = casterLoc.clone().add(Math.cos(a) * r, 0.1, Math.sin(a) * r);
+                        hazeLoc.getWorld().spawnParticle(Utils.DUST, hazeLoc, 1, 0.3, 0.1, 0.3, 0,
+                                new Particle.DustOptions(Color.fromRGB(255, 255, 200), 0.4F));
+                    }
+
+                    if (ticks % 20 == 0) {
+                        casterLoc.getWorld().playSound(casterLoc, Sound.BLOCK_BEACON_POWER_SELECT, 0.5f,
+                                0.8f + (float)(phaseProgress * 0.7f));
+                    }
+                } else {
+                    double phaseProgress = (progress - 0.5) / 0.5;
+                    double density = 1.0 + phaseProgress * 3.0;
+
+                    for (int i = 0; i < (int)(4 * density); i++) {
+                        double angle = (2 * Math.PI * i / (int)(4 * density)) + (ticks * 0.08);
+                        double distance = 2.0 * (1.0 - phaseProgress * 0.7);
+                        double x = Math.cos(angle) * distance;
+                        double z = Math.sin(angle) * distance;
+                        Location convergeLoc = casterLoc.clone().add(x, 0.5 + Math.sin(ticks * 0.2 + i) * 1.0, z);
+                        convergeLoc.getWorld().spawnParticle(Particle.GLOW, convergeLoc, 3, 0.05, 0.05, 0.05, 0);
+                    }
+
+                    for (int i = 0; i < (int)(3 * phaseProgress); i++) {
+                        double a = Math.random() * 2 * Math.PI;
+                        double r = Math.random() * 1.0;
+                        Location sparkleLoc = casterLoc.clone().add(Math.cos(a) * r, Math.random() * 2, Math.sin(a) * r);
+                        sparkleLoc.getWorld().spawnParticle(Particle.END_ROD, sparkleLoc, 1, 0.05, 0.05, 0.05, 0.02);
+                    }
+
+                    if (phaseProgress > 0.8) {
+                        double burstIntensity = (phaseProgress - 0.8) / 0.2;
+                        for (int i = 0; i < (int)(6 * burstIntensity); i++) {
+                            double a = Math.random() * 2 * Math.PI;
+                            double r = Math.random() * 0.5;
+                            Location burstLoc = casterLoc.clone().add(Math.cos(a) * r, 1.0 + Math.random(), Math.sin(a) * r);
+                            burstLoc.getWorld().spawnParticle(Particle.GLOW, burstLoc, 2, 0.1, 0.1, 0.1, 0.1);
+                        }
+                    }
+
+                    if (ticks % 15 == 0) {
+                        casterLoc.getWorld().playSound(casterLoc, Sound.BLOCK_BEACON_POWER_SELECT, 0.7f,
+                                1.2f + (float)(phaseProgress * 0.5f));
+                    }
+                }
+
+                ticks++;
+            }
+        }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
+    }
+
+    private boolean isUndead(LivingEntity entity) {
+        return UNDEAD_TYPES.contains(entity.getType());
+    }
+
+    private void launchRadiance(Player caster, ItemStack wand) {
         if (caster.isDead()) return;
 
         double activeRadius = getModifiedStat(caster, "radius", radius);
@@ -181,10 +280,6 @@ public class Radiance extends Spell {
         }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
     }
 
-    private boolean isUndead(LivingEntity entity) {
-        return UNDEAD_TYPES.contains(entity.getType());
-    }
-
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
         if (caster.isDead()) return;
@@ -196,19 +291,59 @@ public class Radiance extends Spell {
 
             @Override
             public void run() {
-                if (ticks >= (int)(duration * 20)) {
+                if (ticks >= windUpDuration) {
+                    cancel();
+                    launchMobRadiance(caster, totalHeal);
+                    return;
+                }
+
+                if (caster.isDead()) {
                     cancel();
                     return;
                 }
 
-                if (ticks % 10 == 0) {
+                Location casterLoc = caster.getLocation();
+                double progress = (double) ticks / windUpDuration;
+
+                for (int i = 0; i < 4; i++) {
+                    double angle = (2 * Math.PI * i / 4) + (ticks * 0.05);
+                    double distance = 3.0 * (1.0 - progress);
+                    double x = Math.cos(angle) * distance;
+                    double z = Math.sin(angle) * distance;
+                    Location rayLoc = casterLoc.clone().add(x, 0.5, z);
+                    rayLoc.getWorld().spawnParticle(Particle.GLOW, rayLoc, 2, 0.1, 0.1, 0.1, 0);
+                }
+
+                if (ticks % 20 == 0) {
+                    casterLoc.getWorld().playSound(casterLoc, Sound.BLOCK_BEACON_POWER_SELECT, 0.4f, 0.8f);
+                }
+
+                ticks++;
+            }
+        }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
+    }
+
+    private void launchMobRadiance(Mob caster, double totalHeal) {
+        if (caster.isDead()) return;
+
+        new BukkitRunnable() {
+            int healTicks = 0;
+
+            @Override
+            public void run() {
+                if (healTicks >= (int)(duration * 20)) {
+                    cancel();
+                    return;
+                }
+
+                if (healTicks % 10 == 0) {
                     double healPerTick = totalHeal / duration;
                     double maxHealth = caster.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
                     caster.setHealth(Math.min(maxHealth, caster.getHealth() + healPerTick));
                     caster.getWorld().spawnParticle(Particle.GLOW, caster.getLocation(), 10, 2, 1, 2, 0);
                 }
 
-                ticks++;
+                healTicks++;
             }
         }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
     }
