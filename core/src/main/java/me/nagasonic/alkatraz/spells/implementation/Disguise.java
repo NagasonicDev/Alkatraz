@@ -171,7 +171,7 @@ public class Disguise extends Spell implements Listener {
             ItemStack next = new ItemStack(Material.ARROW);
             ItemMeta  meta = next.getItemMeta();
             meta.setDisplayName(format(lang().get("spells.disguise.next_page")));
-            meta.setLore(List.of(format(lang().get("spells.disguise.page_number", "%page%", String.valueOf(page + 1)))));
+            meta.setLore(List.of(format(lang().get("spells.disguise.page_number", "page", String.valueOf(page + 1)))));
             next.setItemMeta(meta);
             NBT.modify(next, nbt -> {
                 nbt.setInteger("page", page + 1);
@@ -186,7 +186,7 @@ public class Disguise extends Spell implements Listener {
             ItemStack prev = new ItemStack(Material.ARROW);
             ItemMeta  meta = prev.getItemMeta();
             meta.setDisplayName(format(lang().get("spells.disguise.previous_page")));
-            meta.setLore(List.of(format(lang().get("spells.disguise.page_number", "%page%", String.valueOf(page - 1)))));
+            meta.setLore(List.of(format(lang().get("spells.disguise.page_number", "page", String.valueOf(page - 1)))));
             prev.setItemMeta(meta);
             NBT.modify(prev, nbt -> {
                 nbt.setInteger("page", page - 1);
@@ -204,7 +204,7 @@ public class Disguise extends Spell implements Listener {
             ItemStack item = ItemUtils.headFromUuid(target.getUniqueId().toString());
             ItemMeta  meta = item.getItemMeta();
             meta.setDisplayName(target.getName());
-            meta.setLore(List.of(format(lang().get("spells.disguise.click_disguise", "%target%", target.getName()))));
+            meta.setLore(List.of(format(lang().get("spells.disguise.click_disguise", "target", target.getName()))));
             item.setItemMeta(meta);
             inv.setItem(i, item);
         }
