@@ -47,12 +47,12 @@ public class Tremor extends AttackSpell implements Listener {
 
     @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
-        location.getWorld().spawnParticle(Particle.BLOCK_DUST, location, 15, Material.DIRT.createBlockData());
+        location.getWorld().spawnParticle(Utils.BLOCK_DUST, location, 15, Material.DIRT.createBlockData());
     }
 
     @Override
     public void onCountered(Location location) {
-        location.getWorld().spawnParticle(Particle.BLOCK_DUST, location, 30, Material.DIRT.createBlockData());
+        location.getWorld().spawnParticle(Utils.BLOCK_DUST, location, 30, Material.DIRT.createBlockData());
     }
 
     @Override
@@ -127,7 +127,7 @@ public class Tremor extends AttackSpell implements Listener {
                             });
                             List<Location> locs = ParticleUtils.circle(loc, 1, 1, 0, 0);
                             for (Location l : locs){
-                                l.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, l, 1);
+                                l.getWorld().spawnParticle(Utils.EXPLOSION, l, 1);
                             }
                             for (LivingEntity entity : me.nagasonic.alkatraz.util.Utils.getNearbyLivingEntities(loc, 2)) {
                                 if (entity != p && !props.hasHit(entity)) {
@@ -214,7 +214,7 @@ public class Tremor extends AttackSpell implements Listener {
                             });
                             List<Location> locs = ParticleUtils.circle(loc, 1, 1, 0, 0);
                             for (Location l : locs){
-                                l.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, l, 1);
+                                l.getWorld().spawnParticle(Utils.EXPLOSION, l, 1);
                             }
                             for (LivingEntity entity : me.nagasonic.alkatraz.util.Utils.getNearbyLivingEntities(loc, 2)) {
                                 if (entity != caster && !props.hasHit(entity)) {

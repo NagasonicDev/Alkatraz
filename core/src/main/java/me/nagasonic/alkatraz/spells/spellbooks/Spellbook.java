@@ -10,6 +10,7 @@ import me.nagasonic.alkatraz.spells.configuration.impact.ValueImpact;
 import me.nagasonic.alkatraz.spells.configuration.requirement.ValueRequirement;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.util.ColorFormat;
+import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -279,7 +280,7 @@ public class Spellbook {
                     // Animation complete
                     if (player.isOnline() && ticks >= maxTicks) {
                         // Final burst
-                        loc.getWorld().spawnParticle(Particle.ENCHANTMENT_TABLE, 
+                        loc.getWorld().spawnParticle(Utils.ENCHANT, 
                                 loc.clone().add(0, 1, 0), 100, 1, 1, 1, 1);
                         loc.getWorld().spawnParticle(Particle.END_ROD, 
                                 loc.clone().add(0, 1, 0), 50, 0.5, 0.5, 0.5, 0.1);
@@ -303,7 +304,7 @@ public class Spellbook {
                     double z = Math.sin(angle) * radius;
                     
                     Location particleLoc = playerLoc.clone().add(x, height, z);
-                    particleLoc.getWorld().spawnParticle(Particle.ENCHANTMENT_TABLE, 
+                    particleLoc.getWorld().spawnParticle(Utils.ENCHANT, 
                             particleLoc, 2, 0, 0, 0, 0.1);
                 }
                 
@@ -316,7 +317,7 @@ public class Spellbook {
                         double z = Math.sin(angle) * 1.5;
                         
                         Location particleLoc = loc.clone().add(x, 0.1, z);
-                        particleLoc.getWorld().spawnParticle(Particle.REDSTONE, particleLoc, 1, 0, 0, 0, 0,
+                        particleLoc.getWorld().spawnParticle(Utils.DUST, particleLoc, 1, 0, 0, 0, 0,
                                 new Particle.DustOptions(Color.fromRGB(255, 215, 0), 1.0f));
                     }
                 }

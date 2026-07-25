@@ -165,9 +165,9 @@ public class WaterSphere extends AttackSpell {
                     }
 
                     // Core water particles - fewer toward the center
-                    worldLoc.getWorld().spawnParticle(Particle.WATER_DROP, worldLoc, 1, 0, 0, 0, 0);
+                    worldLoc.getWorld().spawnParticle(Utils.RAIN, worldLoc, 1, 0, 0, 0, 0);
                     if (step % 2 == 0 && dist > radius * 0.4) {
-                        worldLoc.getWorld().spawnParticle(Particle.WATER_SPLASH, worldLoc, 1,
+                        worldLoc.getWorld().spawnParticle(Utils.SPLASH, worldLoc, 1,
                                 0.05, 0.05, 0.05, 0);
                     }
 
@@ -231,8 +231,8 @@ public class WaterSphere extends AttackSpell {
         World world = center.getWorld();
         double r = sphereRadius * sizeScale;
 
-        world.spawnParticle(Particle.WATER_SPLASH, center, (int) (80 * sizeScale), r, r, r, 0.5);
-        world.spawnParticle(Particle.WATER_DROP, center, (int) (120 * sizeScale), r, r, r, 1);
+        world.spawnParticle(Utils.SPLASH, center, (int) (80 * sizeScale), r, r, r, 0.5);
+        world.spawnParticle(Utils.RAIN, center, (int) (120 * sizeScale), r, r, r, 1);
         world.spawnParticle(Particle.BUBBLE_POP, center, (int) (40 * sizeScale), r, r, r, 0.3);
         world.playSound(center, Sound.ENTITY_FISHING_BOBBER_SPLASH, 1.5f, 0.8f);
         world.playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 0.5f, 1.5f);

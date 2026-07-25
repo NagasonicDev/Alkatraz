@@ -240,7 +240,7 @@ public class Geyser extends AttackSpell {
         // Impact sound and ground burst particles
         world.playSound(epicentre, Sound.ENTITY_GENERIC_SPLASH, 1.4f, 0.6f);
         world.playSound(epicentre, Sound.ENTITY_PLAYER_SPLASH_HIGH_SPEED, 1.0f, 0.7f);
-        world.spawnParticle(Particle.WATER_SPLASH, epicentre.clone().add(0, 0.1, 0),
+        world.spawnParticle(Utils.SPLASH, epicentre.clone().add(0, 0.1, 0),
                 60, radius * 0.6, 0.1, radius * 0.6, 0.2);
 
         // Build column — tight spiral rising from 0 to height, expands slightly
@@ -261,7 +261,7 @@ public class Geyser extends AttackSpell {
             int upTo = (int) Math.min(tick[0] * pointsPerTick, columnPoints.size());
             for (int i = 0; i < upTo; i++) {
                 Location loc = columnPoints.get(i);
-                world.spawnParticle(Particle.WATER_SPLASH,     loc, 3, 0.15, 0, 0.15, 0.08);
+                world.spawnParticle(Utils.SPLASH,     loc, 3, 0.15, 0, 0.15, 0.08);
                 world.spawnParticle(Particle.BUBBLE_POP, loc, 1, 0.1,  0, 0.1,  0.02);
             }
 
@@ -287,7 +287,7 @@ public class Geyser extends AttackSpell {
 
                 // Dissipation — spray particles at the top of the column
                 Location top = epicentre.clone().add(0, height, 0);
-                world.spawnParticle(Particle.WATER_SPLASH,     top, 40, radius * 0.5, 0.3, radius * 0.5, 0.25);
+                world.spawnParticle(Utils.SPLASH,     top, 40, radius * 0.5, 0.3, radius * 0.5, 0.25);
                 world.spawnParticle(Particle.BUBBLE_POP, top, 20, radius * 0.3, 0.2, radius * 0.3, 0.1);
                 world.playSound(top, Sound.ENTITY_GENERIC_SPLASH, 0.8f, 1.2f);
             }
@@ -297,11 +297,11 @@ public class Geyser extends AttackSpell {
 
     @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
-        location.getWorld().spawnParticle(Particle.WATER_SPLASH, location, 25, 0.3, 0.3, 0.3, 0.1);
+        location.getWorld().spawnParticle(Utils.SPLASH, location, 25, 0.3, 0.3, 0.3, 0.1);
     }
 
     @Override
     public void onCountered(Location location) {
-        location.getWorld().spawnParticle(Particle.WATER_SPLASH, location, 40, 0.4, 0.4, 0.4, 0.15);
+        location.getWorld().spawnParticle(Utils.SPLASH, location, 40, 0.4, 0.4, 0.4, 0.15);
     }
 }

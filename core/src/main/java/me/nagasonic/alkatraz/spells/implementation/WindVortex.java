@@ -72,7 +72,7 @@ public class WindVortex extends AttackSpell implements Listener {
     public void onCountered(Location location) {
         // Vortex disperses
         location.getWorld().spawnParticle(Particle.CLOUD, location, 50, 2, 2, 2, 0.2);
-        location.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, location, 1);
+        location.getWorld().spawnParticle(Utils.EXPLOSION, location, 1);
         location.getWorld().playSound(location, Sound.ENTITY_GENERIC_EXPLODE, 0.5f, 1.5f);
     }
 
@@ -270,7 +270,7 @@ public class WindVortex extends AttackSpell implements Listener {
             if (ticksElapsed % 5 == 0) {
                 List<Location> ringPoints = createVortexRings(center, radius, radius * 0.6, 4, rotation);
                 for (Location loc : ringPoints) {
-                    loc.getWorld().spawnParticle(Particle.REDSTONE, loc, 1, 0, 0, 0, 0,
+                    loc.getWorld().spawnParticle(Utils.DUST, loc, 1, 0, 0, 0, 0,
                             new Particle.DustOptions(Color.fromRGB(200, 200, 200), 0.8f));
                 }
             }
@@ -422,7 +422,7 @@ public class WindVortex extends AttackSpell implements Listener {
                 for (int i = 0; i < segments; i++) {
                     double progress = (double) i / segments;
                     Location lineLoc = entityLoc.clone().add(direction.clone().multiply(distance * progress));
-                    lineLoc.getWorld().spawnParticle(Particle.REDSTONE, lineLoc, 1, 0, 0, 0, 0,
+                    lineLoc.getWorld().spawnParticle(Utils.DUST, lineLoc, 1, 0, 0, 0, 0,
                             new Particle.DustOptions(Color.WHITE, 0.5f));
                 }
             }

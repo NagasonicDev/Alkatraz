@@ -124,7 +124,7 @@ public class MeteorShower extends AttackSpell implements Listener {
                         double a = Math.random() * 2 * Math.PI;
                         double r = Math.random() * 2.5;
                         Location groundLoc = casterLoc.clone().add(Math.cos(a) * r, 0.1, Math.sin(a) * r);
-                        groundLoc.getWorld().spawnParticle(Particle.SMOKE_NORMAL, groundLoc, 1, 0.2, 0.1, 0.2, 0.01);
+                        groundLoc.getWorld().spawnParticle(Utils.SMOKE, groundLoc, 1, 0.2, 0.1, 0.2, 0.01);
                     }
 
                     if (ticks % 20 == 0) {
@@ -255,10 +255,10 @@ public class MeteorShower extends AttackSpell implements Listener {
     private void triggerMeteorExplosion(Location explodeLoc, Player caster, double totalPower, ItemStack wand) {
         World world = explodeLoc.getWorld();
 
-        world.spawnParticle(Particle.EXPLOSION_HUGE, explodeLoc, 0, 0, 0, 0, 0);
+        world.spawnParticle(Utils.EXPLOSION_EMITTER, explodeLoc, 0, 0, 0, 0, 0);
         world.spawnParticle(Particle.LAVA, explodeLoc, 30, 2, 1, 2, 0);
         world.spawnParticle(Particle.FLAME, explodeLoc, 60, 3, 1.5, 3, 0.05);
-        world.spawnParticle(Particle.SMOKE_LARGE, explodeLoc, 20, 2, 1, 2, 0);
+        world.spawnParticle(Utils.LARGE_SMOKE, explodeLoc, 20, 2, 1, 2, 0);
         world.spawnParticle(Utils.DUST, explodeLoc, 0, new Particle.DustOptions(Color.fromRGB(255, 100, 0), 2.0F));
         world.playSound(explodeLoc, Sound.ENTITY_GENERIC_EXPLODE, 2.0f, 0.6f);
         world.playSound(explodeLoc, Sound.ENTITY_BLAZE_SHOOT, 1.0f, 0.3f);
@@ -282,7 +282,7 @@ public class MeteorShower extends AttackSpell implements Listener {
                     Location blockLoc = explodeLoc.clone().add(dx, dy, dz);
                     Block b = blockLoc.getBlock();
                     if (b.getType().isSolid() && !b.getType().toString().contains("BEDROCK")) {
-                        b.getWorld().spawnParticle(Particle.BLOCK_CRACK, blockLoc.clone().add(0.5, 0.5, 0.5),
+                        b.getWorld().spawnParticle(Utils.BLOCK, blockLoc.clone().add(0.5, 0.5, 0.5),
                                 8, 0.3, 0.3, 0.3, 0.3, b.getBlockData());
                         if (Math.random() < 0.3) {
                             b.breakNaturally();
@@ -453,7 +453,7 @@ public class MeteorShower extends AttackSpell implements Listener {
 
     @Override
     public void onCountered(Location location) {
-        location.getWorld().spawnParticle(Particle.SMOKE_LARGE, location, 30, 1, 1, 1, 0);
+        location.getWorld().spawnParticle(Utils.LARGE_SMOKE, location, 30, 1, 1, 1, 0);
     }
 
     @Override

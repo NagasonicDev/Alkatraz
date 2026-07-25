@@ -77,11 +77,11 @@ public class LightBuff extends Spell {
             target.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, durationTicks, 0, false, true));
             target.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, durationTicks, 0, false, true));
 
-            target.sendMessage(ChatColor.translateAlternateColorCodes('&', lang().get("spells.lightbuff.blessed_by_target", "%caster%", caster.getName())));
+            target.sendMessage(ChatColor.translateAlternateColorCodes('&', lang().get("spells.lightbuff.blessed_by_target", "caster", caster.getName())));
         }
 
         caster.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                lang().get("spells.lightbuff.blessed_count", "%count%", String.valueOf(nearbyPlayers.size()), "%duration%", String.valueOf((int) duration))));
+                lang().get("spells.lightbuff.blessed_count", "count", String.valueOf(nearbyPlayers.size()), "duration", String.valueOf((int) duration))));
 
         caster.getWorld().playSound(caster.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 0.8f, 1.5f);
         caster.getWorld().playSound(caster.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.6f, 1.8f);
@@ -127,7 +127,7 @@ public class LightBuff extends Spell {
             Location loc = center.clone().add(x, 0.5, z);
             loc.getWorld().spawnParticle(Utils.DUST, loc, 0,
                     new Particle.DustOptions(PARTICLE_COLOR, 0.8F));
-            loc.getWorld().spawnParticle(Particle.SPELL_MOB_AMBIENT, loc, 0, 0.8, 0.8, 0.3, 0);
+            loc.getWorld().spawnParticle(Utils.ENTITY_EFFECT, loc, 0, 0.8, 0.8, 0.3, 0);
         }
 
         for (int i = 0; i < 20; i++) {

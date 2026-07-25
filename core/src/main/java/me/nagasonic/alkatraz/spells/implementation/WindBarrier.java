@@ -202,7 +202,7 @@ public class WindBarrier extends BarrierSpell implements Listener {
     @Override
     public void onBarrierBreak(Location center) {
         center.getWorld().spawnParticle(Particle.CLOUD, center, 50, radius, 1, radius, 0.2);
-        center.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, center, 1);
+        center.getWorld().spawnParticle(Utils.EXPLOSION, center, 1);
         center.getWorld().playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 0.8f, 1.2f);
     }
 }

@@ -493,7 +493,7 @@ public class DarkTendrils extends AttackSpell implements Listener {
                 for (int i = 0; i < Math.min(distance * 2, 10); i++) {
                     Location particleLoc = loc.clone().add(toTarget.clone().multiply(i));
                     particleLoc.getWorld().spawnParticle(
-                            Particle.SPELL_WITCH, 
+                            Utils.WITCH, 
                             particleLoc, 
                             1, 
                             0, 0, 0, 

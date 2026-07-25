@@ -116,7 +116,7 @@ public class Barrier extends BarrierSpell implements Listener {
                             );
                     SpellComponentHandler.register(particle);
 
-                    loc.getWorld().spawnParticle(Particle.SPELL_WITCH, loc, 1, 0, 0, 0, 0);
+                    loc.getWorld().spawnParticle(Utils.WITCH, loc, 1, 0, 0, 0, 0);
                 }
 
                 ticksPassed++;
@@ -160,7 +160,7 @@ public class Barrier extends BarrierSpell implements Listener {
                     SpellComponentHandler.register(particle);
 
                     // Spawn visual particle
-                    loc.getWorld().spawnParticle(Particle.SPELL_WITCH, loc, 1, 0, 0, 0, 0);
+                    loc.getWorld().spawnParticle(Utils.WITCH, loc, 1, 0, 0, 0, 0);
                 }
 
                 ticksPassed++;

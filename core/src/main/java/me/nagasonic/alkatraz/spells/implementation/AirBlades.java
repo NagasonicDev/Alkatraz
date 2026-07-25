@@ -281,7 +281,7 @@ public class AirBlades extends AttackSpell implements Listener {
     @Override
     public void onCountered(Location location) {
         location.getWorld().spawnParticle(Particle.CLOUD, location, 40, 1, 1, 1, 0.15);
-        location.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, location, 1);
+        location.getWorld().spawnParticle(Utils.EXPLOSION, location, 1);
         location.getWorld().playSound(location, Sound.ENTITY_GENERIC_EXPLODE, 0.5f, 1.8f);
     }
 

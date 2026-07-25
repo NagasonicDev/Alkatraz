@@ -93,7 +93,7 @@ public class ShadowRealm extends Spell {
                         sphereLoc.getWorld().spawnParticle(Utils.DUST, sphereLoc, 0,
                                 new Particle.DustOptions(Color.fromRGB(20, 0, 40), (float)(0.3 + phaseProgress * 0.4)));
                         if (Math.random() < 0.2) {
-                            sphereLoc.getWorld().spawnParticle(Particle.SMOKE_NORMAL, sphereLoc, 1, 0.1, 0.1, 0.1, 0);
+                            sphereLoc.getWorld().spawnParticle(Utils.SMOKE, sphereLoc, 1, 0.1, 0.1, 0.1, 0);
                         }
                     }
 
@@ -101,7 +101,7 @@ public class ShadowRealm extends Spell {
                         double a = Math.random() * 2 * Math.PI;
                         double r = Math.random() * 1.5;
                         Location tendrilLoc = casterLoc.clone().add(Math.cos(a) * r, 0.5 + Math.random(), Math.sin(a) * r);
-                        tendrilLoc.getWorld().spawnParticle(Particle.SPELL_WITCH, tendrilLoc, 1, 0.1, 0.1, 0.1, 0);
+                        tendrilLoc.getWorld().spawnParticle(Utils.WITCH, tendrilLoc, 1, 0.1, 0.1, 0.1, 0);
                     }
 
                     if (ticks % 15 == 0) {
@@ -130,7 +130,7 @@ public class ShadowRealm extends Spell {
                         double a = Math.random() * 2 * Math.PI;
                         double r = currentRadius * (0.5 + Math.random() * 0.5);
                         Location tendrilLoc = targetLoc.clone().add(Math.cos(a) * r, 0.1, Math.sin(a) * r);
-                        tendrilLoc.getWorld().spawnParticle(Particle.SPELL_WITCH, tendrilLoc, 1, 0.1, 0.1, 0.1, 0);
+                        tendrilLoc.getWorld().spawnParticle(Utils.WITCH, tendrilLoc, 1, 0.1, 0.1, 0.1, 0);
                         if (Math.random() < 0.3) {
                             tendrilLoc.getWorld().spawnParticle(Particle.PORTAL, tendrilLoc, 1, 0.1, 0.1, 0.1, 0.1);
                         }
@@ -185,9 +185,9 @@ public class ShadowRealm extends Spell {
                         double wz = Math.sin(a) * wallR;
                         Location wallLoc = targetLoc.clone().add(wx, y, wz);
 
-                        wallLoc.getWorld().spawnParticle(Particle.SMOKE_NORMAL, wallLoc, 2, 0.15, 0.15, 0.15, 0.01);
+                        wallLoc.getWorld().spawnParticle(Utils.SMOKE, wallLoc, 2, 0.15, 0.15, 0.15, 0.01);
                         if (Math.random() < 0.1) {
-                            wallLoc.getWorld().spawnParticle(Particle.SPELL_WITCH, wallLoc, 1, 0.1, 0.1, 0.1, 0);
+                            wallLoc.getWorld().spawnParticle(Utils.WITCH, wallLoc, 1, 0.1, 0.1, 0.1, 0);
                         }
                     }
                 }
@@ -196,7 +196,7 @@ public class ShadowRealm extends Spell {
                     floorLoc.getWorld().spawnParticle(Utils.DUST, floorLoc.clone().add(0, 0.1, 0), 0,
                             new Particle.DustOptions(Color.fromRGB(20, 0, 40), 0.6F));
                     if (Math.random() < 0.2) {
-                        floorLoc.getWorld().spawnParticle(Particle.SMOKE_NORMAL, floorLoc.clone().add(0, 0.1, 0), 1, 0.05, 0.05, 0.05, 0);
+                        floorLoc.getWorld().spawnParticle(Utils.SMOKE, floorLoc.clone().add(0, 0.1, 0), 1, 0.05, 0.05, 0.05, 0);
                     }
                 }
 
@@ -232,7 +232,7 @@ public class ShadowRealm extends Spell {
                         le.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 60, 1, false, true));
                     }
 
-                    le.getWorld().spawnParticle(Particle.SMOKE_LARGE, le.getLocation().add(0, 1, 0), 8, 0.3, 0.5, 0.3, 0);
+                    le.getWorld().spawnParticle(Utils.LARGE_SMOKE, le.getLocation().add(0, 1, 0), 8, 0.3, 0.5, 0.3, 0);
 
                     SpellDamageUtil.damageWithSpell(
                             le, activeDamage, caster, wand, ShadowRealm.this
@@ -291,7 +291,7 @@ public class ShadowRealm extends Spell {
                     sphereLoc.getWorld().spawnParticle(Utils.DUST, sphereLoc, 0,
                             new Particle.DustOptions(Color.fromRGB(30, 0, 50), 0.3F));
                     if (Math.random() < 0.1) {
-                        sphereLoc.getWorld().spawnParticle(Particle.SMOKE_NORMAL, sphereLoc, 1, 0.1, 0.1, 0.1, 0);
+                        sphereLoc.getWorld().spawnParticle(Utils.SMOKE, sphereLoc, 1, 0.1, 0.1, 0.1, 0);
                     }
                 }
 
@@ -325,7 +325,7 @@ public class ShadowRealm extends Spell {
                     loc.getWorld().spawnParticle(Utils.DUST, loc, 0,
                             new Particle.DustOptions(Color.fromRGB(50, 0, 80), 0.4F));
                     if (Math.random() < 0.1) {
-                        loc.getWorld().spawnParticle(Particle.SMOKE_NORMAL, loc, 1, 0.1, 0.1, 0.1, 0);
+                        loc.getWorld().spawnParticle(Utils.SMOKE, loc, 1, 0.1, 0.1, 0.1, 0);
                     }
                 }
 
@@ -340,8 +340,8 @@ public class ShadowRealm extends Spell {
                     );
                 }
 
-                targetLoc.getWorld().spawnParticle(Particle.SMOKE_LARGE, targetLoc, 15, radius, 1, radius, 0);
-                targetLoc.getWorld().spawnParticle(Particle.SPELL_WITCH, targetLoc, 5, radius, 1, radius, 0);
+                targetLoc.getWorld().spawnParticle(Utils.LARGE_SMOKE, targetLoc, 15, radius, 1, radius, 0);
+                targetLoc.getWorld().spawnParticle(Utils.WITCH, targetLoc, 5, radius, 1, radius, 0);
 
                 ticks++;
             }

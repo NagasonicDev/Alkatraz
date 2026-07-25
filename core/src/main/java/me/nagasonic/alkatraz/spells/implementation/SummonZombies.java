@@ -200,14 +200,14 @@ public class SummonZombies extends AttackSpell implements Listener {
     }
 
     private void spawnSummonParticles(Location loc) {
-        loc.getWorld().spawnParticle(Particle.SPELL_WITCH, loc, 20, 0.5, 0.5, 0.5, 0);
-        loc.getWorld().spawnParticle(Particle.SMOKE_LARGE, loc, 10, 0.3, 0.3, 0.3, 0.05);
+        loc.getWorld().spawnParticle(Utils.WITCH, loc, 20, 0.5, 0.5, 0.5, 0);
+        loc.getWorld().spawnParticle(Utils.LARGE_SMOKE, loc, 10, 0.3, 0.3, 0.3, 0.05);
     }
 
     private void despawnZombie(Entity e) {
         if (!e.isDead()) {
-            e.getWorld().spawnParticle(Particle.SMOKE_LARGE, e.getLocation(), 15, 0.3, 0.3, 0.3, 0.05);
-            e.getWorld().spawnParticle(Particle.SPELL_WITCH, e.getLocation(), 10, 0.3, 0.3, 0.3, 0);
+            e.getWorld().spawnParticle(Utils.LARGE_SMOKE, e.getLocation(), 15, 0.3, 0.3, 0.3, 0.05);
+            e.getWorld().spawnParticle(Utils.WITCH, e.getLocation(), 10, 0.3, 0.3, 0.3, 0);
             e.getWorld().playSound(e.getLocation(), Sound.ENTITY_ZOMBIE_DEATH, 0.6f, 0.8f);
             e.remove();
         }

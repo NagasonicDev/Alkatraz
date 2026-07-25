@@ -52,12 +52,12 @@ public class EarthSpike extends AttackSpell implements Listener {
 
     @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
-        location.getWorld().spawnParticle(Particle.BLOCK_DUST, location, 15, Material.DIRT.createBlockData());
+        location.getWorld().spawnParticle(Utils.BLOCK_DUST, location, 15, Material.DIRT.createBlockData());
     }
 
     @Override
     public void onCountered(Location location) {
-        location.getWorld().spawnParticle(Particle.BLOCK_DUST, location, 30, Material.DIRT.createBlockData());
+        location.getWorld().spawnParticle(Utils.BLOCK_DUST, location, 30, Material.DIRT.createBlockData());
     }
 
 
