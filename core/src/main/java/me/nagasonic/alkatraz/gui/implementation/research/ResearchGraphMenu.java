@@ -20,6 +20,7 @@ import org.bukkit.inventory.ItemStack;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class ResearchGraphMenu extends Menu {
@@ -212,17 +213,42 @@ public class ResearchGraphMenu extends Menu {
 
     private void drawEdge(ResearchNode parent, ResearchNode child) {
         if (!parent.getCategory().equals(category) || !child.getCategory().equals(category)) return;
+        if (ResearchService.getState(viewer, parent) == ResearchState.HIDDEN) return;
 
+        List<int[]> waypoints = child.getEdgePaths().get(parent.getId());
+        if (waypoints != null && !waypoints.isEmpty()) {
+            drawEdgeWithWaypoints(parent, child, waypoints);
+        } else {
+            drawEdgeDefault(parent, child);
+        }
+    }
+
+    private void drawEdgeWithWaypoints(ResearchNode parent, ResearchNode child, List<int[]> waypoints) {
+        int x = parent.getX();
+        int y = parent.getY();
+        for (int[] wp : waypoints) {
+            drawSegment(x, y, wp[0], wp[1], parent, child);
+            x = wp[0];
+            y = wp[1];
+        }
+        drawSegment(x, y, child.getX(), child.getY(), parent, child);
+    }
+
+    private void drawEdgeDefault(ResearchNode parent, ResearchNode child) {
         int px = parent.getX();
         int py = parent.getY();
         int cx = child.getX();
         int cy = child.getY();
-        int dx = Integer.compare(cx, px);
-        int dy = Integer.compare(cy, py);
-        int x = px + dx;
-        int y = py + dy;
+        drawSegment(px, py, cx, cy, parent, child);
+    }
 
-        while (x != cx || y != cy) {
+    private void drawSegment(int fromX, int fromY, int toX, int toY, ResearchNode parent, ResearchNode child) {
+        int dx = Integer.compare(toX, fromX);
+        int dy = Integer.compare(toY, fromY);
+        int x = fromX + dx;
+        int y = fromY + dy;
+
+        while (x != toX || y != toY) {
             slotFor(x, y).ifPresent(slot -> {
                 ItemStack existing = inventory.getItem(slot);
                 boolean isBlank = existing == null || existing.getType() == Material.AIR
@@ -231,8 +257,8 @@ public class ResearchGraphMenu extends Menu {
                     inventory.setItem(slot, createEdgeItem(parent, child));
                 }
             });
-            if (x != cx) x += dx;
-            if (y != cy) y += dy;
+            if (x != toX) x += dx;
+            if (y != toY) y += dy;
         }
     }
 
@@ -271,8 +297,20 @@ public class ResearchGraphMenu extends Menu {
     private ItemStack createEdgeItem(ResearchNode parent, ResearchNode child) {
         ResearchState parentState = ResearchService.getState(viewer, parent);
         ResearchState childState = ResearchService.getState(viewer, child);
-        boolean bothDone = parentState == ResearchState.COMPLETED && childState == ResearchState.COMPLETED;
-        return ItemBuilder.of(bothDone ? Material.LIME_STAINED_GLASS_PANE : Material.GRAY_STAINED_GLASS_PANE).build();
+        return ItemBuilder.of(getEdgeMaterial(parentState, childState)).build();
+    }
+
+    private Material getEdgeMaterial(ResearchState parentState, ResearchState childState) {
+        return switch (parentState) {
+            case COMPLETED -> switch (childState) {
+                case COMPLETED -> Material.LIME_STAINED_GLASS_PANE;
+                case AVAILABLE -> Material.YELLOW_STAINED_GLASS_PANE;
+                case IN_PROGRESS -> Material.CYAN_STAINED_GLASS_PANE;
+                case LOCKED, HIDDEN -> Material.RED_STAINED_GLASS_PANE;
+            };
+            case IN_PROGRESS, LOCKED, AVAILABLE -> Material.RED_STAINED_GLASS_PANE;
+            case HIDDEN -> Material.GRAY_STAINED_GLASS_PANE;
+        };
     }
 
     private ItemStack panArrow(String nameKey) {

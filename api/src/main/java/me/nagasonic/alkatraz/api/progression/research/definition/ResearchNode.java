@@ -3,6 +3,7 @@ package me.nagasonic.alkatraz.api.progression.research.definition;
 import org.bukkit.Material;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Defines a single node in the research tree, including its position,
@@ -23,6 +24,7 @@ public class ResearchNode {
     private final List<ResearchReward> rewards;
     private final boolean hiddenUntilAvailable;
     private final int researchPointsCost;
+    private final Map<String, List<int[]>> edgePaths;
 
     /**
      * Constructs a new research node.
@@ -40,6 +42,9 @@ public class ResearchNode {
      * @param rewards the rewards granted upon completion
      * @param hiddenUntilAvailable whether this node is hidden until all prerequisites are met
      * @param researchPointsCost the research point cost to begin this research
+     * @param edgePaths custom waypoints for edge paths from each parent, keyed by parent ID.
+     *                   Each value is a list of {@code int[]} waypoints as {@code {x, y}}.
+     *                   If a parent has no entry here, the path is auto-computed.
      */
     public ResearchNode(
             String id,
@@ -54,7 +59,8 @@ public class ResearchNode {
             List<ResearchObjective> objectives,
             List<ResearchReward> rewards,
             boolean hiddenUntilAvailable,
-            int researchPointsCost
+            int researchPointsCost,
+            Map<String, List<int[]>> edgePaths
     ) {
         this.id = id;
         this.displayName = displayName;
@@ -69,6 +75,13 @@ public class ResearchNode {
         this.rewards = List.copyOf(rewards);
         this.hiddenUntilAvailable = hiddenUntilAvailable;
         this.researchPointsCost = researchPointsCost;
+        this.edgePaths = Map.copyOf(edgePaths.entrySet().stream()
+                .collect(java.util.stream.Collectors.toMap(
+                        Map.Entry::getKey,
+                        e -> List.copyOf(e.getValue().stream()
+                                .map(int[]::clone)
+                                .toList())
+                )));
     }
 
     /**
@@ -186,5 +199,16 @@ public class ResearchNode {
      */
     public int getResearchPointsCost() {
         return researchPointsCost;
+    }
+
+    /**
+     * Returns custom waypoints for edge paths from each parent.
+     * Keys are parent node IDs, values are lists of {@code int[]} waypoints as {@code {x, y}}.
+     * If a parent has no entry, the path is auto-computed via diagonal stepping.
+     *
+     * @return an unmodifiable map of parent ID to waypoints
+     */
+    public Map<String, List<int[]>> getEdgePaths() {
+        return edgePaths;
     }
 }

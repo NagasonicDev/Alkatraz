@@ -3,6 +3,7 @@ package me.nagasonic.alkatraz.progression.research.definition;
 import org.bukkit.Material;
 
 import java.util.List;
+import java.util.Map;
 
 public class ResearchNode {
 
@@ -19,6 +20,7 @@ public class ResearchNode {
     private final List<ResearchReward> rewards;
     private final boolean hiddenUntilAvailable;
     private final int researchPointsCost;
+    private final Map<String, List<int[]>> edgePaths;
 
     public ResearchNode(
             String id,
@@ -33,7 +35,8 @@ public class ResearchNode {
             List<ResearchObjective> objectives,
             List<ResearchReward> rewards,
             boolean hiddenUntilAvailable,
-            int researchPointsCost
+            int researchPointsCost,
+            Map<String, List<int[]>> edgePaths
     ) {
         this.id = id;
         this.displayName = displayName;
@@ -48,6 +51,13 @@ public class ResearchNode {
         this.rewards = List.copyOf(rewards);
         this.hiddenUntilAvailable = hiddenUntilAvailable;
         this.researchPointsCost = researchPointsCost;
+        this.edgePaths = Map.copyOf(edgePaths.entrySet().stream()
+                .collect(java.util.stream.Collectors.toMap(
+                        Map.Entry::getKey,
+                        e -> List.copyOf(e.getValue().stream()
+                                .map(int[]::clone)
+                                .toList())
+                )));
     }
 
     public String getId() {
@@ -100,5 +110,9 @@ public class ResearchNode {
 
     public int getResearchPointsCost() {
         return researchPointsCost;
+    }
+
+    public Map<String, List<int[]>> getEdgePaths() {
+        return edgePaths;
     }
 }
