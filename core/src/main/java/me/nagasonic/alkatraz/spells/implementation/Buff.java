@@ -75,9 +75,9 @@ public class Buff extends Spell {
         boolean onOther = target instanceof Player p && !p.getUniqueId().equals(caster.getUniqueId());
 
         String casterMsg = onOther
-                ? lang().get("spells.buff.applied_to_target", "%target%", target.getName(), "%duration%", String.valueOf(duration))
-                : lang().get("spells.buff.active_self", "%duration%", String.valueOf(duration));
-        String targetMsg = lang().get("spells.buff.target_buffed", "%duration%", String.valueOf(duration));
+                ? lang().get("spells.buff.applied_to_target", "target", target.getName(), "duration", String.valueOf(duration))
+                : lang().get("spells.buff.active_self", "duration", String.valueOf(duration));
+        String targetMsg = lang().get("spells.buff.target_buffed", "duration", String.valueOf(duration));
 
         PooledModifierSpellSupport.applyConfiguredModifiers(
                 caster, target, this, BUFF_GROUP_ID, duration, activeModifiers,

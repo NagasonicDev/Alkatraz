@@ -73,9 +73,9 @@ public class Debuff extends Spell {
         int duration = (int) getModifiedStat(caster, "duration", baseDuration);
         String targetName = target instanceof Player p ? p.getName() : target.getType().name();
 
-        String casterMsg = lang().get("spells.debuff.applied", "%target%", targetName, "%duration%", String.valueOf(duration));
+        String casterMsg = lang().get("spells.debuff.applied", "target", targetName, "duration", String.valueOf(duration));
         String targetMsg = target instanceof Player
-                ? lang().get("spells.debuff.target_debuffed", "%duration%", String.valueOf(duration))
+                ? lang().get("spells.debuff.target_debuffed", "duration", String.valueOf(duration))
                 : "";
 
         PooledModifierSpellSupport.applyConfiguredModifiers(
