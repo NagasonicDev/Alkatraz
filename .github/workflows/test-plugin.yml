@@ -52,7 +52,7 @@ jobs:
           path: nms-stage
           # Bump this suffix (-v1 -> -v2) to force a rebuild of every
           # version, e.g. if Spigot re-patches something retroactively.
-          key: spigot-nms-${{ matrix.version }}-v2
+          key: spigot-nms-${{ matrix.version }}-v3
 
       - name: Build with BuildTools (cache miss only)
         if: steps.cache.outputs.cache-hit != 'true'
