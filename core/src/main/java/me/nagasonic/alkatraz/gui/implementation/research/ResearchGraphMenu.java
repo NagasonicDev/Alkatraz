@@ -74,13 +74,20 @@ public class ResearchGraphMenu extends Menu {
             return true;
         }
 
-        if (s == SLOT_PAN_NW || s == SLOT_PAN_N || s == SLOT_PAN_NE) {
+        if (s == SLOT_PAN_NW) {
+            viewCenterX = clamp(viewCenterX - 1);
             viewCenterY = clamp(viewCenterY - 1);
             refresh();
             return true;
         }
-        if (s == SLOT_PAN_SW || s == SLOT_PAN_S || s == SLOT_PAN_SE) {
-            viewCenterY = clamp(viewCenterY + 1);
+        if (s == SLOT_PAN_N) {
+            viewCenterY = clamp(viewCenterY - 1);
+            refresh();
+            return true;
+        }
+        if (s == SLOT_PAN_NE) {
+            viewCenterX = clamp(viewCenterX + 1);
+            viewCenterY = clamp(viewCenterY - 1);
             refresh();
             return true;
         }
@@ -91,6 +98,23 @@ public class ResearchGraphMenu extends Menu {
         }
         if (s == SLOT_PAN_E) {
             viewCenterX = clamp(viewCenterX + 1);
+            refresh();
+            return true;
+        }
+        if (s == SLOT_PAN_SW) {
+            viewCenterX = clamp(viewCenterX - 1);
+            viewCenterY = clamp(viewCenterY + 1);
+            refresh();
+            return true;
+        }
+        if (s == SLOT_PAN_S) {
+            viewCenterY = clamp(viewCenterY + 1);
+            refresh();
+            return true;
+        }
+        if (s == SLOT_PAN_SE) {
+            viewCenterX = clamp(viewCenterX + 1);
+            viewCenterY = clamp(viewCenterY + 1);
             refresh();
             return true;
         }
