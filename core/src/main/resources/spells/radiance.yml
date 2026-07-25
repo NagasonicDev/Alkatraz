@@ -17,3 +17,4 @@ cast_sound: 'ENTITY_EXPERIENCE_ORB_PICKUP'
 heal_amount: 8.0
 radius: 8.0
 duration: 5.0
+wind_up_duration: 3
