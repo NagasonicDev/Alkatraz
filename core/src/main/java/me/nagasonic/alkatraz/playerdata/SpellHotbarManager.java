@@ -205,6 +205,25 @@ public class SpellHotbarManager {
     }
 
     /**
+     * Cleans up hotbar state for a dying player without restoring inventory.
+     * Used by the death handler so the saved inventory can be dropped via
+     * the event's drops list instead of being restored to the (about-to-be-
+     * cleared) player inventory.
+     */
+    public static void cleanupForDeath(Player player) {
+        UUID uuid = player.getUniqueId();
+        if (!hotbarActive.containsKey(uuid)) return;
+
+        hotbarActive.remove(uuid);
+        justEntered.remove(uuid);
+        justExited.put(uuid, System.currentTimeMillis() + 500);
+
+        savedInventories.remove(uuid);
+        savedOffhand.remove(uuid);
+        savedHeldSlot.remove(uuid);
+    }
+
+    /**
      * Exits hotbar mode for all currently active players.
      * Called on plugin disable to ensure no inventories are left in a broken state.
      */

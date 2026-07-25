@@ -384,7 +384,7 @@ public class CastEventListener implements Listener {
         ItemStack[] savedStorage = SpellHotbarManager.peekSavedContents(uuid);
         ItemStack savedOffhand = SpellHotbarManager.peekSavedOffhand(uuid);
 
-        SpellHotbarManager.exit(p);
+        SpellHotbarManager.cleanupForDeath(p);
 
         e.getDrops().clear();
         if (savedStorage != null) {
