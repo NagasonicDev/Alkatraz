@@ -51,12 +51,12 @@ public class EarthThrow extends AttackSpell implements Listener {
 
     @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
-        location.getWorld().spawnParticle(Particle.BLOCK_DUST, location, 15, Material.DIRT.createBlockData());
+        location.getWorld().spawnParticle(Utils.BLOCK_DUST, location, 15, Material.DIRT.createBlockData());
     }
 
     @Override
     public void onCountered(Location location) {
-        location.getWorld().spawnParticle(Particle.BLOCK_DUST, location, 30, Material.DIRT.createBlockData());
+        location.getWorld().spawnParticle(Utils.BLOCK_DUST, location, 30, Material.DIRT.createBlockData());
     }
 
 
@@ -188,7 +188,7 @@ public class EarthThrow extends AttackSpell implements Listener {
                 double radius = comp.getCaster() instanceof Player player ? (Double) getOption("impact_radius").getSelectedValue(player).getValue() : 3.0;
                 List<Location> locs = ParticleUtils.circle(loc, radius, 1, 0, 0);
                 for (Location l : locs){
-                    l.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, l, 1);
+                    l.getWorld().spawnParticle(Utils.EXPLOSION, l, 1);
                 }
                 for (LivingEntity le : me.nagasonic.alkatraz.util.Utils.getNearbyLivingEntities(loc, radius)){
                     SpellDamageUtil.damageWithSpell(le, props.getRemainingPower(), comp.getCaster(), comp.getWand(), EarthThrow.this);
@@ -219,7 +219,7 @@ public class EarthThrow extends AttackSpell implements Listener {
                     double radius = comp.getCaster() instanceof Player player ? (Double) getOption("impact_radius").getSelectedValue(player).getValue() : 3.0;
                     List<Location> locs = ParticleUtils.circle(loc, radius, 1, 0, 0);
                     for (Location l : locs){
-                        l.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, l, 5);
+                        l.getWorld().spawnParticle(Utils.EXPLOSION, l, 5);
                     }
                     for (LivingEntity le : me.nagasonic.alkatraz.util.Utils.getNearbyLivingEntities(loc, radius)){
                         SpellDamageUtil.damageWithSpell(le, props.getRemainingPower(), comp.getCaster(), comp.getWand(), EarthThrow.this);

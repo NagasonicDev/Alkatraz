@@ -86,7 +86,7 @@ public class Fissure extends AttackSpell {
                         Block target = foundation.getRelative(0, -depth, 0);
                         if (Ground.isGround(target.getType())) {
                             target.breakNaturally();
-                            target.getWorld().spawnParticle(Particle.BLOCK_CRACK, target.getLocation().add(0.5, 0.5, 0.5),
+                            target.getWorld().spawnParticle(Utils.BLOCK, target.getLocation().add(0.5, 0.5, 0.5),
                                     5, 0.2, 0.2, 0.2, 0.3, target.getBlockData());
                         }
                     }
@@ -97,7 +97,7 @@ public class Fissure extends AttackSpell {
                             .add(0, -0.5, 0)
                             .add(perpendicular.clone().multiply(w));
 
-                    fissureLoc.getWorld().spawnParticle(Particle.BLOCK_CRACK, fissureLoc, 3, 0.2, 0.2, 0.2, 0.3,
+                    fissureLoc.getWorld().spawnParticle(Utils.BLOCK, fissureLoc, 3, 0.2, 0.2, 0.2, 0.3,
                             Material.STONE.createBlockData());
 
                     if (Math.random() < 0.3) {
@@ -124,7 +124,7 @@ public class Fissure extends AttackSpell {
                     Location edgeLoc = startLoc.clone().add(direction.clone().multiply(distance))
                             .add(0, 0.5, 0)
                             .add(perpendicular.clone().multiply(edgeWidth));
-                    edgeLoc.getWorld().spawnParticle(Particle.BLOCK_CRACK, edgeLoc, 6, 0.4, 0.3, 0.4, 0.2,
+                    edgeLoc.getWorld().spawnParticle(Utils.BLOCK, edgeLoc, 6, 0.4, 0.3, 0.4, 0.2,
                             Material.STONE.createBlockData());
 
                     for (double s = -0.5; s <= 0.5; s += 0.5) {
@@ -143,7 +143,7 @@ public class Fissure extends AttackSpell {
                                 .add(0, -0.3, 0)
                                 .add(perpendicular.clone().multiply(w));
                         if (Math.random() < 0.1) {
-                            trailLoc.getWorld().spawnParticle(Particle.BLOCK_CRACK, trailLoc, 1, 0.1, 0.05, 0.1, 0.2,
+                            trailLoc.getWorld().spawnParticle(Utils.BLOCK, trailLoc, 1, 0.1, 0.05, 0.1, 0.2,
                                     Material.STONE.createBlockData());
                         }
                     }
@@ -202,7 +202,7 @@ public class Fissure extends AttackSpell {
 
                 for (double w = -fissureWidth; w <= fissureWidth; w += 0.5) {
                     Location loc = fissureLoc.clone().add(perpendicular.clone().multiply(w));
-                    loc.getWorld().spawnParticle(Particle.BLOCK_CRACK, loc, 4, 0.3, 0.1, 0.3, 0.3,
+                    loc.getWorld().spawnParticle(Utils.BLOCK, loc, 4, 0.3, 0.1, 0.3, 0.3,
                             Material.STONE.createBlockData());
                 }
 
@@ -294,7 +294,7 @@ public class Fissure extends AttackSpell {
                         double a = Math.random() * 2 * Math.PI;
                         double r = Math.random() * 1.5;
                         Location stoneLoc = casterLoc.clone().add(Math.cos(a) * r, 0.5 + Math.random() * 1.5, Math.sin(a) * r);
-                        stoneLoc.getWorld().spawnParticle(Particle.BLOCK_CRACK, stoneLoc, 2, 0.1, 0.1, 0.1, 0.1,
+                        stoneLoc.getWorld().spawnParticle(Utils.BLOCK, stoneLoc, 2, 0.1, 0.1, 0.1, 0.1,
                                 Material.STONE.createBlockData());
                     }
 
@@ -428,7 +428,7 @@ public class Fissure extends AttackSpell {
 
     @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
-        location.getWorld().spawnParticle(Particle.BLOCK_CRACK, location, 30, 0.5, 0.5, 0.5, 0.5,
+        location.getWorld().spawnParticle(Utils.BLOCK, location, 30, 0.5, 0.5, 0.5, 0.5,
                 Material.STONE.createBlockData());
         location.getWorld().spawnParticle(Particle.FALLING_DUST, location, 15, 0.5, 0.5, 0.5, 0,
                 Material.STONE.createBlockData());
@@ -436,9 +436,9 @@ public class Fissure extends AttackSpell {
 
     @Override
     public void onCountered(Location location) {
-        location.getWorld().spawnParticle(Particle.BLOCK_CRACK, location, 50, 1, 1, 1, 0.5,
+        location.getWorld().spawnParticle(Utils.BLOCK, location, 50, 1, 1, 1, 0.5,
                 Material.STONE.createBlockData());
-        location.getWorld().spawnParticle(Particle.TOTEM, location, 20, 1, 1, 1, 0);
+        location.getWorld().spawnParticle(Utils.TOTEM, location, 20, 1, 1, 1, 0);
     }
 
     @Override

@@ -78,7 +78,7 @@ public class LesserHeal extends Spell {
                         } catch (IndexOutOfBoundsException e) {
                         }
                         if (a != null){
-                            a.getWorld().spawnParticle(Particle.TOTEM, a, 1, 0, 0, 0, 0);
+                            a.getWorld().spawnParticle(Utils.TOTEM, a, 1, 0, 0, 0, 0);
                             l.addAndGet(1);
                         }
                     }else{ stopCast();}
@@ -104,7 +104,7 @@ public class LesserHeal extends Spell {
                         } catch (IndexOutOfBoundsException e) {
                         }
                         if (a != null){
-                            a.getWorld().spawnParticle(Particle.TOTEM, a, 1, 0, 0, 0, 0);
+                            a.getWorld().spawnParticle(Utils.TOTEM, a, 1, 0, 0, 0, 0);
                             l.addAndGet(1);
                         }
                     }else{ stopCast();}
@@ -133,7 +133,7 @@ public class LesserHeal extends Spell {
                 } catch (IndexOutOfBoundsException e) {
                 }
                 if (a != null){
-                    a.getWorld().spawnParticle(Particle.TOTEM, a, 1, 0, 0, 0, 0);
+                    a.getWorld().spawnParticle(Utils.TOTEM, a, 1, 0, 0, 0, 0);
                     l.addAndGet(1);
                 }
             }else{ stopCast();}

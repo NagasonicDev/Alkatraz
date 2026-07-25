@@ -33,6 +33,18 @@ import org.bukkit.util.Vector;
 
 public class Utils {
     public static final Particle DUST = Particle.valueOf(oldOrNew("REDSTONE", "DUST"));
+    public static final Particle EXPLOSION = Particle.valueOf(oldOrNew("EXPLOSION_LARGE", "EXPLOSION"));
+    public static final Particle SMOKE = Particle.valueOf(oldOrNew("SMOKE_NORMAL", "SMOKE"));
+    public static final Particle LARGE_SMOKE = Particle.valueOf(oldOrNew("SMOKE_LARGE", "LARGE_SMOKE"));
+    public static final Particle WITCH = Particle.valueOf(oldOrNew("SPELL_WITCH", "WITCH"));
+    public static final Particle ENTITY_EFFECT = Particle.valueOf(oldOrNew("SPELL_MOB_AMBIENT", "ENTITY_EFFECT"));
+    public static final Particle BLOCK = Particle.valueOf(oldOrNew("BLOCK_CRACK", "BLOCK"));
+    public static final Particle BLOCK_DUST = Particle.valueOf(oldOrNew("BLOCK_DUST", "BLOCK"));
+    public static final Particle SPLASH = Particle.valueOf(oldOrNew("WATER_SPLASH", "SPLASH"));
+    public static final Particle EXPLOSION_EMITTER = Particle.valueOf(oldOrNew("EXPLOSION_HUGE", "EXPLOSION_EMITTER"));
+    public static final Particle RAIN = Particle.valueOf(oldOrNew("WATER_DROP", "RAIN"));
+    public static final Particle TOTEM = Particle.valueOf(oldOrNew("TOTEM", "TOTEM_OF_UNDYING"));
+    public static final Particle ENCHANT = Particle.valueOf(oldOrNew("ENCHANTMENT_TABLE", "ENCHANT"));
     private static final Random random = new Random();
 
     public static DecimalFormat getDecimalFormat(int places) {

@@ -113,7 +113,7 @@ public class Whirlpool extends AttackSpell {
 
                     if (i % 4 == 0) {
                         Location surfaceLoc = targetLoc.clone().add(x, 0, z);
-                        surfaceLoc.getWorld().spawnParticle(Particle.WATER_SPLASH, surfaceLoc, 2, 0.3, 0.1, 0.3, 0);
+                        surfaceLoc.getWorld().spawnParticle(Utils.SPLASH, surfaceLoc, 2, 0.3, 0.1, 0.3, 0);
                     }
                 }
 
@@ -122,7 +122,7 @@ public class Whirlpool extends AttackSpell {
                 }
 
                 if (ticks % 3 == 0) {
-                    targetLoc.getWorld().spawnParticle(Particle.WATER_SPLASH, targetLoc, 15, activeRadius, 0.5, activeRadius, 0);
+                    targetLoc.getWorld().spawnParticle(Utils.SPLASH, targetLoc, 15, activeRadius, 0.5, activeRadius, 0);
                 }
 
                 for (Entity entity : targetLoc.getWorld().getNearbyEntities(targetLoc, activeRadius, activeRadius, activeRadius)) {
@@ -140,7 +140,7 @@ public class Whirlpool extends AttackSpell {
                     if (dist < 1.5) {
                         SpellDamageUtil.damageWithSpell(le, activeDamage, caster, wand, Whirlpool.this);
                         if (Math.random() < 0.3) {
-                            le.getWorld().spawnParticle(Particle.WATER_SPLASH, le.getLocation().add(0, 1, 0), 5, 0.3, 0.3, 0.3, 0);
+                            le.getWorld().spawnParticle(Utils.SPLASH, le.getLocation().add(0, 1, 0), 5, 0.3, 0.3, 0.3, 0);
                         }
                     }
                 }
@@ -216,12 +216,12 @@ public class Whirlpool extends AttackSpell {
 
     @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
-        location.getWorld().spawnParticle(Particle.WATER_SPLASH, location, 30, 0.5, 0.5, 0.5, 0);
+        location.getWorld().spawnParticle(Utils.SPLASH, location, 30, 0.5, 0.5, 0.5, 0);
     }
 
     @Override
     public void onCountered(Location location) {
-        location.getWorld().spawnParticle(Particle.WATER_SPLASH, location, 50, 1, 1, 1, 0.5);
+        location.getWorld().spawnParticle(Utils.SPLASH, location, 50, 1, 1, 1, 0.5);
         location.getWorld().playSound(location, Sound.ENTITY_GENERIC_EXPLODE, 0.6f, 1.5f);
     }
 

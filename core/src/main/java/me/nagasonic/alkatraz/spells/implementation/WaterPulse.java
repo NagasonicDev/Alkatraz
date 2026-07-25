@@ -43,12 +43,12 @@ public class WaterPulse extends AttackSpell implements Listener {
 
     @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
-        location.getWorld().spawnParticle(Particle.WATER_SPLASH, location, 15);
+        location.getWorld().spawnParticle(Utils.SPLASH, location, 15);
     }
 
     @Override
     public void onCountered(Location location) {
-        location.getWorld().spawnParticle(Particle.WATER_SPLASH, location, 30);
+        location.getWorld().spawnParticle(Utils.SPLASH, location, 30);
     }
 
 
@@ -82,7 +82,7 @@ public class WaterPulse extends AttackSpell implements Listener {
                 r += step;
                 List<Location> circle = ParticleUtils.circle(centre, r, 4/r, 0, 0);
                 for (Location loc : circle){
-                    loc.getWorld().spawnParticle(Particle.WATER_SPLASH, loc, 5, 0, 0, 0,0);
+                    loc.getWorld().spawnParticle(Utils.SPLASH, loc, 5, 0, 0, 0,0);
                     SpellParticleComponent comp = new SpellParticleComponent(
                             WaterPulse.this,
                             props,
@@ -150,7 +150,7 @@ public class WaterPulse extends AttackSpell implements Listener {
                 r += 0.5;
                 List<Location> circle = ParticleUtils.circle(centre, r, 4/r, 0, 0);
                 for (Location loc : circle){
-                    loc.getWorld().spawnParticle(Particle.WATER_SPLASH, loc, 5, 0, 0, 0,0);
+                    loc.getWorld().spawnParticle(Utils.SPLASH, loc, 5, 0, 0, 0,0);
                     SpellParticleComponent comp = new SpellParticleComponent(
                             WaterPulse.this,
                             props,

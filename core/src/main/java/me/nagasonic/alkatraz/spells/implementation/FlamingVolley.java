@@ -189,11 +189,11 @@ public class FlamingVolley extends AttackSpell implements Listener {
 
     private void spawnArrowParticles(Location center) {
         center.getWorld().spawnParticle(Particle.FLAME, center, 2, 0.05, 0.05, 0.05, 0.01);
-        center.getWorld().spawnParticle(Particle.SMOKE_NORMAL, center, 1, 0.05, 0.05, 0.05, 0.01);
+        center.getWorld().spawnParticle(Utils.SMOKE, center, 1, 0.05, 0.05, 0.05, 0.01);
     }
 
     private void spawnDisperse(Location loc) {
-        loc.getWorld().spawnParticle(Particle.SMOKE_NORMAL, loc, 8, 0.3, 0.3, 0.3, 0.05);
+        loc.getWorld().spawnParticle(Utils.SMOKE, loc, 8, 0.3, 0.3, 0.3, 0.05);
     }
 
     private void spawnImpact(Location loc, LivingEntity caster) {

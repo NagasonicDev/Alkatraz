@@ -31,7 +31,7 @@ public final class ParticleEffect implements Effect {
     }
 
     public static Effect fromConfig(Map<String, Object> config) {
-        Particle particle = Particle.valueOf(String.valueOf(config.getOrDefault("particle", "FLAME")));
+        Particle particle = Particle.valueOf(translateParticleName(String.valueOf(config.getOrDefault("particle", "FLAME"))));
         return new ParticleEffect(
                 particle,
                 Integer.parseInt(String.valueOf(config.getOrDefault("count", 10))),
@@ -40,5 +40,24 @@ public final class ParticleEffect implements Effect {
                 Double.parseDouble(String.valueOf(config.getOrDefault("offset_z", 0.5))),
                 Double.parseDouble(String.valueOf(config.getOrDefault("speed", 0.1)))
         );
+    }
+
+    private static String translateParticleName(String name) {
+        return switch (name) {
+            case "REDSTONE" -> "DUST";
+            case "EXPLOSION_LARGE" -> "EXPLOSION";
+            case "SMOKE_NORMAL" -> "SMOKE";
+            case "SMOKE_LARGE" -> "LARGE_SMOKE";
+            case "SPELL_WITCH" -> "WITCH";
+            case "SPELL_MOB_AMBIENT" -> "ENTITY_EFFECT";
+            case "BLOCK_CRACK" -> "BLOCK";
+            case "BLOCK_DUST" -> "BLOCK";
+            case "WATER_SPLASH" -> "SPLASH";
+            case "EXPLOSION_HUGE" -> "EXPLOSION_EMITTER";
+            case "WATER_DROP" -> "RAIN";
+            case "TOTEM" -> "TOTEM_OF_UNDYING";
+            case "ENCHANTMENT_TABLE" -> "ENCHANT";
+            default -> name;
+        };
     }
 }

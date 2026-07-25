@@ -52,13 +52,13 @@ public class EarthenWall extends AttackSpell implements Listener {
 
     @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
-        location.getWorld().spawnParticle(Particle.BLOCK_CRACK, location, 15, Material.DIRT.createBlockData());
+        location.getWorld().spawnParticle(Utils.BLOCK, location, 15, Material.DIRT.createBlockData());
     }
 
     @Override
     public void onCountered(Location location) {
-        location.getWorld().spawnParticle(Particle.BLOCK_CRACK, location, 30, 1, 1, 1, 0.1, Material.STONE.createBlockData());
-        location.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, location, 1);
+        location.getWorld().spawnParticle(Utils.BLOCK, location, 30, 1, 1, 1, 0.1, Material.STONE.createBlockData());
+        location.getWorld().spawnParticle(Utils.EXPLOSION, location, 1);
     }
 
     @Override
