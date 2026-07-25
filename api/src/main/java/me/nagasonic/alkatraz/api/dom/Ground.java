@@ -336,44 +336,59 @@ public enum Ground {
      * @return the default ground material for that biome, or {@link Material#DIRT} if no specific mapping exists
      */
     public static Material getGround(Biome biome) {
-        return switch (biome) {
-            case DESERT                -> SAND.getType();
-            case BADLANDS,
-                 WOODED_BADLANDS,
-                 ERODED_BADLANDS       -> RED_SAND.getType();
-            case MUSHROOM_FIELDS       -> MYCELIUM.getType();
-            case SOUL_SAND_VALLEY      -> SOUL_SAND.getType();
-            case BASALT_DELTAS         -> BASALT.getType();
-            case CRIMSON_FOREST,
-                 WARPED_FOREST,
-                 NETHER_WASTES         -> NETHERRACK.getType();
-            case THE_END,
-                 END_HIGHLANDS,
-                 END_MIDLANDS,
-                 END_BARRENS,
-                 SMALL_END_ISLANDS     -> END_STONE.getType();
-            case BEACH,
-                 STONY_SHORE           -> GRAVEL.getType();
-            case MANGROVE_SWAMP        -> MUD.getType();
-            case SWAMP                 -> CLAY.getType();
-            case PLAINS,
-                 MEADOW,
-                 SUNFLOWER_PLAINS,
-                 FLOWER_FOREST,
-                 FOREST,
-                 BIRCH_FOREST,
-                 OLD_GROWTH_BIRCH_FOREST,
-                 DARK_FOREST,
-                 JUNGLE,
-                 SPARSE_JUNGLE,
-                 BAMBOO_JUNGLE,
-                 SAVANNA,
-                 SAVANNA_PLATEAU,
-                  WINDSWEPT_SAVANNA       -> GRASS.getType();
-            case STONY_PEAKS,
-                 JAGGED_PEAKS,
-                 FROZEN_PEAKS          -> STONE.getType();
-            default                    -> DIRT.getType();
+        return switch (biome.name()) {
+            case "DESERT"                -> SAND.getType();
+            case "BADLANDS",
+                 "WOODED_BADLANDS",
+                 "ERODED_BADLANDS"       -> RED_SAND.getType();
+            case "MUSHROOM_FIELDS"       -> MYCELIUM.getType();
+            case "SOUL_SAND_VALLEY",
+                 "SULFUR_CAVES"          -> SOUL_SAND.getType();
+            case "BASALT_DELTAS"         -> BASALT.getType();
+            case "NETHER_WASTES",
+                 "CRIMSON_FOREST",
+                 "WARPED_FOREST"         -> NETHERRACK.getType();
+            case "THE_END",
+                 "END_HIGHLANDS",
+                 "END_MIDLANDS",
+                 "END_BARRENS",
+                 "SMALL_END_ISLANDS"     -> END_STONE.getType();
+            case "BEACH",
+                 "STONY_SHORE"           -> GRAVEL.getType();
+            case "MANGROVE_SWAMP"        -> MUD.getType();
+            case "SWAMP"                 -> CLAY.getType();
+            case "DEEP_DARK",
+                 "DRIPSTONE_CAVES"       -> DEEPSLATE.getType();
+            case "LUSH_CAVES"            -> Material.MOSS_BLOCK;
+            case "PLAINS",
+                 "MEADOW",
+                 "SUNFLOWER_PLAINS",
+                 "FLOWER_FOREST",
+                 "FOREST",
+                 "BIRCH_FOREST",
+                 "OLD_GROWTH_BIRCH_FOREST",
+                 "DARK_FOREST",
+                 "PALE_GARDEN",
+                 "JUNGLE",
+                 "SPARSE_JUNGLE",
+                 "BAMBOO_JUNGLE",
+                 "CHERRY_GROVE",
+                 "SAVANNA",
+                 "SAVANNA_PLATEAU",
+                 "WINDSWEPT_SAVANNA",
+                 "WINDSWEPT_FOREST",
+                 "WINDSWEPT_HILLS"       -> GRASS.getType();
+            case "WINDSWEPT_GRAVELLY_HILLS",
+                 "STONY_PEAKS",
+                 "JAGGED_PEAKS",
+                 "FROZEN_PEAKS"          -> STONE.getType();
+            case "GROVE",
+                 "SNOWY_SLOPES"          -> Material.SNOW_BLOCK;
+            case "ICE_SPIKES"            -> Material.PACKED_ICE;
+            case "OLD_GROWTH_PINE_TAIGA",
+                 "OLD_GROWTH_SPRUCE_TAIGA" -> COARSE_DIRT.getType();
+            case "THE_VOID"              -> STONE.getType();
+            default                      -> DIRT.getType();
         };
     }
 }
