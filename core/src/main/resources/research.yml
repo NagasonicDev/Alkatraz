@@ -1,6 +1,3 @@
-# Research definitions are rendered as directed acyclic graphs.
-# Objectives are functional and update from gameplay events handled by ResearchObjectiveListener.
-
 categories:
   magic:
     display_name: '&dMagic'
@@ -23,21 +20,22 @@ categories:
   dark:
     display_name: '&8Dark'
     icon: ECHO_SHARD
-
 nodes:
   awakened_focus:
     display_name: '&dAwakened Focus'
     category: magic
     icon: AMETHYST_SHARD
     research_points_cost: 0
-    position: { x: 0, y: 0 }
+    position:
+      x: 0
+      y: 0
     description:
-      - 'Shape raw mana into a stable point of focus.'
-      - 'This is the first lesson every serious mage must master.'
+    - Shape raw mana into a stable point of focus.
+    - This is the first lesson every serious mage must master.
     parents: []
     objectives:
       open_the_path:
-        display_name: 'Cast any spell to awaken your focus.'
+        display_name: Cast any spell to awaken your focus.
         event: spell_cast
         amount: 1
     rewards:
@@ -45,30 +43,32 @@ nodes:
         type: magic_stat
         target: arcaneKnowledge
         amount: 5
-        display: '+5 Arcane Knowledge.'
+        display: +5 Arcane Knowledge.
       max_mana:
         type: magic_stat
         target: maxMana
         amount: 10
-        display: '+10 Maximum Mana.'
+        display: +10 Maximum Mana.
     unlocks:
-      - 'Reveals the first elemental studies.'
+    - Reveals the first elemental studies.
     visibility:
       hidden_until_available: false
-
   mana_conservation:
     display_name: '&bMana Conservation'
     category: magic
     icon: LAPIS_LAZULI
     research_points_cost: 25
-    position: { x: 0, y: -3 }
+    position:
+      x: 0
+      y: -3
     description:
-      - 'Learn to hold power without letting it leak away.'
-      - 'Patient casting creates stronger work than haste.'
-    parents: [awakened_focus]
+    - Learn to hold power without letting it leak away.
+    - Patient casting creates stronger work than haste.
+    parents:
+    - awakened_focus
     objectives:
       steady_casting:
-        display_name: 'Cast five spells in any environment.'
+        display_name: Cast five spells in any environment.
         event: spell_cast
         amount: 5
     rewards:
@@ -76,25 +76,27 @@ nodes:
         type: magic_stat
         target: manaRegeneration
         amount: 0.25
-        display: '+0.25 Mana Regeneration.'
+        display: +0.25 Mana Regeneration.
     unlocks:
-      - 'Improves long-form magical practice.'
+    - Improves long-form magical practice.
     visibility:
       hidden_until_available: false
-
   ritual_geometry:
     display_name: '&5Ritual Geometry'
     category: magic
     icon: ENCHANTING_TABLE
     research_points_cost: 25
-    position: { x: -3, y: -2 }
+    position:
+      x: -3
+      y: -2
     description:
-      - 'Place symbols in patterns that mana can follow.'
-      - 'A good ritual is a map, not a miracle.'
-    parents: [awakened_focus]
+    - Place symbols in patterns that mana can follow.
+    - A good ritual is a map, not a miracle.
+    parents:
+    - awakened_focus
     objectives:
       prepared_tools:
-        display_name: 'Enchant an item to study bound patterns.'
+        display_name: Enchant an item to study bound patterns.
         event: item_enchant
         amount: 1
     rewards:
@@ -102,25 +104,27 @@ nodes:
         type: magic_stat
         target: statPoints
         amount: 1
-        display: '+1 Stat Point.'
+        display: +1 Stat Point.
     unlocks:
-      - 'Opens structured research techniques.'
+    - Opens structured research techniques.
     visibility:
       hidden_until_available: false
-
   spellcraft_field_notes:
     display_name: '&aSpellcraft Field Notes'
     category: magic
     icon: WRITABLE_BOOK
     research_points_cost: 25
-    position: { x: 3, y: -2 }
+    position:
+      x: 3
+      y: -2
     description:
-      - 'Record how spells behave outside the safety of theory.'
-      - 'Useful notes separate study from guesswork.'
-    parents: [awakened_focus]
+    - Record how spells behave outside the safety of theory.
+    - Useful notes separate study from guesswork.
+    parents:
+    - awakened_focus
     objectives:
       practical_casting:
-        display_name: 'Cast ten spells while exploring.'
+        display_name: Cast ten spells while exploring.
         event: spell_cast
         amount: 10
     rewards:
@@ -128,25 +132,29 @@ nodes:
         type: magic_stat
         target: magicAffinity
         amount: 2
-        display: '+2 Magic Affinity.'
+        display: +2 Magic Affinity.
     unlocks:
-      - 'Strengthens all elemental practice.'
+    - Strengthens all elemental practice.
     visibility:
       hidden_until_available: false
-
   disciplined_channel:
     display_name: '&dDisciplined Channel'
     category: magic
     icon: NETHER_STAR
     research_points_cost: 75
-    position: { x: 0, y: 3 }
+    position:
+      x: 0
+      y: 3
     description:
-      - 'Bring theory, field notes, and ritual discipline together.'
-      - 'The channel becomes reliable enough for greater work.'
-    parents: [mana_conservation, ritual_geometry, spellcraft_field_notes]
+    - Bring theory, field notes, and ritual discipline together.
+    - The channel becomes reliable enough for greater work.
+    parents:
+    - mana_conservation
+    - ritual_geometry
+    - spellcraft_field_notes
     objectives:
       balanced_study:
-        display_name: 'Reach experience level ten.'
+        display_name: Reach experience level ten.
         event: player_level
         amount: 1
         filters:
@@ -156,32 +164,48 @@ nodes:
         type: vanilla_attribute
         target: GENERIC_MAX_HEALTH
         amount: 2
-        display: '+2 Maximum Health.'
+        display: +2 Maximum Health.
       magic_resistance:
         type: magic_stat
         target: magicResistance
         amount: 2
-        display: '+2 Magic Resistance.'
+        display: +2 Magic Resistance.
     unlocks:
-      - 'Marks the mage as ready for deeper elemental studies.'
+    - Marks the mage as ready for deeper elemental studies.
     visibility:
       hidden_until_available: true
-
-  # ── Ring 1: Foundational Studies (continued) ──
-
+    edge_paths:
+      mana_conservation:
+      - x: 1
+        y: -2
+      - x: 1
+        y: 1
+      ritual_geometry:
+      - x: -2
+        y: -1
+      - x: -2
+        y: 1
+      spellcraft_field_notes:
+      - x: 2
+        y: -1
+      - x: 2
+        y: 1
   focus_discipline:
     display_name: '&6Focus Discipline'
     category: magic
     icon: CROSSBOW
     research_points_cost: 25
-    position: { x: 3, y: 1 }
+    position:
+      x: 3
+      y: 1
     description:
-      - 'Sharpen your concentration until spells land where you intend.'
-      - 'Precision is the bridge between knowledge and power.'
-    parents: [awakened_focus]
+    - Sharpen your concentration until spells land where you intend.
+    - Precision is the bridge between knowledge and power.
+    parents:
+    - awakened_focus
     objectives:
       precision_kills:
-        display_name: 'Defeat three creatures with any spells.'
+        display_name: Defeat three creatures with any spells.
         event: kill_with_spell
         amount: 3
     rewards:
@@ -189,25 +213,27 @@ nodes:
         type: magic_stat
         target: magicAffinity
         amount: 2
-        display: '+2 Magic Affinity.'
+        display: +2 Magic Affinity.
     unlocks:
-      - 'Opens the path to applied combat magic.'
+    - Opens the path to applied combat magic.
     visibility:
       hidden_until_available: false
-
   ward_craft:
     display_name: '&dWard Craft'
     category: magic
     icon: SHIELD
     research_points_cost: 25
-    position: { x: -3, y: 1 }
+    position:
+      x: -3
+      y: 1
     description:
-      - 'Shape mana into invisible barriers that bend and redirect force.'
-      - 'A ward is a promise that harm will have to try harder.'
-    parents: [awakened_focus]
+    - Shape mana into invisible barriers that bend and redirect force.
+    - A ward is a promise that harm will have to try harder.
+    parents:
+    - awakened_focus
     objectives:
       defensive_casting:
-        display_name: 'Cast five spells of any element.'
+        display_name: Cast five spells of any element.
         event: spell_cast
         amount: 5
     rewards:
@@ -215,27 +241,32 @@ nodes:
         type: magic_stat
         target: magicResistance
         amount: 2
-        display: '+2 Magic Resistance.'
+        display: +2 Magic Resistance.
     unlocks:
-      - 'Opens the path to advanced protective magic.'
+    - Opens the path to advanced protective magic.
     visibility:
       hidden_until_available: false
-
-  # ── Ring 2: Advanced Studies ──
-
+    edge_paths:
+      awakened_focus:
+      - x: -2
+        y: 0
   mana_reservoir:
     display_name: '&bMana Reservoir'
     category: magic
     icon: LAPIS_BLOCK
     research_points_cost: 50
-    position: { x: 0, y: -6 }
+    position:
+      x: 0
+      y: -6
     description:
-      - 'Expand the inner vessel until it holds far more than seems possible.'
-      - 'A deep reservoir lets you cast without counting every drop.'
-    parents: [mana_conservation, ritual_geometry]
+    - Expand the inner vessel until it holds far more than seems possible.
+    - A deep reservoir lets you cast without counting every drop.
+    parents:
+    - mana_conservation
+    - ritual_geometry
     objectives:
       sustained_casting:
-        display_name: 'Cast twenty-five spells.'
+        display_name: Cast twenty-five spells.
         event: spell_cast
         amount: 25
     rewards:
@@ -243,30 +274,37 @@ nodes:
         type: magic_stat
         target: maxMana
         amount: 30
-        display: '+30 Maximum Mana.'
+        display: +30 Maximum Mana.
       mana_regeneration:
         type: magic_stat
         target: manaRegeneration
         amount: 0.5
-        display: '+0.5 Mana Regeneration.'
+        display: +0.5 Mana Regeneration.
     unlocks:
-      - 'Unlocks deeper mana studies.'
+    - Unlocks deeper mana studies.
     visibility:
       hidden_until_available: false
-
+    edge_paths:
+      ritual_geometry:
+      - x: -1
+        y: -5
   spell_resonance:
     display_name: '&eSpell Resonance'
     category: magic
     icon: ECHO_SHARD
     research_points_cost: 60
-    position: { x: 5, y: -3 }
+    position:
+      x: 5
+      y: -3
     description:
-      - 'Find the frequency at which spells amplify each other.'
-      - 'Resonance turns a whisper into a roar.'
-    parents: [spellcraft_notes, mana_conservation]
+    - Find the frequency at which spells amplify each other.
+    - Resonance turns a whisper into a roar.
+    parents:
+    - spellcraft_notes
+    - mana_conservation
     objectives:
       resonance_kills:
-        display_name: 'Defeat ten creatures with any spells.'
+        display_name: Defeat ten creatures with any spells.
         event: kill_with_spell
         amount: 10
     rewards:
@@ -274,25 +312,28 @@ nodes:
         type: magic_stat
         target: magicAffinity
         amount: 3
-        display: '+3 Magic Affinity.'
+        display: +3 Magic Affinity.
     unlocks:
-      - 'Unlocks the study of spell combination.'
+    - Unlocks the study of spell combination.
     visibility:
       hidden_until_available: false
-
   combat_casting:
     display_name: '&cCombat Casting'
     category: magic
     icon: IRON_SWORD
     research_points_cost: 60
-    position: { x: 5, y: 3 }
+    position:
+      x: 5
+      y: 3
     description:
-      - 'Apply spells under pressure when every second matters.'
-      - 'The battlefield is the harshest teacher, but the most honest.'
-    parents: [focus_discipline, spellcraft_notes]
+    - Apply spells under pressure when every second matters.
+    - The battlefield is the harshest teacher, but the most honest.
+    parents:
+    - focus_discipline
+    - spellcraft_notes
     objectives:
       close_combat:
-        display_name: 'Defeat five creatures with spells within eight blocks.'
+        display_name: Defeat five creatures with spells within eight blocks.
         event: kill_with_spell
         amount: 5
         filters:
@@ -302,30 +343,33 @@ nodes:
         type: vanilla_attribute
         target: GENERIC_MAX_HEALTH
         amount: 1
-        display: '+1 Maximum Health.'
+        display: +1 Maximum Health.
       magic_affinity:
         type: magic_stat
         target: magicAffinity
         amount: 2
-        display: '+2 Magic Affinity.'
+        display: +2 Magic Affinity.
     unlocks:
-      - 'Unlocks mastery of magical warfare.'
+    - Unlocks mastery of magical warfare.
     visibility:
       hidden_until_available: false
-
   mana_conduit:
     display_name: '&9Mana Conduit'
     category: magic
     icon: PRISMARINE_CRYSTALS
     research_points_cost: 75
-    position: { x: 0, y: 6 }
+    position:
+      x: 0
+      y: 6
     description:
-      - 'Channel raw mana through your body until it flows without friction.'
-      - 'The conduit becomes a living pipeline for arcane force.'
-    parents: [disciplined_channel, ward_craft]
+    - Channel raw mana through your body until it flows without friction.
+    - The conduit becomes a living pipeline for arcane force.
+    parents:
+    - disciplined_channel
+    - ward_craft
     objectives:
       conduit_casting:
-        display_name: 'Cast forty spells.'
+        display_name: Cast forty spells.
         event: spell_cast
         amount: 40
     rewards:
@@ -333,30 +377,39 @@ nodes:
         type: magic_stat
         target: manaRegeneration
         amount: 0.75
-        display: '+0.75 Mana Regeneration.'
+        display: +0.75 Mana Regeneration.
       max_mana:
         type: magic_stat
         target: maxMana
         amount: 30
-        display: '+30 Maximum Mana.'
+        display: +30 Maximum Mana.
     unlocks:
-      - 'Unlocks the deepest mana channeling.'
+    - Unlocks the deepest mana channeling.
     visibility:
       hidden_until_available: false
-
+    edge_paths:
+      disciplined_channel:
+      - x: 1
+        y: 4
+      - x: 1
+        y: 5
   barrier_weave:
     display_name: '&5Barrier Weave'
     category: magic
     icon: IRON_DOOR
     research_points_cost: 50
-    position: { x: -5, y: 3 }
+    position:
+      x: -5
+      y: 3
     description:
-      - 'Weave multiple protective wards into a single unbreakable lattice.'
-      - 'A strong barrier is not one thick wall, but many thin ones.'
-    parents: [ward_craft, disciplined_channel]
+    - Weave multiple protective wards into a single unbreakable lattice.
+    - A strong barrier is not one thick wall, but many thin ones.
+    parents:
+    - ward_craft
+    - disciplined_channel
     objectives:
       weave_spells:
-        display_name: 'Cast fifteen spells of any element.'
+        display_name: Cast fifteen spells of any element.
         event: spell_cast
         amount: 15
     rewards:
@@ -364,25 +417,41 @@ nodes:
         type: magic_stat
         target: magicResistance
         amount: 3
-        display: '+3 Magic Resistance.'
+        display: +3 Magic Resistance.
     unlocks:
-      - 'Unlocks the grand defensive traditions.'
+    - Unlocks the grand defensive traditions.
     visibility:
       hidden_until_available: false
-
+    edge_paths:
+      disciplined_channel:
+      - x: 0
+        y: 2
+      - x: -3
+        y: 1
+      - x: -5
+        y: 2
+      ward_craft:
+      - x: -4
+        y: 1
+      - x: -5
+        y: 2
   arcane_theory:
     display_name: '&dArcane Theory'
     category: magic
     icon: BOOK
     research_points_cost: 75
-    position: { x: -5, y: -3 }
+    position:
+      x: -5
+      y: -3
     description:
-      - 'Study the underlying mathematics that govern all magic.'
-      - 'Theory without practice is empty, but practice without theory is blind.'
-    parents: [ritual_geometry, ward_craft]
+    - Study the underlying mathematics that govern all magic.
+    - Theory without practice is empty, but practice without theory is blind.
+    parents:
+    - ritual_geometry
+    - ward_craft
     objectives:
       reach_level_ten:
-        display_name: 'Reach experience level ten.'
+        display_name: Reach experience level ten.
         event: player_level
         amount: 1
         filters:
@@ -392,32 +461,33 @@ nodes:
         type: magic_stat
         target: arcaneKnowledge
         amount: 10
-        display: '+10 Arcane Knowledge.'
+        display: +10 Arcane Knowledge.
       stat_points:
         type: magic_stat
         target: statPoints
         amount: 1
-        display: '+1 Stat Point.'
+        display: +1 Stat Point.
     unlocks:
-      - 'Opens the path to arcane mastery.'
+    - Opens the path to arcane mastery.
     visibility:
       hidden_until_available: false
-
-  # ── Ring 3: Mastery ──
-
   mana_sovereignty:
     display_name: '&bMana Sovereignty'
     category: magic
     icon: DIAMOND
     research_points_cost: 100
-    position: { x: 0, y: -9 }
+    position:
+      x: 0
+      y: -9
     description:
-      - 'Command mana as an extension of your will, without waste or delay.'
-      - 'The sovereign does not ask mana to move — it obeys.'
-    parents: [mana_reservoir, arcane_theory]
+    - Command mana as an extension of your will, without waste or delay.
+    - The sovereign does not ask mana to move — it obeys.
+    parents:
+    - mana_reservoir
+    - arcane_theory
     objectives:
       sovereignty_casting:
-        display_name: 'Cast fifty spells.'
+        display_name: Cast fifty spells.
         event: spell_cast
         amount: 50
     rewards:
@@ -425,35 +495,44 @@ nodes:
         type: magic_stat
         target: maxMana
         amount: 50
-        display: '+50 Maximum Mana.'
+        display: +50 Maximum Mana.
       mana_regeneration:
         type: magic_stat
         target: manaRegeneration
         amount: 1.0
-        display: '+1.0 Mana Regeneration.'
+        display: +1.0 Mana Regeneration.
       magic_affinity:
         type: magic_stat
         target: magicAffinity
         amount: 5
-        display: '+5 Magic Affinity.'
+        display: +5 Magic Affinity.
     unlocks:
-      - 'Achieves the highest level of mana control.'
+    - Achieves the highest level of mana control.
     visibility:
       hidden_until_available: true
-
+    edge_paths:
+      arcane_theory:
+      - x: -1
+        y: -7
+      - x: -1
+        y: -8
   spell_synthesis:
     display_name: '&aSpell Synthesis'
     category: magic
     icon: END_CRYSTAL
     research_points_cost: 125
-    position: { x: 8, y: -5 }
+    position:
+      x: 8
+      y: -5
     description:
-      - 'Combine the principles of resonance and field study into unified expressions.'
-      - 'Synthesis turns scattered knowledge into seamless power.'
-    parents: [spell_resonance, mana_reservoir]
+    - Combine the principles of resonance and field study into unified expressions.
+    - Synthesis turns scattered knowledge into seamless power.
+    parents:
+    - spell_resonance
+    - mana_reservoir
     objectives:
       synthesis_kills:
-        display_name: 'Defeat twenty creatures with any spells.'
+        display_name: Defeat twenty creatures with any spells.
         event: kill_with_spell
         amount: 20
     rewards:
@@ -461,30 +540,37 @@ nodes:
         type: magic_stat
         target: magicAffinity
         amount: 5
-        display: '+5 Magic Affinity.'
+        display: +5 Magic Affinity.
       attack_speed:
         type: vanilla_attribute
         target: GENERIC_ATTACK_SPEED
         amount: 0.05
-        display: '+0.05 Attack Speed.'
+        display: +0.05 Attack Speed.
     unlocks:
-      - 'Unlocks the synthesis of offensive spellcraft.'
+    - Unlocks the synthesis of offensive spellcraft.
     visibility:
       hidden_until_available: true
-
+    edge_paths:
+      spell_resonance:
+      - x: 7
+        y: -4
   battle_mage:
     display_name: '&cBattle Mage'
     category: magic
     icon: NETHERITE_SWORD
     research_points_cost: 150
-    position: { x: 8, y: 5 }
+    position:
+      x: 8
+      y: 5
     description:
-      - 'Become a seamless fusion of martial skill and magical devastation.'
-      - 'The battle mage does not choose between sword and spell.'
-    parents: [combat_casting, spell_resonance]
+    - Become a seamless fusion of martial skill and magical devastation.
+    - The battle mage does not choose between sword and spell.
+    parents:
+    - combat_casting
+    - spell_resonance
     objectives:
       battle_kills:
-        display_name: 'Defeat ten creatures with spells within eight blocks.'
+        display_name: Defeat ten creatures with spells within eight blocks.
         event: kill_with_spell
         amount: 10
         filters:
@@ -494,30 +580,33 @@ nodes:
         type: vanilla_attribute
         target: GENERIC_MAX_HEALTH
         amount: 2
-        display: '+2 Maximum Health.'
+        display: +2 Maximum Health.
       attack_damage:
         type: vanilla_attribute
         target: GENERIC_ATTACK_DAMAGE
         amount: 0.5
-        display: '+0.5 Attack Damage.'
+        display: +0.5 Attack Damage.
     unlocks:
-      - 'Mastery of magical combat.'
+    - Mastery of magical combat.
     visibility:
       hidden_until_available: true
-
   arcane_nexus:
     display_name: '&dArcane Nexus'
     category: magic
     icon: END_ROD
     research_points_cost: 150
-    position: { x: 0, y: 9 }
+    position:
+      x: 0
+      y: 9
     description:
-      - 'Become a living conduit for raw arcane force from the world itself.'
-      - 'The nexus draws power from everywhere and sends it where you choose.'
-    parents: [mana_conduit, combat_casting]
+    - Become a living conduit for raw arcane force from the world itself.
+    - The nexus draws power from everywhere and sends it where you choose.
+    parents:
+    - mana_conduit
+    - combat_casting
     objectives:
       reach_level_twenty:
-        display_name: 'Reach experience level twenty.'
+        display_name: Reach experience level twenty.
         event: player_level
         amount: 1
         filters:
@@ -527,35 +616,44 @@ nodes:
         type: magic_stat
         target: arcaneKnowledge
         amount: 25
-        display: '+25 Arcane Knowledge.'
+        display: +25 Arcane Knowledge.
       stat_points:
         type: magic_stat
         target: statPoints
         amount: 2
-        display: '+2 Stat Points.'
+        display: +2 Stat Points.
       magic_affinity:
         type: magic_stat
         target: magicAffinity
         amount: 5
-        display: '+5 Magic Affinity.'
+        display: +5 Magic Affinity.
     unlocks:
-      - 'The pinnacle of arcane understanding.'
+    - The pinnacle of arcane understanding.
     visibility:
       hidden_until_available: true
-
+    edge_paths:
+      combat_casting:
+      - x: 1
+        y: 7
+      - x: 1
+        y: 8
   grand_ward:
     display_name: '&5Grand Ward'
     category: magic
     icon: ENCHANTED_GOLDEN_APPLE
     research_points_cost: 125
-    position: { x: -8, y: 5 }
+    position:
+      x: -8
+      y: 5
     description:
-      - 'Construct a defense so thorough that nothing passes without your consent.'
-      - 'The grand ward is not a wall — it is a declaration.'
-    parents: [barrier_weave, mana_conduit]
+    - Construct a defense so thorough that nothing passes without your consent.
+    - The grand ward is not a wall — it is a declaration.
+    parents:
+    - barrier_weave
+    - mana_conduit
     objectives:
       grand_ward_spells:
-        display_name: 'Cast twenty-five spells of any element.'
+        display_name: Cast twenty-five spells of any element.
         event: spell_cast
         amount: 25
     rewards:
@@ -563,30 +661,39 @@ nodes:
         type: magic_stat
         target: magicResistance
         amount: 5
-        display: '+5 Magic Resistance.'
+        display: +5 Magic Resistance.
       armor:
         type: vanilla_attribute
         target: GENERIC_ARMOR
         amount: 1
-        display: '+1 Armor.'
+        display: +1 Armor.
     unlocks:
-      - 'Mastery of protective magic.'
+    - Mastery of protective magic.
     visibility:
       hidden_until_available: true
-
+    edge_paths:
+      barrier_weave:
+      - x: -7
+        y: 4
+      - x: -8
+        y: 4
   archmage:
     display_name: '&dArchmage'
     category: magic
     icon: DRAGON_EGG
     research_points_cost: 150
-    position: { x: -8, y: -5 }
+    position:
+      x: -8
+      y: -5
     description:
-      - 'Bring all schools of magic together under a single disciplined will.'
-      - 'The archmage has nothing left to prove and everything left to create.'
-    parents: [arcane_theory, barrier_weave]
+    - Bring all schools of magic together under a single disciplined will.
+    - The archmage has nothing left to prove and everything left to create.
+    parents:
+    - arcane_theory
+    - barrier_weave
     objectives:
       archmage_enchant:
-        display_name: 'Enchant ten items.'
+        display_name: Enchant ten items.
         event: item_enchant
         amount: 10
     rewards:
@@ -594,35 +701,37 @@ nodes:
         type: magic_stat
         target: statPoints
         amount: 3
-        display: '+3 Stat Points.'
+        display: +3 Stat Points.
       magic_affinity:
         type: magic_stat
         target: magicAffinity
         amount: 8
-        display: '+8 Magic Affinity.'
+        display: +8 Magic Affinity.
       magic_resistance:
         type: magic_stat
         target: magicResistance
         amount: 8
-        display: '+8 Magic Resistance.'
+        display: +8 Magic Resistance.
     unlocks:
-      - 'The ultimate achievement in magical study.'
+    - The ultimate achievement in magical study.
     visibility:
       hidden_until_available: true
-
   fire_spark:
     display_name: '&cKindled Spark'
     category: fire
     icon: BLAZE_POWDER
     research_points_cost: 20
-    position: { x: 0, y: 0 }
+    position:
+      x: 0
+      y: 0
     description:
-      - 'Find the first controlled heat within your mana.'
-      - 'Fire rewards courage, but punishes carelessness.'
-    parents: [awakened_focus]
+    - Find the first controlled heat within your mana.
+    - Fire rewards courage, but punishes carelessness.
+    parents:
+    - awakened_focus
     objectives:
       cast_fire:
-        display_name: 'Cast three Fire spells.'
+        display_name: Cast three Fire spells.
         event: spell_cast
         amount: 3
         filters:
@@ -632,32 +741,32 @@ nodes:
         type: magic_stat
         target: fireAffinity
         amount: 3
-        display: '+3 Fire Affinity.'
+        display: +3 Fire Affinity.
       fire_points:
         type: magic_stat
         target: firePoints
         amount: 1
-        display: '+1 Fire Point.'
+        display: +1 Fire Point.
     unlocks:
-      - 'Unlocks the Fire research branch.'
+    - Unlocks the Fire research branch.
     visibility:
       hidden_until_available: false
-
-  # ── Ring 1: Fire Foundational Studies ──
-
   flame_study:
     display_name: '&6Flame Study'
     category: fire
     icon: FIRE_CHARGE
     research_points_cost: 20
-    position: { x: 0, y: -3 }
+    position:
+      x: 0
+      y: -3
     description:
-      - 'Observe how flame behaves when given form and direction.'
-      - 'Every fire begins with understanding.'
-    parents: [fire_spark]
+    - Observe how flame behaves when given form and direction.
+    - Every fire begins with understanding.
+    parents:
+    - fire_spark
     objectives:
       cast_fire_basic:
-        display_name: 'Cast five Fire spells.'
+        display_name: Cast five Fire spells.
         event: spell_cast
         amount: 5
         filters:
@@ -667,25 +776,27 @@ nodes:
         type: magic_stat
         target: fireAffinity
         amount: 3
-        display: '+3 Fire Affinity.'
+        display: +3 Fire Affinity.
     unlocks:
-      - 'Opens advanced fire studies.'
+    - Opens advanced fire studies.
     visibility:
       hidden_until_available: false
-
   heat_siphon:
     display_name: '&6Heat Siphon'
     category: fire
     icon: MAGMA_CREAM
     research_points_cost: 25
-    position: { x: 3, y: 2 }
+    position:
+      x: 3
+      y: 2
     description:
-      - 'Draw residual warmth from your own flames to replenish your reserves.'
-      - 'No heat is truly lost.'
-    parents: [fire_spark]
+    - Draw residual warmth from your own flames to replenish your reserves.
+    - No heat is truly lost.
+    parents:
+    - fire_spark
     objectives:
       siphon_casting:
-        display_name: 'Cast ten Fire spells.'
+        display_name: Cast ten Fire spells.
         event: spell_cast
         amount: 10
         filters:
@@ -695,25 +806,27 @@ nodes:
         type: magic_stat
         target: manaRegeneration
         amount: 1
-        display: '+1 Mana Regeneration.'
+        display: +1 Mana Regeneration.
     unlocks:
-      - 'Unlocks efficient fire casting.'
+    - Unlocks efficient fire casting.
     visibility:
       hidden_until_available: false
-
   smoke_shroud:
     display_name: '&8Smoke Shroud'
     category: fire
     icon: SOUL_CAMPFIRE
     research_points_cost: 20
-    position: { x: -3, y: 2 }
+    position:
+      x: -3
+      y: 2
     description:
-      - 'Wrap yourself in ash and smoke to dull incoming harm.'
-      - 'Where there is smoke, there is protection.'
-    parents: [fire_spark]
+    - Wrap yourself in ash and smoke to dull incoming harm.
+    - Where there is smoke, there is protection.
+    parents:
+    - fire_spark
     objectives:
       shroud_casting:
-        display_name: 'Cast three Fire spells.'
+        display_name: Cast three Fire spells.
         event: spell_cast
         amount: 3
         filters:
@@ -723,25 +836,27 @@ nodes:
         type: magic_stat
         target: fireResistance
         amount: 2
-        display: '+2 Fire Resistance.'
+        display: +2 Fire Resistance.
     unlocks:
-      - 'Opens fire defensive studies.'
+    - Opens fire defensive studies.
     visibility:
       hidden_until_available: false
-
   cinder_sigil:
     display_name: '&6Cinder Sigil'
     category: fire
     icon: FLINT_AND_STEEL
     research_points_cost: 25
-    position: { x: -3, y: -1 }
+    position:
+      x: -3
+      y: -1
     description:
-      - 'Mark your spells with a sigil that burns brighter on impact.'
-      - 'A sigil is a promise of fire to come.'
-    parents: [fire_spark]
+    - Mark your spells with a sigil that burns brighter on impact.
+    - A sigil is a promise of fire to come.
+    parents:
+    - fire_spark
     objectives:
       sigil_kills:
-        display_name: 'Defeat three creatures with Fire spells.'
+        display_name: Defeat three creatures with Fire spells.
         event: kill_with_spell
         amount: 3
         filters:
@@ -751,25 +866,27 @@ nodes:
         type: magic_stat
         target: firePoints
         amount: 1
-        display: '+1 Fire Point.'
+        display: +1 Fire Point.
     unlocks:
-      - 'Opens fire mastery studies.'
+    - Opens fire mastery studies.
     visibility:
       hidden_until_available: false
-
   water_first_tide:
     display_name: '&9First Tide'
     category: water
     icon: WATER_BUCKET
     research_points_cost: 20
-    position: { x: 0, y: 0 }
+    position:
+      x: 0
+      y: 0
     description:
-      - 'Let mana settle into flow, pressure, and patience.'
-      - 'Water wins by adapting before it strikes.'
-    parents: [awakened_focus]
+    - Let mana settle into flow, pressure, and patience.
+    - Water wins by adapting before it strikes.
+    parents:
+    - awakened_focus
     objectives:
       cast_water:
-        display_name: 'Cast three Water spells.'
+        display_name: Cast three Water spells.
         event: spell_cast
         amount: 3
         filters:
@@ -779,30 +896,32 @@ nodes:
         type: magic_stat
         target: waterAffinity
         amount: 3
-        display: '+3 Water Affinity.'
+        display: +3 Water Affinity.
       water_points:
         type: magic_stat
         target: waterPoints
         amount: 1
-        display: '+1 Water Point.'
+        display: +1 Water Point.
     unlocks:
-      - 'Unlocks the Water research branch.'
+    - Unlocks the Water research branch.
     visibility:
       hidden_until_available: false
-
   tidal_studies:
     display_name: '&9Tidal Studies'
     category: water
     icon: PRISMARINE_SHARD
     research_points_cost: 20
-    position: { x: 0, y: -3 }
+    position:
+      x: 0
+      y: -3
     description:
-      - 'Chart the rhythms of tides and currents.'
-      - 'Every wave carries knowledge.'
-    parents: [water_first_tide]
+    - Chart the rhythms of tides and currents.
+    - Every wave carries knowledge.
+    parents:
+    - water_first_tide
     objectives:
       cast_water_5:
-        display_name: 'Cast five Water spells.'
+        display_name: Cast five Water spells.
         event: spell_cast
         amount: 5
         filters:
@@ -812,25 +931,27 @@ nodes:
         type: magic_stat
         target: waterAffinity
         amount: 3
-        display: '+3 Water Affinity.'
+        display: +3 Water Affinity.
     unlocks:
-      - 'Deepens understanding of water currents.'
+    - Deepens understanding of water currents.
     visibility:
       hidden_until_available: false
-
   current_sense:
     display_name: '&9Current Sense'
     category: water
     icon: CLOCK
     research_points_cost: 25
-    position: { x: 3, y: 2 }
+    position:
+      x: 3
+      y: 2
     description:
-      - 'Feel the pull of every flowing stream.'
-      - 'Water always finds the quickest path.'
-    parents: [water_first_tide]
+    - Feel the pull of every flowing stream.
+    - Water always finds the quickest path.
+    parents:
+    - water_first_tide
     objectives:
       cast_water_10:
-        display_name: 'Cast ten Water spells.'
+        display_name: Cast ten Water spells.
         event: spell_cast
         amount: 10
         filters:
@@ -840,25 +961,27 @@ nodes:
         type: magic_stat
         target: manaRegeneration
         amount: 1
-        display: '+1 Mana Regeneration.'
+        display: +1 Mana Regeneration.
     unlocks:
-      - 'Improves mana flow through water attunement.'
+    - Improves mana flow through water attunement.
     visibility:
       hidden_until_available: false
-
   frost_ward:
     display_name: '&9Frost Ward'
     category: water
     icon: ICE
     research_points_cost: 20
-    position: { x: -3, y: 2 }
+    position:
+      x: -3
+      y: 2
     description:
-      - 'Cool the blood, shield the spirit.'
-      - 'Ice is water that chose to stand firm.'
-    parents: [water_first_tide]
+    - Cool the blood, shield the spirit.
+    - Ice is water that chose to stand firm.
+    parents:
+    - water_first_tide
     objectives:
       cast_water_3:
-        display_name: 'Cast three Water spells.'
+        display_name: Cast three Water spells.
         event: spell_cast
         amount: 3
         filters:
@@ -868,25 +991,27 @@ nodes:
         type: magic_stat
         target: waterResistance
         amount: 2
-        display: '+2 Water Resistance.'
+        display: +2 Water Resistance.
     unlocks:
-      - 'Hardens resolve against hostile magic.'
+    - Hardens resolve against hostile magic.
     visibility:
       hidden_until_available: false
-
   depth_mark:
     display_name: '&9Depth Mark'
     category: water
     icon: CONDUIT
     research_points_cost: 25
-    position: { x: -3, y: -1 }
+    position:
+      x: -3
+      y: -1
     description:
-      - 'Mark the depth where light fades.'
-      - 'True power rests in the dark waters.'
-    parents: [water_first_tide]
+    - Mark the depth where light fades.
+    - True power rests in the dark waters.
+    parents:
+    - water_first_tide
     objectives:
       kill_water_3:
-        display_name: 'Defeat three enemies after casting Water spells.'
+        display_name: Defeat three enemies after casting Water spells.
         event: kill_with_spell
         amount: 3
         filters:
@@ -896,25 +1021,27 @@ nodes:
         type: magic_stat
         target: waterPoints
         amount: 1
-        display: '+1 Water Point.'
+        display: +1 Water Point.
     unlocks:
-      - 'Focuses water magic toward specialization.'
+    - Focuses water magic toward specialization.
     visibility:
       hidden_until_available: false
-
   earth_stone_memory:
     display_name: '&2Stone Memory'
     category: earth
     icon: MOSS_BLOCK
     research_points_cost: 20
-    position: { x: 0, y: 0 }
+    position:
+      x: 0
+      y: 0
     description:
-      - 'Listen to old stone until it answers through your hands.'
-      - 'Earth magic begins with endurance.'
-    parents: [awakened_focus]
+    - Listen to old stone until it answers through your hands.
+    - Earth magic begins with endurance.
+    parents:
+    - awakened_focus
     objectives:
       cast_earth:
-        display_name: 'Cast three Earth spells.'
+        display_name: Cast three Earth spells.
         event: spell_cast
         amount: 3
         filters:
@@ -924,30 +1051,32 @@ nodes:
         type: magic_stat
         target: earthAffinity
         amount: 3
-        display: '+3 Earth Affinity.'
+        display: +3 Earth Affinity.
       earth_points:
         type: magic_stat
         target: earthPoints
         amount: 1
-        display: '+1 Earth Point.'
+        display: +1 Earth Point.
     unlocks:
-      - 'Unlocks the Earth research branch.'
+    - Unlocks the Earth research branch.
     visibility:
       hidden_until_available: false
-
   tectonic_sense:
     display_name: '&2Tectonic Sense'
     category: earth
     icon: CRYING_OBSIDIAN
     research_points_cost: 20
-    position: { x: 0, y: -3 }
+    position:
+      x: 0
+      y: -3
     description:
-      - 'Feel the tremors deep beneath the surface.'
-      - 'Every spell sends ripples through the stone.'
-    parents: [earth_stone_memory]
+    - Feel the tremors deep beneath the surface.
+    - Every spell sends ripples through the stone.
+    parents:
+    - earth_stone_memory
     objectives:
       cast_earth_5:
-        display_name: 'Cast five Earth spells.'
+        display_name: Cast five Earth spells.
         event: spell_cast
         amount: 5
         filters:
@@ -957,25 +1086,27 @@ nodes:
         type: magic_stat
         target: earthAffinity
         amount: 3
-        display: '+3 Earth Affinity.'
+        display: +3 Earth Affinity.
     unlocks:
-      - 'Deepens connection to earth currents.'
+    - Deepens connection to earth currents.
     visibility:
       hidden_until_available: false
-
   stonebond_will:
     display_name: '&6Stonebond Will'
     category: earth
     icon: ANVIL
     research_points_cost: 25
-    position: { x: 3, y: 2 }
+    position:
+      x: 3
+      y: 2
     description:
-      - 'Bind stone to purpose until it answers every command.'
-      - 'Willpower shapes the earth more than any tool.'
-    parents: [earth_stone_memory]
+    - Bind stone to purpose until it answers every command.
+    - Willpower shapes the earth more than any tool.
+    parents:
+    - earth_stone_memory
     objectives:
       earth_kills_3:
-        display_name: 'Defeat three enemies with Earth spells.'
+        display_name: Defeat three enemies with Earth spells.
         event: kill_with_spell
         amount: 3
         filters:
@@ -985,25 +1116,27 @@ nodes:
         type: magic_stat
         target: earthPoints
         amount: 1
-        display: '+1 Earth Point.'
+        display: +1 Earth Point.
     unlocks:
-      - "Strengthens the caster's bond with earth."
+    - Strengthens the caster's bond with earth.
     visibility:
       hidden_until_available: false
-
   bedrock_ward:
     display_name: '&8Bedrock Ward'
     category: earth
     icon: DEEPSLATE
     research_points_cost: 20
-    position: { x: -3, y: 2 }
+    position:
+      x: -3
+      y: 2
     description:
-      - 'Channel mana into the ground as living armor.'
-      - 'Stone remembers every ward you lay upon it.'
-    parents: [earth_stone_memory]
+    - Channel mana into the ground as living armor.
+    - Stone remembers every ward you lay upon it.
+    parents:
+    - earth_stone_memory
     objectives:
       cast_earth_3:
-        display_name: 'Cast three Earth spells.'
+        display_name: Cast three Earth spells.
         event: spell_cast
         amount: 3
         filters:
@@ -1013,25 +1146,27 @@ nodes:
         type: magic_stat
         target: earthResistance
         amount: 2
-        display: '+2 Earth Resistance.'
+        display: +2 Earth Resistance.
     unlocks:
-      - 'Provides basic earth shielding.'
+    - Provides basic earth shielding.
     visibility:
       hidden_until_available: false
-
   geode_lore:
     display_name: '&5Geode Lore'
     category: earth
     icon: AMETHYST_SHARD
     research_points_cost: 25
-    position: { x: -3, y: -1 }
+    position:
+      x: -3
+      y: -1
     description:
-      - 'Study the crystalline chambers hidden within stone.'
-      - 'Geodes hold knowledge older than any library.'
-    parents: [earth_stone_memory]
+    - Study the crystalline chambers hidden within stone.
+    - Geodes hold knowledge older than any library.
+    parents:
+    - earth_stone_memory
     objectives:
       cast_earth_10:
-        display_name: 'Cast ten Earth spells.'
+        display_name: Cast ten Earth spells.
         event: spell_cast
         amount: 10
         filters:
@@ -1041,25 +1176,27 @@ nodes:
         type: magic_stat
         target: manaRegeneration
         amount: 1
-        display: '+1 Mana Regeneration.'
+        display: +1 Mana Regeneration.
     unlocks:
-      - 'Reveals hidden pathways in earth magic.'
+    - Reveals hidden pathways in earth magic.
     visibility:
       hidden_until_available: false
-
   air_open_breath:
     display_name: '&fOpen Breath'
     category: air
     icon: FEATHER
     research_points_cost: 20
-    position: { x: 0, y: 0 }
+    position:
+      x: 0
+      y: 0
     description:
-      - 'Make your mana light enough to move before thought.'
-      - 'Air magic favors timing, distance, and release.'
-    parents: [awakened_focus]
+    - Make your mana light enough to move before thought.
+    - Air magic favors timing, distance, and release.
+    parents:
+    - awakened_focus
     objectives:
       cast_air:
-        display_name: 'Cast three Air spells.'
+        display_name: Cast three Air spells.
         event: spell_cast
         amount: 3
         filters:
@@ -1069,30 +1206,32 @@ nodes:
         type: magic_stat
         target: airAffinity
         amount: 3
-        display: '+3 Air Affinity.'
+        display: +3 Air Affinity.
       air_points:
         type: magic_stat
         target: airPoints
         amount: 1
-        display: '+1 Air Point.'
+        display: +1 Air Point.
     unlocks:
-      - 'Unlocks the Air research branch.'
+    - Unlocks the Air research branch.
     visibility:
       hidden_until_available: false
-
   gale_wisps:
     display_name: '&fGale Wisps'
     category: air
     icon: PHANTOM_MEMBRANE
     research_points_cost: 20
-    position: { x: 0, y: -3 }
+    position:
+      x: 0
+      y: -3
     description:
-      - 'Chase the small currents others ignore.'
-      - 'Wisps carry the shape of larger storms.'
-    parents: [air_open_breath]
+    - Chase the small currents others ignore.
+    - Wisps carry the shape of larger storms.
+    parents:
+    - air_open_breath
     objectives:
       cast_air:
-        display_name: 'Cast five Air spells.'
+        display_name: Cast five Air spells.
         event: spell_cast
         amount: 5
         filters:
@@ -1102,25 +1241,27 @@ nodes:
         type: magic_stat
         target: airAffinity
         amount: 3
-        display: '+3 Air Affinity.'
+        display: +3 Air Affinity.
     unlocks:
-      - 'Deepens connection to air currents.'
+    - Deepens connection to air currents.
     visibility:
       hidden_until_available: false
-
   static_cast:
     display_name: '&fStatic Cast'
     category: air
     icon: LIGHTNING_ROD
     research_points_cost: 25
-    position: { x: 3, y: 2 }
+    position:
+      x: 3
+      y: 2
     description:
-      - 'Channel the charge between storm clouds into your spells.'
-      - 'Every spark carries a message.'
-    parents: [air_open_breath]
+    - Channel the charge between storm clouds into your spells.
+    - Every spark carries a message.
+    parents:
+    - air_open_breath
     objectives:
       kill_air:
-        display_name: 'Defeat three enemies with Air spells.'
+        display_name: Defeat three enemies with Air spells.
         event: kill_with_spell
         amount: 3
         filters:
@@ -1130,25 +1271,27 @@ nodes:
         type: magic_stat
         target: airPoints
         amount: 1
-        display: '+1 Air Point.'
+        display: +1 Air Point.
     unlocks:
-      - 'Harnesses the offensive side of wind.'
+    - Harnesses the offensive side of wind.
     visibility:
       hidden_until_available: false
-
   squall_ward:
     display_name: '&fSquall Ward'
     category: air
     icon: WHITE_WOOL
     research_points_cost: 20
-    position: { x: -3, y: 2 }
+    position:
+      x: -3
+      y: 2
     description:
-      - 'Turn moving air into a protective shell.'
-      - 'The wind remembers what it shields.'
-    parents: [air_open_breath]
+    - Turn moving air into a protective shell.
+    - The wind remembers what it shields.
+    parents:
+    - air_open_breath
     objectives:
       cast_air:
-        display_name: 'Cast three Air spells.'
+        display_name: Cast three Air spells.
         event: spell_cast
         amount: 3
         filters:
@@ -1158,25 +1301,27 @@ nodes:
         type: magic_stat
         target: airResistance
         amount: 2
-        display: '+2 Air Resistance.'
+        display: +2 Air Resistance.
     unlocks:
-      - 'Strengthens air-based defenses.'
+    - Strengthens air-based defenses.
     visibility:
       hidden_until_available: false
-
   wind_theory:
     display_name: '&fWind Theory'
     category: air
     icon: FEATHER
     research_points_cost: 25
-    position: { x: -3, y: -1 }
+    position:
+      x: -3
+      y: -1
     description:
-      - 'Study the mathematics of pressure differentials.'
-      - 'Wind is energy seeking balance.'
-    parents: [air_open_breath]
+    - Study the mathematics of pressure differentials.
+    - Wind is energy seeking balance.
+    parents:
+    - air_open_breath
     objectives:
       cast_air:
-        display_name: 'Cast ten Air spells.'
+        display_name: Cast ten Air spells.
         event: spell_cast
         amount: 10
         filters:
@@ -1186,25 +1331,27 @@ nodes:
         type: magic_stat
         target: manaRegeneration
         amount: 1
-        display: '+1 Mana Regeneration.'
+        display: +1 Mana Regeneration.
     unlocks:
-      - 'Advances understanding of wind currents.'
+    - Advances understanding of wind currents.
     visibility:
       hidden_until_available: false
-
   light_first_lantern:
     display_name: '&eFirst Lantern'
     category: light
     icon: LANTERN
     research_points_cost: 20
-    position: { x: 0, y: 0 }
+    position:
+      x: 0
+      y: 0
     description:
-      - 'Turn mana toward clarity, warmth, and repair.'
-      - 'Light is not soft; it is honest.'
-    parents: [awakened_focus]
+    - Turn mana toward clarity, warmth, and repair.
+    - Light is not soft; it is honest.
+    parents:
+    - awakened_focus
     objectives:
       cast_light:
-        display_name: 'Cast three Light spells.'
+        display_name: Cast three Light spells.
         event: spell_cast
         amount: 3
         filters:
@@ -1214,30 +1361,32 @@ nodes:
         type: magic_stat
         target: lightAffinity
         amount: 3
-        display: '+3 Light Affinity.'
+        display: +3 Light Affinity.
       light_points:
         type: magic_stat
         target: lightPoints
         amount: 1
-        display: '+1 Light Point.'
+        display: +1 Light Point.
     unlocks:
-      - 'Unlocks the Light research branch.'
+    - Unlocks the Light research branch.
     visibility:
       hidden_until_available: false
-
   radiant_study:
     display_name: '&eRadiant Study'
     category: light
     icon: GLOWSTONE_DUST
     research_points_cost: 20
-    position: { x: 0, y: -3 }
+    position:
+      x: 0
+      y: -3
     description:
-      - 'Observe how light bends through crystal and memory.'
-      - 'Every refraction teaches a new angle of healing.'
-    parents: [light_first_lantern]
+    - Observe how light bends through crystal and memory.
+    - Every refraction teaches a new angle of healing.
+    parents:
+    - light_first_lantern
     objectives:
       cast_light:
-        display_name: 'Cast five Light spells.'
+        display_name: Cast five Light spells.
         event: spell_cast
         amount: 5
         filters:
@@ -1247,25 +1396,27 @@ nodes:
         type: magic_stat
         target: lightAffinity
         amount: 3
-        display: '+3 Light Affinity.'
+        display: +3 Light Affinity.
     unlocks:
-      - 'Deepens connection to radiant energy.'
+    - Deepens connection to radiant energy.
     visibility:
       hidden_until_available: false
-
   blessed_will:
     display_name: '&eBlessed Will'
     category: light
     icon: CRAFTING_TABLE
     research_points_cost: 25
-    position: { x: 3, y: 2 }
+    position:
+      x: 3
+      y: 2
     description:
-      - 'Shape raw materials with restorative intent.'
-      - "Every crafted item carries the maker's light."
-    parents: [light_first_lantern]
+    - Shape raw materials with restorative intent.
+    - Every crafted item carries the maker's light.
+    parents:
+    - light_first_lantern
     objectives:
       craft_items:
-        display_name: 'Craft ten items.'
+        display_name: Craft ten items.
         event: item_craft
         amount: 10
     rewards:
@@ -1273,25 +1424,27 @@ nodes:
         type: magic_stat
         target: lightPoints
         amount: 1
-        display: '+1 Light Point.'
+        display: +1 Light Point.
     unlocks:
-      - 'Channels light through creation.'
+    - Channels light through creation.
     visibility:
       hidden_until_available: false
-
   aegis_light:
     display_name: '&eAegis Light'
     category: light
     icon: SHIELD
     research_points_cost: 20
-    position: { x: -3, y: 2 }
+    position:
+      x: -3
+      y: 2
     description:
-      - 'Weave light into a protective shell around yourself.'
-      - 'The brightest shield is one the enemy cannot see.'
-    parents: [light_first_lantern]
+    - Weave light into a protective shell around yourself.
+    - The brightest shield is one the enemy cannot see.
+    parents:
+    - light_first_lantern
     objectives:
       cast_light:
-        display_name: 'Cast three Light spells.'
+        display_name: Cast three Light spells.
         event: spell_cast
         amount: 3
         filters:
@@ -1301,25 +1454,27 @@ nodes:
         type: magic_stat
         target: lightResistance
         amount: 2
-        display: '+2 Light Resistance.'
+        display: +2 Light Resistance.
     unlocks:
-      - 'Strengthens light-based defenses.'
+    - Strengthens light-based defenses.
     visibility:
       hidden_until_available: false
-
   luminarch_theory:
     display_name: '&eLuminarch Theory'
     category: light
     icon: BOOK_AND_QUILL
     research_points_cost: 25
-    position: { x: -3, y: -1 }
+    position:
+      x: -3
+      y: -1
     description:
-      - 'Study the architecture of sustained illumination.'
-      - 'Light that endures is light that understands itself.'
-    parents: [light_first_lantern]
+    - Study the architecture of sustained illumination.
+    - Light that endures is light that understands itself.
+    parents:
+    - light_first_lantern
     objectives:
       cast_light:
-        display_name: 'Cast ten Light spells.'
+        display_name: Cast ten Light spells.
         event: spell_cast
         amount: 10
         filters:
@@ -1329,25 +1484,27 @@ nodes:
         type: magic_stat
         target: manaRegeneration
         amount: 1
-        display: '+1 Mana Regeneration.'
+        display: +1 Mana Regeneration.
     unlocks:
-      - 'Advances understanding of radiant energy.'
+    - Advances understanding of radiant energy.
     visibility:
       hidden_until_available: false
-
   dark_quiet_shadow:
     display_name: '&8Quiet Shadow'
     category: dark
     icon: ECHO_SHARD
     research_points_cost: 20
-    position: { x: 0, y: 0 }
+    position:
+      x: 0
+      y: 0
     description:
-      - 'Approach the hidden current beneath ordinary mana.'
-      - 'Darkness is secrecy, weight, and consequence.'
-    parents: [awakened_focus]
+    - Approach the hidden current beneath ordinary mana.
+    - Darkness is secrecy, weight, and consequence.
+    parents:
+    - awakened_focus
     objectives:
       cast_dark:
-        display_name: 'Cast three Dark spells.'
+        display_name: Cast three Dark spells.
         event: spell_cast
         amount: 3
         filters:
@@ -1357,30 +1514,32 @@ nodes:
         type: magic_stat
         target: darkAffinity
         amount: 3
-        display: '+3 Dark Affinity.'
+        display: +3 Dark Affinity.
       dark_points:
         type: magic_stat
         target: darkPoints
         amount: 1
-        display: '+1 Dark Point.'
+        display: +1 Dark Point.
     unlocks:
-      - 'Unlocks the Dark research branch.'
+    - Unlocks the Dark research branch.
     visibility:
       hidden_until_available: false
-
   shadow_insight:
     display_name: '&5Shadow Insight'
     category: dark
     icon: ECHO_SHARD
     research_points_cost: 20
-    position: { x: 0, y: -3 }
+    position:
+      x: 0
+      y: -3
     description:
-      - 'Peer into the darkness until it peers back.'
-      - 'Shadow reveals what light conceals.'
-    parents: [dark_quiet_shadow]
+    - Peer into the darkness until it peers back.
+    - Shadow reveals what light conceals.
+    parents:
+    - dark_quiet_shadow
     objectives:
       cast_dark:
-        display_name: 'Cast five Dark spells.'
+        display_name: Cast five Dark spells.
         event: spell_cast
         amount: 5
         filters:
@@ -1390,25 +1549,27 @@ nodes:
         type: magic_stat
         target: darkAffinity
         amount: 3
-        display: '+3 Dark Affinity.'
+        display: +3 Dark Affinity.
     unlocks:
-      - 'Deepens connection to shadow currents.'
+    - Deepens connection to shadow currents.
     visibility:
       hidden_until_available: false
-
   night_harvest:
     display_name: '&5Night Harvest'
     category: dark
     icon: WITHER_SKELETON_SKULL
     research_points_cost: 25
-    position: { x: 3, y: 2 }
+    position:
+      x: 3
+      y: 2
     description:
-      - 'Reap what the darkness sows in combat.'
-      - 'Every fallen enemy strengthens the shadow.'
-    parents: [dark_quiet_shadow]
+    - Reap what the darkness sows in combat.
+    - Every fallen enemy strengthens the shadow.
+    parents:
+    - dark_quiet_shadow
     objectives:
       kill_dark:
-        display_name: 'Defeat three enemies with Dark spells.'
+        display_name: Defeat three enemies with Dark spells.
         event: kill_with_spell
         amount: 3
         filters:
@@ -1418,25 +1579,27 @@ nodes:
         type: magic_stat
         target: darkPoints
         amount: 1
-        display: '+1 Dark Point.'
+        display: +1 Dark Point.
     unlocks:
-      - 'Harvests the offensive side of darkness.'
+    - Harvests the offensive side of darkness.
     visibility:
       hidden_until_available: false
-
   void_ward:
     display_name: '&5Void Ward'
     category: dark
     icon: SCULK_SENSOR
     research_points_cost: 20
-    position: { x: -3, y: 2 }
+    position:
+      x: -3
+      y: 2
     description:
-      - 'Turn the absence of light into a barrier.'
-      - 'The void remembers what it swallows.'
-    parents: [dark_quiet_shadow]
+    - Turn the absence of light into a barrier.
+    - The void remembers what it swallows.
+    parents:
+    - dark_quiet_shadow
     objectives:
       cast_dark:
-        display_name: 'Cast three Dark spells.'
+        display_name: Cast three Dark spells.
         event: spell_cast
         amount: 3
         filters:
@@ -1446,25 +1609,27 @@ nodes:
         type: magic_stat
         target: darkResistance
         amount: 2
-        display: '+2 Dark Resistance.'
+        display: +2 Dark Resistance.
     unlocks:
-      - 'Strengthens dark-based defenses.'
+    - Strengthens dark-based defenses.
     visibility:
       hidden_until_available: false
-
   entropy_theory:
     display_name: '&5Entropy Theory'
     category: dark
     icon: WITHER_ROSE
     research_points_cost: 25
-    position: { x: -3, y: -1 }
+    position:
+      x: -3
+      y: -1
     description:
-      - 'Study the mathematics of decay and dissolution.'
-      - 'Darkness is energy seeking equilibrium through destruction.'
-    parents: [dark_quiet_shadow]
+    - Study the mathematics of decay and dissolution.
+    - Darkness is energy seeking equilibrium through destruction.
+    parents:
+    - dark_quiet_shadow
     objectives:
       cast_dark:
-        display_name: 'Cast ten Dark spells.'
+        display_name: Cast ten Dark spells.
         event: spell_cast
         amount: 10
         filters:
@@ -1474,25 +1639,27 @@ nodes:
         type: magic_stat
         target: manaRegeneration
         amount: 1
-        display: '+1 Mana Regeneration.'
+        display: +1 Mana Regeneration.
     unlocks:
-      - 'Advances understanding of entropic forces.'
+    - Advances understanding of entropic forces.
     visibility:
       hidden_until_available: false
-
   fire_ember_control:
     display_name: '&6Ember Control'
     category: fire
     icon: CAMPFIRE
     research_points_cost: 40
-    position: { x: 3, y: -1 }
+    position:
+      x: 3
+      y: -1
     description:
-      - 'Keep flame alive without letting it spread.'
-      - 'Small fires teach precision better than grand infernos.'
-    parents: [fire_spark]
+    - Keep flame alive without letting it spread.
+    - Small fires teach precision better than grand infernos.
+    parents:
+    - fire_spark
     objectives:
       burn_hostiles:
-        display_name: 'Defeat five creatures after casting Fire spells.'
+        display_name: Defeat five creatures after casting Fire spells.
         event: kill_with_spell
         amount: 5
         filters:
@@ -1502,25 +1669,28 @@ nodes:
         type: magic_stat
         target: fireResistance
         amount: 2
-        display: '+2 Fire Resistance.'
+        display: +2 Fire Resistance.
     unlocks:
-      - 'Improves safety around volatile spells.'
+    - Improves safety around volatile spells.
     visibility:
       hidden_until_available: false
-
   fire_inferno_rite:
     display_name: '&cInferno Rite'
     category: fire
     icon: BLAZE_ROD
     research_points_cost: 100
-    position: { x: 8, y: 5 }
+    position:
+      x: 8
+      y: 5
     description:
-      - 'Call heat through motion, breath, and violent intent.'
-      - 'Only a focused mage can make destruction useful.'
-    parents: [immolation_aura, pyroclasm]
+    - Call heat through motion, breath, and violent intent.
+    - Only a focused mage can make destruction useful.
+    parents:
+    - immolation_aura
+    - pyroclasm
     objectives:
       close_range_fire:
-        display_name: 'Defeat ten enemies with Fire spells within eight blocks.'
+        display_name: Defeat ten enemies with Fire spells within eight blocks.
         event: kill_with_spell
         amount: 10
         filters:
@@ -1531,32 +1701,33 @@ nodes:
         type: vanilla_attribute
         target: GENERIC_ATTACK_SPEED
         amount: 0.05
-        display: '+0.05 Attack Speed.'
+        display: +0.05 Attack Speed.
       fire_affinity:
         type: magic_stat
         target: fireAffinity
         amount: 5
-        display: '+5 Fire Affinity.'
+        display: +5 Fire Affinity.
     unlocks:
-      - 'Completes the Inferno Rite.'
+    - Completes the Inferno Rite.
     visibility:
       hidden_until_available: true
-
-  # ── Ring 2: Fire Advanced Studies ──
-
   pyroclasm:
     display_name: '&cPyroclasm'
     category: fire
     icon: FIREWORK_STAR
     research_points_cost: 60
-    position: { x: 5, y: -3 }
+    position:
+      x: 5
+      y: -3
     description:
-      - 'Unleash destruction in its purest and most violent form.'
-      - 'Pyroclasm leaves nothing but ash and silence.'
-    parents: [flame_study, ember_control]
+    - Unleash destruction in its purest and most violent form.
+    - Pyroclasm leaves nothing but ash and silence.
+    parents:
+    - flame_study
+    - ember_control
     objectives:
       pyroclasm_kills:
-        display_name: 'Defeat ten creatures with Fire spells.'
+        display_name: Defeat ten creatures with Fire spells.
         event: kill_with_spell
         amount: 10
         filters:
@@ -1566,25 +1737,28 @@ nodes:
         type: magic_stat
         target: fireAffinity
         amount: 5
-        display: '+5 Fire Affinity.'
+        display: +5 Fire Affinity.
     unlocks:
-      - 'Unlocks the path of fire destruction.'
+    - Unlocks the path of fire destruction.
     visibility:
       hidden_until_available: false
-
   immolation_aura:
     display_name: '&6Immolation Aura'
     category: fire
     icon: NETHER_WART
     research_points_cost: 75
-    position: { x: 5, y: 3 }
+    position:
+      x: 5
+      y: 3
     description:
-      - 'Surround yourself in a field of living flame that sears all who approach.'
-      - 'The aura does not distinguish between friend and foe.'
-    parents: [ember_control, heat_siphon]
+    - Surround yourself in a field of living flame that sears all who approach.
+    - The aura does not distinguish between friend and foe.
+    parents:
+    - ember_control
+    - heat_siphon
     objectives:
       aura_casting:
-        display_name: 'Cast fifteen Fire spells.'
+        display_name: Cast fifteen Fire spells.
         event: spell_cast
         amount: 15
         filters:
@@ -1594,30 +1768,33 @@ nodes:
         type: magic_stat
         target: fireResistance
         amount: 3
-        display: '+3 Fire Resistance.'
+        display: +3 Fire Resistance.
       fire_affinity:
         type: magic_stat
         target: fireAffinity
         amount: 2
-        display: '+2 Fire Affinity.'
+        display: +2 Fire Affinity.
     unlocks:
-      - 'Unlocks the aura of the fire walker.'
+    - Unlocks the aura of the fire walker.
     visibility:
       hidden_until_available: false
-
   cinder_ward:
     display_name: '&6Cinder Ward'
     category: fire
     icon: SHIELD
     research_points_cost: 50
-    position: { x: -5, y: 3 }
+    position:
+      x: -5
+      y: 3
     description:
-      - 'Forge protective barriers from charred and hardened mana.'
-      - 'What fire has burned, fire can guard.'
-    parents: [smoke_shroud, heat_siphon]
+    - Forge protective barriers from charred and hardened mana.
+    - What fire has burned, fire can guard.
+    parents:
+    - smoke_shroud
+    - heat_siphon
     objectives:
       ward_kills:
-        display_name: 'Defeat five creatures with Fire spells within eight blocks.'
+        display_name: Defeat five creatures with Fire spells within eight blocks.
         event: kill_with_spell
         amount: 5
         filters:
@@ -1628,30 +1805,37 @@ nodes:
         type: vanilla_attribute
         target: GENERIC_ARMOR
         amount: 1
-        display: '+1 Armor.'
+        display: +1 Armor.
       fire_resistance:
         type: magic_stat
         target: fireResistance
         amount: 2
-        display: '+2 Fire Resistance.'
+        display: +2 Fire Resistance.
     unlocks:
-      - 'Unlocks the cinder ward technique.'
+    - Unlocks the cinder ward technique.
     visibility:
       hidden_until_available: false
-
+    edge_paths:
+      smoke_shroud:
+      - x: -4
+        y: 2
   ashen_theory:
     display_name: '&8Ashen Theory'
     category: fire
     icon: WRITABLE_BOOK
     research_points_cost: 60
-    position: { x: -5, y: -3 }
+    position:
+      x: -5
+      y: -3
     description:
-      - 'Study the residue left behind by great fires and learn from it.'
-      - 'Ash remembers what fire consumes.'
-    parents: [cinder_sigil, smoke_shroud]
+    - Study the residue left behind by great fires and learn from it.
+    - Ash remembers what fire consumes.
+    parents:
+    - cinder_sigil
+    - smoke_shroud
     objectives:
       theory_casting:
-        display_name: 'Cast twenty Fire spells.'
+        display_name: Cast twenty Fire spells.
         event: spell_cast
         amount: 20
         filters:
@@ -1661,32 +1845,33 @@ nodes:
         type: magic_stat
         target: arcaneKnowledge
         amount: 10
-        display: '+10 Arcane Knowledge.'
+        display: +10 Arcane Knowledge.
       stat_points:
         type: magic_stat
         target: statPoints
         amount: 1
-        display: '+1 Stat Point.'
+        display: +1 Stat Point.
     unlocks:
-      - 'Unlocks deeper fire theory.'
+    - Unlocks deeper fire theory.
     visibility:
       hidden_until_available: false
-
-  # ── Ring 3: Fire Mastery ──
-
   inferno_mastery:
     display_name: '&cInferno Mastery'
     category: fire
     icon: NETHERITE_INGOT
     research_points_cost: 125
-    position: { x: 0, y: -9 }
+    position:
+      x: 0
+      y: -9
     description:
-      - 'Command fire at its most primal and devastating level.'
-      - 'The inferno answers to no one but its master.'
-    parents: [pyroclasm, ashen_theory]
+    - Command fire at its most primal and devastating level.
+    - The inferno answers to no one but its master.
+    parents:
+    - pyroclasm
+    - ashen_theory
     objectives:
       mastery_casting:
-        display_name: 'Cast fifty Fire spells.'
+        display_name: Cast fifty Fire spells.
         event: spell_cast
         amount: 50
         filters:
@@ -1696,30 +1881,39 @@ nodes:
         type: magic_stat
         target: fireAffinity
         amount: 8
-        display: '+8 Fire Affinity.'
+        display: +8 Fire Affinity.
       max_mana:
         type: magic_stat
         target: maxMana
         amount: 50
-        display: '+50 Maximum Mana.'
+        display: +50 Maximum Mana.
     unlocks:
-      - 'The pinnacle of offensive fire magic.'
+    - The pinnacle of offensive fire magic.
     visibility:
       hidden_until_available: true
-
+    edge_paths:
+      pyroclasm:
+      - x: 1
+        y: -7
+      - x: 1
+        y: -8
   hellfire_sovereign:
     display_name: '&cHellfire Sovereign'
     category: fire
     icon: NETHER_STAR
     research_points_cost: 150
-    position: { x: -8, y: 5 }
+    position:
+      x: -8
+      y: 5
     description:
-      - 'Become the living embodiment of destructive flame.'
-      - 'The sovereign does not wield hellfire — they are hellfire.'
-    parents: [cinder_ward, immolation_aura]
+    - Become the living embodiment of destructive flame.
+    - The sovereign does not wield hellfire — they are hellfire.
+    parents:
+    - cinder_ward
+    - immolation_aura
     objectives:
       sovereign_level:
-        display_name: 'Reach experience level fifteen.'
+        display_name: Reach experience level fifteen.
         event: player_level
         amount: 1
         filters:
@@ -1729,35 +1923,43 @@ nodes:
         type: magic_stat
         target: statPoints
         amount: 3
-        display: '+3 Stat Points.'
+        display: +3 Stat Points.
       fire_affinity:
         type: magic_stat
         target: fireAffinity
         amount: 8
-        display: '+8 Fire Affinity.'
+        display: +8 Fire Affinity.
       fire_resistance:
         type: magic_stat
         target: fireResistance
         amount: 8
-        display: '+8 Fire Resistance.'
+        display: +8 Fire Resistance.
     unlocks:
-      - 'Mastery over all forms of fire.'
+    - Mastery over all forms of fire.
     visibility:
       hidden_until_available: true
-
+    edge_paths:
+      cinder_ward:
+      - x: -7
+        y: 4
+      - x: -8
+        y: 4
   water_restorative_current:
     display_name: '&bRestorative Current'
     category: water
     icon: PRISMARINE_CRYSTALS
     research_points_cost: 40
-    position: { x: 3, y: -1 }
+    position:
+      x: 3
+      y: -1
     description:
-      - 'Study the way moving water carries wounds away.'
-      - 'Restoration begins with clean motion.'
-    parents: [water_first_tide]
+    - Study the way moving water carries wounds away.
+    - Restoration begins with clean motion.
+    parents:
+    - water_first_tide
     objectives:
       gather_water_life:
-        display_name: 'Fish successfully three times.'
+        display_name: Fish successfully three times.
         event: fish
         amount: 3
         filters:
@@ -1767,25 +1969,28 @@ nodes:
         type: magic_stat
         target: maxMana
         amount: 8
-        display: '+8 Maximum Mana.'
+        display: +8 Maximum Mana.
     unlocks:
-      - 'Improves sustain-focused magic.'
+    - Improves sustain-focused magic.
     visibility:
       hidden_until_available: false
-
   water_depth_oath:
     display_name: '&3Depth Oath'
     category: water
     icon: HEART_OF_THE_SEA
     research_points_cost: 100
-    position: { x: 8, y: 5 }
+    position:
+      x: 8
+      y: 5
     description:
-      - 'Swear patience to the deep and learn its pressure.'
-      - 'The calm surface hides immense force.'
-    parents: [healing_current, pressure_surge]
+    - Swear patience to the deep and learn its pressure.
+    - The calm surface hides immense force.
+    parents:
+    - healing_current
+    - pressure_surge
     objectives:
       water_victories:
-        display_name: 'Defeat ten enemies at close range after casting Water spells.'
+        display_name: Defeat ten enemies at close range after casting Water spells.
         event: kill_with_spell
         amount: 10
         filters:
@@ -1796,25 +2001,28 @@ nodes:
         type: magic_stat
         target: waterResistance
         amount: 5
-        display: '+5 Water Resistance.'
+        display: +5 Water Resistance.
     unlocks:
-      - 'Completes the Water oath.'
+    - Completes the Water oath.
     visibility:
       hidden_until_available: true
-
   pressure_surge:
     display_name: '&9Pressure Surge'
     category: water
     icon: DIAMOND
     research_points_cost: 60
-    position: { x: 5, y: -3 }
+    position:
+      x: 5
+      y: -3
     description:
-      - 'Compress water into a force that pierces stone.'
-      - 'Depth multiplies power beyond measure.'
-    parents: [tidal_studies, water_restorative_current]
+    - Compress water into a force that pierces stone.
+    - Depth multiplies power beyond measure.
+    parents:
+    - tidal_studies
+    - water_restorative_current
     objectives:
       kill_water_10:
-        display_name: 'Defeat ten enemies with Water spells.'
+        display_name: Defeat ten enemies with Water spells.
         event: kill_with_spell
         amount: 10
         filters:
@@ -1824,25 +2032,28 @@ nodes:
         type: magic_stat
         target: waterAffinity
         amount: 5
-        display: '+5 Water Affinity.'
+        display: +5 Water Affinity.
     unlocks:
-      - 'Unleashes devastating pressure attacks.'
+    - Unleashes devastating pressure attacks.
     visibility:
       hidden_until_available: false
-
   healing_current:
     display_name: '&bHealing Current'
     category: water
     icon: GLISTERING_MELON_SLICE
     research_points_cost: 75
-    position: { x: 5, y: 3 }
+    position:
+      x: 5
+      y: 3
     description:
-      - 'Let the river carry away pain and illness.'
-      - 'Water heals as easily as it harms.'
-    parents: [water_restorative_current, current_sense]
+    - Let the river carry away pain and illness.
+    - Water heals as easily as it harms.
+    parents:
+    - water_restorative_current
+    - current_sense
     objectives:
       cast_water_15:
-        display_name: 'Cast fifteen Water spells.'
+        display_name: Cast fifteen Water spells.
         event: spell_cast
         amount: 15
         filters:
@@ -1852,30 +2063,33 @@ nodes:
         type: magic_stat
         target: waterResistance
         amount: 3
-        display: '+3 Water Resistance.'
+        display: +3 Water Resistance.
       water_affinity:
         type: magic_stat
         target: waterAffinity
         amount: 2
-        display: '+2 Water Affinity.'
+        display: +2 Water Affinity.
     unlocks:
-      - 'Grants restorative power from water mastery.'
+    - Grants restorative power from water mastery.
     visibility:
       hidden_until_available: false
-
   glacial_barrier:
     display_name: '&9Glacial Barrier'
     category: water
     icon: BLUE_STAINED_GLASS
     research_points_cost: 50
-    position: { x: -5, y: 3 }
+    position:
+      x: -5
+      y: 3
     description:
-      - 'Raise a wall of ice that no blade can pass.'
-      - 'The glacier does not retreat.'
-    parents: [frost_ward, current_sense]
+    - Raise a wall of ice that no blade can pass.
+    - The glacier does not retreat.
+    parents:
+    - frost_ward
+    - current_sense
     objectives:
       kill_water_close:
-        display_name: 'Defeat five enemies at close range with Water spells.'
+        display_name: Defeat five enemies at close range with Water spells.
         event: kill_with_spell
         amount: 5
         filters:
@@ -1886,30 +2100,37 @@ nodes:
         type: vanilla_attribute
         target: GENERIC_ARMOR
         amount: 1
-        display: '+1 Armor.'
+        display: +1 Armor.
       water_resistance:
         type: magic_stat
         target: waterResistance
         amount: 2
-        display: '+2 Water Resistance.'
+        display: +2 Water Resistance.
     unlocks:
-      - 'Creates powerful ice-based defenses.'
+    - Creates powerful ice-based defenses.
     visibility:
       hidden_until_available: false
-
+    edge_paths:
+      frost_ward:
+      - x: -4
+        y: 2
   oceanic_theory:
     display_name: '&9Oceanic Theory'
     category: water
     icon: BOOK
     research_points_cost: 60
-    position: { x: -5, y: -3 }
+    position:
+      x: -5
+      y: -3
     description:
-      - 'Study the principles that govern all bodies of water.'
-      - 'From droplet to ocean, the rules are one.'
-    parents: [depth_mark, frost_ward]
+    - Study the principles that govern all bodies of water.
+    - From droplet to ocean, the rules are one.
+    parents:
+    - depth_mark
+    - frost_ward
     objectives:
       cast_water_20:
-        display_name: 'Cast twenty Water spells.'
+        display_name: Cast twenty Water spells.
         event: spell_cast
         amount: 20
         filters:
@@ -1919,30 +2140,33 @@ nodes:
         type: magic_stat
         target: arcaneKnowledge
         amount: 10
-        display: '+10 Arcane Knowledge.'
+        display: +10 Arcane Knowledge.
       stat_points:
         type: magic_stat
         target: statPoints
         amount: 1
-        display: '+1 Stat Point.'
+        display: +1 Stat Point.
     unlocks:
-      - 'Reveals the hidden mechanics of water magic.'
+    - Reveals the hidden mechanics of water magic.
     visibility:
       hidden_until_available: false
-
   abyssal_mastery:
     display_name: '&3Abyssal Mastery'
     category: water
     icon: NAUTILUS_SHELL
     research_points_cost: 125
-    position: { x: 0, y: -9 }
+    position:
+      x: 0
+      y: -9
     description:
-      - 'Command the crushing darkness of the deep ocean.'
-      - 'Where no light reaches, water reigns supreme.'
-    parents: [pressure_surge, oceanic_theory]
+    - Command the crushing darkness of the deep ocean.
+    - Where no light reaches, water reigns supreme.
+    parents:
+    - pressure_surge
+    - oceanic_theory
     objectives:
       cast_water_50:
-        display_name: 'Cast fifty Water spells.'
+        display_name: Cast fifty Water spells.
         event: spell_cast
         amount: 50
         filters:
@@ -1952,30 +2176,39 @@ nodes:
         type: magic_stat
         target: waterAffinity
         amount: 8
-        display: '+8 Water Affinity.'
+        display: +8 Water Affinity.
       max_mana:
         type: magic_stat
         target: maxMana
         amount: 50
-        display: '+50 Maximum Mana.'
+        display: +50 Maximum Mana.
     unlocks:
-      - 'Achieves supreme mastery over deep water forces.'
+    - Achieves supreme mastery over deep water forces.
     visibility:
       hidden_until_available: true
-
+    edge_paths:
+      pressure_surge:
+      - x: 1
+        y: -7
+      - x: 1
+        y: -8
   tidal_sovereign:
     display_name: '&9Tidal Sovereign'
     category: water
     icon: TRIDENT
     research_points_cost: 150
-    position: { x: -8, y: 5 }
+    position:
+      x: -8
+      y: 5
     description:
-      - 'Rise as master of all tides, currents, and depths.'
-      - 'The ocean bows to those who command its full force.'
-    parents: [glacial_barrier, healing_current]
+    - Rise as master of all tides, currents, and depths.
+    - The ocean bows to those who command its full force.
+    parents:
+    - glacial_barrier
+    - healing_current
     objectives:
       reach_level_15:
-        display_name: 'Reach player level 15.'
+        display_name: Reach player level 15.
         event: player_level
         amount: 1
         filters:
@@ -1985,35 +2218,43 @@ nodes:
         type: magic_stat
         target: statPoints
         amount: 3
-        display: '+3 Stat Points.'
+        display: +3 Stat Points.
       water_affinity:
         type: magic_stat
         target: waterAffinity
         amount: 8
-        display: '+8 Water Affinity.'
+        display: +8 Water Affinity.
       water_resistance:
         type: magic_stat
         target: waterResistance
         amount: 8
-        display: '+8 Water Resistance.'
+        display: +8 Water Resistance.
     unlocks:
-      - 'Becomes the supreme water archmage.'
+    - Becomes the supreme water archmage.
     visibility:
       hidden_until_available: true
-
+    edge_paths:
+      glacial_barrier:
+      - x: -7
+        y: 4
+      - x: -8
+        y: 4
   earth_quarry_signs:
     display_name: '&aQuarry Signs'
     category: earth
     icon: IRON_PICKAXE
     research_points_cost: 40
-    position: { x: 3, y: -1 }
+    position:
+      x: 3
+      y: -1
     description:
-      - 'Break stone and read the pressure lines it leaves behind.'
-      - 'Every fracture is a sentence.'
-    parents: [earth_stone_memory]
+    - Break stone and read the pressure lines it leaves behind.
+    - Every fracture is a sentence.
+    parents:
+    - earth_stone_memory
     objectives:
       break_stone:
-        display_name: 'Break twenty stone blocks.'
+        display_name: Break twenty stone blocks.
         event: block_break
         amount: 20
         filters:
@@ -2023,25 +2264,28 @@ nodes:
         type: vanilla_attribute
         target: GENERIC_ARMOR
         amount: 1
-        display: '+1 Armor.'
+        display: +1 Armor.
     unlocks:
-      - 'Improves defensive Earth work.'
+    - Improves defensive Earth work.
     visibility:
       hidden_until_available: false
-
   earth_bulwark_vow:
     display_name: '&2Bulwark Vow'
     category: earth
     icon: SHIELD
     research_points_cost: 100
-    position: { x: 8, y: 5 }
+    position:
+      x: 8
+      y: 5
     description:
-      - 'Hold your ground while mana settles into your bones.'
-      - 'The mountain does not need to hurry.'
-    parents: [earthen_fortress, seismic_focus]
+    - Hold your ground while mana settles into your bones.
+    - The mountain does not need to hurry.
+    parents:
+    - earthen_fortress
+    - seismic_focus
     objectives:
       earth_victories:
-        display_name: 'Defeat ten enemies at close range with Earth spells.'
+        display_name: Defeat ten enemies at close range with Earth spells.
         event: kill_with_spell
         amount: 10
         filters:
@@ -2052,30 +2296,33 @@ nodes:
         type: magic_stat
         target: earthResistance
         amount: 5
-        display: '+5 Earth Resistance.'
+        display: +5 Earth Resistance.
       max_health:
         type: vanilla_attribute
         target: GENERIC_MAX_HEALTH
         amount: 4
-        display: '+4 Maximum Health.'
+        display: +4 Maximum Health.
     unlocks:
-      - 'Completes the Bulwark Vow.'
+    - Completes the Bulwark Vow.
     visibility:
       hidden_until_available: true
-
   seismic_focus:
     display_name: '&2Seismic Focus'
     category: earth
     icon: POINTED_DRIPSTONE
     research_points_cost: 60
-    position: { x: 5, y: -3 }
+    position:
+      x: 5
+      y: -3
     description:
-      - 'Concentrate seismic energy through practiced channels.'
-      - 'The earth answers to those who listen with precision.'
-    parents: [tectonic_sense, earth_quarry_signs]
+    - Concentrate seismic energy through practiced channels.
+    - The earth answers to those who listen with precision.
+    parents:
+    - tectonic_sense
+    - earth_quarry_signs
     objectives:
       earth_kills_10:
-        display_name: 'Defeat ten enemies with Earth spells.'
+        display_name: Defeat ten enemies with Earth spells.
         event: kill_with_spell
         amount: 10
         filters:
@@ -2085,25 +2332,28 @@ nodes:
         type: magic_stat
         target: earthAffinity
         amount: 5
-        display: '+5 Earth Affinity.'
+        display: +5 Earth Affinity.
     unlocks:
-      - 'Sharpens offensive earth magic.'
+    - Sharpens offensive earth magic.
     visibility:
       hidden_until_available: false
-
   earthen_fortress:
     display_name: '&2Earthen Fortress'
     category: earth
     icon: DEEPSLATE_BRICKS
     research_points_cost: 75
-    position: { x: 5, y: 3 }
+    position:
+      x: 5
+      y: 3
     description:
-      - 'Raise walls of living stone from the ground itself.'
-      - 'A fortress caster stands unyielding.'
-    parents: [earth_quarry_signs, stonebond_will]
+    - Raise walls of living stone from the ground itself.
+    - A fortress caster stands unyielding.
+    parents:
+    - earth_quarry_signs
+    - stonebond_will
     objectives:
       earth_kills_close:
-        display_name: 'Defeat five enemies at close range with Earth spells.'
+        display_name: Defeat five enemies at close range with Earth spells.
         event: kill_with_spell
         amount: 5
         filters:
@@ -2114,30 +2364,33 @@ nodes:
         type: vanilla_attribute
         target: GENERIC_ARMOR
         amount: 1
-        display: '+1 Armor.'
+        display: +1 Armor.
       earth_resistance:
         type: magic_stat
         target: earthResistance
         amount: 3
-        display: '+3 Earth Resistance.'
+        display: +3 Earth Resistance.
     unlocks:
-      - 'Masters defensive earth formations.'
+    - Masters defensive earth formations.
     visibility:
       hidden_until_available: false
-
   crystal_resonance:
     display_name: '&dCrystal Resonance'
     category: earth
     icon: AMETHYST_BLOCK
     research_points_cost: 50
-    position: { x: -5, y: 3 }
+    position:
+      x: -5
+      y: 3
     description:
-      - 'Attune to the harmonic vibrations of buried crystal.'
-      - 'Resonance amplifies both ward and spell.'
-    parents: [bedrock_ward, stonebond_will]
+    - Attune to the harmonic vibrations of buried crystal.
+    - Resonance amplifies both ward and spell.
+    parents:
+    - bedrock_ward
+    - stonebond_will
     objectives:
       cast_earth_15:
-        display_name: 'Cast fifteen Earth spells.'
+        display_name: Cast fifteen Earth spells.
         event: spell_cast
         amount: 15
         filters:
@@ -2147,30 +2400,37 @@ nodes:
         type: magic_stat
         target: earthResistance
         amount: 3
-        display: '+3 Earth Resistance.'
+        display: +3 Earth Resistance.
       earth_affinity:
         type: magic_stat
         target: earthAffinity
         amount: 2
-        display: '+2 Earth Affinity.'
+        display: +2 Earth Affinity.
     unlocks:
-      - 'Deepens defensive earth attunement.'
+    - Deepens defensive earth attunement.
     visibility:
       hidden_until_available: false
-
+    edge_paths:
+      bedrock_ward:
+      - x: -4
+        y: 2
   titan_bastion:
     display_name: '&4Titan Bastion'
     category: earth
     icon: CRAFTING_TABLE
     research_points_cost: 60
-    position: { x: -5, y: -3 }
+    position:
+      x: -5
+      y: -3
     description:
-      - 'Study the ancient fortifications of titan-kind.'
-      - 'Knowledge of structure surpasses raw power.'
-    parents: [geode_lore, bedrock_ward]
+    - Study the ancient fortifications of titan-kind.
+    - Knowledge of structure surpasses raw power.
+    parents:
+    - geode_lore
+    - bedrock_ward
     objectives:
       cast_earth_20:
-        display_name: 'Cast twenty Earth spells.'
+        display_name: Cast twenty Earth spells.
         event: spell_cast
         amount: 20
         filters:
@@ -2180,30 +2440,33 @@ nodes:
         type: magic_stat
         target: arcaneKnowledge
         amount: 10
-        display: '+10 Arcane Knowledge.'
+        display: +10 Arcane Knowledge.
       stat_point:
         type: magic_stat
         target: statPoints
         amount: 1
-        display: '+1 Stat Point.'
+        display: +1 Stat Point.
     unlocks:
-      - 'Reveals advanced earth theory.'
+    - Reveals advanced earth theory.
     visibility:
       hidden_until_available: false
-
   earth_sovereign:
     display_name: '&2Earth Sovereign'
     category: earth
     icon: NETHERITE_BLOCK
     research_points_cost: 125
-    position: { x: 0, y: -9 }
+    position:
+      x: 0
+      y: -9
     description:
-      - 'Command the deepest currents of the earth.'
-      - 'The sovereign shapes reality through stone alone.'
-    parents: [seismic_focus, titan_bastion]
+    - Command the deepest currents of the earth.
+    - The sovereign shapes reality through stone alone.
+    parents:
+    - seismic_focus
+    - titan_bastion
     objectives:
       cast_earth_50:
-        display_name: 'Cast fifty Earth spells.'
+        display_name: Cast fifty Earth spells.
         event: spell_cast
         amount: 50
         filters:
@@ -2213,30 +2476,39 @@ nodes:
         type: magic_stat
         target: earthAffinity
         amount: 8
-        display: '+8 Earth Affinity.'
+        display: +8 Earth Affinity.
       max_mana:
         type: magic_stat
         target: maxMana
         amount: 50
-        display: '+50 Maximum Mana.'
+        display: +50 Maximum Mana.
     unlocks:
-      - 'Becomes the supreme earth archmage.'
+    - Becomes the supreme earth archmage.
     visibility:
       hidden_until_available: true
-
+    edge_paths:
+      seismic_focus:
+      - x: 1
+        y: -7
+      - x: 1
+        y: -8
   mountain_wraith:
     display_name: '&2Mountain Wraith'
     category: earth
     icon: GRINDSTONE
     research_points_cost: 150
-    position: { x: -8, y: 5 }
+    position:
+      x: -8
+      y: 5
     description:
-      - 'Become one with the mountain itself.'
-      - 'The wraith is never far from stone.'
-    parents: [crystal_resonance, earthen_fortress]
+    - Become one with the mountain itself.
+    - The wraith is never far from stone.
+    parents:
+    - crystal_resonance
+    - earthen_fortress
     objectives:
       player_level_15:
-        display_name: 'Reach player level 15.'
+        display_name: Reach player level 15.
         event: player_level
         amount: 1
         filters:
@@ -2246,35 +2518,43 @@ nodes:
         type: magic_stat
         target: statPoints
         amount: 3
-        display: '+3 Stat Points.'
+        display: +3 Stat Points.
       earth_affinity:
         type: magic_stat
         target: earthAffinity
         amount: 8
-        display: '+8 Earth Affinity.'
+        display: +8 Earth Affinity.
       earth_resistance:
         type: magic_stat
         target: earthResistance
         amount: 8
-        display: '+8 Earth Resistance.'
+        display: +8 Earth Resistance.
     unlocks:
-      - 'Becomes a legendary earth guardian.'
+    - Becomes a legendary earth guardian.
     visibility:
       hidden_until_available: true
-
+    edge_paths:
+      crystal_resonance:
+      - x: -7
+        y: 4
+      - x: -8
+        y: 4
   air_kinetic_step:
     display_name: '&bKinetic Step'
     category: air
     icon: RABBIT_FOOT
     research_points_cost: 40
-    position: { x: 3, y: -1 }
+    position:
+      x: 3
+      y: -1
     description:
-      - 'Study motion until the body wastes less effort.'
-      - 'A light step is often better than a hard shield.'
-    parents: [air_open_breath]
+    - Study motion until the body wastes less effort.
+    - A light step is often better than a hard shield.
+    parents:
+    - air_open_breath
     objectives:
       distant_air:
-        display_name: 'Defeat three enemies with Air spells from at least ten blocks away.'
+        display_name: Defeat three enemies with Air spells from at least ten blocks away.
         event: kill_with_spell
         amount: 3
         filters:
@@ -2285,25 +2565,28 @@ nodes:
         type: vanilla_attribute
         target: GENERIC_MOVEMENT_SPEED
         amount: 0.01
-        display: '+0.01 Movement Speed.'
+        display: +0.01 Movement Speed.
     unlocks:
-      - 'Improves mobility-focused magic.'
+    - Improves mobility-focused magic.
     visibility:
       hidden_until_available: false
-
   air_storm_eye:
     display_name: '&fStorm Eye'
     category: air
     icon: PHANTOM_MEMBRANE
     research_points_cost: 100
-    position: { x: 8, y: 5 }
+    position:
+      x: 8
+      y: 5
     description:
-      - 'Stand calmly inside violent motion.'
-      - 'Control is proven when the storm bends around you.'
-    parents: [cyclone_ward, tempest_focus]
+    - Stand calmly inside violent motion.
+    - Control is proven when the storm bends around you.
+    parents:
+    - cyclone_ward
+    - tempest_focus
     objectives:
       air_practice:
-        display_name: 'Cast ten Air spells.'
+        display_name: Cast ten Air spells.
         event: spell_cast
         amount: 10
         filters:
@@ -2313,25 +2596,28 @@ nodes:
         type: magic_stat
         target: airResistance
         amount: 5
-        display: '+5 Air Resistance.'
+        display: +5 Air Resistance.
     unlocks:
-      - 'Completes the first Air meditation.'
+    - Completes the first Air meditation.
     visibility:
       hidden_until_available: true
-
   tempest_focus:
     display_name: '&fTempest Focus'
     category: air
     icon: IRON_SWORD
     research_points_cost: 60
-    position: { x: 5, y: -3 }
+    position:
+      x: 5
+      y: -3
     description:
-      - 'Channel the storm into a precise killing wind.'
-      - 'Sharp air cuts deeper than steel.'
-    parents: [gale_wisps, air_kinetic_step]
+    - Channel the storm into a precise killing wind.
+    - Sharp air cuts deeper than steel.
+    parents:
+    - gale_wisps
+    - air_kinetic_step
     objectives:
       kill_air:
-        display_name: 'Defeat ten enemies with Air spells.'
+        display_name: Defeat ten enemies with Air spells.
         event: kill_with_spell
         amount: 10
         filters:
@@ -2341,25 +2627,28 @@ nodes:
         type: magic_stat
         target: airAffinity
         amount: 5
-        display: '+5 Air Affinity.'
+        display: +5 Air Affinity.
     unlocks:
-      - 'Masters offensive air channeling.'
+    - Masters offensive air channeling.
     visibility:
       hidden_until_available: false
-
   cyclone_ward:
     display_name: '&fCyclone Ward'
     category: air
     icon: SHIELD
     research_points_cost: 75
-    position: { x: 5, y: 3 }
+    position:
+      x: 5
+      y: 3
     description:
-      - 'Wrap the cyclone around yourself as living armor.'
-      - 'Wind that shields is wind that understands pressure.'
-    parents: [air_kinetic_step, static_cast]
+    - Wrap the cyclone around yourself as living armor.
+    - Wind that shields is wind that understands pressure.
+    parents:
+    - air_kinetic_step
+    - static_cast
     objectives:
       kill_air_close:
-        display_name: 'Defeat five enemies with Air spells from close range.'
+        display_name: Defeat five enemies with Air spells from close range.
         event: kill_with_spell
         amount: 5
         filters:
@@ -2370,30 +2659,33 @@ nodes:
         type: vanilla_attribute
         target: GENERIC_ARMOR
         amount: 1
-        display: '+1 Armor.'
+        display: +1 Armor.
       air_resistance:
         type: magic_stat
         target: airResistance
         amount: 3
-        display: '+3 Air Resistance.'
+        display: +3 Air Resistance.
     unlocks:
-      - 'Combines mobility with defensive wind.'
+    - Combines mobility with defensive wind.
     visibility:
       hidden_until_available: false
-
   skyward_barrier:
     display_name: '&fSkyward Barrier'
     category: air
     icon: BARRIER
     research_points_cost: 50
-    position: { x: -5, y: 3 }
+    position:
+      x: -5
+      y: 3
     description:
-      - 'Weave layered air shields from ambient pressure.'
-      - 'A barrier born from stillness outlasts one born from fury.'
-    parents: [squall_ward, static_cast]
+    - Weave layered air shields from ambient pressure.
+    - A barrier born from stillness outlasts one born from fury.
+    parents:
+    - squall_ward
+    - static_cast
     objectives:
       cast_air:
-        display_name: 'Cast fifteen Air spells.'
+        display_name: Cast fifteen Air spells.
         event: spell_cast
         amount: 15
         filters:
@@ -2403,30 +2695,37 @@ nodes:
         type: magic_stat
         target: airResistance
         amount: 3
-        display: '+3 Air Resistance.'
+        display: +3 Air Resistance.
       air_affinity:
         type: magic_stat
         target: airAffinity
         amount: 2
-        display: '+2 Air Affinity.'
+        display: +2 Air Affinity.
     unlocks:
-      - 'Advances protective air magic.'
+    - Advances protective air magic.
     visibility:
       hidden_until_available: false
-
+    edge_paths:
+      squall_ward:
+      - x: -4
+        y: 2
   storm_theory:
     display_name: '&fStorm Theory'
     category: air
     icon: BOOK_AND_QUILL
     research_points_cost: 60
-    position: { x: -5, y: -3 }
+    position:
+      x: -5
+      y: -3
     description:
-      - 'Map the full lifecycle of a storm from birth to dissipation.'
-      - 'Theory turns raw power into repeatable technique.'
-    parents: [wind_theory, squall_ward]
+    - Map the full lifecycle of a storm from birth to dissipation.
+    - Theory turns raw power into repeatable technique.
+    parents:
+    - wind_theory
+    - squall_ward
     objectives:
       cast_air:
-        display_name: 'Cast twenty Air spells.'
+        display_name: Cast twenty Air spells.
         event: spell_cast
         amount: 20
         filters:
@@ -2436,30 +2735,33 @@ nodes:
         type: magic_stat
         target: arcaneKnowledge
         amount: 10
-        display: '+10 Arcane Knowledge.'
+        display: +10 Arcane Knowledge.
       stat_point:
         type: magic_stat
         target: statPoints
         amount: 1
-        display: '+1 Stat Point.'
+        display: +1 Stat Point.
     unlocks:
-      - 'Unlocks advanced storm manipulation.'
+    - Unlocks advanced storm manipulation.
     visibility:
       hidden_until_available: false
-
   wind_sovereign:
     display_name: '&fWind Sovereign'
     category: air
     icon: NETHER_STAR
     research_points_cost: 125
-    position: { x: 0, y: -9 }
+    position:
+      x: 0
+      y: -9
     description:
-      - 'Command every current from the faintest breeze to the mightiest gale.'
-      - 'The sovereign does not fight the wind; the wind fights for them.'
-    parents: [tempest_focus, storm_theory]
+    - Command every current from the faintest breeze to the mightiest gale.
+    - The sovereign does not fight the wind; the wind fights for them.
+    parents:
+    - tempest_focus
+    - storm_theory
     objectives:
       cast_air:
-        display_name: 'Cast fifty Air spells.'
+        display_name: Cast fifty Air spells.
         event: spell_cast
         amount: 50
         filters:
@@ -2469,30 +2771,39 @@ nodes:
         type: magic_stat
         target: airAffinity
         amount: 8
-        display: '+8 Air Affinity.'
+        display: +8 Air Affinity.
       max_mana:
         type: magic_stat
         target: maxMana
         amount: 50
-        display: '+50 Maximum Mana.'
+        display: +50 Maximum Mana.
     unlocks:
-      - 'Achieves total mastery over wind currents.'
+    - Achieves total mastery over wind currents.
     visibility:
       hidden_until_available: true
-
+    edge_paths:
+      tempest_focus:
+      - x: 1
+        y: -7
+      - x: 1
+        y: -8
   skyward_phantom:
     display_name: '&fSkyward Phantom'
     category: air
     icon: PHANTOM_MEMBRANE
     research_points_cost: 150
-    position: { x: -8, y: 5 }
+    position:
+      x: -8
+      y: 5
     description:
-      - 'Move between the spaces the wind forgets to touch.'
-      - 'Phantoms ride currents that mortals cannot perceive.'
-    parents: [skyward_barrier, cyclone_ward]
+    - Move between the spaces the wind forgets to touch.
+    - Phantoms ride currents that mortals cannot perceive.
+    parents:
+    - skyward_barrier
+    - cyclone_ward
     objectives:
       reach_level:
-        display_name: 'Reach player level fifteen.'
+        display_name: Reach player level fifteen.
         event: player_level
         amount: 1
         filters:
@@ -2502,35 +2813,43 @@ nodes:
         type: magic_stat
         target: statPoints
         amount: 3
-        display: '+3 Stat Points.'
+        display: +3 Stat Points.
       air_affinity:
         type: magic_stat
         target: airAffinity
         amount: 8
-        display: '+8 Air Affinity.'
+        display: +8 Air Affinity.
       air_resistance:
         type: magic_stat
         target: airResistance
         amount: 8
-        display: '+8 Air Resistance.'
+        display: +8 Air Resistance.
     unlocks:
-      - 'Masters the boundary between wind and shadow.'
+    - Masters the boundary between wind and shadow.
     visibility:
       hidden_until_available: true
-
+    edge_paths:
+      skyward_barrier:
+      - x: -7
+        y: 4
+      - x: -8
+        y: 4
   light_mending_script:
     display_name: '&eMending Script'
     category: light
     icon: GOLDEN_APPLE
     research_points_cost: 40
-    position: { x: 3, y: -1 }
+    position:
+      x: 3
+      y: -1
     description:
-      - 'Write restorative intent into a repeatable form.'
-      - 'The best healing is consistent enough to trust.'
-    parents: [light_first_lantern]
+    - Write restorative intent into a repeatable form.
+    - The best healing is consistent enough to trust.
+    parents:
+    - light_first_lantern
     objectives:
       consume_remedy:
-        display_name: 'Consume a golden apple.'
+        display_name: Consume a golden apple.
         event: item_consume
         amount: 1
         filters:
@@ -2540,25 +2859,28 @@ nodes:
         type: magic_stat
         target: manaRegeneration
         amount: 0.2
-        display: '+0.2 Mana Regeneration.'
+        display: +0.2 Mana Regeneration.
     unlocks:
-      - 'Improves restorative Light work.'
+    - Improves restorative Light work.
     visibility:
       hidden_until_available: false
-
   light_radiant_oath:
     display_name: '&eRadiant Oath'
     category: light
     icon: GLOWSTONE
     research_points_cost: 100
-    position: { x: 8, y: 5 }
+    position:
+      x: 8
+      y: 5
     description:
-      - 'Carry enough light that fear has less room to grow.'
-      - 'Protection becomes an act of discipline.'
-    parents: [bulwark_light, solar_focus]
+    - Carry enough light that fear has less room to grow.
+    - Protection becomes an act of discipline.
+    parents:
+    - bulwark_light
+    - solar_focus
     objectives:
       light_practice:
-        display_name: 'Cast ten Light spells.'
+        display_name: Cast ten Light spells.
         event: spell_cast
         amount: 10
         filters:
@@ -2568,30 +2890,33 @@ nodes:
         type: magic_stat
         target: lightResistance
         amount: 5
-        display: '+5 Light Resistance.'
+        display: +5 Light Resistance.
       luck:
         type: vanilla_attribute
         target: GENERIC_LUCK
         amount: 1
-        display: '+1 Luck.'
+        display: +1 Luck.
     unlocks:
-      - 'Completes the first Light oath.'
+    - Completes the first Light oath.
     visibility:
       hidden_until_available: true
-
   solar_focus:
     display_name: '&eSolar Focus'
     category: light
     icon: FIREWORK_STAR
     research_points_cost: 60
-    position: { x: 5, y: -3 }
+    position:
+      x: 5
+      y: -3
     description:
-      - 'Concentrate light into a searing point of restoration.'
-      - 'The sun does not choose who it warms, but it can also burn.'
-    parents: [radiant_study, light_mending_script]
+    - Concentrate light into a searing point of restoration.
+    - The sun does not choose who it warms, but it can also burn.
+    parents:
+    - radiant_study
+    - light_mending_script
     objectives:
       kill_light:
-        display_name: 'Defeat five enemies with Light spells.'
+        display_name: Defeat five enemies with Light spells.
         event: kill_with_spell
         amount: 5
         filters:
@@ -2601,25 +2926,28 @@ nodes:
         type: magic_stat
         target: lightAffinity
         amount: 5
-        display: '+5 Light Affinity.'
+        display: +5 Light Affinity.
     unlocks:
-      - 'Masters offensive light channeling.'
+    - Masters offensive light channeling.
     visibility:
       hidden_until_available: false
-
   bulwark_light:
     display_name: '&eBulwark of Light'
     category: light
     icon: GOLDEN_CHESTPLATE
     research_points_cost: 75
-    position: { x: 5, y: 3 }
+    position:
+      x: 5
+      y: 3
     description:
-      - 'Wrap yourself in living light that absorbs harm.'
-      - 'The strongest armor is the one that heals as it protects.'
-    parents: [light_mending_script, blessed_will]
+    - Wrap yourself in living light that absorbs harm.
+    - The strongest armor is the one that heals as it protects.
+    parents:
+    - light_mending_script
+    - blessed_will
     objectives:
       kill_light_close:
-        display_name: 'Defeat five enemies with Light spells from close range.'
+        display_name: Defeat five enemies with Light spells from close range.
         event: kill_with_spell
         amount: 5
         filters:
@@ -2630,30 +2958,33 @@ nodes:
         type: vanilla_attribute
         target: GENERIC_ARMOR
         amount: 1
-        display: '+1 Armor.'
+        display: +1 Armor.
       light_resistance:
         type: magic_stat
         target: lightResistance
         amount: 3
-        display: '+3 Light Resistance.'
+        display: +3 Light Resistance.
     unlocks:
-      - 'Combines protection with radiant power.'
+    - Combines protection with radiant power.
     visibility:
       hidden_until_available: false
-
   restoration_ward:
     display_name: '&eRestoration Ward'
     category: light
     icon: BEACON
     research_points_cost: 50
-    position: { x: -5, y: 3 }
+    position:
+      x: -5
+      y: 3
     description:
-      - 'Weave a persistent field of mending energy.'
-      - 'The best ward is one that repairs what it shields.'
-    parents: [aegis_light, blessed_will]
+    - Weave a persistent field of mending energy.
+    - The best ward is one that repairs what it shields.
+    parents:
+    - aegis_light
+    - blessed_will
     objectives:
       cast_light:
-        display_name: 'Cast fifteen Light spells.'
+        display_name: Cast fifteen Light spells.
         event: spell_cast
         amount: 15
         filters:
@@ -2663,30 +2994,37 @@ nodes:
         type: magic_stat
         target: lightResistance
         amount: 3
-        display: '+3 Light Resistance.'
+        display: +3 Light Resistance.
       light_affinity:
         type: magic_stat
         target: lightAffinity
         amount: 2
-        display: '+2 Light Affinity.'
+        display: +2 Light Affinity.
     unlocks:
-      - 'Advances restorative light magic.'
+    - Advances restorative light magic.
     visibility:
       hidden_until_available: false
-
+    edge_paths:
+      aegis_light:
+      - x: -4
+        y: 2
   sanctum_theory:
     display_name: '&eSanctum Theory'
     category: light
     icon: ENCHANTED_BOOK
     research_points_cost: 60
-    position: { x: -5, y: -3 }
+    position:
+      x: -5
+      y: -3
     description:
-      - 'Map the complete spectrum of healing frequencies.'
-      - 'Theory turns compassion into repeatable technique.'
-    parents: [luminarch_theory, aegis_light]
+    - Map the complete spectrum of healing frequencies.
+    - Theory turns compassion into repeatable technique.
+    parents:
+    - luminarch_theory
+    - aegis_light
     objectives:
       cast_light:
-        display_name: 'Cast twenty Light spells.'
+        display_name: Cast twenty Light spells.
         event: spell_cast
         amount: 20
         filters:
@@ -2696,30 +3034,33 @@ nodes:
         type: magic_stat
         target: arcaneKnowledge
         amount: 10
-        display: '+10 Arcane Knowledge.'
+        display: +10 Arcane Knowledge.
       stat_point:
         type: magic_stat
         target: statPoints
         amount: 1
-        display: '+1 Stat Point.'
+        display: +1 Stat Point.
     unlocks:
-      - 'Unlocks advanced restorative theory.'
+    - Unlocks advanced restorative theory.
     visibility:
       hidden_until_available: false
-
   light_sovereign:
     display_name: '&eLight Sovereign'
     category: light
     icon: NETHER_STAR
     research_points_cost: 125
-    position: { x: 0, y: -9 }
+    position:
+      x: 0
+      y: -9
     description:
-      - 'Command every frequency of light from the faintest glow to the blinding radiance.'
-      - 'The sovereign does not merely heal; they redefine what it means to be whole.'
-    parents: [solar_focus, sanctum_theory]
+    - Command every frequency of light from the faintest glow to the blinding radiance.
+    - The sovereign does not merely heal; they redefine what it means to be whole.
+    parents:
+    - solar_focus
+    - sanctum_theory
     objectives:
       cast_light:
-        display_name: 'Cast fifty Light spells.'
+        display_name: Cast fifty Light spells.
         event: spell_cast
         amount: 50
         filters:
@@ -2729,30 +3070,39 @@ nodes:
         type: magic_stat
         target: lightAffinity
         amount: 8
-        display: '+8 Light Affinity.'
+        display: +8 Light Affinity.
       max_mana:
         type: magic_stat
         target: maxMana
         amount: 50
-        display: '+50 Maximum Mana.'
+        display: +50 Maximum Mana.
     unlocks:
-      - 'Achieves total mastery over radiant energy.'
+    - Achieves total mastery over radiant energy.
     visibility:
       hidden_until_available: true
-
+    edge_paths:
+      solar_focus:
+      - x: 1
+        y: -7
+      - x: 1
+        y: -8
   celestial_phantom:
     display_name: '&eCelestial Phantom'
     category: light
     icon: PHANTOM_MEMBRANE
     research_points_cost: 150
-    position: { x: -8, y: 5 }
+    position:
+      x: -8
+      y: 5
     description:
-      - 'Move between the spaces where light pools and lingers.'
-      - 'Phantoms of radiance protect what mortals cannot see.'
-    parents: [restoration_ward, bulwark_light]
+    - Move between the spaces where light pools and lingers.
+    - Phantoms of radiance protect what mortals cannot see.
+    parents:
+    - restoration_ward
+    - bulwark_light
     objectives:
       reach_level:
-        display_name: 'Reach player level fifteen.'
+        display_name: Reach player level fifteen.
         event: player_level
         amount: 1
         filters:
@@ -2762,35 +3112,43 @@ nodes:
         type: magic_stat
         target: statPoints
         amount: 3
-        display: '+3 Stat Points.'
+        display: +3 Stat Points.
       light_affinity:
         type: magic_stat
         target: lightAffinity
         amount: 8
-        display: '+8 Light Affinity.'
+        display: +8 Light Affinity.
       light_resistance:
         type: magic_stat
         target: lightResistance
         amount: 8
-        display: '+8 Light Resistance.'
+        display: +8 Light Resistance.
     unlocks:
-      - 'Masters the boundary between light and shadow.'
+    - Masters the boundary between light and shadow.
     visibility:
       hidden_until_available: true
-
+    edge_paths:
+      restoration_ward:
+      - x: -7
+        y: 4
+      - x: -8
+        y: 4
   dark_tethered_whisper:
     display_name: '&5Tethered Whisper'
     category: dark
     icon: SCULK
     research_points_cost: 40
-    position: { x: 3, y: -1 }
+    position:
+      x: 3
+      y: -1
     description:
-      - 'Bind intention to silence and let the target feel it late.'
-      - 'Subtle magic still leaves a mark.'
-    parents: [dark_quiet_shadow]
+    - Bind intention to silence and let the target feel it late.
+    - Subtle magic still leaves a mark.
+    parents:
+    - dark_quiet_shadow
     objectives:
       dark_victories:
-        display_name: 'Defeat five enemies after casting Dark spells.'
+        display_name: Defeat five enemies after casting Dark spells.
         event: kill_with_spell
         amount: 5
         filters:
@@ -2800,25 +3158,28 @@ nodes:
         type: vanilla_attribute
         target: GENERIC_ATTACK_DAMAGE
         amount: 0.5
-        display: '+0.5 Attack Damage.'
+        display: +0.5 Attack Damage.
     unlocks:
-      - 'Improves pressure-focused Dark work.'
+    - Improves pressure-focused Dark work.
     visibility:
       hidden_until_available: false
-
   dark_eclipse_compact:
     display_name: '&8Eclipse Compact'
     category: dark
     icon: BLACK_CANDLE
     research_points_cost: 100
-    position: { x: 8, y: 5 }
+    position:
+      x: 8
+      y: 5
     description:
-      - 'Accept the cost of hidden power and name it clearly.'
-      - 'A compact is strongest when nothing is left implied.'
-    parents: [void_lash, shadow_focus]
+    - Accept the cost of hidden power and name it clearly.
+    - A compact is strongest when nothing is left implied.
+    parents:
+    - void_lash
+    - shadow_focus
     objectives:
       night_study:
-        display_name: 'Cast ten Dark spells.'
+        display_name: Cast ten Dark spells.
         event: spell_cast
         amount: 10
         filters:
@@ -2828,30 +3189,33 @@ nodes:
         type: magic_stat
         target: darkResistance
         amount: 5
-        display: '+5 Dark Resistance.'
+        display: +5 Dark Resistance.
       arcane_knowledge:
         type: magic_stat
         target: arcaneKnowledge
         amount: 15
-        display: '+15 Arcane Knowledge.'
+        display: +15 Arcane Knowledge.
     unlocks:
-      - 'Completes the first Dark compact.'
+    - Completes the first Dark compact.
     visibility:
       hidden_until_available: true
-
   shadow_focus:
     display_name: '&5Shadow Focus'
     category: dark
     icon: NETHERITE_SWORD
     research_points_cost: 60
-    position: { x: 5, y: -3 }
+    position:
+      x: 5
+      y: -3
     description:
-      - 'Compress shadow into a focused instrument of elimination.'
-      - 'The dark does not miss; it waits.'
-    parents: [shadow_insight, dark_tethered_whisper]
+    - Compress shadow into a focused instrument of elimination.
+    - The dark does not miss; it waits.
+    parents:
+    - shadow_insight
+    - dark_tethered_whisper
     objectives:
       kill_dark:
-        display_name: 'Defeat ten enemies with Dark spells.'
+        display_name: Defeat ten enemies with Dark spells.
         event: kill_with_spell
         amount: 10
         filters:
@@ -2861,25 +3225,28 @@ nodes:
         type: magic_stat
         target: darkAffinity
         amount: 5
-        display: '+5 Dark Affinity.'
+        display: +5 Dark Affinity.
     unlocks:
-      - 'Masters offensive shadow channeling.'
+    - Masters offensive shadow channeling.
     visibility:
       hidden_until_available: false
-
   void_lash:
     display_name: '&5Void Lash'
     category: dark
     icon: END_ROD
     research_points_cost: 75
-    position: { x: 5, y: 3 }
+    position:
+      x: 5
+      y: 3
     description:
-      - 'Crack the void open and let its hunger strike nearby.'
-      - 'Close darkness hits harder than distant darkness.'
-    parents: [dark_tethered_whisper, night_harvest]
+    - Crack the void open and let its hunger strike nearby.
+    - Close darkness hits harder than distant darkness.
+    parents:
+    - dark_tethered_whisper
+    - night_harvest
     objectives:
       kill_dark_close:
-        display_name: 'Defeat five enemies with Dark spells from close range.'
+        display_name: Defeat five enemies with Dark spells from close range.
         event: kill_with_spell
         amount: 5
         filters:
@@ -2890,30 +3257,33 @@ nodes:
         type: vanilla_attribute
         target: GENERIC_ATTACK_SPEED
         amount: 0.05
-        display: '+0.05 Attack Speed.'
+        display: +0.05 Attack Speed.
       dark_resistance:
         type: magic_stat
         target: darkResistance
         amount: 3
-        display: '+3 Dark Resistance.'
+        display: +3 Dark Resistance.
     unlocks:
-      - 'Combines aggression with void power.'
+    - Combines aggression with void power.
     visibility:
       hidden_until_available: false
-
   abyssal_ward:
     display_name: '&5Abyssal Ward'
     category: dark
     icon: SCULK_CATALYST
     research_points_cost: 50
-    position: { x: -5, y: 3 }
+    position:
+      x: -5
+      y: 3
     description:
-      - 'Weave a persistent field of entropic decay.'
-      - 'The best ward is one that devours what it touches.'
-    parents: [void_ward, night_harvest]
+    - Weave a persistent field of entropic decay.
+    - The best ward is one that devours what it touches.
+    parents:
+    - void_ward
+    - night_harvest
     objectives:
       cast_dark:
-        display_name: 'Cast fifteen Dark spells.'
+        display_name: Cast fifteen Dark spells.
         event: spell_cast
         amount: 15
         filters:
@@ -2923,30 +3293,37 @@ nodes:
         type: magic_stat
         target: darkResistance
         amount: 3
-        display: '+3 Dark Resistance.'
+        display: +3 Dark Resistance.
       dark_affinity:
         type: magic_stat
         target: darkAffinity
         amount: 2
-        display: '+2 Dark Affinity.'
+        display: +2 Dark Affinity.
     unlocks:
-      - 'Advances destructive dark magic.'
+    - Advances destructive dark magic.
     visibility:
       hidden_until_available: false
-
+    edge_paths:
+      void_ward:
+      - x: -4
+        y: 2
   oblivion_theory:
     display_name: '&5Oblivion Theory'
     category: dark
     icon: WITHER_SKELETON_SKULL
     research_points_cost: 60
-    position: { x: -5, y: -3 }
+    position:
+      x: -5
+      y: -3
     description:
-      - 'Map the complete lifecycle of shadow from birth to consumption.'
-      - 'Theory turns raw destruction into repeatable annihilation.'
-    parents: [entropy_theory, void_ward]
+    - Map the complete lifecycle of shadow from birth to consumption.
+    - Theory turns raw destruction into repeatable annihilation.
+    parents:
+    - entropy_theory
+    - void_ward
     objectives:
       cast_dark:
-        display_name: 'Cast twenty Dark spells.'
+        display_name: Cast twenty Dark spells.
         event: spell_cast
         amount: 20
         filters:
@@ -2956,30 +3333,33 @@ nodes:
         type: magic_stat
         target: arcaneKnowledge
         amount: 10
-        display: '+10 Arcane Knowledge.'
+        display: +10 Arcane Knowledge.
       stat_point:
         type: magic_stat
         target: statPoints
         amount: 1
-        display: '+1 Stat Point.'
+        display: +1 Stat Point.
     unlocks:
-      - 'Unlocks advanced entropic theory.'
+    - Unlocks advanced entropic theory.
     visibility:
       hidden_until_available: false
-
   dark_sovereign:
     display_name: '&5Dark Sovereign'
     category: dark
     icon: NETHER_STAR
     research_points_cost: 125
-    position: { x: 0, y: -9 }
+    position:
+      x: 0
+      y: -9
     description:
-      - 'Command every shadow from the faintest gloom to the all-consuming void.'
-      - 'The sovereign does not merely destroy; they redefine what it means to end.'
-    parents: [shadow_focus, oblivion_theory]
+    - Command every shadow from the faintest gloom to the all-consuming void.
+    - The sovereign does not merely destroy; they redefine what it means to end.
+    parents:
+    - shadow_focus
+    - oblivion_theory
     objectives:
       cast_dark:
-        display_name: 'Cast fifty Dark spells.'
+        display_name: Cast fifty Dark spells.
         event: spell_cast
         amount: 50
         filters:
@@ -2989,30 +3369,39 @@ nodes:
         type: magic_stat
         target: darkAffinity
         amount: 8
-        display: '+8 Dark Affinity.'
+        display: +8 Dark Affinity.
       max_mana:
         type: magic_stat
         target: maxMana
         amount: 50
-        display: '+50 Maximum Mana.'
+        display: +50 Maximum Mana.
     unlocks:
-      - 'Achieves total mastery over shadow currents.'
+    - Achieves total mastery over shadow currents.
     visibility:
       hidden_until_available: true
-
+    edge_paths:
+      shadow_focus:
+      - x: 1
+        y: -7
+      - x: 1
+        y: -8
   eclipse_phantom:
     display_name: '&5Eclipse Phantom'
     category: dark
     icon: PHANTOM_MEMBRANE
     research_points_cost: 150
-    position: { x: -8, y: 5 }
+    position:
+      x: -8
+      y: 5
     description:
-      - 'Move between the spaces where shadow pools and festers.'
-      - 'Phantoms of darkness protect what mortals refuse to see.'
-    parents: [abyssal_ward, void_lash]
+    - Move between the spaces where shadow pools and festers.
+    - Phantoms of darkness protect what mortals refuse to see.
+    parents:
+    - abyssal_ward
+    - void_lash
     objectives:
       reach_level:
-        display_name: 'Reach player level fifteen.'
+        display_name: Reach player level fifteen.
         event: player_level
         amount: 1
         filters:
@@ -3022,18 +3411,24 @@ nodes:
         type: magic_stat
         target: statPoints
         amount: 3
-        display: '+3 Stat Points.'
+        display: +3 Stat Points.
       dark_affinity:
         type: magic_stat
         target: darkAffinity
         amount: 8
-        display: '+8 Dark Affinity.'
+        display: +8 Dark Affinity.
       dark_resistance:
         type: magic_stat
         target: darkResistance
         amount: 8
-        display: '+8 Dark Resistance.'
+        display: +8 Dark Resistance.
     unlocks:
-      - 'Masters the boundary between void and shadow.'
+    - Masters the boundary between void and shadow.
     visibility:
       hidden_until_available: true
+    edge_paths:
+      abyssal_ward:
+      - x: -7
+        y: 4
+      - x: -8
+        y: 4

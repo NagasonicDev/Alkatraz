@@ -17,7 +17,7 @@ cd "${WORKDIR}"
 curl -sSL -o BuildTools.jar \
   "https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar"
 
-java -jar BuildTools.jar --rev "${VERSION}" --remapped-mojang --output-dir "${WORKDIR}/out"
+java -jar BuildTools.jar --rev "${VERSION}" --remapped --output-dir "${WORKDIR}/out"
 
 BUILT_JAR="${WORKDIR}/out/spigot-${VERSION}.jar"
 if [ ! -f "${BUILT_JAR}" ]; then

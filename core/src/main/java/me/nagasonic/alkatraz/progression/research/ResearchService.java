@@ -229,7 +229,8 @@ public final class ResearchService {
                     loadObjectives(config.getConfigurationSection(root + "objectives")),
                     loadRewards(config.getConfigurationSection(root + "rewards")),
                     config.getBoolean(root + "visibility.hidden_until_available", false),
-                    config.getInt(root + "research_points_cost", 0)
+                    config.getInt(root + "research_points_cost", 0),
+                    loadEdgePaths(config.getConfigurationSection(root + "edge_paths"))
             );
             loaded.put(key, node);
         }
@@ -267,6 +268,22 @@ public final class ResearchService {
             ));
         }
         return rewards;
+    }
+
+    private static Map<String, List<int[]>> loadEdgePaths(ConfigurationSection section) {
+        Map<String, List<int[]>> paths = new HashMap<>();
+        if (section == null) return paths;
+        for (String parentId : section.getKeys(false)) {
+            List<Map<?, ?>> waypointMaps = section.getMapList(parentId);
+            List<int[]> waypoints = new ArrayList<>();
+            for (Map<?, ?> wp : waypointMaps) {
+                int wx = wp.containsKey("x") ? ((Number) wp.get("x")).intValue() : 0;
+                int wy = wp.containsKey("y") ? ((Number) wp.get("y")).intValue() : 0;
+                waypoints.add(new int[]{wx, wy});
+            }
+            paths.put(parentId.toLowerCase(), List.copyOf(waypoints));
+        }
+        return paths;
     }
 
     private static boolean matches(ResearchObjective objective, Map<String, Object> context) {
