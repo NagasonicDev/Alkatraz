@@ -11,17 +11,30 @@ VERSION="$1"
 OUT="$2"
 
 WORKDIR=$(mktemp -d)
+LOGFILE="${WORKDIR}/buildtools.log"
 echo "Building Spigot ${VERSION} in ${WORKDIR} (this can take several minutes)..."
 
 cd "${WORKDIR}"
 curl -sSL -o BuildTools.jar \
   "https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar"
 
-java -jar BuildTools.jar --rev "${VERSION}" --remapped --output-dir "${WORKDIR}/out"
+# Run BuildTools and capture output for debugging
+if ! java -jar BuildTools.jar --rev "${VERSION}" --remapped --output-dir "${WORKDIR}/out" 2>&1 | tee "${LOGFILE}"; then
+  echo "=== BuildTools FAILED for ${VERSION} (exit code $?) ===" >&2
+  echo "Last 50 lines of output:" >&2
+  tail -n 50 "${LOGFILE}" >&2
+  rm -rf "${WORKDIR}"
+  exit 1
+fi
 
 BUILT_JAR="${WORKDIR}/out/spigot-${VERSION}.jar"
 if [ ! -f "${BUILT_JAR}" ]; then
-  echo "BuildTools did not produce spigot-${VERSION}.jar - check BuildTools output above" >&2
+  echo "=== BuildTools did not produce spigot-${VERSION}.jar ===" >&2
+  echo "BuildTools output directory contents:" >&2
+  ls -la "${WORKDIR}/out/" 2>/dev/null >&2 || echo "(out dir does not exist)" >&2
+  echo "Last 50 lines of BuildTools output:" >&2
+  tail -n 50 "${LOGFILE}" >&2
+  rm -rf "${WORKDIR}"
   exit 1
 fi
 

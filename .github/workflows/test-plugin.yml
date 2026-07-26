@@ -52,7 +52,7 @@ jobs:
           path: nms-stage
           # Bump this suffix (-v1 -> -v2) to force a rebuild of every
           # version, e.g. if Spigot re-patches something retroactively.
-          key: spigot-nms-${{ matrix.version }}-v3
+          key: spigot-nms-${{ matrix.version }}-v4
 
       - name: Build with BuildTools (cache miss only)
         if: steps.cache.outputs.cache-hit != 'true'
@@ -64,6 +64,7 @@ jobs:
           if [ -d "$HOME/.m2/repository/org/bukkit" ]; then cp -r "$HOME/.m2/repository/org/bukkit/." nms-stage/m2/org/bukkit/; fi
 
       - name: Upload artifact for this run
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: nms-${{ matrix.version }}
