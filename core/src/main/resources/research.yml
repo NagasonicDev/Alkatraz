@@ -1845,7 +1845,7 @@ nodes:
     - Pyroclasm leaves nothing but ash and silence.
     parents:
     - flame_study
-    - ember_control
+    - fire_ember_control
     objectives:
       pyroclasm_kills:
         display_name: Defeat ten creatures with Fire spells.
@@ -1880,7 +1880,7 @@ nodes:
     - Surround yourself in a field of living flame that sears all who approach.
     - The aura does not distinguish between friend and foe.
     parents:
-    - ember_control
+    - fire_ember_control
     - heat_siphon
     objectives:
       aura_casting:
