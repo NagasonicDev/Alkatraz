@@ -16,6 +16,9 @@ out/
 # BlueJ files
 *.ctxt
 
+# Python Scripts
+*.py
+
 # Package Files #
 *.jar
 *.war
