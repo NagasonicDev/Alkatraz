@@ -455,7 +455,7 @@ public class ResearchGraphMenu extends Menu {
         Material mat = switch (stateKey) {
             case "completed" -> Material.PURPLE_STAINED_GLASS_PANE;
             case "available" -> Material.PINK_STAINED_GLASS_PANE;
-            default -> Material.GRAY_STAINED_GLASS_PANE;
+            default -> Material.RED_STAINED_GLASS_PANE;
         };
         int cmd = TexturePackManager.getConnectorCMD(piece.name().toLowerCase() + "_" + stateKey);
         return ItemBuilder.of(mat).name(" ").glint("in_progress".equals(stateKey)).customModelData(cmd).build();
