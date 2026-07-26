@@ -308,7 +308,7 @@ nodes:
     - Find the frequency at which spells amplify each other.
     - Resonance turns a whisper into a roar.
     parents:
-    - spellcraft_notes
+    - spellcraft_field_notes
     - mana_conservation
     objectives:
       resonance_kills:
@@ -342,7 +342,7 @@ nodes:
     - The battlefield is the harshest teacher, but the most honest.
     parents:
     - focus_discipline
-    - spellcraft_notes
+    - spellcraft_field_notes
     objectives:
       close_combat:
         display_name: Defeat five creatures with spells within eight blocks.

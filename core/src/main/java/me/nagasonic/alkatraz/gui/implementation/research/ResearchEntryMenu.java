@@ -205,12 +205,18 @@ public class ResearchEntryMenu extends Menu {
             case LOCKED -> {
                 actionMat = Material.BARRIER;
                 actionName = lang().get("research.entry_locked");
-                String firstName = node.getParents().stream()
-                        .map(id -> ResearchService.getNode(id).map(ResearchNode::getDisplayName).orElse(null))
-                        .filter(java.util.Objects::nonNull)
-                        .findFirst().orElse(null);
-                if (firstName != null) {
-                    lore.add(ColorFormat.format("&7Complete &c" + firstName + " &7first."));
+                List<String> missingParents = new ArrayList<>();
+                for (String parentId : node.getParents()) {
+                    ResearchService.getNode(parentId).ifPresent(parent -> {
+                        ResearchState parentState = ResearchService.getState(viewer, parent);
+                        if (parentState != ResearchState.COMPLETED) {
+                            missingParents.add(parent.getDisplayName());
+                        }
+                    });
+                }
+                if (!missingParents.isEmpty()) {
+                    String joined = String.join(", ", missingParents);
+                    lore.add(ColorFormat.format("&7Complete &c" + joined + " &7first."));
                 } else {
                     lore.add(ColorFormat.format("&7Requirements not yet met."));
                 }
