@@ -109,6 +109,10 @@ nodes:
     - Opens structured research techniques.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      awakened_focus:
+      - x: -3
+        y: 0
   spellcraft_field_notes:
     display_name: '&aSpellcraft Field Notes'
     category: magic
@@ -137,6 +141,10 @@ nodes:
     - Strengthens all elemental practice.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      awakened_focus:
+      - x: 3
+        y: 0
   disciplined_channel:
     display_name: '&dDisciplined Channel'
     category: magic
@@ -177,19 +185,15 @@ nodes:
     edge_paths:
       mana_conservation:
       - x: 1
-        y: -2
+        y: 3
       - x: 1
-        y: 1
+        y: -3
       ritual_geometry:
-      - x: -2
-        y: -1
-      - x: -2
-        y: 1
+      - x: -3
+        y: 3
       spellcraft_field_notes:
-      - x: 2
-        y: -1
-      - x: 2
-        y: 1
+      - x: 3
+        y: 3
   focus_discipline:
     display_name: '&6Focus Discipline'
     category: magic
@@ -218,6 +222,10 @@ nodes:
     - Opens the path to applied combat magic.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      awakened_focus:
+      - x: 3
+        y: 0
   ward_craft:
     display_name: '&dWard Craft'
     category: magic
@@ -248,7 +256,7 @@ nodes:
       hidden_until_available: false
     edge_paths:
       awakened_focus:
-      - x: -2
+      - x: -3
         y: 0
   mana_reservoir:
     display_name: '&bMana Reservoir'
@@ -286,8 +294,8 @@ nodes:
       hidden_until_available: false
     edge_paths:
       ritual_geometry:
-      - x: -1
-        y: -5
+      - x: -3
+        y: -6
   spell_resonance:
     display_name: '&eSpell Resonance'
     category: magic
@@ -317,6 +325,10 @@ nodes:
     - Unlocks the study of spell combination.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      spellcraft_field_notes:
+      - x: 5
+        y: -2
   combat_casting:
     display_name: '&cCombat Casting'
     category: magic
@@ -353,6 +365,10 @@ nodes:
     - Unlocks mastery of magical warfare.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      focus_discipline:
+      - x: 5
+        y: 1
   mana_conduit:
     display_name: '&9Mana Conduit'
     category: magic
@@ -390,9 +406,9 @@ nodes:
     edge_paths:
       disciplined_channel:
       - x: 1
-        y: 4
+        y: 6
       - x: 1
-        y: 5
+        y: 3
   barrier_weave:
     display_name: '&5Barrier Weave'
     category: magic
@@ -424,17 +440,13 @@ nodes:
       hidden_until_available: false
     edge_paths:
       disciplined_channel:
+      - x: -5
+        y: 2
       - x: 0
         y: 2
-      - x: -3
-        y: 1
-      - x: -5
-        y: 2
       ward_craft:
-      - x: -4
-        y: 1
       - x: -5
-        y: 2
+        y: 1
   arcane_theory:
     display_name: '&dArcane Theory'
     category: magic
@@ -471,6 +483,13 @@ nodes:
     - Opens the path to arcane mastery.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      ritual_geometry:
+      - x: -5
+        y: -2
+      ward_craft:
+      - x: -5
+        y: 1
   mana_sovereignty:
     display_name: '&bMana Sovereignty'
     category: magic
@@ -513,9 +532,9 @@ nodes:
     edge_paths:
       arcane_theory:
       - x: -1
-        y: -7
+        y: -9
       - x: -1
-        y: -8
+        y: -3
   spell_synthesis:
     display_name: '&aSpell Synthesis'
     category: magic
@@ -634,9 +653,9 @@ nodes:
     edge_paths:
       combat_casting:
       - x: 1
-        y: 7
+        y: 9
       - x: 1
-        y: 8
+        y: 6
   grand_ward:
     display_name: '&5Grand Ward'
     category: magic
@@ -672,10 +691,10 @@ nodes:
     visibility:
       hidden_until_available: true
     edge_paths:
-      barrier_weave:
-      - x: -7
-        y: 4
+      cinder_ward:
       - x: -8
+        y: 4
+      - x: -5
         y: 4
   archmage:
     display_name: '&dArchmage'
@@ -716,6 +735,13 @@ nodes:
     - The ultimate achievement in magical study.
     visibility:
       hidden_until_available: true
+    edge_paths:
+      arcane_theory:
+      - x: -8
+        y: -3
+      barrier_weave:
+      - x: -8
+        y: 3
   fire_spark:
     display_name: '&cKindled Spark'
     category: fire
@@ -781,6 +807,8 @@ nodes:
     - Opens advanced fire studies.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      fire_spark:
   heat_siphon:
     display_name: '&6Heat Siphon'
     category: fire
@@ -811,6 +839,10 @@ nodes:
     - Unlocks efficient fire casting.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      fire_spark:
+      - x: 3
+        y: 0
   smoke_shroud:
     display_name: '&8Smoke Shroud'
     category: fire
@@ -841,6 +873,10 @@ nodes:
     - Opens fire defensive studies.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      fire_spark:
+      - x: -3
+        y: 0
   cinder_sigil:
     display_name: '&6Cinder Sigil'
     category: fire
@@ -871,6 +907,10 @@ nodes:
     - Opens fire mastery studies.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      fire_spark:
+      - x: -3
+        y: 0
   water_first_tide:
     display_name: '&9First Tide'
     category: water
@@ -936,6 +976,8 @@ nodes:
     - Deepens understanding of water currents.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      water_first_tide:
   current_sense:
     display_name: '&9Current Sense'
     category: water
@@ -966,6 +1008,10 @@ nodes:
     - Improves mana flow through water attunement.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      water_first_tide:
+      - x: 3
+        y: 0
   frost_ward:
     display_name: '&9Frost Ward'
     category: water
@@ -996,6 +1042,10 @@ nodes:
     - Hardens resolve against hostile magic.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      water_first_tide:
+      - x: -3
+        y: 0
   depth_mark:
     display_name: '&9Depth Mark'
     category: water
@@ -1026,6 +1076,10 @@ nodes:
     - Focuses water magic toward specialization.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      water_first_tide:
+      - x: -3
+        y: 0
   earth_stone_memory:
     display_name: '&2Stone Memory'
     category: earth
@@ -1091,6 +1145,8 @@ nodes:
     - Deepens connection to earth currents.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      earth_stone_memory:
   stonebond_will:
     display_name: '&6Stonebond Will'
     category: earth
@@ -1121,6 +1177,10 @@ nodes:
     - Strengthens the caster's bond with earth.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      earth_stone_memory:
+      - x: 3
+        y: 0
   bedrock_ward:
     display_name: '&8Bedrock Ward'
     category: earth
@@ -1151,6 +1211,10 @@ nodes:
     - Provides basic earth shielding.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      earth_stone_memory:
+      - x: -3
+        y: 0
   geode_lore:
     display_name: '&5Geode Lore'
     category: earth
@@ -1181,6 +1245,10 @@ nodes:
     - Reveals hidden pathways in earth magic.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      earth_stone_memory:
+      - x: -3
+        y: 0
   air_open_breath:
     display_name: '&fOpen Breath'
     category: air
@@ -1246,6 +1314,8 @@ nodes:
     - Deepens connection to air currents.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      air_open_breath:
   static_cast:
     display_name: '&fStatic Cast'
     category: air
@@ -1276,6 +1346,10 @@ nodes:
     - Harnesses the offensive side of wind.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      air_open_breath:
+      - x: 3
+        y: 0
   squall_ward:
     display_name: '&fSquall Ward'
     category: air
@@ -1306,6 +1380,10 @@ nodes:
     - Strengthens air-based defenses.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      air_open_breath:
+      - x: -3
+        y: 0
   wind_theory:
     display_name: '&fWind Theory'
     category: air
@@ -1336,6 +1414,10 @@ nodes:
     - Advances understanding of wind currents.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      air_open_breath:
+      - x: -3
+        y: 0
   light_first_lantern:
     display_name: '&eFirst Lantern'
     category: light
@@ -1401,6 +1483,8 @@ nodes:
     - Deepens connection to radiant energy.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      light_first_lantern:
   blessed_will:
     display_name: '&eBlessed Will'
     category: light
@@ -1429,6 +1513,10 @@ nodes:
     - Channels light through creation.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      light_first_lantern:
+      - x: 3
+        y: 0
   aegis_light:
     display_name: '&eAegis Light'
     category: light
@@ -1459,6 +1547,10 @@ nodes:
     - Strengthens light-based defenses.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      light_first_lantern:
+      - x: -3
+        y: 0
   luminarch_theory:
     display_name: '&eLuminarch Theory'
     category: light
@@ -1489,6 +1581,10 @@ nodes:
     - Advances understanding of radiant energy.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      light_first_lantern:
+      - x: -3
+        y: 0
   dark_quiet_shadow:
     display_name: '&8Quiet Shadow'
     category: dark
@@ -1554,6 +1650,8 @@ nodes:
     - Deepens connection to shadow currents.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      dark_quiet_shadow:
   night_harvest:
     display_name: '&5Night Harvest'
     category: dark
@@ -1584,6 +1682,10 @@ nodes:
     - Harvests the offensive side of darkness.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      dark_quiet_shadow:
+      - x: 3
+        y: 0
   void_ward:
     display_name: '&5Void Ward'
     category: dark
@@ -1614,6 +1716,10 @@ nodes:
     - Strengthens dark-based defenses.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      dark_quiet_shadow:
+      - x: -3
+        y: 0
   entropy_theory:
     display_name: '&5Entropy Theory'
     category: dark
@@ -1644,6 +1750,10 @@ nodes:
     - Advances understanding of entropic forces.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      dark_quiet_shadow:
+      - x: -3
+        y: 0
   fire_ember_control:
     display_name: '&6Ember Control'
     category: fire
@@ -1674,6 +1784,10 @@ nodes:
     - Improves safety around volatile spells.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      fire_spark:
+      - x: 3
+        y: 0
   fire_inferno_rite:
     display_name: '&cInferno Rite'
     category: fire
@@ -1711,6 +1825,13 @@ nodes:
     - Completes the Inferno Rite.
     visibility:
       hidden_until_available: true
+    edge_paths:
+      immolation_aura:
+      - x: 8
+        y: 3
+      pyroclasm:
+      - x: 8
+        y: -3
   pyroclasm:
     display_name: '&cPyroclasm'
     category: fire
@@ -1742,6 +1863,11 @@ nodes:
     - Unlocks the path of fire destruction.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      flame_study:
+      ember_control:
+      - x: 5
+        y: -1
   immolation_aura:
     display_name: '&6Immolation Aura'
     category: fire
@@ -1778,6 +1904,13 @@ nodes:
     - Unlocks the aura of the fire walker.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      ember_control:
+      - x: 5
+        y: -1
+      heat_siphon:
+      - x: 5
+        y: 2
   cinder_ward:
     display_name: '&6Cinder Ward'
     category: fire
@@ -1817,7 +1950,10 @@ nodes:
       hidden_until_available: false
     edge_paths:
       smoke_shroud:
-      - x: -4
+      - x: -3
+        y: 0
+      heat_siphon:
+      - x: -5
         y: 2
   ashen_theory:
     display_name: '&8Ashen Theory'
@@ -1855,6 +1991,13 @@ nodes:
     - Unlocks deeper fire theory.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      cinder_sigil:
+      - x: -5
+        y: -1
+      smoke_shroud:
+      - x: -5
+        y: 2
   inferno_mastery:
     display_name: '&cInferno Mastery'
     category: fire
@@ -1894,9 +2037,14 @@ nodes:
     edge_paths:
       pyroclasm:
       - x: 1
-        y: -7
+        y: -9
       - x: 1
-        y: -8
+        y: -3
+      ashen_theory:
+      - x: -1
+        y: -9
+      - x: -1
+        y: -3
   hellfire_sovereign:
     display_name: '&cHellfire Sovereign'
     category: fire
@@ -1940,10 +2088,11 @@ nodes:
       hidden_until_available: true
     edge_paths:
       cinder_ward:
-      - x: -7
-        y: 4
       - x: -8
         y: 4
+      - x: -5
+        y: 4
+      immolation_aura:
   water_restorative_current:
     display_name: '&bRestorative Current'
     category: water
@@ -1974,6 +2123,10 @@ nodes:
     - Improves sustain-focused magic.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      water_first_tide:
+      - x: 3
+        y: 0
   water_depth_oath:
     display_name: '&3Depth Oath'
     category: water
@@ -2006,6 +2159,13 @@ nodes:
     - Completes the Water oath.
     visibility:
       hidden_until_available: true
+    edge_paths:
+      healing_current:
+      - x: 8
+        y: 3
+      pressure_surge:
+      - x: 8
+        y: -3
   pressure_surge:
     display_name: '&9Pressure Surge'
     category: water
@@ -2037,8 +2197,12 @@ nodes:
     - Unleashes devastating pressure attacks.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      tidal_studies:
+      water_restorative_current:
+      - x: 5
+        y: -1
   healing_current:
-    display_name: '&bHealing Current'
     category: water
     icon: GLISTERING_MELON_SLICE
     research_points_cost: 75
@@ -2073,6 +2237,13 @@ nodes:
     - Grants restorative power from water mastery.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      water_restorative_current:
+      - x: 5
+        y: -1
+      current_sense:
+      - x: 5
+        y: 2
   glacial_barrier:
     display_name: '&9Glacial Barrier'
     category: water
@@ -2112,7 +2283,10 @@ nodes:
       hidden_until_available: false
     edge_paths:
       frost_ward:
-      - x: -4
+      - x: -3
+        y: 0
+      current_sense:
+      - x: -5
         y: 2
   oceanic_theory:
     display_name: '&9Oceanic Theory'
@@ -2150,6 +2324,13 @@ nodes:
     - Reveals the hidden mechanics of water magic.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      depth_mark:
+      - x: -5
+        y: -1
+      frost_ward:
+      - x: -5
+        y: 2
   abyssal_mastery:
     display_name: '&3Abyssal Mastery'
     category: water
@@ -2189,9 +2370,14 @@ nodes:
     edge_paths:
       pressure_surge:
       - x: 1
-        y: -7
+        y: -9
       - x: 1
-        y: -8
+        y: -3
+      oceanic_theory:
+      - x: -1
+        y: -9
+      - x: -1
+        y: -3
   tidal_sovereign:
     display_name: '&9Tidal Sovereign'
     category: water
@@ -2235,10 +2421,11 @@ nodes:
       hidden_until_available: true
     edge_paths:
       glacial_barrier:
-      - x: -7
-        y: 4
       - x: -8
         y: 4
+      - x: -5
+        y: 4
+      healing_current:
   earth_quarry_signs:
     display_name: '&aQuarry Signs'
     category: earth
@@ -2269,6 +2456,10 @@ nodes:
     - Improves defensive Earth work.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      earth_stone_memory:
+      - x: 3
+        y: 0
   earth_bulwark_vow:
     display_name: '&2Bulwark Vow'
     category: earth
@@ -2306,6 +2497,13 @@ nodes:
     - Completes the Bulwark Vow.
     visibility:
       hidden_until_available: true
+    edge_paths:
+      earthen_fortress:
+      - x: 8
+        y: 3
+      seismic_focus:
+      - x: 8
+        y: -3
   seismic_focus:
     display_name: '&2Seismic Focus'
     category: earth
@@ -2337,6 +2535,11 @@ nodes:
     - Sharpens offensive earth magic.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      tectonic_sense:
+      earth_quarry_signs:
+      - x: 5
+        y: -1
   earthen_fortress:
     display_name: '&2Earthen Fortress'
     category: earth
@@ -2374,6 +2577,13 @@ nodes:
     - Masters defensive earth formations.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      earth_quarry_signs:
+      - x: 5
+        y: -1
+      stonebond_will:
+      - x: 5
+        y: 2
   crystal_resonance:
     display_name: '&dCrystal Resonance'
     category: earth
@@ -2412,7 +2622,10 @@ nodes:
       hidden_until_available: false
     edge_paths:
       bedrock_ward:
-      - x: -4
+      - x: -3
+        y: 0
+      stonebond_will:
+      - x: -5
         y: 2
   titan_bastion:
     display_name: '&4Titan Bastion'
@@ -2450,6 +2663,13 @@ nodes:
     - Reveals advanced earth theory.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      geode_lore:
+      - x: -5
+        y: -1
+      bedrock_ward:
+      - x: -5
+        y: 2
   earth_sovereign:
     display_name: '&2Earth Sovereign'
     category: earth
@@ -2489,9 +2709,14 @@ nodes:
     edge_paths:
       seismic_focus:
       - x: 1
-        y: -7
+        y: -9
       - x: 1
-        y: -8
+        y: -3
+      titan_bastion:
+      - x: -1
+        y: -9
+      - x: -1
+        y: -3
   mountain_wraith:
     display_name: '&2Mountain Wraith'
     category: earth
@@ -2535,10 +2760,11 @@ nodes:
       hidden_until_available: true
     edge_paths:
       crystal_resonance:
-      - x: -7
-        y: 4
       - x: -8
         y: 4
+      - x: -5
+        y: 4
+      earthen_fortress:
   air_kinetic_step:
     display_name: '&bKinetic Step'
     category: air
@@ -2570,6 +2796,10 @@ nodes:
     - Improves mobility-focused magic.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      air_open_breath:
+      - x: 3
+        y: 0
   air_storm_eye:
     display_name: '&fStorm Eye'
     category: air
@@ -2601,6 +2831,13 @@ nodes:
     - Completes the first Air meditation.
     visibility:
       hidden_until_available: true
+    edge_paths:
+      cyclone_ward:
+      - x: 8
+        y: 3
+      tempest_focus:
+      - x: 8
+        y: -3
   tempest_focus:
     display_name: '&fTempest Focus'
     category: air
@@ -2632,6 +2869,11 @@ nodes:
     - Masters offensive air channeling.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      gale_wisps:
+      air_kinetic_step:
+      - x: 5
+        y: -1
   cyclone_ward:
     display_name: '&fCyclone Ward'
     category: air
@@ -2669,6 +2911,13 @@ nodes:
     - Combines mobility with defensive wind.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      air_kinetic_step:
+      - x: 5
+        y: -1
+      static_cast:
+      - x: 5
+        y: 2
   skyward_barrier:
     display_name: '&fSkyward Barrier'
     category: air
@@ -2707,7 +2956,10 @@ nodes:
       hidden_until_available: false
     edge_paths:
       squall_ward:
-      - x: -4
+      - x: -3
+        y: 0
+      static_cast:
+      - x: -5
         y: 2
   storm_theory:
     display_name: '&fStorm Theory'
@@ -2745,6 +2997,13 @@ nodes:
     - Unlocks advanced storm manipulation.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      wind_theory:
+      - x: -5
+        y: -1
+      squall_ward:
+      - x: -5
+        y: 2
   wind_sovereign:
     display_name: '&fWind Sovereign'
     category: air
@@ -2784,9 +3043,14 @@ nodes:
     edge_paths:
       tempest_focus:
       - x: 1
-        y: -7
+        y: -9
       - x: 1
-        y: -8
+        y: -3
+      storm_theory:
+      - x: -1
+        y: -9
+      - x: -1
+        y: -3
   skyward_phantom:
     display_name: '&fSkyward Phantom'
     category: air
@@ -2830,10 +3094,11 @@ nodes:
       hidden_until_available: true
     edge_paths:
       skyward_barrier:
-      - x: -7
-        y: 4
       - x: -8
         y: 4
+      - x: -5
+        y: 4
+      cyclone_ward:
   light_mending_script:
     display_name: '&eMending Script'
     category: light
@@ -2864,6 +3129,10 @@ nodes:
     - Improves restorative Light work.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      light_first_lantern:
+      - x: 3
+        y: 0
   light_radiant_oath:
     display_name: '&eRadiant Oath'
     category: light
@@ -2900,6 +3169,13 @@ nodes:
     - Completes the first Light oath.
     visibility:
       hidden_until_available: true
+    edge_paths:
+      bulwark_light:
+      - x: 8
+        y: 3
+      solar_focus:
+      - x: 8
+        y: -3
   solar_focus:
     display_name: '&eSolar Focus'
     category: light
@@ -2931,6 +3207,11 @@ nodes:
     - Masters offensive light channeling.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      radiant_study:
+      light_mending_script:
+      - x: 5
+        y: -1
   bulwark_light:
     display_name: '&eBulwark of Light'
     category: light
@@ -2968,6 +3249,13 @@ nodes:
     - Combines protection with radiant power.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      light_mending_script:
+      - x: 5
+        y: -1
+      blessed_will:
+      - x: 5
+        y: 2
   restoration_ward:
     display_name: '&eRestoration Ward'
     category: light
@@ -3006,7 +3294,10 @@ nodes:
       hidden_until_available: false
     edge_paths:
       aegis_light:
-      - x: -4
+      - x: -3
+        y: 0
+      blessed_will:
+      - x: -5
         y: 2
   sanctum_theory:
     display_name: '&eSanctum Theory'
@@ -3044,6 +3335,13 @@ nodes:
     - Unlocks advanced restorative theory.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      luminarch_theory:
+      - x: -5
+        y: -1
+      aegis_light:
+      - x: -5
+        y: 2
   light_sovereign:
     display_name: '&eLight Sovereign'
     category: light
@@ -3083,9 +3381,14 @@ nodes:
     edge_paths:
       solar_focus:
       - x: 1
-        y: -7
+        y: -9
       - x: 1
-        y: -8
+        y: -3
+      sanctum_theory:
+      - x: -1
+        y: -9
+      - x: -1
+        y: -3
   celestial_phantom:
     display_name: '&eCelestial Phantom'
     category: light
@@ -3129,10 +3432,11 @@ nodes:
       hidden_until_available: true
     edge_paths:
       restoration_ward:
-      - x: -7
-        y: 4
       - x: -8
         y: 4
+      - x: -5
+        y: 4
+      bulwark_light:
   dark_tethered_whisper:
     display_name: '&5Tethered Whisper'
     category: dark
@@ -3163,6 +3467,10 @@ nodes:
     - Improves pressure-focused Dark work.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      dark_quiet_shadow:
+      - x: 3
+        y: 0
   dark_eclipse_compact:
     display_name: '&8Eclipse Compact'
     category: dark
@@ -3199,6 +3507,13 @@ nodes:
     - Completes the first Dark compact.
     visibility:
       hidden_until_available: true
+    edge_paths:
+      void_lash:
+      - x: 8
+        y: 3
+      shadow_focus:
+      - x: 8
+        y: -3
   shadow_focus:
     display_name: '&5Shadow Focus'
     category: dark
@@ -3230,6 +3545,11 @@ nodes:
     - Masters offensive shadow channeling.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      shadow_insight:
+      dark_tethered_whisper:
+      - x: 5
+        y: -1
   void_lash:
     display_name: '&5Void Lash'
     category: dark
@@ -3267,6 +3587,13 @@ nodes:
     - Combines aggression with void power.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      dark_tethered_whisper:
+      - x: 5
+        y: -1
+      night_harvest:
+      - x: 5
+        y: 2
   abyssal_ward:
     display_name: '&5Abyssal Ward'
     category: dark
@@ -3305,7 +3632,10 @@ nodes:
       hidden_until_available: false
     edge_paths:
       void_ward:
-      - x: -4
+      - x: -3
+        y: 0
+      night_harvest:
+      - x: -5
         y: 2
   oblivion_theory:
     display_name: '&5Oblivion Theory'
@@ -3343,6 +3673,13 @@ nodes:
     - Unlocks advanced entropic theory.
     visibility:
       hidden_until_available: false
+    edge_paths:
+      entropy_theory:
+      - x: -5
+        y: -1
+      void_ward:
+      - x: -5
+        y: 2
   dark_sovereign:
     display_name: '&5Dark Sovereign'
     category: dark
@@ -3382,9 +3719,14 @@ nodes:
     edge_paths:
       shadow_focus:
       - x: 1
-        y: -7
+        y: -9
       - x: 1
-        y: -8
+        y: -3
+      oblivion_theory:
+      - x: -1
+        y: -9
+      - x: -1
+        y: -3
   eclipse_phantom:
     display_name: '&5Eclipse Phantom'
     category: dark
@@ -3428,7 +3770,8 @@ nodes:
       hidden_until_available: true
     edge_paths:
       abyssal_ward:
-      - x: -7
-        y: 4
       - x: -8
         y: 4
+      - x: -5
+        y: 4
+      void_lash:

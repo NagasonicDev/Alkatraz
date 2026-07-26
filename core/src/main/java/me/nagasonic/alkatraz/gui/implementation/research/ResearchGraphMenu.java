@@ -10,6 +10,7 @@ import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.progression.research.ResearchService;
 import me.nagasonic.alkatraz.progression.research.ResearchState;
 import me.nagasonic.alkatraz.progression.research.definition.ResearchCategory;
+import me.nagasonic.alkatraz.texturepack.TexturePackManager;
 import me.nagasonic.alkatraz.progression.research.definition.ResearchNode;
 import me.nagasonic.alkatraz.util.ColorFormat;
 import org.bukkit.Material;
@@ -24,6 +25,13 @@ import java.util.Map;
 import java.util.Optional;
 
 public class ResearchGraphMenu extends Menu {
+
+    private enum Direction { N, S, E, W }
+
+    private enum PieceType {
+        STRAIGHT_H, STRAIGHT_V,
+        CORNER_NE, CORNER_SE, CORNER_SW, CORNER_NW
+    }
 
     private static LangManager lang() { return Alkatraz.getLangManager(); }
 
@@ -212,54 +220,95 @@ public class ResearchGraphMenu extends Menu {
     }
 
     private void drawEdge(ResearchNode parent, ResearchNode child) {
-        if (!parent.getCategory().equals(category) || !child.getCategory().equals(category)) return;
-        if (ResearchService.getState(viewer, parent) == ResearchState.HIDDEN) return;
+        ResearchState parentState = ResearchService.getState(viewer, parent);
+        if (parentState == ResearchState.HIDDEN) return;
 
-        List<int[]> waypoints = child.getEdgePaths().get(parent.getId());
+        List<int[]> waypoints = child.getEdgePaths() != null
+            ? child.getEdgePaths().get(parent.getId()) : null;
         if (waypoints != null && !waypoints.isEmpty()) {
             drawEdgeWithWaypoints(parent, child, waypoints);
         } else {
-            drawEdgeDefault(parent, child);
+            drawCardinalEdge(parent, child);
         }
     }
 
     private void drawEdgeWithWaypoints(ResearchNode parent, ResearchNode child, List<int[]> waypoints) {
-        int x = parent.getX();
-        int y = parent.getY();
-        for (int[] wp : waypoints) {
-            drawSegment(x, y, wp[0], wp[1], parent, child);
-            x = wp[0];
-            y = wp[1];
+        ResearchState parentState = ResearchService.getState(viewer, parent);
+        ResearchState childState = ResearchService.getState(viewer, child);
+        String stateKey = getStateKey(parentState, childState);
+
+        int px = parent.getX(), py = parent.getY();
+        int cx = child.getX(), cy = child.getY();
+
+        List<int[]> fullPath = new ArrayList<>();
+        fullPath.add(new int[]{px, py});
+        fullPath.addAll(waypoints);
+        fullPath.add(new int[]{cx, cy});
+
+        for (int i = 0; i < fullPath.size() - 1; i++) {
+            int[] from = fullPath.get(i);
+            int[] to = fullPath.get(i + 1);
+            drawStraightSegment(from[0], from[1], to[0], to[1], stateKey);
         }
-        drawSegment(x, y, child.getX(), child.getY(), parent, child);
+
+        for (int i = 1; i < fullPath.size() - 1; i++) {
+            int[] prev = fullPath.get(i - 1);
+            int[] wp = fullPath.get(i);
+            int[] next = fullPath.get(i + 1);
+            Direction in = getDirection(prev[0], prev[1], wp[0], wp[1]);
+            Direction out = getDirection(wp[0], wp[1], next[0], next[1]);
+            placeCornerAt(wp[0], wp[1], in, out, stateKey);
+        }
     }
 
-    private void drawEdgeDefault(ResearchNode parent, ResearchNode child) {
-        int px = parent.getX();
-        int py = parent.getY();
-        int cx = child.getX();
-        int cy = child.getY();
-        drawSegment(px, py, cx, cy, parent, child);
+    private void drawCardinalEdge(ResearchNode parent, ResearchNode child) {
+        ResearchState parentState = ResearchService.getState(viewer, parent);
+        ResearchState childState = ResearchService.getState(viewer, child);
+        String stateKey = getStateKey(parentState, childState);
+
+        int px = parent.getX(), py = parent.getY();
+        int cx = child.getX(), cy = child.getY();
+
+        if (px == cx || py == cy) {
+            drawStraightSegment(px, py, cx, cy, stateKey);
+            return;
+        }
+
+        drawStraightSegment(px, py, cx, py, stateKey);
+        Direction hDir = (cx > px) ? Direction.E : Direction.W;
+        Direction vDir = (cy > py) ? Direction.S : Direction.N;
+        placeCornerAt(cx, py, hDir, vDir, stateKey);
+        drawStraightSegment(cx, py, cx, cy, stateKey);
     }
 
-    private void drawSegment(int fromX, int fromY, int toX, int toY, ResearchNode parent, ResearchNode child) {
-        int dx = Integer.compare(toX, fromX);
-        int dy = Integer.compare(toY, fromY);
-        int x = fromX + dx;
-        int y = fromY + dy;
+    private void drawStraightSegment(int fromX, int fromY, int toX, int toY, String stateKey) {
+        if (fromX == toX && fromY == toY) return;
 
+        Direction dir = getDirection(fromX, fromY, toX, toY);
+        PieceType piece = (dir == Direction.E || dir == Direction.W)
+            ? PieceType.STRAIGHT_H : PieceType.STRAIGHT_V;
+
+        int x = fromX;
+        int y = fromY;
         while (x != toX || y != toY) {
+            if (x < toX) x++; else if (x > toX) x--;
+            if (y < toY) y++; else if (y > toY) y--;
+
             slotFor(x, y).ifPresent(slot -> {
-                ItemStack existing = inventory.getItem(slot);
-                boolean isBlank = existing == null || existing.getType() == Material.AIR
-                        || existing.isSimilar(Alkatraz.getGuiItemRegistry().getItem("blank"));
-                if (isBlank) {
-                    inventory.setItem(slot, createEdgeItem(parent, child));
+                if (isBlankSlot(slot)) {
+                    inventory.setItem(slot, createConnectorItem(piece, stateKey));
                 }
             });
-            if (x != toX) x += dx;
-            if (y != toY) y += dy;
         }
+    }
+
+    private void placeCornerAt(int x, int y, Direction in, Direction out, String stateKey) {
+        PieceType piece = getPieceType(in, out);
+        slotFor(x, y).ifPresent(slot -> {
+            if (isBlankSlot(slot)) {
+                inventory.setItem(slot, createConnectorItem(piece, stateKey));
+            }
+        });
     }
 
     private ItemStack createNodeItem(ResearchNode node, ResearchState state) {
@@ -294,24 +343,7 @@ public class ResearchGraphMenu extends Menu {
         return item;
     }
 
-    private ItemStack createEdgeItem(ResearchNode parent, ResearchNode child) {
-        ResearchState parentState = ResearchService.getState(viewer, parent);
-        ResearchState childState = ResearchService.getState(viewer, child);
-        return ItemBuilder.of(getEdgeMaterial(parentState, childState)).build();
-    }
 
-    private Material getEdgeMaterial(ResearchState parentState, ResearchState childState) {
-        return switch (parentState) {
-            case COMPLETED -> switch (childState) {
-                case COMPLETED -> Material.LIME_STAINED_GLASS_PANE;
-                case AVAILABLE -> Material.YELLOW_STAINED_GLASS_PANE;
-                case IN_PROGRESS -> Material.CYAN_STAINED_GLASS_PANE;
-                case LOCKED, HIDDEN -> Material.RED_STAINED_GLASS_PANE;
-            };
-            case IN_PROGRESS, LOCKED, AVAILABLE -> Material.RED_STAINED_GLASS_PANE;
-            case HIDDEN -> Material.GRAY_STAINED_GLASS_PANE;
-        };
-    }
 
     private ItemStack panArrow(String nameKey) {
         return ItemBuilder.of(Material.ARROW).rawName(ColorFormat.format(lang().get(nameKey))).build();
@@ -376,5 +408,53 @@ public class ResearchGraphMenu extends Menu {
                 .findFirst()
                 .map(ResearchCategory::getId)
                 .orElse("general");
+    }
+
+    private Direction getDirection(int fromX, int fromY, int toX, int toY) {
+        int dx = Integer.compare(toX, fromX);
+        int dy = Integer.compare(toY, fromY);
+        if (dx == 1) return Direction.E;
+        if (dx == -1) return Direction.W;
+        if (dy == 1) return Direction.S;
+        return Direction.N;
+    }
+
+    private PieceType getPieceType(Direction incoming, Direction outgoing) {
+        if (incoming == outgoing) {
+            return (incoming == Direction.E || incoming == Direction.W)
+                ? PieceType.STRAIGHT_H : PieceType.STRAIGHT_V;
+        }
+        return switch (incoming) {
+            case N -> outgoing == Direction.E ? PieceType.CORNER_NE : PieceType.CORNER_NW;
+            case S -> outgoing == Direction.E ? PieceType.CORNER_SE : PieceType.CORNER_SW;
+            case E -> outgoing == Direction.N ? PieceType.CORNER_NE : PieceType.CORNER_SE;
+            case W -> outgoing == Direction.N ? PieceType.CORNER_NW : PieceType.CORNER_SW;
+        };
+    }
+
+    private String getStateKey(ResearchState parentState, ResearchState childState) {
+        if (parentState == ResearchState.HIDDEN) return "hidden";
+        if (parentState != ResearchState.COMPLETED) return "locked";
+        return switch (childState) {
+            case COMPLETED -> "completed";
+            case AVAILABLE -> "available";
+            case IN_PROGRESS -> "in_progress";
+            case LOCKED, HIDDEN -> "locked";
+        };
+    }
+
+    private ItemStack createConnectorItem(PieceType piece, String stateKey) {
+        String cmdKey = piece.name().toLowerCase() + "_" + stateKey;
+        int cmd = TexturePackManager.getConnectorCMD(cmdKey);
+        return ItemBuilder.of(Material.GRAY_STAINED_GLASS_PANE)
+            .name(" ")
+            .customModelData(cmd)
+            .build();
+    }
+
+    private boolean isBlankSlot(int slot) {
+        ItemStack existing = inventory.getItem(slot);
+        if (existing == null || existing.getType() == Material.AIR) return true;
+        return existing.isSimilar(Alkatraz.getGuiItemRegistry().getItem("blank"));
     }
 }

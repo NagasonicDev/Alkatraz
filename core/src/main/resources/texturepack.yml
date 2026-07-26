@@ -144,13 +144,17 @@ custom_model_data:
     void_grimoire: 5009
     
   gui:
-    # GUI Elements (4001-4999)
+    # GUI Elements (4001-4099)
     next_page: 4001
     prev_page: 4002
     back_button: 4003
     blank_pane: 4004
     border_pane: 4005
     header_pane: 4006
+    confirm_button: 4007
+    cancel_button: 4008
+    info_button: 4009
+    close_button: 4010
     
     # Spell GUI items (4100-4199)
     spell_magic_missile: 4101
@@ -186,6 +190,9 @@ custom_model_data:
     spell_whirlpool: 4131
     spell_wind_barrier: 4132
     spell_wind_vortex: 4133
+    spell_fire_blast: 4134
+    spell_fire_wall: 4135
+    spell_lesser_heal: 4136
 
 # GUI item materials configuration
 gui_items:
@@ -201,3 +208,39 @@ gui_items:
     confirm: "LIME_CONCRETE"
     cancel: "RED_CONCRETE"
     info: "KNOWLEDGE_BOOK"
+    close: "BARRIER"
+
+# Connector textures for research graph edges (6001-6030)
+# Piece types: straight_h, straight_v, corner_ne, corner_se, corner_sw, corner_nw
+# States: completed, available, in_progress, locked, hidden
+connector_textures:
+  straight_h_completed: 6001
+  straight_h_available: 6002
+  straight_h_in_progress: 6003
+  straight_h_locked: 6004
+  straight_h_hidden: 6005
+  straight_v_completed: 6006
+  straight_v_available: 6007
+  straight_v_in_progress: 6008
+  straight_v_locked: 6009
+  straight_v_hidden: 6010
+  corner_ne_completed: 6011
+  corner_ne_available: 6012
+  corner_ne_in_progress: 6013
+  corner_ne_locked: 6014
+  corner_ne_hidden: 6015
+  corner_se_completed: 6016
+  corner_se_available: 6017
+  corner_se_in_progress: 6018
+  corner_se_locked: 6019
+  corner_se_hidden: 6020
+  corner_sw_completed: 6021
+  corner_sw_available: 6022
+  corner_sw_in_progress: 6023
+  corner_sw_locked: 6024
+  corner_sw_hidden: 6025
+  corner_nw_completed: 6026
+  corner_nw_available: 6027
+  corner_nw_in_progress: 6028
+  corner_nw_locked: 6029
+  corner_nw_hidden: 6030
