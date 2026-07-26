@@ -1,5 +1,6 @@
 key: alkatraz:blaze_pendant
 material: AMETHYST_SHARD
+custom_model_data: 1237
 display_name: '&r&6Blaze Pendant'
 lore:
   - 'A powerful Fire accessory.'

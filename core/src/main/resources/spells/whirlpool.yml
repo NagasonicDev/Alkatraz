@@ -1,4 +1,4 @@
-id: 'whirlpool'
+﻿id: 'whirlpool'
 display_name: '&9Whirlpool'
 description:
   - '&7Summons a whirlpool at the'
@@ -19,3 +19,4 @@ damage_per_tick: 1.0
 pull_strength: 0.4
 mastery_bar_color: 'BLUE'
 gui_item: 'WATER_BUCKET'
+gui_custom_model_data: 4131

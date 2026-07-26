@@ -1,5 +1,6 @@
 key: alkatraz:boulder_pendant
 material: AMETHYST_SHARD
+custom_model_data: 1247
 display_name: '&r&aBoulder Pendant'
 lore:
   - 'A simple piece of Earth jewelry.'

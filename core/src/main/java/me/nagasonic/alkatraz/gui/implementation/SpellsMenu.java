@@ -115,6 +115,7 @@ public class SpellsMenu extends PagedMenu<Spell> {
                 .rawName(ColorFormat.format(spell.getDisplayName()))
                 .rawLore(lore)
                 .hideAttributes()
+                .customModelData(spell.getGuiCustomModelData())
                 .glint(false)
                 .build();
 

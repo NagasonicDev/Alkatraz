@@ -1,5 +1,6 @@
 key: alkatraz:arcane_necklace
 material: IRON_CHAIN
+custom_model_data: 1227
 display_name: '&r&dArcane Necklace'
 lore:
   - 'A powerful Magic accessory.'

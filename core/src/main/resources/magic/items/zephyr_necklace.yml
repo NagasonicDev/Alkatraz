@@ -1,5 +1,6 @@
 key: alkatraz:zephyr_necklace
 material: STRING
+custom_model_data: 1217
 display_name: '&r&fZephyr Necklace'
 lore:
   - 'A simple piece of Air jewelry.'

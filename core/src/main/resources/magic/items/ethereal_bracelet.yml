@@ -1,5 +1,6 @@
 key: alkatraz:ethereal_bracelet
 material: GOLD_INGOT
+custom_model_data: 1260
 display_name: '&r&6Ethereal Bracelet'
 lore:
   - 'A legendary Magic artifact of immense power.'

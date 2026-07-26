@@ -1,5 +1,6 @@
 key: alkatraz:fireball_scroll
 material: PAPER
+custom_model_data: 1103
 display_name: '&6Scroll of Fireball'
 lore:
   - '&7A blazing scroll containing'

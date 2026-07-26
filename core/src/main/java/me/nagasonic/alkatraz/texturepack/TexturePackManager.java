@@ -52,9 +52,22 @@ public class TexturePackManager {
         loadConnectorCMDs();
     }
     
+    private static String resourcePackUrl = "";
+    private static String resourcePackHash = "";
+    private static String resourcePackPrompt = "";
+    private static String resourcePackMessage = "";
+
     private static void loadResourcePackSettings() {
-        // Resource pack settings will be handled by the main plugin
+        resourcePackUrl = config.getString("resource_pack.url", "");
+        resourcePackHash = config.getString("resource_pack.hash", "");
+        resourcePackPrompt = config.getString("resource_pack.prompt", "");
+        resourcePackMessage = config.getString("resource_pack.message", "");
     }
+
+    public static String getResourcePackUrl() { return resourcePackUrl; }
+    public static String getResourcePackHash() { return resourcePackHash; }
+    public static String getResourcePackPrompt() { return resourcePackPrompt; }
+    public static String getResourcePackMessage() { return resourcePackMessage; }
     
     private static void loadAsciiCodes() {
         // Load menu title codes

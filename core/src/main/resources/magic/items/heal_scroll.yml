@@ -1,5 +1,6 @@
 key: alkatraz:heal_scroll
 material: PAPER
+custom_model_data: 1102
 display_name: '&aScroll of Healing'
 lore:
   - '&7A soothing scroll imbued'

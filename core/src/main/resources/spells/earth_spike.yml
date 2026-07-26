@@ -1,4 +1,4 @@
-id: 'earth_spike'
+﻿id: 'earth_spike'
 display_name: '#A0522DEarth Spike'
 description:
   - '&7Creates a spike of condensed rock,'
@@ -34,6 +34,7 @@ mastery_bar_color: 'GREEN'
 
 #THE ITEM THAT APPEARS IN THE /SPELLS GUI
 gui_item: 'POINTED_DRIPSTONE'
+gui_custom_model_data: 4122
 
 # SELF-DESTRUCT: Ticks after spike finishes rising before blocks are restored (20 ticks = 1 second)
 self_destruct_ticks: 100

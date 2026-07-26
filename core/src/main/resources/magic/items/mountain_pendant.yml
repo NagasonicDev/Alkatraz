@@ -1,5 +1,6 @@
 key: alkatraz:mountain_pendant
 material: AMETHYST_SHARD
+custom_model_data: 1248
 display_name: '&r&2Mountain Pendant'
 lore:
   - 'A powerful Earth accessory.'

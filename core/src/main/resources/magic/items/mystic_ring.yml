@@ -1,5 +1,6 @@
 key: alkatraz:mystic_ring
 material: GOLD_NUGGET
+custom_model_data: 1210
 display_name: '&r&bMystic Ring'
 lore:
   - 'A simple piece of Magic jewelry.'

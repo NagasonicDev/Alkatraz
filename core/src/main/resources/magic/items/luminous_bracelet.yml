@@ -1,5 +1,6 @@
 key: alkatraz:luminous_bracelet
 material: IRON_NUGGET
+custom_model_data: 1261
 display_name: '&r&fLuminous Bracelet'
 lore:
   - 'A powerful Light accessory.'

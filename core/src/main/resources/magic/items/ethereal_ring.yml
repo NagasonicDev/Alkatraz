@@ -1,5 +1,6 @@
 key: alkatraz:ethereal_ring
 material: DIAMOND
+custom_model_data: 1212
 display_name: '&r&6Ethereal Ring'
 lore:
   - 'A legendary Magic artifact of immense power.'

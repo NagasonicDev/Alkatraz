@@ -1,5 +1,6 @@
 key: alkatraz:archmage_hat
 material: LEATHER_HELMET
+custom_model_data: 2809
 dye_color: 'FFCC88'
 display_name: '&r&6Archmage Hat'
 lore:

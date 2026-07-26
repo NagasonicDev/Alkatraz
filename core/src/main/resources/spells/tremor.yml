@@ -1,4 +1,4 @@
-id: 'tremor'
+﻿id: 'tremor'
 display_name: '#A0522DTremor'
 description:
   - '&7Sends out a shockwave through the ground'
@@ -34,5 +34,6 @@ mastery_bar_color: 'GREEN'
 
 #THE ITEM THAT APPEARS IN THE /SPELLS GUI
 gui_item: 'CRACKED_STONE_BRICKS'
+gui_custom_model_data: 4128
 
 

@@ -1,5 +1,6 @@
 key: alkatraz:nether_ring
 material: DIAMOND
+custom_model_data: 1209
 display_name: '&r&5Nether Ring'
 lore:
   - 'A legendary Dark artifact of immense power.'

@@ -1,5 +1,6 @@
 key: alkatraz:arcane_ring
 material: GOLD_NUGGET
+custom_model_data: 1211
 display_name: '&r&dArcane Ring'
 lore:
   - 'A powerful Magic accessory.'

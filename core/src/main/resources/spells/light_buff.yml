@@ -1,4 +1,4 @@
-id: 'light_buff'
+﻿id: 'light_buff'
 display_name: '&eLight Buff'
 description:
   - '&7Blesses nearby allies with'
@@ -15,3 +15,4 @@ buff_radius: 8.0
 base_duration: 15
 mastery_bar_color: 'YELLOW'
 gui_item: 'GLOWSTONE_DUST'
+gui_custom_model_data: 4111

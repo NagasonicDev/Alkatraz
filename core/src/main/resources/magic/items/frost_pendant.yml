@@ -1,5 +1,6 @@
 key: alkatraz:frost_pendant
 material: AMETHYST_SHARD
+custom_model_data: 1246
 display_name: '&r&bFrost Pendant'
 lore:
   - 'A simple piece of Water jewelry.'

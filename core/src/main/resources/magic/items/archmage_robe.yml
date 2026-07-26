@@ -1,5 +1,6 @@
 key: alkatraz:archmage_robe
 material: LEATHER_CHESTPLATE
+custom_model_data: 2810
 dye_color: 'FFCC88'
 display_name: '&r&6Archmage Robe'
 lore:

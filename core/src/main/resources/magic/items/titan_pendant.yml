@@ -1,5 +1,6 @@
 key: alkatraz:titan_pendant
 material: ECHO_SHARD
+custom_model_data: 1235
 display_name: '&r&6Titan Pendant'
 lore:
   - 'A legendary Earth artifact of immense power.'

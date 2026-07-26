@@ -1,5 +1,6 @@
 key: alkatraz:divine_bracelet
 material: GOLD_INGOT
+custom_model_data: 1256
 display_name: '&r&dDivine Bracelet'
 lore:
   - 'A legendary Light artifact of immense power.'

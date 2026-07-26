@@ -1,5 +1,6 @@
 key: alkatraz:archmage_boots
 material: LEATHER_BOOTS
+custom_model_data: 2812
 dye_color: 'FFCC88'
 display_name: '&r&6Archmage Boots'
 lore:

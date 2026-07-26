@@ -1,5 +1,6 @@
 key: alkatraz:glacier_pendant
 material: AMETHYST_SHARD
+custom_model_data: 1246
 display_name: '&r&3Glacier Pendant'
 lore:
   - 'A powerful Water accessory.'

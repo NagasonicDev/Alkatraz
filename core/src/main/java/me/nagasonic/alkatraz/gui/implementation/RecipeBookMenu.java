@@ -2,6 +2,7 @@ package me.nagasonic.alkatraz.gui.implementation;
 
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.gui.PagedMenu;
+import me.nagasonic.alkatraz.texturepack.TexturePackManager;
 import me.nagasonic.alkatraz.items.magic.recipe.MagicItemRecipeManager;
 import me.nagasonic.alkatraz.util.ColorFormat;
 import me.nagasonic.alkatraz.util.StringUtils;
@@ -27,11 +28,19 @@ public class RecipeBookMenu extends PagedMenu<MagicItemRecipeManager.RecipeData>
     };
 
     public RecipeBookMenu(Player viewer) {
-        super(viewer, ColorFormat.format(Alkatraz.getLangManager().get("menu.recipe_book")), 54, getSortedRecipes(), 28);
+        super(viewer, getResourceTitle(), 54, getSortedRecipes(), 28);
         this.contentSlots = RECIPE_SLOTS;
         this.nextPageSlot = 53;
         this.previousPageSlot = 45;
         this.backButtonSlot = 49;
+    }
+
+    private static String getResourceTitle() {
+        String code = Alkatraz.getTexturePackManager().getMenuTitleCode("recipes");
+        if (code == null || code.isEmpty() || !TexturePackManager.isResourcePackEnabled()) {
+            return ColorFormat.format(Alkatraz.getLangManager().get("menu.recipe_book"));
+        }
+        return code;
     }
 
     private static List<MagicItemRecipeManager.RecipeData> getSortedRecipes() {

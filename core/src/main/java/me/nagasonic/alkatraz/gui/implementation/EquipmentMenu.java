@@ -7,6 +7,7 @@ import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
 import me.nagasonic.alkatraz.items.magic.equipment.EquipmentStorage;
 import me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack;
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.texturepack.TexturePackManager;
 import me.nagasonic.alkatraz.util.ColorFormat;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -35,7 +36,15 @@ public class EquipmentMenu extends Menu {
     );
 
     public EquipmentMenu(Player viewer) {
-        super(viewer, ColorFormat.format(Alkatraz.getLangManager().get("menu.equipment")), 45);
+        super(viewer, getResourceTitle(), 45);
+    }
+
+    private static String getResourceTitle() {
+        String code = Alkatraz.getTexturePackManager().getMenuTitleCode("equipment");
+        if (code == null || code.isEmpty() || !TexturePackManager.isResourcePackEnabled()) {
+            return ColorFormat.format(Alkatraz.getLangManager().get("menu.equipment"));
+        }
+        return code;
     }
 
     @Override

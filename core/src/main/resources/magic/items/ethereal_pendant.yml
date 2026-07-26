@@ -1,5 +1,6 @@
 key: alkatraz:ethereal_pendant
 material: ECHO_SHARD
+custom_model_data: 1244
 display_name: '&r&6Ethereal Pendant'
 lore:
   - 'A legendary Magic artifact of immense power.'

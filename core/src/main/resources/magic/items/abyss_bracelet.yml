@@ -1,5 +1,6 @@
 key: alkatraz:abyss_bracelet
 material: GOLD_INGOT
+custom_model_data: 1254
 display_name: '&r&9Abyss Bracelet'
 lore:
   - 'A legendary Water artifact of immense power.'

@@ -1,4 +1,4 @@
-id: 'tsunami'
+﻿id: 'tsunami'
 display_name: '&9Tsunami'
 description:
   - '&7Summons a massive wave that surges forward,'
@@ -14,5 +14,6 @@ power: 7
 maximum_mastery: 100
 mastery_bar_color: 'BLUE'
 gui_item: 'WATER_BUCKET'
+gui_custom_model_data: 4106
 cast_sound: 'ENTITY_DROWNED_SWIM'
 wind_up_duration: 2

@@ -1,5 +1,6 @@
 key: alkatraz:tempest_ring
 material: DIAMOND
+custom_model_data: 1207
 display_name: '&r&8Tempest Ring'
 lore:
   - 'A legendary Air artifact of immense power.'

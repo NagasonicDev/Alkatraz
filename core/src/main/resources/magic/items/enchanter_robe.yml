@@ -1,5 +1,6 @@
 key: alkatraz:enchanter_robe
 material: LEATHER_CHESTPLATE
+custom_model_data: 2806
 dye_color: 'AA3333'
 display_name: '&r&cEnchanter Robe'
 lore:

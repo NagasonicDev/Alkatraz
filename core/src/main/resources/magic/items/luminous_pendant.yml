@@ -1,5 +1,6 @@
 key: alkatraz:luminous_pendant
 material: AMETHYST_SHARD
+custom_model_data: 1245
 display_name: '&r&fLuminous Pendant'
 lore:
   - 'A powerful Light accessory.'

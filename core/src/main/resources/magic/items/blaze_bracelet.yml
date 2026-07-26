@@ -1,5 +1,6 @@
 key: alkatraz:blaze_bracelet
 material: IRON_NUGGET
+custom_model_data: 1253
 display_name: '&r&6Blaze Bracelet'
 lore:
   - 'A powerful Fire accessory.'

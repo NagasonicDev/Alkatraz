@@ -1,4 +1,4 @@
-id: 'tornado'
+﻿id: 'tornado'
 display_name: '&bTornado'
 description:
   - '&7Creates a violent vortex that pulls in'
@@ -13,6 +13,7 @@ mana_cost: 110
 maximum_mastery: 100
 mastery_bar_color: 'WHITE'
 gui_item: 'FEATHER'
+gui_custom_model_data: 4104
 cast_sound: 'ENTITY_BLAZE_SHOOT'
 wind_up_duration: 2
 radius: 6.0

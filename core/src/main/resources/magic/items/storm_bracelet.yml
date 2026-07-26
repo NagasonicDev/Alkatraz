@@ -1,5 +1,6 @@
 key: alkatraz:storm_bracelet
 material: IRON_NUGGET
+custom_model_data: 1252
 display_name: '&r&7Storm Bracelet'
 lore:
   - 'A powerful Air accessory.'

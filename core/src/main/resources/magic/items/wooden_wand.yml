@@ -1,5 +1,6 @@
 key: alkatraz:wooden_wand
 material: STICK
+custom_model_data: 1001
 display_name: '&r&fWooden Wand'
 lore:
   - '&7A plain old wand.'

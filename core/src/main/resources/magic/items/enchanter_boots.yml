@@ -1,5 +1,6 @@
 key: alkatraz:enchanter_boots
 material: LEATHER_BOOTS
+custom_model_data: 2808
 dye_color: 'AA3333'
 display_name: '&r&cEnchanter Boots'
 lore:

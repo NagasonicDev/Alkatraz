@@ -1,5 +1,6 @@
 key: alkatraz:luminous_grimoire
 material: BOOK
+custom_model_data: 5008
 display_name: '&r&eLuminous Grimoire'
 lore:
   - '&7A grimoire that glows with inner light,'

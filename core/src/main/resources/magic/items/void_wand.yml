@@ -1,5 +1,6 @@
 key: alkatraz:void_wand
 material: END_ROD
+custom_model_data: 1009
 display_name: '&r&8Void Wand'
 lore:
   - '&7A wand born from the abyss,'

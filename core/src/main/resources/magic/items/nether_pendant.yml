@@ -1,5 +1,6 @@
 key: alkatraz:nether_pendant
 material: ECHO_SHARD
+custom_model_data: 1241
 display_name: '&r&5Nether Pendant'
 lore:
   - 'A legendary Dark artifact of immense power.'

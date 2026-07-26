@@ -1,5 +1,6 @@
 key: alkatraz:mountain_grimoire
 material: BOOK
+custom_model_data: 5006
 display_name: '&r&5Mountain Grimoire'
 lore:
   - '&7A grimoire etched in stone, its'

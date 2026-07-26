@@ -1,5 +1,6 @@
 key: alkatraz:luminous_ring
 material: GOLD_NUGGET
+custom_model_data: 1213
 display_name: '&r&fLuminous Ring'
 lore:
   - 'A powerful Light accessory.'

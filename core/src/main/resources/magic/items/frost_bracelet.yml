@@ -1,5 +1,6 @@
 key: alkatraz:frost_bracelet
 material: IRON_NUGGET
+custom_model_data: 1262
 display_name: '&r&bFrost Bracelet'
 lore:
   - 'A simple piece of Water jewelry.'

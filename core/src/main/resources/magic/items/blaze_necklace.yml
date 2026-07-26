@@ -1,5 +1,6 @@
 key: alkatraz:blaze_necklace
 material: IRON_CHAIN
+custom_model_data: 1221
 display_name: '&r&6Blaze Necklace'
 lore:
   - 'A powerful Fire accessory.'

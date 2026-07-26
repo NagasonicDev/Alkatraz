@@ -1,5 +1,6 @@
 key: alkatraz:void_ring
 material: GOLD_NUGGET
+custom_model_data: 1202
 display_name: '&r&0Void Ring'
 lore:
   - 'A powerful Dark accessory.'

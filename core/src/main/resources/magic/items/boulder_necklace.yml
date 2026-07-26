@@ -1,5 +1,6 @@
 key: alkatraz:boulder_necklace
 material: STRING
+custom_model_data: 1231
 display_name: '&r&aBoulder Necklace'
 lore:
   - 'A simple piece of Earth jewelry.'

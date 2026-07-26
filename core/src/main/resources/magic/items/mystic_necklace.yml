@@ -1,5 +1,6 @@
 key: alkatraz:mystic_necklace
 material: STRING
+custom_model_data: 1226
 display_name: '&r&bMystic Necklace'
 lore:
   - 'A simple piece of Magic jewelry.'

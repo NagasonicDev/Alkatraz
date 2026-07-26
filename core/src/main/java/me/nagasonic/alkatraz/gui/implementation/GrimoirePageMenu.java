@@ -1,5 +1,6 @@
 package me.nagasonic.alkatraz.gui.implementation;
 
+import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.api.magic.definition.ItemDefinition;
 import me.nagasonic.alkatraz.api.magic.instance.MagicItemInstance;
 import me.nagasonic.alkatraz.gui.ItemBuilder;
@@ -9,6 +10,7 @@ import me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellCastValidator;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
+import me.nagasonic.alkatraz.texturepack.TexturePackManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -37,12 +39,20 @@ public class GrimoirePageMenu extends Menu {
     private int currentSpread;
 
     public GrimoirePageMenu(Player viewer, ItemStack grimoireStack, MagicItemInstance instance, ItemDefinition definition) {
-        super(viewer, lang().get("menu.grimoire"), 54);
+        super(viewer, getResourceTitle(), 54);
         this.grimoireStack = grimoireStack;
         this.instance = instance;
         this.definition = definition;
         this.currentSpread = 0;
         GrimoireComponentHandler.ensurePagesInitialized(instance, definition);
+    }
+
+    private static String getResourceTitle() {
+        String code = Alkatraz.getTexturePackManager().getMenuTitleCode("grimoire");
+        if (code == null || code.isEmpty() || !TexturePackManager.isResourcePackEnabled()) {
+            return lang().get("menu.grimoire");
+        }
+        return code;
     }
 
     @Override

@@ -1,5 +1,6 @@
 key: alkatraz:tempest_pendant
 material: ECHO_SHARD
+custom_model_data: 1239
 display_name: '&r&8Tempest Pendant'
 lore:
   - 'A legendary Air artifact of immense power.'

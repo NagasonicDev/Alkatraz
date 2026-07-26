@@ -1,5 +1,6 @@
 key: alkatraz:storm_grimoire
 material: BOOK
+custom_model_data: 5007
 display_name: '&r&fStorm Grimoire'
 lore:
   - '&7A grimoire that crackles with wind,'

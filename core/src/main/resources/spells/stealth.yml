@@ -1,4 +1,4 @@
-id: 'stealth'
+﻿id: 'stealth'
 display_name: '&7Stealth'
 description:
   - '&7Uses magic power to hide the player,'
@@ -33,6 +33,7 @@ mastery_bar_color: 'WHITE'
 
 #THE ITEM THAT APPEARS IN THE /SPELLS GUI
 gui_item: 'GUNPOWDER'
+gui_custom_model_data: 4113
 
 # THE COST OVER TIME TO MAINTAIN STEALTH
 cost_over_time:

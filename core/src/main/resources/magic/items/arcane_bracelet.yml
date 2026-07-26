@@ -1,5 +1,6 @@
 key: alkatraz:arcane_bracelet
 material: IRON_NUGGET
+custom_model_data: 1259
 display_name: '&r&dArcane Bracelet'
 lore:
   - 'A powerful Magic accessory.'

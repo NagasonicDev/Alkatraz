@@ -1,4 +1,4 @@
-id: 'heal'
+﻿id: 'heal'
 display_name: '&eHeal'
 description:
   - '&7Heal yourself (&8Shift&7) or any'
@@ -38,6 +38,7 @@ mastery_bar_color: 'YELLOW'
 
 #THE ITEM THAT APPEARS IN THE /SPELLS GUI
 gui_item: 'GOLD_INGOT'
+gui_custom_model_data: 4103
 
 cast_sound: 'BLOCK_BEACON_ACTIVATE'
 cast_sound_pitch: 0.8

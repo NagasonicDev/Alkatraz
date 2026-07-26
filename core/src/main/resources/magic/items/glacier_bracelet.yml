@@ -1,5 +1,6 @@
 key: alkatraz:glacier_bracelet
 material: IRON_NUGGET
+custom_model_data: 1262
 display_name: '&r&3Glacier Bracelet'
 lore:
   - 'A powerful Water accessory.'
