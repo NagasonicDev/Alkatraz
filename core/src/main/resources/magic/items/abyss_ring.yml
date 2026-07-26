@@ -1,5 +1,6 @@
 key: alkatraz:abyss_ring
 material: DIAMOND
+custom_model_data: 1206
 display_name: '&r&9Abyss Ring'
 lore:
   - 'A legendary Water artifact of immense power.'

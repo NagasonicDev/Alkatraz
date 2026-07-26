@@ -1,5 +1,6 @@
 key: alkatraz:blaze_grimoire
 material: BOOK
+custom_model_data: 5004
 display_name: '&r&6Blaze Grimoire'
 lore:
   - '&7A grimoire wreathed in embers,'

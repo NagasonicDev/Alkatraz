@@ -1,4 +1,4 @@
-id: 'wind_barrier'
+﻿id: 'wind_barrier'
 display_name: '&fWind Barrier'
 description:
   - '&7Creates a barrier of wind that'
@@ -16,3 +16,4 @@ duration: 30
 max_hitpoints: 30
 mastery_bar_color: 'WHITE'
 gui_item: 'SHIELD'
+gui_custom_model_data: 4132

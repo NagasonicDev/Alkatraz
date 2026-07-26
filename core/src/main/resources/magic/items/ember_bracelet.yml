@@ -1,5 +1,6 @@
 key: alkatraz:ember_bracelet
 material: IRON_NUGGET
+custom_model_data: 1261
 display_name: '&r&cEmber Bracelet'
 lore:
   - 'A simple piece of Fire jewelry.'

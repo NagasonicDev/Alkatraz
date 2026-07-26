@@ -1,5 +1,6 @@
 key: alkatraz:leather_grimoire
 material: BOOK
+custom_model_data: 5002
 display_name: '&r&6Leather Grimoire'
 lore:
   - '&7A grimoire that stores spells'

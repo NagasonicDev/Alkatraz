@@ -1,5 +1,6 @@
 key: alkatraz:titan_bracelet
 material: GOLD_INGOT
+custom_model_data: 1251
 display_name: '&r&6Titan Bracelet'
 lore:
   - 'A legendary Earth artifact of immense power.'

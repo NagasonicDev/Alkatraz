@@ -1,4 +1,4 @@
-id: 'magic_missile'
+﻿id: 'magic_missile'
 display_name: '&bMagic Missile'
 description:
   - '&7A short burst of mana that'
@@ -34,3 +34,4 @@ mastery_bar_color: 'BLUE'
 
 #THE ITEM THAT APPEARS IN THE /SPELLS GUI
 gui_item: 'IRON_NUGGET'
+gui_custom_model_data: 4101

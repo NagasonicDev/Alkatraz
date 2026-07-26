@@ -1,5 +1,6 @@
 key: alkatraz:scholar_boots
 material: LEATHER_BOOTS
+custom_model_data: 2804
 dye_color: '8833AA'
 display_name: '&r&dScholar Boots'
 lore:

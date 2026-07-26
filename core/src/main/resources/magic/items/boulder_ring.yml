@@ -1,5 +1,6 @@
 key: alkatraz:boulder_ring
 material: GOLD_NUGGET
+custom_model_data: 1215
 display_name: '&r&aBoulder Ring'
 lore:
   - 'A simple piece of Earth jewelry.'

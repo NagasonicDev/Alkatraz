@@ -41,6 +41,7 @@ public abstract class Spell {
     protected String code;
     protected BarColor masteryBarColor;
     protected ItemStack guiItem;
+    protected int guiCustomModelData;
     protected long cooldown;
     protected int cost;
     protected double castTime;
@@ -228,6 +229,7 @@ public abstract class Spell {
         this.cooldown      = spellConfig.getLong("cooldown");
         this.masteryBarColor = BarColor.valueOf(spellConfig.getString("mastery_bar_color"));
         this.guiItem       = Utils.materialFromString(spellConfig.getString("gui_item"));
+        this.guiCustomModelData = spellConfig.getInt("gui_custom_model_data", 0);
 
         loadSoundConfig(spellConfig);
     }
@@ -409,6 +411,7 @@ public abstract class Spell {
     public int getRequiredCircleLevel() { return requiredCircle; }
     public BarColor getMasteryBarColor() { return masteryBarColor; }
     public ItemStack getGuiItem()    { return guiItem; }
+    public int getGuiCustomModelData() { return guiCustomModelData; }
     public boolean isEnabled()       { return enabled; }
 
     /**

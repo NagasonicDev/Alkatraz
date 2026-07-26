@@ -1,5 +1,6 @@
 key: alkatraz:ember_ring
 material: GOLD_NUGGET
+custom_model_data: 1213
 display_name: '&r&cEmber Ring'
 lore:
   - 'A simple piece of Fire jewelry.'

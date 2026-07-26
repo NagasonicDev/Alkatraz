@@ -1,5 +1,6 @@
 key: alkatraz:storm_pendant
 material: AMETHYST_SHARD
+custom_model_data: 1236
 display_name: '&r&7Storm Pendant'
 lore:
   - 'A powerful Air accessory.'

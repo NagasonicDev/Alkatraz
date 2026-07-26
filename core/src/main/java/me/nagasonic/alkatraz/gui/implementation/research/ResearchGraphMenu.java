@@ -58,10 +58,18 @@ public class ResearchGraphMenu extends Menu {
     }
 
     public ResearchGraphMenu(Player viewer, String category, int viewCenterX, int viewCenterY) {
-        super(viewer, lang().get("menu.research_library"), 54);
+        super(viewer, getResourceTitle(), 54);
         this.category = category;
         this.viewCenterX = clamp(viewCenterX);
         this.viewCenterY = clamp(viewCenterY);
+    }
+
+    private static String getResourceTitle() {
+        String code = Alkatraz.getTexturePackManager().getMenuTitleCode("research");
+        if (code == null || code.isEmpty() || !TexturePackManager.isResourcePackEnabled()) {
+            return lang().get("menu.research_library");
+        }
+        return code;
     }
 
     @Override
@@ -444,12 +452,13 @@ public class ResearchGraphMenu extends Menu {
     }
 
     private ItemStack createConnectorItem(PieceType piece, String stateKey) {
-        String cmdKey = piece.name().toLowerCase() + "_" + stateKey;
-        int cmd = TexturePackManager.getConnectorCMD(cmdKey);
-        return ItemBuilder.of(Material.GRAY_STAINED_GLASS_PANE)
-            .name(" ")
-            .customModelData(cmd)
-            .build();
+        Material mat = switch (stateKey) {
+            case "completed" -> Material.PURPLE_STAINED_GLASS_PANE;
+            case "available" -> Material.PINK_STAINED_GLASS_PANE;
+            default -> Material.GRAY_STAINED_GLASS_PANE;
+        };
+        int cmd = TexturePackManager.getConnectorCMD(piece.name().toLowerCase() + "_" + stateKey);
+        return ItemBuilder.of(mat).name(" ").glint("in_progress".equals(stateKey)).customModelData(cmd).build();
     }
 
     private boolean isBlankSlot(int slot) {

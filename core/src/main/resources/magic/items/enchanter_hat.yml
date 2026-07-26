@@ -1,5 +1,6 @@
 key: alkatraz:enchanter_hat
 material: LEATHER_HELMET
+custom_model_data: 2805
 dye_color: 'AA3333'
 display_name: '&r&cEnchanter Hat'
 lore:

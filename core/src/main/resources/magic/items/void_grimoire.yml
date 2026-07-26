@@ -1,5 +1,6 @@
 key: alkatraz:void_grimoire
 material: BOOK
+custom_model_data: 5009
 display_name: '&r&8Void Grimoire'
 lore:
   - '&7A grimoire bound in shadow, its'

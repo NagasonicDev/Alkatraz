@@ -1,4 +1,4 @@
-id: 'dark_tendrils'
+﻿id: 'dark_tendrils'
 display_name: '&5Dark Tendrils'
 description:
   - '&7Summon tendrils of dark mana that'
@@ -43,6 +43,7 @@ mastery_bar_color: 'PURPLE'
 
 #THE ITEM THAT APPEARS IN THE /SPELLS GUI
 gui_item: 'ENDER_EYE'
+gui_custom_model_data: 4118
 
 prepare_sound: 'ENTITY_PHANTOM_HURT'
 prepare_sound_volume: 0.4

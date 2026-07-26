@@ -1,4 +1,4 @@
-id: 'radiance'
+﻿id: 'radiance'
 display_name: '&eRadiance'
 description:
   - '&7A burst of holy light that heals allies'
@@ -13,6 +13,7 @@ mana_cost: 95
 maximum_mastery: 100
 mastery_bar_color: 'YELLOW'
 gui_item: 'GLOWSTONE_DUST'
+gui_custom_model_data: 4108
 cast_sound: 'ENTITY_EXPERIENCE_ORB_PICKUP'
 heal_amount: 8.0
 radius: 8.0

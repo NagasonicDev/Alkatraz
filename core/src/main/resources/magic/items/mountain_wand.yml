@@ -1,5 +1,6 @@
 key: alkatraz:mountain_wand
 material: END_ROD
+custom_model_data: 1006
 display_name: '&r&5Mountain Wand'
 lore:
   - '&7A wand shaped from ancient stone,'

@@ -1,5 +1,6 @@
 key: alkatraz:magic_stone
 material: AMETHYST_SHARD
+custom_model_data: 5001
 display_name: '&dMagic Stone'
 lore:
   - '&7A shimmering stone infused with raw'

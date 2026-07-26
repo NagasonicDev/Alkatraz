@@ -1,5 +1,6 @@
 key: alkatraz:magic_missile_scroll
 material: PAPER
+custom_model_data: 1101
 display_name: '&dScroll of Magic Missile'
 lore:
   - '&7A basic scroll for the'

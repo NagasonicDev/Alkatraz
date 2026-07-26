@@ -1,5 +1,6 @@
 key: alkatraz:void_pendant
 material: AMETHYST_SHARD
+custom_model_data: 1234
 display_name: '&r&0Void Pendant'
 lore:
   - 'A powerful Dark accessory.'

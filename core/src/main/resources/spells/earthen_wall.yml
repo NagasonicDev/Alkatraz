@@ -1,4 +1,4 @@
-id: 'earthen_wall'
+﻿id: 'earthen_wall'
 display_name: '&6Earthen Wall'
 description:
   - '&7Raises a wall of earth to block'
@@ -17,6 +17,7 @@ height: 6
 length: 20
 mastery_bar_color: 'GREEN'
 gui_item: 'STONE'
+gui_custom_model_data: 4121
 
 # SELF-DESTRUCT: Ticks after wall is fully raised before blocks are restored (20 ticks = 1 second)
 self_destruct_ticks: 100

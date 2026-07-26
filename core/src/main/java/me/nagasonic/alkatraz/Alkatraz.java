@@ -34,6 +34,7 @@ import me.nagasonic.alkatraz.playerdata.profiles.CoreProfileProvider;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.spellbooks.SpellbookListener;
 import me.nagasonic.alkatraz.spells.spellbooks.SpellbookVillagerListener;
+import me.nagasonic.alkatraz.texturepack.ResourcePackListener;
 import me.nagasonic.alkatraz.tutorial.FirstJoinTutorial;
 import me.nagasonic.alkatraz.api.SpellAPI;
 import me.nagasonic.alkatraz.util.UpdateChecker;
@@ -152,6 +153,7 @@ public final class Alkatraz extends JavaPlugin {
         registerListener(new MagicItemComponentListener());
         registerListener(new RecipeCraftListener());
         registerListener(new MagicStoneDropListener());
+        registerListener(new ResourcePackListener());
         Bukkit.getPluginManager().registerEvents(new MenuListener(), this);
         logInfo("NMS version " + nms.getClass().getSimpleName() + " registered!");
         getCommand("spells").setExecutor(new SpellsCommand());

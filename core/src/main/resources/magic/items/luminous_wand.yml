@@ -1,5 +1,6 @@
 key: alkatraz:luminous_wand
 material: END_ROD
+custom_model_data: 1008
 display_name: '&r&eLuminous Wand'
 lore:
   - '&7A wand radiating pure light,'

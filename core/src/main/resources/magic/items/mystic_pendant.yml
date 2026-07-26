@@ -1,5 +1,6 @@
 key: alkatraz:mystic_pendant
 material: AMETHYST_SHARD
+custom_model_data: 1242
 display_name: '&r&bMystic Pendant'
 lore:
   - 'A simple piece of Magic jewelry.'

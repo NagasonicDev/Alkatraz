@@ -1,4 +1,4 @@
-id: 'fireball'
+﻿id: 'fireball'
 display_name: '&6Fireball'
 description:
   - '&7A small ball of fire that can be shot'
@@ -34,6 +34,7 @@ mastery_bar_color: 'RED'
 
 #THE ITEM THAT APPEARS IN THE /SPELLS GUI
 gui_item: 'FIRE_CHARGE'
+gui_custom_model_data: 4102
 
 cast_sound: 'ITEM_FIRECHARGE_USE'
 

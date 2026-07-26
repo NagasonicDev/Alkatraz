@@ -1,5 +1,6 @@
 key: alkatraz:reinforced_wand
 material: BLAZE_ROD
+custom_model_data: 1002
 display_name: '&r&fReinforced Wand'
 lore:
   - '&7A reinforced wand capable of'

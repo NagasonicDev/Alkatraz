@@ -1,5 +1,6 @@
 key: alkatraz:inferno_bracelet
 material: GOLD_INGOT
+custom_model_data: 1253
 display_name: '&r&4Inferno Bracelet'
 lore:
   - 'A legendary Fire artifact of immense power.'

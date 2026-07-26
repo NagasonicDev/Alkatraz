@@ -1,5 +1,6 @@
 key: alkatraz:divine_necklace
 material: GOLD_INGOT
+custom_model_data: 1224
 display_name: '&r&dDivine Necklace'
 lore:
   - 'A legendary Light artifact of immense power.'

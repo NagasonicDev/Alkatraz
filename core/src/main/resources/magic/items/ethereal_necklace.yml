@@ -1,5 +1,6 @@
 key: alkatraz:ethereal_necklace
 material: GOLD_INGOT
+custom_model_data: 1228
 display_name: '&r&6Ethereal Necklace'
 lore:
   - 'A legendary Magic artifact of immense power.'

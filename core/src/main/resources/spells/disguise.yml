@@ -1,4 +1,4 @@
-id: 'disguise'
+﻿id: 'disguise'
 display_name: '&fDisguise'
 description:
   - '&7Uses mana to change the appearance of the player'
@@ -32,5 +32,6 @@ mastery_bar_color: 'WHITE'
 
 #THE ITEM THAT APPEARS IN THE /SPELLS GUI
 gui_item: 'PLAYER_HEAD'
+gui_custom_model_data: 4120
 
 

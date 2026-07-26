@@ -1,5 +1,6 @@
 key: alkatraz:divine_ring
 material: DIAMOND
+custom_model_data: 1208
 display_name: '&r&dDivine Ring'
 lore:
   - 'A legendary Light artifact of immense power.'

@@ -1,5 +1,6 @@
 key: alkatraz:luminous_necklace
 material: IRON_CHAIN
+custom_model_data: 1229
 display_name: '&r&fLuminous Necklace'
 lore:
   - 'A powerful Light accessory.'

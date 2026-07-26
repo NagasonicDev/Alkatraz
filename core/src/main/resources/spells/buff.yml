@@ -1,4 +1,4 @@
-id: buff
+﻿id: buff
 display_name: "&eBuff"
 description:
   - "&7Applies your configured buffs"
@@ -14,6 +14,7 @@ maximum_mastery: 100
 cooldown: 30
 mastery_bar_color: BLUE
 gui_item: BEACON
+gui_custom_model_data: 4110
 base_duration: 30
 target_range: 20
 

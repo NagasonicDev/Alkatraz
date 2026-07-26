@@ -1,4 +1,4 @@
-id: 'water_pulse'
+﻿id: 'water_pulse'
 display_name: '&9Water Pulse'
 description:
   - '&7A wave of water that knocks'
@@ -36,3 +36,4 @@ mastery_bar_color: 'BLUE'
 
 #THE ITEM THAT APPEARS IN THE /SPELLS GUI
 gui_item: 'TUBE_CORAL_FAN'
+gui_custom_model_data: 4129

@@ -1,5 +1,6 @@
 key: alkatraz:glacier_wand
 material: END_ROD
+custom_model_data: 1005
 display_name: '&r&9Glacier Wand'
 lore:
   - '&7A wand carved from eternal ice,'

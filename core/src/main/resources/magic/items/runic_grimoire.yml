@@ -1,5 +1,6 @@
 key: alkatraz:runic_grimoire
 material: BOOK
+custom_model_data: 5003
 display_name: '&r&5Runic Grimoire'
 lore:
   - '&7A grimoire bound in runic leather,'

@@ -1,4 +1,4 @@
-id: 'air_blades'
+﻿id: 'air_blades'
 display_name: '&fAir Blades'
 description:
   - '&7Arm yourself with blades of wind,'
@@ -47,6 +47,7 @@ mastery_bar_color: 'WHITE'
 
 # THE ITEM THAT APPEARS IN THE /SPELLS GUI
 gui_item: 'FEATHER'
+gui_custom_model_data: 4114
 
 cast_sound: 'ENTITY_PLAYER_ATTACK_SWEEP'
 cast_sound_volume: 0.5

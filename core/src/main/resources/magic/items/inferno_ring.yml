@@ -1,5 +1,6 @@
 key: alkatraz:inferno_ring
 material: DIAMOND
+custom_model_data: 1205
 display_name: '&r&4Inferno Ring'
 lore:
   - 'A legendary Fire artifact of immense power.'

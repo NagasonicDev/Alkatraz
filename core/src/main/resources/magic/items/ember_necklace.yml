@@ -1,5 +1,6 @@
 key: alkatraz:ember_necklace
 material: STRING
+custom_model_data: 1229
 display_name: '&r&cEmber Necklace'
 lore:
   - 'A simple piece of Fire jewelry.'

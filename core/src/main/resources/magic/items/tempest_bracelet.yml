@@ -1,5 +1,6 @@
 key: alkatraz:tempest_bracelet
 material: GOLD_INGOT
+custom_model_data: 1255
 display_name: '&r&8Tempest Bracelet'
 lore:
   - 'A legendary Air artifact of immense power.'

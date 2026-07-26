@@ -14,5 +14,6 @@ power: 9
 maximum_mastery: 100
 mastery_bar_color: 'GREEN'
 gui_item: 'DIAMOND_PICKAXE'
+gui_custom_model_data: 4107
 cast_sound: 'BLOCK_GRINDSTONE_USE'
 wind_up_duration: 2

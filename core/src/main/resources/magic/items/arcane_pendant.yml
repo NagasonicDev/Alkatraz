@@ -1,5 +1,6 @@
 key: alkatraz:arcane_pendant
 material: AMETHYST_SHARD
+custom_model_data: 1243
 display_name: '&r&dArcane Pendant'
 lore:
   - 'A powerful Magic accessory.'

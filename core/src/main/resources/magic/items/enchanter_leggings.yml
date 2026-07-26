@@ -1,5 +1,6 @@
 key: alkatraz:enchanter_leggings
 material: LEATHER_LEGGINGS
+custom_model_data: 2807
 dye_color: 'AA3333'
 display_name: '&r&cEnchanter Leggings'
 lore:

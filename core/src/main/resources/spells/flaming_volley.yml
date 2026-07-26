@@ -1,4 +1,4 @@
-id: 'flaming_volley'
+﻿id: 'flaming_volley'
 display_name: '&6Flaming Volley'
 description:
   - '&7Fires a volley of flaming arrows'
@@ -17,3 +17,4 @@ arrow_range: 50.0
 arrow_spread: 45.0
 mastery_bar_color: 'RED'
 gui_item: 'BOW'
+gui_custom_model_data: 4124

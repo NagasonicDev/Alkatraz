@@ -1,5 +1,6 @@
 key: alkatraz:titan_ring
 material: DIAMOND
+custom_model_data: 1203
 display_name: '&r&6Titan Ring'
 lore:
   - 'A legendary Earth artifact of immense power.'

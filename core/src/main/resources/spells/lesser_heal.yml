@@ -1,4 +1,4 @@
-id: 'lesser_heal'
+﻿id: 'lesser_heal'
 display_name: '&eLesser Heal'
 description:
   - '&7Heal yourself (&8Shift&7) or any'
@@ -38,3 +38,4 @@ mastery_bar_color: 'YELLOW'
 
 #THE ITEM THAT APPEARS IN THE /SPELLS GUI
 gui_item: 'GOLD_NUGGET'
+gui_custom_model_data: 4136

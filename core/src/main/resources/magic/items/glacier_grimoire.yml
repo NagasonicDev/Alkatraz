@@ -1,5 +1,6 @@
 key: alkatraz:glacier_grimoire
 material: BOOK
+custom_model_data: 5005
 display_name: '&r&9Glacier Grimoire'
 lore:
   - '&7A grimoire frozen in time, its'

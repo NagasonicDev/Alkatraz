@@ -1,5 +1,6 @@
 key: alkatraz:divine_pendant
 material: ECHO_SHARD
+custom_model_data: 1240
 display_name: '&r&dDivine Pendant'
 lore:
   - 'A legendary Light artifact of immense power.'

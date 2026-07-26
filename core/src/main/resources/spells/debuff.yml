@@ -1,4 +1,4 @@
-id: debuff
+﻿id: debuff
 display_name: "&7Debuff"
 description:
   - "&7Applies your configured debuffs"
@@ -13,6 +13,7 @@ maximum_mastery: 100
 cooldown: 25
 mastery_bar_color: PURPLE
 gui_item: FERMENTED_SPIDER_EYE
+gui_custom_model_data: 4112
 base_duration: 20
 target_range: 24
 

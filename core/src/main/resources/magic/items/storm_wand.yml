@@ -1,5 +1,6 @@
 key: alkatraz:storm_wand
 material: END_ROD
+custom_model_data: 1007
 display_name: '&r&fStorm Wand'
 lore:
   - '&7A wand wreathed in crackling wind,'

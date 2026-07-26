@@ -1,5 +1,6 @@
 key: alkatraz:earth_spike_scroll
 material: PAPER
+custom_model_data: 1104
 display_name: '&6Scroll of Earth Spike'
 lore:
   - '&7A sturdy scroll etched with'

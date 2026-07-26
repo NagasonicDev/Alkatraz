@@ -1,5 +1,6 @@
 key: alkatraz:abyss_pendant
 material: ECHO_SHARD
+custom_model_data: 1238
 display_name: '&r&9Abyss Pendant'
 lore:
   - 'A legendary Water artifact of immense power.'

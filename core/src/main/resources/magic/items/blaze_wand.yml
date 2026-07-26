@@ -1,5 +1,6 @@
 key: alkatraz:blaze_wand
 material: END_ROD
+custom_model_data: 1004
 display_name: '&r&6Blaze Wand'
 lore:
   - '&7A wand forged in living flame,'

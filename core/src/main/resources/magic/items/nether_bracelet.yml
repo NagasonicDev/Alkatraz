@@ -1,5 +1,6 @@
 key: alkatraz:nether_bracelet
 material: GOLD_INGOT
+custom_model_data: 1257
 display_name: '&r&5Nether Bracelet'
 lore:
   - 'A legendary Dark artifact of immense power.'

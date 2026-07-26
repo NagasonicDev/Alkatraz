@@ -1,5 +1,6 @@
 key: alkatraz:zephyr_pendant
 material: AMETHYST_SHARD
+custom_model_data: 1233
 display_name: '&r&fZephyr Pendant'
 lore:
   - 'A simple piece of Air jewelry.'

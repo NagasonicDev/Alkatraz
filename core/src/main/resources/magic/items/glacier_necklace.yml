@@ -1,5 +1,6 @@
 key: alkatraz:glacier_necklace
 material: IRON_CHAIN
+custom_model_data: 1230
 display_name: '&r&3Glacier Necklace'
 lore:
   - 'A powerful Water accessory.'

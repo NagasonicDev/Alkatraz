@@ -1,5 +1,6 @@
 key: alkatraz:abyss_necklace
 material: GOLD_INGOT
+custom_model_data: 1222
 display_name: '&r&9Abyss Necklace'
 lore:
   - 'A legendary Water artifact of immense power.'

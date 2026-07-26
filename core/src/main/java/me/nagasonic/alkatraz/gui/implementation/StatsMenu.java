@@ -1,5 +1,6 @@
 package me.nagasonic.alkatraz.gui.implementation;
 
+import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.gui.ItemBuilder;
 import me.nagasonic.alkatraz.gui.Menu;
@@ -7,6 +8,7 @@ import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.Element;
+import me.nagasonic.alkatraz.texturepack.TexturePackManager;
 import me.nagasonic.alkatraz.util.ColorFormat;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -32,10 +34,18 @@ public class StatsMenu extends Menu {
     private static final Element[] DISPLAY_ELEMENTS = {Element.FIRE, Element.WATER, Element.EARTH, Element.AIR, Element.LIGHT, Element.DARK};
 
     public StatsMenu(Player viewer, Player target) {
-        super(viewer, lang().get("menu.stats", "player", target.getName()), 54);
+        super(viewer, getResourceTitle(target), 54);
         this.target = target;
         this.affinityIncrease = (Integer) Configs.AFFINITY_PER_POINT.get();
         this.resistanceIncrease = (Integer) Configs.RESISTANCE_PER_POINT.get();
+    }
+
+    private static String getResourceTitle(Player target) {
+        String code = Alkatraz.getTexturePackManager().getMenuTitleCode("stats");
+        if (code == null || code.isEmpty() || !TexturePackManager.isResourcePackEnabled()) {
+            return lang().get("menu.stats", "player", target.getName());
+        }
+        return code;
     }
 
     @Override

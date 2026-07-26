@@ -1,5 +1,6 @@
 key: alkatraz:storm_necklace
 material: IRON_CHAIN
+custom_model_data: 1220
 display_name: '&r&7Storm Necklace'
 lore:
   - 'A powerful Air accessory.'

@@ -1,4 +1,4 @@
-id: 'detect'
+﻿id: 'detect'
 display_name: '&fDetect'
 description:
   - '&7Uses magic power to search the surroundings.'
@@ -32,6 +32,7 @@ mastery_bar_color: 'WHITE'
 
 #THE ITEM THAT APPEARS IN THE /SPELLS GUI
 gui_item: 'ENDER_EYE'
+gui_custom_model_data: 4119
 
 # THE RANGE SCALING BASED ON CIRCLE LEVEL
 range:

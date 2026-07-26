@@ -1,5 +1,6 @@
 key: alkatraz:runic_wand
 material: END_ROD
+custom_model_data: 1003
 display_name: '&r&5Runic Wand'
 lore:
   - '&7A wand inscribed with ancient runic'

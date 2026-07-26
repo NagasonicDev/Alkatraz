@@ -1,4 +1,4 @@
-id: 'meteor_shower'
+﻿id: 'meteor_shower'
 display_name: '&6Meteor Shower'
 description:
   - '&7Calls down a rain of fiery meteors'
@@ -14,5 +14,6 @@ power: 8
 maximum_mastery: 100
 mastery_bar_color: 'RED'
 gui_item: 'FIREWORK_STAR'
+gui_custom_model_data: 4105
 cast_sound: 'ENTITY_FIREWORK_ROCKET_BLAST'
 wind_up_duration: 2

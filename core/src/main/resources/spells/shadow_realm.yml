@@ -1,4 +1,4 @@
-id: 'shadow_realm'
+﻿id: 'shadow_realm'
 display_name: '&5Shadow Realm'
 description:
   - '&7Envelops an area in pure darkness,'
@@ -13,6 +13,7 @@ mana_cost: 115
 maximum_mastery: 100
 mastery_bar_color: 'PURPLE'
 gui_item: 'ENDER_PEARL'
+gui_custom_model_data: 4109
 cast_sound: 'ENTITY_ENDERMAN_TELEPORT'
 wind_up_duration: 2
 radius: 10.0

@@ -1,4 +1,4 @@
-id: 'swift'
+﻿id: 'swift'
 display_name: '&fSwift'
 description:
   - '&7Generates a gust of air behind the caster,'
@@ -32,6 +32,7 @@ mastery_bar_color: 'WHITE'
 
 #THE ITEM THAT APPEARS IN THE /SPELLS GUI
 gui_item: 'RABBIT_FOOT'
+gui_custom_model_data: 4127
 
 #THE STRENGTH OF THE DASH. DEFAULT: 1.5
 dash_strength: 1.5
