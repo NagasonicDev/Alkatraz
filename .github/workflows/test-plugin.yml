@@ -51,17 +51,32 @@ jobs:
         with:
           path: nms-stage
           # Bump this suffix (-v1 -> -v2) to force a rebuild of every
-          # version, e.g. if Spigot re-patches something retroactively.
-          key: spigot-nms-${{ matrix.version }}-v4
+          # version, e.g. if Spigot re-patches something retroactively,
+          # or if a previous run poisoned the cache with a partial build.
+          key: spigot-nms-${{ matrix.version }}-v5
+
+      - name: Verify cache contents
+        if: steps.cache.outputs.cache-hit == 'true'
+        run: |
+          test -f "nms-stage/jars/spigot-${{ matrix.version }}.jar" || {
+            echo "::error::Cached nms-stage is missing the spigot jar for ${{ matrix.version }} — cache is likely poisoned. Bump the cache key suffix."
+            exit 1
+          }
 
       - name: Build with BuildTools (cache miss only)
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          mkdir -p nms-stage/m2/org/spigotmc nms-stage/m2/org/bukkit nms-stage/jars
+          # Build into a scratch dir first. Only publish into nms-stage
+          # (the cached path) once every step below has succeeded, so a
+          # failed/partial build can never poison the cache.
+          rm -rf nms-build-tmp
+          mkdir -p nms-build-tmp/m2/org/spigotmc nms-build-tmp/m2/org/bukkit nms-build-tmp/jars
           chmod +x scripts/build-spigot.sh
-          scripts/build-spigot.sh "${{ matrix.version }}" "nms-stage/jars/spigot-${{ matrix.version }}.jar"
-          if [ -d "$HOME/.m2/repository/org/spigotmc" ]; then cp -r "$HOME/.m2/repository/org/spigotmc/." nms-stage/m2/org/spigotmc/; fi
-          if [ -d "$HOME/.m2/repository/org/bukkit" ]; then cp -r "$HOME/.m2/repository/org/bukkit/." nms-stage/m2/org/bukkit/; fi
+          scripts/build-spigot.sh "${{ matrix.version }}" "nms-build-tmp/jars/spigot-${{ matrix.version }}.jar"
+          if [ -d "$HOME/.m2/repository/org/spigotmc" ]; then cp -r "$HOME/.m2/repository/org/spigotmc/." nms-build-tmp/m2/org/spigotmc/; fi
+          if [ -d "$HOME/.m2/repository/org/bukkit" ]; then cp -r "$HOME/.m2/repository/org/bukkit/." nms-build-tmp/m2/org/bukkit/; fi
+          rm -rf nms-stage
+          mv nms-build-tmp nms-stage
 
       - name: Upload artifact for this run
         if: success()
