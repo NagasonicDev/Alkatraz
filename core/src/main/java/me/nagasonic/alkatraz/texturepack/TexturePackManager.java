@@ -3,6 +3,7 @@ package me.nagasonic.alkatraz.texturepack;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.Material;
 
 import java.util.Map;
@@ -14,6 +15,7 @@ public class TexturePackManager {
     private static final Map<String, Integer> itemCMDCache = new HashMap<>();
     private static final Map<String, String> asciiCodeCache = new HashMap<>();
     private static final Map<String, Material> guiMaterialCache = new HashMap<>();
+    private static final Map<String, Integer> connectorCMDCache = new HashMap<>();
     
     // Load the texture pack configuration
     public static void load() {
@@ -45,6 +47,9 @@ public class TexturePackManager {
         
         // Load GUI materials
         loadGuiMaterials();
+
+        // Load connector CMDs
+        loadConnectorCMDs();
     }
     
     private static void loadResourcePackSettings() {
@@ -99,7 +104,15 @@ public class TexturePackManager {
             }
         }
     }
-    
+
+    private static void loadConnectorCMDs() {
+        ConfigurationSection section = config.getConfigurationSection("connector_textures");
+        if (section == null) return;
+        for (String key : section.getKeys(false)) {
+            connectorCMDCache.put(key, section.getInt(key));
+        }
+    }
+
     // Get methods for ASCII codes
     public static String getMenuTitleCode(String menuType) {
         return asciiCodeCache.getOrDefault("menu_title_" + menuType.toLowerCase(), "");
@@ -123,7 +136,11 @@ public class TexturePackManager {
         Material material = guiMaterialCache.get(materialType.toLowerCase());
         return material != null ? material : Material.STONE; // Fallback
     }
-    
+
+    public static int getConnectorCMD(String pieceKey) {
+        return connectorCMDCache.getOrDefault(pieceKey, 0);
+    }
+
     // Get the raw config for admin interface
     public static YamlConfiguration getConfig() {
         return config;

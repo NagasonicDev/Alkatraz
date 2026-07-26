@@ -131,9 +131,9 @@ jobs:
         with:
           name: plugin-jar
           path: |
-            target/*.jar
-            !target/*-sources.jar
-            !target/original-*.jar
+            dist/target/*.jar
+            !dist/target/*-sources.jar
+            !dist/target/original-*.jar
           retention-days: 1
 
   # ---------------------------------------------------------------------
