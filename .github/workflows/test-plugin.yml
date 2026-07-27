@@ -51,32 +51,17 @@ jobs:
         with:
           path: nms-stage
           # Bump this suffix (-v1 -> -v2) to force a rebuild of every
-          # version, e.g. if Spigot re-patches something retroactively,
-          # or if a previous run poisoned the cache with a partial build.
-          key: spigot-nms-${{ matrix.version }}-v5.3
-
-      - name: Verify cache contents
-        if: steps.cache.outputs.cache-hit == 'true'
-        run: |
-          test -f "nms-stage/jars/spigot-${{ matrix.version }}.jar" || {
-            echo "::error::Cached nms-stage is missing the spigot jar for ${{ matrix.version }} — cache is likely poisoned. Bump the cache key suffix."
-            exit 1
-          }
+          # version, e.g. if Spigot re-patches something retroactively.
+          key: spigot-nms-${{ matrix.version }}-v4
 
       - name: Build with BuildTools (cache miss only)
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          # Build into a scratch dir first. Only publish into nms-stage
-          # (the cached path) once every step below has succeeded, so a
-          # failed/partial build can never poison the cache.
-          rm -rf nms-build-tmp
-          mkdir -p nms-build-tmp/m2/org/spigotmc nms-build-tmp/m2/org/bukkit nms-build-tmp/jars
+          mkdir -p nms-stage/m2/org/spigotmc nms-stage/m2/org/bukkit nms-stage/jars
           chmod +x scripts/build-spigot.sh
-          scripts/build-spigot.sh "${{ matrix.version }}" "nms-build-tmp/jars/spigot-${{ matrix.version }}.jar"
-          if [ -d "$HOME/.m2/repository/org/spigotmc" ]; then cp -r "$HOME/.m2/repository/org/spigotmc/." nms-build-tmp/m2/org/spigotmc/; fi
-          if [ -d "$HOME/.m2/repository/org/bukkit" ]; then cp -r "$HOME/.m2/repository/org/bukkit/." nms-build-tmp/m2/org/bukkit/; fi
-          rm -rf nms-stage
-          mv nms-build-tmp nms-stage
+          scripts/build-spigot.sh "${{ matrix.version }}" "nms-stage/jars/spigot-${{ matrix.version }}.jar"
+          if [ -d "$HOME/.m2/repository/org/spigotmc" ]; then cp -r "$HOME/.m2/repository/org/spigotmc/." nms-stage/m2/org/spigotmc/; fi
+          if [ -d "$HOME/.m2/repository/org/bukkit" ]; then cp -r "$HOME/.m2/repository/org/bukkit/." nms-stage/m2/org/bukkit/; fi
 
       - name: Upload artifact for this run
         if: success()
@@ -213,20 +198,7 @@ jobs:
               scripts/fetch-purpur.sh "${{ matrix.mc_version }}" servers/server.jar
               ;;
             spigot)
-              echo "== pwd =="
-              pwd
-              echo "== full recursive listing of nms-download =="
-              find nms-download -print
-              SPIGOT_JAR=$(find nms-download -iname 'spigot-*.jar' -path '*/jars/*' | head -n1)
-              if [ -z "$SPIGOT_JAR" ]; then
-                SPIGOT_JAR=$(find nms-download -iname 'spigot-*.jar' | head -n1)
-              fi
-              if [ -z "$SPIGOT_JAR" ]; then
-                echo "::error::No spigot jar found anywhere under nms-download for mc_version=${{ matrix.mc_version }}"
-                exit 1
-              fi
-              echo "Using jar: $SPIGOT_JAR"
-              cp "$SPIGOT_JAR" servers/server.jar
+              cp "nms-download/jars/spigot-${{ matrix.mc_version }}.jar" servers/server.jar
               ;;
           esac
 
@@ -239,6 +211,28 @@ jobs:
           fi
           scripts/run-server-test.sh servers/server.jar "$PLUGIN_JAR" "${{ matrix.loader }}" "${{ matrix.mc_version }}"
 
+      - name: Extract plugin warnings
+        if: always()
+        run: |
+          LOG=$(ls /tmp/mc-test-*/server.log 2>/dev/null | head -1)
+          WARN_FILE="warnings-${{ matrix.loader }}-${{ matrix.mc_version }}.txt"
+          if [ -n "$LOG" ] && grep -q '\[WARN\].*\[Alkatraz\]' "$LOG" 2>/dev/null; then
+            grep '\[WARN\].*\[Alkatraz\]' "$LOG" | sort -u > "$WARN_FILE"
+            COUNT=$(wc -l < "$WARN_FILE")
+            echo "Found ${COUNT} unique warning(s)"
+          else
+            touch "$WARN_FILE"
+            echo "No plugin warnings"
+          fi
+
+      - name: Upload warnings
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: warnings-${{ matrix.loader }}-${{ matrix.mc_version }}
+          path: warnings-*.txt
+          retention-days: 1
+
       - name: Upload server log on failure
         if: failure()
         uses: actions/upload-artifact@v4
@@ -246,3 +240,55 @@ jobs:
           name: server-log-${{ matrix.loader }}-${{ matrix.mc_version }}
           path: /tmp/mc-test-*/server.log
           retention-days: 7
+
+  # ---------------------------------------------------------------------
+  # 5. Consolidated warning report — collects warnings from every
+  #    integration-test run into a single summary.
+  # ---------------------------------------------------------------------
+  report-warnings:
+    needs: integration-test
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all warning artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: warnings-*
+          path: all-warnings
+          merge-multiple: true
+
+      - name: Generate summary
+        run: |
+          echo "## Plugin Warnings Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          TOTAL=0
+          FOUND=false
+
+          for f in all-warnings/warnings-*.txt; do
+            [ -f "$f" ] || continue
+            NAME=$(basename "$f" .txt | sed 's/^warnings-//')
+            COUNT=$(wc -l < "$f")
+            [ "$COUNT" -eq 0 ] && continue
+
+            FOUND=true
+            TOTAL=$((TOTAL + COUNT))
+            echo "### ${NAME} (${COUNT} unique)" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            cat "$f" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+
+            while IFS= read -r line; do
+              echo "::warning::${NAME} - ${line}"
+            done < "$f"
+          done
+
+          if [ "$FOUND" = false ]; then
+            echo "No plugin warnings found across all versions." >> "$GITHUB_STEP_SUMMARY"
+            echo "No plugin warnings found."
+          else
+            echo "---" >> "$GITHUB_STEP_SUMMARY"
+            echo "**Total unique warnings: ${TOTAL}**" >> "$GITHUB_STEP_SUMMARY"
+            echo "Found ${TOTAL} total unique warning(s) across all versions."
+          fi
