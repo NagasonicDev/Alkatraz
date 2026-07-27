@@ -124,3 +124,4 @@ wiki/
 .superpowers/
 rename_nms_packages.ps1
 /.superpowers/
+/opencode.json

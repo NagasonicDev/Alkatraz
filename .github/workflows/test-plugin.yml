@@ -186,6 +186,12 @@ jobs:
           name: nms-${{ matrix.mc_version }}
           path: nms-download
 
+      - name: Debug artifact contents
+        if: matrix.loader == 'spigot'
+        run: |
+          echo "=== nms-download contents ==="
+          find nms-download -type f 2>/dev/null || echo "(nms-download directory is empty or missing)"
+
       - name: Fetch server jar
         run: |
           mkdir -p servers
@@ -198,7 +204,13 @@ jobs:
               scripts/fetch-purpur.sh "${{ matrix.mc_version }}" servers/server.jar
               ;;
             spigot)
-              cp "nms-download/jars/spigot-${{ matrix.mc_version }}.jar" servers/server.jar
+              JAR="nms-download/jars/spigot-${{ matrix.mc_version }}.jar"
+              if [ ! -f "$JAR" ]; then
+                echo "::error::Spigot jar not found at ${JAR} — the build-nms job may have failed or the artifact structure changed"
+                echo "Expected: nms-${{ matrix.mc_version }} artifact with jars/spigot-${{ matrix.mc_version }}.jar"
+                exit 1
+              fi
+              cp "$JAR" servers/server.jar
               ;;
           esac
 
