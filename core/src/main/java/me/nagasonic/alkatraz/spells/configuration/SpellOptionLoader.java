@@ -336,9 +336,10 @@ public class SpellOptionLoader {
     }
 
     private static Material parseMaterial(String name, String file, String key) {
-        Material m = MaterialCompat.resolve(name, Material.BARRIER);
-        if (m == Material.BARRIER) {
+        Material m = MaterialCompat.resolve(name);
+        if (m == null) {
             warn(file, key, "Unknown material '" + name + "', falling back to BARRIER");
+            return Material.BARRIER;
         }
         return m;
     }
