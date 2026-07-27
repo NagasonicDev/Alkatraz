@@ -228,8 +228,8 @@ jobs:
         run: |
           LOG=$(ls /tmp/mc-test-*/server.log 2>/dev/null | head -1)
           WARN_FILE="warnings-${{ matrix.loader }}-${{ matrix.mc_version }}.txt"
-          if [ -n "$LOG" ] && grep -q '\[WARN\].*\[Alkatraz\]' "$LOG" 2>/dev/null; then
-            grep '\[WARN\].*\[Alkatraz\]' "$LOG" | sort -u > "$WARN_FILE"
+          if [ -n "$LOG" ] && grep -q 'WARN\].*\[Alkatraz\]' "$LOG" 2>/dev/null; then
+            grep 'WARN\].*\[Alkatraz\]' "$LOG" | sort -u > "$WARN_FILE"
             COUNT=$(wc -l < "$WARN_FILE")
             echo "Found ${COUNT} unique warning(s)"
           else
