@@ -227,26 +227,35 @@ jobs:
           fi
           scripts/run-server-test.sh servers/server.jar "$PLUGIN_JAR" "${{ matrix.loader }}" "${{ matrix.mc_version }}"
 
-      - name: Extract plugin warnings
+      - name: Extract plugin warnings and errors
         if: always()
         run: |
           LOG=$(ls /tmp/mc-test-*/server.log 2>/dev/null | head -1)
           WARN_FILE="warnings-${{ matrix.loader }}-${{ matrix.mc_version }}.txt"
+          ERROR_FILE="errors-${{ matrix.loader }}-${{ matrix.mc_version }}.txt"
+
           if [ -n "$LOG" ] && grep -q 'WARN\].*\[Alkatraz\]' "$LOG" 2>/dev/null; then
             grep 'WARN\].*\[Alkatraz\]' "$LOG" | sort -u > "$WARN_FILE"
-            COUNT=$(wc -l < "$WARN_FILE")
-            echo "Found ${COUNT} unique warning(s)"
           else
             touch "$WARN_FILE"
-            echo "No plugin warnings"
           fi
 
-      - name: Upload warnings
+          if [ -n "$LOG" ] && grep -q 'ERROR\].*\[Alkatraz\]' "$LOG" 2>/dev/null; then
+            grep 'ERROR\].*\[Alkatraz\]' "$LOG" | sort -u > "$ERROR_FILE"
+          else
+            touch "$ERROR_FILE"
+          fi
+
+          echo "Warnings: $(wc -l < "$WARN_FILE"), Errors: $(wc -l < "$ERROR_FILE")"
+
+      - name: Upload warnings and errors
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: warnings-${{ matrix.loader }}-${{ matrix.mc_version }}
-          path: warnings-*.txt
+          name: alerts-${{ matrix.loader }}-${{ matrix.mc_version }}
+          path: |
+            warnings-*.txt
+            errors-*.txt
           retention-days: 1
 
       - name: Upload server log on failure
@@ -266,30 +275,50 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     steps:
-      - name: Download all warning artifacts
+      - name: Download all alert artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: warnings-*
-          path: all-warnings
+          pattern: alerts-*
+          path: all-alerts
           merge-multiple: true
 
       - name: Generate summary
         run: |
-          echo "## Plugin Warnings Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "## Plugin Warnings & Errors Summary" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
 
-          TOTAL=0
+          TOTAL_WARN=0
+          TOTAL_ERR=0
           FOUND=false
 
-          for f in all-warnings/warnings-*.txt; do
+          for f in all-alerts/errors-*.txt; do
+            [ -f "$f" ] || continue
+            NAME=$(basename "$f" .txt | sed 's/^errors-//')
+            COUNT=$(wc -l < "$f")
+            [ "$COUNT" -eq 0 ] && continue
+
+            FOUND=true
+            TOTAL_ERR=$((TOTAL_ERR + COUNT))
+            echo "### ❌ ${NAME} — ${COUNT} error(s)" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            cat "$f" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+
+            while IFS= read -r line; do
+              echo "::error::${NAME} - ${line}"
+            done < "$f"
+          done
+
+          for f in all-alerts/warnings-*.txt; do
             [ -f "$f" ] || continue
             NAME=$(basename "$f" .txt | sed 's/^warnings-//')
             COUNT=$(wc -l < "$f")
             [ "$COUNT" -eq 0 ] && continue
 
             FOUND=true
-            TOTAL=$((TOTAL + COUNT))
-            echo "### ${NAME} (${COUNT} unique)" >> "$GITHUB_STEP_SUMMARY"
+            TOTAL_WARN=$((TOTAL_WARN + COUNT))
+            echo "### ⚠️ ${NAME} — ${COUNT} warning(s)" >> "$GITHUB_STEP_SUMMARY"
             echo '```' >> "$GITHUB_STEP_SUMMARY"
             cat "$f" >> "$GITHUB_STEP_SUMMARY"
             echo '```' >> "$GITHUB_STEP_SUMMARY"
@@ -301,10 +330,13 @@ jobs:
           done
 
           if [ "$FOUND" = false ]; then
-            echo "No plugin warnings found across all versions." >> "$GITHUB_STEP_SUMMARY"
-            echo "No plugin warnings found."
+            echo "No plugin warnings or errors found across all versions." >> "$GITHUB_STEP_SUMMARY"
+            echo "No plugin warnings or errors found."
           else
             echo "---" >> "$GITHUB_STEP_SUMMARY"
-            echo "**Total unique warnings: ${TOTAL}**" >> "$GITHUB_STEP_SUMMARY"
-            echo "Found ${TOTAL} total unique warning(s) across all versions."
+            echo "**Total: ${TOTAL_ERR} error(s), ${TOTAL_WARN} warning(s)**" >> "$GITHUB_STEP_SUMMARY"
+            echo "Found ${TOTAL_ERR} error(s) and ${TOTAL_WARN} warning(s) across all versions."
+            if [ "$TOTAL_ERR" -gt 0 ]; then
+              exit 1
+            fi
           fi
