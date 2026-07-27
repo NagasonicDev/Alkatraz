@@ -6,18 +6,25 @@
 #
 # Usage: build-spigot.sh <mc_version> <output_path>
 set -euo pipefail
-
 VERSION="$1"
 OUT="$2"
+
+# Resolve OUT to an absolute path BEFORE we cd into WORKDIR below.
+# Without this, the final `cp "${BUILT_JAR}" "${OUT}"` and the
+# subsequent `rm -rf "${WORKDIR}"` both operate on a path relative to
+# WORKDIR (since bash never re-resolves an already-relative variable),
+# so the copy silently lands inside the temp dir and gets deleted a
+# few lines later - even though the script still prints "Saved to..."
+# and exits 0.
+mkdir -p "$(dirname "${OUT}")"
+OUT="$(realpath -m "${OUT}")"
 
 WORKDIR=$(mktemp -d)
 LOGFILE="${WORKDIR}/buildtools.log"
 echo "Building Spigot ${VERSION} in ${WORKDIR} (this can take several minutes)..."
-
 cd "${WORKDIR}"
 curl -sSL -o BuildTools.jar \
   "https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar"
-
 # Run BuildTools and capture output for debugging
 if ! java -jar BuildTools.jar --rev "${VERSION}" --remapped --output-dir "${WORKDIR}/out" 2>&1 | tee "${LOGFILE}"; then
   echo "=== BuildTools FAILED for ${VERSION} (exit code $?) ===" >&2
@@ -26,7 +33,6 @@ if ! java -jar BuildTools.jar --rev "${VERSION}" --remapped --output-dir "${WORK
   rm -rf "${WORKDIR}"
   exit 1
 fi
-
 BUILT_JAR="${WORKDIR}/out/spigot-${VERSION}.jar"
 if [ ! -f "${BUILT_JAR}" ]; then
   echo "=== BuildTools did not produce spigot-${VERSION}.jar ===" >&2
@@ -37,9 +43,6 @@ if [ ! -f "${BUILT_JAR}" ]; then
   rm -rf "${WORKDIR}"
   exit 1
 fi
-
-mkdir -p "$(dirname "${OUT}")"
 cp "${BUILT_JAR}" "${OUT}"
 rm -rf "${WORKDIR}"
-
 echo "Saved to ${OUT}"
