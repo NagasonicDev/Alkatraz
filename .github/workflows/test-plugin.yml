@@ -11,13 +11,17 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       versions: ${{ steps.set.outputs.versions }}
+      mc_versions: ${{ steps.set.outputs.mc_versions }}
     steps:
       - uses: actions/checkout@v4
       - id: set
         run: |
           JSON=$(grep -v '^\s*#' .github/workflows/nms-versions.txt | grep -v '^\s*$' | jq -R -s -c 'split("\n") | map(select(length > 0)) | map(split(",") | {version: .[0], java: .[1]})')
           echo "versions=$JSON" >> "$GITHUB_OUTPUT"
+          MC=$(echo "$JSON" | jq -c '[.[].version]')
+          echo "mc_versions=$MC" >> "$GITHUB_OUTPUT"
           echo "Versions: $JSON"
+          echo "MC versions: $MC"
 
   # ---------------------------------------------------------------------
   # 1. Build (or restore from cache) the remapped Spigot artifacts for
@@ -144,12 +148,12 @@ jobs:
   #    BuildTools invocation happens here.
   # ---------------------------------------------------------------------
   integration-test:
-    needs: [build-plugin, build-nms]
+    needs: [build-plugin, build-nms, load-versions]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        mc_version: ["1.20.1", "1.20.4", "1.21.1", "1.21.4", "1.21.8", "26.1.2", "26.2"]
+        mc_version: ${{ fromJson(needs.load-versions.outputs.mc_versions) }}
         loader: [paper, purpur, spigot]
         # Add exclusions here if a given loader doesn't publish a
         # particular version, e.g.:
