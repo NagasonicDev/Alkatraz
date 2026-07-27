@@ -116,21 +116,12 @@ public class ItemUtils {
         return headWithUrl(item, getUrlFromBase64(base64).toString());
     }
 
-    private static boolean newerApi() {
-        try {
-            Material.valueOf("PLAYER_HEAD");
-            return true;
-        } catch (IllegalArgumentException e) {
-            return false;
-        }
-    }
-
     public static ItemStack getPlayerSkullItem() {
-        if (newerApi()) {
-            return new ItemStack(Material.valueOf("PLAYER_HEAD"));
-        } else {
-            return new ItemStack(Material.valueOf("SKULL_ITEM"), 1, (byte) 3);
+        Material mat = MaterialCompat.resolve("PLAYER_HEAD");
+        if (mat != null) {
+            return new ItemStack(mat);
         }
+        return new ItemStack(Material.STONE);
     }
 
     private static void notNull(Object o, String name) {

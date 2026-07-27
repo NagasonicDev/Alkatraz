@@ -7,6 +7,7 @@ import me.nagasonic.alkatraz.spells.configuration.impact.ValueImpact;
 import me.nagasonic.alkatraz.spells.configuration.impact.ValueImpactFactory;
 import me.nagasonic.alkatraz.spells.configuration.requirement.ValueRequirement;
 import me.nagasonic.alkatraz.spells.configuration.requirement.ValueRequirementFactory;
+import me.nagasonic.alkatraz.util.MaterialCompat;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -335,10 +336,9 @@ public class SpellOptionLoader {
     }
 
     private static Material parseMaterial(String name, String file, String key) {
-        Material m = Material.matchMaterial(name.toUpperCase());
-        if (m == null) {
+        Material m = MaterialCompat.resolve(name, Material.BARRIER);
+        if (m == Material.BARRIER) {
             warn(file, key, "Unknown material '" + name + "', falling back to BARRIER");
-            return Material.BARRIER;
         }
         return m;
     }

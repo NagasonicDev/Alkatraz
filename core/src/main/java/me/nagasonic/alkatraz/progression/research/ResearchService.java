@@ -4,6 +4,7 @@ import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.util.ColorFormat;
+import me.nagasonic.alkatraz.util.MaterialCompat;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.progression.research.definition.ResearchCategory;
@@ -424,11 +425,6 @@ public final class ResearchService {
     }
 
     private static Material material(String name, Material fallback) {
-        if (name == null || name.isBlank()) return fallback;
-        try {
-            return Material.valueOf(name.toUpperCase());
-        } catch (IllegalArgumentException ex) {
-            return fallback;
-        }
+        return MaterialCompat.resolve(name, fallback);
     }
 }

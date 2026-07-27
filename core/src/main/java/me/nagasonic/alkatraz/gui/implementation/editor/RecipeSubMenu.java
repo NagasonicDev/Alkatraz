@@ -6,6 +6,7 @@ import me.nagasonic.alkatraz.gui.Menu;
 import me.nagasonic.alkatraz.items.magic.recipe.MagicItemRecipeManager;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.util.ColorFormat;
+import me.nagasonic.alkatraz.util.MaterialCompat;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
@@ -136,7 +137,7 @@ public class RecipeSubMenu extends Menu {
             }
         } else {
             String matName = ingredients.getOrDefault(c, "?");
-            Material mat = Material.getMaterial(matName.toUpperCase());
+            Material mat = MaterialCompat.resolve(matName);
             if (mat == null || mat == Material.AIR) mat = Material.STONE;
             item = new ItemStack(mat);
             ItemMeta meta = item.getItemMeta();

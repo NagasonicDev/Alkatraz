@@ -10,6 +10,7 @@ import me.nagasonic.alkatraz.configuration.requirement.Requirement;
 import me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
+import me.nagasonic.alkatraz.util.MaterialCompat;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -74,7 +75,7 @@ public final class MagicItemRecipeManager {
             char c = ingredientKey.charAt(0);
             String materialName = ingredientsSection.getString(ingredientKey);
             if (materialName == null) continue;
-            Material material = Material.matchMaterial(materialName);
+            Material material = MaterialCompat.resolve(materialName);
             if (material == null) {
                 Alkatraz.logWarning("Unknown material '" + materialName + "' in recipe " + key);
                 continue;
@@ -141,7 +142,7 @@ public final class MagicItemRecipeManager {
             String value = ingredientsSection.getString(ingredientKey);
             if (value == null) continue;
 
-            Material material = Material.matchMaterial(value);
+            Material material = MaterialCompat.resolve(value);
             if (material != null) {
                 ingredients.put(c, new RecipeChoice.MaterialChoice(material));
             } else {

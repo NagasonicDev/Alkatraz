@@ -325,7 +325,8 @@ public class Utils {
                     def = MagicItemServices.get().createItem(MagicKeys.alkatraz(aitem[1].toLowerCase()));
                 }
             }else{
-                def.setType(Material.valueOf(item));
+                Material resolved = MaterialCompat.resolve(item);
+                if (resolved != null) def.setType(resolved);
             }
             return def;
         } catch (IllegalArgumentException ignored){

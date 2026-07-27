@@ -2,6 +2,7 @@ package me.nagasonic.alkatraz.items.magic.util;
 
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
+import me.nagasonic.alkatraz.util.MaterialCompat;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
 
