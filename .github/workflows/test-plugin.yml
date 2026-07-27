@@ -213,11 +213,11 @@ jobs:
               scripts/fetch-purpur.sh "${{ matrix.mc_version }}" servers/server.jar
               ;;
             spigot)
-              echo "== nms-download contents =="
-              find nms-download -maxdepth 3 -print
-              SPIGOT_JAR=$(find nms-download -iname 'spigot-*.jar' | head -n1)
+              echo "== nms-download/jars contents =="
+              ls -la nms-download/jars/ 2>/dev/null || echo "jars dir missing"
+              SPIGOT_JAR=$(find nms-download/jars -iname 'spigot-*.jar' | head -n1)
               if [ -z "$SPIGOT_JAR" ]; then
-                echo "::error::No spigot jar found under nms-download for mc_version=${{ matrix.mc_version }}"
+                echo "::error::No spigot jar found under nms-download/jars for mc_version=${{ matrix.mc_version }}"
                 exit 1
               fi
               cp "$SPIGOT_JAR" servers/server.jar
