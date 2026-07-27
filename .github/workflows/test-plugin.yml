@@ -53,7 +53,7 @@ jobs:
           # Bump this suffix (-v1 -> -v2) to force a rebuild of every
           # version, e.g. if Spigot re-patches something retroactively,
           # or if a previous run poisoned the cache with a partial build.
-          key: spigot-nms-${{ matrix.version }}-v5
+          key: spigot-nms-${{ matrix.version }}-v5.1
 
       - name: Verify cache contents
         if: steps.cache.outputs.cache-hit == 'true'
