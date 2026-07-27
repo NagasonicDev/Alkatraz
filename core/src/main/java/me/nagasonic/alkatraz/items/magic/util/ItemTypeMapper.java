@@ -26,10 +26,10 @@ public final class ItemTypeMapper {
         for (String type : config.getConfigurationSection("types").getKeys(false)) {
             List<String> materials = config.getStringList("types." + type);
             for (String matStr : materials) {
-                try {
-                    Material mat = Material.valueOf(matStr.toUpperCase());
+                Material mat = MaterialCompat.resolve(matStr);
+                if (mat != null) {
                     map.computeIfAbsent(mat, k -> new HashSet<>()).add(type);
-                } catch (IllegalArgumentException e) {
+                } else {
                     Alkatraz.logWarning("Unknown material in item_types.yml: " + matStr);
                 }
             }
