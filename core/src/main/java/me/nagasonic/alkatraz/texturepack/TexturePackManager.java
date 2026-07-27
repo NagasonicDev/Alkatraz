@@ -2,6 +2,7 @@ package me.nagasonic.alkatraz.texturepack;
 
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
+import me.nagasonic.alkatraz.util.MaterialCompat;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.Material;
@@ -106,14 +107,14 @@ public class TexturePackManager {
         // Load decorative materials
         if (config.contains("gui_items.decorative")) {
             for (String key : config.getConfigurationSection("gui_items.decorative").getKeys(false)) {
-                guiMaterialCache.put("decorative_" + key, Material.matchMaterial(config.getString("gui_items.decorative." + key)));
+                guiMaterialCache.put("decorative_" + key, MaterialCompat.resolve(config.getString("gui_items.decorative." + key)));
             }
         }
 
         // Load button materials
         if (config.contains("gui_items.buttons")) {
             for (String key : config.getConfigurationSection("gui_items.buttons").getKeys(false)) {
-                guiMaterialCache.put("button_" + key, Material.matchMaterial(config.getString("gui_items.buttons." + key)));
+                guiMaterialCache.put("button_" + key, MaterialCompat.resolve(config.getString("gui_items.buttons." + key)));
             }
         }
     }

@@ -133,6 +133,12 @@
                             <shadedPattern>me.nagasonic.alkatraz.libs.nbtapi</shadedPattern>
                         </relocation>
                         <!-- NBT-API end -->
+                        <!-- XSeries start -->
+                        <relocation>
+                            <pattern>com.cryptomorin.xseries</pattern>
+                            <shadedPattern>me.nagasonic.alkatraz.libs.xseries</shadedPattern>
+                        </relocation>
+                        <!-- XSeries end -->
                     </relocations>
                 </configuration>
                 <executions>

@@ -75,13 +75,13 @@ public class EditorChatHandler implements Listener {
             return;
         }
         if (action.equals("edit_material")) {
-            try {
-                org.bukkit.Material mat = org.bukkit.Material.valueOf(value.toUpperCase());
-                session.config().set("material", mat.name());
-                player.sendMessage(ColorFormat.format("&aSet material to: &f" + mat.name()));
-            } catch (IllegalArgumentException e) {
+            org.bukkit.Material mat = me.nagasonic.alkatraz.util.MaterialCompat.resolve(value);
+            if (mat == null) {
                 player.sendMessage(ColorFormat.format("&cInvalid material: " + value));
+                return;
             }
+            session.config().set("material", mat.name());
+            player.sendMessage(ColorFormat.format("&aSet material to: &f" + mat.name()));
             return;
         }
         if (action.equals("edit_dye_color")) {
@@ -182,13 +182,13 @@ public class EditorChatHandler implements Listener {
         }
         if (action.startsWith("recipe_ingredient:")) {
             char c = action.charAt("recipe_ingredient:".length());
-            try {
-                org.bukkit.Material mat = org.bukkit.Material.valueOf(value.toUpperCase());
-                session.config().set("recipe.ingredients." + c, mat.name());
-                player.sendMessage(ColorFormat.format("&aSet ingredient '" + c + "' to: &f" + mat.name()));
-            } catch (IllegalArgumentException e) {
+            org.bukkit.Material mat = me.nagasonic.alkatraz.util.MaterialCompat.resolve(value);
+            if (mat == null) {
                 player.sendMessage(ColorFormat.format("&cInvalid material: " + value));
+                return;
             }
+            session.config().set("recipe.ingredients." + c, mat.name());
+            player.sendMessage(ColorFormat.format("&aSet ingredient '" + c + "' to: &f" + mat.name()));
             return;
         }
         if (action.equals("add_requirement")) {
