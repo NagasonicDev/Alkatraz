@@ -227,6 +227,22 @@ jobs:
           fi
           scripts/run-server-test.sh servers/server.jar "$PLUGIN_JAR" "${{ matrix.loader }}" "${{ matrix.mc_version }}"
 
+      - name: Extract test results
+        if: always()
+        run: |
+          RESULTS=$(ls /tmp/mc-test-*/test-results.txt 2>/dev/null | head -1)
+          if [ -n "$RESULTS" ]; then
+            cp "$RESULTS" "test-results-${{ matrix.loader }}-${{ matrix.mc_version }}.txt"
+            echo "Test results captured"
+          else
+            echo "LOADER=${{ matrix.loader }}" > "test-results-${{ matrix.loader }}-${{ matrix.mc_version }}.txt"
+            echo "VERSION=${{ matrix.mc_version }}" >> "test-results-${{ matrix.loader }}-${{ matrix.mc_version }}.txt"
+            echo "PASS=0" >> "test-results-${{ matrix.loader }}-${{ matrix.mc_version }}.txt"
+            echo "FAIL=0" >> "test-results-${{ matrix.loader }}-${{ matrix.mc_version }}.txt"
+            echo "SECTIONS:" >> "test-results-${{ matrix.loader }}-${{ matrix.mc_version }}.txt"
+            echo "No test results file found" >> "test-results-${{ matrix.loader }}-${{ matrix.mc_version }}.txt"
+          fi
+
       - name: Extract plugin warnings
         if: always()
         run: |
@@ -241,6 +257,14 @@ jobs:
             echo "No plugin warnings"
           fi
 
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.loader }}-${{ matrix.mc_version }}
+          path: test-results-*.txt
+          retention-days: 1
+
       - name: Upload warnings
         if: always()
         uses: actions/upload-artifact@v4
@@ -250,7 +274,7 @@ jobs:
           retention-days: 1
 
       - name: Upload server log on failure
-        if: failure()
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: server-log-${{ matrix.loader }}-${{ matrix.mc_version }}
@@ -273,8 +297,66 @@ jobs:
           path: all-warnings
           merge-multiple: true
 
+      - name: Download all test result artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: test-results-*
+          path: all-test-results
+          merge-multiple: true
+
       - name: Generate summary
         run: |
+          echo "## Test Results Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          TOTAL_PASS=0
+          TOTAL_FAIL=0
+          FOUND_RESULTS=false
+
+          for f in all-test-results/test-results-*.txt; do
+            [ -f "$f" ] || continue
+            NAME=$(basename "$f" .txt | sed 's/^test-results-//')
+            PASS=$(grep '^PASS=' "$f" | cut -d= -f2)
+            FAIL=$(grep '^FAIL=' "$f" | cut -d= -f2)
+            PASS=${PASS:-0}
+            FAIL=${FAIL:-0}
+
+            FOUND_RESULTS=true
+            TOTAL_PASS=$((TOTAL_PASS + PASS))
+            TOTAL_FAIL=$((TOTAL_FAIL + FAIL))
+
+            if [ "$FAIL" -gt 0 ]; then
+              echo "| ${NAME} | ${PASS} | ❌ ${FAIL} |" >> "$GITHUB_STEP_SUMMARY"
+              echo "::error::${NAME} — ${FAIL} test(s) failed"
+            else
+              echo "| ${NAME} | ✅ ${PASS} | 0 |" >> "$GITHUB_STEP_SUMMARY"
+            fi
+
+            # Show section breakdown if any failures
+            if [ "$FAIL" -gt 0 ]; then
+              SECTIONS=$(sed -n '/^SECTIONS:/,/^$/p' "$f" | grep -v '^SECTIONS:' | grep -v '^$' || true)
+              if [ -n "$SECTIONS" ]; then
+                echo "" >> "$GITHUB_STEP_SUMMARY"
+                echo "<details><summary>${NAME} details</summary>" >> "$GITHUB_STEP_SUMMARY"
+                echo "" >> "$GITHUB_STEP_SUMMARY"
+                echo '```' >> "$GITHUB_STEP_SUMMARY"
+                echo "$SECTIONS" >> "$GITHUB_STEP_SUMMARY"
+                echo '```' >> "$GITHUB_STEP_SUMMARY"
+                echo "</details>" >> "$GITHUB_STEP_SUMMARY"
+                echo "" >> "$GITHUB_STEP_SUMMARY"
+              fi
+            fi
+          done
+
+          if [ "$FOUND_RESULTS" = true ]; then
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "---" >> "$GITHUB_STEP_SUMMARY"
+            echo "**Total: ${TOTAL_PASS} passed, ${TOTAL_FAIL} failed**" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "No test results found." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "## Plugin Warnings Summary" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
 
@@ -302,9 +384,13 @@ jobs:
 
           if [ "$FOUND" = false ]; then
             echo "No plugin warnings found across all versions." >> "$GITHUB_STEP_SUMMARY"
-            echo "No plugin warnings found."
           else
             echo "---" >> "$GITHUB_STEP_SUMMARY"
             echo "**Total unique warnings: ${TOTAL}**" >> "$GITHUB_STEP_SUMMARY"
-            echo "Found ${TOTAL} total unique warning(s) across all versions."
+          fi
+
+          if [ "$TOTAL_FAIL" -gt 0 ]; then
+            echo ""
+            echo "::error::${TOTAL_FAIL} test(s) failed across all versions"
+            exit 1
           fi
