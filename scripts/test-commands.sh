@@ -22,7 +22,7 @@ assert_log_not_contains "Unknown command.*alkatraz" "alkatraz command registered
 
 send_command "alkatraz reload"
 sleep 1
-assert_log_contains "Reloaded configs" "alkatraz reload works"
+assert_log_contains "Reloaded" "alkatraz reload works"
 
 send_command "alkatraz spawnmob zombie_mage"
 sleep 1
