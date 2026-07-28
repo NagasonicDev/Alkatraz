@@ -343,16 +343,28 @@ jobs:
               echo "| ${NAME} | ✅ ${PASS} | 0 |" >> "$GITHUB_STEP_SUMMARY"
             fi
 
-            # Show section breakdown if any failures
+            # Show section breakdown and log snapshots if any failures
             if [ "$FAIL" -gt 0 ]; then
               SECTIONS=$(sed -n '/^SECTIONS:/,/^$/p' "$f" | grep -v '^SECTIONS:' | grep -v '^$' || true)
-              if [ -n "$SECTIONS" ]; then
+              LOG_SNAPS=$(sed -n '/^LOG_SNAPSHOTS:/,/^$/p' "$f" | grep -v '^LOG_SNAPSHOTS:' | grep -v '^$' || true)
+              if [ -n "$SECTIONS" ] || [ -n "$LOG_SNAPS" ]; then
                 echo "" >> "$GITHUB_STEP_SUMMARY"
-                echo "<details><summary>${NAME} details</summary>" >> "$GITHUB_STEP_SUMMARY"
+                echo "<details><summary>${NAME} — failure details</summary>" >> "$GITHUB_STEP_SUMMARY"
                 echo "" >> "$GITHUB_STEP_SUMMARY"
-                echo '```' >> "$GITHUB_STEP_SUMMARY"
-                echo "$SECTIONS" >> "$GITHUB_STEP_SUMMARY"
-                echo '```' >> "$GITHUB_STEP_SUMMARY"
+                if [ -n "$SECTIONS" ]; then
+                  echo "**Test results:**" >> "$GITHUB_STEP_SUMMARY"
+                  echo '```' >> "$GITHUB_STEP_SUMMARY"
+                  echo "$SECTIONS" >> "$GITHUB_STEP_SUMMARY"
+                  echo '```' >> "$GITHUB_STEP_SUMMARY"
+                  echo "" >> "$GITHUB_STEP_SUMMARY"
+                fi
+                if [ -n "$LOG_SNAPS" ]; then
+                  echo "**Server log snapshot:**" >> "$GITHUB_STEP_SUMMARY"
+                  echo '```' >> "$GITHUB_STEP_SUMMARY"
+                  echo "$LOG_SNAPS" >> "$GITHUB_STEP_SUMMARY"
+                  echo '```' >> "$GITHUB_STEP_SUMMARY"
+                  echo "" >> "$GITHUB_STEP_SUMMARY"
+                fi
                 echo "</details>" >> "$GITHUB_STEP_SUMMARY"
                 echo "" >> "$GITHUB_STEP_SUMMARY"
               fi
