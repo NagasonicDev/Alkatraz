@@ -227,6 +227,22 @@ jobs:
           fi
           scripts/run-server-test.sh servers/server.jar "$PLUGIN_JAR" "${{ matrix.loader }}" "${{ matrix.mc_version }}"
 
+      - name: Copy test results to workspace
+        if: always()
+        run: |
+          RESULTS=$(ls /tmp/mc-test-*/test-results.txt 2>/dev/null | head -1)
+          if [ -n "$RESULTS" ]; then
+            cp "$RESULTS" "test-results-${{ matrix.loader }}-${{ matrix.mc_version }}.txt"
+            echo "Test results captured from $RESULTS"
+          else
+            echo "LOADER=${{ matrix.loader }}" > "test-results-${{ matrix.loader }}-${{ matrix.mc_version }}.txt"
+            echo "VERSION=${{ matrix.mc_version }}" >> "test-results-${{ matrix.loader }}-${{ matrix.mc_version }}.txt"
+            echo "PASS=0" >> "test-results-${{ matrix.loader }}-${{ matrix.mc_version }}.txt"
+            echo "FAIL=0" >> "test-results-${{ matrix.loader }}-${{ matrix.mc_version }}.txt"
+            echo "SECTIONS:" >> "test-results-${{ matrix.loader }}-${{ matrix.mc_version }}.txt"
+            echo "(no results file found)" >> "test-results-${{ matrix.loader }}-${{ matrix.mc_version }}.txt"
+          fi
+
       - name: Extract plugin warnings
         if: always()
         run: |
@@ -401,7 +417,7 @@ jobs:
             echo "No plugin warnings found across all versions." >> "$GITHUB_STEP_SUMMARY"
           else
             echo "---" >> "$GITHUB_STEP_SUMMARY"
-            echo "**Total unique warnings: ${TOTAL}**" >> "$GITHUB_STEP_SUMMARY"
+            echo "**Total unique warnings: ${TOTAL_WARN}**" >> "$GITHUB_STEP_SUMMARY"
           fi
 
           if [ "$TOTAL_FAIL" -gt 0 ]; then
