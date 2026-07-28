@@ -66,12 +66,16 @@ sleep 3
 TOTAL_PASS=0
 TOTAL_FAIL=0
 TEST_SECTIONS=""
+LOG_SNAPSHOTS=""
 
 for test_script in "${SCRIPT_DIR}"/test-*.sh; do
     [ -f "$test_script" ] || continue
     echo ""
     echo "Running $(basename "$test_script")..."
     chmod +x "$test_script"
+
+    # Snapshot log line count before test
+    LOG_BEFORE=$(wc -l < "$LOG_FILE" 2>/dev/null || echo 0)
 
     # Run test in subshell, capture output for result parsing
     OUTPUT=$(bash "$test_script" "$WORKDIR" "$LOG_FILE" "$LOADER" "$VERSION" 2>&1 || true)
@@ -83,6 +87,15 @@ for test_script in "${SCRIPT_DIR}"/test-*.sh; do
     TOTAL_PASS=$((TOTAL_PASS + SCRIPT_PASS))
     TOTAL_FAIL=$((TOTAL_FAIL + SCRIPT_FAIL))
     TEST_SECTIONS="${TEST_SECTIONS}$(basename "$test_script"): ${SCRIPT_PASS} pass, ${SCRIPT_FAIL} fail\n"
+
+    # If failures occurred, capture the log snapshot for this test window
+    if [ "$SCRIPT_FAIL" -gt 0 ]; then
+        LOG_AFTER=$(wc -l < "$LOG_FILE" 2>/dev/null || echo 0)
+        if [ "$LOG_AFTER" -gt "$LOG_BEFORE" ]; then
+            SNAPSHOT=$(tail -n +"$((LOG_BEFORE + 1))" "$LOG_FILE" 2>/dev/null | tail -80)
+            LOG_SNAPSHOTS="${LOG_SNAPSHOTS}=== $(basename "$test_script") ===\n${SNAPSHOT}\n\n"
+        fi
+    fi
 done
 
 # Check for plugin load failures
@@ -97,6 +110,9 @@ echo "VERSION=${VERSION}" >> "$RESULTS_FILE"
 echo "PASS=${TOTAL_PASS}" >> "$RESULTS_FILE"
 echo "FAIL=${TOTAL_FAIL}" >> "$RESULTS_FILE"
 echo -e "SECTIONS:\n${TEST_SECTIONS}" >> "$RESULTS_FILE"
+if [ -n "$LOG_SNAPSHOTS" ]; then
+    echo -e "LOG_SNAPSHOTS:\n${LOG_SNAPSHOTS}" >> "$RESULTS_FILE"
+fi
 
 echo ""
 echo "========================================="
