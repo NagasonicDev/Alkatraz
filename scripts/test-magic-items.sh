@@ -14,11 +14,11 @@ begin_test_section "Magic Items"
 
 send_command "alkatraz give wooden_wand"
 sleep 1
-assert_log_contains "Couldn't find a player|Only players" "give from console handled correctly"
+assert_log_contains "must specify a player|Only players" "give from console handled correctly"
 
 send_command "alkatraz give fake_item_123"
 sleep 1
-assert_log_contains "Couldn't find a player|Only players|no item|not found" "give nonexistent item handled"
+assert_log_contains "must specify a player|Only players|no item|not found" "give nonexistent item handled"
 
 assert_no_exceptions "No exceptions from magic item system"
 

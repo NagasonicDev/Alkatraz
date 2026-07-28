@@ -16,15 +16,15 @@ assert_log_not_contains "Error.*magic.*mob|Error.*MobProfile|Error.*mob.*config"
 
 send_command "alkatraz spawnmob zombie_mage"
 sleep 1
-assert_log_contains "Spawned zombie_mage" "zombie_mage spawn"
+assert_log_contains "must specify a player|Spawned zombie_mage" "zombie_mage spawn handled"
 
 send_command "alkatraz spawnmob zombie_fighter"
 sleep 1
-assert_log_contains "Spawned zombie_fighter" "zombie_fighter spawn"
+assert_log_contains "must specify a player|Spawned zombie_fighter" "zombie_fighter spawn handled"
 
 send_command "alkatraz spawnmob skeletal_mage"
 sleep 1
-assert_log_contains "Spawned skeletal_mage" "skeletal_mage spawn"
+assert_log_contains "must specify a player|Spawned skeletal_mage" "skeletal_mage spawn handled"
 
 send_command "alkatraz spawnmob fake_mob"
 sleep 1

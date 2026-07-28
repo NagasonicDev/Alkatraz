@@ -26,15 +26,15 @@ assert_log_contains "Reloaded configs" "alkatraz reload works"
 
 send_command "alkatraz spawnmob zombie_mage"
 sleep 1
-assert_log_contains "Spawned zombie_mage" "spawnmob zombie_mage works"
+assert_log_contains "must specify a player" "spawnmob zombie_mage requires player from console"
 
 send_command "alkatraz spawnmob zombie_fighter"
 sleep 1
-assert_log_contains "Spawned zombie_fighter" "spawnmob zombie_fighter works"
+assert_log_contains "must specify a player" "spawnmob zombie_fighter requires player from console"
 
 send_command "alkatraz spawnmob skeletal_mage"
 sleep 1
-assert_log_contains "Spawned skeletal_mage" "spawnmob skeletal_mage works"
+assert_log_contains "must specify a player" "spawnmob skeletal_mage requires player from console"
 
 send_command "alkatraz spawnmob nonexistent_mob"
 sleep 1
@@ -70,15 +70,15 @@ assert_log_contains "Only players can use this command" "/alkatraz editor requir
 
 send_command "alkatraz give wooden_wand"
 sleep 1
-assert_log_contains "Couldn't find a player" "give without target shows player-not-found"
+assert_log_contains "must specify a player" "give requires player from console"
 
 send_command "alkatraz arcaneknowledge set 100"
 sleep 1
-assert_log_contains "Couldn't find a player" "arcaneknowledge without target shows player-not-found"
+assert_log_contains "must specify a player" "arcaneknowledge requires player from console"
 
 send_command "alkatraz circle set 5"
 sleep 1
-assert_log_contains "Couldn't find a player" "circle without target shows player-not-found"
+assert_log_contains "must specify a player" "circle requires player from console"
 
 assert_no_exceptions "No exceptions during command execution"
 

@@ -17,7 +17,7 @@ if [ "$HTTP_CODE" = "200" ] && [ -s "$OUT_DIR/PlaceholderAPI.jar" ]; then
     FILESIZE=$(stat -c%s "$OUT_DIR/PlaceholderAPI.jar" 2>/dev/null || stat -f%z "$OUT_DIR/PlaceholderAPI.jar" 2>/dev/null || echo 0)
     if [ "$FILESIZE" -gt 10000 ]; then
         echo "Downloaded PlaceholderAPI (${FILESIZE} bytes)"
-        return 0
+        exit 0
     fi
 fi
 
@@ -30,7 +30,7 @@ if [ "$HTTP_CODE" = "200" ] && [ -s "$OUT_DIR/PlaceholderAPI.jar" ]; then
     FILESIZE=$(stat -c%s "$OUT_DIR/PlaceholderAPI.jar" 2>/dev/null || stat -f%z "$OUT_DIR/PlaceholderAPI.jar" 2>/dev/null || echo 0)
     if [ "$FILESIZE" -gt 10000 ]; then
         echo "Downloaded PlaceholderAPI from GitHub (${FILESIZE} bytes)"
-        return 0
+        exit 0
     fi
 fi
 
