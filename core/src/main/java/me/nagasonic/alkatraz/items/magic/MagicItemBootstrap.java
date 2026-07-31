@@ -5,6 +5,7 @@ import me.nagasonic.alkatraz.api.magic.attribute.AttributeService;
 import me.nagasonic.alkatraz.api.magic.attribute.AttributeType;
 import me.nagasonic.alkatraz.items.magic.attribute.EquipmentAttributeSource;
 import me.nagasonic.alkatraz.api.magic.component.ComponentHandlerRegistry;
+import me.nagasonic.alkatraz.items.magic.imbue.ImbueManager;
 import me.nagasonic.alkatraz.api.magic.component.ComponentType;
 import me.nagasonic.alkatraz.items.magic.component.handler.wand.WandComponentHandler;
 import me.nagasonic.alkatraz.items.magic.component.handler.grimoire.GrimoireComponentHandler;
@@ -78,8 +79,10 @@ public final class MagicItemBootstrap {
 
         MagicItemServices.initialize(itemService, attributeService, equipmentService);
         int registeredRecipes = MagicItemRecipeManager.registerRecipes();
+        ImbueManager.initialize();
+        int imbuingRecipes = MagicItemRecipeManager.registerImbuingRecipes();
         long elapsed = (System.nanoTime() - start) / 1_000_000;
-        Alkatraz.logInfo("Registered " + registeredRecipes + " recipes.");
+        Alkatraz.logInfo("Registered " + registeredRecipes + " shaped recipes and " + imbuingRecipes + " imbuing recipes.");
         Alkatraz.logVeryHigh("MagicItemBootstrap initialization completed in " + elapsed + "ms");
     }
 
@@ -209,6 +212,11 @@ public final class MagicItemBootstrap {
         MagicItemService.saveDefaultResource("magic/items/luminous_wand.yml");
         MagicItemService.saveDefaultResource("magic/items/void_wand.yml");
         MagicItemService.saveDefaultResource("magic/items/magic_stone.yml");
+        MagicItemService.saveDefaultResource("magic/items/imbued_tier1.yml");
+        MagicItemService.saveDefaultResource("magic/items/imbued_tier2.yml");
+        MagicItemService.saveDefaultResource("magic/items/imbued_tier3.yml");
+        MagicItemService.saveDefaultResource("magic/items/imbued_tier4.yml");
+        MagicItemService.saveDefaultResource("magic/items/imbued_tier5.yml");
         MagicItemService.saveDefaultResource("magic/items/leather_grimoire.yml");
         MagicItemService.saveDefaultResource("magic/items/runic_grimoire.yml");
         MagicItemService.saveDefaultResource("magic/items/blaze_grimoire.yml");

@@ -8,6 +8,7 @@ import me.nagasonic.alkatraz.config.ConfigUpdater;
 import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.config.VerbosityLevel;
 import me.nagasonic.alkatraz.dom.MinecraftVersion;
+import me.nagasonic.alkatraz.gui.EnchantingTableListener;
 import me.nagasonic.alkatraz.gui.MenuListener;
 import me.nagasonic.alkatraz.items.magic.MagicItemBootstrap;
 import me.nagasonic.alkatraz.items.magic.adapter.MagicItemTriggerAdapter;
@@ -151,6 +152,7 @@ public final class Alkatraz extends JavaPlugin {
         registerListener(new FirstJoinTutorial());
         registerListener(new MagicItemTriggerAdapter());
         registerListener(new MagicItemComponentListener());
+        registerListener(new EnchantingTableListener());
         registerListener(new RecipeCraftListener());
         registerListener(new MagicStoneDropListener());
         registerListener(new ResourcePackListener());

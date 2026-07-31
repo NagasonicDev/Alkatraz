@@ -1,0 +1,7 @@
+key: alkatraz:imbued_tier1
+material: BARRIER
+display_name: 'Imbued'
+components:
+  - alkatraz:equipment
+attributes:
+  alkatraz:max_mana: 10

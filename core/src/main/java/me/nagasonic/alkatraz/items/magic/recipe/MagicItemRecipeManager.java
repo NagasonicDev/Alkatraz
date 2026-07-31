@@ -7,6 +7,7 @@ import me.nagasonic.alkatraz.api.magic.modifier.EngravingDefinition;
 import me.nagasonic.alkatraz.api.magic.registry.MagicItemRegistries;
 import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
 import me.nagasonic.alkatraz.configuration.requirement.Requirement;
+import me.nagasonic.alkatraz.items.magic.imbue.ImbueManager;
 import me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
@@ -19,6 +20,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.ShapelessRecipe;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,6 +50,34 @@ public final class MagicItemRecipeManager {
             Bukkit.addRecipe(recipe);
             count++;
         }
+        return count;
+    }
+
+    public static int registerImbuingRecipes() {
+        NamespacedKey stoneDefKey = MagicKeys.alkatraz("magic_stone");
+        ItemDefinition stoneDef = MagicItemRegistries.ITEM_DEFINITIONS.get(stoneDefKey).orElse(null);
+        if (stoneDef == null) {
+            Alkatraz.logWarning("Cannot register imbuing recipes: magic_stone definition not found");
+            return 0;
+        }
+        ItemStack magicStone = MagicItemStack.create(stoneDef, MagicItemInstance.createDefault(stoneDefKey));
+
+        int count = 0;
+        for (Material mat : ImbueManager.getImbuableMaterials()) {
+            int stoneCount = ImbueManager.getStoneCount(mat);
+            NamespacedKey recipeKey = new NamespacedKey(Alkatraz.getInstance(), "imbue_" + mat.name().toLowerCase(Locale.ROOT));
+
+            if (Bukkit.getRecipe(recipeKey) != null) continue;
+
+            ShapelessRecipe recipe = new ShapelessRecipe(recipeKey, new ItemStack(mat));
+            recipe.addIngredient(new RecipeChoice.MaterialChoice(mat));
+            for (int i = 0; i < stoneCount; i++) {
+                recipe.addIngredient(new RecipeChoice.ExactChoice(magicStone.clone()));
+            }
+            Bukkit.addRecipe(recipe);
+            count++;
+        }
+        Alkatraz.logInfo("Registered " + count + " imbuing recipes.");
         return count;
     }
 

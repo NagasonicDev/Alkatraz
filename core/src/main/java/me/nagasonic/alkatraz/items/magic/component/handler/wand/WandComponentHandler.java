@@ -16,7 +16,6 @@ import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellCastValidator;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
 import me.nagasonic.alkatraz.util.Utils;
-import me.nagasonic.alkatraz.gui.implementation.WandTableSelectionMenu;
 import org.bukkit.Material;
 import org.bukkit.event.block.Action;
 import me.nagasonic.alkatraz.util.WandUtils;
@@ -56,11 +55,9 @@ public class WandComponentHandler implements ComponentHandler {
         // Skip if not a wand (should never happen)
         if (!WandUtils.isWand(stack)) return;
         
-        // Open wand menu when clicking enchanting table
-        if ((event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) && 
+        // Enchanting table clicks are handled by EnchantingTableListener
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK &&
             event.getClickedBlock() != null && event.getClickedBlock().getType() == Material.ENCHANTING_TABLE) {
-            event.setCancelled(true);
-            new WandTableSelectionMenu(player).open();
             return;
         }
         
