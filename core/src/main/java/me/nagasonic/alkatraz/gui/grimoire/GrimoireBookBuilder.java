@@ -1,5 +1,9 @@
 package me.nagasonic.alkatraz.gui.grimoire;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import me.nagasonic.alkatraz.spells.Element;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
@@ -29,7 +33,41 @@ public class GrimoireBookBuilder {
         }
         meta.spigot().setPages(bookPages.toArray(new BaseComponent[0][]));
         book.setItemMeta(meta);
+
+        injectShadowFalse(book);
         return book;
+    }
+
+    private static void injectShadowFalse(ItemStack book) {
+        BookMeta meta = (BookMeta) book.getItemMeta();
+        if (meta == null || !meta.hasPages()) return;
+
+        List<String> rawPages = meta.getPages();
+        for (int i = 0; i < rawPages.size(); i++) {
+            String page = rawPages.get(i);
+            try {
+                JsonElement element = JsonParser.parseString(page);
+                addShadowFalse(element);
+                meta.setPage(i, element.toString());
+            } catch (Exception ignored) {
+            }
+        }
+        book.setItemMeta(meta);
+    }
+
+    private static void addShadowFalse(JsonElement element) {
+        if (element.isJsonObject()) {
+            JsonObject obj = element.getAsJsonObject();
+            obj.addProperty("shadow", false);
+            if (obj.has("extra")) {
+                addShadowFalse(obj.get("extra"));
+            }
+        } else if (element.isJsonArray()) {
+            JsonArray arr = element.getAsJsonArray();
+            for (JsonElement child : arr) {
+                addShadowFalse(child);
+            }
+        }
     }
 
     private static BaseComponent[] buildPage(int pageNumber, String spellId) {
@@ -39,7 +77,7 @@ public class GrimoireBookBuilder {
             builder.append("Page " + pageNumber)
                     .bold(true)
                     .color(ChatColor.BLACK)
-                    .append("\n\n\nEmpty.\n\nShift+Right-click\nto assign a spell.\n\nClose the book\nto cast the\nselected spell.")
+                    .append("\n\n\nEmpty.\n\nShift+Right-click\nto assign a spell.")
                     .bold(false)
                     .color(ChatColor.BLACK);
             return builder.create();
@@ -76,6 +114,11 @@ public class GrimoireBookBuilder {
                 .append("\n").reset();
         builder.append("Mana: " + spell.getCost() + " | CD: " + spell.getCooldown() + "s | Cast: " + spell.getCastTime() + "s")
                 .color(ChatColor.BLACK);
+
+        builder.append("\n\n").reset();
+        builder.append("Press the 'Take Book'\nbutton to cast this\nspell.")
+                .color(ChatColor.GRAY)
+                .italic(true);
 
         return builder.create();
     }

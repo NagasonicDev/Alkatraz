@@ -156,6 +156,14 @@ public class SpellbookConfig {
     }
 
     // ==========================================
+    // IMBUING
+    // ==========================================
+
+    public static int getImbueStoneCost(int tier) {
+        return getInt("imbuing.stone_costs." + tier, tier);
+    }
+
+    // ==========================================
     // LOOT - GLOBAL
     // ==========================================
 

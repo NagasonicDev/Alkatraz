@@ -94,6 +94,20 @@ villager_trading:
       stone_min: 5
       stone_max: 8
 
+# ==============================
+# Imbuing System
+# Converts vanilla tools/weapons/armor into magic items
+# using magic stones in a crafting table.
+# ==============================
+imbuing:
+  # Stone cost per tier (tier determined by material)
+  stone_costs:
+    1: 1
+    2: 2
+    3: 3
+    4: 4
+    5: 5
+
 # PlaceholderAPI integration settings
 placeholders:
   leaderboard:

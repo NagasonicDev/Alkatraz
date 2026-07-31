@@ -32,4 +32,12 @@ public final class WandUtils {
         Boolean result = NBT.get(item, nbt -> (Boolean) nbt.getBoolean("wand"));
         return result != null && result;
     }
+
+    /**
+     * Checks if an ItemStack is a grimoire.
+     */
+    public static boolean isGrimoire(ItemStack item) {
+        if (item == null || item.getType().isAir()) return false;
+        return MagicItemStack.isMagicItem(item) && MagicItemStack.isGrimoireDefinition(item);
+    }
 }

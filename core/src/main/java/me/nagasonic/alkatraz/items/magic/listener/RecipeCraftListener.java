@@ -2,6 +2,7 @@ package me.nagasonic.alkatraz.items.magic.listener;
 
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.configuration.requirement.Requirement;
+import me.nagasonic.alkatraz.items.magic.imbue.ImbueManager;
 import me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack;
 import me.nagasonic.alkatraz.items.magic.recipe.MagicItemRecipeManager;
 import org.bukkit.Keyed;
@@ -21,8 +22,15 @@ public class RecipeCraftListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onPrepareCraft(PrepareItemCraftEvent event) {
-        boolean hasMagicIngredient = hasMagicIngredient(event);
         Recipe recipe = event.getRecipe();
+
+        if (recipe instanceof Keyed keyed && keyed.getKey().getNamespace().equals("alkatraz")
+                && keyed.getKey().getKey().startsWith("imbue_")) {
+            handleImbuingCraft(event);
+            return;
+        }
+
+        boolean hasMagicIngredient = hasMagicIngredient(event);
         if (recipe instanceof Keyed keyed) {
             Alkatraz.logInfo("[CraftListener] Detected recipe is keyed: " + keyed.getKey() + " with namespace: " + keyed.getKey().getNamespace());
         }
@@ -75,6 +83,23 @@ public class RecipeCraftListener implements Listener {
             }
         }
         return false;
+    }
+
+    private void handleImbuingCraft(PrepareItemCraftEvent event) {
+        ItemStack[] matrix = event.getInventory().getMatrix();
+        ItemStack input = null;
+        for (ItemStack item : matrix) {
+            if (item != null && !item.getType().isAir() && !MagicItemStack.isMagicItem(item)) {
+                input = item;
+                break;
+            }
+        }
+        if (input == null || !ImbueManager.isImbuable(input.getType())) {
+            event.getInventory().setResult(null);
+            return;
+        }
+        ItemStack result = ImbueManager.imbue(input);
+        event.getInventory().setResult(result);
     }
 
     private static String describeStack(ItemStack stack) {

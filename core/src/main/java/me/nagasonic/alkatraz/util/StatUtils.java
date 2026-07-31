@@ -34,7 +34,7 @@ public class StatUtils {
 
         ItemStack item = p.getInventory().getItemInMainHand();
         if (item.getType() != Material.AIR && item.getAmount() != 0) {
-            if (WandUtils.isWand(item) || SpellHotbarManager.isActive(p)){
+            if (WandUtils.isWand(item) || WandUtils.isGrimoire(item) || SpellHotbarManager.isActive(p)){
                 Alkatraz.getNms().fakeExp(
                         p,
                         (float) (profile.getMana() / profile.getMaxMana()),
@@ -55,7 +55,7 @@ public class StatUtils {
 
         ItemStack item = p.getInventory().getItemInMainHand();
         if (item.getType() != Material.AIR && item.getAmount() != 0) {
-            if (WandUtils.isWand(item) || SpellHotbarManager.isActive(p)) {
+            if (WandUtils.isWand(item) || WandUtils.isGrimoire(item) || SpellHotbarManager.isActive(p)) {
                 Alkatraz.getNms().fakeExp(
                         p,
                         (float) (profile.getMana() / profile.getMaxMana()),
@@ -217,7 +217,7 @@ public class StatUtils {
 
         ItemStack item = p.getInventory().getItemInMainHand();
         if (item.getType() != Material.AIR && item.getAmount() != 0) {
-            if (WandUtils.isWand(item) || SpellHotbarManager.isActive(p)) {
+            if (WandUtils.isWand(item) || WandUtils.isGrimoire(item) || SpellHotbarManager.isActive(p)) {
                 Alkatraz.getNms().fakeExp(
                         p,
                         (float) (profile.getMana() / profile.getMaxMana()),

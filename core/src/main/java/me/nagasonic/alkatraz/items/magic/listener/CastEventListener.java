@@ -75,14 +75,14 @@ public class CastEventListener implements Listener {
         ItemStack curr = p.getInventory().getItem(e.getNewSlot());
         if (prev != null) {
             if (prev.getType() != Material.AIR && prev.getAmount() != 0){
-                if (WandUtils.isWand(prev)) {
+                if (isManaDisplayItem(prev)) {
                     switchFrom(p);
                 }
             }
         }
         if (curr != null){
             if (curr.getType() != Material.AIR && curr.getAmount() != 0){
-                if (WandUtils.isWand(curr)) {
+                if (isManaDisplayItem(curr)) {
                     switchTo(p, curr);
                 }
             }
@@ -99,13 +99,13 @@ public class CastEventListener implements Listener {
                     ItemStack cursor = e.getCursor();
                     if (cursor != null){
                         if (cursor.getType() != Material.AIR && cursor.getAmount() != 0){
-                            if (WandUtils.isWand(cursor)) { switchTo(p, cursor); }
+                            if (isManaDisplayItem(cursor)) { switchTo(p, cursor); }
                         }
                     }
                     ItemStack curr = e.getCurrentItem();
                     if (curr != null){
                         if (curr.getType() != Material.AIR && curr.getAmount() != 0){
-                            if (WandUtils.isWand(curr)) { switchFrom(p); }
+                            if (isManaDisplayItem(curr)) { switchFrom(p); }
                         }
                     }
                 }
@@ -114,34 +114,34 @@ public class CastEventListener implements Listener {
                     ItemStack swapped = e.getCurrentItem();
                     ItemStack swappedWith = p.getInventory().getItem(e.getHotbarButton());
                     if (notAir(swappedWith) && notAir(swapped)){
-                        boolean clickedIsWand = WandUtils.isWand(swapped);
-                        boolean hotbarIsWand = WandUtils.isWand(swappedWith);
+                        boolean clickedIsWand = isManaDisplayItem(swapped);
+                        boolean hotbarIsWand = isManaDisplayItem(swappedWith);
                         if (clickedIsWand && !hotbarIsWand) { switchTo(p, swapped); }
                         else if (!clickedIsWand && hotbarIsWand) { switchFrom(p); }
                     } else if (notAir(swapped) && !notAir(swappedWith)) {
-                        if (WandUtils.isWand(swapped)){ switchTo(p, swapped); }
+                        if (isManaDisplayItem(swapped)){ switchTo(p, swapped); }
                     } else if (notAir(swappedWith) && !notAir(swapped)) {
-                        if (WandUtils.isWand(swappedWith)){ switchFrom(p); }
+                        if (isManaDisplayItem(swappedWith)){ switchFrom(p); }
                     }
                 } else if (e.getSlot() == p.getInventory().getHeldItemSlot()) {
                     ItemStack swapped = e.getCurrentItem();
                     ItemStack swappedWith = p.getInventory().getItem(e.getHotbarButton());
                     if (notAir(swappedWith) && notAir(swapped)){
-                        boolean clickedIsWand = WandUtils.isWand(swapped);
-                        boolean hotbarIsWand = WandUtils.isWand(swappedWith);
+                        boolean clickedIsWand = isManaDisplayItem(swapped);
+                        boolean hotbarIsWand = isManaDisplayItem(swappedWith);
                         if (clickedIsWand && !hotbarIsWand) { switchFrom(p); }
                         else if (!clickedIsWand && hotbarIsWand) { switchTo(p, swapped); }
                     } else if (notAir(swapped) && !notAir(swappedWith)) {
-                        if (WandUtils.isWand(swapped)){ switchFrom(p); }
+                        if (isManaDisplayItem(swapped)){ switchFrom(p); }
                     } else if (notAir(swappedWith) && !notAir(swapped)) {
-                        if (WandUtils.isWand(swappedWith)){ switchTo(p, swappedWith); }
+                        if (isManaDisplayItem(swappedWith)){ switchTo(p, swappedWith); }
                     }
                 }
             }else if (e.getAction() == InventoryAction.PICKUP_ALL || e.getAction().equals(InventoryAction.PICKUP_HALF) || e.getAction().equals(InventoryAction.PICKUP_ONE) || e.getAction().equals(InventoryAction.PICKUP_SOME)){
                 ItemStack curr = e.getCurrentItem();
                 if (curr != null){
                     if (curr.getType() != Material.AIR && curr.getAmount() != 0){
-                        if (WandUtils.isWand(curr)) {
+                        if (isManaDisplayItem(curr)) {
                             if (e.getSlot() == p.getInventory().getHeldItemSlot()){ switchFrom(p); }
                         }
                     }
@@ -150,7 +150,7 @@ public class CastEventListener implements Listener {
                 ItemStack cursor = e.getCursor();
                 if (cursor != null){
                     if (cursor.getType() != Material.AIR && cursor.getAmount() != 0){
-                        if (WandUtils.isWand(cursor)) {
+                        if (isManaDisplayItem(cursor)) {
                             if (e.getSlot() == p.getInventory().getHeldItemSlot()){ switchTo(p, cursor); }
                         }
                     }
@@ -165,7 +165,7 @@ public class CastEventListener implements Listener {
                                     ItemStack wand = p.getInventory().getItem(mainSlot);
                                     if (wand != null){
                                         if (wand.getType() != Material.AIR && wand.getAmount() != 0){
-                                            if (WandUtils.isWand(wand)) { switchTo(p, wand); }
+                                            if (isManaDisplayItem(wand)) { switchTo(p, wand); }
                                         }
                                     }
                                 }
@@ -176,7 +176,7 @@ public class CastEventListener implements Listener {
                     ItemStack curr = e.getCurrentItem();
                     if (curr != null){
                         if (curr.getType() != Material.AIR && curr.getAmount() != 0){
-                            if (WandUtils.isWand(curr)) { switchFrom(p); }
+                            if (isManaDisplayItem(curr)) { switchFrom(p); }
                         }
                     }
                 }
@@ -192,8 +192,8 @@ public class CastEventListener implements Listener {
         ItemStack hand = p.getItemInHand();
         if (dropped.getType() != Material.AIR && dropped.getAmount() != 0){
             if (hand.getAmount() != 0 && hand.getType() != Material.AIR) {
-                if (!WandUtils.isWand(hand)){ switchFrom(p); }
-            } else if (WandUtils.isWand(dropped)){ switchFrom(p); }
+                if (!isManaDisplayItem(hand)){ switchFrom(p); }
+            } else if (isManaDisplayItem(dropped)){ switchFrom(p); }
         }
     }
 
@@ -203,7 +203,7 @@ public class CastEventListener implements Listener {
         Player p = e.getPlayer();
         if (SpellHotbarManager.isActive(p)) return;
         if (item.getType() != Material.AIR && item.getAmount() != 0){
-            if (WandUtils.isWand(item)){
+            if (isManaDisplayItem(item)){
                 for (int i = 0; i <= p.getInventory().getHeldItemSlot(); i++){
                     ItemStack s = p.getInventory().getItem(i);
                     if (s != null){
@@ -238,7 +238,7 @@ public class CastEventListener implements Listener {
         ItemStack wand = p.getInventory().getItem(p.getInventory().getHeldItemSlot());
         if (wand != null){
             if (wand.getType() != Material.AIR && wand.getAmount() != 0){
-                if (WandUtils.isWand(wand)){ switchFrom(p); }
+                if (isManaDisplayItem(wand)){ switchFrom(p); }
             }
         }
         MagicProfile data = ProfileManager.getProfile(e.getPlayer().getUniqueId(), MagicProfile.class);
@@ -251,7 +251,7 @@ public class CastEventListener implements Listener {
         ItemStack wand = p.getInventory().getItem(p.getInventory().getHeldItemSlot());
         if (wand != null){
             if (wand.getType() != Material.AIR && wand.getAmount() != 0){
-                if (WandUtils.isWand(wand)){
+                if (isManaDisplayItem(wand)){
                     Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(Alkatraz.getInstance(), () -> {
                         switchTo(p, wand);
                     }, 1L);
@@ -416,6 +416,10 @@ public class CastEventListener implements Listener {
     // ============================
     // MANA DISPLAY HELPERS
     // ============================
+
+    private static boolean isManaDisplayItem(ItemStack item) {
+        return WandUtils.isWand(item) || WandUtils.isGrimoire(item);
+    }
 
     public static void resetExperience(Player p){
         level.remove(p.getUniqueId().toString());

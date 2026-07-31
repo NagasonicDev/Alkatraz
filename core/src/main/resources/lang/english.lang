@@ -123,6 +123,12 @@ arcane.engineering_desc = &7  Engineering - &7Modify your equipment
 arcane.choose_path = &7Choose your path:
 arcane.click_to_open = &eClick to open
 
+# --- Enchanting Table Choice ---
+arcane_table_choice.arcane = &dArcane Table
+arcane_table_choice.arcane_lore = &7Access the Alkatraz arcane system\n&7for research and engineering.
+arcane_table_choice.enchanting = &eEnchanting Table
+arcane_table_choice.enchanting_lore = &7Open the vanilla enchanting table.
+
 # --- Equipment Menu ---
 equipment.slot_ring = Ring
 equipment.slot_necklace = Necklace
@@ -397,7 +403,7 @@ tutorial.step2_subtitle = &7Your progression system
 tutorial.step2_chat = &7Invest stat points using the &e/spells &7command. Then click &eCircle Up &7to advance!
 tutorial.step3_title = &e&lStep 3: Arcane Table
 tutorial.step3_subtitle = &7Research & Engineering
-tutorial.step3_chat = &7Use &e/wandtable &7to access the Arcane Table for research and equipment modification.
+tutorial.step3_chat = &7Right-click an &eEnchanting Table &7and select\n&7"Arcane Table" for research and equipment modification.
 tutorial.step4_title = &e&lStep 4: Spell Options
 tutorial.step4_subtitle = &7Customize your spells
 tutorial.step4_chat = &7Click a spell in &e/spells &7to configure its options and hotbar assignment.
