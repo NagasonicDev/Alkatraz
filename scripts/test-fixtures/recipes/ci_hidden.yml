@@ -1,0 +1,10 @@
+definition: alkatraz:ci_hidden
+type: SHAPED
+result:
+  item: STICK
+  amount: 1
+hidden_when_locked: true
+shape:
+  - "S"
+ingredients:
+  S: STICK

@@ -1,0 +1,12 @@
+definition: alkatraz:ci_shaped
+result:
+  item: STICK
+  amount: 1
+shape:
+  - "  M"
+  - " W "
+  - "S  "
+ingredients:
+  M: DIAMOND
+  W: OAK_WOOD
+  S: STICK

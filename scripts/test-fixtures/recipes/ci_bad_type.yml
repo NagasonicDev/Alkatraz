@@ -1,0 +1,5 @@
+definition: alkatraz:ci_bad_type
+type: WAFFLE
+result:
+  item: STICK
+  amount: 1

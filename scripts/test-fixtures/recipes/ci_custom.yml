@@ -1,0 +1,7 @@
+definition: alkatraz:ci_custom
+type: CUSTOM
+result:
+  item: STICK
+  amount: 1
+unlock:
+  message: "You discovered the custom recipe!"

@@ -1,0 +1,8 @@
+definition: alkatraz:ci_bad_shape
+type: SHAPED
+result:
+  item: STICK
+  amount: 1
+shape: []
+ingredients:
+  S: STICK

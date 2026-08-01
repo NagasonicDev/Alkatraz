@@ -31,6 +31,7 @@ public final class RecipeRegistry {
         if (BY_KEY.containsKey(key)) {
             Alkatraz.logWarning("Duplicate recipe key overwritten: " + key);
         }
+        Alkatraz.logInfo("Registered recipe " + key);
         BY_KEY.put(key, recipe);
         BY_OUTPUT_MATERIAL.computeIfAbsent(recipe.getResult().getType(), k -> new HashSet<>()).add(key);
         BY_STATION.computeIfAbsent(recipe.getType(), k -> new HashSet<>()).add(key);
@@ -40,6 +41,7 @@ public final class RecipeRegistry {
     public static void unregisterAll() {
         for (NamespacedKey key : BY_KEY.keySet()) {
             Bukkit.removeRecipe(key);
+            Alkatraz.logInfo("Removed recipe " + key);
         }
         BY_KEY.clear();
         BY_OUTPUT_MATERIAL.clear();
@@ -83,10 +85,17 @@ public final class RecipeRegistry {
             if (CraftingEventRouter.getAdapter(recipe.getType()) == null) continue;
             if (recipe.isOverrideVanilla()) {
                 Bukkit.removeRecipe(recipe.getKey());
+                Alkatraz.logInfo("Overrode vanilla recipe " + recipe.getKey());
             } else if (Bukkit.getRecipe(recipe.getKey()) != null) {
                 Alkatraz.logWarning("Recipe key " + recipe.getKey() + " conflicts with an existing Bukkit recipe; set override_vanilla: true to replace it");
+                continue;
             }
-            CraftingEventRouter.registerNative(recipe);
+            try {
+                CraftingEventRouter.registerNative(recipe);
+            } catch (IllegalStateException e) {
+                Alkatraz.logWarning("Failed to register native recipe " + recipe.getKey() + ": " + e.getMessage());
+                continue;
+            }
             count++;
         }
         return count;

@@ -1,0 +1,8 @@
+definition: alkatraz:ci_brewing
+type: BREWING
+result:
+  item: GLOWSTONE_DUST
+  amount: 1
+brewing:
+  input: SUGAR
+  ingredient: REDSTONE

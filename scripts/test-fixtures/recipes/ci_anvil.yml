@@ -1,0 +1,8 @@
+definition: alkatraz:ci_anvil
+type: ANVIL
+result:
+  item: STICK
+  amount: 1
+anvil:
+  base: DIAMOND
+  addition: STICK

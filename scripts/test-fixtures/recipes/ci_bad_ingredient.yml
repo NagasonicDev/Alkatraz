@@ -1,0 +1,7 @@
+definition: alkatraz:ci_bad_ingredient
+type: SHAPELESS
+result:
+  item: STICK
+  amount: 1
+ingredients:
+  - definitely_not_a_material

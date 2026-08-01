@@ -1,0 +1,12 @@
+definition: alkatraz:ci_gated
+type: SHAPED
+result:
+  item: STICK
+  amount: 1
+requirements:
+  - type: recipe_unlocked
+    recipe: alkatraz:ci_shaped
+shape:
+  - "S"
+ingredients:
+  S: STICK
