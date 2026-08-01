@@ -1,0 +1,11 @@
+# Key deliberately collides with the vanilla minecraft:stick recipe so the
+# Bukkit-conflict warning path (RecipeRegistry.registerNativeRecipes) is tested.
+definition: minecraft:stick
+type: SHAPED
+result:
+  item: STICK
+  amount: 1
+shape:
+  - "S"
+ingredients:
+  S: STICK

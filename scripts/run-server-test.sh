@@ -44,6 +44,12 @@ chmod +x "${SCRIPT_DIR}/download-placeholderapi.sh"
 
 cp "${PLUGIN_JAR}" "${WORKDIR}/plugins/"
 
+# Copy recipe test fixtures into the plugin's recipe data folder (no-op when absent)
+if [ -d "${SCRIPT_DIR}/test-fixtures/recipes" ]; then
+    mkdir -p "${WORKDIR}/plugins/Alkatraz/magic/recipes"
+    cp "${SCRIPT_DIR}/test-fixtures/recipes/"*.yml "${WORKDIR}/plugins/Alkatraz/magic/recipes/"
+fi
+
 cd "${WORKDIR}"
 
 mkfifo cmd_pipe

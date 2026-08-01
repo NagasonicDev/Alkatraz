@@ -1,0 +1,8 @@
+definition: alkatraz:ci_shapeless
+type: SHAPELESS
+result:
+  item: STICK
+  amount: 2
+ingredients:
+  - STICK
+  - OAK_PLANKS

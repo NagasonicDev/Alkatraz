@@ -1,0 +1,7 @@
+definition: alkatraz:ci_stonecutter
+type: STONECUTTER
+result:
+  item: STICK
+  amount: 1
+stonecutter:
+  input: COBBLESTONE

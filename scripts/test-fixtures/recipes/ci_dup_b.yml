@@ -1,0 +1,9 @@
+definition: alkatraz:ci_dup
+type: SHAPED
+result:
+  item: STICK
+  amount: 1
+shape:
+  - "S"
+ingredients:
+  S: STICK

@@ -1,0 +1,10 @@
+definition: alkatraz:ci_override
+type: SHAPED
+result:
+  item: STICK
+  amount: 1
+override_vanilla: true
+shape:
+  - "S"
+ingredients:
+  S: STICK

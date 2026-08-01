@@ -1,0 +1,8 @@
+definition: alkatraz:ci_smithing
+type: SMITHING
+result:
+  item: NETHERITE_INGOT
+  amount: 1
+smithing:
+  base: DIAMOND
+  addition: NETHERITE_INGOT

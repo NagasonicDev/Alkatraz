@@ -1,0 +1,11 @@
+definition: alkatraz:ci_permission
+type: SHAPED
+result:
+  item: STICK
+  amount: 1
+permissions:
+  - alkatraz.recipes.ci
+shape:
+  - "S"
+ingredients:
+  S: STICK

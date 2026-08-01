@@ -1,0 +1,8 @@
+definition: alkatraz:ci_cooking
+type: FURNACE
+result:
+  item: CHARCOAL
+  amount: 1
+input: OAK_LOG
+experience: 0.5
+cooking_time: 100
