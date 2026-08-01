@@ -79,6 +79,9 @@ public final class MagicItemService {
         }
         for (File file : files) {
             String relative = folder + "/" + file.getName();
+            if (ConfigManager.getConfigs().containsKey(relative)) {
+                ConfigManager.reloadConfig(relative);
+            }
             consumer.accept(relative, ConfigManager.getConfig(relative).get());
         }
     }

@@ -1,5 +1,7 @@
 package me.nagasonic.alkatraz.configuration.requirement;
 
+import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
+import me.nagasonic.alkatraz.items.magic.recipe.unlock.UnlockManager;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.progression.research.ResearchProgressRegistry;
@@ -11,6 +13,8 @@ import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.Com
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.OptionValueRequirement;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.PermissionRequirement;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Statistic;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -111,6 +115,41 @@ public final class RequirementFactory {
                     player -> masteredSpellCount(ProfileManager.getProfile(player, MagicProfile.class), circle, mastery) >= count
             );
         });
+
+        register("xp_level", (spell, s) -> {
+            int minimum = s.getInt("minimum", 1);
+            return simple(
+                    s.getString("description", "Requires Level " + minimum),
+                    player -> player.getLevel() >= minimum,
+                    player -> player.getLevel() * 100 / minimum
+            );
+        });
+
+        register("playtime", (spell, s) -> {
+            int minutes = s.getInt("minutes", 1);
+            return simple(
+                    s.getString("description", "Requires " + minutes + " minutes of playtime"),
+                    player -> player.getStatistic(Statistic.PLAY_ONE_MINUTE) / 20 / 60 >= minutes,
+                    player -> player.getStatistic(Statistic.PLAY_ONE_MINUTE) / 20 / 60 * 100 / minutes
+            );
+        });
+
+        register("world", (spell, s) -> {
+            List<String> worlds = s.getStringList("worlds");
+            return simple(
+                    s.getString("description", "Requires being in a specific world"),
+                    player -> worlds.contains(player.getWorld().getName())
+            );
+        });
+
+        register("recipe_unlocked", (spell, s) -> {
+            String recipeId = s.getString("recipe", "");
+            String normalized = MagicKeys.parse(recipeId).map(NamespacedKey::toString).orElse(recipeId);
+            return simple(
+                    s.getString("description", "Requires crafting " + recipeId),
+                    player -> UnlockManager.isUnlocked(player, normalized)
+            );
+        });
     }
 
     public static void register(String type, Builder builder) {
@@ -162,6 +201,25 @@ public final class RequirementFactory {
             @Override
             public String getDescription() {
                 return description;
+            }
+        };
+    }
+
+    private static ValueRequirement simple(String description, java.util.function.Predicate<org.bukkit.entity.Player> predicate, java.util.function.ToIntFunction<org.bukkit.entity.Player> progress) {
+        return new ValueRequirement() {
+            @Override
+            public boolean isMet(org.bukkit.entity.Player player) {
+                return predicate.test(player);
+            }
+
+            @Override
+            public String getDescription() {
+                return description;
+            }
+
+            @Override
+            public int getProgress(org.bukkit.entity.Player player) {
+                return Math.max(0, Math.min(100, progress.applyAsInt(player)));
             }
         };
     }

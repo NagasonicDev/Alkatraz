@@ -16,6 +16,10 @@ import me.nagasonic.alkatraz.items.magic.adapter.MagicItemComponentListener;
 import me.nagasonic.alkatraz.items.magic.listener.CastEventListener;
 import me.nagasonic.alkatraz.items.magic.listener.RecipeCraftListener;
 import me.nagasonic.alkatraz.items.magic.listener.MagicStoneDropListener;
+import me.nagasonic.alkatraz.items.magic.recipe.RecipeManager;
+import me.nagasonic.alkatraz.items.magic.recipe.RecipeManagerAPI;
+import me.nagasonic.alkatraz.items.magic.recipe.adapter.CraftingEventRouter;
+import me.nagasonic.alkatraz.items.magic.recipe.unlock.UnlockListener;
 import me.nagasonic.alkatraz.loot.LootInjector;
 import me.nagasonic.alkatraz.loot.MobLootInjector;
 import me.nagasonic.alkatraz.loot.implementation.SpellbookLoot;
@@ -64,6 +68,7 @@ public final class Alkatraz extends JavaPlugin {
     private static boolean enabled = true;
     private static boolean resourcePackForced = false;
     private static VerbosityLevel verbosity = VerbosityLevel.NORMAL;
+    private static RecipeManagerAPI recipeManager = new RecipeManager();
     
     // Texture pack system
     private static me.nagasonic.alkatraz.texturepack.TexturePackManager texturePackManager = null;
@@ -155,11 +160,14 @@ public final class Alkatraz extends JavaPlugin {
         registerListener(new EnchantingTableListener());
         registerListener(new RecipeCraftListener());
         registerListener(new MagicStoneDropListener());
+        registerListener(new UnlockListener());
+        registerListener(new CraftingEventRouter());
         registerListener(new ResourcePackListener());
         Bukkit.getPluginManager().registerEvents(new MenuListener(), this);
         logInfo("NMS version " + nms.getClass().getSimpleName() + " registered!");
         getCommand("spells").setExecutor(new SpellsCommand());
         getCommand("recipes").setExecutor(new RecipesCommand());
+        getCommand("recipes").setTabCompleter(new RecipesCommand());
         getCommand("cast").setExecutor(new CastCommand());
         getCommand("alkatraz").setExecutor(new AlkatrazCommand());
         getCommand("alkatraz").setTabCompleter(new AlkatrazCommand());
@@ -210,6 +218,10 @@ public final class Alkatraz extends JavaPlugin {
 
     public static me.nagasonic.alkatraz.lang.LangManager getLangManager() {
         return langManager;
+    }
+
+    public static RecipeManagerAPI getRecipeManager() {
+        return recipeManager;
     }
 
     public static void log(VerbosityLevel level, String message) {

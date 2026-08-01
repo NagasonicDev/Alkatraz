@@ -19,6 +19,11 @@ public enum Permission {
     COMMAND_PROFILE("alkatraz.command.profile"),
     COMMAND_EDITOR("alkatraz.command.editor"),
     RECIPE_BOOK("alkatraz.recipebook"),
+    COMMAND_RECIPE_UNLOCK("alkatraz.recipe.unlock"),
+    COMMAND_RECIPE_LOCK("alkatraz.recipe.lock"),
+    COMMAND_RECIPE_RELOAD("alkatraz.recipe.reload"),
+    COMMAND_RECIPE_GIVE("alkatraz.recipe.give"),
+    COMMAND_RECIPE_CHECK("alkatraz.recipe.check"),
     ALL_SPELLS("alkatraz.allspells"),
     NO_COOLDOWN("alkatraz.nocooldown");
 

@@ -2,6 +2,7 @@ package me.nagasonic.alkatraz.gui.implementation;
 
 import me.nagasonic.alkatraz.gui.ItemBuilder;
 import me.nagasonic.alkatraz.gui.Menu;
+import me.nagasonic.alkatraz.items.magic.recipe.unlock.UnlockManager;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
@@ -88,6 +89,7 @@ public class CircleUpConfirmationMenu extends Menu {
             close();
             CircleUpAnimation.play(viewer, () -> {
                 ProgressionService.advance(viewer);
+                UnlockManager.refresh(viewer);
                 new ProgressionMenu(viewer).open();
             });
             return true;

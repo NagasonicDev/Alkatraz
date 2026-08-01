@@ -17,7 +17,7 @@ public class ConfigManager {
     private static final Map<String, Config> configs = new HashMap<>();
     private static final Map<String, YamlConfiguration> defaultConfigs = new HashMap<>();
 
-    public Map<String, Config> getConfigs() {
+    public static Map<String, Config> getConfigs() {
         return configs;
     }
 
