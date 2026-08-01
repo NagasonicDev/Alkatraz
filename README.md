@@ -32,6 +32,7 @@
 | 🗃️ **Item Definitions** | 123 | Wands, armor, accessories, scrolls, grimoires |
 | 📦 **Public API** | Full | Maven dependency for external plugin integration |
 | 🌐 **Localization** | Yes | YAML-based language file overrides |
+| 📜 **Recipes** | 8 stations | Config-driven crafting: shaped, shapeless, cooking, smithing, stonecutter, brewing, anvil, custom; unlockable via requirements |
 
 ## How It Works
 
@@ -136,6 +137,11 @@ Spell codes and options are viewable from the `/spells` menu.
 | `/alkatraz equipment` | — | Open the Equipment Menu |
 | `/alkatraz editor` | — | Open the Item Editor GUI |
 | `/alkatraz reload` | `alkatraz.command.reload` | Reload spell configs |
+| `/recipes unlock <id> [<player>]` | `alkatraz.recipe.unlock` | Unlock a recipe for a player |
+| `/recipes lock <id> [<player>]` | `alkatraz.recipe.lock` | Lock a recipe for a player |
+| `/recipes give <id> [<player>]` | `alkatraz.recipe.give` | Grant a recipe to a player |
+| `/recipes check <player> <id>` | `alkatraz.recipe.check` | Check a player's recipe unlock status |
+| `/recipes reload` | `alkatraz.recipe.reload` | Reload recipe definitions |
 | `/spells <player>` | `alkatraz.command.spells.other` | View another player's spells |
 
 ### Permissions
@@ -143,6 +149,11 @@ Spell codes and options are viewable from the `/spells` menu.
 | Permission | Description |
 |------------|-------------|
 | `alkatraz.allspells` | Use all spells without discovering them |
+| `alkatraz.recipe.unlock` | Unlock recipes via command |
+| `alkatraz.recipe.lock` | Lock recipes via command |
+| `alkatraz.recipe.give` | Grant recipes via command |
+| `alkatraz.recipe.check` | Check recipe unlock status |
+| `alkatraz.recipe.reload` | Reload recipe definitions |
 
 </details>
 

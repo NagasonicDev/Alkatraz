@@ -3,7 +3,10 @@ package me.nagasonic.alkatraz.gui.implementation.editor;
 import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.gui.Menu;
-import me.nagasonic.alkatraz.items.magic.recipe.MagicItemRecipeManager;
+import me.nagasonic.alkatraz.items.magic.recipe.AlkatrazRecipe;
+import me.nagasonic.alkatraz.items.magic.recipe.Ingredient;
+import me.nagasonic.alkatraz.items.magic.recipe.MaterialIngredient;
+import me.nagasonic.alkatraz.items.magic.recipe.RecipeRegistry;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.util.ColorFormat;
 import me.nagasonic.alkatraz.util.MaterialCompat;
@@ -14,7 +17,6 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.*;
@@ -51,21 +53,16 @@ public class RecipeSubMenu extends Menu {
         NamespacedKey recipeKey = MagicKeys.alkatraz(defKey);
         
         // Get the recipe data from the manager
-        MagicItemRecipeManager.RecipeData recipeData = MagicItemRecipeManager.RECIPES.get(recipeKey);
-        
+        AlkatrazRecipe recipeData = RecipeRegistry.get(recipeKey);
+
         if (recipeData != null) {
-            // Load the shape
-            this.recipeShape = recipeData.shape();
-            
-            // Load the ingredients
-            for (Map.Entry<Character, RecipeChoice> entry : recipeData.ingredients().entrySet()) {
-                if (entry.getValue() instanceof RecipeChoice.MaterialChoice materialChoice) {
-                    Material material = materialChoice.getChoices().stream().findFirst().orElse(Material.STONE);
-                    ingredients.put(entry.getKey(), material.name());
+            this.recipeShape = recipeData.getShape();
+            for (Map.Entry<Character, Ingredient> entry : recipeData.getIngredientMap().entrySet()) {
+                if (entry.getValue() instanceof MaterialIngredient) {
+                    ingredients.put(entry.getKey(), entry.getValue().describe());
                 }
             }
         } else {
-            // Fallback to loading from config if recipe not found in manager
             parseIngredientsFromConfig();
         }
     }

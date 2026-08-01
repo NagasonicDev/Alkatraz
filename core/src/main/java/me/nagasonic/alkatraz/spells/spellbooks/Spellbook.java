@@ -2,6 +2,7 @@ package me.nagasonic.alkatraz.spells.spellbooks;
 
 import de.tr7zw.changeme.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.items.magic.recipe.unlock.UnlockManager;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.Spell;
@@ -249,6 +250,7 @@ public class Spellbook {
         playDiscoveryAnimation(player, () -> {
             // Discover the spell
             profile.setDiscoveredSpell(spell, true);
+            UnlockManager.refresh(player);
 
             // Apply all impacts
             for (ValueImpact impact : impacts) {

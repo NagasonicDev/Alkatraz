@@ -13,6 +13,7 @@ import me.nagasonic.alkatraz.api.magic.definition.ItemDefinition;
 import me.nagasonic.alkatraz.api.magic.instance.MagicItemInstance;
 import me.nagasonic.alkatraz.api.magic.modifier.EngravingDefinition;
 import me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack;
+import me.nagasonic.alkatraz.items.magic.MagicItemBootstrap;
 import me.nagasonic.alkatraz.api.magic.registry.MagicItemRegistries;
 import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
 import de.tr7zw.changeme.nbtapi.NBT;
@@ -332,6 +333,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
         SpellRegistry.reload();
         ProgressionService.reload();
         MagicEntities.registerProfiles();
+        MagicItemBootstrap.reload();
         sender.sendMessage(lang().get("commands.reload_success"));
     }
 

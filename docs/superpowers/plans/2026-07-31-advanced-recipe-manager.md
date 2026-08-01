@@ -248,18 +248,18 @@ Each phase ends with a testable deliverable. **Commits happen once at the very e
 - [ ] **T11. Smithing + stonecutter** adapters.
 - [ ] **T12. Brewing adapter** (`BrewEvent`).
 - [ ] **T13. Anvil adapter** (`PrepareAnvilEvent`).
-- [ ] **T14. `CustomCraftingAdapter` hook** + docs.
+- [x] **T14. `CustomCraftingAdapter` hook** + docs.
 
 ### Phase 3 — Player-facing UX
-- [ ] **T15. RecipeBookMenu** locked/unlocked filter, lock icons, hidden-when-locked, progress bars in lore.
-- [ ] **T16. RecipeDetailMenu** requirement checklist + Unlock button.
-- [ ] **T17. Notification system** (config-driven channels: chat/title/actionbar/sound/particles).
-- [ ] **T18. `/recipes` subcommands** (`unlock`/`lock`/`reload`/`give`/`check`) + permissions.
+- [x] **T15. RecipeBookMenu** locked/unlocked filter, lock icons, hidden-when-locked, progress bars in lore.
+- [x] **T16. RecipeDetailMenu** requirement checklist + Unlock button.
+- [x] **T17. Notification system** (config-driven channels: chat/title/actionbar/sound/particles).
+- [x] **T18. `/recipes` subcommands** (`unlock`/`lock`/`reload`/`give`/`check`) + permissions.
 
 ### Phase 4 — API, robustness, docs
-- [ ] **T19. Complete `RecipeManagerAPI`** + third-party registration docs + `api/` javadocs.
-- [ ] **T20. Performance & conflict handling**: verify indexes, UnlockCache invalidation events (circle-up, research complete, spell discovery, login), `override_vanilla`, startup conflict warnings.
-- [ ] **T21. Testing plan + migration doc + wiki update.**
+- [x] **T19. Complete `RecipeManagerAPI`** + third-party registration docs + `api/` javadocs.
+- [x] **T20. Performance & conflict handling**: verify indexes, UnlockCache invalidation events (circle-up, research complete, spell discovery, login), `override_vanilla`, startup conflict warnings.
+- [x] **T21. Testing plan + migration doc + wiki update.**
 
 ---
 

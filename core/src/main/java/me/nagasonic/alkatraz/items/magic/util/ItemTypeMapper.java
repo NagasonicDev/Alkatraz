@@ -52,4 +52,14 @@ public final class ItemTypeMapper {
         Set<String> types = materialToTypes.get(material);
         return types != null && types.contains(type);
     }
+
+    public static Set<Material> getMaterials(String type) {
+        Set<Material> result = new HashSet<>();
+        for (Map.Entry<Material, Set<String>> entry : materialToTypes.entrySet()) {
+            if (entry.getValue().contains(type)) {
+                result.add(entry.getKey());
+            }
+        }
+        return Collections.unmodifiableSet(result);
+    }
 }

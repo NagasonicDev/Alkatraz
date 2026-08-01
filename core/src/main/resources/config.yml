@@ -117,3 +117,15 @@ placeholders:
     refresh_interval_minutes: 5
     # Maximum number of entries on the leaderboard
     max_entries: 10
+
+# ==============================
+# Recipe Unlock Notifications
+# Channels used when a player unlocks a recipe.
+# ==============================
+recipes:
+  unlock_notifications:
+    chat: true
+    title: true
+    actionbar: false
+    sound: true
+    particles: true

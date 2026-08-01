@@ -41,6 +41,7 @@ import me.nagasonic.alkatraz.items.magic.equipment.StorageSlotResolver;
 import me.nagasonic.alkatraz.api.magic.modifier.EngravingDefinition;
 import me.nagasonic.alkatraz.items.magic.persistence.ItemDataKeys;
 import me.nagasonic.alkatraz.items.magic.recipe.MagicItemRecipeManager;
+import me.nagasonic.alkatraz.items.magic.recipe.adapter.CraftingEventRouter;
 import me.nagasonic.alkatraz.api.magic.registry.MagicItemRegistries;
 import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
 import me.nagasonic.alkatraz.items.magic.trigger.TriggerPipeline;
@@ -61,6 +62,7 @@ public final class MagicItemBootstrap {
         ItemDataKeys.initialize();
         registerBuiltInTypes();
         loadDefinitions();
+        CraftingEventRouter.registerDefaultAdapters();
 
         EquipmentService equipmentService = new EquipmentService();
         equipmentService.registerVirtualSlot(EquipmentSlot.RING, new StorageSlotResolver(EquipmentSlot.RING));
@@ -87,9 +89,14 @@ public final class MagicItemBootstrap {
     }
 
     public static void reload() {
+        MagicItemRecipeManager.unregisterAll();
         MagicItemRegistries.ITEM_DEFINITIONS.clear();
         MagicItemRegistries.ENGRAVING_DEFINITIONS.clear();
         loadDefinitions();
+        CraftingEventRouter.registerDefaultAdapters();
+        MagicItemRecipeManager.registerRecipes();
+        ImbueManager.initialize();
+        MagicItemRecipeManager.registerImbuingRecipes();
     }
 
     /** Addon entry point: register a new component type at runtime. */

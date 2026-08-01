@@ -73,6 +73,7 @@ public class MagicProfile extends Profile {
 
         // String sets for spell data
         stringSetStat("discoveredSpells");  // Stores spell types that player has discovered
+        stringSetStat("unlockedRecipes");   // Stores recipe keys that player has unlocked
         stringSetStat("spellOptions");      // Stores spell option selections (format: "optionId:valueId")
         stringSetStat("spellTags");         // Stores active spell tags
         stringSetStat("researchProgress");  // Adapter storage for configurable research requirements
@@ -323,6 +324,28 @@ public class MagicProfile extends Profile {
      */
     public Collection<String> getAllDiscoveredSpellTypes() {
         return new HashSet<>(getStringSet("discoveredSpells"));
+    }
+
+    // ============================================
+    // Recipe Unlock Management
+    // ============================================
+
+    public boolean hasUnlockedRecipe(String recipeKey) {
+        return recipeKey != null && getStringSet("unlockedRecipes").contains(recipeKey.toLowerCase());
+    }
+
+    public void setRecipeUnlocked(String recipeKey, boolean unlocked) {
+        if (recipeKey == null || recipeKey.isBlank()) return;
+        String key = recipeKey.toLowerCase();
+        if (unlocked) {
+            getStringSet("unlockedRecipes").add(key);
+        } else {
+            getStringSet("unlockedRecipes").remove(key);
+        }
+    }
+
+    public Collection<String> getAllUnlockedRecipes() {
+        return new HashSet<>(getStringSet("unlockedRecipes"));
     }
 
     public boolean hasResearch(String researchId) {

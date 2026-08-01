@@ -162,6 +162,23 @@ recipes.has_requirements = &cRequirements
 recipes.click_details = &eClick for details
 recipes.back_to_recipes = &f← Back to Recipes
 recipes.unknown = &cUnknown
+recipes.locked = &cLocked
+recipes.unlocked = &aUnlocked
+recipes.filter_all = &fAll
+recipes.filter_locked = &cLocked Only
+recipes.filter_unlocked = &aUnlocked Only
+recipes.progress_header = &7&m---&r &bProgress &7&m---
+recipes.unlock_button = &eClick to Unlock
+recipes.unlock_title = &dRecipe Unlocked!
+recipes.unlock_chat = &dYou unlocked the &f%recipe% &drecipe!
+recipes.already_unlocked = &cThis recipe is already unlocked.
+recipes.not_found = &cUnknown recipe: &f%id%
+recipes.commands.unlock = &aUnlocked &f%id% &afor %player%.
+recipes.commands.reload = &aRecipes reloaded (&f%count%&a).
+recipes.commands.lock = &cLocked &f%id% &afor %player%.
+recipes.commands.give = &aGranted &f%id% &ato %player%.
+recipes.commands.check = &f%id% &afor %player%: %status%.
+recipes.commands.usage = &cUsage: /recipes unlock|lock|give <id> [player] | /recipes check <player> <id> | /recipes reload
 
 # --- Spell Options ---
 spell_options.configure = &7Configure spell options
