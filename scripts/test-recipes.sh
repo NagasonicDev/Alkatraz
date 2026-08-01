@@ -48,26 +48,6 @@ assert_window_not_contains() {
     fi
 }
 
-# Condition-based wait: poll the log for a pattern after a marker line instead of
-# relying on the fixed 1s send_command sleep. The "Recipes reloaded (N)." marker
-# is logged only after reload() finishes, which can exceed 1s on slower servers.
-wait_for_new_log_match() {
-    local from_line="$1" pattern="$2" test_name="$3" max_seconds="${4:-20}" i
-    for i in $(seq 1 "$max_seconds"); do
-        if tail -n +"$from_line" "$LOG_FILE" | grep -qE "$pattern" 2>/dev/null; then
-            echo "  PASS: $test_name"
-            echo "RESULT:PASS:$test_name"
-            PASS_COUNT=$((PASS_COUNT + 1))
-            return 0
-        fi
-        sleep 1
-    done
-    echo "  FAIL: $test_name (pattern not found after line $from_line within ${max_seconds}s: $pattern)"
-    echo "RESULT:FAIL:$test_name"
-    FAIL_COUNT=$((FAIL_COUNT + 1))
-    return 1
-}
-
 # --- Section 1: Startup & load ---------------------------------------------
 begin_test_section "Recipe load"
 
