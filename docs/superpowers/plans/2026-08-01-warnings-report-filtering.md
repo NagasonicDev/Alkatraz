@@ -59,7 +59,7 @@ with this block (comment + pipeline + count line):
               | grep -oE '\[Alkatraz\].*' \
               | sort -u \
               | grep -vE "\[Alkatraz\] (Duplicate recipe key overwritten: alkatraz:ci_(dup|override)|Empty ingredients for shapeless recipe alkatraz:ci_bad_ingredient|Empty recipe shape for alkatraz:ci_bad_(shape|type)|Recipe key minecraft:stick conflicts with an existing Bukkit recipe; set override_vanilla: true to replace it|Recipe missing 'definition'/'id' key|Unknown ingredient 'definitely_not_a_material' in recipe|Unknown recipe type 'WAFFLE', defaulting to SHAPED)" \
-              > "$WARN_FILE"
+              > "$WARN_FILE" || true
             COUNT=$(wc -l < "$WARN_FILE")
             echo "Found ${COUNT} unique unexpected warning(s)"
           else
