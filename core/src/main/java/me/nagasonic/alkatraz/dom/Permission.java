@@ -24,6 +24,10 @@ public enum Permission {
     COMMAND_RECIPE_RELOAD("alkatraz.recipe.reload"),
     COMMAND_RECIPE_GIVE("alkatraz.recipe.give"),
     COMMAND_RECIPE_CHECK("alkatraz.recipe.check"),
+    RECIPES_VIEW("alkatraz.recipes.view"),
+    RECIPES_EDIT("alkatraz.recipes.edit"),
+    RECIPES_DELETE("alkatraz.recipes.delete"),
+    RECIPES_CREATE("alkatraz.recipes.create"),
     ALL_SPELLS("alkatraz.allspells"),
     NO_COOLDOWN("alkatraz.nocooldown");
 

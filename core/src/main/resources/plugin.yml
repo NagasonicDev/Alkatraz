@@ -21,3 +21,42 @@ permissions:
   alkatraz.recipebook:
     description: Access to the Recipe Book
     default: true
+  alkatraz.recipes.view:
+    description: Access to the Recipe Manager
+    default: true
+  alkatraz.recipes.edit:
+    description: Edit any recipe in the Recipe Manager
+    default: op
+  alkatraz.recipes.edit.crafting:
+    description: Edit crafting recipes
+    default: false
+  alkatraz.recipes.edit.furnace:
+    description: Edit furnace recipes
+    default: false
+  alkatraz.recipes.edit.blast_furnace:
+    description: Edit blast furnace recipes
+    default: false
+  alkatraz.recipes.edit.smoker:
+    description: Edit smoker recipes
+    default: false
+  alkatraz.recipes.edit.campfire:
+    description: Edit campfire recipes
+    default: false
+  alkatraz.recipes.edit.brewing:
+    description: Edit brewing recipes
+    default: false
+  alkatraz.recipes.edit.smithing:
+    description: Edit smithing recipes
+    default: false
+  alkatraz.recipes.edit.stonecutter:
+    description: Edit stonecutter recipes
+    default: false
+  alkatraz.recipes.edit.other:
+    description: Edit anvil and custom recipes
+    default: false
+  alkatraz.recipes.delete:
+    description: Delete recipes in the Recipe Manager
+    default: op
+  alkatraz.recipes.create:
+    description: Create and duplicate recipes in the Recipe Manager
+    default: op
