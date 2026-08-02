@@ -3,7 +3,8 @@ package me.nagasonic.alkatraz.commands;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
 import me.nagasonic.alkatraz.dom.Permission;
-import me.nagasonic.alkatraz.gui.implementation.RecipeBookMenu;
+import me.nagasonic.alkatraz.gui.implementation.recipe.RecipeCategoryMenu;
+import me.nagasonic.alkatraz.gui.implementation.recipe.RecipesPermissions;
 import me.nagasonic.alkatraz.items.magic.recipe.RecipeRegistry;
 import me.nagasonic.alkatraz.items.magic.recipe.unlock.UnlockManager;
 import me.nagasonic.alkatraz.lang.LangManager;
@@ -48,11 +49,11 @@ public class RecipesCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage(lang().get("commands.player_only"));
             return;
         }
-        if (!Permission.hasPermission(p, Permission.RECIPE_BOOK)) {
+        if (!RecipesPermissions.canView(p)) {
             p.sendMessage(lang().get("commands.recipes_permission"));
             return;
         }
-        new RecipeBookMenu(p).open();
+        new RecipeCategoryMenu(p).open();
     }
 
     private void handleSetUnlocked(CommandSender sender, String[] args, boolean unlock, Permission perm, String successKey) {

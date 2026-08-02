@@ -155,6 +155,10 @@ custom_model_data:
     cancel_button: 4008
     info_button: 4009
     close_button: 4010
+    search_button: 4011
+    sort_button: 4012
+    create_button: 4013
+    duplicate_button: 4014
     
     # Spell GUI items (4100-4199)
     spell_magic_missile: 4101
@@ -209,6 +213,10 @@ gui_items:
     cancel: "RED_CONCRETE"
     info: "KNOWLEDGE_BOOK"
     close: "BARRIER"
+    search: "COMPASS"
+    sort: "HOPPER"
+    create: "EMERALD"
+    duplicate: "ENDER_PEARL"
 
 # Connector textures for research graph edges (6001-6030)
 # Piece types: straight_h, straight_v, corner_ne, corner_se, corner_sw, corner_nw

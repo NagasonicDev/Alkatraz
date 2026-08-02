@@ -4,6 +4,7 @@ import de.tr7zw.changeme.nbtapi.NBT;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -105,6 +106,16 @@ public abstract class Menu {
      */
     public static void removeActiveMenu(Player player) {
         activeMenus.remove(player.getUniqueId());
+    }
+
+    public Set<Integer> dropZoneSlots() {
+        return Set.of();
+    }
+
+    public void onClose() {
+    }
+
+    public void onDrag(InventoryDragEvent event) {
     }
 
     /**

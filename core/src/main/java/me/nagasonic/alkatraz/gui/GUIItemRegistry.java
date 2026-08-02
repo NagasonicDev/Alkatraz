@@ -36,6 +36,10 @@ public class GUIItemRegistry {
         registerItem("cancel_button", createCancelButton());
         registerItem("info_button", createInfoButton());
         registerItem("close_button", createCloseButton());
+        registerItem("search_button", createSearchButton());
+        registerItem("sort_button", createSortButton());
+        registerItem("create_button", createCreateButton());
+        registerItem("duplicate_button", createDuplicateButton());
     }
     
     private static ItemStack createDecorativeItem(String type) {
@@ -158,6 +162,78 @@ public class GUIItemRegistry {
         meta.setDisplayName(Alkatraz.getLangManager().get("common.close"));
 
         int cmd = TexturePackManager.getGUICMD("close_button");
+        if (cmd > 0) {
+            meta.setCustomModelData(cmd);
+        }
+
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    private static ItemStack createSearchButton() {
+        Material material = TexturePackManager.getGuiMaterial("button_search");
+        if (material == null) material = Material.COMPASS;
+
+        ItemStack item = new ItemStack(material);
+        ItemMeta meta = item.getItemMeta();
+
+        meta.setDisplayName(Alkatraz.getLangManager().get("recipes.search"));
+
+        int cmd = TexturePackManager.getGUICMD("search_button");
+        if (cmd > 0) {
+            meta.setCustomModelData(cmd);
+        }
+
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    private static ItemStack createSortButton() {
+        Material material = TexturePackManager.getGuiMaterial("button_sort");
+        if (material == null) material = Material.HOPPER;
+
+        ItemStack item = new ItemStack(material);
+        ItemMeta meta = item.getItemMeta();
+
+        meta.setDisplayName(Alkatraz.getLangManager().get("recipes.sort.alphabetical"));
+
+        int cmd = TexturePackManager.getGUICMD("sort_button");
+        if (cmd > 0) {
+            meta.setCustomModelData(cmd);
+        }
+
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    private static ItemStack createCreateButton() {
+        Material material = TexturePackManager.getGuiMaterial("button_create");
+        if (material == null) material = Material.EMERALD;
+
+        ItemStack item = new ItemStack(material);
+        ItemMeta meta = item.getItemMeta();
+
+        meta.setDisplayName(Alkatraz.getLangManager().get("recipes.create.title"));
+
+        int cmd = TexturePackManager.getGUICMD("create_button");
+        if (cmd > 0) {
+            meta.setCustomModelData(cmd);
+        }
+
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    private static ItemStack createDuplicateButton() {
+        Material material = TexturePackManager.getGuiMaterial("button_duplicate");
+        if (material == null) material = Material.ENDER_PEARL;
+
+        ItemStack item = new ItemStack(material);
+        ItemMeta meta = item.getItemMeta();
+
+        meta.setDisplayName(Alkatraz.getLangManager().get("recipes.detail_duplicate"));
+
+        int cmd = TexturePackManager.getGUICMD("duplicate_button");
         if (cmd > 0) {
             meta.setCustomModelData(cmd);
         }

@@ -10,6 +10,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.RecipeChoice;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,6 +24,7 @@ public final class RecipeRegistry {
     private static final Map<Material, Set<NamespacedKey>> BY_OUTPUT_MATERIAL = new HashMap<>();
     private static final Map<RecipeType, Set<NamespacedKey>> BY_STATION = new HashMap<>();
     private static final Map<Material, Set<NamespacedKey>> BY_INGREDIENT = new HashMap<>();
+    private static final Map<NamespacedKey, File> BY_FILE = new HashMap<>();
 
     private RecipeRegistry() {}
 
@@ -47,6 +49,7 @@ public final class RecipeRegistry {
         BY_OUTPUT_MATERIAL.clear();
         BY_STATION.clear();
         BY_INGREDIENT.clear();
+        BY_FILE.clear();
     }
 
     public static AlkatrazRecipe get(NamespacedKey key) {
@@ -79,6 +82,15 @@ public final class RecipeRegistry {
         return BY_INGREDIENT.getOrDefault(material, Set.of());
     }
 
+    public static File fileOf(NamespacedKey key) {
+        return BY_FILE.get(key);
+    }
+
+    public static long lastModified(NamespacedKey key) {
+        File file = BY_FILE.get(key);
+        return file != null ? file.lastModified() : 0;
+    }
+
     public static int registerNativeRecipes() {
         int count = 0;
         for (AlkatrazRecipe recipe : BY_KEY.values()) {
@@ -105,7 +117,10 @@ public final class RecipeRegistry {
         unregisterAll();
         MagicItemService.loadYamlDefinitions("magic/recipes", (path, config) -> {
             AlkatrazRecipe recipe = RecipeLoader.load(config);
-            if (recipe != null) register(recipe);
+            if (recipe != null) {
+                BY_FILE.put(recipe.getKey(), new File(Alkatraz.getInstance().getDataFolder(), path));
+                register(recipe);
+            }
         });
         registerNativeRecipes();
     }
