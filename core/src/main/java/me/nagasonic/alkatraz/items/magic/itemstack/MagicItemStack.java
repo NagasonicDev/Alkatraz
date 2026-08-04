@@ -117,10 +117,13 @@ public final class MagicItemStack {
     }
 
     public static ItemStack writeInstance(ItemStack stack, MagicItemInstance instance) {
-        if (stack == null || !stack.hasItemMeta()) {
+        if (stack == null || stack.getType().isAir()) {
             return stack;
         }
         ItemMeta meta = stack.getItemMeta();
+        if (meta == null) {
+            return stack;
+        }
         write(meta, instance.definitionKey(), instance);
         readDefinition(stack).ifPresent(def -> {
             List<String> lore = buildLore(def, instance);
