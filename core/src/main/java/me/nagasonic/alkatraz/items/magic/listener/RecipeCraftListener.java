@@ -36,7 +36,7 @@ public class RecipeCraftListener implements Listener {
         }
 
         if (hasMagicIngredient(event)) {
-            Alkatraz.logInfo("[CraftListener] Blocking non-alkatraz recipe because matrix contains magic item(s): " +
+            Alkatraz.logHigh("[CraftListener] Blocking non-alkatraz recipe because matrix contains magic item(s): " +
                     Arrays.toString(Arrays.stream(event.getInventory().getMatrix()).map(RecipeCraftListener::describeStack).toArray()));
             event.getInventory().setResult(null);
         }
@@ -65,6 +65,10 @@ public class RecipeCraftListener implements Listener {
             return;
         }
         ItemStack result = ImbueManager.imbue(input);
+        if (result == input) {
+            event.getInventory().setResult(null);
+            return;
+        }
         event.getInventory().setResult(result);
     }
 

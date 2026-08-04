@@ -64,9 +64,16 @@ public final class ImbueManager {
         return SpellbookConfig.getImbueStoneCost(getTier(material));
     }
 
+    public static boolean isImbued(ItemStack stack) {
+        return MagicItemStack.readDefinitionKey(stack)
+                .map(key -> key.getKey().startsWith("imbued_"))
+                .orElse(false);
+    }
+
     public static ItemStack imbue(ItemStack input) {
         if (input == null || input.getType().isAir()) return input;
         if (!isImbuable(input.getType())) return input;
+        if (isImbued(input)) return input;
 
         NamespacedKey tierKey = getTierKey(input.getType());
         if (tierKey == null) return input;
