@@ -26,8 +26,8 @@ public enum Permission {
     COMMAND_STATS_OTHER("alkatraz.command.stats.other"),
     /** Permission to use the /reload command. */
     COMMAND_RELOAD("alkatraz.command.reload"),
-    /** Permission to use the /spawnmob command. */
-    COMMAND_SPAWN_MOB("alkatraz.command.spawnmob"),
+    /** Permission to use the /summon command. */
+    COMMAND_SUMMON("alkatraz.command.summon"),
     /** Permission to use the /convert command. */
     COMMAND_CONVERT("alkatraz.command.convert"),
     /** Permission to use the /equipment command. */

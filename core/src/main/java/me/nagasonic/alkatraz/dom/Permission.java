@@ -13,7 +13,7 @@ public enum Permission {
     COMMAND_UNDISCOVER("alkatraz.command.undiscoverspell"),
     COMMAND_STATS_OTHER("alkatraz.command.stats.other"),
     COMMAND_RELOAD("alkatraz.command.reload"),
-    COMMAND_SPAWN_MOB("alkatraz.command.spawnmob"),
+    COMMAND_SUMMON("alkatraz.command.summon"),
     COMMAND_EQUIPMENT("alkatraz.command.equipment"),
     COMMAND_CONVERT("alkatraz.command.convert"),
     COMMAND_PROFILE("alkatraz.command.profile"),
