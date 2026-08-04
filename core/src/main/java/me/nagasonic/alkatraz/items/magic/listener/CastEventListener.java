@@ -248,6 +248,7 @@ public class CastEventListener implements Listener {
     @EventHandler
     private void onJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
+        SpellHotbarManager.restoreIfNeeded(p);
         ItemStack wand = p.getInventory().getItem(p.getInventory().getHeldItemSlot());
         if (wand != null){
             if (wand.getType() != Material.AIR && wand.getAmount() != 0){
@@ -302,8 +303,10 @@ public class CastEventListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     private void onHotbarQuit(PlayerQuitEvent e) {
-        if (SpellHotbarManager.isActive(e.getPlayer())) {
-            SpellHotbarManager.exit(e.getPlayer());
+        Player p = e.getPlayer();
+        if (SpellHotbarManager.isActive(p)) {
+            SpellHotbarManager.exit(p);
+            p.saveData();
         }
     }
 

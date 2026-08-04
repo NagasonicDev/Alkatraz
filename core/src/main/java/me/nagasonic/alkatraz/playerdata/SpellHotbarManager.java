@@ -128,6 +128,30 @@ public class SpellHotbarManager {
         justEntered.remove(uuid);
         justExited.put(uuid, System.currentTimeMillis() + 500);
 
+        restoreSnapshot(player, uuid);
+    }
+
+    /**
+     * Restores a leftover saved inventory snapshot for the given player if one exists.
+     *
+     * <p>Used on join as a safety net: if a player disconnects while in hotbar mode
+     * before {@link #exit(Player)} could persist the restored inventory, this recovers
+     * their original inventory from the in-memory snapshot.
+     *
+     * @param player the player to restore
+     * @return {@code true} if a snapshot was found and restored
+     */
+    public static boolean restoreIfNeeded(Player player) {
+        UUID uuid = player.getUniqueId();
+        if (!savedInventories.containsKey(uuid)) return false;
+        hotbarActive.remove(uuid);
+        justEntered.remove(uuid);
+        justExited.remove(uuid);
+        restoreSnapshot(player, uuid);
+        return true;
+    }
+
+    private static void restoreSnapshot(Player player, UUID uuid) {
         ItemStack[] storage = savedInventories.remove(uuid);
         ItemStack offhand = savedOffhand.remove(uuid);
         Integer heldSlot = savedHeldSlot.remove(uuid);
