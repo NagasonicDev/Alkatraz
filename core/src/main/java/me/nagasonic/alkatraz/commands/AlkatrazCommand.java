@@ -29,6 +29,8 @@ import me.nagasonic.alkatraz.util.StatUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import me.nagasonic.alkatraz.util.WandUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -66,7 +68,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
             case "stats" -> handleStats(sender, args);
             case "reload" -> handleReload(sender, args);
             case "castmode", "mode" -> handleCastMode(sender, args);
-            case "spawnmob" -> handleSpawnMob(sender, args);
+            case "summon" -> handleSummon(sender, args);
             case "equipment", "eq" -> handleEquipment(sender, args);
             case "convert" -> handleConvert(sender, args);
             case "profile" -> handleProfile(sender, args);
@@ -104,7 +106,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage(lang().get("commands.no_permission"));
             return;
         }
-        if (args.length < 2 || args.length > 3) {
+        if (args.length < 2 || args.length > 4) {
             sender.sendMessage(lang().get("commands.give_usage"));
             return;
         }
@@ -115,7 +117,22 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
             return;
         }
 
-        Player p = resolvePlayer(sender, args, 2);
+        int count = 1;
+        int playerIndex = 2;
+        if (args.length >= 3) {
+            try {
+                count = Integer.parseInt(args[2]);
+                playerIndex = 3;
+            } catch (NumberFormatException e) {
+                playerIndex = 2;
+            }
+        }
+        if (count < 1) {
+            sender.sendMessage(lang().get("commands.give_usage"));
+            return;
+        }
+
+        Player p = resolvePlayer(sender, args, playerIndex);
         if (p == null) return;
 
         // Try magic item definition first
@@ -123,8 +140,8 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
         if (itemDef != null) {
             MagicItemInstance instance = MagicItemInstance.createDefault(itemDef.getKey());
             ItemStack stack = MagicItemStack.create(itemDef, instance);
-            p.getInventory().addItem(stack);
-            sender.sendMessage(lang().get("commands.gave_item", "item", itemDef.getKey().getKey(), "player", p.getName()));
+            giveCount(p, stack, count);
+            sender.sendMessage(lang().get("commands.gave_item", "item", itemDef.getKey().getKey(), "player", p.getName(), "count", String.valueOf(count)));
             return;
         }
 
@@ -132,12 +149,24 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
         EngravingDefinition engravingDef = MagicItemRegistries.ENGRAVING_DEFINITIONS.get(parsedKey).orElse(null);
         if (engravingDef != null) {
             ItemStack stack = MagicItemStack.createEngravingItem(engravingDef);
-            p.getInventory().addItem(stack);
-            sender.sendMessage(lang().get("commands.gave_item", "item", engravingDef.getKey().getKey(), "player", p.getName()));
+            giveCount(p, stack, count);
+            sender.sendMessage(lang().get("commands.gave_item", "item", engravingDef.getKey().getKey(), "player", p.getName(), "count", String.valueOf(count)));
             return;
         }
 
         sender.sendMessage(lang().get("commands.item_not_found_or_engraving", "name", args[1]));
+    }
+
+    private void giveCount(Player p, ItemStack stack, int count) {
+        int max = stack.getMaxStackSize();
+        int remaining = count;
+        while (remaining > 0) {
+            ItemStack part = stack.clone();
+            part.setAmount(Math.min(remaining, max));
+            p.getInventory().addItem(part).values()
+                    .forEach(left -> p.getWorld().dropItemNaturally(p.getLocation(), left));
+            remaining -= part.getAmount();
+        }
     }
 
     private void handleConvert(CommandSender sender, String[] args) {
@@ -337,28 +366,73 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage(lang().get("commands.reload_success"));
     }
 
-    private void handleSpawnMob(CommandSender sender, String[] args) {
-        if (!Permission.hasPermission(sender, Permission.COMMAND_SPAWN_MOB)) {
+    private void handleSummon(CommandSender sender, String[] args) {
+        if (!Permission.hasPermission(sender, Permission.COMMAND_SUMMON)) {
             sender.sendMessage(lang().get("commands.no_permission"));
             return;
         }
-        if (args.length < 2 || args.length > 3) {
-            sender.sendMessage(lang().get("commands.spawnmob_usage"));
+        if (args.length < 2 || args.length > 4) {
+            sender.sendMessage(lang().get("commands.summon_usage"));
             return;
         }
         MagicEntityType type = MagicEntityType.fromId(args[1]).orElse(null);
         if (type == null) {
-            sender.sendMessage(lang().get("commands.spawnmob_invalid_type", "type", args[1], "valid", String.join(", ", magicMobIds())));
+            sender.sendMessage(lang().get("commands.summon_invalid_type", "type", args[1], "valid", String.join(", ", magicMobIds())));
             return;
         }
-        Player target = resolvePlayer(sender, args, 2);
+
+        int count = 1;
+        int targetIndex = 2;
+        if (args.length >= 3) {
+            try {
+                count = Integer.parseInt(args[2]);
+                targetIndex = 3;
+            } catch (NumberFormatException e) {
+                targetIndex = 2;
+            }
+        }
+        if (count < 1) {
+            sender.sendMessage(lang().get("commands.summon_usage"));
+            return;
+        }
+
+        SummonTarget target = resolveSummonTarget(sender, args, targetIndex);
         if (target == null) return;
 
-        MagicEntities.spawn(type, target.getLocation()).ifPresentOrElse(
-                spawned -> sender.sendMessage(lang().get("commands.spawnmob_success", "mob", type.getId(), "player", target.getName())),
-                () -> sender.sendMessage(lang().get("commands.spawnmob_invalid_type", "type", type.getId(), "valid", String.join(", ", magicMobIds())))
-        );
+        int spawned = 0;
+        for (int i = 0; i < count; i++) {
+            if (MagicEntities.spawn(type, target.location()).isPresent()) spawned++;
+        }
+        sender.sendMessage(lang().get("commands.summon_success", "count", String.valueOf(spawned), "mob", type.getId(), "target", target.description()));
     }
+
+    private SummonTarget resolveSummonTarget(CommandSender sender, String[] args, int argIndex) {
+        if (args.length > argIndex) {
+            String raw = args[argIndex];
+            Player player = Bukkit.getPlayer(raw);
+            if (player != null) return new SummonTarget(player.getLocation(), player.getName());
+            String[] coords = raw.split(",");
+            if (coords.length == 3) {
+                try {
+                    double x = Double.parseDouble(coords[0]);
+                    double y = Double.parseDouble(coords[1]);
+                    double z = Double.parseDouble(coords[2]);
+                    World world = sender instanceof Player p ? p.getWorld() : Bukkit.getWorlds().get(0);
+                    return new SummonTarget(new Location(world, x, y, z), raw);
+                } catch (NumberFormatException ignored) {
+                }
+            }
+            sender.sendMessage(lang().get("commands.summon_invalid_location", "target", raw));
+            return null;
+        }
+        if (!(sender instanceof Player p)) {
+            sender.sendMessage(lang().get("commands.summon_require_target"));
+            return null;
+        }
+        return new SummonTarget(p.getLocation(), p.getName());
+    }
+
+    private record SummonTarget(Location location, String description) {}
 
     private void handleCastMode(CommandSender sender, String[] args) {
         if (!(sender instanceof Player p)) {
@@ -530,7 +604,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
             case "mastery" -> tabMastery(sender, args);
             case "stats" -> tabStats(sender, args);
             case "castmode", "mode" -> tabCastMode(sender, args);
-            case "spawnmob" -> tabSpawnMob(sender, args);
+            case "summon" -> tabSummon(sender, args);
             case "equipment", "eq" -> List.of();
             case "profile" -> tabProfile(sender, args);
             case "convert" -> tabConvert(sender, args);
@@ -549,7 +623,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
         if (Permission.hasPermission(sender, Permission.COMMAND_CIRCLE)) list.add("circle");
         if (Permission.hasPermission(sender, Permission.COMMAND_MASTERY)) list.add("mastery");
         if (Permission.hasPermission(sender, Permission.COMMAND_RELOAD)) list.add("reload");
-        if (Permission.hasPermission(sender, Permission.COMMAND_SPAWN_MOB)) list.add("spawnmob");
+        if (Permission.hasPermission(sender, Permission.COMMAND_SUMMON)) list.add("summon");
         if (Permission.hasPermission(sender, Permission.COMMAND_CONVERT)) list.add("convert");
         if (Permission.hasPermission(sender, Permission.COMMAND_EDITOR)) list.add("editor");
         list.add("stats");
@@ -580,7 +654,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                 ids.addAll(MagicItemRegistries.ENGRAVING_DEFINITIONS.values().stream().map(def -> def.getKey().getKey()).collect(Collectors.toList()));
                 yield ids;
             }
-            case 3 -> playerNames();
+            case 3, 4 -> playerNames();
             default -> List.of();
         };
     }
@@ -632,11 +706,11 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
         return List.of();
     }
 
-    private List<String> tabSpawnMob(CommandSender sender, String[] args) {
-        if (!Permission.hasPermission(sender, Permission.COMMAND_SPAWN_MOB)) return List.of();
+    private List<String> tabSummon(CommandSender sender, String[] args) {
+        if (!Permission.hasPermission(sender, Permission.COMMAND_SUMMON)) return List.of();
         return switch (args.length) {
             case 2 -> magicMobIds();
-            case 3 -> playerNames();
+            case 3, 4 -> playerNames();
             default -> List.of();
         };
     }
