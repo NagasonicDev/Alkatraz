@@ -24,7 +24,6 @@ public final class ItemInstanceSerializer {
     public static String serialize(MagicItemInstance instance) {
         YamlConfiguration yaml = new YamlConfiguration();
         yaml.set(ROOT + ".data-version", ItemDataVersion.CURRENT);
-        yaml.set(ROOT + ".instance-id", instance.instanceId().toString());
         yaml.set(ROOT + ".definition-key", MagicKeys.format(instance.definitionKey()));
         yaml.set(ROOT + ".modifiers", formatKeys(instance.modifiers()));
         yaml.set(ROOT + ".engravings", serializeEngravings(instance.engravings()));
@@ -55,7 +54,8 @@ public final class ItemInstanceSerializer {
             // Future migrations deserialize older versions here.
         }
 
-        UUID instanceId = UUID.fromString(yaml.getString(ROOT + ".instance-id"));
+        String rawInstanceId = yaml.getString(ROOT + ".instance-id");
+        UUID instanceId = rawInstanceId != null ? UUID.fromString(rawInstanceId) : null;
         NamespacedKey definitionKey = MagicKeys.require(yaml.getString(ROOT + ".definition-key"));
         List<NamespacedKey> modifiers = parseKeys(yaml.getStringList(ROOT + ".modifiers"));
         List<Engraving> engravings = parseEngravings(yaml.getMapList(ROOT + ".engravings"));
