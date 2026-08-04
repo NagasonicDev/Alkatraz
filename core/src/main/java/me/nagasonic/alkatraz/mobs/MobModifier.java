@@ -154,7 +154,7 @@ public class MobModifier implements Listener {
      * Returns an empty list for unmodified mobs.
      */
     public static List<String> getMobSpellIds(LivingEntity entity) {
-        String raw = NBT.get(entity, nbt -> (String) nbt.getString("mob_spells"));
+        String raw = NBT.getPersistentData(entity, nbt -> nbt.getString("mob_spells"));
         if (raw == null || raw.isBlank()) {
             return Collections.emptyList();
         }
@@ -171,14 +171,14 @@ public class MobModifier implements Listener {
     /** Reads a stored affinity value directly from NBT. */
     public static double getEntityAffinity(Element element, LivingEntity entity) {
         String key = elementKey(element) + "_affinity";
-        Double val = NBT.get(entity, nbt -> (Double) nbt.getDouble(key));
+        Double val = NBT.getPersistentData(entity, nbt -> nbt.getDouble(key));
         return val != null ? val : 0.0;
     }
 
     /** Reads a stored resistance value directly from NBT. */
     public static double getEntityResistance(Element element, LivingEntity entity) {
         String key = elementKey(element) + "_resistance";
-        Double val = NBT.get(entity, nbt -> (Double) nbt.getDouble(key));
+        Double val = NBT.getPersistentData(entity, nbt -> nbt.getDouble(key));
         return val != null ? val : 0.0;
     }
 
