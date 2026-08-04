@@ -197,17 +197,11 @@ public final class MagicItemComponentListener implements Listener {
             return;
         }
 
-        boolean handled = false;
         for (NamespacedKey componentKey : definition.components()) {
             ComponentHandler handler = ComponentHandlerRegistry.get(componentKey).orElse(null);
             if (handler != null) {
                 handler.onDrop(event, stack, instance, definition);
-                handled = true;
             }
-        }
-
-        if (handled) {
-            event.setCancelled(true);
         }
     }
 
