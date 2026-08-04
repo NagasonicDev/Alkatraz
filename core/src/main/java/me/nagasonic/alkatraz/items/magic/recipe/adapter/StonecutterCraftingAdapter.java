@@ -33,7 +33,6 @@ public class StonecutterCraftingAdapter implements CraftingTypeAdapter {
         result.setAmount(recipe.getResultAmount());
         RecipeChoice input = new RecipeChoice.ExactChoice(recipe.getInput());
         Bukkit.addRecipe(new StonecuttingRecipe(recipe.getKey(), result, input));
-        Alkatraz.logInfo("Registered stonecutter recipe " + recipe.getKey());
     }
 
     @Override

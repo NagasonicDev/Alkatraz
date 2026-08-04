@@ -84,7 +84,7 @@ public final class MagicItemBootstrap {
         ImbueManager.initialize();
         int imbuingRecipes = MagicItemRecipeManager.registerImbuingRecipes();
         long elapsed = (System.nanoTime() - start) / 1_000_000;
-        Alkatraz.logInfo("Registered " + registeredRecipes + " shaped recipes and " + imbuingRecipes + " imbuing recipes.");
+        Alkatraz.logInfo("Registered " + registeredRecipes + " recipes and " + imbuingRecipes + " imbuing recipes.");
         Alkatraz.logVeryHigh("MagicItemBootstrap initialization completed in " + elapsed + "ms");
     }
 
