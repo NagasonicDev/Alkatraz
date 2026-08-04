@@ -414,8 +414,8 @@ public class Utils {
         if (element == Element.NONE){
             name = "magic";
         }else { name = element.name().toLowerCase(); }
-        if (NBT.get(entity, nbt -> (Double) nbt.getDouble(name + "_affinity")) != null){
-            return NBT.get(entity, nbt -> (Double) nbt.getDouble(name + "_affinity"));
+        if (NBT.getPersistentData(entity, nbt -> nbt.getDouble(name + "_affinity")) != null){
+            return NBT.getPersistentData(entity, nbt -> nbt.getDouble(name + "_affinity"));
         }
         return 0;
     }
@@ -425,8 +425,8 @@ public class Utils {
         if (element == Element.NONE){
             name = "magic";
         }else { name = element.name().toLowerCase(); }
-        if (NBT.get(entity, nbt -> (Double) nbt.getDouble(name + "_resistance")) != null){
-            return NBT.get(entity, nbt -> (Double) nbt.getDouble(name + "_resistance"));
+        if (NBT.getPersistentData(entity, nbt -> nbt.getDouble(name + "_resistance")) != null){
+            return NBT.getPersistentData(entity, nbt -> nbt.getDouble(name + "_resistance"));
         }
         return 0;
     }

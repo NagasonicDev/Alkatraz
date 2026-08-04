@@ -68,7 +68,7 @@ public final class MagicEntities {
     }
 
     public static Optional<MagicEntityType> getType(LivingEntity entity) {
-        String id = NBT.get(entity, nbt -> (String) nbt.getString(MagicEntityType.NBT_KEY));
+        String id = NBT.getPersistentData(entity, nbt -> nbt.getString(MagicEntityType.NBT_KEY));
         return MagicEntityType.fromId(id);
     }
 

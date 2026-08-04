@@ -23,7 +23,7 @@ public class MagicStoneDropListener implements Listener {
         LivingEntity entity = event.getEntity();
         if (!MagicEntities.isMagicEntity(entity)) return;
 
-        Boolean summoned = NBT.get(entity, nbt -> (Boolean) nbt.getBoolean("summoned_zombie"));
+        Boolean summoned = NBT.getPersistentData(entity, nbt -> nbt.getBoolean("summoned_zombie"));
         if (Boolean.TRUE.equals(summoned)) return;
 
         Enchantment looting = Enchantment.getByKey(NamespacedKey.minecraft("looting"));
