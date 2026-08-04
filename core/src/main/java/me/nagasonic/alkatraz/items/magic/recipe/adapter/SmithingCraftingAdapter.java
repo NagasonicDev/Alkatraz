@@ -33,7 +33,6 @@ public class SmithingCraftingAdapter implements CraftingTypeAdapter {
         RecipeChoice base = new RecipeChoice.ExactChoice(recipe.getBase());
         RecipeChoice addition = new RecipeChoice.ExactChoice(recipe.getAddition());
         Bukkit.addRecipe(new SmithingRecipe(recipe.getKey(), result, base, addition));
-        Alkatraz.logInfo("Registered smithing recipe " + recipe.getKey());
     }
 
     @Override

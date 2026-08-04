@@ -14,8 +14,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.inventory.SmokingRecipe;
 
-import java.util.Locale;
-
 public class CookingCraftingAdapter implements CraftingTypeAdapter {
 
     @Override
@@ -54,8 +52,6 @@ public class CookingCraftingAdapter implements CraftingTypeAdapter {
             default ->
                     Bukkit.addRecipe(new FurnaceRecipe(recipe.getKey(), result, input, experience, cookingTime));
         }
-        Alkatraz.logInfo("Registered " + recipe.getType().name().toLowerCase(Locale.ROOT)
-                + " recipe " + recipe.getKey());
     }
 
     @Override

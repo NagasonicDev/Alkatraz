@@ -33,7 +33,6 @@ public final class RecipeRegistry {
         if (BY_KEY.containsKey(key)) {
             Alkatraz.logWarning("Duplicate recipe key overwritten: " + key);
         }
-        Alkatraz.logInfo("Registered recipe " + key);
         BY_KEY.put(key, recipe);
         BY_OUTPUT_MATERIAL.computeIfAbsent(recipe.getResult().getType(), k -> new HashSet<>()).add(key);
         BY_STATION.computeIfAbsent(recipe.getType(), k -> new HashSet<>()).add(key);
@@ -43,7 +42,6 @@ public final class RecipeRegistry {
     public static void unregisterAll() {
         for (NamespacedKey key : BY_KEY.keySet()) {
             Bukkit.removeRecipe(key);
-            Alkatraz.logInfo("Removed recipe " + key);
         }
         BY_KEY.clear();
         BY_OUTPUT_MATERIAL.clear();
@@ -123,6 +121,7 @@ public final class RecipeRegistry {
             }
         });
         registerNativeRecipes();
+        Alkatraz.logInfo("Registered " + BY_KEY.size() + " recipes.");
     }
 
     private static void indexIngredients(NamespacedKey key, AlkatrazRecipe recipe) {

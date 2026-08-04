@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # Recipe-subsystem integration tests.
 #
-# Runs against a live server through the console (no player online). Asserts on
-# the per-recipe registration/removal/override logInfo anchors in RecipeRegistry
-# and the existing RecipeLoader warnings. Fixture YAMLs live in
+# Runs against a live server through the console (no player online). Recipe
+# registration is verified through the recipes command (unlock resolves the
+# recipe key in RecipeRegistry), alongside the recipe count logs and the
+# existing RecipeLoader warnings. Fixture YAMLs live in
 # scripts/test-fixtures/recipes/ and are copied into
 # $WORKDIR/plugins/Alkatraz/magic/recipes/ by run-server-test.sh before boot.
 #
@@ -54,14 +55,28 @@ begin_test_section "Recipe load"
 assert_no_exceptions "no exceptions during startup"
 assert_log_contains "Loaded [0-9]+ item definitions, [0-9]+ recipes, [0-9]+ engravings\\." \
     "definition/recipe summary logged"
+assert_log_contains "Registered [0-9]+ recipes and [0-9]+ imbuing recipes\\." \
+    "bootstrap count log"
+assert_log_not_contains "Registered recipe " "no per-recipe registration logs"
 
 for key in ci_shaped ci_shapeless ci_smithing ci_stonecutter ci_brewing ci_anvil \
            ci_cooking ci_custom ci_gated ci_hidden ci_permission; do
-    assert_log_contains "Registered recipe alkatraz:${key}" "registered ${key}"
+    MARKER=$(wc -l < "$LOG_FILE")
+    send_command "recipes unlock alkatraz:${key}"
+    assert_window_contains $((MARKER + 1)) "You must specify a player when running this from console" \
+        "registered ${key}"
 done
-assert_log_contains "Registered recipe alkatraz:ci_dup" "duplicate-pair key registered"
-assert_log_contains "Registered recipe alkatraz:ci_override" "override-pair key registered"
-assert_log_contains "Registered recipe minecraft:stick" "conflict fixture key registered"
+
+for key in ci_dup ci_override; do
+    MARKER=$(wc -l < "$LOG_FILE")
+    send_command "recipes unlock alkatraz:${key}"
+    assert_window_contains $((MARKER + 1)) "You must specify a player when running this from console" \
+        "${key} key registered"
+done
+MARKER=$(wc -l < "$LOG_FILE")
+send_command "recipes unlock minecraft:stick"
+assert_window_contains $((MARKER + 1)) "You must specify a player when running this from console" \
+    "conflict fixture key registered"
 
 for key in ci_shaped ci_shapeless ci_smithing ci_stonecutter ci_brewing ci_anvil \
            ci_cooking ci_custom ci_gated ci_hidden ci_permission; do
@@ -87,16 +102,25 @@ ingredients:
   S: STICK
 EOF
 
+MARKER=$(wc -l < "$LOG_FILE")
 send_command "recipes reload"
-wait_for_new_log_match 1 "Recipes reloaded \(.*\)" "reload command acknowledged"
-assert_log_contains "Registered recipe alkatraz:ci_postadd" "reload registers added fixture"
+wait_for_new_log_match $((MARKER + 1)) "Recipes reloaded \(.*\)" "reload command acknowledged"
+assert_window_contains $((MARKER + 1)) "Registered [0-9]+ recipes\\." "reload count log"
+
+MARKER=$(wc -l < "$LOG_FILE")
+send_command "recipes unlock alkatraz:ci_postadd"
+assert_window_contains $((MARKER + 1)) "You must specify a player when running this from console" \
+    "reload registers added fixture"
 
 WINDOW=$(wc -l < "$LOG_FILE")
 rm -f "${RECIPES_DIR}/ci_shapeless.yml"
 send_command "recipes reload"
 wait_for_new_log_match $((WINDOW + 1)) "Recipes reloaded \(.*\)" "second reload acknowledged"
-assert_window_contains "$WINDOW" "Removed recipe alkatraz:ci_shapeless" "reload removes deleted fixture"
-assert_window_not_contains "$WINDOW" "Registered recipe alkatraz:ci_shapeless" "deleted fixture not re-registered"
+
+MARKER=$(wc -l < "$LOG_FILE")
+send_command "recipes unlock alkatraz:ci_shapeless"
+assert_window_contains $((MARKER + 1)) "Unknown recipe:.*alkatraz:ci_shapeless" \
+    "reload removes deleted fixture"
 assert_no_exceptions "no exceptions during reloads"
 
 end_test_section
@@ -121,14 +145,20 @@ end_test_section
 begin_test_section "Recipe malformed fixtures"
 
 assert_log_contains "Empty recipe shape for alkatraz:ci_bad_shape" "bad shape warning"
-assert_log_not_contains "Registered recipe alkatraz:ci_bad_shape" "bad shape not registered"
+MARKER=$(wc -l < "$LOG_FILE")
+send_command "recipes unlock alkatraz:ci_bad_shape"
+assert_window_contains $((MARKER + 1)) "Unknown recipe:.*alkatraz:ci_bad_shape" "bad shape not registered"
 
 assert_log_contains "Unknown ingredient 'definitely_not_a_material' in recipe" "bad ingredient warning"
 assert_log_contains "Empty ingredients for shapeless recipe alkatraz:ci_bad_ingredient" "bad shapeless empty warning"
-assert_log_not_contains "Registered recipe alkatraz:ci_bad_ingredient" "bad ingredient not registered"
+MARKER=$(wc -l < "$LOG_FILE")
+send_command "recipes unlock alkatraz:ci_bad_ingredient"
+assert_window_contains $((MARKER + 1)) "Unknown recipe:.*alkatraz:ci_bad_ingredient" "bad ingredient not registered"
 
 assert_log_contains "Unknown recipe type 'WAFFLE', defaulting to SHAPED" "bad type warning"
-assert_log_not_contains "Registered recipe alkatraz:ci_bad_type" "bad type not registered"
+MARKER=$(wc -l < "$LOG_FILE")
+send_command "recipes unlock alkatraz:ci_bad_type"
+assert_window_contains $((MARKER + 1)) "Unknown recipe:.*alkatraz:ci_bad_type" "bad type not registered"
 
 assert_log_contains "Recipe missing 'definition'/'id' key" "missing key warning"
 assert_no_exceptions "no exceptions from malformed fixtures"
