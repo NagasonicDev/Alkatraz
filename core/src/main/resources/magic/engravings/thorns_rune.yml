@@ -2,6 +2,8 @@ key: alkatraz:thorns_rune
 allowed_item_types:
   - chestplate
   - leggings
+triggers:
+  - on_damage_taken
 item:
   material: CACTUS
   display_name: '&aThorns Rune'

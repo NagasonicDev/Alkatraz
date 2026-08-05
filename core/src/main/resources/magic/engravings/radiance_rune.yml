@@ -1,6 +1,9 @@
 key: alkatraz:radiance_rune
 allowed_item_types:
   - wand
+triggers:
+  - on_spell_cast
+  - on_item_held
 item:
   material: GLOWSTONE_DUST
   display_name: '&eRadiance Rune'

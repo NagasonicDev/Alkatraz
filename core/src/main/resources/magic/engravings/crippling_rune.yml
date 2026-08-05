@@ -2,6 +2,9 @@ key: alkatraz:crippling_rune
 allowed_item_types:
   - sword
   - axe
+triggers:
+  - on_damage_dealt
+  - on_kill
 item:
   material: COBWEB
   display_name: '&7Crippling Rune'

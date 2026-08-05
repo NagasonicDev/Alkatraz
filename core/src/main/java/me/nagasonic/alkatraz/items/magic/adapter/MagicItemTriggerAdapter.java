@@ -21,6 +21,7 @@ import me.nagasonic.alkatraz.items.magic.effect.EffectExecutor;
 import me.nagasonic.alkatraz.spells.Spell;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -233,6 +234,32 @@ public final class MagicItemTriggerAdapter implements Listener {
         );
         MagicItemServices.get().dispatchTrigger(
                 new InternalTriggerEvent(MagicKeys.alkatraz("on_damage_taken"), context));
+    }
+
+    /**
+     * Fires {@code alkatraz:on_damage_dealt} when a player damages an entity,
+     * either by melee hit or by a projectile they shot.
+     */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onDamageDealt(EntityDamageByEntityEvent event) {
+        Player attacker = null;
+        if (event.getDamager() instanceof Player player) {
+            attacker = player;
+        } else if (event.getDamager() instanceof Projectile projectile
+                && projectile.getShooter() instanceof Player player) {
+            attacker = player;
+        }
+        if (attacker == null) return;
+
+        if (!(event.getEntity() instanceof LivingEntity victim)) return;
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("damage", event.getFinalDamage());
+        params.put("cause", event.getCause().name());
+
+        TriggerContext context = new TriggerContext(attacker, victim, null, null, null, params);
+        MagicItemServices.get().dispatchTrigger(
+                new InternalTriggerEvent(MagicKeys.alkatraz("on_damage_dealt"), context));
     }
 
     /**

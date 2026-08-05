@@ -4,6 +4,8 @@ allowed_item_types:
   - shovel
   - axe
   - bow
+triggers:
+  - on_item_held
 item:
   material: SUGAR
   display_name: '&eHaste Rune'

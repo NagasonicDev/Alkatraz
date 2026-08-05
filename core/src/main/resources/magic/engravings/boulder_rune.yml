@@ -3,6 +3,9 @@ allowed_item_types:
   - sword
   - axe
   - wand
+triggers:
+  - on_damage_dealt
+  - on_kill
 item:
   material: STONE
   display_name: '&7Boulder Rune'
@@ -11,9 +14,6 @@ item:
     - '&7&oCreates a small explosion on impact.'
 attributes:
   alkatraz:earth_affinity: 10
-conditions:
-  - type: spell_element
-    element: EARTH
 effects:
   - type: explosion
     power: 2

@@ -289,6 +289,7 @@ public final class MagicItemBootstrap {
         registerTrigger("on_spell_cast", "When the holder casts a spell", "wand");
         registerTrigger("on_spell_hit", "When a spell hits a target", "wand");
         registerTrigger("on_kill", "When the holder kills an entity", "sword", "axe", "wand");
+        registerTrigger("on_damage_dealt", "When the holder deals damage to an entity", "sword", "axe", "wand", "bow", "crossbow", "trident");
         registerTrigger("on_equip", "When equipped in a slot", "helmet", "chestplate", "leggings", "boots", "ring", "necklace", "bracelet", "pendant");
         registerTrigger("on_unequip", "When unequipped from a slot", "helmet", "chestplate", "leggings", "boots", "ring", "necklace", "bracelet", "pendant");
         registerTrigger("on_damage_taken", "When the holder takes damage", "helmet", "chestplate", "leggings", "boots");

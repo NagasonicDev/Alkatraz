@@ -2,6 +2,8 @@ key: alkatraz:marksman_rune
 allowed_item_types:
   - bow
   - crossbow
+triggers:
+  - on_damage_dealt
 item:
   material: ARROW
   display_name: '&aMarksman Rune'

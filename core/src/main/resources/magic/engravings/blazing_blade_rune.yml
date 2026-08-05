@@ -2,6 +2,9 @@ key: alkatraz:blazing_blade_rune
 allowed_item_types:
   - sword
   - axe
+triggers:
+  - on_damage_dealt
+  - on_kill
 item:
   material: BLAZE_ROD
   display_name: '&6Blazing Blade Rune'
