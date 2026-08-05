@@ -3,6 +3,8 @@ allowed_item_types:
   - bow
   - crossbow
   - trident
+triggers:
+  - on_damage_dealt
 item:
   material: TNT
   display_name: '&cExplosive Rune'

@@ -3,6 +3,10 @@ allowed_item_types:
   - wand
   - sword
   - bow
+triggers:
+  - on_damage_dealt
+  - on_spell_cast
+  - on_item_held
 item:
   material: ENDER_PEARL
   display_name: '&5Ender Rune'

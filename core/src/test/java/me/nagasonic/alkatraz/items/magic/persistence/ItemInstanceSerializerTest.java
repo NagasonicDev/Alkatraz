@@ -80,4 +80,18 @@ class ItemInstanceSerializerTest {
         assertEquals(1, roundTrip.engravings().size());
         assertEquals(Map.of("charges", 5), roundTrip.customData());
     }
+
+    @Test
+    void deserializeRoundTripPreservesPassiveTriggerEngraving() {
+        MagicItemInstance source = MagicItemInstance.createDefault(STONE);
+        source.addEngraving(new Engraving(
+                MagicKeys.alkatraz("blazing_blade_rune"),
+                MagicKeys.alkatraz("passive")));
+
+        MagicItemInstance roundTrip = ItemInstanceSerializer.deserialize(
+                ItemInstanceSerializer.serialize(source));
+
+        assertEquals(1, roundTrip.engravings().size());
+        assertEquals(MagicKeys.alkatraz("passive"), roundTrip.engravings().get(0).triggerKey());
+    }
 }

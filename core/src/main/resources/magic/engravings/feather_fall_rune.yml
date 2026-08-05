@@ -1,6 +1,7 @@
 key: alkatraz:feather_fall_rune
 allowed_item_types:
   - boots
+triggers: []
 item:
   material: FEATHER
   display_name: '&fFeather Fall Rune'

@@ -3,6 +3,11 @@ allowed_item_types:
   - ring
   - robe
   - artifact
+triggers:
+  - on_equip
+  - on_unequip
+  - on_join
+  - on_death
 item:
   material: POPPY
   display_name: '&dRejuvenation Rune'

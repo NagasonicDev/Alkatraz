@@ -4,6 +4,11 @@ allowed_item_types:
   - chestplate
   - leggings
   - boots
+triggers:
+  - on_equip
+  - on_unequip
+  - on_join
+  - on_death
 item:
   material: SHIELD
   display_name: '&7Fortification Rune'

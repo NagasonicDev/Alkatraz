@@ -1,28 +1,22 @@
 package me.nagasonic.alkatraz.gui.implementation.engraving;
 
 import me.nagasonic.alkatraz.Alkatraz;
-import me.nagasonic.alkatraz.api.magic.instance.Engraving;
 import me.nagasonic.alkatraz.api.magic.registry.MagicItemRegistries;
 import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
 import me.nagasonic.alkatraz.api.magic.trigger.TriggerType;
 import me.nagasonic.alkatraz.gui.PagedMenu;
-import me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack;
 import me.nagasonic.alkatraz.items.magic.util.ItemTypeMapper;
-import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
-import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.util.ColorFormat;
-import me.nagasonic.alkatraz.util.StatUtils;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -52,10 +46,30 @@ public class TriggerSelectionMenu extends PagedMenu<TriggerType> {
 
         Set<String> itemTypes = ItemTypeMapper.getTypes(session.targetStack().getType());
 
-        return MagicItemRegistries.TRIGGER_TYPES.values().stream()
+        List<TriggerType> byItemType = MagicItemRegistries.TRIGGER_TYPES.values().stream()
                 .filter(t -> t.allowedItemTypes().isEmpty()
                         || t.allowedItemTypes().stream().anyMatch(itemTypes::contains))
                 .collect(Collectors.toList());
+
+        // If the selected engraving declares the triggers it supports, offer only
+        // those that also pass the item-type filter above. Absent field -> fall back.
+        NamespacedKey engravingKey = session.selectedEngravingKey();
+        if (engravingKey != null) {
+            Object rawTriggers = MagicItemRegistries.ENGRAVING_DEFINITIONS.get(engravingKey)
+                    .map(def -> def.staticConfig().get("triggers"))
+                    .orElse(null);
+            if (rawTriggers instanceof List<?> declared) {
+                Set<NamespacedKey> declaredKeys = new HashSet<>();
+                for (Object entry : declared) {
+                    MagicKeys.parse(String.valueOf(entry)).ifPresent(declaredKeys::add);
+                }
+                return byItemType.stream()
+                        .filter(t -> declaredKeys.contains(t.getKey()))
+                        .collect(Collectors.toList());
+            }
+        }
+
+        return byItemType;
     }
 
     @Override
@@ -106,64 +120,7 @@ public class TriggerSelectionMenu extends PagedMenu<TriggerType> {
         if (session == null) return;
 
         session.setSelectedTriggerKey(trigger.getKey());
-
-        // Check engraving slot limit
-        int currentEngravings = session.targetInstance().engravings().size();
-        Object rawMax = session.targetDefinition().staticConfig().get("max_engravings");
-        int maxEngravings = rawMax != null ? Integer.parseInt(rawMax.toString()) : 1;
-        if (currentEngravings >= maxEngravings) {
-            viewer.sendMessage(ColorFormat.format("&cEngraving slots are full!"));
-            viewer.playSound(viewer.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
-            return;
-        }
-
-        // Calculate mana cost: 100 for first engraving, +50 per additional
-        int manaCost = 100 + (currentEngravings * 50);
-
-        // Check player has enough mana
-        MagicProfile profile = ProfileManager.getProfile(viewer.getUniqueId(), MagicProfile.class);
-        if (profile == null) return;
-
-        if (profile.getMana() < manaCost) {
-            viewer.sendMessage(ColorFormat.format("&cNot enough mana! Need &b" + manaCost + " &cmana, you have &b" + (int) profile.getMana()));
-            viewer.playSound(viewer.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
-            return;
-        }
-
-        // Deduct mana
-        StatUtils.subMana(viewer, manaCost);
-
-        // Consume one rune from the player's inventory
-        NamespacedKey targetKey = session.selectedEngravingKey();
-        if (targetKey != null) {
-            for (int i = 0; i <= 35; i++) {
-                ItemStack invItem = viewer.getInventory().getItem(i);
-                if (invItem == null || invItem.getType() == Material.AIR) continue;
-                Optional<NamespacedKey> key = MagicItemStack.readEngravingKey(invItem);
-                if (key.isPresent() && key.get().equals(targetKey)) {
-                    int amount = invItem.getAmount() - 1;
-                    if (amount <= 0) {
-                        viewer.getInventory().setItem(i, null);
-                    } else {
-                        invItem.setAmount(amount);
-                    }
-                    break;
-                }
-            }
-        }
-
-        // Apply engraving
-        Engraving engraving = new Engraving(session.selectedEngravingKey(), session.selectedTriggerKey());
-        session.targetInstance().addEngraving(engraving);
-        MagicItemStack.writeInstance(session.targetStack(), session.targetInstance());
-
-        viewer.sendMessage(ColorFormat.format("&aInstalled engraving: &f"
-                + session.selectedEngravingKey().getKey() + " &8(" + trigger.getKey().getKey() + ")"));
-        viewer.sendMessage(ColorFormat.format("&aUsed &b" + manaCost + " &amana."));
-        viewer.playSound(viewer.getLocation(), Sound.BLOCK_ANVIL_USE, 1.0f, 1.0f);
-
-        EngravingSession.remove(viewer.getUniqueId());
-        new EngravingTableMenu(viewer, session.targetStack(), session.targetInstance(), session.targetDefinition()).open();
+        EngravingTableMenu.applyEngraving(viewer, session);
     }
 
     @Override

@@ -3,6 +3,9 @@ allowed_item_types:
   - sword
   - axe
   - wand
+triggers:
+  - on_damage_dealt
+  - on_kill
 item:
   material: FIRE_CHARGE
   display_name: '&cFire Rune'
@@ -11,9 +14,6 @@ item:
     - '&7&oIgnites targets for a duration.'
 attributes:
   alkatraz:fire_affinity: 10
-conditions:
-  - type: spell_element
-    element: FIRE
 effects:
   - type: ignite
     duration_ticks: 80

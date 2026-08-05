@@ -3,6 +3,7 @@ allowed_item_types:
   - ring
   - robe
   - artifact
+triggers: []
 item:
   material: DRAGON_BREATH
   display_name: '&dMana Font Rune'

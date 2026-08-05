@@ -6,11 +6,15 @@ import me.nagasonic.alkatraz.api.magic.instance.Engraving;
 import me.nagasonic.alkatraz.api.magic.instance.MagicItemInstance;
 import me.nagasonic.alkatraz.api.magic.modifier.EngravingDefinition;
 import me.nagasonic.alkatraz.api.magic.registry.MagicItemRegistries;
+import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
 import me.nagasonic.alkatraz.gui.ItemBuilder;
 import me.nagasonic.alkatraz.gui.Menu;
 import me.nagasonic.alkatraz.gui.implementation.WandTableSelectionMenu;
 import me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack;
+import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
+import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.util.ColorFormat;
+import me.nagasonic.alkatraz.util.StatUtils;
 import me.nagasonic.alkatraz.util.StringUtils;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -28,6 +32,9 @@ public class EngravingTableMenu extends Menu {
     private static final int[] ENGRAVING_SLOTS = {10, 11, 12, 13, 14, 15, 16};
     private static final int TARGET_SLOT = 31;
     private static final int BACK_SLOT = 33;
+
+    /** Sentinel trigger key stored for passive engravings that need no trigger selection. */
+    private static final NamespacedKey PASSIVE_TRIGGER = MagicKeys.alkatraz("passive");
 
     private ItemStack targetStack;
     private MagicItemInstance targetInstance;
@@ -112,8 +119,10 @@ public class EngravingTableMenu extends Menu {
     private ItemStack createEngravingDisplay(Engraving engraving, int index) {
         String engName = MagicItemRegistries.ENGRAVING_DEFINITIONS.get(engraving.engravingKey())
                 .map(def -> StringUtils.prettifyKey(def.getKey().getKey())).orElse("Unknown");
-        String trigName = MagicItemRegistries.TRIGGER_TYPES.get(engraving.triggerKey())
-                .map(t -> StringUtils.prettifyKey(t.getKey().getKey())).orElse("Unknown");
+        String trigName = engraving.triggerKey().equals(PASSIVE_TRIGGER)
+                ? "Passive"
+                : MagicItemRegistries.TRIGGER_TYPES.get(engraving.triggerKey())
+                        .map(t -> StringUtils.prettifyKey(t.getKey().getKey())).orElse("Unknown");
 
         ItemStack item = ItemBuilder.of(Material.ENCHANTED_BOOK)
                 .name("&6" + engName)
@@ -241,6 +250,17 @@ public class EngravingTableMenu extends Menu {
         session.setSelectedEngravingKey(engravingKey.get());
         session.setEngravingItemStack(runeStack);
 
+        EngravingDefinition def = MagicItemRegistries.ENGRAVING_DEFINITIONS.get(engravingKey.get()).orElse(null);
+        if (def == null) return;
+
+        Object rawTriggers = def.staticConfig().get("triggers");
+        if (rawTriggers instanceof List<?> triggers && triggers.isEmpty()) {
+            // Passive engraving: no trigger selection, apply directly.
+            session.setSelectedTriggerKey(PASSIVE_TRIGGER);
+            applyEngraving(viewer, session);
+            return;
+        }
+
         viewer.playSound(viewer.getLocation(), Sound.BLOCK_STONE_BUTTON_CLICK_ON, 1.0f, 1.0f);
         new TriggerSelectionMenu(viewer).open();
     }
@@ -267,6 +287,71 @@ public class EngravingTableMenu extends Menu {
         viewer.sendMessage(ColorFormat.format("&cUnequipped: &f" + removed.engravingKey().getKey()));
         viewer.playSound(viewer.getLocation(), Sound.ENTITY_ITEM_BREAK, 1.0f, 1.0f);
         refresh();
+    }
+
+    /**
+     * Applies the engraving currently selected in {@code session} to its target item:
+     * validates the slot limit and mana, consumes one rune, writes the engraving to
+     * the item, clears the session, and reopens the engraving table.
+     *
+     * @return {@code true} if the engraving was applied, {@code false} otherwise
+     */
+    public static boolean applyEngraving(Player viewer, EngravingSession session) {
+        if (session == null) return false;
+
+        int currentEngravings = session.targetInstance().engravings().size();
+        Object rawMax = session.targetDefinition().staticConfig().get("max_engravings");
+        int maxEngravings = rawMax != null ? Integer.parseInt(rawMax.toString()) : 1;
+        if (currentEngravings >= maxEngravings) {
+            viewer.sendMessage(ColorFormat.format("&cEngraving slots are full!"));
+            viewer.playSound(viewer.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
+            return false;
+        }
+
+        int manaCost = 100 + (currentEngravings * 50);
+
+        MagicProfile profile = ProfileManager.getProfile(viewer.getUniqueId(), MagicProfile.class);
+        if (profile == null) return false;
+        if (profile.getMana() < manaCost) {
+            viewer.sendMessage(ColorFormat.format("&cNot enough mana! Need &b" + manaCost + " &cmana, you have &b" + (int) profile.getMana()));
+            viewer.playSound(viewer.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
+            return false;
+        }
+        StatUtils.subMana(viewer, manaCost);
+
+        NamespacedKey targetKey = session.selectedEngravingKey();
+        if (targetKey != null) {
+            for (int i = 0; i <= 35; i++) {
+                ItemStack invItem = viewer.getInventory().getItem(i);
+                if (invItem == null || invItem.getType() == Material.AIR) continue;
+                Optional<NamespacedKey> key = MagicItemStack.readEngravingKey(invItem);
+                if (key.isPresent() && key.get().equals(targetKey)) {
+                    int amount = invItem.getAmount() - 1;
+                    if (amount <= 0) {
+                        viewer.getInventory().setItem(i, null);
+                    } else {
+                        invItem.setAmount(amount);
+                    }
+                    break;
+                }
+            }
+        }
+
+        Engraving engraving = new Engraving(session.selectedEngravingKey(), session.selectedTriggerKey());
+        session.targetInstance().addEngraving(engraving);
+        MagicItemStack.writeInstance(session.targetStack(), session.targetInstance());
+
+        viewer.sendMessage(ColorFormat.format("&aInstalled engraving: &f"
+                + session.selectedEngravingKey().getKey() + " &8(" + session.selectedTriggerKey().getKey() + ")"));
+        viewer.sendMessage(ColorFormat.format("&aUsed &b" + manaCost + " &amana."));
+        viewer.playSound(viewer.getLocation(), Sound.BLOCK_ANVIL_USE, 1.0f, 1.0f);
+
+        ItemStack stack = session.targetStack();
+        MagicItemInstance instance = session.targetInstance();
+        ItemDefinition definition = session.targetDefinition();
+        EngravingSession.remove(viewer.getUniqueId());
+        new EngravingTableMenu(viewer, stack, instance, definition).open();
+        return true;
     }
 
     private void handleBack() {

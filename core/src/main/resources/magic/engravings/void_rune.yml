@@ -1,6 +1,9 @@
 key: alkatraz:void_rune
 allowed_item_types:
   - wand
+triggers:
+  - on_damage_dealt
+  - on_kill
 item:
   material: OBSIDIAN
   display_name: '&5Void Rune'
@@ -10,8 +13,6 @@ item:
 attributes:
   alkatraz:dark_affinity: 10
 conditions:
-  - type: spell_element
-    element: DARK
   - type: random
     chance: 0.5
   - type: circle_level

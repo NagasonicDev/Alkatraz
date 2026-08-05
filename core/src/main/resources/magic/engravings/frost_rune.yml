@@ -3,6 +3,9 @@ allowed_item_types:
   - sword
   - axe
   - wand
+triggers:
+  - on_damage_dealt
+  - on_kill
 item:
   material: ICE
   display_name: '&bFrost Rune'
@@ -11,9 +14,6 @@ item:
     - '&7&oApplies slowness effect to targets.'
 attributes:
   alkatraz:water_affinity: 10
-conditions:
-  - type: spell_element
-    element: WATER
 effects:
   - type: potion_effect
     effect: SLOWNESS
