@@ -305,7 +305,7 @@ public class CastEventListener implements Listener {
     private void onHotbarQuit(PlayerQuitEvent e) {
         Player p = e.getPlayer();
         if (SpellHotbarManager.isActive(p)) {
-            SpellHotbarManager.exit(p);
+            SpellHotbarManager.exitForQuit(p);
             p.saveData();
         }
     }
@@ -386,8 +386,17 @@ public class CastEventListener implements Listener {
         UUID uuid = p.getUniqueId();
         ItemStack[] savedStorage = SpellHotbarManager.peekSavedContents(uuid);
         ItemStack savedOffhand = SpellHotbarManager.peekSavedOffhand(uuid);
+        Integer savedHeldSlot = SpellHotbarManager.peekSavedHeldSlot(uuid);
 
         SpellHotbarManager.cleanupForDeath(p);
+
+        if (e.getKeepInventory()) {
+            // Keep-inventory servers do not spawn the drops, so restore the
+            // original items straight back into the inventory instead of losing them.
+            e.getDrops().clear();
+            SpellHotbarManager.restoreSnapshotToInventory(p, savedStorage, savedOffhand, savedHeldSlot);
+            return;
+        }
 
         e.getDrops().clear();
         if (savedStorage != null) {

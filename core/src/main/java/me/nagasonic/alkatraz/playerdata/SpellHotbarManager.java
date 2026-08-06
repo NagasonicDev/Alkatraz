@@ -1,6 +1,7 @@
 package me.nagasonic.alkatraz.playerdata;
 
 import de.tr7zw.changeme.nbtapi.NBT;
+import de.tr7zw.changeme.nbtapi.iface.ReadWriteNBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
@@ -15,6 +16,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -71,22 +74,17 @@ public class SpellHotbarManager {
 
         UUID uuid = player.getUniqueId();
 
-        savedInventories.put(
-                uuid,
-                player.getInventory().getStorageContents().clone()
-        );
+        ItemStack[] storageContents = player.getInventory().getStorageContents().clone();
+        ItemStack offhand = player.getInventory().getItemInOffHand() == null
+                ? null
+                : player.getInventory().getItemInOffHand().clone();
+        int heldSlot = player.getInventory().getHeldItemSlot();
 
-        savedOffhand.put(
-                uuid,
-                player.getInventory().getItemInOffHand() == null
-                        ? null
-                        : player.getInventory().getItemInOffHand().clone()
-        );
+        savedInventories.put(uuid, storageContents);
+        savedOffhand.put(uuid, offhand);
+        savedHeldSlot.put(uuid, heldSlot);
 
-        savedHeldSlot.put(
-                uuid,
-                player.getInventory().getHeldItemSlot()
-        );
+        persistSnapshot(uuid, storageContents, offhand, heldSlot);
 
         justEntered.put(uuid, System.currentTimeMillis() + 500);
 
@@ -118,9 +116,32 @@ public class SpellHotbarManager {
      * Deactivates hotbar mode and restores the player's saved inventory.
      * Safe to call when not in hotbar mode.
      *
+     * <p>This is the in-game exit path (e.g. right-clicking the wand). The
+     * persisted backup snapshot is removed because the player stays online and
+     * their inventory is authoritative again from this point on.
+     *
      * @param player the player un-equipping the wand
      */
     public static void exit(Player player) {
+        exit(player, true);
+    }
+
+    /**
+     * Deactivates hotbar mode and restores the player's saved inventory without
+     * removing the persisted backup snapshot.
+     *
+     * <p>Used on quit: the restored inventory is written to the player's data
+     * file, but if that save does not take effect on some server versions the
+     * persisted snapshot survives so the next join can still recover the
+     * original inventory.
+     *
+     * @param player the player disconnecting
+     */
+    public static void exitForQuit(Player player) {
+        exit(player, false);
+    }
+
+    private static void exit(Player player, boolean clearPersisted) {
         if (!hotbarActive.containsKey(player.getUniqueId())) return;
         UUID uuid = player.getUniqueId();
 
@@ -128,34 +149,74 @@ public class SpellHotbarManager {
         justEntered.remove(uuid);
         justExited.put(uuid, System.currentTimeMillis() + 500);
 
-        restoreSnapshot(player, uuid);
+        MagicProfile profile = ProfileManager.getProfile(player, MagicProfile.class);
+        profile.setCanCast(true);
+
+        restoreFromMemory(player, uuid);
+
+        if (clearPersisted) {
+            deletePersistedSnapshot(uuid);
+        }
     }
 
     /**
      * Restores a leftover saved inventory snapshot for the given player if one exists.
      *
-     * <p>Used on join as a safety net: if a player disconnects while in hotbar mode
-     * before {@link #exit(Player)} could persist the restored inventory, this recovers
-     * their original inventory from the in-memory snapshot.
+     * <p>Used on join as a safety net: if a player disconnected while in hotbar mode
+     * and the restored inventory did not reach the player's data file, this recovers
+     * their original inventory from the in-memory snapshot or from the persisted
+     * backup snapshot written when they entered hotbar mode.
      *
      * @param player the player to restore
      * @return {@code true} if a snapshot was found and restored
      */
     public static boolean restoreIfNeeded(Player player) {
         UUID uuid = player.getUniqueId();
-        if (!savedInventories.containsKey(uuid)) return false;
+        boolean fromMemory = savedInventories.containsKey(uuid);
+        boolean fromDisk = snapshotFile(uuid).exists();
+        if (!fromMemory && !fromDisk) return false;
+
         hotbarActive.remove(uuid);
         justEntered.remove(uuid);
         justExited.remove(uuid);
-        restoreSnapshot(player, uuid);
+
+        MagicProfile profile = ProfileManager.getProfile(player, MagicProfile.class);
+        profile.setCanCast(true);
+
+        if (fromMemory) {
+            restoreFromMemory(player, uuid);
+            deletePersistedSnapshot(uuid);
+        } else {
+            restoreFromPersisted(player, uuid);
+        }
         return true;
     }
 
-    private static void restoreSnapshot(Player player, UUID uuid) {
+    private static void restoreFromMemory(Player player, UUID uuid) {
         ItemStack[] storage = savedInventories.remove(uuid);
         ItemStack offhand = savedOffhand.remove(uuid);
         Integer heldSlot = savedHeldSlot.remove(uuid);
+        applySnapshot(player, storage, offhand, heldSlot);
+    }
 
+    private static void restoreFromPersisted(Player player, UUID uuid) {
+        File file = snapshotFile(uuid);
+        if (!file.exists()) return;
+        try {
+            ReadWriteNBT compound = NBT.readFile(file);
+            ItemStack[] storage = compound.getItemStackArray("storage");
+            ItemStack offhand = compound.hasTag("offhand") ? compound.getItemStack("offhand") : null;
+            Integer heldSlot = compound.hasTag("heldSlot") ? compound.getInteger("heldSlot") : null;
+            applySnapshot(player, storage, offhand, heldSlot);
+        } catch (IOException e) {
+            Alkatraz.getInstance().getLogger().severe("Failed to read hotbar inventory snapshot for " + uuid);
+            e.printStackTrace();
+        } finally {
+            deletePersistedSnapshot(uuid);
+        }
+    }
+
+    private static void applySnapshot(Player player, ItemStack[] storage, ItemStack offhand, Integer heldSlot) {
         if (storage != null) {
             player.getInventory().setStorageContents(storage);
         }
@@ -167,6 +228,38 @@ public class SpellHotbarManager {
         }
 
         player.updateInventory();
+    }
+
+    private static void persistSnapshot(UUID uuid, ItemStack[] storage, ItemStack offhand, int heldSlot) {
+        ReadWriteNBT compound = NBT.createNBTObject();
+        compound.setItemStackArray("storage", storage);
+        if (offhand != null) {
+            compound.setItemStack("offhand", offhand);
+        }
+        compound.setInteger("heldSlot", heldSlot);
+        File file = snapshotFile(uuid);
+        try {
+            if (file.getParentFile() != null) {
+                file.getParentFile().mkdirs();
+            }
+            NBT.writeFile(file, compound);
+        } catch (IOException e) {
+            Alkatraz.getInstance().getLogger().severe("Failed to persist hotbar inventory snapshot for " + uuid);
+            e.printStackTrace();
+        }
+    }
+
+    private static void deletePersistedSnapshot(UUID uuid) {
+        File file = snapshotFile(uuid);
+        if (file.exists()) {
+            file.delete();
+        }
+    }
+
+    private static File snapshotFile(UUID uuid) {
+        return new File(
+                new File(Alkatraz.getInstance().getDataFolder().getParentFile(), "Alkatraz/playerdata/" + uuid),
+                "hotbar_snapshot.nbt");
     }
 
     /**
@@ -197,6 +290,23 @@ public class SpellHotbarManager {
      */
     public static ItemStack peekSavedOffhand(UUID uuid) {
         return savedOffhand.get(uuid);
+    }
+
+    /**
+     * Returns the saved held slot for the given player without removing it,
+     * or {@code null} if nothing is saved.
+     */
+    public static Integer peekSavedHeldSlot(UUID uuid) {
+        return savedHeldSlot.get(uuid);
+    }
+
+    /**
+     * Restores a previously saved inventory snapshot into the player's live
+     * inventory. Used by the death handler to keep the original items on
+     * keep-inventory servers.
+     */
+    public static void restoreSnapshotToInventory(Player player, ItemStack[] storage, ItemStack offhand, Integer heldSlot) {
+        applySnapshot(player, storage, offhand, heldSlot);
     }
 
     /**
@@ -245,6 +355,11 @@ public class SpellHotbarManager {
         savedInventories.remove(uuid);
         savedOffhand.remove(uuid);
         savedHeldSlot.remove(uuid);
+
+        MagicProfile profile = ProfileManager.getProfile(player, MagicProfile.class);
+        profile.setCanCast(true);
+
+        deletePersistedSnapshot(uuid);
     }
 
     /**
