@@ -18,7 +18,7 @@ import java.util.List;
 
 public class RecipeCategoryMenu extends Menu {
 
-    private static final int[] CATEGORY_SLOTS = {10, 11, 12, 19, 20, 21, 28, 29, 30};
+    private static final int[] CATEGORY_SLOTS = {10, 13, 16, 19, 22, 25, 28, 31, 34};
     private static final int SEARCH_SLOT = 40;
     private static final int CREATE_SLOT = 42;
 

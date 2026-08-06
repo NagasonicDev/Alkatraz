@@ -50,7 +50,7 @@ public class RecipeListMenu extends PagedMenu<AlkatrazRecipe> {
 
     public RecipeListMenu(Player viewer, RecipeCategory category) {
         super(viewer, ColorFormat.format(
-                Alkatraz.getLangManager().get("menu.recipe_categories")), 54, new ArrayList<>(), 28);
+                Alkatraz.getLangManager().get("menu.recipe_categories")), 54, new ArrayList<>(), 27);
         this.category = category;
         this.searchQuery = null;
         this.contentSlots = getDefaultContentSlots();
@@ -60,7 +60,7 @@ public class RecipeListMenu extends PagedMenu<AlkatrazRecipe> {
 
     public RecipeListMenu(Player viewer, List<AlkatrazRecipe> searchResults, String query) {
         super(viewer, ColorFormat.format(
-                Alkatraz.getLangManager().get("menu.recipe_categories")), 54, searchResults, 28);
+                Alkatraz.getLangManager().get("menu.recipe_categories")), 54, searchResults, 27);
         this.category = null;
         this.searchQuery = query;
         this.contentSlots = getDefaultContentSlots();
