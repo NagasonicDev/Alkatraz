@@ -8,7 +8,6 @@
 # set. Add new ones here as Minecraft/Spigot release them; nothing
 # else in the workflow needs to change.
 
-1.19,17
 1.19.1,17
 1.19.2,17
 1.19.3,17
