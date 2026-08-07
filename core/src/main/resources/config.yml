@@ -123,6 +123,10 @@ placeholders:
 # Channels used when a player unlocks a recipe.
 # ==============================
 recipes:
+  # How often (in ticks, 20 = 1 second) the unlock sweep runs. The sweep checks
+  # every online player against all recipe requirements so passive requirements
+  # (playtime, permissions, admin-granted stats) unlock in-game without a rejoin.
+  unlock_check_interval_ticks: 60
   unlock_notifications:
     chat: true
     title: true

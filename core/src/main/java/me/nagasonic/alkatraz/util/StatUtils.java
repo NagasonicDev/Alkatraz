@@ -1,6 +1,7 @@
 package me.nagasonic.alkatraz.util;
 
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.items.magic.recipe.unlock.UnlockManager;
 import me.nagasonic.alkatraz.playerdata.SpellHotbarManager;
 import me.nagasonic.alkatraz.util.WandUtils;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
@@ -122,6 +123,7 @@ public class StatUtils {
                 profile.setMasteryBarTaskIds(taskIds);
             }
         }
+        UnlockManager.refresh(p);
     }
 
     public static int getStatPointsMastery(int circle){

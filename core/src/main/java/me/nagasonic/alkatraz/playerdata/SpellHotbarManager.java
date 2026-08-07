@@ -75,9 +75,8 @@ public class SpellHotbarManager {
         UUID uuid = player.getUniqueId();
 
         ItemStack[] storageContents = player.getInventory().getStorageContents().clone();
-        ItemStack offhand = player.getInventory().getItemInOffHand() == null
-                ? null
-                : player.getInventory().getItemInOffHand().clone();
+        ItemStack offhand = player.getInventory().getItemInOffHand();
+        offhand = (offhand == null || offhand.getType().isAir()) ? null : offhand.clone();
         int heldSlot = player.getInventory().getHeldItemSlot();
 
         savedInventories.put(uuid, storageContents);
@@ -233,7 +232,7 @@ public class SpellHotbarManager {
     private static void persistSnapshot(UUID uuid, ItemStack[] storage, ItemStack offhand, int heldSlot) {
         ReadWriteNBT compound = NBT.createNBTObject();
         compound.setItemStackArray("storage", storage);
-        if (offhand != null) {
+        if (offhand != null && !offhand.getType().isAir()) {
             compound.setItemStack("offhand", offhand);
         }
         compound.setInteger("heldSlot", heldSlot);

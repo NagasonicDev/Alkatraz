@@ -20,6 +20,7 @@ import me.nagasonic.alkatraz.items.magic.recipe.RecipeManager;
 import me.nagasonic.alkatraz.items.magic.recipe.RecipeManagerAPI;
 import me.nagasonic.alkatraz.items.magic.recipe.adapter.CraftingEventRouter;
 import me.nagasonic.alkatraz.items.magic.recipe.unlock.UnlockListener;
+import me.nagasonic.alkatraz.items.magic.recipe.unlock.UnlockSweep;
 import me.nagasonic.alkatraz.loot.LootInjector;
 import me.nagasonic.alkatraz.loot.MobLootInjector;
 import me.nagasonic.alkatraz.loot.implementation.SpellbookLoot;
@@ -172,6 +173,7 @@ public final class Alkatraz extends JavaPlugin {
         getCommand("alkatraz").setExecutor(new AlkatrazCommand());
         getCommand("alkatraz").setTabCompleter(new AlkatrazCommand());
         SpellComponentHandler.tick();
+        UnlockSweep.start();
         logVeryHigh("Initializing PlaceholderAPI hook...");
         PlaceholderAPIHook placeholderHook = new PlaceholderAPIHook();
         if (placeholderHook.isPresent()) {

@@ -2,6 +2,7 @@ package me.nagasonic.alkatraz.progression;
 
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
+import me.nagasonic.alkatraz.items.magic.recipe.unlock.UnlockManager;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
@@ -77,6 +78,9 @@ public final class ProgressionService {
         MagicProfile profile = ProfileManager.getProfile(player.getUniqueId(), MagicProfile.class);
         profile.setArcaneKnowledge(Math.max(0, profile.getArcaneKnowledge() + amount));
         showArcaneKnowledgeBar(player, profile);
+        if (player instanceof Player online) {
+            UnlockManager.refresh(online);
+        }
     }
 
     public static boolean canAdvance(Player player) {
