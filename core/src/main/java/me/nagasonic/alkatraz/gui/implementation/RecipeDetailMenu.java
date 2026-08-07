@@ -9,6 +9,9 @@ import me.nagasonic.alkatraz.gui.implementation.recipe.RecipeCreateMenu;
 import me.nagasonic.alkatraz.gui.implementation.recipe.RecipeDeleteConfirmMenu;
 import me.nagasonic.alkatraz.gui.implementation.recipe.RecipeEditMenu;
 import me.nagasonic.alkatraz.gui.implementation.recipe.RecipeListMenu;
+import me.nagasonic.alkatraz.gui.implementation.editor.EditorSession;
+import me.nagasonic.alkatraz.gui.implementation.editor.ItemDetailMenu;
+import me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack;
 import me.nagasonic.alkatraz.items.magic.recipe.AlkatrazRecipe;
 import me.nagasonic.alkatraz.items.magic.recipe.RecipeCategory;
 import me.nagasonic.alkatraz.items.magic.recipe.unlock.UnlockManager;
@@ -28,17 +31,17 @@ public class RecipeDetailMenu extends Menu {
 
     private static final int[] GRID = {10, 11, 12, 19, 20, 21, 28, 29, 30};
     private static final int RESULT_SLOT = 24;
-    private static final int BACK_SLOT = 40;
-    private static final int UNLOCK_SLOT = 38;
-    private static final int EDIT_SLOT = 31;
-    private static final int DUPLICATE_SLOT = 32;
-    private static final int DELETE_SLOT = 33;
+    private static final int BACK_SLOT = 49;
+    private static final int UNLOCK_SLOT = 47;
+    private static final int EDIT_SLOT = 40;
+    private static final int DUPLICATE_SLOT = 41;
+    private static final int DELETE_SLOT = 42;
 
     private final AlkatrazRecipe recipe;
     private final RecipeCategory category;
 
     public RecipeDetailMenu(Player viewer, AlkatrazRecipe recipe) {
-        super(viewer, ColorFormat.format(Alkatraz.getLangManager().get("menu.recipe_details")), 45);
+        super(viewer, ColorFormat.format(Alkatraz.getLangManager().get("menu.recipe_details")), 54);
         this.recipe = recipe;
         this.category = RecipeCategory.of(recipe.getType());
     }
@@ -118,6 +121,7 @@ public class RecipeDetailMenu extends Menu {
     private void placeIngredients() {
         switch (category) {
             case CRAFTING -> {
+                for (int slot : GRID) inventory.setItem(slot, null);
                 if (recipe.getShape() == null) {
                     placeIngredientList(19, 20, 21);
                 } else {
@@ -204,6 +208,7 @@ public class RecipeDetailMenu extends Menu {
             rMeta.setLore(rLore);
             result.setItemMeta(rMeta);
         }
+        setMenuData(result, "action", "edit_item");
         inventory.setItem(RESULT_SLOT, result);
     }
 
@@ -263,6 +268,16 @@ public class RecipeDetailMenu extends Menu {
                     return true;
                 }
                 new RecipeEditMenu(viewer, recipe).open();
+            }
+            case "edit_item" -> {
+                if (!RecipesPermissions.canEdit(viewer, category)) {
+                    return true;
+                }
+                MagicItemStack.readDefinition(recipe.getResult()).ifPresentOrElse(definition -> {
+                    String key = definition.getKey().getKey();
+                    new EditorSession(viewer, key);
+                    new ItemDetailMenu(viewer, definition, key, recipe).open();
+                }, () -> viewer.sendMessage(lang().get("recipes.no_editor")));
             }
             case "duplicate" -> {
                 if (!RecipesPermissions.canCreate(viewer)) {

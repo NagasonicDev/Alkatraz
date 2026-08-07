@@ -6,7 +6,12 @@ import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.api.magic.instance.MagicItemInstance;
 import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
 import me.nagasonic.alkatraz.gui.Menu;
+import me.nagasonic.alkatraz.gui.implementation.RecipeDetailMenu;
+import me.nagasonic.alkatraz.gui.implementation.recipe.RecipeListMenu;
 import me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack;
+import me.nagasonic.alkatraz.items.magic.recipe.AlkatrazRecipe;
+import me.nagasonic.alkatraz.items.magic.recipe.RecipeCategory;
+import me.nagasonic.alkatraz.items.magic.recipe.RecipeRegistry;
 import me.nagasonic.alkatraz.util.ColorFormat;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -31,14 +36,20 @@ public class ItemDetailMenu extends Menu {
     final ItemDefinition definition;
     final String defKey;
     private final EditorSession session;
+    private final AlkatrazRecipe sourceRecipe;
     private boolean needsSave;
 
     public ItemDetailMenu(Player viewer, ItemDefinition definition, String defKey) {
+        this(viewer, definition, defKey, null);
+    }
+
+    public ItemDetailMenu(Player viewer, ItemDefinition definition, String defKey, AlkatrazRecipe sourceRecipe) {
         super(viewer, ColorFormat.format("&8Edit: " + defKey), 45);
         this.definition = definition;
         this.defKey = defKey;
         this.session = EditorSession.get(viewer.getUniqueId());
         this.needsSave = false;
+        this.sourceRecipe = sourceRecipe;
     }
 
     @Override
@@ -245,6 +256,16 @@ public class ItemDetailMenu extends Menu {
 
     private void handleBack() {
         viewer.playSound(viewer.getLocation(), Sound.BLOCK_STONE_BUTTON_CLICK_ON, 1.0f, 1.0f);
+        if (sourceRecipe != null) {
+            EditorSession.remove(viewer.getUniqueId());
+            AlkatrazRecipe fresh = RecipeRegistry.get(sourceRecipe.getKey());
+            if (fresh != null) {
+                new RecipeDetailMenu(viewer, fresh).open();
+            } else {
+                new RecipeListMenu(viewer, RecipeCategory.of(sourceRecipe.getType())).open();
+            }
+            return;
+        }
         new ItemEditorMenu(viewer).open();
     }
 

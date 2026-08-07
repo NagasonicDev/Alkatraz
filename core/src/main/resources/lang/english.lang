@@ -272,6 +272,7 @@ recipes.create.result_hint = &7Drag an item here to set the result.
 recipes.no_perm_edit = &cYou don't have permission to edit this recipe.
 recipes.no_perm_delete = &cYou don't have permission to delete recipes.
 recipes.no_perm_create = &cYou don't have permission to create recipes.
+recipes.no_editor = &cThis item has no item editor.
 
 # --- Spell Options ---
 spell_options.configure = &7Configure spell options

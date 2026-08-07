@@ -64,9 +64,7 @@ public class RecipeShapeSubMenu extends Menu {
 
     private ItemStack cellItem(char c) {
         if (c == ' ') {
-            return ItemBuilder.of(Material.GRAY_STAINED_GLASS_PANE)
-                    .name(lang().get("recipes.edit.drop_hint"))
-                    .build();
+            return null;
         }
         String value = parent.session().config().getString("ingredients." + c);
         Material material = me.nagasonic.alkatraz.util.MaterialCompat.resolve(value);
