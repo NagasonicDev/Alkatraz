@@ -25,6 +25,7 @@ public enum Permission {
     COMMAND_RECIPE_GIVE("alkatraz.recipe.give"),
     COMMAND_RECIPE_CHECK("alkatraz.recipe.check"),
     RECIPES_VIEW("alkatraz.recipes.view"),
+    RECIPES_VIEW_LOCKED("alkatraz.recipes.view.locked"),
     RECIPES_EDIT("alkatraz.recipes.edit"),
     RECIPES_DELETE("alkatraz.recipes.delete"),
     RECIPES_CREATE("alkatraz.recipes.create"),

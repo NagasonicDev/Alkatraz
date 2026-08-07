@@ -7,3 +7,4 @@ ingredients:
   M: MAGIC_STONE
   W: OAK_WOOD
   S: STICK
+hidden_when_locked: true

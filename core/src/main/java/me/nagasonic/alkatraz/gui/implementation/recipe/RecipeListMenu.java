@@ -73,7 +73,7 @@ public class RecipeListMenu extends PagedMenu<AlkatrazRecipe> {
     private List<AlkatrazRecipe> collectRecipes() {
         List<AlkatrazRecipe> recipes = new ArrayList<>();
         for (AlkatrazRecipe recipe : RecipeRegistry.getAll()) {
-            if (category.contains(recipe.getType())) {
+            if (category.contains(recipe.getType()) && RecipesPermissions.canSee(viewer, recipe)) {
                 recipes.add(recipe);
             }
         }

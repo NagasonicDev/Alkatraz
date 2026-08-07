@@ -5,3 +5,4 @@ shape:
 ingredients:
   L: LEATHER
   M: MAGIC_STONE
+hidden_when_locked: true

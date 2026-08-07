@@ -50,6 +50,16 @@ public class RecipeDetailMenu extends Menu {
     @Override
     protected void build() {
         fillAll();
+        if (!RecipesPermissions.canSee(viewer, recipe)) {
+            ItemStack hidden = ItemBuilder.of(Material.BARRIER)
+                    .name(lang().get("recipes.hidden"))
+                    .lore(lang().get("recipes.hidden_lore"))
+                    .build();
+            setMenuData(hidden, "action", "back");
+            inventory.setItem(RESULT_SLOT, hidden);
+            addBackButton();
+            return;
+        }
         placeIngredients();
         placeResult();
 
@@ -90,6 +100,10 @@ public class RecipeDetailMenu extends Menu {
             inventory.setItem(DELETE_SLOT, delete);
         }
 
+        addBackButton();
+    }
+
+    private void addBackButton() {
         ItemStack back = Alkatraz.getGuiItemRegistry().getItem("back_button").clone();
         ItemMeta backMeta = back.getItemMeta();
         if (backMeta != null) {

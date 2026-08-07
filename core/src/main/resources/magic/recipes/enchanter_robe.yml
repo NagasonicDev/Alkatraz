@@ -13,3 +13,4 @@ requirements:
     stat: circleLevel
     minimum: 3
     description: "Requires Circle Level 3"
+hidden_when_locked: true

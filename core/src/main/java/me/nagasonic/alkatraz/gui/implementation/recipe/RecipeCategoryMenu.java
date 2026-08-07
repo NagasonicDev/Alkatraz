@@ -5,7 +5,6 @@ import me.nagasonic.alkatraz.gui.ItemBuilder;
 import me.nagasonic.alkatraz.gui.Menu;
 import me.nagasonic.alkatraz.items.magic.recipe.RecipeCategory;
 import me.nagasonic.alkatraz.items.magic.recipe.RecipeRegistry;
-import me.nagasonic.alkatraz.items.magic.recipe.RecipeType;
 import me.nagasonic.alkatraz.util.ColorFormat;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -63,8 +62,10 @@ public class RecipeCategoryMenu extends Menu {
 
     private ItemStack createCategoryItem(RecipeCategory category) {
         int count = 0;
-        for (RecipeType type : category.getTypes()) {
-            count += RecipeRegistry.getByStation(type).size();
+        for (me.nagasonic.alkatraz.items.magic.recipe.AlkatrazRecipe recipe : RecipeRegistry.getAll()) {
+            if (category.contains(recipe.getType()) && RecipesPermissions.canSee(viewer, recipe)) {
+                count++;
+            }
         }
         boolean empty = count == 0;
 
@@ -99,7 +100,7 @@ public class RecipeCategoryMenu extends Menu {
                     p.sendMessage(lang().get("recipes.edit.chat_cancelled"));
                     return;
                 }
-                new RecipeListMenu(p, searchRecipes(query), query).open();
+                new RecipeListMenu(p, searchRecipes(p, query), query).open();
             });
             return true;
         }
@@ -121,7 +122,7 @@ public class RecipeCategoryMenu extends Menu {
         return true;
     }
 
-    private static List<me.nagasonic.alkatraz.items.magic.recipe.AlkatrazRecipe> searchRecipes(String query) {
+    private static List<me.nagasonic.alkatraz.items.magic.recipe.AlkatrazRecipe> searchRecipes(Player p, String query) {
         String q = query.toLowerCase();
         List<me.nagasonic.alkatraz.items.magic.recipe.AlkatrazRecipe> results = new ArrayList<>();
         for (me.nagasonic.alkatraz.items.magic.recipe.AlkatrazRecipe recipe : RecipeRegistry.getAll()) {
@@ -130,7 +131,8 @@ public class RecipeCategoryMenu extends Menu {
             String resultName = recipe.getResult().hasItemMeta() && recipe.getResult().getItemMeta().hasDisplayName()
                     ? recipe.getResult().getItemMeta().getDisplayName().toLowerCase()
                     : recipe.getResult().getType().name().toLowerCase();
-            if (id.contains(q) || display.contains(q) || resultName.contains(q)) {
+            if (RecipesPermissions.canSee(p, recipe)
+                    && (id.contains(q) || display.contains(q) || resultName.contains(q))) {
                 results.add(recipe);
             }
         }

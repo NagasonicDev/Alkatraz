@@ -24,6 +24,9 @@ permissions:
   alkatraz.recipes.view:
     description: Access to the Recipe Manager
     default: true
+  alkatraz.recipes.view.locked:
+    description: View recipes that are hidden while locked
+    default: op
   alkatraz.recipes.edit:
     description: Edit any recipe in the Recipe Manager
     default: op
