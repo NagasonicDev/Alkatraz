@@ -3,6 +3,7 @@ version: '${project.version}'
 main: me.nagasonic.alkatraz.Alkatraz
 softdepend:
   - PlaceholderAPI
+  - WorldGuard
 api-version: '1.19'
 commands:
   spells:

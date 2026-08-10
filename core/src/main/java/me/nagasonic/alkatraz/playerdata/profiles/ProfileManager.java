@@ -1,6 +1,7 @@
 package me.nagasonic.alkatraz.playerdata.profiles;
 
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.events.SpellDiscoveredEvent;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
@@ -297,6 +298,7 @@ public class ProfileManager implements Listener {
             Spell magicMissile = SpellRegistry.getSpell("magic_missile");
             if (magicMissile != null) {
                 magicProfile.setDiscoveredSpell(magicMissile, true);
+                Bukkit.getPluginManager().callEvent(new SpellDiscoveredEvent(player, magicMissile));
                 Alkatraz.getInstance().getLogger().log(Level.FINE,
                     "Granted starter spell 'magic_missile' to new player: " + player.getName());
             }

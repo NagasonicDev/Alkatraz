@@ -4,6 +4,7 @@ import de.tr7zw.changeme.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.events.CastEvent;
 import me.nagasonic.alkatraz.events.PlayerCastEvent;
+import me.nagasonic.alkatraz.events.PlayerSpellFailEvent;
 import me.nagasonic.alkatraz.events.PlayerSpellPrepareEvent;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.gui.Menu;
@@ -109,6 +110,7 @@ public abstract class Spell {
         // Check circle level requirement
         if (profile.getCircleLevel() < getRequiredCircleLevel()) {
             Utils.sendActionBar(p, lang().get("spells.cast.too_low_circle"));
+            fireSpellFail(p, wand, "LOW_CIRCLE");
             return;
         }
 
@@ -117,11 +119,13 @@ public abstract class Spell {
 
         if (!profile.canCast()) {
             Utils.sendActionBar(p, lang().get("spells.cast.cannot_cast_now"));
+            fireSpellFail(p, wand, "CANNOT_CAST");
             return;
         }
         // Check mana
         if (profile.getMana() < manaCost) {
             Utils.sendActionBar(p, lang().get("spells.cast.not_enough_mana"));
+            fireSpellFail(p, wand, "NOT_ENOUGH_MANA");
             return;
         }
 
@@ -131,16 +135,23 @@ public abstract class Spell {
             if (TimeUnit.MILLISECONDS.toSeconds(timePassed) < getCooldown()) {
                 Utils.sendActionBar(p, lang().get("spells.cast.please_wait",
                         "time", TimeUnit.MILLISECONDS.toSeconds(getCooldown() * 1000 - timePassed)));
+                fireSpellFail(p, wand, "COOLDOWN");
                 return;
             }
         }
 
         // Check if player is alive
-        if (p.isDead()) return;
+        if (p.isDead()) {
+            fireSpellFail(p, wand, "DEAD");
+            return;
+        }
         // Create and fire spell prepare event
         PlayerSpellPrepareEvent castEvent = new PlayerSpellPrepareEvent(p, this, wand);
         Bukkit.getPluginManager().callEvent(castEvent);
-        if (castEvent.isCancelled()) return;
+        if (castEvent.isCancelled()) {
+            fireSpellFail(p, wand, "CANCELLED");
+            return;
+        }
         // Set casting state
         profile.setCasting(true);
 
@@ -262,6 +273,13 @@ public abstract class Spell {
      */
     protected final void cancelCast(Player p) {
         castCancelledPlayers.add(p.getUniqueId());
+    }
+
+    /**
+     * Fires a {@link PlayerSpellFailEvent} for a cast that could not proceed.
+     */
+    private void fireSpellFail(Player p, ItemStack wand, String reason) {
+        Bukkit.getPluginManager().callEvent(new PlayerSpellFailEvent(p, this, wand, reason));
     }
 
     /**

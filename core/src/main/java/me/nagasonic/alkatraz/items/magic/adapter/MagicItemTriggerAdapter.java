@@ -11,13 +11,17 @@ import me.nagasonic.alkatraz.api.magic.trigger.InternalTriggerEvent;
 import me.nagasonic.alkatraz.api.magic.trigger.TriggerContext;
 import me.nagasonic.alkatraz.api.magic.trigger.event.EntityKilledTriggerEvent;
 import me.nagasonic.alkatraz.api.magic.trigger.event.EquipTriggerEvent;
+import me.nagasonic.alkatraz.api.magic.trigger.event.ProjectileHitTriggerEvent;
 import me.nagasonic.alkatraz.api.magic.trigger.event.SpellCastTriggerEvent;
 import me.nagasonic.alkatraz.api.magic.instance.Engraving;
 import me.nagasonic.alkatraz.api.magic.instance.MagicItemInstance;
 import me.nagasonic.alkatraz.api.magic.modifier.EngravingDefinition;
 import me.nagasonic.alkatraz.api.magic.registry.MagicItemRegistries;
 import me.nagasonic.alkatraz.items.magic.condition.ConditionEvaluator;
+import me.nagasonic.alkatraz.items.magic.condition.implementation.CooldownCondition;
 import me.nagasonic.alkatraz.items.magic.effect.EffectExecutor;
+import me.nagasonic.alkatraz.items.magic.persistence.ItemDataKeys;
+import me.nagasonic.alkatraz.items.magic.persistence.ItemInstanceSerializer;
 import me.nagasonic.alkatraz.spells.Spell;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -28,15 +32,21 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.persistence.PersistentDataType;
 
 import me.nagasonic.alkatraz.api.magic.equipment.EquipmentProfile;
 import org.bukkit.configuration.ConfigurationSection;
@@ -138,6 +148,7 @@ public final class MagicItemTriggerAdapter implements Listener {
 
             event.setCancelled(true);
             EffectExecutor.executeAll(def.effects(), ctx);
+            CooldownCondition.commitPending(def.conditions(), ctx);
             return;
         }
     }
@@ -206,6 +217,7 @@ public final class MagicItemTriggerAdapter implements Listener {
                 } else {
                     event.setDamage(remainingDamage);
                 }
+                CooldownCondition.commitPending(def.conditions(), ctx);
                 return;
             }
         }
@@ -238,16 +250,29 @@ public final class MagicItemTriggerAdapter implements Listener {
 
     /**
      * Fires {@code alkatraz:on_damage_dealt} when a player damages an entity,
-     * either by melee hit or by a projectile they shot.
+     * either by melee hit or by a projectile they shot. For projectile damage the
+     * weapon that fired the projectile (if linked at launch time) is passed as the
+     * trigger source, so runes on it fire even if the player has since changed
+     * their held item.
      */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onDamageDealt(EntityDamageByEntityEvent event) {
         Player attacker = null;
+        MagicItemInstance weaponInstance = null;
         if (event.getDamager() instanceof Player player) {
             attacker = player;
         } else if (event.getDamager() instanceof Projectile projectile
                 && projectile.getShooter() instanceof Player player) {
             attacker = player;
+            String raw = projectile.getPersistentDataContainer().get(
+                    ItemDataKeys.projectileWeaponInstance(), PersistentDataType.STRING);
+            if (raw != null && !raw.isBlank()) {
+                try {
+                    weaponInstance = ItemInstanceSerializer.deserialize(raw);
+                } catch (IllegalStateException ignored) {
+                    weaponInstance = null;
+                }
+            }
         }
         if (attacker == null) return;
 
@@ -257,9 +282,84 @@ public final class MagicItemTriggerAdapter implements Listener {
         params.put("damage", event.getFinalDamage());
         params.put("cause", event.getCause().name());
 
-        TriggerContext context = new TriggerContext(attacker, victim, null, null, null, params);
+        TriggerContext context = weaponInstance != null
+                ? new TriggerContext(attacker, victim, null, weaponInstance, EquipmentSlot.MAIN_HAND, params)
+                : new TriggerContext(attacker, victim, null, null, null, params);
         MagicItemServices.get().dispatchTrigger(
                 new InternalTriggerEvent(MagicKeys.alkatraz("on_damage_dealt"), context));
+    }
+
+    /**
+     * Links a magic bow or crossbow to the projectile it fires by storing the weapon's
+     * instance on the projectile's persistent data container. This lets the
+     * {@code alkatraz:on_projectile_hit} trigger resolve the source weapon even if the
+     * player has since changed their held item.
+     */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onShootBow(EntityShootBowEvent event) {
+        if (!(event.getEntity() instanceof Player)) return;
+        ItemStack bow = event.getBow();
+        if (bow == null) return;
+        MagicItemStack.readInstance(bow).ifPresent(instance ->
+                event.getProjectile().getPersistentDataContainer().set(
+                        ItemDataKeys.projectileWeaponInstance(),
+                        PersistentDataType.STRING,
+                        ItemInstanceSerializer.serialize(instance)));
+    }
+
+    /**
+     * Links the player's held magic weapon to any projectile they launch, so
+     * {@code alkatraz:on_projectile_hit} and {@code alkatraz:on_damage_dealt}
+     * resolve the source weapon for projectiles that are not fired from a bow or
+     * crossbow (tridents, snowballs, eggs, ender pearls, fire charges, potions,
+     * etc.).
+     */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onProjectileLaunch(ProjectileLaunchEvent event) {
+        if (!(event.getEntity().getShooter() instanceof Player player)) return;
+        ItemStack held = player.getInventory().getItemInMainHand();
+        if (held == null || held.getType() == Material.AIR) {
+            held = player.getInventory().getItemInOffHand();
+        }
+        if (held == null || held.getType() == Material.AIR) return;
+        MagicItemStack.readInstance(held).ifPresent(instance ->
+                event.getEntity().getPersistentDataContainer().set(
+                        ItemDataKeys.projectileWeaponInstance(),
+                        PersistentDataType.STRING,
+                        ItemInstanceSerializer.serialize(instance)));
+    }
+
+    /**
+     * Fires {@code alkatraz:on_projectile_hit} when a projectile launched by a magic
+     * bow or crossbow hits a living entity. The source item is the weapon linked to the
+     * projectile at launch time.
+     */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onProjectileHit(ProjectileHitEvent event) {
+        if (!(event.getHitEntity() instanceof LivingEntity victim)) return;
+        if (!(event.getEntity().getShooter() instanceof LivingEntity shooter)) return;
+
+        String raw = event.getEntity().getPersistentDataContainer().get(
+                ItemDataKeys.projectileWeaponInstance(), PersistentDataType.STRING);
+        if (raw == null || raw.isBlank()) {
+            return;
+        }
+
+        MagicItemInstance bowInstance;
+        try {
+            bowInstance = ItemInstanceSerializer.deserialize(raw);
+        } catch (IllegalStateException ex) {
+            return;
+        }
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("cause", "PROJECTILE");
+        params.put("projectile_type", event.getEntity().getType().name());
+
+        TriggerContext context = new TriggerContext(
+                shooter, victim, null, bowInstance, EquipmentSlot.MAIN_HAND, params);
+
+        MagicItemServices.get().dispatchTrigger(new ProjectileHitTriggerEvent(context));
     }
 
     /**
@@ -314,6 +414,18 @@ public final class MagicItemTriggerAdapter implements Listener {
         }
 
         EquipmentStatService.getInstance().syncEquipmentStats(player);
+    }
+
+    /**
+     * Fires {@code alkatraz:on_sneak} when a player starts sneaking and
+     * {@code alkatraz:on_stop_sneak} when they stop sneaking.
+     */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onToggleSneak(org.bukkit.event.player.PlayerToggleSneakEvent event) {
+        Player player = event.getPlayer();
+        TriggerContext context = new TriggerContext(player, null, null, null, null, Map.of());
+        MagicItemServices.get().dispatchTrigger(
+                new InternalTriggerEvent(MagicKeys.alkatraz(event.isSneaking() ? "on_sneak" : "on_stop_sneak"), context));
     }
 
     /**

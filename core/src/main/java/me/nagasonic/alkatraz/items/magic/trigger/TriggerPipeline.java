@@ -5,6 +5,7 @@ import me.nagasonic.alkatraz.api.magic.trigger.TriggerContext;
 import me.nagasonic.alkatraz.api.magic.trigger.TriggerBinding;
 
 import me.nagasonic.alkatraz.items.magic.condition.ConditionEvaluator;
+import me.nagasonic.alkatraz.items.magic.condition.implementation.CooldownCondition;
 import me.nagasonic.alkatraz.api.magic.definition.ItemDefinition;
 import me.nagasonic.alkatraz.items.magic.effect.EffectExecutor;
 import me.nagasonic.alkatraz.api.magic.equipment.EquipmentProfile;
@@ -19,7 +20,9 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Event Ã¢â€ â€™ context Ã¢â€ â€™ relevant items Ã¢â€ â€™ modifiers Ã¢â€ â€™ conditions Ã¢â€ â€™ effects.
@@ -51,6 +54,7 @@ public final class TriggerPipeline {
                 baseContext.setCancelled(true);
                 return;
             }
+            CooldownCondition.commitPending(binding.binding().conditions(), scoped);
         }
     }
 
@@ -69,7 +73,25 @@ public final class TriggerPipeline {
             }
         }
 
-        return resolved;
+        return deduplicate(resolved);
+    }
+
+    /**
+     * Removes duplicate bindings for the same item (definition + slot). A source item
+     * linked into the context (e.g. the weapon that fired a projectile) is usually also
+     * present in the actor's equipment profile, so without deduplication its trigger
+     * would fire twice.
+     */
+    private List<ResolvedBinding> deduplicate(List<ResolvedBinding> resolved) {
+        Set<String> seen = new HashSet<>();
+        List<ResolvedBinding> deduped = new ArrayList<>();
+        for (ResolvedBinding binding : resolved) {
+            String key = binding.instance().definitionKey().toString() + "@" + binding.slot().getKey().toString();
+            if (seen.add(key)) {
+                deduped.add(binding);
+            }
+        }
+        return deduped;
     }
 
     private void collectForInstance(

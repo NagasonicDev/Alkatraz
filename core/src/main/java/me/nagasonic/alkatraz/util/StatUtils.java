@@ -1,6 +1,12 @@
 package me.nagasonic.alkatraz.util;
 
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.api.magic.equipment.EquipmentSlot;
+import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
+import me.nagasonic.alkatraz.api.magic.trigger.InternalTriggerEvent;
+import me.nagasonic.alkatraz.api.magic.trigger.TriggerContext;
+import me.nagasonic.alkatraz.items.magic.MagicItemServices;
+import me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack;
 import me.nagasonic.alkatraz.items.magic.recipe.unlock.UnlockManager;
 import me.nagasonic.alkatraz.playerdata.SpellHotbarManager;
 import me.nagasonic.alkatraz.util.WandUtils;
@@ -20,6 +26,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static me.nagasonic.alkatraz.util.ColorFormat.format;
@@ -49,7 +56,8 @@ public class StatUtils {
     public static void subMana(Player p, double amount) {
         MagicProfile profile = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
 
-        profile.setMana(profile.getMana() - amount);
+        double previousMana = profile.getMana();
+        profile.setMana(previousMana - amount);
         if (profile.getMana() < 0) {
             profile.setMana(0);
         }
@@ -65,6 +73,37 @@ public class StatUtils {
                 );
             }
         }
+
+        if (amount > 0) {
+            dispatchManaTrigger(p, "on_mana_use", amount, profile);
+            if (crossedIntoZero(previousMana, profile.getMana())) {
+                dispatchManaTrigger(p, "on_mana_empty", amount, profile);
+            }
+        }
+    }
+
+    /**
+     * Returns true when a mana value crosses from above zero into zero (or below),
+     * used to fire the "empty" trigger exactly once rather than on every call
+     * while mana stays at zero.
+     */
+    public static boolean crossedIntoZero(double previous, double current) {
+        return previous > 0 && current <= 0;
+    }
+
+    private static void dispatchManaTrigger(Player p, String trigger, double amount, MagicProfile profile) {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("amount", amount);
+        parameters.put("mana", profile.getMana());
+        parameters.put("max_mana", profile.getMaxMana());
+        parameters.put("mana_percent", profile.getMana() / profile.getMaxMana());
+
+        TriggerContext context = new TriggerContext(p, null, null, null, null, parameters);
+        TriggerContext scoped = MagicItemStack.readInstance(p.getInventory().getItemInMainHand())
+                .map(instance -> context.withSource(instance, EquipmentSlot.MAIN_HAND))
+                .orElse(context);
+
+        MagicItemServices.get().dispatchTrigger(new InternalTriggerEvent(MagicKeys.alkatraz(trigger), scoped));
     }
 
     public static void addSpellMastery(Player p, Spell spell, int mastery){

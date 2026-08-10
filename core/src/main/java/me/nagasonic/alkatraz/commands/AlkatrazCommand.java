@@ -1,6 +1,7 @@
 package me.nagasonic.alkatraz.commands;
 
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.events.SpellDiscoveredEvent;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.mobs.MagicEntities;
 import me.nagasonic.alkatraz.mobs.MagicEntityType;
@@ -99,6 +100,9 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
         if (p == null) return;
 
         ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class).setDiscoveredSpell(spell, discover);
+        if (discover) {
+            Bukkit.getPluginManager().callEvent(new SpellDiscoveredEvent(p, spell));
+        }
     }
 
     private void handleGive(CommandSender sender, String[] args) {

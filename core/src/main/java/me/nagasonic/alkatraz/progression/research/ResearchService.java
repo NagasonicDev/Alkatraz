@@ -2,6 +2,7 @@ package me.nagasonic.alkatraz.progression.research;
 
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
+import me.nagasonic.alkatraz.events.ResearchCompletedEvent;
 import me.nagasonic.alkatraz.items.magic.recipe.unlock.UnlockManager;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.util.ColorFormat;
@@ -111,6 +112,7 @@ public final class ResearchService {
         profile.setResearchCompleted(node.getId(), true);
         applyRewards(player, node);
         UnlockManager.refresh(player);
+        Bukkit.getPluginManager().callEvent(new ResearchCompletedEvent(player, node));
         return true;
     }
 
