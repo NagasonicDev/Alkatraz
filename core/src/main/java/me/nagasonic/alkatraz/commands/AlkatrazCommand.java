@@ -4,9 +4,9 @@ import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.events.SpellDiscoveredEvent;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.mobs.MagicEntities;
-import me.nagasonic.alkatraz.mobs.MagicEntityType;
+import me.nagasonic.alkatraz.api.mobs.MagicEntityType;
 import me.nagasonic.alkatraz.config.ConfigManager;
-import me.nagasonic.alkatraz.dom.Permission;
+import me.nagasonic.alkatraz.api.dom.Permission;
 import me.nagasonic.alkatraz.gui.implementation.EquipmentMenu;
 import me.nagasonic.alkatraz.gui.implementation.StatsMenu;
 import me.nagasonic.alkatraz.gui.implementation.editor.ItemEditorMenu;
@@ -166,6 +166,9 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
         int remaining = count;
         while (remaining > 0) {
             ItemStack part = stack.clone();
+            if (MagicItemStack.isNonStackable(part)) {
+                MagicItemStack.refreshUniqueUuid(part);
+            }
             part.setAmount(Math.min(remaining, max));
             p.getInventory().addItem(part).values()
                     .forEach(left -> p.getWorld().dropItemNaturally(p.getLocation(), left));

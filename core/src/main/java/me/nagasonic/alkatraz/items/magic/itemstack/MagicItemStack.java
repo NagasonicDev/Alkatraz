@@ -6,13 +6,15 @@ import me.nagasonic.alkatraz.api.magic.instance.Engraving;
 import me.nagasonic.alkatraz.api.magic.instance.MagicItemInstance;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.api.magic.modifier.EngravingDefinition;
-import me.nagasonic.alkatraz.api.magic.trigger.TriggerType;
+import me.nagasonic.alkatraz.items.magic.config.SetBonusConfig;
+import me.nagasonic.alkatraz.items.magic.lore.LoreFormatter;
 import me.nagasonic.alkatraz.items.magic.persistence.ItemDataKeys;
 import me.nagasonic.alkatraz.items.magic.persistence.ItemInstanceSerializer;
 import me.nagasonic.alkatraz.api.magic.registry.MagicItemRegistries;
 import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
 import me.nagasonic.alkatraz.util.ColorFormat;
 import me.nagasonic.alkatraz.util.StringUtils;
+import me.nagasonic.alkatraz.items.magic.service.SetBonusService;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -29,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Reads and writes magic item data on Bukkit {@link ItemStack}s using PDC.
@@ -51,6 +54,17 @@ public final class MagicItemStack {
     public static boolean isGrimoireDefinition(ItemStack stack) {
         if (stack == null || !isMagicItem(stack)) return false;
         return readDefinition(stack).map(def -> def.hasComponent(MagicKeys.alkatraz("grimoire"))).orElse(false);
+    }
+
+    public static boolean isNonStackable(ItemDefinition definition) {
+        return definition.hasComponent(MagicKeys.alkatraz("equipment"))
+                || definition.hasComponent(MagicKeys.alkatraz("wand"))
+                || definition.hasComponent(MagicKeys.alkatraz("grimoire"));
+    }
+
+    public static boolean isNonStackable(ItemStack stack) {
+        if (stack == null || !isMagicItem(stack)) return false;
+        return readDefinition(stack).map(MagicItemStack::isNonStackable).orElse(false);
     }
 
     public static Optional<NamespacedKey> readDefinitionKey(ItemStack stack) {
@@ -112,6 +126,9 @@ public final class MagicItemStack {
         }
 
         write(meta, definition.getKey(), instance);
+        if (isNonStackable(definition)) {
+            meta.getPersistentDataContainer().set(ItemDataKeys.itemUuid(), PersistentDataType.STRING, UUID.randomUUID().toString());
+        }
         stack.setItemMeta(meta);
         return stack;
     }
@@ -131,6 +148,13 @@ public final class MagicItemStack {
         });
         stack.setItemMeta(meta);
         return stack;
+    }
+
+    public static void refreshUniqueUuid(ItemStack stack) {
+        if (stack == null || !stack.hasItemMeta()) return;
+        ItemMeta meta = stack.getItemMeta();
+        meta.getPersistentDataContainer().set(ItemDataKeys.itemUuid(), PersistentDataType.STRING, UUID.randomUUID().toString());
+        stack.setItemMeta(meta);
     }
 
     private static void write(ItemMeta meta, NamespacedKey definitionKey, MagicItemInstance instance) {
@@ -165,6 +189,9 @@ public final class MagicItemStack {
         meta.setDisplayName(ColorFormat.format(definition.visual().displayName()));
         List<String> lore = new ArrayList<>();
         for (String line : definition.visual().lore()) {
+            lore.add(ColorFormat.format(line));
+        }
+        for (String line : LoreFormatter.runeBlock(definition)) {
             lore.add(ColorFormat.format(line));
         }
         meta.setLore(lore);
@@ -253,14 +280,23 @@ public final class MagicItemStack {
             }
         }
 
+        if (definition.hasComponent(MagicKeys.alkatraz("equipment"))) {
+            String setName = SetBonusService.getInstance().extractSetName(definition.getKey().getKey());
+            SetBonusConfig.SetBonusData setData = SetBonusService.getInstance().setBonusData(setName);
+            for (String line : LoreFormatter.setBonusBlock(setName, setData)) {
+                lore.add(ColorFormat.format(line));
+            }
+        }
+
         for (Engraving eng : instance.engravings()) {
-            String engName = MagicItemRegistries.ENGRAVING_DEFINITIONS.get(eng.engravingKey())
-                    .map(def -> StringUtils.prettifyKey(def.getKey().getKey()))
-                    .orElse("?");
-            String trigName = MagicItemRegistries.TRIGGER_TYPES.get(eng.triggerKey())
-                    .map(t -> StringUtils.prettifyKey(t.getKey().getKey()))
-                    .orElse("?");
-            lore.add(ColorFormat.format("&7" + engName + " &8(" + trigName + ")"));
+            Optional<EngravingDefinition> def = MagicItemRegistries.ENGRAVING_DEFINITIONS.get(eng.engravingKey());
+            if (def.isPresent()) {
+                for (String line : LoreFormatter.engravingBlock(def.get(), eng.triggerKey())) {
+                    lore.add(ColorFormat.format(line));
+                }
+            } else {
+                lore.add(ColorFormat.format("&7" + StringUtils.prettifyKey(eng.engravingKey().getKey())));
+            }
         }
 
         return lore;

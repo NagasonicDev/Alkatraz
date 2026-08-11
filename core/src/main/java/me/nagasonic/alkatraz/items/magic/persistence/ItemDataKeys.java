@@ -13,6 +13,7 @@ public final class ItemDataKeys {
     private static NamespacedKey itemInstance;
     private static NamespacedKey engraving;
     private static NamespacedKey projectileWeaponInstance;
+    private static NamespacedKey itemUuid;
 
     private ItemDataKeys() {}
 
@@ -21,6 +22,7 @@ public final class ItemDataKeys {
         itemInstance = new NamespacedKey(Alkatraz.getInstance(), "item_instance");
         engraving = new NamespacedKey(Alkatraz.getInstance(), "engraving");
         projectileWeaponInstance = new NamespacedKey(Alkatraz.getInstance(), "projectile_weapon_instance");
+        itemUuid = new NamespacedKey(Alkatraz.getInstance(), "item_uuid");
     }
 
     public static NamespacedKey itemDefinition() {
@@ -37,5 +39,9 @@ public final class ItemDataKeys {
 
     public static NamespacedKey projectileWeaponInstance() {
         return projectileWeaponInstance;
+    }
+
+    public static NamespacedKey itemUuid() {
+        return itemUuid;
     }
 }

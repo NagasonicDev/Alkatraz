@@ -1,7 +1,10 @@
 package me.nagasonic.alkatraz.items.magic.condition.implementation;
 
 import me.nagasonic.alkatraz.api.magic.condition.Condition;
+import me.nagasonic.alkatraz.api.magic.instance.Engraving;
+import me.nagasonic.alkatraz.api.magic.instance.MagicItemInstance;
 import me.nagasonic.alkatraz.api.magic.trigger.TriggerContext;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.LivingEntity;
 
 import java.util.List;
@@ -69,9 +72,29 @@ public final class CooldownCondition implements Condition {
     }
 
     private static String itemKey(TriggerContext context) {
-        return context.sourceItem() != null
-                ? context.sourceItem().instanceId().toString()
-                : "no-source";
+        MagicItemInstance source = context.sourceItem();
+        return source != null ? stableItemKey(source) : "no-source";
+    }
+
+    /**
+     * Builds a stable per-item identity key for cooldown tracking.
+     * <p>
+     * The per-instance UUID is deliberately not persisted (see
+     * {@link me.nagasonic.alkatraz.items.magic.persistence.ItemInstanceSerializer}) so identical
+     * items can stack, which means every read of an item produces a fresh random UUID. Keying
+     * cooldowns on that UUID would reset them on every trigger event. Instead the key is derived
+     * from the item's identity-relevant state (definition, modifiers, engravings), which is
+     * deterministic across reads of the same physical item.
+     */
+    static String stableItemKey(MagicItemInstance instance) {
+        StringBuilder key = new StringBuilder(instance.definitionKey().toString());
+        for (NamespacedKey modifier : instance.modifiers()) {
+            key.append('|').append(modifier);
+        }
+        for (Engraving engraving : instance.engravings()) {
+            key.append('|').append(engraving.engravingKey()).append('@').append(engraving.triggerKey());
+        }
+        return key.toString();
     }
 
     public static Condition fromConfig(Map<String, Object> config) {

@@ -7,10 +7,10 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * In-memory store for per-actor, per-item cooldowns.
  * <p>
- * Keys are derived from the acting entity's UUID and the triggering item's
- * instance id, so two separate engravings on different items track their own
- * cooldowns. Exposed as static helpers so the logic is testable without
- * Bukkit entities.
+ * Keys are derived from the acting entity's UUID and a stable item-identity key
+ * (definition + modifiers + engravings, see {@link CooldownCondition#stableItemKey}),
+ * so two separate engravings on different items track their own cooldowns.
+ * Exposed as static helpers so the logic is testable without Bukkit entities.
  */
 public final class CooldownTracker {
 
