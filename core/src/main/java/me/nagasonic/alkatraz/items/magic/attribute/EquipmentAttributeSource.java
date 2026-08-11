@@ -119,13 +119,7 @@ public final class EquipmentAttributeSource implements AttributeSource {
             AttributeContribution.AttributeSourceType sourceType
     ) {
         for (var entry : attributes.entrySet()) {
-            AttributeContribution.AttributeOperation operation = AttributeContribution.AttributeOperation.ADD;
-            String key = entry.getKey().getNamespace() + "_" + entry.getKey().getKey();
-            if (key.contains("_set_") || key.contains("_multiply_")) {
-                operation = key.contains("_set_") ? 
-                        AttributeContribution.AttributeOperation.SET : 
-                        AttributeContribution.AttributeOperation.MULTIPLY;
-            }
+            AttributeContribution.AttributeOperation operation = AttributeOps.operationFor(entry.getKey());
             contributions.add(new AttributeContribution(
                     entry.getKey(),
                     entry.getValue(),

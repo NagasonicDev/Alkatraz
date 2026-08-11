@@ -180,9 +180,6 @@ public class EquipmentMenu extends Menu {
             return;
         }
 
-        // Fire on_equip trigger event before setting item
-        fireOnEquipEvent(viewer, slot, item);
-
         EquipmentStorage.setItem(viewer, slot, item);
         item.setAmount(item.getAmount() - 1);
 
@@ -201,9 +198,6 @@ public class EquipmentMenu extends Menu {
         }
 
         ItemStack item = equipped.get();
-
-        // Fire on_unequip trigger event before removing item
-        fireOnUnequipEvent(viewer, slot, item);
 
         // Try to add to inventory, drop if full
         HashMap<Integer, ItemStack> remaining = viewer.getInventory().addItem(item);
@@ -253,44 +247,4 @@ public class EquipmentMenu extends Menu {
                 .orElse(null);
     }
 
-    private void fireOnEquipEvent(Player player, EquipmentSlot slot, ItemStack item) {
-        try {
-            if (item == null || item.getType().isAir() || !item.hasItemMeta()) return;
-            if (me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack.isMagicItem(item)) {
-                me.nagasonic.alkatraz.api.magic.instance.MagicItemInstance instance = me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack.readInstance(item).orElse(null);
-                if (instance != null) {
-                    me.nagasonic.alkatraz.api.magic.definition.ItemDefinition definition = me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack.readDefinition(item).orElse(null);
-                    if (definition != null) {
-                        me.nagasonic.alkatraz.api.magic.trigger.TriggerContext ctx = new me.nagasonic.alkatraz.api.magic.trigger.TriggerContext(player, null, null, null, null, java.util.Map.of());
-                        me.nagasonic.alkatraz.api.magic.trigger.TriggerContext scoped = ctx.withSource(instance, slot);
-                        me.nagasonic.alkatraz.items.magic.MagicItemServices.get().dispatchTrigger(
-                                new me.nagasonic.alkatraz.api.magic.trigger.event.EquipTriggerEvent(scoped));
-                    }
-                }
-            }
-        } catch (Exception e) {
-            me.nagasonic.alkatraz.Alkatraz.logWarning("Error firing on_equip event: " + e.getMessage());
-        }
-    }
-
-    private void fireOnUnequipEvent(Player player, EquipmentSlot slot, ItemStack item) {
-        try {
-            if (item == null || item.getType().isAir() || !item.hasItemMeta()) return;
-            if (me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack.isMagicItem(item)) {
-                me.nagasonic.alkatraz.api.magic.instance.MagicItemInstance instance = me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack.readInstance(item).orElse(null);
-                if (instance != null) {
-                    me.nagasonic.alkatraz.api.magic.definition.ItemDefinition definition = me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack.readDefinition(item).orElse(null);
-                    if (definition != null) {
-                        me.nagasonic.alkatraz.api.magic.trigger.TriggerContext ctx = new me.nagasonic.alkatraz.api.magic.trigger.TriggerContext(player, null, null, null, null, java.util.Map.of());
-                        me.nagasonic.alkatraz.api.magic.trigger.TriggerContext scoped = ctx.withSource(instance, slot);
-                        me.nagasonic.alkatraz.items.magic.MagicItemServices.get().dispatchTrigger(
-                                new me.nagasonic.alkatraz.api.magic.trigger.InternalTriggerEvent(
-                                        me.nagasonic.alkatraz.api.magic.registry.MagicKeys.alkatraz("on_unequip"), scoped));
-                    }
-                }
-            }
-        } catch (Exception e) {
-            me.nagasonic.alkatraz.Alkatraz.logWarning("Error firing on_unequip event: " + e.getMessage());
-        }
-    }
 }

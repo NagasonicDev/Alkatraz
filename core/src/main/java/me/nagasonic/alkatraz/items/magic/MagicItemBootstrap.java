@@ -4,6 +4,7 @@ import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.api.magic.attribute.AttributeService;
 import me.nagasonic.alkatraz.api.magic.attribute.AttributeType;
 import me.nagasonic.alkatraz.items.magic.attribute.EquipmentAttributeSource;
+import me.nagasonic.alkatraz.items.magic.attribute.StatPointsAttributeSource;
 import me.nagasonic.alkatraz.api.magic.component.ComponentHandlerRegistry;
 import me.nagasonic.alkatraz.items.magic.imbue.ImbueManager;
 import me.nagasonic.alkatraz.api.magic.component.ComponentType;
@@ -36,6 +37,8 @@ import me.nagasonic.alkatraz.items.magic.effect.implementation.MessageEffect;
 import me.nagasonic.alkatraz.items.magic.effect.implementation.ParticleEffect;
 import me.nagasonic.alkatraz.items.magic.effect.implementation.PlaySoundEffect;
 import me.nagasonic.alkatraz.items.magic.effect.implementation.TeleportEffect;
+import me.nagasonic.alkatraz.items.magic.equipment.EquipmentChangeListener;
+import me.nagasonic.alkatraz.items.magic.equipment.EquipmentReconcileTask;
 import me.nagasonic.alkatraz.items.magic.equipment.EquipmentService;
 import me.nagasonic.alkatraz.api.magic.equipment.EquipmentSlot;
 import me.nagasonic.alkatraz.items.magic.equipment.StorageSlotResolver;
@@ -72,6 +75,7 @@ public final class MagicItemBootstrap {
         equipmentService.registerVirtualSlot(EquipmentSlot.PENDANT, new StorageSlotResolver(EquipmentSlot.PENDANT));
         AttributeService attributeService = AttributeService.getInstance();
         attributeService.registerSource(new EquipmentAttributeSource(equipmentService));
+        attributeService.registerSource(StatPointsAttributeSource.getInstance());
 
         TriggerPipeline triggerPipeline = new TriggerPipeline(equipmentService);
         MagicItemService itemService = new MagicItemService(triggerPipeline);
@@ -81,6 +85,8 @@ public final class MagicItemBootstrap {
         ComponentHandlerRegistry.register(new GrimoireComponentHandler());
 
         MagicItemServices.initialize(itemService, attributeService, equipmentService);
+        EquipmentChangeListener.tryRegister(Alkatraz.getInstance());
+        EquipmentReconcileTask.start();
         int registeredRecipes = MagicItemRecipeManager.registerRecipes();
         ImbueManager.initialize();
         int imbuingRecipes = MagicItemRecipeManager.registerImbuingRecipes();

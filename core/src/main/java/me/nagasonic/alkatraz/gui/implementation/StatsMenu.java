@@ -7,7 +7,7 @@ import me.nagasonic.alkatraz.gui.Menu;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
-import me.nagasonic.alkatraz.spells.Element;
+import me.nagasonic.alkatraz.api.Element;
 import me.nagasonic.alkatraz.texturepack.TexturePackManager;
 import me.nagasonic.alkatraz.util.ColorFormat;
 import org.bukkit.Material;
@@ -26,8 +26,6 @@ public class StatsMenu extends Menu {
         return me.nagasonic.alkatraz.Alkatraz.getLangManager();
     }
     private final Player target;
-    private final int affinityIncrease;
-    private final int resistanceIncrease;
     private boolean confirmingReset = false;
 
     private static final int[] DISPLAY_SLOTS = {19, 20, 21, 23, 24, 25};
@@ -36,8 +34,6 @@ public class StatsMenu extends Menu {
     public StatsMenu(Player viewer, Player target) {
         super(viewer, getResourceTitle(target), 54);
         this.target = target;
-        this.affinityIncrease = (Integer) Configs.AFFINITY_PER_POINT.get();
-        this.resistanceIncrease = (Integer) Configs.RESISTANCE_PER_POINT.get();
     }
 
     private static String getResourceTitle(Player target) {
@@ -157,9 +153,9 @@ public class StatsMenu extends Menu {
             lore.add("");
             lore.add(lang().get("stats.bonus"));
             lore.add(ColorFormat.format("&7 - " + element.getColor() + "+" +
-                (affinityIncrease * points) + " " + element.getName() + " Affinity"));
+                (((Number) Configs.AFFINITY_PER_POINT.get()).intValue() * points) + " " + element.getName() + " Affinity"));
             lore.add(ColorFormat.format("&7 - " + element.getColor() + "+" +
-                (resistanceIncrease * points) + " " + element.getName() + " Resistance"));
+                (((Number) Configs.RESISTANCE_PER_POINT.get()).intValue() * points) + " " + element.getName() + " Resistance"));
         }
 
         if (profile.getStatPoints() > 0) {
@@ -248,35 +244,9 @@ public class StatsMenu extends Menu {
             case DARK -> profile.setDarkPoints(currentPoints + 1);
         }
 
-        double currentAffinity = profile.getAffinity(element);
-        double currentResistance = profile.getResistance(element);
-
-        switch (element) {
-            case FIRE -> {
-                profile.setFireAffinity(currentAffinity + affinityIncrease);
-                profile.setFireResistance(currentResistance + resistanceIncrease);
-            }
-            case WATER -> {
-                profile.setWaterAffinity(currentAffinity + affinityIncrease);
-                profile.setWaterResistance(currentResistance + resistanceIncrease);
-            }
-            case AIR -> {
-                profile.setAirAffinity(currentAffinity + affinityIncrease);
-                profile.setAirResistance(currentResistance + resistanceIncrease);
-            }
-            case EARTH -> {
-                profile.setEarthAffinity(currentAffinity + affinityIncrease);
-                profile.setEarthResistance(currentResistance + resistanceIncrease);
-            }
-            case LIGHT -> {
-                profile.setLightAffinity(currentAffinity + affinityIncrease);
-                profile.setLightResistance(currentResistance + resistanceIncrease);
-            }
-            case DARK -> {
-                profile.setDarkAffinity(currentAffinity + affinityIncrease);
-                profile.setDarkResistance(currentResistance + resistanceIncrease);
-            }
-        }
+        // Points now flow through the attribute pipeline; re-sync so the new
+        // base is resolved and equipment stacks on top of it.
+        me.nagasonic.alkatraz.items.magic.equipment.EquipmentStatService.getInstance().syncEquipmentStats(viewer);
 
         viewer.sendMessage(lang().get("stats.invest_success", "element", lang().get("stats.element_" + element.name().toLowerCase())));
         viewer.playSound(viewer.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
@@ -313,20 +283,11 @@ public class StatsMenu extends Menu {
         profile.setLightPoints(0);
         profile.setDarkPoints(0);
 
-        profile.setFireAffinity(0);
-        profile.setFireResistance(0);
-        profile.setWaterAffinity(0);
-        profile.setWaterResistance(0);
-        profile.setAirAffinity(0);
-        profile.setAirResistance(0);
-        profile.setEarthAffinity(0);
-        profile.setEarthResistance(0);
-        profile.setLightAffinity(0);
-        profile.setLightResistance(0);
-        profile.setDarkAffinity(0);
-        profile.setDarkResistance(0);
-
         profile.setStatPoints(profile.getStatPoints() + totalPoints);
+
+        // Points now flow through the attribute pipeline; re-sync so the reset
+        // base is resolved and equipment stacks on top of it.
+        me.nagasonic.alkatraz.items.magic.equipment.EquipmentStatService.getInstance().syncEquipmentStats(viewer);
 
         viewer.sendMessage(lang().get("stats.reset_success", "points", String.valueOf(totalPoints)));
         viewer.playSound(viewer.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);

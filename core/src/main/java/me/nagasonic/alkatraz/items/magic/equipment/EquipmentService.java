@@ -1,5 +1,6 @@
 package me.nagasonic.alkatraz.items.magic.equipment;
 
+import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.api.magic.equipment.EquipmentSlot;
 import me.nagasonic.alkatraz.api.magic.equipment.EquipmentProfile;
 import me.nagasonic.alkatraz.api.magic.equipment.VirtualSlotResolver;
@@ -9,7 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -17,31 +18,28 @@ import java.util.Map;
  */
 public final class EquipmentService {
 
-    private final Map<EquipmentSlot, VirtualSlotResolver> virtualResolvers = new HashMap<>();
+    private static final EquipmentSlot[] VANILLA_ORDER = {
+            EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET
+    };
+
+    private final Map<EquipmentSlot, VirtualSlotResolver> virtualResolvers = new LinkedHashMap<>();
 
     public void registerVirtualSlot(EquipmentSlot slot, VirtualSlotResolver resolver) {
         virtualResolvers.put(slot, resolver);
     }
 
     public EquipmentProfile profile(Player player) {
-        Map<EquipmentSlot, ItemStack> items = new HashMap<>();
-        Map<EquipmentSlot, MagicItemInstance> instances = new HashMap<>();
+        Map<EquipmentSlot, ItemStack> items = new LinkedHashMap<>();
+        Map<EquipmentSlot, MagicItemInstance> instances = new LinkedHashMap<>();
 
         PlayerInventory inventory = player.getInventory();
         putIfMagic(inventory.getItemInMainHand(), EquipmentSlot.MAIN_HAND, items, instances);
         putIfMagic(inventory.getItemInOffHand(), EquipmentSlot.OFF_HAND, items, instances);
-
-        for (org.bukkit.inventory.EquipmentSlot vanilla : org.bukkit.inventory.EquipmentSlot.values()) {
-            ItemStack armor = inventory.getItem(vanilla);
-            EquipmentSlot slot = mapVanilla(vanilla);
-            if (slot != null) {
-                putIfMagic(armor, slot, items, instances);
-            }
+        for (EquipmentSlot slot : VANILLA_ORDER) {
+            putIfMagic(inventory.getItem(slot.vanillaSlot()), slot, items, instances);
         }
-
         for (Map.Entry<EquipmentSlot, VirtualSlotResolver> entry : virtualResolvers.entrySet()) {
-            ItemStack stack = entry.getValue().resolve(player);
-            putIfMagic(stack, entry.getKey(), items, instances);
+            putIfMagic(entry.getValue().resolve(player), entry.getKey(), items, instances);
         }
 
         return new EquipmentProfile(items, instances);
@@ -57,20 +55,12 @@ public final class EquipmentService {
             return;
         }
         items.put(slot, stack);
-        MagicItemStack.readInstance(stack).ifPresent(instance ->
-            instances.put(slot, instance)
-        );
-    }
-
-    private static EquipmentSlot mapVanilla(org.bukkit.inventory.EquipmentSlot slot) {
-        switch (slot) {
-            case HEAD: return EquipmentSlot.HEAD;
-            case CHEST: return EquipmentSlot.CHEST;
-            case LEGS: return EquipmentSlot.LEGS;
-            case FEET: return EquipmentSlot.FEET;
-            case HAND: return EquipmentSlot.MAIN_HAND;
-            case OFF_HAND: return EquipmentSlot.OFF_HAND;
-            default: return null;
+        try {
+            MagicItemStack.readInstance(stack).ifPresent(instance ->
+                instances.put(slot, instance)
+            );
+        } catch (Exception e) {
+            Alkatraz.logWarning("Skipping corrupt magic item in slot " + slot.getKey().getKey() + ": " + e.getMessage());
         }
     }
 }

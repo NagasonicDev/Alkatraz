@@ -49,45 +49,42 @@ public final class EquipmentStatService {
         profile.setMagicAffinity(baseMagicAffinity + equipMagicAffinity);
         profile.setMagicResistance(baseMagicResistance + equipMagicResistance);
         setIfContributed(contributed, profile, MagicKeys.alkatraz("fire_affinity"),
-                v -> profile.setFireAffinity(v));
+                v -> profile.setFireAffinity(v), 0.0);
         setIfContributed(contributed, profile, MagicKeys.alkatraz("water_affinity"),
-                v -> profile.setWaterAffinity(v));
+                v -> profile.setWaterAffinity(v), 0.0);
         setIfContributed(contributed, profile, MagicKeys.alkatraz("air_affinity"),
-                v -> profile.setAirAffinity(v));
+                v -> profile.setAirAffinity(v), 0.0);
         setIfContributed(contributed, profile, MagicKeys.alkatraz("earth_affinity"),
-                v -> profile.setEarthAffinity(v));
+                v -> profile.setEarthAffinity(v), 0.0);
         setIfContributed(contributed, profile, MagicKeys.alkatraz("light_affinity"),
-                v -> profile.setLightAffinity(v));
+                v -> profile.setLightAffinity(v), 0.0);
         setIfContributed(contributed, profile, MagicKeys.alkatraz("dark_affinity"),
-                v -> profile.setDarkAffinity(v));
+                v -> profile.setDarkAffinity(v), 0.0);
         setIfContributed(contributed, profile, MagicKeys.alkatraz("fire_resistance"),
-                v -> profile.setFireResistance(v));
+                v -> profile.setFireResistance(v), 0.0);
         setIfContributed(contributed, profile, MagicKeys.alkatraz("water_resistance"),
-                v -> profile.setWaterResistance(v));
+                v -> profile.setWaterResistance(v), 0.0);
         setIfContributed(contributed, profile, MagicKeys.alkatraz("air_resistance"),
-                v -> profile.setAirResistance(v));
+                v -> profile.setAirResistance(v), 0.0);
         setIfContributed(contributed, profile, MagicKeys.alkatraz("earth_resistance"),
-                v -> profile.setEarthResistance(v));
+                v -> profile.setEarthResistance(v), 0.0);
         setIfContributed(contributed, profile, MagicKeys.alkatraz("light_resistance"),
-                v -> profile.setLightResistance(v));
+                v -> profile.setLightResistance(v), 0.0);
         setIfContributed(contributed, profile, MagicKeys.alkatraz("dark_resistance"),
-                v -> profile.setDarkResistance(v));
+                v -> profile.setDarkResistance(v), 0.0);
 
         setIfContributed(contributed, profile, MagicKeys.alkatraz("spell_power"),
-                v -> profile.addMagicStat("spell_power", v, "set"));
+                profile::setSpellPower, 0.0);
+        setIfContributed(contributed, profile, MagicKeys.alkatraz("cast_time_multiplier"),
+                profile::setCastTimeMultiplier, 1.0);
 
         applySyncToPlayerProfile(profile);
     }
 
     private void setIfContributed(Map<NamespacedKey, Double> contributed, MagicProfile profile,
-                                  NamespacedKey key, java.util.function.DoubleConsumer setter) {
+                                  NamespacedKey key, java.util.function.DoubleConsumer setter, double fallback) {
         Double value = contributed.get(key);
-        if (value != null) {
-            setter.accept(value);
-        } else {
-            // Reset stat when equipment is removed
-            setter.accept(0.0);
-        }
+        setter.accept(value != null ? value : fallback);
     }
 
     private void applySyncToPlayerProfile(MagicProfile profile) {

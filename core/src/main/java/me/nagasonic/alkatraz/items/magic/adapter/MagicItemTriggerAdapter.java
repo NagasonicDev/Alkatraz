@@ -451,21 +451,31 @@ public final class MagicItemTriggerAdapter implements Listener {
 
         // Fire on_equip for all virtual slots
         EquipmentService service = MagicItemServices.equipment();
-        for (EquipmentSlot slot : java.util.List.of(
-                EquipmentSlot.RING,
-                EquipmentSlot.NECKLACE,
-                EquipmentSlot.BRACELET,
-                EquipmentSlot.PENDANT
-        )) {
-            var itemStack = service.profile(player).items().get(slot);
-            if (itemStack != null) {
-                var instanceOpt = MagicItemStack.readInstance(itemStack);
-                instanceOpt.ifPresent(instance -> {
-                    TriggerContext ctx = new TriggerContext(player, null, null, null, null, Map.of());
-                    TriggerContext scoped = ctx.withSource(instance, slot);
-                    MagicItemServices.get().dispatchTrigger(
-                            new EquipTriggerEvent(scoped));
-                });
+        EquipmentProfile profile;
+        try {
+            profile = service.profile(player);
+        } catch (Exception e) {
+            me.nagasonic.alkatraz.Alkatraz.logWarning(
+                    "EquipmentService.profile() failed during join for " + player.getName() + ": " + e.getMessage());
+            profile = null;
+        }
+        if (profile != null) {
+            for (EquipmentSlot slot : java.util.List.of(
+                    EquipmentSlot.RING,
+                    EquipmentSlot.NECKLACE,
+                    EquipmentSlot.BRACELET,
+                    EquipmentSlot.PENDANT
+            )) {
+                var itemStack = profile.items().get(slot);
+                if (itemStack != null) {
+                    var instanceOpt = MagicItemStack.readInstance(itemStack);
+                    instanceOpt.ifPresent(instance -> {
+                        TriggerContext ctx = new TriggerContext(player, null, null, null, null, Map.of());
+                        TriggerContext scoped = ctx.withSource(instance, slot);
+                        MagicItemServices.get().dispatchTrigger(
+                                new EquipTriggerEvent(scoped));
+                    });
+                }
             }
         }
         me.nagasonic.alkatraz.items.magic.equipment.EquipmentStatService.getInstance().syncEquipmentStats(player);

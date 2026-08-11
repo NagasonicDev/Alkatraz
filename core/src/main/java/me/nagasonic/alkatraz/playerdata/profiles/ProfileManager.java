@@ -1,7 +1,9 @@
 package me.nagasonic.alkatraz.playerdata.profiles;
 
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.api.playerdata.Profile;
 import me.nagasonic.alkatraz.events.SpellDiscoveredEvent;
+import me.nagasonic.alkatraz.items.magic.equipment.EquipmentStorage;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
@@ -312,6 +314,7 @@ public class ProfileManager implements Listener {
         try {
             MagicProfile magicProfile = getProfile(player.getUniqueId(), MagicProfile.class);
             magicProfile.cancelManaRegenTask();
+            EquipmentStorage.unload(player);
             unloadPlayer(player);
             Alkatraz.getInstance().getLogger().log(Level.FINE, 
                 "Saved and unloaded profiles for player: " + player.getName());

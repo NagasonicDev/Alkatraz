@@ -30,7 +30,14 @@ public class SetBonusService {
         Alkatraz.logInfo("Loaded " + setBonuses.size() + " set bonus definitions.");
     }
 
+    public void ensureLoaded() {
+        if (!loaded) {
+            loadSetBonuses();
+        }
+    }
+
     public List<AttributeContribution> getSetBonuses(EquipmentProfile profile) {
+        ensureLoaded();
         List<AttributeContribution> contributions = new ArrayList<>();
         if (profile == null || setBonuses == null) {
             return contributions;
@@ -58,7 +65,15 @@ public class SetBonusService {
         return groups;
     }
 
-    private String extractSetName(String itemKey) {
+    public SetBonusConfig.SetBonusData setBonusData(String setName) {
+        ensureLoaded();
+        if (setBonuses == null) {
+            return null;
+        }
+        return setBonuses.get(setName);
+    }
+
+    public static String extractSetName(String itemKey) {
         String[] parts = itemKey.split(":");
         String namespaceAware = parts.length > 1 ? parts[1] : parts[0];
         String itemName = namespaceAware;
@@ -86,10 +101,16 @@ public class SetBonusService {
             int threshold = entry.getKey();
             if (pieceCount >= threshold) {
                 for (SetBonusConfig.BonusEntry bonus : entry.getValue()) {
+                    AttributeContribution.AttributeOperation operation = AttributeContribution.AttributeOperation.ADD;
+                    double value = bonus.value;
+                    if (bonus.attribute.getKey().equals("cast_time_multiplier")) {
+                        operation = AttributeContribution.AttributeOperation.MULTIPLY;
+                        value = 1.0 + bonus.value;
+                    }
                     contributions.add(new AttributeContribution(
                             bonus.attribute,
-                            bonus.value,
-                            AttributeContribution.AttributeOperation.ADD,
+                            value,
+                            operation,
                             AttributeContribution.AttributeSourceType.BUFF,
                             0
                     ));
