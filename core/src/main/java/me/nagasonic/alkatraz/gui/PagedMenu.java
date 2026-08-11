@@ -121,6 +121,8 @@ public abstract class PagedMenu<T> extends Menu {
      * Adds next/previous page buttons
      */
     protected void addNavigationButtons() {
+        ItemStack blank = Alkatraz.getGuiItemRegistry().getItem("blank");
+
         // Next page button
         if (currentPage < totalPages) {
             ItemStack nextPage = Alkatraz.getGuiItemRegistry().getItem("next_page").clone();
@@ -131,6 +133,8 @@ public abstract class PagedMenu<T> extends Menu {
             nextPage.setItemMeta(meta);
             setMenuData(nextPage, "action", "next_page");
             inventory.setItem(nextPageSlot, nextPage);
+        } else {
+            inventory.setItem(nextPageSlot, blank.clone());
         }
         
         // Previous page button
@@ -143,6 +147,8 @@ public abstract class PagedMenu<T> extends Menu {
             prevPage.setItemMeta(meta);
             setMenuData(prevPage, "action", "previous_page");
             inventory.setItem(previousPageSlot, prevPage);
+        } else {
+            inventory.setItem(previousPageSlot, blank.clone());
         }
     }
 

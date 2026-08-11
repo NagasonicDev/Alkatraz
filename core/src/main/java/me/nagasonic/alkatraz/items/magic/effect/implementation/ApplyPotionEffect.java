@@ -14,16 +14,22 @@ public final class ApplyPotionEffect implements Effect {
     private final PotionEffectType effectType;
     private final int duration;
     private final int amplifier;
+    private final boolean selfTarget;
 
     public ApplyPotionEffect(PotionEffectType effectType, int duration, int amplifier) {
+        this(effectType, duration, amplifier, false);
+    }
+
+    public ApplyPotionEffect(PotionEffectType effectType, int duration, int amplifier, boolean selfTarget) {
         this.effectType = effectType;
         this.duration = duration;
         this.amplifier = amplifier;
+        this.selfTarget = selfTarget;
     }
 
     @Override
     public void execute(TriggerContext context) {
-        LivingEntity target = EffectExecutor.resolveTarget(context);
+        LivingEntity target = selfTarget ? context.actor() : EffectExecutor.resolveTarget(context);
         if (target != null) {
             target.addPotionEffect(new PotionEffect(effectType, duration, amplifier));
         }
@@ -33,6 +39,7 @@ public final class ApplyPotionEffect implements Effect {
         PotionEffectType type = PotionEffectType.getByName(String.valueOf(config.getOrDefault("effect", "SPEED")));
         int duration = Integer.parseInt(String.valueOf(config.getOrDefault("duration_ticks", 100)));
         int amplifier = Integer.parseInt(String.valueOf(config.getOrDefault("amplifier", 0)));
-        return new ApplyPotionEffect(type, duration, amplifier);
+        boolean selfTarget = "self".equalsIgnoreCase(String.valueOf(config.get("target")));
+        return new ApplyPotionEffect(type, duration, amplifier, selfTarget);
     }
 }
