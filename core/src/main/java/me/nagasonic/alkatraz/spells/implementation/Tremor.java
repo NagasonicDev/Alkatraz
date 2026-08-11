@@ -4,10 +4,10 @@ import de.tr7zw.changeme.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
-import me.nagasonic.alkatraz.dom.Ground;
+import me.nagasonic.alkatraz.api.dom.Ground;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.lang.LangManager;
-import me.nagasonic.alkatraz.spells.Element;
+import me.nagasonic.alkatraz.api.Element;
 import me.nagasonic.alkatraz.spells.components.*;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
@@ -70,7 +70,7 @@ public class Tremor extends AttackSpell implements Listener {
     @Override
     public void castAction(Player p, ItemStack wand) {
         if (!p.isDead()){
-            AttackProperties props = new AttackProperties(p, Utils.castLocation(p), getBasePower() * getWandPower(wand), AttackType.PHYSICAL);
+            AttackProperties props = new AttackProperties(p, Utils.castLocation(p), getBasePower() * getWandPower(wand, p), AttackType.PHYSICAL);
             final Location base = p.getLocation().subtract(0, 0.5, 0);
             Vector dir = p.getEyeLocation().getDirection();
             Vector perp = dir.clone().rotateAroundY(90);

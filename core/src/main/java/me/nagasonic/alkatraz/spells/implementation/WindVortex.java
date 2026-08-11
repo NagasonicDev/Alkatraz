@@ -103,7 +103,7 @@ public class WindVortex extends AttackSpell implements Listener {
         int duration = (int) getModifiedStat(caster, "duration", vortexDuration);
 
         // Create attack properties
-        double power = getPower(caster, getBasePower()) * getWandPower(wand);
+        double power = getPower(caster, getBasePower()) * getWandPower(wand, caster);
         AttackProperties props = new AttackProperties(
                 caster,
                 caster.getLocation(),

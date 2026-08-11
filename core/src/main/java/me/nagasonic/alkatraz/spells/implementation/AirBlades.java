@@ -86,7 +86,7 @@ public class AirBlades extends AttackSpell implements Listener {
                  (int) getOption("blade_count").getSelectedValue(caster).getValue());
 
         double power = getPower(caster, getBasePower())
-                * getWandPower(wand);
+                * getWandPower(wand, caster);
         double size = getModifiedStat(caster, "blade_size", 0.6);
         AttackProperties props = new AttackProperties(
                 caster,

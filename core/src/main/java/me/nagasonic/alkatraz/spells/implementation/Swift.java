@@ -51,7 +51,7 @@ public class Swift extends Spell {
     @Override
     public void castAction(Player p, ItemStack wand) {
         if (!p.isDead()){
-            double wandPower = getWandPower(wand);
+            double wandPower = getWandPower(wand, p);
             double dashMultiplier = (Double) getOption("dash_style").getSelectedValue(p).getValue();
             double speed = wandPower * strength * dashMultiplier;
             if (speed > MAX_DASH_SPEED) speed = MAX_DASH_SPEED;

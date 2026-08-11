@@ -71,7 +71,7 @@ public class MeteorShower extends AttackSpell implements Listener {
     public void castAction(Player caster, ItemStack wand) {
         if (caster.isDead()) return;
 
-        double totalPower = getPower(caster, getBasePower()) * getWandPower(wand);
+        double totalPower = getPower(caster, getBasePower()) * getWandPower(wand, caster);
         AttackProperties props = new AttackProperties(
                 caster,
                 Utils.castLocation(caster),
@@ -173,7 +173,7 @@ public class MeteorShower extends AttackSpell implements Listener {
 
     private void launchMeteorAttack(Player caster, ItemStack wand, AttackProperties props, Location targetLoc, double radius) {
         World world = caster.getWorld();
-        double totalPower = getPower(caster, getBasePower()) * getWandPower(wand);
+        double totalPower = getPower(caster, getBasePower()) * getWandPower(wand, caster);
         int totalMeteors = 6;
         int durationTicks = 80;
 

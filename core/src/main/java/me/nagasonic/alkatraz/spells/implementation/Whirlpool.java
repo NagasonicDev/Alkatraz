@@ -61,7 +61,7 @@ public class Whirlpool extends AttackSpell {
     public void castAction(Player caster, ItemStack wand) {
         if (caster.isDead()) return;
 
-        double power = getPower(caster, getBasePower()) * getWandPower(wand);
+        double power = getPower(caster, getBasePower()) * getWandPower(wand, caster);
         AttackProperties props = new AttackProperties(
                 caster,
                 Utils.castLocation(caster),

@@ -65,7 +65,7 @@ public class WaterPulse extends AttackSpell implements Listener {
 
     @Override
     public void castAction(Player p, ItemStack wand) {
-        AttackProperties props = new AttackProperties(p, Utils.castLocation(p), getBasePower() * getBasePower() * getWandPower(wand), AttackType.MAGIC);
+        AttackProperties props = new AttackProperties(p, Utils.castLocation(p), getBasePower() * getBasePower() * getWandPower(wand, p), AttackType.MAGIC);
         Location centre = p.getLocation();
         double maxRadius = (Double) getOption("pulse_radius").getSelectedValue(p).getValue();
         double step = (Double) getOption("pulse_speed").getSelectedValue(p).getValue();

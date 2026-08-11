@@ -66,7 +66,7 @@ public class MagicMissile extends AttackSpell {
     @Override
     public void castAction(Player p, ItemStack wand) {
         if (!p.isDead()){
-            AttackProperties props = new AttackProperties(p, Utils.castLocation(p), getBasePower() * getWandPower(wand), AttackType.MAGIC);
+            AttackProperties props = new AttackProperties(p, Utils.castLocation(p), getBasePower() * getWandPower(wand, p), AttackType.MAGIC);
             Location loc1 = p.getEyeLocation();
             Vector direction = p.getEyeLocation().getDirection();
             Location loc2 = p.getEyeLocation().add(direction.multiply((Double) getOption("missile_range").getSelectedValue(p).getValue()));

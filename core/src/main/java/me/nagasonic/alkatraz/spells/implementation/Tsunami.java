@@ -55,7 +55,7 @@ public class Tsunami extends AttackSpell {
     public void castAction(Player caster, ItemStack wand) {
         if (caster.isDead()) return;
 
-        double totalPower = getPower(caster, getBasePower()) * getWandPower(wand);
+        double totalPower = getPower(caster, getBasePower()) * getWandPower(wand, caster);
         AttackProperties props = new AttackProperties(
                 caster,
                 Utils.castLocation(caster),

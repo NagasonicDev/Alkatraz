@@ -2,8 +2,8 @@ package me.nagasonic.alkatraz.playerdata.profiles.implementation;
 
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.playerdata.SpellHotbarManager;
-import me.nagasonic.alkatraz.playerdata.profiles.Profile;
-import me.nagasonic.alkatraz.spells.Element;
+import me.nagasonic.alkatraz.api.Element;
+import me.nagasonic.alkatraz.api.playerdata.Profile;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.util.StatUtils;
 import org.bukkit.Bukkit;
@@ -60,6 +60,10 @@ public class MagicProfile extends Profile {
         doubleStat("earthResistance", 0);
         doubleStat("lightResistance", 0);
         doubleStat("darkResistance", 0);
+
+        // Cast time multiplier (default 1.0 = no change)
+        doubleStat("castTimeMultiplier", 1.0);
+        doubleStat("spellPower", 0.0);
 
         // Booleans
         boolStat("casting", false);
@@ -235,6 +239,12 @@ public class MagicProfile extends Profile {
 
     public double getDarkResistance() { return getDouble("darkResistance"); }
     public void setDarkResistance(double value) { setDouble("darkResistance", value); }
+
+    public double getCastTimeMultiplier() { return getDouble("castTimeMultiplier"); }
+    public void setCastTimeMultiplier(double value) { setDouble("castTimeMultiplier", value); }
+
+    public double getSpellPower() { return getDouble("spellPower"); }
+    public void setSpellPower(double value) { setDouble("spellPower", value); }
 
     // ============================================
     // String Stat Getters/Setters

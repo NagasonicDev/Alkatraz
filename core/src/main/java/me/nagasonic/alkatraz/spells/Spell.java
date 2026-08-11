@@ -2,6 +2,7 @@ package me.nagasonic.alkatraz.spells;
 
 import de.tr7zw.changeme.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.api.Element;
 import me.nagasonic.alkatraz.events.CastEvent;
 import me.nagasonic.alkatraz.events.PlayerCastEvent;
 import me.nagasonic.alkatraz.events.PlayerSpellFailEvent;
@@ -16,7 +17,7 @@ import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.configuration.SpellOption;
 import me.nagasonic.alkatraz.spells.configuration.SpellOptionLoader;
 import me.nagasonic.alkatraz.spells.configuration.impact.implementation.StatModifierImpact;
-import me.nagasonic.alkatraz.dom.Permission;
+import me.nagasonic.alkatraz.api.dom.Permission;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.util.ColorFormat;
 import me.nagasonic.alkatraz.util.StatUtils;
@@ -173,7 +174,7 @@ public abstract class Spell {
         playSound(p, prepareSound, prepareSoundVolume, prepareSoundPitch);
 
         // Calculate cast time (affected by wand and mastery)
-        float baseCastTime  = getFullCastTime(wand, getCastTime());
+        float baseCastTime  = getFullCastTime(wand, p, getCastTime());
         long  finalCastTime = calculateFinalCastTime(profile, baseCastTime);
 
         // Schedule spell execution after cast time
@@ -396,6 +397,18 @@ public abstract class Spell {
         return (float) wandCastTime * (float) spellCastTime;
     }
 
+    public float getFullCastTime(ItemStack wand, Player player, double spellCastTime) {
+        if (player != null && wand != null && MagicItemStack.isMagicItem(wand)) {
+            MagicProfile profile = ProfileManager.getProfile(player, MagicProfile.class);
+            if (profile != null) {
+                double resolved = profile.getCastTimeMultiplier();
+                if (resolved <= 0.0) resolved = 1.0;
+                return (float) resolved * (float) spellCastTime;
+            }
+        }
+        return getFullCastTime(wand, spellCastTime);
+    }
+
     public double calcPower(double base, LivingEntity target, Player caster) {
         MagicProfile casterProfile = ProfileManager.getProfile(caster, MagicProfile.class);
         double casterAffinity = casterProfile.getAffinity(getElement());
@@ -464,6 +477,19 @@ public abstract class Spell {
      */
     public static double getWandPowerOrDefault(ItemStack wand) {
         double power = getWandPower(wand);
+        return power == 0.0 && wand != null ? 1.0 : power;
+    }
+
+    public static double getWandPower(ItemStack wand, Player player) {
+        double base = getWandPower(wand);
+        if (player == null) return base;
+        MagicProfile profile = ProfileManager.getProfile(player, MagicProfile.class);
+        if (profile == null) return base;
+        return base * (1 + profile.getSpellPower());
+    }
+
+    public static double getWandPowerOrDefault(ItemStack wand, Player player) {
+        double power = getWandPower(wand, player);
         return power == 0.0 && wand != null ? 1.0 : power;
     }
 }

@@ -73,7 +73,7 @@ public class FireWall extends AttackSpell implements Listener {
     @SuppressWarnings("deprecation")
     @Override
     public void castAction(Player player, ItemStack wand) {
-        AttackProperties props = new AttackProperties(player, Utils.castLocation(player), getBasePower() * getWandPower(wand), AttackType.MAGIC);
+        AttackProperties props = new AttackProperties(player, Utils.castLocation(player), getBasePower() * getWandPower(wand, player), AttackType.MAGIC);
         Location start = player.getLocation();
 
         double spacing = 0.5;

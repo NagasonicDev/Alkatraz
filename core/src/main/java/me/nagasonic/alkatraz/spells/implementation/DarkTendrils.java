@@ -102,7 +102,7 @@ public class DarkTendrils extends AttackSpell implements Listener {
         int count = (int) getModifiedStat(caster, "tendril_count", 1);
 
         // Create attack properties
-        double power = getPower(caster, getBasePower()) * getWandPower(wand);
+        double power = getPower(caster, getBasePower()) * getWandPower(wand, caster);
         AttackProperties props = new AttackProperties(
                 caster,
                 Utils.castLocation(caster),

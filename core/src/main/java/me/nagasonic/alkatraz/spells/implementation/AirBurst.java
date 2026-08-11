@@ -65,7 +65,7 @@ public class AirBurst extends AttackSpell {
     public void castAction(Player caster, ItemStack wand) {
         if (caster.isDead()) return;
 
-        final AttackProperties properties = new AttackProperties(caster, Utils.castLocation(caster), getBasePower() * getWandPower(wand), AttackType.MAGIC);
+        final AttackProperties properties = new AttackProperties(caster, Utils.castLocation(caster), getBasePower() * getWandPower(wand, caster), AttackType.MAGIC);
 
         final List<Location> lineLocs = ParticleUtils.line(
                 2,

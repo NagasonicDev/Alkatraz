@@ -7,7 +7,7 @@ import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
-import me.nagasonic.alkatraz.spells.Element;
+import me.nagasonic.alkatraz.api.Element;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.configuration.OptionValue;
 import me.nagasonic.alkatraz.spells.configuration.SpellOption;
@@ -60,7 +60,7 @@ public class Heal extends Spell {
     public void castAction(Player p, ItemStack wand) {
         if (!p.isDead()){
             if (p.isSneaking() || me.nagasonic.alkatraz.util.Utils.getTargetEntity(p, (int) getModifiedStat(p, "target_range", 20)) == null || !(me.nagasonic.alkatraz.util.Utils.getTargetEntity(p, (int) getModifiedStat(p, "target_range", 20)) instanceof Player)){
-                double wandPower = getWandPower(wand);
+                double wandPower = getWandPower(wand, p);
                 double base = (baseHeal * wandPower) * (1 + ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class).getAffinity(Element.LIGHT) / 100);
                 double heal = getModifiedStat(p, "heal", base);
                 if (heal > maxHeal){
@@ -86,7 +86,7 @@ public class Heal extends Spell {
                 }, 0L, 1L);
             }else{
                 Player target = (Player) me.nagasonic.alkatraz.util.Utils.getTargetEntity(p, (int) getModifiedStat(p, "target_range", 20));
-                double wandPower = getWandPower(wand);
+                double wandPower = getWandPower(wand, p);
                 double base = (baseHeal * wandPower) * (1 + ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class).getAffinity(Element.LIGHT) / 100);
                 double heal = getModifiedStat(p, "heal", base);
                 if (heal > maxHeal){

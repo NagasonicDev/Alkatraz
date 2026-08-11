@@ -69,7 +69,7 @@ public class FireBlast extends AttackSpell implements Listener {
     @Override
     public void castAction(Player p, ItemStack wand) {
         if (!p.isDead()){
-            AttackProperties props = new AttackProperties(p, Utils.castLocation(p), getBasePower() * getWandPower(wand), AttackType.MAGIC);
+            AttackProperties props = new AttackProperties(p, Utils.castLocation(p), getBasePower() * getWandPower(wand, p), AttackType.MAGIC);
             LargeFireball fire = p.launchProjectile(LargeFireball.class, p.getLocation().getDirection().multiply((Double) getOption("blast_speed").getSelectedValue(p).getValue()));
             SpellEntityComponent comp = new SpellEntityComponent(
                     this,

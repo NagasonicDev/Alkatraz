@@ -4,10 +4,10 @@ import de.tr7zw.changeme.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
-import me.nagasonic.alkatraz.dom.Ground;
+import me.nagasonic.alkatraz.api.dom.Ground;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.lang.LangManager;
-import me.nagasonic.alkatraz.spells.Element;
+import me.nagasonic.alkatraz.api.Element;
 import me.nagasonic.alkatraz.spells.components.SpellComponent;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
@@ -75,7 +75,7 @@ public class EarthThrow extends AttackSpell implements Listener {
     @Override
     public void castAction(Player p, ItemStack wand) {
         if (!p.isDead()){
-            AttackProperties props = new AttackProperties(p, Utils.castLocation(p), getBasePower() * getWandPower(wand), AttackType.PHYSICAL);
+            AttackProperties props = new AttackProperties(p, Utils.castLocation(p), getBasePower() * getWandPower(wand, p), AttackType.PHYSICAL);
             Location loc = p.getEyeLocation();
             Vector direction = loc.getDirection();
             if (p.isOnGround()){

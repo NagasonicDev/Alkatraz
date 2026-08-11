@@ -3,7 +3,7 @@ package me.nagasonic.alkatraz.spells.implementation;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
-import me.nagasonic.alkatraz.dom.Ground;
+import me.nagasonic.alkatraz.api.dom.Ground;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
@@ -50,7 +50,7 @@ public class Fissure extends AttackSpell {
     }
 
     private void launchFissureAttack(Player caster, ItemStack wand, AttackProperties props, double range, Vector direction, Vector perpendicular, Location startLoc, double maxWidth) {
-        double totalPower = getPower(caster, getBasePower()) * getWandPower(wand);
+        double totalPower = getPower(caster, getBasePower()) * getWandPower(wand, caster);
         caster.getWorld().playSound(caster.getLocation(), Sound.BLOCK_GRINDSTONE_USE, 1.2f, 0.4f);
         caster.getWorld().playSound(caster.getLocation(), Sound.BLOCK_STONE_BREAK, 1.0f, 0.6f);
 
@@ -231,7 +231,7 @@ public class Fissure extends AttackSpell {
     public void castAction(Player caster, ItemStack wand) {
         if (caster.isDead()) return;
 
-        double totalPower = getPower(caster, getBasePower()) * getWandPower(wand);
+        double totalPower = getPower(caster, getBasePower()) * getWandPower(wand, caster);
         AttackProperties props = new AttackProperties(
                 caster,
                 Utils.castLocation(caster),

@@ -3,7 +3,7 @@ package me.nagasonic.alkatraz.spells.implementation;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
-import me.nagasonic.alkatraz.dom.Ground;
+import me.nagasonic.alkatraz.api.dom.Ground;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
@@ -78,7 +78,7 @@ public class EarthenWall extends AttackSpell implements Listener {
     @Override
     public void castAction(Player player, ItemStack wand) {
         AttackProperties props = new AttackProperties(player, Utils.castLocation(player),
-                getBasePower() * getWandPower(wand), AttackType.MAGIC);
+                getBasePower() * getWandPower(wand, player), AttackType.MAGIC);
         Location start = player.getLocation();
 
         double spacing = 0.5;

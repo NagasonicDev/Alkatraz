@@ -170,7 +170,7 @@ public class Radiance extends Spell {
         if (caster.isDead()) return;
 
         double activeRadius = getModifiedStat(caster, "radius", radius);
-        double wandPower = getWandPower(wand);
+        double wandPower = getWandPower(wand, caster);
         double healPerTick = getModifiedStat(caster, "heal", healAmount * wandPower) / duration;
         int totalTicks = (int) (duration * 20);
 

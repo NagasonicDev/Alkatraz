@@ -74,7 +74,7 @@ public class FlamingVolley extends AttackSpell implements Listener {
         int arrowCount = (int) getModifiedStat(caster, "arrow_count",
                 ((Number) getOption("arrow_count").getSelectedValue(caster).getValue()).intValue());
         double power = getPower(caster, getBasePower())
-                * getWandPower(wand);
+                * getWandPower(wand, caster);
         AttackProperties props = new AttackProperties(
                 caster,
                 caster.getEyeLocation(),

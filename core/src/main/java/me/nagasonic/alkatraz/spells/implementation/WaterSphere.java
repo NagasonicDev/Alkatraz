@@ -70,7 +70,7 @@ public class WaterSphere extends AttackSpell {
     public void castAction(Player caster, ItemStack wand) {
         if (caster.isDead()) return;
 
-        double wandPower = getWandPower(wand);
+        double wandPower = getWandPower(wand, caster);
         double power = getPower(caster, getBasePower()) * wandPower;
         double radius = getModifiedStat(caster, "sphere_size", sphereRadius);
         double range = getModifiedStat(caster, "sphere_range", sphereRange);

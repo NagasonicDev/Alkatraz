@@ -114,7 +114,7 @@ public class Geyser extends AttackSpell {
         double radius = getModifiedStat(caster, "radius",        2.5);
         double launchPower = getModifiedStat(caster, "launch_power",  1.0);
         double basePower = getPower(caster, getBasePower())
-                * getWandPower(wand);
+                * getWandPower(wand, caster);
 
         AttackProperties props = new AttackProperties(
                 caster,

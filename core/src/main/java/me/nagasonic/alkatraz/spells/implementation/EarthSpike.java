@@ -3,12 +3,12 @@ package me.nagasonic.alkatraz.spells.implementation;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
-import me.nagasonic.alkatraz.dom.Ground;
+import me.nagasonic.alkatraz.api.dom.Ground;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
-import me.nagasonic.alkatraz.spells.Element;
+import me.nagasonic.alkatraz.api.Element;
 import me.nagasonic.alkatraz.spells.components.SpellBlockComponent;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
@@ -86,7 +86,7 @@ public class EarthSpike extends AttackSpell implements Listener {
             cancelCast(player);
             return;
         }
-        AttackProperties props = new AttackProperties(player, Utils.castLocation(player), getBasePower() * getWandPower(wand), AttackType.PHYSICAL);
+        AttackProperties props = new AttackProperties(player, Utils.castLocation(player), getBasePower() * getWandPower(wand, player), AttackType.PHYSICAL);
         double heightMultiplier = (Double) getOption("spike_height").getSelectedValue(player).getValue();
         boolean selfDestruct = (boolean) getOption("self_destruct").getSelectedValue(player).getValue();
 

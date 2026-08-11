@@ -78,7 +78,7 @@ public class Fireball extends AttackSpell implements Listener {
         AttackProperties props = new AttackProperties(
                 caster,
                 Utils.castLocation(caster),
-                getPower(caster, getBasePower()) * getWandPower(wand),
+                getPower(caster, getBasePower()) * getWandPower(wand, caster),
                 AttackType.MAGIC
         );
 
