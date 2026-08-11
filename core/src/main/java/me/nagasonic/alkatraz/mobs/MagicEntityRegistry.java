@@ -3,6 +3,7 @@ package me.nagasonic.alkatraz.mobs;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.Config;
 import me.nagasonic.alkatraz.config.ConfigManager;
+import me.nagasonic.alkatraz.api.mobs.MagicEntityType;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 

@@ -4,7 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import me.nagasonic.alkatraz.spells.Element;
+import me.nagasonic.alkatraz.api.Element;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
 import net.md_5.bungee.api.ChatColor;

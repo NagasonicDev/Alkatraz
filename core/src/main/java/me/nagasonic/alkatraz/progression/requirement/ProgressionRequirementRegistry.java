@@ -1,6 +1,6 @@
 package me.nagasonic.alkatraz.progression.requirement;
 
-import me.nagasonic.alkatraz.configuration.requirement.Requirement;
+import me.nagasonic.alkatraz.api.configuration.requirement.Requirement;
 import me.nagasonic.alkatraz.configuration.requirement.RequirementFactory;
 
 import java.util.Collections;

@@ -1,6 +1,6 @@
 package me.nagasonic.alkatraz.gui.implementation.recipe;
 
-import me.nagasonic.alkatraz.dom.Permission;
+import me.nagasonic.alkatraz.api.dom.Permission;
 import me.nagasonic.alkatraz.items.magic.recipe.AlkatrazRecipe;
 import me.nagasonic.alkatraz.items.magic.recipe.RecipeCategory;
 import me.nagasonic.alkatraz.items.magic.recipe.unlock.UnlockManager;

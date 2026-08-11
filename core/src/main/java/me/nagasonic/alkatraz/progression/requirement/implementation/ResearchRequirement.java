@@ -2,7 +2,7 @@ package me.nagasonic.alkatraz.progression.requirement.implementation;
 
 import me.nagasonic.alkatraz.progression.requirement.ProgressionRequirement;
 import me.nagasonic.alkatraz.progression.requirement.RequirementContext;
-import me.nagasonic.alkatraz.progression.research.ResearchProgressRegistry;
+import me.nagasonic.alkatraz.api.progression.research.ResearchProgressRegistry;
 
 import java.util.Map;
 

@@ -1,6 +1,7 @@
 package me.nagasonic.alkatraz.dom;
 
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.api.dom.Fetcher;
 
 public class Catch {
     public static <T> T catchOrElse(Fetcher<T> c, T r){

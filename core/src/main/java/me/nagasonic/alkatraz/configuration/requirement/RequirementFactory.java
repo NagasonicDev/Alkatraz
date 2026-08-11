@@ -1,10 +1,11 @@
 package me.nagasonic.alkatraz.configuration.requirement;
 
+import me.nagasonic.alkatraz.api.configuration.requirement.Requirement;
 import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
 import me.nagasonic.alkatraz.items.magic.recipe.unlock.UnlockManager;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
-import me.nagasonic.alkatraz.progression.research.ResearchProgressRegistry;
+import me.nagasonic.alkatraz.api.progression.research.ResearchProgressRegistry;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
 import me.nagasonic.alkatraz.spells.configuration.requirement.ValueRequirement;

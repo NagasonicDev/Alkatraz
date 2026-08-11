@@ -6,7 +6,7 @@ import me.nagasonic.alkatraz.api.magic.instance.MagicItemInstance;
 import me.nagasonic.alkatraz.api.magic.modifier.EngravingDefinition;
 import me.nagasonic.alkatraz.api.magic.registry.MagicItemRegistries;
 import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
-import me.nagasonic.alkatraz.configuration.requirement.Requirement;
+import me.nagasonic.alkatraz.api.configuration.requirement.Requirement;
 import me.nagasonic.alkatraz.items.magic.imbue.ImbueManager;
 import me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack;
 import org.bukkit.Bukkit;

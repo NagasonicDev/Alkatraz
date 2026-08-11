@@ -1,7 +1,7 @@
 package me.nagasonic.alkatraz.items.magic.recipe.unlock;
 
 import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
-import me.nagasonic.alkatraz.configuration.requirement.Requirement;
+import me.nagasonic.alkatraz.api.configuration.requirement.Requirement;
 import me.nagasonic.alkatraz.events.RecipeUnlockedEvent;
 import me.nagasonic.alkatraz.items.magic.recipe.MagicItemRecipeManager;
 import me.nagasonic.alkatraz.items.magic.recipe.RecipeRegistry;

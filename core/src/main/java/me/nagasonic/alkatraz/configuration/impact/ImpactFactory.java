@@ -1,5 +1,6 @@
 package me.nagasonic.alkatraz.configuration.impact;
 
+import me.nagasonic.alkatraz.api.configuration.impact.Impact;
 import me.nagasonic.alkatraz.spells.Spell;
 import org.bukkit.configuration.ConfigurationSection;
 

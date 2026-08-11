@@ -1,6 +1,6 @@
 package me.nagasonic.alkatraz.items.magic.recipe;
 
-import me.nagasonic.alkatraz.configuration.requirement.Requirement;
+import me.nagasonic.alkatraz.api.configuration.requirement.Requirement;
 import me.nagasonic.alkatraz.configuration.requirement.RequirementFactory;
 import me.nagasonic.alkatraz.items.magic.MagicItemBootstrap;
 import me.nagasonic.alkatraz.items.magic.recipe.adapter.CraftingEventRouter;

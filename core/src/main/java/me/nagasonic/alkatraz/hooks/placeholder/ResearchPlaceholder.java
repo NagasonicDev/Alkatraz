@@ -2,9 +2,9 @@ package me.nagasonic.alkatraz.hooks.placeholder;
 
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
+import me.nagasonic.alkatraz.api.progression.research.ResearchState;
+import me.nagasonic.alkatraz.api.progression.research.definition.ResearchNode;
 import me.nagasonic.alkatraz.progression.research.ResearchService;
-import me.nagasonic.alkatraz.progression.research.ResearchState;
-import me.nagasonic.alkatraz.progression.research.definition.ResearchNode;
 import org.bukkit.entity.Player;
 
 import java.util.Optional;

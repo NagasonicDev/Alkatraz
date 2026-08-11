@@ -25,4 +25,24 @@ public interface Requirement {
      * @return the description of this requirement
      */
     String getDescription();
+
+    /**
+     * Returns the player's progress towards meeting this requirement as a percentage.
+     *
+     * @param player the player to check
+     * @return a progress value between 0 and 100
+     */
+    default int getProgress(Player player) {
+        return isMet(player) ? 100 : 0;
+    }
+
+    /**
+     * Returns a human-readable description of this requirement for the given player.
+     *
+     * @param player the player to check
+     * @return the description of this requirement
+     */
+    default String getDescription(Player player) {
+        return getDescription();
+    }
 }

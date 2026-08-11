@@ -1,7 +1,7 @@
 package me.nagasonic.alkatraz.items.magic.recipe;
 
 import me.nagasonic.alkatraz.Alkatraz;
-import me.nagasonic.alkatraz.configuration.requirement.Requirement;
+import me.nagasonic.alkatraz.api.configuration.requirement.Requirement;
 import me.nagasonic.alkatraz.items.magic.MagicItemService;
 import me.nagasonic.alkatraz.items.magic.recipe.adapter.CraftingEventRouter;
 import org.bukkit.Bukkit;

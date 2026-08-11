@@ -1,7 +1,7 @@
 package me.nagasonic.alkatraz.spells;
 
 import de.tr7zw.changeme.nbtapi.NBT;
-import me.nagasonic.alkatraz.dom.Permission;
+import me.nagasonic.alkatraz.api.dom.Permission;
 import me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack;
 import me.nagasonic.alkatraz.api.magic.registry.MagicItemRegistries;
 import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;

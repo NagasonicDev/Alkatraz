@@ -1,6 +1,7 @@
 package me.nagasonic.alkatraz.gui.implementation.options;
 
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.api.gui.implementation.options.PooledSlotMenuLayout;
 import me.nagasonic.alkatraz.gui.ItemBuilder;
 import me.nagasonic.alkatraz.gui.PagedMenu;
 import me.nagasonic.alkatraz.gui.implementation.SpellOptionsMenu;

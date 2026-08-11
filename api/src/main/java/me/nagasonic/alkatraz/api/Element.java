@@ -44,6 +44,15 @@ public enum Element {
     }
 
     /**
+     * Returns the raw display name of this element without its color code.
+     *
+     * @return the element name without any color formatting
+     */
+    public String getColorlessName() {
+        return name;
+    }
+
+    /**
      * Returns the raw color code for this element.
      *
      * @return the color code string (hex or ampersand format)

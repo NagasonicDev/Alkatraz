@@ -34,8 +34,34 @@ public enum Permission {
     COMMAND_EQUIPMENT("alkatraz.command.equipment"),
     /** Permission to use the /profile command. */
     COMMAND_PROFILE("alkatraz.command.profile"),
+    /** Permission to use the /editor command. */
+    COMMAND_EDITOR("alkatraz.command.editor"),
+    /** Permission to use the recipe book. */
+    RECIPE_BOOK("alkatraz.recipebook"),
+    /** Permission to use the /recipe unlock command. */
+    COMMAND_RECIPE_UNLOCK("alkatraz.recipe.unlock"),
+    /** Permission to use the /recipe lock command. */
+    COMMAND_RECIPE_LOCK("alkatraz.recipe.lock"),
+    /** Permission to use the /recipe reload command. */
+    COMMAND_RECIPE_RELOAD("alkatraz.recipe.reload"),
+    /** Permission to use the /recipe give command. */
+    COMMAND_RECIPE_GIVE("alkatraz.recipe.give"),
+    /** Permission to use the /recipe check command. */
+    COMMAND_RECIPE_CHECK("alkatraz.recipe.check"),
+    /** Permission to view recipes. */
+    RECIPES_VIEW("alkatraz.recipes.view"),
+    /** Permission to view locked recipes. */
+    RECIPES_VIEW_LOCKED("alkatraz.recipes.view.locked"),
+    /** Permission to edit recipes. */
+    RECIPES_EDIT("alkatraz.recipes.edit"),
+    /** Permission to delete recipes. */
+    RECIPES_DELETE("alkatraz.recipes.delete"),
+    /** Permission to create recipes. */
+    RECIPES_CREATE("alkatraz.recipes.create"),
     /** Permission to access all spells. */
-    ALL_SPELLS("alkatraz.allspells");
+    ALL_SPELLS("alkatraz.allspells"),
+    /** Permission to cast spells without a cooldown. */
+    NO_COOLDOWN("alkatraz.nocooldown");
 
 
     private final String permission;

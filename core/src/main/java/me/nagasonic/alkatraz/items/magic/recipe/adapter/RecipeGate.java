@@ -1,6 +1,6 @@
 package me.nagasonic.alkatraz.items.magic.recipe.adapter;
 
-import me.nagasonic.alkatraz.configuration.requirement.Requirement;
+import me.nagasonic.alkatraz.api.configuration.requirement.Requirement;
 import me.nagasonic.alkatraz.configuration.requirement.RequirementFactory;
 import me.nagasonic.alkatraz.items.magic.recipe.AlkatrazRecipe;
 import me.nagasonic.alkatraz.items.magic.recipe.unlock.UnlockManager;

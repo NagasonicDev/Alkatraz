@@ -3,7 +3,7 @@ package me.nagasonic.alkatraz.spells.spellbooks;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.SpellbookConfig;
 import me.nagasonic.alkatraz.lang.LangManager;
-import me.nagasonic.alkatraz.spells.Element;
+import me.nagasonic.alkatraz.api.Element;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
 import me.nagasonic.alkatraz.spells.configuration.impact.implementation.ManaCostImpact;

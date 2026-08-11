@@ -1,6 +1,6 @@
 package me.nagasonic.alkatraz.spells.configuration.impact;
 
-import me.nagasonic.alkatraz.configuration.impact.Impact;
+import me.nagasonic.alkatraz.api.configuration.impact.Impact;
 import me.nagasonic.alkatraz.configuration.impact.ImpactFactory;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.configuration.impact.implementation.CastModifierImpact;

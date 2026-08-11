@@ -2,9 +2,9 @@ package me.nagasonic.alkatraz.nms_v1_19_R2.entity.definitions;
 
 import me.nagasonic.alkatraz.mobs.MagicEntity;
 import me.nagasonic.alkatraz.mobs.MagicEntityRegistry;
-import me.nagasonic.alkatraz.mobs.MagicEntityType;
+import me.nagasonic.alkatraz.api.mobs.MagicEntityType;
 import me.nagasonic.alkatraz.mobs.MobProfile;
-import me.nagasonic.alkatraz.mobs.MobBrain;
+import me.nagasonic.alkatraz.api.mobs.MobBrain;
 import me.nagasonic.alkatraz.nms_v1_19_R2.entity.GoalBuilder;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.Zombie;

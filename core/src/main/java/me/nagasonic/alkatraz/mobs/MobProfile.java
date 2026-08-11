@@ -1,6 +1,6 @@
 package me.nagasonic.alkatraz.mobs;
 
-import me.nagasonic.alkatraz.spells.Element;
+import me.nagasonic.alkatraz.api.Element;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.entity.CreatureSpawnEvent;

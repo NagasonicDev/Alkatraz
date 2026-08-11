@@ -3,7 +3,7 @@ package me.nagasonic.alkatraz.loot.implementation;
 import me.nagasonic.alkatraz.config.SpellbookConfig;
 import me.nagasonic.alkatraz.loot.LootInjector;
 import me.nagasonic.alkatraz.loot.MobLootInjector;
-import me.nagasonic.alkatraz.spells.Element;
+import me.nagasonic.alkatraz.api.Element;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
 import me.nagasonic.alkatraz.spells.spellbooks.SpellbookFactory;

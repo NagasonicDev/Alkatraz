@@ -4,7 +4,7 @@ import de.tr7zw.changeme.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.Config;
 import me.nagasonic.alkatraz.config.ConfigManager;
-import me.nagasonic.alkatraz.spells.Element;
+import me.nagasonic.alkatraz.api.Element;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;

@@ -2,10 +2,12 @@ package me.nagasonic.alkatraz.util;
 
 import de.tr7zw.changeme.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
-import me.nagasonic.alkatraz.dom.*;
+import me.nagasonic.alkatraz.dom.Catch;
+import me.nagasonic.alkatraz.dom.MinecraftVersion;
+import me.nagasonic.alkatraz.api.dom.Action;
 import me.nagasonic.alkatraz.items.magic.MagicItemServices;
 import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
-import me.nagasonic.alkatraz.spells.Element;
+import me.nagasonic.alkatraz.api.Element;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ChatMessageType;

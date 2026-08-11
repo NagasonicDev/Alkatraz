@@ -1,6 +1,6 @@
 package me.nagasonic.alkatraz.events;
 
-import me.nagasonic.alkatraz.progression.research.definition.ResearchNode;
+import me.nagasonic.alkatraz.api.progression.research.definition.ResearchNode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;

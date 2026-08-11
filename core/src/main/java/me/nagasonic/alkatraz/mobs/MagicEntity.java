@@ -1,7 +1,8 @@
 package me.nagasonic.alkatraz.mobs;
 
 import de.tr7zw.changeme.nbtapi.NBT;
-import me.nagasonic.alkatraz.spells.Element;
+import me.nagasonic.alkatraz.api.Element;
+import me.nagasonic.alkatraz.api.mobs.MagicEntityType;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
 import org.bukkit.entity.LivingEntity;

@@ -2,7 +2,7 @@ package me.nagasonic.alkatraz.commands;
 
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.lang.LangManager;
-import me.nagasonic.alkatraz.dom.Permission;
+import me.nagasonic.alkatraz.api.dom.Permission;
 import me.nagasonic.alkatraz.gui.implementation.SpellsMenu;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;

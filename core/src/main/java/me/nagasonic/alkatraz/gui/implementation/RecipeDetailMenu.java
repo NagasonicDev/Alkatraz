@@ -1,7 +1,7 @@
 package me.nagasonic.alkatraz.gui.implementation;
 
 import me.nagasonic.alkatraz.Alkatraz;
-import me.nagasonic.alkatraz.configuration.requirement.Requirement;
+import me.nagasonic.alkatraz.api.configuration.requirement.Requirement;
 import me.nagasonic.alkatraz.gui.ItemBuilder;
 import me.nagasonic.alkatraz.gui.Menu;
 import me.nagasonic.alkatraz.gui.implementation.recipe.RecipesPermissions;

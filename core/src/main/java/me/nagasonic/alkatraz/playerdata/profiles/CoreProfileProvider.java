@@ -31,32 +31,6 @@ public class CoreProfileProvider implements ProfileProvider {
         }
     }
 
-    private static Element toApiElement(me.nagasonic.alkatraz.spells.Element core) {
-        if (core == null) return Element.NONE;
-        return switch (core) {
-            case FIRE -> Element.FIRE;
-            case WATER -> Element.WATER;
-            case EARTH -> Element.EARTH;
-            case AIR -> Element.AIR;
-            case LIGHT -> Element.LIGHT;
-            case DARK -> Element.DARK;
-            case NONE -> Element.NONE;
-        };
-    }
-
-    private static me.nagasonic.alkatraz.spells.Element toCoreElement(Element api) {
-        if (api == null) return me.nagasonic.alkatraz.spells.Element.NONE;
-        return switch (api) {
-            case FIRE -> me.nagasonic.alkatraz.spells.Element.FIRE;
-            case WATER -> me.nagasonic.alkatraz.spells.Element.WATER;
-            case EARTH -> me.nagasonic.alkatraz.spells.Element.EARTH;
-            case AIR -> me.nagasonic.alkatraz.spells.Element.AIR;
-            case LIGHT -> me.nagasonic.alkatraz.spells.Element.LIGHT;
-            case DARK -> me.nagasonic.alkatraz.spells.Element.DARK;
-            case NONE -> me.nagasonic.alkatraz.spells.Element.NONE;
-        };
-    }
-
     private static class MagicProfileAdapter implements MagicProfileView {
         final MagicProfile delegate;
 
@@ -71,7 +45,7 @@ public class CoreProfileProvider implements ProfileProvider {
         @Override public int getResetTokens() { return delegate.getResetTokens(); }
         @Override public void setResetTokens(int value) { delegate.setResetTokens(value); }
 
-        @Override public int getPoints(Element element) { return delegate.getPoints(toCoreElement(element)); }
+        @Override public int getPoints(Element element) { return delegate.getPoints(element); }
         @Override public double getMaxMana() { return delegate.getMaxMana(); }
         @Override public void setMaxMana(double value) { delegate.setMaxMana(value); }
         @Override public double getMana() { return delegate.getMana(); }
@@ -90,8 +64,8 @@ public class CoreProfileProvider implements ProfileProvider {
         @Override public double getMagicResistance() { return delegate.getMagicResistance(); }
         @Override public void setMagicResistance(double value) { delegate.setMagicResistance(value); }
 
-        @Override public double getAffinity(Element element) { return delegate.getAffinity(toCoreElement(element)); }
-        @Override public double getResistance(Element element) { return delegate.getResistance(toCoreElement(element)); }
+        @Override public double getAffinity(Element element) { return delegate.getAffinity(element); }
+        @Override public double getResistance(Element element) { return delegate.getResistance(element); }
 
         @Override public boolean canCast() { return delegate.canCast(); }
         @Override public void setCanCast(boolean value) { delegate.setCanCast(value); }
@@ -127,12 +101,12 @@ public class CoreProfileProvider implements ProfileProvider {
         @Override public Long getCooldown(String spellId) {
             if (spellId == null) return null;
             String id = spellId + "_cooldown";
-            return delegate.longs.containsKey(id) ? delegate.getLong(id) : null;
+            return delegate.isLong(id) ? delegate.getLong(id) : null;
         }
         @Override public void setCooldown(String spellId, Long cooldown) {
             if (spellId == null) return;
             String id = spellId + "_cooldown";
-            if (!delegate.longs.containsKey(id)) {
+            if (!delegate.isLong(id)) {
                 delegate.longStat(id, cooldown);
             } else {
                 delegate.setLong(id, cooldown);

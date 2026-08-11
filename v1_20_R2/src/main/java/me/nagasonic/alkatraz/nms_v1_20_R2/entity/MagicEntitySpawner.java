@@ -1,7 +1,7 @@
 package me.nagasonic.alkatraz.nms_v1_20_R2.entity;
 
-import me.nagasonic.alkatraz.mobs.MagicEntityType;
-import me.nagasonic.alkatraz.mobs.NmsMobFactory;
+import me.nagasonic.alkatraz.api.mobs.MagicEntityType;
+import me.nagasonic.alkatraz.api.mobs.NmsMobFactory;
 import me.nagasonic.alkatraz.nms_v1_20_R2.entity.implementation.SkeletalMage;
 import me.nagasonic.alkatraz.nms_v1_20_R2.entity.implementation.ZombieFighter;
 import me.nagasonic.alkatraz.nms_v1_20_R2.entity.implementation.ZombieMage;

@@ -1,5 +1,6 @@
 package me.nagasonic.alkatraz.playerdata.profiles;
 
+import me.nagasonic.alkatraz.api.playerdata.Profile;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 
 import java.lang.reflect.Constructor;

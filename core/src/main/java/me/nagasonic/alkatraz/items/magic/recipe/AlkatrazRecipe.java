@@ -1,6 +1,6 @@
 package me.nagasonic.alkatraz.items.magic.recipe;
 
-import me.nagasonic.alkatraz.configuration.requirement.Requirement;
+import me.nagasonic.alkatraz.api.configuration.requirement.Requirement;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 

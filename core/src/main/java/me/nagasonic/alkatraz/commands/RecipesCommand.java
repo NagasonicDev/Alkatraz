@@ -2,7 +2,7 @@ package me.nagasonic.alkatraz.commands;
 
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
-import me.nagasonic.alkatraz.dom.Permission;
+import me.nagasonic.alkatraz.api.dom.Permission;
 import me.nagasonic.alkatraz.gui.implementation.recipe.RecipeCategoryMenu;
 import me.nagasonic.alkatraz.gui.implementation.recipe.RecipesPermissions;
 import me.nagasonic.alkatraz.items.magic.recipe.RecipeRegistry;

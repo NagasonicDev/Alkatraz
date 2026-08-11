@@ -5,7 +5,7 @@ import me.nagasonic.alkatraz.api.magic.definition.ItemDefinition;
 import me.nagasonic.alkatraz.api.magic.instance.MagicItemInstance;
 import me.nagasonic.alkatraz.api.magic.registry.MagicItemRegistries;
 import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
-import me.nagasonic.alkatraz.configuration.requirement.Requirement;
+import me.nagasonic.alkatraz.api.configuration.requirement.Requirement;
 import me.nagasonic.alkatraz.configuration.requirement.RequirementFactory;
 import me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack;
 import me.nagasonic.alkatraz.util.MaterialCompat;

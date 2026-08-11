@@ -2,7 +2,7 @@ package me.nagasonic.alkatraz.hooks.placeholder;
 
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
-import me.nagasonic.alkatraz.spells.Element;
+import me.nagasonic.alkatraz.api.Element;
 import org.bukkit.entity.Player;
 
 import java.util.Map;

@@ -1,6 +1,6 @@
 package me.nagasonic.alkatraz.spells.configuration.requirement;
 
-import me.nagasonic.alkatraz.configuration.requirement.Requirement;
+import me.nagasonic.alkatraz.api.configuration.requirement.Requirement;
 import me.nagasonic.alkatraz.configuration.requirement.RequirementFactory;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.*;

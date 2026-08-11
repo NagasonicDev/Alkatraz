@@ -1,6 +1,7 @@
 package me.nagasonic.alkatraz.mobs;
 
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.api.mobs.MagicEntityType;
 import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;

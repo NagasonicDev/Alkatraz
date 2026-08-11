@@ -1,5 +1,6 @@
 package me.nagasonic.alkatraz.spells;
 
+import me.nagasonic.alkatraz.api.Element;
 import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import org.bukkit.entity.LivingEntity;

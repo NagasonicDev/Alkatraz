@@ -1,8 +1,8 @@
 package me.nagasonic.alkatraz.nms_v26_R1.entity;
 
 import me.nagasonic.alkatraz.mobs.MagicEntity;
-import me.nagasonic.alkatraz.mobs.MobBrain;
-import me.nagasonic.alkatraz.mobs.SpellCastConfig;
+import me.nagasonic.alkatraz.api.mobs.MobBrain;
+import me.nagasonic.alkatraz.api.mobs.SpellCastConfig;
 import me.nagasonic.alkatraz.nms_v26_R1.entity.goals.CastSpellGoal;
 import me.nagasonic.alkatraz.nms_v26_R1.entity.goals.KeepSpellRangeGoal;
 import net.minecraft.world.entity.Mob;

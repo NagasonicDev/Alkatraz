@@ -1,5 +1,6 @@
 package me.nagasonic.alkatraz.configuration.requirement;
 
+import me.nagasonic.alkatraz.api.configuration.requirement.Requirement;
 import me.nagasonic.alkatraz.api.recipe.RecipeRequirement;
 import org.bukkit.entity.Player;
 

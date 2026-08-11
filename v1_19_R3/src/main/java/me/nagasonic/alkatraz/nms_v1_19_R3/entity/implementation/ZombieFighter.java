@@ -1,8 +1,8 @@
 package me.nagasonic.alkatraz.nms_v1_19_R3.entity.implementation;
 
-import me.nagasonic.alkatraz.mobs.MagicEntityType;
-import me.nagasonic.alkatraz.mobs.MobBrain;
-import me.nagasonic.alkatraz.mobs.SpellCastConfig;
+import me.nagasonic.alkatraz.api.mobs.MagicEntityType;
+import me.nagasonic.alkatraz.api.mobs.MobBrain;
+import me.nagasonic.alkatraz.api.mobs.SpellCastConfig;
 import me.nagasonic.alkatraz.nms_v1_19_R3.entity.definitions.NMSMagicZombie;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;

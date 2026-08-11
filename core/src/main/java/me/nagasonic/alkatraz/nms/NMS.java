@@ -1,6 +1,6 @@
 package me.nagasonic.alkatraz.nms;
 
-import me.nagasonic.alkatraz.mobs.MagicEntityType;
+import me.nagasonic.alkatraz.api.mobs.MagicEntityType;
 import me.nagasonic.alkatraz.util.Skin;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
