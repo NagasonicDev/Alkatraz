@@ -1,4 +1,4 @@
-key: alkatraz:haste_rune
+key: haste_rune
 allowed_item_types:
   - pickaxe
   - shovel
@@ -26,6 +26,6 @@ recipe:
     - "RMR"
     - "   "
   ingredients:
-    M: AMETHYST_SHARD
+    M: alkatraz:magic_stone
     S: SUGAR
     R: REDSTONE

@@ -23,6 +23,6 @@ recipe:
     - "IMI"
     - "   "
   ingredients:
-    M: AMETHYST_SHARD
+    M: alkatraz:magic_stone
     C: CACTUS
     I: IRON_BARS

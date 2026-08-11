@@ -16,13 +16,23 @@ public final class MagicKeys {
     private MagicKeys() {}
 
     /**
-     * Creates a new {@link NamespacedKey} in the {@code alkatraz} namespace.
+     * Creates a new {@link NamespacedKey}. If the given path is already namespaced
+     * (contains a colon), it is parsed as-is; otherwise it is placed in the
+     * {@code alkatraz} namespace.
      *
-     * @param path the key path; must not be blank
-     * @return a new {@link NamespacedKey} under the {@code alkatraz} namespace
+     * @param path the key path; may be a bare key or a full {@code namespace:key} string
+     * @return the parsed {@link NamespacedKey}
+     * @throws IllegalArgumentException if the input cannot be parsed into a valid key
      */
     public static NamespacedKey alkatraz(String path) {
-        return new NamespacedKey(NAMESPACE, path);
+        if (path == null || path.isBlank()) {
+            throw new IllegalArgumentException("Invalid namespaced key: " + path);
+        }
+        String trimmed = path.trim();
+        if (trimmed.indexOf(':') >= 0) {
+            return require(trimmed);
+        }
+        return new NamespacedKey(NAMESPACE, trimmed);
     }
 
     /**

@@ -1,9 +1,9 @@
-key: alkatraz:marksman_rune
+key: marksman_rune
 allowed_item_types:
   - bow
   - crossbow
 triggers:
-  - on_damage_dealt
+  - on_projectile_hit
 item:
   material: ARROW
   display_name: '&aMarksman Rune'
@@ -24,6 +24,6 @@ recipe:
     - "FMF"
     - "   "
   ingredients:
-    M: AMETHYST_SHARD
+    M: alkatraz:magic_stone
     A: ARROW
     F: FLINT

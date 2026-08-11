@@ -1,4 +1,4 @@
-key: alkatraz:feather_fall_rune
+key: feather_fall_rune
 allowed_item_types:
   - boots
 triggers: []
@@ -12,10 +12,8 @@ conditions:
   - type: event_parameter
     parameter: cause
     value: FALL
-  - type: random
-    chance: 0.4
   - type: circle_level
-    min_circle: 1
+    min_circle: 3
 effects:
   - type: potion_effect
     effect: SLOW_FALLING
@@ -27,5 +25,5 @@ recipe:
     - "FMF"
     - "   "
   ingredients:
-    M: AMETHYST_SHARD
+    M: alkatraz:magic_stone
     F: FEATHER

@@ -1,4 +1,4 @@
-key: alkatraz:radiance_rune
+key: radiance_rune
 allowed_item_types:
   - wand
 triggers:
@@ -26,6 +26,6 @@ recipe:
     - " M "
     - " L "
   ingredients:
-    M: AMETHYST_SHARD
+    M: alkatraz:magic_stone
     G: GLOWSTONE_DUST
     L: GOLD_NUGGET

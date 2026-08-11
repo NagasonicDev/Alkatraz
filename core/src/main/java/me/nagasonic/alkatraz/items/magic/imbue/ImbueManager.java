@@ -5,6 +5,7 @@ import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
 import me.nagasonic.alkatraz.config.SpellbookConfig;
 import me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack;
 import me.nagasonic.alkatraz.util.ColorFormat;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
@@ -25,6 +26,8 @@ public final class ImbueManager {
     private static final NamespacedKey TIER3_KEY = MagicKeys.alkatraz("imbued_tier3");
     private static final NamespacedKey TIER4_KEY = MagicKeys.alkatraz("imbued_tier4");
     private static final NamespacedKey TIER5_KEY = MagicKeys.alkatraz("imbued_tier5");
+    private static final String IMBUE_SYMBOL = "𖢻";
+    private static final String IMBUE_PREFIX_LEGACY = ColorFormat.format("&dImbued &r");
 
     private ImbueManager() {}
 
@@ -70,6 +73,52 @@ public final class ImbueManager {
                 .orElse(false);
     }
 
+    public static String wrapName(String name) {
+        if (name == null) return "";
+        String clean = unwrapName(name);
+        if (clean.isEmpty()) return "";
+        return ColorFormat.format("&d&k" + IMBUE_SYMBOL + " &r&d" + clean + " &d&k" + IMBUE_SYMBOL);
+    }
+
+    public static String unwrapName(String displayName) {
+        if (displayName == null) return "";
+        String s = displayName;
+        if (s.startsWith(IMBUE_PREFIX_LEGACY)) {
+            s = s.substring(IMBUE_PREFIX_LEGACY.length());
+        }
+        s = ChatColor.stripColor(s);
+        s = s.replace(IMBUE_SYMBOL, "");
+        return s.trim();
+    }
+
+    public static String getCleanName(ItemStack stack) {
+        if (stack == null || stack.getType().isAir()) return "";
+        ItemMeta meta = stack.getItemMeta();
+        String clean = meta != null && meta.hasDisplayName() ? unwrapName(meta.getDisplayName()) : "";
+        if (clean.isEmpty()) clean = prettifyMaterial(stack.getType());
+        return clean;
+    }
+
+    public static ItemStack toWrapped(ItemStack stack) {
+        if (stack == null || stack.getType().isAir()) return stack;
+        ItemStack copy = stack.clone();
+        ItemMeta meta = copy.getItemMeta();
+        if (meta == null) return copy;
+        meta.setDisplayName(wrapName(getCleanName(copy)));
+        copy.setItemMeta(meta);
+        return copy;
+    }
+
+    public static ItemStack toClean(ItemStack stack) {
+        if (stack == null || stack.getType().isAir()) return stack;
+        ItemStack copy = stack.clone();
+        ItemMeta meta = copy.getItemMeta();
+        if (meta == null || !meta.hasDisplayName()) return copy;
+        meta.setDisplayName(getCleanName(copy));
+        copy.setItemMeta(meta);
+        return copy;
+    }
+
     public static ItemStack imbue(ItemStack input) {
         if (input == null || input.getType().isAir()) return input;
         if (!isImbuable(input.getType())) return input;
@@ -90,12 +139,7 @@ public final class ImbueManager {
 
         ItemMeta resultMeta = result.getItemMeta();
         if (resultMeta != null) {
-            String imbuedPrefix = ColorFormat.format("&dImbued &r");
-            if (originalName != null) {
-                resultMeta.setDisplayName(imbuedPrefix + originalName);
-            } else {
-                resultMeta.setDisplayName(imbuedPrefix + prettifyMaterial(input.getType()));
-            }
+            resultMeta.setDisplayName(wrapName(originalName != null ? originalName : prettifyMaterial(input.getType())));
 
             if (originalLore != null && !originalLore.isEmpty()) {
                 List<String> combinedLore = resultMeta.getLore();

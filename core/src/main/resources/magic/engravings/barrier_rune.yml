@@ -1,4 +1,4 @@
-key: alkatraz:barrier_rune
+key: barrier_rune
 allowed_item_types:
   - helmet
   - chestplate
@@ -22,5 +22,5 @@ recipe:
     - "OMO"
     - "   "
   ingredients:
-    M: AMETHYST_SHARD
+    M: alkatraz:magic_stone
     O: OBSIDIAN

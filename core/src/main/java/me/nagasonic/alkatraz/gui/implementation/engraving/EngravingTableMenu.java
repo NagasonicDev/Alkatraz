@@ -11,6 +11,8 @@ import me.nagasonic.alkatraz.gui.ItemBuilder;
 import me.nagasonic.alkatraz.gui.Menu;
 import me.nagasonic.alkatraz.gui.implementation.WandTableSelectionMenu;
 import me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack;
+import me.nagasonic.alkatraz.items.magic.lore.LoreFormatter;
+import me.nagasonic.alkatraz.items.magic.util.ItemTypeMapper;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.util.ColorFormat;
@@ -24,8 +26,10 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public class EngravingTableMenu extends Menu {
 
@@ -119,16 +123,17 @@ public class EngravingTableMenu extends Menu {
     private ItemStack createEngravingDisplay(Engraving engraving, int index) {
         String engName = MagicItemRegistries.ENGRAVING_DEFINITIONS.get(engraving.engravingKey())
                 .map(def -> StringUtils.prettifyKey(def.getKey().getKey())).orElse("Unknown");
-        String trigName = engraving.triggerKey().equals(PASSIVE_TRIGGER)
-                ? "Passive"
-                : MagicItemRegistries.TRIGGER_TYPES.get(engraving.triggerKey())
-                        .map(t -> StringUtils.prettifyKey(t.getKey().getKey())).orElse("Unknown");
+
+        List<String> lore = new ArrayList<>();
+        MagicItemRegistries.ENGRAVING_DEFINITIONS.get(engraving.engravingKey()).ifPresent(def ->
+                LoreFormatter.engravingBlock(def, engraving.triggerKey())
+                        .forEach(line -> lore.add(ColorFormat.format(line))));
+        lore.add("");
+        lore.add(ColorFormat.format(lang().get("engraving.unequip_click")));
 
         ItemStack item = ItemBuilder.of(Material.ENCHANTED_BOOK)
                 .name("&6" + engName)
-                .lore("&7Trigger: &f" + trigName,
-                      "",
-                      lang().get("engraving.unequip_click"))
+                .rawLore(lore)
                 .build();
         setMenuData(item, "engraving_index", index);
         setMenuData(item, "action", "remove");
@@ -252,6 +257,16 @@ public class EngravingTableMenu extends Menu {
 
         EngravingDefinition def = MagicItemRegistries.ENGRAVING_DEFINITIONS.get(engravingKey.get()).orElse(null);
         if (def == null) return;
+
+        List<String> allowedTypes = def.allowedItemTypes();
+        if (!allowedTypes.isEmpty()) {
+            Set<String> targetTypes = ItemTypeMapper.getTypes(targetStack.getType());
+            if (Collections.disjoint(allowedTypes, targetTypes)) {
+                viewer.sendMessage(ColorFormat.format("&cThis rune cannot be applied to that item type."));
+                viewer.playSound(viewer.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
+                return;
+            }
+        }
 
         Object rawTriggers = def.staticConfig().get("triggers");
         if (rawTriggers instanceof List<?> triggers && triggers.isEmpty()) {
