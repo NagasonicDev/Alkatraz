@@ -46,7 +46,6 @@ public final class MagicItemComponentListener implements Listener {
             if (definition == null) {
                 return;
             }
-            
             for (NamespacedKey componentKey : definition.components()) {
                 ComponentHandlerRegistry.get(componentKey).ifPresent(handler -> {
                     handler.onInteract(event, stack, instance, definition);

@@ -5,7 +5,6 @@ import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.api.magic.component.ComponentHandler;
 import me.nagasonic.alkatraz.api.magic.component.ComponentType;
 import me.nagasonic.alkatraz.api.magic.definition.ItemDefinition;
-import me.nagasonic.alkatraz.api.magic.attribute.AttributeService;
 import me.nagasonic.alkatraz.api.magic.instance.MagicItemInstance;
 import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
 import me.nagasonic.alkatraz.api.magic.trigger.TriggerContext;
@@ -16,14 +15,17 @@ import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellCastValidator;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
 import me.nagasonic.alkatraz.util.Utils;
-import org.bukkit.Material;
-import org.bukkit.event.block.Action;
 import me.nagasonic.alkatraz.util.WandUtils;
-import org.bukkit.NamespacedKey;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class WandComponentHandler implements ComponentHandler {
 
@@ -32,6 +34,20 @@ public class WandComponentHandler implements ComponentHandler {
         .description("Wand that holds spell power and casting attributes")
         .build();
 
+    private static final Map<UUID, String> castCodes = new ConcurrentHashMap<>();
+
+    public static String getCastCode(UUID playerId) {
+        return castCodes.getOrDefault(playerId, "");
+    }
+
+    public static void setCastCode(UUID playerId, String code) {
+        castCodes.put(playerId, code);
+    }
+
+    public static void resetCastCode(UUID playerId) {
+        castCodes.remove(playerId);
+    }
+
     @Override
     public ComponentType type() {
         return TYPE;
@@ -39,12 +55,31 @@ public class WandComponentHandler implements ComponentHandler {
 
     @Override
     public void onEquip(Player player, ItemStack stack, MagicItemInstance instance, ItemDefinition definition) {
-        syncWandAttributesToNBT(instance, stack);
+        cleanLegacyWandNbt(stack);
     }
 
     @Override
     public void onUnequip(Player player, ItemStack stack, MagicItemInstance instance, ItemDefinition definition) {
-        NBT.modify(stack, nbt -> { nbt.removeKey("wand"); });
+        cleanLegacyWandNbt(stack);
+    }
+
+    private static void cleanLegacyWandNbt(ItemStack stack) {
+        NBT.modify(stack, nbt -> {
+            nbt.removeKey("wand");
+            nbt.removeKey("cast_code");
+            nbt.removeKey("circle_limit");
+            nbt.removeKey("magic_power");
+            nbt.removeKey("casting_time");
+            nbt.removeKey("mana");
+            nbt.removeKey("cast_time_multiplier");
+            nbt.removeKey("definition_key");
+            nbt.removeKey("fire_damage");
+            nbt.removeKey("air_damage");
+            nbt.removeKey("earth_damage");
+            nbt.removeKey("water_damage");
+            nbt.removeKey("light_damage");
+            nbt.removeKey("dark_damage");
+        });
     }
 
     @Override
@@ -73,8 +108,7 @@ public class WandComponentHandler implements ComponentHandler {
         }
         
         if (!data.isCasting()) {
-            String code = NBT.get(stack, nbt -> (String) nbt.getString("cast_code"));
-            if (code == null) code = "";
+            String code = getCastCode(player.getUniqueId());
             
             // Handle click types
             if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
@@ -83,9 +117,8 @@ public class WandComponentHandler implements ComponentHandler {
                 code += "L";
             }
             
-            // Update the code in NBT
-            String finalCode = code;
-            NBT.modify(stack, nbt -> { nbt.setString("cast_code", finalCode); });
+            // Store the code in memory
+            setCastCode(player.getUniqueId(), code);
             
             // Display the code to the player with proper symbols
             String message = code.replace("R", "\u25C6").replace("L", "\u25C8").replace("S", "\u2756");
@@ -108,13 +141,9 @@ public class WandComponentHandler implements ComponentHandler {
         MagicProfile data = ProfileManager.getProfile(player, MagicProfile.class);
         if (data.isCasting()) return;
 
-        String code = NBT.get(stack, nbt -> (String) nbt.getString("cast_code"));
-        if (code == null) code = "";
-
+        String code = getCastCode(player.getUniqueId());
         code += "S";
-
-        String finalCode = code;
-        NBT.modify(stack, nbt -> { nbt.setString("cast_code", finalCode); });
+        setCastCode(player.getUniqueId(), code);
 
         String message = code.replace("R", "\u25C6").replace("L", "\u25C8").replace("S", "\u2756");
         Utils.sendActionBar(player, message);
@@ -127,86 +156,13 @@ public class WandComponentHandler implements ComponentHandler {
 
     @Override
     public void onTrigger(TriggerContext context, ItemStack stack, MagicItemInstance instance, ItemDefinition definition) {
-        // Handle mana display updates
-        Player player = context.actor() instanceof Player ? (Player) context.actor() : null;
-        syncManaDisplay(player, stack);
         // Handle cast code reset when equipping a wand
+        Player player = context.actor() instanceof Player ? (Player) context.actor() : null;
         if (player != null && context.triggerType().equals(MagicKeys.alkatraz("on_equip"))) {
-            NBT.modify(stack, nbt -> { nbt.setString("cast_code", ""); });
+            resetCastCode(player.getUniqueId());
         }
     }
 
-    private void syncManaDisplay(Player player, ItemStack stack) {
-        double currentMana = getCurrentManaFromNBT(stack);
-        if (player != null) {
-            NBT.modify(stack, nbt -> { nbt.setDouble("mana", currentMana); });
-        }
-    }
-
-    private double getCurrentManaFromNBT(ItemStack stack) {
-        return NBT.get(stack, nbt -> {
-            if (nbt.hasTag("mana")) {
-                return nbt.getDouble("mana");
-            }
-            return 100.0;
-        });
-    }
-
-    public static void syncWandAttributesToNBT(MagicItemInstance instance, ItemStack stack) {
-        syncStatsToNBT(stack, instance, AttributeService.getInstance());
-    }
-
-    public static void syncWandAttributesToNBT(Player player, MagicItemInstance instance, ItemStack stack) {
-        double spellPower = getSpellPower(player, instance);
-        writeWandNBT(stack, instance.definitionKey(), spellPower);
-    }
-
-    private static void syncStatsToNBT(ItemStack stack, MagicItemInstance instance, AttributeService attributeService) {
-        double spellPower = readSpellPowerFromDefinition(instance);
-        writeWandNBT(stack, instance.definitionKey(), spellPower);
-    }
-
-    private static double readSpellPowerFromDefinition(MagicItemInstance instance) {
-        return me.nagasonic.alkatraz.api.magic.registry.MagicItemRegistries.ITEM_DEFINITIONS
-                .get(instance.definitionKey())
-                .map(def -> def.attributes().getOrDefault(MagicKeys.alkatraz("spell_power"), 0.0))
-                .orElse(0.0);
-    }
-
-    public static double getSpellPower(Player player, MagicItemInstance instance) {
-        return AttributeService.getInstance().get(player, MagicKeys.alkatraz("spell_power"));
-    }
-
-    public static double getSpellPower(Player player) {
-        return AttributeService.getInstance().get(player, MagicKeys.alkatraz("spell_power"));
-    }
-
-    private static void writeWandNBT(ItemStack stack, NamespacedKey definitionKey, double spellPower) {
-        NBT.modify(stack, nbt -> {
-            nbt.setBoolean("wand", true);
-            nbt.setDouble("magic_power", spellPower);
-            nbt.setString("definition_key", definitionKey.toString());
-            nbt.setDouble("mana", 100.0);
-            if (!nbt.hasTag("cast_time_multiplier")) {
-                nbt.setDouble("cast_time_multiplier", 1.0);
-            }
-        });
-        Alkatraz.logInfo("Updated wand magic_power to " + spellPower);
-    }
-
-    public static void syncManaToNBT(ItemStack stack, double mana) {
-        NBT.modify(stack, nbt -> { nbt.setDouble("mana", mana); });
-    }
-
-    public static double getManaFromNBT(ItemStack stack) {
-        return NBT.get(stack, nbt -> {
-            if (nbt.hasTag("mana")) {
-                return nbt.getDouble("mana");
-            }
-            return 100.0;
-        });
-    }
-    
     // ============================
     // CAST HELPERS
     // ============================
@@ -221,6 +177,6 @@ public class WandComponentHandler implements ComponentHandler {
                 Alkatraz.logHigh("Cast validation failed for " + (spell != null ? spell.getId() : "null") + " by " + player.getName());
             }
         }
-        NBT.modify(wand, nbt -> { nbt.setString("cast_code", ""); });
+        resetCastCode(player.getUniqueId());
     }
 }

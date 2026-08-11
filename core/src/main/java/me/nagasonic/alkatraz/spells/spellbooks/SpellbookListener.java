@@ -1,7 +1,6 @@
 package me.nagasonic.alkatraz.spells.spellbooks;
 
 import de.tr7zw.changeme.nbtapi.NBT;
-import me.nagasonic.alkatraz.Alkatraz;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -34,7 +33,8 @@ public class SpellbookListener implements Listener {
 
         // Check if it's a spellbook
         String spellbookType = NBT.get(item, nbt -> (String) nbt.getString("spellbook_type"));
-        if (spellbookType == null) return;
+        // Empty string (not null) is returned for a missing tag on modern MC versions.
+        if (spellbookType == null || spellbookType.isEmpty()) return;
 
         // Cancel the event to prevent other interactions
         event.setCancelled(true);

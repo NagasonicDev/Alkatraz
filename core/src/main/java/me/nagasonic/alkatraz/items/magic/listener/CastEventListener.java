@@ -2,6 +2,7 @@ package me.nagasonic.alkatraz.items.magic.listener;
 
 import de.tr7zw.changeme.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.items.magic.component.handler.wand.WandComponentHandler;
 import me.nagasonic.alkatraz.playerdata.SpellHotbarManager;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
@@ -61,7 +62,7 @@ public class CastEventListener implements Listener {
         if (wand != null){
             if (wand.getType() != Material.AIR && wand.getAmount() != 0) {
                 if (WandUtils.isWand(wand)) {
-                    NBT.modify(wand, nbt -> { nbt.setString("cast_code", ""); });
+                    WandComponentHandler.resetCastCode(e.getPlayer().getUniqueId());
                 }
             }
         }
