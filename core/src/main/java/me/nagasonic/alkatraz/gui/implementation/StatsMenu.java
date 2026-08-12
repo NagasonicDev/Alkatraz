@@ -83,7 +83,7 @@ public class StatsMenu extends Menu {
     private void buildResetConfirmation(MagicProfile profile) {
         inventory.setItem(13, ItemBuilder.of(Material.NETHER_STAR)
                 .name(lang().get("stats.reset_confirm_title"))
-                .rawLore(List.of(lang().get("stats.reset_confirm_lore").split("\\n")))
+                .rawLore(List.of(lang().get("stats.reset_confirm_lore").split("\\\\n")))
                 .build());
 
         inventory.setItem(11, ItemBuilder.of(Material.LIME_WOOL)
@@ -176,7 +176,7 @@ public class StatsMenu extends Menu {
     private ItemStack createResetButton(MagicProfile profile) {
         ItemStack item = ItemBuilder.of(Material.BARRIER)
                 .name(lang().get("stats.reset_button"))
-                .rawLore(List.of(lang().get("stats.reset_button_lore", "tokens", String.valueOf(profile.getResetTokens())).split("\\n")))
+                .rawLore(List.of(lang().get("stats.reset_button_lore", "tokens", String.valueOf(profile.getResetTokens())).split("\\\\n")))
                 .build();
         setMenuData(item, "action", "reset");
         return item;

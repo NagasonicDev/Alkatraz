@@ -80,7 +80,7 @@ public class EngravingTableMenuSelector extends Menu {
         if (meta != null) {
             meta.setDisplayName(ColorFormat.format(lang().get("engraving.select_item")));
             List<String> lore = new ArrayList<>();
-            for (String line : lang().get("engraving.select_item_lore").split("\\n")) {
+            for (String line : lang().get("engraving.select_item_lore").split("\\\\n")) {
                 lore.add(ColorFormat.format(line));
             }
             meta.setLore(lore);

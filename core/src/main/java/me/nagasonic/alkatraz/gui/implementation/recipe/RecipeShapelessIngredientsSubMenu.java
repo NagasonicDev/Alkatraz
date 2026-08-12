@@ -6,6 +6,7 @@ import me.nagasonic.alkatraz.gui.Menu;
 import me.nagasonic.alkatraz.util.ColorFormat;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.ItemStack;
@@ -84,7 +85,7 @@ public class RecipeShapelessIngredientsSubMenu extends Menu {
         int slot = event.getRawSlot();
         int index = indexOf(slot);
         if (index < 0) return true;
-        if (event.isRightClick()) {
+        if (event.isRightClick() || event.getAction() == InventoryAction.COLLECT_TO_CURSOR) {
             List<String> ingredients = parent.session().config().getStringList("ingredients");
             if (index < ingredients.size()) {
                 ingredients.remove(index);
@@ -93,7 +94,28 @@ public class RecipeShapelessIngredientsSubMenu extends Menu {
             }
             return true;
         }
+        ItemStack cursor = event.getCursor();
+        if (cursor != null && cursor.getType() != Material.AIR) {
+            String value = RecipeEditorSession.serializeItem(cursor);
+            if (value != null) {
+                List<String> ingredients = parent.session().config().getStringList("ingredients");
+                if (index < ingredients.size()) {
+                    ingredients.set(index, value);
+                } else {
+                    ingredients.add(value);
+                }
+                parent.session().config().set("ingredients", ingredients);
+                placeOne(cursor);
+                refresh();
+            }
+        }
         return true;
+    }
+
+    private void placeOne(ItemStack cursor) {
+        ItemStack remaining = cursor.clone();
+        remaining.setAmount(cursor.getAmount() - 1);
+        viewer.setItemOnCursor(remaining.getAmount() > 0 ? remaining : null);
     }
 
     @Override
@@ -102,8 +124,16 @@ public class RecipeShapelessIngredientsSubMenu extends Menu {
         if (dragged == null || dragged.getType() == Material.AIR) return;
         String value = RecipeEditorSession.serializeItem(dragged);
         if (value == null) return;
-        List<String> ingredients = parent.session().config().getStringList("ingredients");
+        int affected = 0;
         for (int slot : event.getRawSlots()) {
+            if (indexOf(slot) >= 0) affected++;
+        }
+        if (affected == 0) return;
+        int maxAffected = Math.min(affected, dragged.getAmount());
+        List<String> ingredients = parent.session().config().getStringList("ingredients");
+        int consumed = 0;
+        for (int slot : event.getRawSlots()) {
+            if (consumed >= maxAffected) break;
             int index = indexOf(slot);
             if (index < 0) continue;
             if (index < ingredients.size()) {
@@ -111,10 +141,12 @@ public class RecipeShapelessIngredientsSubMenu extends Menu {
             } else {
                 ingredients.add(value);
             }
-            inventory.setItem(slot, ingredientItem(value));
+            consumed++;
         }
         parent.session().config().set("ingredients", ingredients);
-        viewer.setItemOnCursor(null);
+        ItemStack cursor = dragged.clone();
+        cursor.setAmount(Math.max(0, cursor.getAmount() - consumed));
+        viewer.setItemOnCursor(cursor.getAmount() > 0 ? cursor : null);
         refresh();
     }
 

@@ -39,7 +39,7 @@ public class RecipeDeleteConfirmMenu extends Menu {
 
         ItemStack prompt = ItemBuilder.of(Material.PAPER)
                 .name(lang().get("recipes.delete.title"))
-                .lore(lang().get("recipes.delete.prompt", "key", recipe.getKey().toString()).split("\n"))
+                .lore(lang().get("recipes.delete.prompt", "key", recipe.getKey().toString()))
                 .build();
         inventory.setItem(PROMPT_SLOT, prompt);
 

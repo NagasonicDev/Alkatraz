@@ -32,9 +32,20 @@ public class MenuListener implements Listener {
         boolean inTop = raw >= 0 && raw < top.getSize();
 
         if (!menu.dropZoneSlots().isEmpty()) {
-            // Edit menus: the player's own inventory is off-limits entirely
+            // Edit menus: the player's own inventory is the material source, so plain
+            // pickup/place/swap clicks are allowed (they let players pick items up for
+            // drag-drop and return them). Shift-move, number-key swaps, drops, and
+            // collect are blocked since they could move items into the menu or lose them.
             if (!inTop) {
-                event.setCancelled(true);
+                InventoryAction action = event.getAction();
+                boolean inventoryFriendly = action == InventoryAction.PICKUP_ALL
+                        || action == InventoryAction.PICKUP_HALF
+                        || action == InventoryAction.PLACE_ONE
+                        || action == InventoryAction.PLACE_ALL
+                        || action == InventoryAction.SWAP_WITH_CURSOR;
+                if (!inventoryFriendly) {
+                    event.setCancelled(true);
+                }
                 return;
             }
             // Non-drop-zone top slots run the menu handler (buttons) but never move items
@@ -44,11 +55,12 @@ public class MenuListener implements Listener {
                 event.setCancelled(true);
                 return;
             }
-            // Drop-zone slots: only single-slot place / collect actions reach the menu
+            // Drop-zone slots: place / clear / collect actions reach the menu
             InventoryAction action = event.getAction();
             boolean allowed = action == InventoryAction.PLACE_ONE
                     || action == InventoryAction.PLACE_ALL
-                    || action == InventoryAction.COLLECT_TO_CURSOR;
+                    || action == InventoryAction.COLLECT_TO_CURSOR
+                    || action == InventoryAction.PICKUP_HALF;
             if (!allowed) {
                 event.setCancelled(true);
                 return;
@@ -72,20 +84,23 @@ public class MenuListener implements Listener {
 
         if (!menu.matches(event.getView().getTitle())) return;
 
-        // Edit menus only: drags are never allowed to touch a non-drop-zone slot.
-        // Non-edit menus declare no drop zones, so they keep their prior (unhandled) drag behavior.
+        // Edit menus: a drag that stays inside the player's own inventory is a plain
+        // rearrangement and is allowed to proceed. A drag that touches any top (menu)
+        // slot is cancelled and resolved manually by the menu, so items are only ever
+        // placed into declared drop zones (never into border/fill slots).
         Inventory top = event.getView().getTopInventory();
         Set<Integer> dropZones = menu.dropZoneSlots();
         if (!dropZones.isEmpty()) {
+            boolean touchesTop = false;
             for (int slot : event.getRawSlots()) {
-                if (slot < top.getSize() && !dropZones.contains(slot)) {
-                    event.setCancelled(true);
-                    return;
+                if (slot < top.getSize()) {
+                    touchesTop = true;
+                    break;
                 }
             }
-        }
-        // If it is an edit menu, cancel and let the menu resolve placement manually.
-        if (!dropZones.isEmpty()) {
+            if (!touchesTop) {
+                return;
+            }
             event.setCancelled(true);
             menu.onDrag(event);
         }

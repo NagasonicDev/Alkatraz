@@ -6,6 +6,7 @@ import me.nagasonic.alkatraz.gui.Menu;
 import me.nagasonic.alkatraz.util.ColorFormat;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.ItemStack;
@@ -83,19 +84,26 @@ public class RecipeShapeSubMenu extends Menu {
 
     @Override
     protected boolean handleClick(InventoryClickEvent event, ItemStack clicked) {
+        int slot = event.getRawSlot();
+        int index = slotInGrid(slot);
+        if (index >= 0) {
+            int row = index / 3;
+            int col = index % 3;
+            if (event.isRightClick() || event.getAction() == InventoryAction.COLLECT_TO_CURSOR) {
+                clearCell(row, col);
+                return true;
+            }
+            ItemStack cursor = event.getCursor();
+            if (cursor != null && cursor.getType() != Material.AIR) {
+                setCell(row, col, cursor);
+                placeOne(cursor);
+            }
+            return true;
+        }
         if (clicked == null || clicked.getType() == Material.AIR) return true;
         String action = getStringData(clicked, "action");
         if ("back".equals(action)) {
             parent.open();
-            return true;
-        }
-        int slot = event.getRawSlot();
-        int index = slotInGrid(slot);
-        if (index < 0) return true;
-        int row = index / 3;
-        int col = index % 3;
-        if (event.isRightClick()) {
-            clearCell(row, col);
             return true;
         }
         return true;
@@ -105,15 +113,29 @@ public class RecipeShapeSubMenu extends Menu {
     public void onDrag(InventoryDragEvent event) {
         ItemStack dragged = event.getOldCursor();
         if (dragged == null || dragged.getType() == Material.AIR) return;
+        int affected = 0;
         for (int slot : event.getRawSlots()) {
+            if (slotInGrid(slot) >= 0) affected++;
+        }
+        if (affected == 0) return;
+        int maxAffected = Math.min(affected, dragged.getAmount());
+        int consumed = 0;
+        for (int slot : event.getRawSlots()) {
+            if (consumed >= maxAffected) break;
             int index = slotInGrid(slot);
             if (index < 0) continue;
-            int row = index / 3;
-            int col = index % 3;
-            setCell(row, col, dragged);
-            inventory.setItem(slot, cellItem(charAt(row, col)));
+            setCell(index / 3, index % 3, dragged);
+            consumed++;
         }
-        viewer.setItemOnCursor(null);
+        ItemStack cursor = dragged.clone();
+        cursor.setAmount(Math.max(0, cursor.getAmount() - consumed));
+        viewer.setItemOnCursor(cursor.getAmount() > 0 ? cursor : null);
+    }
+
+    private void placeOne(ItemStack cursor) {
+        ItemStack remaining = cursor.clone();
+        remaining.setAmount(cursor.getAmount() - 1);
+        viewer.setItemOnCursor(remaining.getAmount() > 0 ? remaining : null);
     }
 
     private void setCell(int row, int col, ItemStack stack) {

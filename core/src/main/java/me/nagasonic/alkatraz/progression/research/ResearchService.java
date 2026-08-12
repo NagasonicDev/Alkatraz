@@ -220,7 +220,7 @@ public final class ResearchService {
             String descKey = "override.research.nodes." + key + ".description";
             String langDesc = lang.get(descKey);
             if (!langDesc.equals(descKey)) {
-                description = Arrays.asList(ColorFormat.format(langDesc).split("\\n"));
+                description = Arrays.asList(ColorFormat.format(langDesc).split("\\\\n"));
             }
 
             ResearchNode node = new ResearchNode(

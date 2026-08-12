@@ -270,11 +270,11 @@ public class RecipeEditMenu extends Menu {
             case FIELD_SLOT_OVERRIDE -> toggleField(RecipeField.OVERRIDE_VANILLA);
             case FIELD_SLOT_HIDDEN -> toggleField(RecipeField.HIDDEN_WHEN_LOCKED);
             case FIELD_SLOT_UNLOCK_MSG -> promptField(RecipeField.UNLOCK_MESSAGE, "Enter an unlock message (or \"none\" to clear):");
-            case FIELD_SLOT_REQUIREMENTS -> new RecipeRequirementsSubMenu(viewer, this).open();
-            case FIELD_SLOT_PERMISSIONS -> new RecipePermissionsSubMenu(viewer, this).open();
+            case FIELD_SLOT_REQUIREMENTS -> openSubMenu(new RecipeRequirementsSubMenu(viewer, this));
+            case FIELD_SLOT_PERMISSIONS -> openSubMenu(new RecipePermissionsSubMenu(viewer, this));
             case FIELD_SLOT_SPECIAL_A -> {
-                if (type == RecipeType.SHAPED) new RecipeShapeSubMenu(viewer, this).open();
-                else if (type == RecipeType.SHAPELESS) new RecipeShapelessIngredientsSubMenu(viewer, this).open();
+                if (type == RecipeType.SHAPED) openSubMenu(new RecipeShapeSubMenu(viewer, this));
+                else if (type == RecipeType.SHAPELESS) openSubMenu(new RecipeShapelessIngredientsSubMenu(viewer, this));
             }
             default -> {}
         }
@@ -292,15 +292,19 @@ public class RecipeEditMenu extends Menu {
                 copy.setAmount(1);
                 session.setDropItem(slot, copy, configPathFor(field));
                 ItemStack remaining = cursor.clone();
-                remaining.setAmount(action == InventoryAction.PLACE_ONE
-                        ? Math.max(0, cursor.getAmount() - 1) : 0);
+                remaining.setAmount(Math.max(0, cursor.getAmount() - 1));
                 viewer.setItemOnCursor(remaining.getAmount() > 0 ? remaining : null);
                 refresh();
             }
-        } else if (action == InventoryAction.COLLECT_TO_CURSOR) {
+        } else if (action == InventoryAction.PICKUP_HALF || action == InventoryAction.COLLECT_TO_CURSOR) {
             session.clearDropItem(slot, configPathFor(field));
             refresh();
         }
+    }
+
+    private void openSubMenu(Menu subMenu) {
+        suppressCleanup = true;
+        subMenu.open();
     }
 
     private RecipeField fieldForSlot(int slot) {
@@ -420,8 +424,10 @@ public class RecipeEditMenu extends Menu {
             if (dropZoneSlots().contains(slot)) affected++;
         }
         if (affected == 0) return;
+        int maxAffected = Math.min(affected, dragged.getAmount());
         int consumed = 0;
         for (int slot : event.getRawSlots()) {
+            if (consumed >= maxAffected) break;
             if (!dropZoneSlots().contains(slot)) continue;
             RecipeField field = fieldForSlot(slot);
             if (field == null) continue;

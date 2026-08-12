@@ -100,7 +100,7 @@ public class EngravingTableMenu extends Menu {
 
     private ItemStack createSelectPrompt() {
         List<String> lore = new ArrayList<>();
-        for (String line : lang().get("engraving.select_item_lore").split("\\n")) {
+        for (String line : lang().get("engraving.select_item_lore").split("\\\\n")) {
             lore.add(ColorFormat.format(line));
         }
         return ItemBuilder.of(Material.ENCHANTING_TABLE)

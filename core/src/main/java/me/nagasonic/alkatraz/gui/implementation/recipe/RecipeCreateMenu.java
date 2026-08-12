@@ -71,7 +71,7 @@ public class RecipeCreateMenu extends Menu {
                 ? ItemBuilder.of(Material.NAME_TAG).name("&e" + recipeKey).build()
                 : ItemBuilder.of(Material.NAME_TAG)
                         .name(lang().get("recipes.create.key"))
-                        .lore(lang().get("recipes.create.key_prompt").split("\n"))
+                        .lore(lang().get("recipes.create.key_prompt"))
                         .build();
         setMenuData(keyItem, "action", "key");
         inventory.setItem(KEY_SLOT, keyItem);
@@ -113,10 +113,12 @@ public class RecipeCreateMenu extends Menu {
                 if (cursor != null && cursor.getType() != Material.AIR) {
                     result = cursor.clone();
                     result.setAmount(1);
-                    viewer.setItemOnCursor(null);
+                    ItemStack remaining = cursor.clone();
+                    remaining.setAmount(cursor.getAmount() - 1);
+                    viewer.setItemOnCursor(remaining.getAmount() > 0 ? remaining : null);
                     refresh();
                 }
-            } else if (action == InventoryAction.COLLECT_TO_CURSOR) {
+            } else if (action == InventoryAction.PICKUP_HALF || action == InventoryAction.COLLECT_TO_CURSOR) {
                 result = null;
                 refresh();
             }
@@ -184,10 +186,20 @@ public class RecipeCreateMenu extends Menu {
     public void onDrag(InventoryDragEvent event) {
         ItemStack dragged = event.getOldCursor();
         if (dragged == null || dragged.getType() == Material.AIR) return;
+        boolean touchesResult = false;
+        for (int slot : event.getRawSlots()) {
+            if (slot == RESULT_SLOT) {
+                touchesResult = true;
+                break;
+            }
+        }
+        if (!touchesResult) return;
         result = dragged.clone();
         result.setAmount(1);
         inventory.setItem(RESULT_SLOT, result.clone());
-        viewer.setItemOnCursor(null);
+        ItemStack remaining = dragged.clone();
+        remaining.setAmount(dragged.getAmount() - 1);
+        viewer.setItemOnCursor(remaining.getAmount() > 0 ? remaining : null);
     }
 
     @Override

@@ -42,7 +42,7 @@ public class RecipeCategoryMenu extends Menu {
         ItemStack search = Alkatraz.getGuiItemRegistry().getItem("search_button").clone();
         ItemMeta searchMeta = search.getItemMeta();
         if (searchMeta != null) {
-            searchMeta.setLore(colorLore(lang().get("recipes.search_lore").split("\n")));
+            searchMeta.setLore(colorLore(lang().get("recipes.search_lore").split("\\\\n")));
             search.setItemMeta(searchMeta);
         }
         setMenuData(search, "action", "search");

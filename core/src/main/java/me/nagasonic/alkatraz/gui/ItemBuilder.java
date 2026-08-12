@@ -55,10 +55,12 @@ public class ItemBuilder {
         return this;
     }
 
-    /** Add lore lines with color formatting. */
+    /** Add lore lines with color formatting. Literal \n sequences are expanded into separate lines. */
     public ItemBuilder lore(String... lines) {
         for (String line : lines) {
-            lore.add(ColorFormat.format(line));
+            for (String part : line.split("\\\\n")) {
+                lore.add(ColorFormat.format(part));
+            }
         }
         return this;
     }
@@ -69,11 +71,13 @@ public class ItemBuilder {
         return this;
     }
 
-    /** Set the full lore, replacing any existing lines. Lines are color-formatted. */
+    /** Set the full lore, replacing any existing lines. Lines are color-formatted, with literal \n expanded. */
     public ItemBuilder setLore(List<String> lines) {
         lore.clear();
         for (String line : lines) {
-            lore.add(ColorFormat.format(line));
+            for (String part : line.split("\\\\n")) {
+                lore.add(ColorFormat.format(part));
+            }
         }
         return this;
     }

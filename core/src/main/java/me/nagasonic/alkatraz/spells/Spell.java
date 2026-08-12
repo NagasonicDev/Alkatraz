@@ -227,7 +227,7 @@ public abstract class Spell {
         String descKey = "override.spells." + this.id + ".description";
         String langDesc = lang.get(descKey);
         if (!langDesc.equals(descKey)) {
-            this.description = Arrays.asList(ColorFormat.format(langDesc).split("\\n"));
+            this.description = Arrays.asList(ColorFormat.format(langDesc).split("\\\\n"));
         } else {
             this.description = spellConfig.getStringList("description");
         }
