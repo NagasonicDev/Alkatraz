@@ -157,9 +157,9 @@ public final class ImbueManager {
 
     private static int determineTier(Material material) {
         String name = material.name();
-        if (name.startsWith("NETHERITE_") || name.equals("TURTLE_HELMET")) return 5;
+        if (name.startsWith("NETHERITE_") || name.equals("TURTLE_HELMET") || name.equals("MACE")) return 5;
         if (name.startsWith("DIAMOND_") || name.equals("CROSSBOW") || name.equals("TRIDENT")) return 4;
-        if (name.startsWith("IRON_")) return 3;
+        if (name.startsWith("IRON_") || name.equals("SHIELD")) return 3;
         if (name.startsWith("STONE_") || name.startsWith("CHAINMAIL_")) return 2;
         if (name.startsWith("WOODEN_") || name.startsWith("LEATHER_") || name.startsWith("GOLDEN_")) return 1;
         if (name.equals("BOW")) return 3;

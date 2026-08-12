@@ -17,13 +17,13 @@ public final class EquipmentSlot implements Keyed {
     /** The player's off hand. */
     public static final EquipmentSlot OFF_HAND = of("off_hand");
     /** The helmet/head slot. */
-    public static final EquipmentSlot HEAD = of("head");
+    public static final EquipmentSlot HEAD = vanilla(org.bukkit.inventory.EquipmentSlot.HEAD);
     /** The chestplate slot. */
-    public static final EquipmentSlot CHEST = of("chest");
+    public static final EquipmentSlot CHEST = vanilla(org.bukkit.inventory.EquipmentSlot.CHEST);
     /** The leggings slot. */
-    public static final EquipmentSlot LEGS = of("legs");
+    public static final EquipmentSlot LEGS = vanilla(org.bukkit.inventory.EquipmentSlot.LEGS);
     /** The boots slot. */
-    public static final EquipmentSlot FEET = of("feet");
+    public static final EquipmentSlot FEET = vanilla(org.bukkit.inventory.EquipmentSlot.FEET);
     /** The body (tunic) slot. */
     public static final EquipmentSlot BODY = of("body");
     /** A custom virtual ring slot. */

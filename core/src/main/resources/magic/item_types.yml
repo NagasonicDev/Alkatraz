@@ -69,6 +69,10 @@ types:
     - CROSSBOW
   trident:
     - TRIDENT
+  mace:
+    - MACE
+  shield:
+    - SHIELD
   wand:
     - STICK
     - BLAZE_ROD
