@@ -231,6 +231,11 @@ public final class MagicItemBootstrap {
         MagicItemService.saveDefaultResource("magic/items/imbued_tier3.yml");
         MagicItemService.saveDefaultResource("magic/items/imbued_tier4.yml");
         MagicItemService.saveDefaultResource("magic/items/imbued_tier5.yml");
+        MagicItemService.saveDefaultResource("magic/items/imbued_tier1_weapon.yml");
+        MagicItemService.saveDefaultResource("magic/items/imbued_tier2_weapon.yml");
+        MagicItemService.saveDefaultResource("magic/items/imbued_tier3_weapon.yml");
+        MagicItemService.saveDefaultResource("magic/items/imbued_tier4_weapon.yml");
+        MagicItemService.saveDefaultResource("magic/items/imbued_tier5_weapon.yml");
         MagicItemService.saveDefaultResource("magic/items/leather_grimoire.yml");
         MagicItemService.saveDefaultResource("magic/items/runic_grimoire.yml");
         MagicItemService.saveDefaultResource("magic/items/blaze_grimoire.yml");
@@ -291,6 +296,7 @@ public final class MagicItemBootstrap {
         registerAttribute("light_affinity", 0, "Light Affinity");
         registerAttribute("dark_affinity", 0, "Dark Affinity");
         registerAttribute("max_mana", 0, "Maximum Mana");
+        registerAttribute("magic_damage", 0, "Magic Damage");
         registerAttribute("mana_regeneration", 0, "Mana Regeneration");
 
         registerTrigger("on_spell_cast", "When the holder casts a spell", "wand");

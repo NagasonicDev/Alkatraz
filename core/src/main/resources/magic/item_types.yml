@@ -93,3 +93,6 @@ types:
     - AMETHYST_BLOCK
     - ECHO_SHARD
     - DIAMOND
+  robe:
+    - LEATHER_CHESTPLATE
+  artifact: []

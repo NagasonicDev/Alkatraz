@@ -26,6 +26,11 @@ public final class ImbueManager {
     private static final NamespacedKey TIER3_KEY = MagicKeys.alkatraz("imbued_tier3");
     private static final NamespacedKey TIER4_KEY = MagicKeys.alkatraz("imbued_tier4");
     private static final NamespacedKey TIER5_KEY = MagicKeys.alkatraz("imbued_tier5");
+    private static final NamespacedKey TIER1_WEAPON_KEY = MagicKeys.alkatraz("imbued_tier1_weapon");
+    private static final NamespacedKey TIER2_WEAPON_KEY = MagicKeys.alkatraz("imbued_tier2_weapon");
+    private static final NamespacedKey TIER3_WEAPON_KEY = MagicKeys.alkatraz("imbued_tier3_weapon");
+    private static final NamespacedKey TIER4_WEAPON_KEY = MagicKeys.alkatraz("imbued_tier4_weapon");
+    private static final NamespacedKey TIER5_WEAPON_KEY = MagicKeys.alkatraz("imbued_tier5_weapon");
     private static final String IMBUE_SYMBOL = "𖢻";
     private static final String IMBUE_PREFIX_LEGACY = ColorFormat.format("&dImbued &r");
 
@@ -53,6 +58,16 @@ public final class ImbueManager {
     }
 
     public static NamespacedKey getTierKey(Material material) {
+        if (isWeapon(material)) {
+            return switch (getTier(material)) {
+                case 1 -> TIER1_WEAPON_KEY;
+                case 2 -> TIER2_WEAPON_KEY;
+                case 3 -> TIER3_WEAPON_KEY;
+                case 4 -> TIER4_WEAPON_KEY;
+                case 5 -> TIER5_WEAPON_KEY;
+                default -> null;
+            };
+        }
         return switch (getTier(material)) {
             case 1 -> TIER1_KEY;
             case 2 -> TIER2_KEY;
@@ -61,6 +76,14 @@ public final class ImbueManager {
             case 5 -> TIER5_KEY;
             default -> null;
         };
+    }
+
+    public static boolean isWeapon(Material material) {
+        String name = material.name();
+        return name.endsWith("_SWORD")
+                || name.endsWith("_AXE")
+                || name.equals("MACE")
+                || name.equals("TRIDENT");
     }
 
     public static int getStoneCount(Material material) {

@@ -142,7 +142,7 @@ public final class MagicItemStack {
             return stack;
         }
         write(meta, instance.definitionKey(), instance);
-        readDefinition(stack).ifPresent(def -> {
+        MagicItemRegistries.ITEM_DEFINITIONS.get(instance.definitionKey()).ifPresent(def -> {
             List<String> lore = buildLore(def, instance);
             meta.setLore(lore);
         });
