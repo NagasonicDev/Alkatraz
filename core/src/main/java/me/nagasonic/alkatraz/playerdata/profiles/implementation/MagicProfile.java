@@ -21,6 +21,7 @@ public class MagicProfile extends Profile {
     {
         // Core stats
         intStat("circleLevel", 0);
+        intStat("equipmentMaxCircle", 0);
         intStat("statPoints", 0);
         intStat("resetTokens", 0);
 
@@ -105,6 +106,9 @@ public class MagicProfile extends Profile {
 
     public int getCircleLevel() { return getInt("circleLevel"); }
     public void setCircleLevel(int value) { setInt("circleLevel", value); }
+
+    public int getEquipmentMaxCircle() { return getInt("equipmentMaxCircle"); }
+    public void setEquipmentMaxCircle(int value) { setInt("equipmentMaxCircle", value); }
 
     public int getStatPoints() { return getInt("statPoints"); }
     public void setStatPoints(int value) { setInt("statPoints", value); }

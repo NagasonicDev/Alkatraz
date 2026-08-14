@@ -56,19 +56,24 @@ public final class SpellCastValidator {
     }
 
     private static int getToolCircleLimit(Player player, ItemStack wand) {
+        int wandLimit;
         // Try new PDC magic item first
         if (MagicItemStack.isMagicItem(wand)) {
-            return MagicItemStack.readInstance(wand)
+            wandLimit = MagicItemStack.readInstance(wand)
                     .flatMap(instance -> MagicItemRegistries.ITEM_DEFINITIONS.get(instance.definitionKey()))
                     .map(def -> (int) def.attributeOrDefault(MagicKeys.alkatraz("max_circle"), 1))
                     .orElse(1);
+        } else {
+            // Fall back to legacy NBT
+            wandLimit = NBT.get(wand, nbt -> {
+                if (nbt.hasTag("circle_limit")) {
+                    return nbt.getInteger("circle_limit");
+                }
+                return 1;
+            });
         }
-        // Fall back to legacy NBT
-        return NBT.get(wand, nbt -> {
-            if (nbt.hasTag("circle_limit")) {
-                return nbt.getInteger("circle_limit");
-            }
-            return 1;
-        });
+        MagicProfile profile = ProfileManager.getProfile(player.getUniqueId(), MagicProfile.class);
+        int equipmentBonus = profile != null ? profile.getEquipmentMaxCircle() : 0;
+        return wandLimit + equipmentBonus;
     }
 }

@@ -44,10 +44,12 @@ public final class EquipmentStatService {
         double equipRegen = contributed.getOrDefault(MagicKeys.alkatraz("mana_regeneration"), 0.0);
         double equipMagicAffinity = contributed.getOrDefault(MagicKeys.alkatraz("magic_affinity"), 0.0);
         double equipMagicResistance = contributed.getOrDefault(MagicKeys.alkatraz("magic_resistance"), 0.0);
+        double equipMaxCircle = contributed.getOrDefault(MagicKeys.alkatraz("max_circle"), 0.0);
         profile.setMaxMana(Math.max(100, baseMana + equipMana));
         profile.setManaRegeneration(Math.max(0, baseRegen + equipRegen));
         profile.setMagicAffinity(baseMagicAffinity + equipMagicAffinity);
         profile.setMagicResistance(baseMagicResistance + equipMagicResistance);
+        profile.setEquipmentMaxCircle((int) equipMaxCircle);
         setIfContributed(contributed, profile, MagicKeys.alkatraz("fire_affinity"),
                 v -> profile.setFireAffinity(v), 0.0);
         setIfContributed(contributed, profile, MagicKeys.alkatraz("water_affinity"),
