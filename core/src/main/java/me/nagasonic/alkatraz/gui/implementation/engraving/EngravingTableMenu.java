@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.Set;
 
 public class EngravingTableMenu extends Menu {
@@ -39,6 +40,15 @@ public class EngravingTableMenu extends Menu {
 
     /** Sentinel trigger key stored for passive engravings that need no trigger selection. */
     private static final NamespacedKey PASSIVE_TRIGGER = MagicKeys.alkatraz("passive");
+
+    /** Probability that an engraving attempt succeeds. */
+    public static final double SUCCESS_CHANCE = 0.8;
+
+    public static int engravingManaCost(EngravingSession session) {
+        if (session == null) return 0;
+        int currentEngravings = session.targetInstance().engravings().size();
+        return 100 + (currentEngravings * 50);
+    }
 
     private ItemStack targetStack;
     private MagicItemInstance targetInstance;
@@ -270,9 +280,10 @@ public class EngravingTableMenu extends Menu {
 
         Object rawTriggers = def.staticConfig().get("triggers");
         if (rawTriggers instanceof List<?> triggers && triggers.isEmpty()) {
-            // Passive engraving: no trigger selection, apply directly.
+            // Passive engraving: no trigger selection, confirm then apply.
             session.setSelectedTriggerKey(PASSIVE_TRIGGER);
-            applyEngraving(viewer, session);
+            viewer.playSound(viewer.getLocation(), Sound.BLOCK_STONE_BUTTON_CLICK_ON, 1.0f, 1.0f);
+            new ConfirmEngravingMenu(viewer).open();
             return;
         }
 
@@ -285,14 +296,6 @@ public class EngravingTableMenu extends Menu {
         if (index < 0 || index >= engravings.size()) return;
 
         Engraving removed = engravings.get(index);
-
-        Optional<EngravingDefinition> def = MagicItemRegistries.ENGRAVING_DEFINITIONS.get(removed.engravingKey());
-        if (def.isPresent()) {
-            ItemStack refundItem = MagicItemStack.createEngravingItem(def.get());
-            viewer.getInventory().addItem(refundItem)
-                    .values().forEach(leftover ->
-                            viewer.getWorld().dropItemNaturally(viewer.getLocation(), leftover));
-        }
 
         List<Engraving> updated = new ArrayList<>(engravings);
         updated.remove(index);
@@ -323,7 +326,7 @@ public class EngravingTableMenu extends Menu {
             return false;
         }
 
-        int manaCost = 100 + (currentEngravings * 50);
+        int manaCost = engravingManaCost(session);
 
         MagicProfile profile = ProfileManager.getProfile(viewer.getUniqueId(), MagicProfile.class);
         if (profile == null) return false;
@@ -353,6 +356,18 @@ public class EngravingTableMenu extends Menu {
         }
 
         Engraving engraving = new Engraving(session.selectedEngravingKey(), session.selectedTriggerKey());
+
+        if (new Random().nextDouble() >= SUCCESS_CHANCE) {
+            viewer.sendMessage(ColorFormat.format("&cThe engraving failed! The rune was consumed."));
+            viewer.playSound(viewer.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
+            ItemStack stack = session.targetStack();
+            MagicItemInstance instance = session.targetInstance();
+            ItemDefinition definition = session.targetDefinition();
+            EngravingSession.remove(viewer.getUniqueId());
+            new EngravingTableMenu(viewer, stack, instance, definition).open();
+            return false;
+        }
+
         session.targetInstance().addEngraving(engraving);
         MagicItemStack.writeInstance(session.targetStack(), session.targetInstance());
 

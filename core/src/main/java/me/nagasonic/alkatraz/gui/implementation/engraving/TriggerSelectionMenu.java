@@ -9,6 +9,7 @@ import me.nagasonic.alkatraz.items.magic.util.ItemTypeMapper;
 import me.nagasonic.alkatraz.util.ColorFormat;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -120,7 +121,8 @@ public class TriggerSelectionMenu extends PagedMenu<TriggerType> {
         if (session == null) return;
 
         session.setSelectedTriggerKey(trigger.getKey());
-        EngravingTableMenu.applyEngraving(viewer, session);
+        viewer.playSound(viewer.getLocation(), Sound.BLOCK_STONE_BUTTON_CLICK_ON, 1.0f, 1.0f);
+        new ConfirmEngravingMenu(viewer).open();
     }
 
     @Override

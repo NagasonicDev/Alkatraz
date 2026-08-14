@@ -36,6 +36,7 @@ menu.research_categories = &5Research Categories
 menu.engraving_table = &8Engraving Table
 menu.engraving_selector = &dEngraving Table
 menu.trigger_select = &6Select Trigger Type
+menu.confirm_engraving = &8Confirm Engraving
 menu.item_editor = &8Item Editor
 menu.rune_editor = &b&lRune Editor
 menu.circle_up_confirm = &5&lConfirm Circle Up
