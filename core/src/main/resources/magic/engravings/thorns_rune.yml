@@ -15,8 +15,8 @@ conditions:
     min_circle: 1
 effects:
   - type: damage
-    damage: 2
-    bypass_armor: true
+    damage: 4
+    bypass_armor: false
 recipe:
   shape:
     - " C "

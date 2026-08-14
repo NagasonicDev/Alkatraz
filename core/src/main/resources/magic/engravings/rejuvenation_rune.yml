@@ -4,10 +4,7 @@ allowed_item_types:
   - robe
   - artifact
 triggers:
-  - on_equip
-  - on_unequip
-  - on_join
-  - on_death
+  - on_low_health
 item:
   material: POPPY
   display_name: '&dRejuvenation Rune'
@@ -17,6 +14,8 @@ item:
 conditions:
   - type: circle_level
     min_circle: 2
+  - type: cooldown
+    seconds: 60
 effects:
   - type: potion_effect
     effect: REGENERATION

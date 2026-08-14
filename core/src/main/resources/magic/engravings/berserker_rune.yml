@@ -13,12 +13,12 @@ item:
     - '&7&oDeals additional damage in combat.'
 conditions:
   - type: random
-    chance: 0.3
+    chance: 0.5
   - type: circle_level
     min_circle: 1
 effects:
   - type: damage
-    damage: 4
+    damage: 6
 recipe:
   shape:
     - " R "

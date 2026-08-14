@@ -20,6 +20,7 @@ effects:
   - type: explosion
     power: 2.5
     set_fire: true
+    break_blocks: false
 recipe:
   shape:
     - " T "

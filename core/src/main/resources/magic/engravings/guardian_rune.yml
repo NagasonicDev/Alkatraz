@@ -13,6 +13,8 @@ item:
 conditions:
   - type: circle_level
     min_circle: 2
+  - type: random
+    chance: 0.4
 effects:
   - type: potion_effect
     effect: RESISTANCE

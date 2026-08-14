@@ -11,6 +11,9 @@ item:
   lore:
     - '&7&oA sticky rune woven from ensnaring webs.'
     - '&7&oApplies slowness effect to targets.'
+conditions:
+  - type: random
+    chance: 0.5
 effects:
   - type: potion_effect
     effect: SLOWNESS

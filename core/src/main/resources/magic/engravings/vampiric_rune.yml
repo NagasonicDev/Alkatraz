@@ -14,6 +14,8 @@ item:
 conditions:
   - type: circle_level
     min_circle: 1
+  - type: random
+    chance: 0.5
 effects:
   - type: heal
     amount: 4

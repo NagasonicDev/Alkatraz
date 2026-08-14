@@ -8,10 +8,7 @@ allowed_item_types:
   - robe
   - artifact
 triggers:
-  - on_equip
-  - on_unequip
-  - on_join
-  - on_death
+  - on_low_health
 item:
   material: GOLDEN_APPLE
   display_name: '&6Vitality Rune'
@@ -23,6 +20,8 @@ attributes:
 conditions:
   - type: circle_level
     min_circle: 1
+  - type: cooldown
+    seconds: 30
 effects:
   - type: heal
     amount: 2

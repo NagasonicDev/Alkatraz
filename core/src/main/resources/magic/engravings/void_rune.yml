@@ -2,8 +2,7 @@ key: void_rune
 allowed_item_types:
   - wand
 triggers:
-  - on_damage_dealt
-  - on_kill
+  - on_spell_hit
 item:
   material: OBSIDIAN
   display_name: '&5Void Rune'
@@ -20,7 +19,7 @@ conditions:
 effects:
   - type: damage
     damage: 6
-    bypass_armor: true
+    bypass_armor: false
   - type: ignite
     duration_ticks: 40
 recipe:

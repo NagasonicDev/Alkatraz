@@ -14,6 +14,9 @@ item:
     - '&7&oIgnites targets for a duration.'
 attributes:
   alkatraz:fire_affinity: 10
+conditions:
+  - type: random
+    chance: 0.35
 effects:
   - type: ignite
     duration_ticks: 60

@@ -14,10 +14,13 @@ item:
     - '&7&oDeals lightning damage to foes.'
 attributes:
   alkatraz:air_affinity: 10
+conditions:
+  - type: random
+    chance: 0.5
 effects:
   - type: damage
     damage: 4
-    bypass_armor: true
+    bypass_armor: false
 recipe:
   shape:
     - " G "

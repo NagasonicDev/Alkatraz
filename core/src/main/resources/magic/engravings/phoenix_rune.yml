@@ -5,9 +5,7 @@ allowed_item_types:
   - boots
 triggers:
   - on_equip
-  - on_unequip
   - on_join
-  - on_death
 item:
   material: MAGMA_CREAM
   display_name: '&cPhoenix Rune'

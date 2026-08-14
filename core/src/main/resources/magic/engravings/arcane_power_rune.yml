@@ -12,7 +12,7 @@ item:
     - '&7&oA rune pulsing with focused arcane power.'
     - '&7&oIncreases spell power and heals the caster.'
 attributes:
-  alkatraz:spell_power: 5
+  alkatraz:spell_power: 0.5
 conditions:
   - type: circle_level
     min_circle: 2
