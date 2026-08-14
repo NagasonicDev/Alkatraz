@@ -14,6 +14,7 @@ import me.nagasonic.alkatraz.items.magic.MagicItemBootstrap;
 import me.nagasonic.alkatraz.items.magic.adapter.MagicItemTriggerAdapter;
 import me.nagasonic.alkatraz.items.magic.adapter.MagicItemComponentListener;
 import me.nagasonic.alkatraz.items.magic.adapter.CombatTriggerListener;
+import me.nagasonic.alkatraz.items.magic.adapter.MagicDamageListener;
 import me.nagasonic.alkatraz.items.magic.adapter.MovementTriggerListener;
 import me.nagasonic.alkatraz.items.magic.adapter.EnvironmentTriggerListener;
 import me.nagasonic.alkatraz.items.magic.adapter.InventoryTriggerListener;
@@ -169,6 +170,7 @@ public final class Alkatraz extends JavaPlugin {
         registerListener(new FirstJoinTutorial());
         registerListener(new MagicItemTriggerAdapter());
         registerListener(new CombatTriggerListener());
+        registerListener(new MagicDamageListener());
         registerListener(new MovementTriggerListener());
         registerListener(new EnvironmentTriggerListener());
         registerListener(new InventoryTriggerListener());

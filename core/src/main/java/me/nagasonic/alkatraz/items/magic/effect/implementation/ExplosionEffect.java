@@ -3,8 +3,12 @@ package me.nagasonic.alkatraz.items.magic.effect.implementation;
 import me.nagasonic.alkatraz.api.magic.effect.Effect;
 
 import me.nagasonic.alkatraz.api.magic.trigger.TriggerContext;
+import me.nagasonic.alkatraz.items.magic.adapter.MagicDamageListener;
+import me.nagasonic.alkatraz.items.magic.attribute.MagicDamage;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 
 import java.util.Map;
 
@@ -24,7 +28,21 @@ public final class ExplosionEffect implements Effect {
         LivingEntity origin = context.target() != null ? context.target() : context.actor();
         if (origin == null) return;
         Location loc = origin.getLocation();
-        loc.getWorld().createExplosion(loc, power, setFire, breakBlocks);
+        World world = loc.getWorld();
+        if (world == null) return;
+
+        Player actor = context.playerActor().orElse(null);
+        double magicDamage = actor != null ? MagicDamage.of(context.sourceItem()) : 0.0;
+        if (magicDamage > 0) {
+            MagicDamageListener.registerExplosionBonus(actor.getUniqueId(), magicDamage);
+        }
+        try {
+            world.createExplosion(loc, power, setFire, breakBlocks, actor);
+        } finally {
+            if (magicDamage > 0) {
+                MagicDamageListener.clearExplosionBonus(actor.getUniqueId());
+            }
+        }
     }
 
     public static Effect fromConfig(Map<String, Object> config) {

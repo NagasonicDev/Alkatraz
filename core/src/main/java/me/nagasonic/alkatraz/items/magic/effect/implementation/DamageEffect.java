@@ -3,6 +3,7 @@ package me.nagasonic.alkatraz.items.magic.effect.implementation;
 import me.nagasonic.alkatraz.api.magic.effect.Effect;
 
 import me.nagasonic.alkatraz.api.magic.trigger.TriggerContext;
+import me.nagasonic.alkatraz.items.magic.attribute.MagicDamage;
 import me.nagasonic.alkatraz.items.magic.effect.EffectExecutor;
 import org.bukkit.entity.LivingEntity;
 
@@ -21,10 +22,11 @@ public final class DamageEffect implements Effect {
     public void execute(TriggerContext context) {
         LivingEntity target = EffectExecutor.resolveTarget(context);
         if (target != null) {
+            double total = damage + MagicDamage.of(context.sourceItem());
             if (bypassArmor) {
-                target.setHealth(Math.max(0, target.getHealth() - damage));
+                target.setHealth(Math.max(0, target.getHealth() - total));
             } else {
-                target.damage(damage);
+                target.damage(total);
             }
         }
     }
