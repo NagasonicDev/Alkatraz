@@ -55,7 +55,7 @@ public class ProgressionMenu extends Menu {
             inventory.setItem(9 + i, createCirclePane(circle, currentCircle, profile));
         }
 
-        inventory.setItem(22, ItemBuilder.of(Material.ARROW)
+        inventory.setItem(22, ItemBuilder.of(Material.BARRIER)
                 .name(lang().get("common.back_white"))
                 .build());
 

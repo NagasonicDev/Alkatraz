@@ -268,7 +268,7 @@ public class ResearchEntryMenu extends Menu {
     }
 
     private ItemStack backItem() {
-        ItemStack item = ItemBuilder.of(Material.ARROW)
+        ItemStack item = ItemBuilder.of(Material.BARRIER)
                 .name(lang().get("research.back_to_graph"))
                 .build();
         setMenuData(item, "action", "back");

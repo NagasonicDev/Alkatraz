@@ -180,7 +180,7 @@ public class ResearchGraphMenu extends Menu {
     }
 
     private void drawScrollbar() {
-        inventory.setItem(45, button(Material.ARROW, lang().get("research.back_to_arcane"), "back_table"));
+        inventory.setItem(45, button(Material.BARRIER, lang().get("research.back_to_arcane"), "back_table"));
 
         List<ResearchCategory> cats = sortedCategories();
         int activeIndex = findActiveCategoryIndex(cats);
