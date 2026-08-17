@@ -127,7 +127,7 @@ public class HotbarSpellSelectionMenu extends PagedMenu<Spell> {
 
         Material mat = (assigned != null)
                 ? assigned.getGuiItem().getType()
-                : Material.LIME_STAINED_GLASS_PANE;
+                : Material.GRAY_STAINED_GLASS_PANE;
 
         String prefix  = focused ? "&b▶ " : "&e";
         String content = (assigned != null) ? assigned.getDisplayName()

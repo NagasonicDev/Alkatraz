@@ -223,7 +223,7 @@ public class PooledSlotSelectionMenu extends PagedMenu<OptionValue<?>> {
     // =========================================================================
 
     private ItemStack buildLockedSlotItem(SpellOption slotOption) {
-        ItemBuilder builder = ItemBuilder.of(Material.LIGHT_GRAY_STAINED_GLASS_PANE)
+        ItemBuilder builder = ItemBuilder.of(Material.GRAY_STAINED_GLASS_PANE)
                 .name("&8" + slotOption.getDisplayName() + " &7(Locked)");
 
         if (!slotOption.getUnmetRequirements(viewer).isEmpty()) {

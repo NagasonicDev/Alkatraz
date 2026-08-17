@@ -95,7 +95,7 @@ public class RecipeDetailMenu extends Menu {
             inventory.setItem(DUPLICATE_SLOT, duplicate);
         }
         if (RecipesPermissions.canDelete(viewer)) {
-            ItemStack delete = ItemBuilder.of(Material.RED_DYE)
+            ItemStack delete = ItemBuilder.of(Material.RED_CONCRETE)
                     .name(lang().get("recipes.detail_delete"))
                     .lore(lang().get("recipes.detail_delete_lore"))
                     .build();

@@ -131,7 +131,7 @@ public class ConfirmEngravingMenu extends Menu {
         lore.add(ColorFormat.format("&c" + percent + "%"));
         lore.add("");
         lore.add(ColorFormat.format("&7On failure the rune &fand mana &7are lost."));
-        return ItemBuilder.of(Material.RED_DYE)
+        return ItemBuilder.of(Material.RED_CONCRETE)
                 .name("&cFailure Chance")
                 .rawLore(lore)
                 .build();

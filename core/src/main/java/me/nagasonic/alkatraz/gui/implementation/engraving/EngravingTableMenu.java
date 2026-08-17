@@ -151,7 +151,7 @@ public class EngravingTableMenu extends Menu {
     }
 
     private ItemStack createEmptyEngravingSlot() {
-        return ItemBuilder.of(Material.LIGHT_GRAY_STAINED_GLASS_PANE)
+        return ItemBuilder.of(Material.GRAY_STAINED_GLASS_PANE)
                 .name(lang().get("engraving.empty_slot"))
                 .lore(lang().get("engraving.empty_slot_lore"))
                 .build();

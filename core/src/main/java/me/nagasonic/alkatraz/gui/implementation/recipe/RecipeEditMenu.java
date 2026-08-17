@@ -198,7 +198,7 @@ public class RecipeEditMenu extends Menu {
     }
 
     private ItemStack createBoolField(Material material, RecipeField field, boolean value) {
-        Material icon = value ? Material.LIME_DYE : Material.RED_DYE;
+        Material icon = value ? Material.LIME_DYE : Material.RED_CONCRETE;
         return ItemBuilder.of(icon)
                 .name(lang().get(field.langKey()))
                 .lore(lang().get("recipes.edit.current", "value", String.valueOf(value)))

@@ -68,7 +68,7 @@ public class CircleUpConfirmationMenu extends Menu {
 
         setMenuData(inventory.getItem(SLOT_CONFIRM), "action", "confirm");
 
-        inventory.setItem(SLOT_CANCEL, ItemBuilder.of(Material.RED_WOOL)
+        inventory.setItem(SLOT_CANCEL, ItemBuilder.of(Material.RED_CONCRETE)
                 .name(lang().get("circleup.confirm_no"))
                 .build());
 

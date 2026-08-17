@@ -93,7 +93,7 @@ public class StatsMenu extends Menu {
 
         setMenuData(inventory.getItem(11), "action", "confirm_reset");
 
-        inventory.setItem(15, ItemBuilder.of(Material.RED_WOOL)
+        inventory.setItem(15, ItemBuilder.of(Material.RED_CONCRETE)
                 .name(lang().get("stats.reset_confirm_no"))
                 .lore(lang().get("stats.reset_confirm_no_lore"))
                 .build());
@@ -147,7 +147,7 @@ public class StatsMenu extends Menu {
 
         List<String> lore = new ArrayList<>();
         int points = profile.getPoints(element);
-        lore.add(lang().get("stats.invested_points") + " &6" + points);
+        lore.add(ColorFormat.format(lang().get("stats.invested_points") + " &6" + points));
 
         if (points > 0) {
             lore.add("");

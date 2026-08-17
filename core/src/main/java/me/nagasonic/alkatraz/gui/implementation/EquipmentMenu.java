@@ -84,7 +84,7 @@ public class EquipmentMenu extends Menu {
 
     private ItemStack createEmptySlot(EquipmentSlot equipSlot) {
         String slotName = lang().get("equipment.slot_" + equipSlot.getKey().getKey());
-        ItemStack item = ItemBuilder.of(Material.LIME_STAINED_GLASS_PANE)
+        ItemStack item = ItemBuilder.of(Material.GRAY_STAINED_GLASS_PANE)
                 .name(lang().get("equipment.empty_slot", "slot", slotName))
                 .lore(lang().get("equipment.empty_slot_lore"))
                 .build();

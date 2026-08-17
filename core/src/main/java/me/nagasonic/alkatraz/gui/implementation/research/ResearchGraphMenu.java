@@ -321,8 +321,8 @@ public class ResearchGraphMenu extends Menu {
 
     private ItemStack createNodeItem(ResearchNode node, ResearchState state) {
         Material material = switch (state) {
-            case HIDDEN -> Material.GRAY_DYE;
-            case LOCKED -> Material.RED_DYE;
+            case HIDDEN -> Material.RED_DYE;
+            case LOCKED -> Material.RED_CONCRETE;
             case AVAILABLE -> node.getIcon();
             case IN_PROGRESS -> Material.WRITABLE_BOOK;
             case COMPLETED -> Material.ENCHANTED_BOOK;
@@ -455,7 +455,7 @@ public class ResearchGraphMenu extends Menu {
         Material mat = switch (stateKey) {
             case "completed" -> Material.PURPLE_STAINED_GLASS_PANE;
             case "available" -> Material.PINK_STAINED_GLASS_PANE;
-            default -> Material.RED_STAINED_GLASS_PANE;
+            default -> Material.RED_DYE;
         };
         int cmd = TexturePackManager.getConnectorCMD(piece.name().toLowerCase() + "_" + stateKey);
         return ItemBuilder.of(mat).name(" ").glint("in_progress".equals(stateKey)).customModelData(cmd).build();
