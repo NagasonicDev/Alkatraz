@@ -203,12 +203,12 @@ gui_items:
   # Default materials for GUI elements
   decorative:
     blank: "GRAY_STAINED_GLASS_PANE"
-    border: "BLACK_STAINED_GLASS_PANE"
-    header: "CYAN_STAINED_GLASS_PANE"
+    border: "GRAY_STAINED_GLASS_PANE"
+    header: "GRAY_STAINED_GLASS_PANE"
   buttons:
-    back: "ARROW"
-    next_page: "PAPER"
-    prev_page: "PAPER"
+    back: "BARRIER"
+    next_page: "ARROW"
+    prev_page: "ARROW"
     confirm: "LIME_CONCRETE"
     cancel: "RED_CONCRETE"
     info: "KNOWLEDGE_BOOK"

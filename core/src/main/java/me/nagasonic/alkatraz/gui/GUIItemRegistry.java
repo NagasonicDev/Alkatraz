@@ -64,11 +64,11 @@ public class GUIItemRegistry {
     
     private static ItemStack createBackButton() {
         Material material = TexturePackManager.getGuiMaterial("button_back");
-        if (material == null) material = Material.ARROW;
-        
+        if (material == null) material = Material.BARRIER;
+
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
-        
+
         meta.setDisplayName(Alkatraz.getLangManager().get("common.back"));
         
         int cmd = TexturePackManager.getGUICMD("back_button");
@@ -82,7 +82,7 @@ public class GUIItemRegistry {
     
     private static ItemStack createPageButton(String direction) {
         Material material = TexturePackManager.getGuiMaterial("button_" + (direction.equals("next") ? "next_page" : "prev_page"));
-        if (material == null) material = Material.PAPER;
+        if (material == null) material = Material.ARROW;
         
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
