@@ -148,7 +148,7 @@ public class ConfirmEngravingMenu extends Menu {
         lore.add("");
         lore.add(ColorFormat.format("&7Success chance: &a" + successPercent() + "%"));
         lore.add(ColorFormat.format("&7Failure: &c" + (100 - successPercent()) + "% &8(rune lost)"));
-        return ItemBuilder.of(Material.EMERALD_BLOCK)
+        return ItemBuilder.of(Material.LIME_CONCRETE)
                 .name("&aConfirm Engraving")
                 .rawLore(lore)
                 .build();

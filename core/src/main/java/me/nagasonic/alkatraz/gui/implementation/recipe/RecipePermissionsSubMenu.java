@@ -42,7 +42,7 @@ public class RecipePermissionsSubMenu extends Menu {
                         .build());
             }
         }
-        ItemStack add = ItemBuilder.of(Material.LIME_DYE)
+        ItemStack add = ItemBuilder.of(Material.LIME_CONCRETE)
                 .name(lang().get("recipes.edit.add_permission"))
                 .build();
         setMenuData(add, "action", "add");

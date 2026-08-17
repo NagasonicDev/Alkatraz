@@ -77,7 +77,7 @@ public class LoreSubMenu extends Menu {
     }
 
     private ItemStack createAddButton() {
-        ItemStack item = new ItemStack(Material.LIME_DYE);
+        ItemStack item = new ItemStack(Material.LIME_CONCRETE);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
             meta.setDisplayName(lang().get("editor.add_line"));

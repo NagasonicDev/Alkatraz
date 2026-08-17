@@ -198,7 +198,7 @@ public class ResearchEntryMenu extends Menu {
                 actionTag = "complete";
             }
             case COMPLETED -> {
-                actionMat = Material.LIME_DYE;
+                actionMat = Material.LIME_CONCRETE;
                 actionName = lang().get("research.entry_completed");
                 lore.add(ColorFormat.format("&7This research is finished."));
             }

@@ -65,7 +65,7 @@ public class ComponentsSubMenu extends Menu {
     }
 
     private ItemStack createCompItem(String key, boolean enabled) {
-        ItemStack item = new ItemStack(enabled ? Material.LIME_DYE : Material.GRAY_DYE);
+        ItemStack item = new ItemStack(enabled ? Material.LIME_CONCRETE : Material.GRAY_DYE);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
             meta.setDisplayName(ColorFormat.format((enabled ? "&a" : "&7") + key));

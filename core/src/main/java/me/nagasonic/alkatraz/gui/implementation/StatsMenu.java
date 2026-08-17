@@ -86,7 +86,7 @@ public class StatsMenu extends Menu {
                 .rawLore(List.of(lang().get("stats.reset_confirm_lore").split("\\\\n")))
                 .build());
 
-        inventory.setItem(11, ItemBuilder.of(Material.LIME_WOOL)
+        inventory.setItem(11, ItemBuilder.of(Material.LIME_CONCRETE)
                 .name(lang().get("stats.reset_confirm_yes"))
                 .lore(lang().get("stats.reset_confirm_yes_lore"))
                 .build());

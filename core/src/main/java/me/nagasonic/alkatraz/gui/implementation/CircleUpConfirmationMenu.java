@@ -61,7 +61,7 @@ public class CircleUpConfirmationMenu extends Menu {
                 .rawLore(infoLore)
                 .build());
 
-        inventory.setItem(SLOT_CONFIRM, ItemBuilder.of(Material.LIME_WOOL)
+        inventory.setItem(SLOT_CONFIRM, ItemBuilder.of(Material.LIME_CONCRETE)
                 .name(lang().get("circleup.confirm_yes"))
                 .lore(lang().get("circleup.confirm_lore", "ordinal", StringUtils.toOrdinal(targetCircle)))
                 .build());

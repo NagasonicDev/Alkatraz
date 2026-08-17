@@ -47,7 +47,7 @@ public class RecipeRequirementsSubMenu extends Menu {
                         .build());
             }
         }
-        ItemStack add = ItemBuilder.of(Material.LIME_DYE)
+        ItemStack add = ItemBuilder.of(Material.LIME_CONCRETE)
                 .name(lang().get("recipes.edit.add_requirement"))
                 .build();
         setMenuData(add, "action", "add");
