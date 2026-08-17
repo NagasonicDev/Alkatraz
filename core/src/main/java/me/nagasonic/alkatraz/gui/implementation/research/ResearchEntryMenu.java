@@ -203,7 +203,7 @@ public class ResearchEntryMenu extends Menu {
                 lore.add(ColorFormat.format("&7This research is finished."));
             }
             case LOCKED -> {
-                actionMat = Material.BARRIER;
+                actionMat = Material.RED_DYE;
                 actionName = lang().get("research.entry_locked");
                 List<String> missingParents = new ArrayList<>();
                 for (String parentId : node.getParents()) {

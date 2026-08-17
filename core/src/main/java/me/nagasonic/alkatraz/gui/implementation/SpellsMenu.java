@@ -126,7 +126,7 @@ public class SpellsMenu extends PagedMenu<Spell> {
     }
 
     private ItemStack createLockedSpellItem(Spell spell) {
-        return ItemBuilder.of(Material.GRAY_DYE)
+        return ItemBuilder.of(Material.RED_DYE)
                 .name(lang().get("spells.locked_name"))
                 .rawLore(List.of(lang().get("spells.locked_lore", "circle", String.valueOf(spell.getRequiredCircleLevel()))))
                 .build();
