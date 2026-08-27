@@ -12,6 +12,7 @@ import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
+import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
@@ -213,10 +214,14 @@ public class Tsunami extends AttackSpell {
 
                     for (Block b : Utils.blocksInRadius(colLoc, 2)) {
                         if (b.getType() == Material.FIRE) {
-                            b.setType(Material.AIR);
+                            if (Protection.blockEdit(caster, b.getLocation())) {
+                                b.setType(Material.AIR);
+                            }
                         } else if (b.getType() == Material.LAVA) {
                             Levelled data = (Levelled) b.getBlockData();
-                            b.setType(data.getLevel() == 0 ? Material.OBSIDIAN : Material.COBBLESTONE);
+                            if (Protection.blockEdit(caster, b.getLocation())) {
+                                b.setType(data.getLevel() == 0 ? Material.OBSIDIAN : Material.COBBLESTONE);
+                            }
                         }
                     }
 
@@ -356,10 +361,14 @@ public class Tsunami extends AttackSpell {
 
                     for (Block b : Utils.blocksInRadius(colLoc, 2)) {
                         if (b.getType() == Material.FIRE) {
-                            b.setType(Material.AIR);
+                            if (Protection.blockEdit(caster, b.getLocation())) {
+                                b.setType(Material.AIR);
+                            }
                         } else if (b.getType() == Material.LAVA) {
                             Levelled data = (Levelled) b.getBlockData();
-                            b.setType(data.getLevel() == 0 ? Material.OBSIDIAN : Material.COBBLESTONE);
+                            if (Protection.blockEdit(caster, b.getLocation())) {
+                                b.setType(data.getLevel() == 0 ? Material.OBSIDIAN : Material.COBBLESTONE);
+                            }
                         }
                     }
 

@@ -17,6 +17,7 @@ import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
+import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.block.data.BlockData;
@@ -34,12 +35,18 @@ import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class Tremor extends AttackSpell implements Listener {
 
+    private static final Map<UUID, Map<Location, Material>> recoverData = new java.util.concurrent.ConcurrentHashMap<>();
     private static LangManager lang() {
         return Alkatraz.getLangManager();
     }
+
+    private boolean blockDamage;
+    private long recoverTime;
 
     public Tremor(String type) {
         super(type);
@@ -64,6 +71,8 @@ public class Tremor extends AttackSpell implements Listener {
 
         loadCommonConfig(spellConfig);
         loadOptions();
+        this.blockDamage = spellConfig.getBoolean("block_damage", true);
+        this.recoverTime = spellConfig.getLong("recover_time", 0);
         Alkatraz.getInstance().getServer().getPluginManager().registerEvents(this,  Alkatraz.getInstance());
     }
 
@@ -118,13 +127,20 @@ public class Tremor extends AttackSpell implements Listener {
                                     8
                             );
                             SpellComponentHandler.register(component);
-                            BlockData data = Bukkit.createBlockData(loc.getBlock().getType());
-                            FallingBlock b = loc.getWorld().spawnFallingBlock(loc.add(0, 0.5, 0), data);
-                            b.setHurtEntities(false);
-                            b.setVelocity(new Vector(0, 0.5, 0));
-                            NBT.modifyPersistentData(b, nbt -> {
-                                nbt.setString("spell", getId());
-                            });
+                            if (blockDamage) {
+                                Map<Location, Material> originals = new java.util.HashMap<>();
+                                originals.put(loc, loc.getBlock().getType());
+                                BlockData data = Bukkit.createBlockData(loc.getBlock().getType());
+                                if (Protection.blockEdit(p, loc)) {
+                                    FallingBlock b = loc.getWorld().spawnFallingBlock(loc.add(0, 0.5, 0), data);
+                                    recoverData.put(b.getUniqueId(), originals);
+                                    b.setHurtEntities(false);
+                                    b.setVelocity(new Vector(0, 0.5, 0));
+                                    NBT.modifyPersistentData(b, nbt -> {
+                                        nbt.setString("spell", getId());
+                                    });
+                                }
+                            }
                             List<Location> locs = ParticleUtils.circle(loc, 1, 1, 0, 0);
                             for (Location l : locs){
                                 l.getWorld().spawnParticle(Utils.EXPLOSION, l, 1);
@@ -205,13 +221,20 @@ public class Tremor extends AttackSpell implements Listener {
                                     8
                             );
                             SpellComponentHandler.register(component);
-                            BlockData data = Bukkit.createBlockData(loc.getBlock().getType());
-                            FallingBlock b = loc.getWorld().spawnFallingBlock(loc.add(0, 0.5, 0), data);
-                            b.setHurtEntities(false);
-                            b.setVelocity(new Vector(0, 0.5, 0));
-                            NBT.modifyPersistentData(b, nbt -> {
-                                nbt.setString("spell", getId());
-                            });
+                            if (blockDamage) {
+                                Map<Location, Material> originals = new java.util.HashMap<>();
+                                originals.put(loc, loc.getBlock().getType());
+                                BlockData data = Bukkit.createBlockData(loc.getBlock().getType());
+                                if (Protection.blockEdit(caster, loc)) {
+                                    FallingBlock b = loc.getWorld().spawnFallingBlock(loc.add(0, 0.5, 0), data);
+                                    recoverData.put(b.getUniqueId(), originals);
+                                    b.setHurtEntities(false);
+                                    b.setVelocity(new Vector(0, 0.5, 0));
+                                    NBT.modifyPersistentData(b, nbt -> {
+                                        nbt.setString("spell", getId());
+                                    });
+                                }
+                            }
                             List<Location> locs = ParticleUtils.circle(loc, 1, 1, 0, 0);
                             for (Location l : locs){
                                 l.getWorld().spawnParticle(Utils.EXPLOSION, l, 1);
@@ -281,7 +304,23 @@ public class Tremor extends AttackSpell implements Listener {
             if (id != null && !id.isEmpty()){
                 if (id != getId()) return;
                 e.setCancelled(true);
+                UUID entityUUID = b.getUniqueId();
                 b.remove();
+                if (blockDamage && recoverTime > 0) {
+                    Map<Location, Material> originals = recoverData.remove(entityUUID);
+                    if (originals != null && !originals.isEmpty()) {
+                        new BukkitRunnable() {
+                            @Override
+                            public void run() {
+                                for (Map.Entry<Location, Material> entry : originals.entrySet()) {
+                                    entry.getKey().getBlock().setType(entry.getValue(), false);
+                                }
+                            }
+                        }.runTaskLater(Alkatraz.getInstance(), recoverTime * 20);
+                    }
+                } else {
+                    recoverData.remove(entityUUID);
+                }
             }
         }
     }

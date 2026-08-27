@@ -7,6 +7,7 @@ import me.nagasonic.alkatraz.items.magic.listener.CastEventListener;
 import me.nagasonic.alkatraz.api.magic.trigger.TriggerContext;
 import me.nagasonic.alkatraz.api.magic.trigger.event.SpellHitTriggerEvent;
 import me.nagasonic.alkatraz.spells.Spell;
+import me.nagasonic.alkatraz.hooks.Protection;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 
@@ -48,6 +49,12 @@ public final class SpellDamageUtil {
 
         // Flag so CastEventListener.onAttack skips spell-caused damage
         CastEventListener.markSpellDamage(target);
+
+        // Respect region PvP / mob-damage flags before dealing damage
+        if (!Protection.damage(target, caster, target.getLocation())) {
+            return;
+        }
+
         // Apply the actual damage
         target.damage(damage, caster);
 

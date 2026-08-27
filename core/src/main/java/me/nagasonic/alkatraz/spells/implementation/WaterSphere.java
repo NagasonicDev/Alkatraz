@@ -16,6 +16,7 @@ import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
+import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -138,7 +139,7 @@ public class WaterSphere extends AttackSpell {
 
                 if (step >= totalSteps) {
                     splash(targetLoc, 1.0);
-                    placeWater(targetLoc);
+                    placeWater(caster, targetLoc);
                     cancel();
                     return;
                 }
@@ -217,7 +218,9 @@ public class WaterSphere extends AttackSpell {
                     if (b.getType() == Material.FARMLAND) {
                         if (b.getBlockData() instanceof Farmland farm) {
                             farm.setMoisture(farm.getMaximumMoisture());
-                            b.setBlockData(farm);
+                            if (Protection.blockEdit(caster, b.getLocation())) {
+                                b.setBlockData(farm);
+                            }
                         }
                     }
                 }
@@ -238,25 +241,31 @@ public class WaterSphere extends AttackSpell {
         world.playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 0.5f, 1.5f);
     }
 
-    private void placeWater(Location center) {
+    private void placeWater(LivingEntity caster, Location center) {
         Block centerBlock = center.getBlock();
         if (centerBlock.getType() == Material.AIR) {
-            centerBlock.setType(Material.WATER);
-            if (centerBlock.getBlockData() instanceof Levelled water) {
-                water.setLevel(0);
-                centerBlock.setBlockData(water);
-            }
-            Bukkit.getScheduler().runTaskLater(Alkatraz.getInstance(), () -> {
-                if (centerBlock.getType() == Material.WATER) {
-                    centerBlock.setType(Material.AIR);
+            if (Protection.blockEdit(caster, center)) {
+                centerBlock.setType(Material.WATER);
+                if (centerBlock.getBlockData() instanceof Levelled water) {
+                    water.setLevel(0);
+                    centerBlock.setBlockData(water);
                 }
-            }, 100L);
+                Bukkit.getScheduler().runTaskLater(Alkatraz.getInstance(), () -> {
+                    if (centerBlock.getType() == Material.WATER) {
+                        if (Protection.blockEdit(caster, centerBlock.getLocation())) {
+                            centerBlock.setType(Material.AIR);
+                        }
+                    }
+                }, 100L);
+            }
         }
         // Also hydrate all farmland within the sphere
         for (Block b : Utils.blocksInRadius(center, (int) Math.ceil(sphereRadius))) {
             if (b.getType() == Material.FARMLAND && b.getBlockData() instanceof Farmland farm) {
                 farm.setMoisture(farm.getMaximumMoisture());
-                b.setBlockData(farm);
+                if (Protection.blockEdit(caster, b.getLocation())) {
+                    b.setBlockData(farm);
+                }
             }
         }
     }

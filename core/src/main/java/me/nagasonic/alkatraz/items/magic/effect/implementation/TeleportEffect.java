@@ -3,6 +3,7 @@ package me.nagasonic.alkatraz.items.magic.effect.implementation;
 import me.nagasonic.alkatraz.api.magic.effect.Effect;
 
 import me.nagasonic.alkatraz.api.magic.trigger.TriggerContext;
+import me.nagasonic.alkatraz.hooks.Protection;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
@@ -21,6 +22,9 @@ public final class TeleportEffect implements Effect {
             Location loc = player.getLocation();
             loc.add(loc.getDirection().multiply(distance));
             loc.setY(loc.getWorld().getHighestBlockYAt(loc) + 1);
+            if (!Protection.teleport(player, loc)) {
+                return;
+            }
             player.teleport(loc);
         }
     }

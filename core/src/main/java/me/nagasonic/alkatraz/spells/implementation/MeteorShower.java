@@ -12,6 +12,7 @@ import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
+import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
@@ -42,6 +43,7 @@ public class MeteorShower extends AttackSpell implements Listener {
     private record MeteorData(Player caster, double totalPower, ItemStack wand) {}
 
     private int windUpDuration;
+    private boolean blockDamage;
 
     public MeteorShower(String type) {
         super(type);
@@ -55,6 +57,7 @@ public class MeteorShower extends AttackSpell implements Listener {
         loadCommonConfig(spellConfig);
         loadOptions();
         this.windUpDuration = spellConfig.getInt("wind_up_duration", 6) * 20;
+        this.blockDamage = spellConfig.getBoolean("block_damage", true);
         Alkatraz.getInstance().getServer().getPluginManager().registerEvents(this, Alkatraz.getInstance());
     }
 
@@ -274,34 +277,40 @@ public class MeteorShower extends AttackSpell implements Listener {
             );
         }
 
-        int destroyRadius = 5;
-        for (int dx = -destroyRadius; dx <= destroyRadius; dx++) {
-            for (int dy = -destroyRadius; dy <= destroyRadius; dy++) {
-                for (int dz = -destroyRadius; dz <= destroyRadius; dz++) {
-                    if (dx * dx + dy * dy + dz * dz > destroyRadius * destroyRadius) continue;
-                    Location blockLoc = explodeLoc.clone().add(dx, dy, dz);
-                    Block b = blockLoc.getBlock();
-                    if (b.getType().isSolid() && !b.getType().toString().contains("BEDROCK")) {
-                        b.getWorld().spawnParticle(Utils.BLOCK, blockLoc.clone().add(0.5, 0.5, 0.5),
-                                8, 0.3, 0.3, 0.3, 0.3, b.getBlockData());
-                        if (Math.random() < 0.3) {
-                            b.breakNaturally();
-                        } else {
-                            b.setType(Material.AIR);
+        if (blockDamage) {
+            int destroyRadius = 5;
+            for (int dx = -destroyRadius; dx <= destroyRadius; dx++) {
+                for (int dy = -destroyRadius; dy <= destroyRadius; dy++) {
+                    for (int dz = -destroyRadius; dz <= destroyRadius; dz++) {
+                        if (dx * dx + dy * dy + dz * dz > destroyRadius * destroyRadius) continue;
+                        Location blockLoc = explodeLoc.clone().add(dx, dy, dz);
+                        Block b = blockLoc.getBlock();
+                        if (b.getType().isSolid() && !b.getType().toString().contains("BEDROCK")) {
+                            b.getWorld().spawnParticle(Utils.BLOCK, blockLoc.clone().add(0.5, 0.5, 0.5),
+                                    8, 0.3, 0.3, 0.3, 0.3, b.getBlockData());
+                            if (Protection.blockEdit(caster, b.getLocation())) {
+                                if (Math.random() < 0.3) {
+                                    b.breakNaturally();
+                                } else {
+                                    b.setType(Material.AIR);
+                                }
+                            }
                         }
                     }
                 }
             }
-        }
 
-        for (int dx = -destroyRadius; dx <= destroyRadius; dx++) {
-            for (int dy = -destroyRadius; dy <= destroyRadius; dy++) {
-                for (int dz = -destroyRadius; dz <= destroyRadius; dz++) {
-                    if (dx * dx + dy * dy + dz * dz > destroyRadius * destroyRadius) continue;
-                    Location blockLoc = explodeLoc.clone().add(dx, dy, dz);
-                    Block b = blockLoc.getBlock();
-                    if (b.isPassable() && b.getRelative(0, -1, 0).getType().isSolid()) {
-                        b.setType(Material.FIRE);
+            for (int dx = -destroyRadius; dx <= destroyRadius; dx++) {
+                for (int dy = -destroyRadius; dy <= destroyRadius; dy++) {
+                    for (int dz = -destroyRadius; dz <= destroyRadius; dz++) {
+                        if (dx * dx + dy * dy + dz * dz > destroyRadius * destroyRadius) continue;
+                        Location blockLoc = explodeLoc.clone().add(dx, dy, dz);
+                        Block b = blockLoc.getBlock();
+                        if (b.isPassable() && b.getRelative(0, -1, 0).getType().isSolid()) {
+                            if (Protection.ignite(caster, b.getLocation())) {
+                                b.setType(Material.FIRE);
+                            }
+                        }
                     }
                 }
             }

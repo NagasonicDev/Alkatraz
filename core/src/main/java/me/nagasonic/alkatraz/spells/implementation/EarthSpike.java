@@ -20,6 +20,7 @@ import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
+import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -45,6 +46,8 @@ public class EarthSpike extends AttackSpell implements Listener {
     }
 
     private long selfDestructTicks;
+    private boolean blockDamage;
+    private long recoverTime;
 
     public EarthSpike(String type) {
         super(type);
@@ -71,6 +74,8 @@ public class EarthSpike extends AttackSpell implements Listener {
         loadCommonConfig(spellConfig);
         loadOptions();
         this.selfDestructTicks = spellConfig.getLong("self_destruct_ticks", 100);
+        this.blockDamage = spellConfig.getBoolean("block_damage", true);
+        this.recoverTime = spellConfig.getLong("recover_time", 0);
         Alkatraz.getInstance().getServer().getPluginManager().registerEvents(this, Alkatraz.getInstance());
     }
 
@@ -119,7 +124,7 @@ public class EarthSpike extends AttackSpell implements Listener {
             int y = block.getY();
             int z = block.getZ();
 
-            if (selfDestruct) {
+            if (selfDestruct || recoverTime > 0) {
                 for (int dy = -height; dy <= height; dy++) {
                     Location l = new Location(world, x, y + dy, z);
                     originals.putIfAbsent(l, l.getBlock().getType());
@@ -134,14 +139,18 @@ public class EarthSpike extends AttackSpell implements Listener {
                         cancel();
                         return;
                     }
-                    for (int i = 0; i <= height; i++) {
-                        if (props.isCountered() || props.isCancelled()) {
-                            cancel();
-                            return;
+                    if (blockDamage) {
+                        for (int i = 0; i <= height; i++) {
+                            if (props.isCountered() || props.isCancelled()) {
+                                cancel();
+                                return;
+                            }
+                            Block from = world.getBlockAt(x, y - i + step, z);
+                            Block to   = world.getBlockAt(x, y - i + step + 1, z);
+                            if (Ground.isGround(from.getType()) && Protection.blockEdit(player, to.getLocation())) {
+                                to.setType(from.getType(), false);
+                            }
                         }
-                        Block from = world.getBlockAt(x, y - i + step, z);
-                        Block to   = world.getBlockAt(x, y - i + step + 1, z);
-                        if (Ground.isGround(from.getType())) to.setType(from.getType(), false);
                     }
 
                     SpellBlockComponent comp = new SpellBlockComponent(
@@ -165,7 +174,12 @@ public class EarthSpike extends AttackSpell implements Listener {
                             le.setVelocity(new Vector(0, 1, 0));
                         }
                     }
-                    world.getBlockAt(x, y - height + step, z).setType(Material.AIR, false);
+                    if (blockDamage) {
+                        Block topClear = world.getBlockAt(x, y - height + step, z);
+                        if (Protection.blockEdit(player, topClear.getLocation())) {
+                            topClear.setType(Material.AIR, false);
+                        }
+                    }
                     if (props.isCountered() || props.isCancelled()) {
                         cancel();
                         return;
@@ -186,6 +200,15 @@ public class EarthSpike extends AttackSpell implements Listener {
                     }
                 }
             }.runTaskLater(Alkatraz.getInstance(), maxHeight + selfDestructTicks);
+        } else if (recoverTime > 0 && !originals.isEmpty()) {
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    for (Map.Entry<Location, Material> e : originals.entrySet()) {
+                        e.getKey().getBlock().setType(e.getValue(), false);
+                    }
+                }
+            }.runTaskLater(Alkatraz.getInstance(), recoverTime * 20);
         }
     }
 
@@ -226,7 +249,7 @@ public class EarthSpike extends AttackSpell implements Listener {
             int y = block.getY();
             int z = block.getZ();
 
-            if (selfDestruct) {
+            if (recoverTime > 0) {
                 for (int dy = -height; dy <= height; dy++) {
                     Location l = new Location(world, x, y + dy, z);
                     originals.putIfAbsent(l, l.getBlock().getType());
@@ -241,14 +264,18 @@ public class EarthSpike extends AttackSpell implements Listener {
                         cancel();
                         return;
                     }
-                    for (int i = 0; i <= height; i++) {
-                        if (props.isCountered() || props.isCancelled()) {
-                            cancel();
-                            return;
+                    if (blockDamage) {
+                        for (int i = 0; i <= height; i++) {
+                            if (props.isCountered() || props.isCancelled()) {
+                                cancel();
+                                return;
+                            }
+                            Block from = world.getBlockAt(x, y - i + step, z);
+                            Block to   = world.getBlockAt(x, y - i + step + 1, z);
+                            if (Ground.isGround(from.getType()) && Protection.blockEdit(caster, to.getLocation())) {
+                                to.setType(from.getType(), false);
+                            }
                         }
-                        Block from = world.getBlockAt(x, y - i + step, z);
-                        Block to   = world.getBlockAt(x, y - i + step + 1, z);
-                        if (Ground.isGround(from.getType())) to.setType(from.getType(), false);
                     }
 
                     SpellBlockComponent comp = new SpellBlockComponent(
@@ -272,7 +299,12 @@ public class EarthSpike extends AttackSpell implements Listener {
                             le.setVelocity(new Vector(0, 1, 0));
                         }
                     }
-                    world.getBlockAt(x, y - height + step, z).setType(Material.AIR, false);
+                    if (blockDamage) {
+                        Block topClear = world.getBlockAt(x, y - height + step, z);
+                        if (Protection.blockEdit(caster, topClear.getLocation())) {
+                            topClear.setType(Material.AIR, false);
+                        }
+                    }
                     if (props.isCountered() || props.isCancelled()) {
                         cancel();
                         return;
@@ -293,6 +325,15 @@ public class EarthSpike extends AttackSpell implements Listener {
                     }
                 }
             }.runTaskLater(Alkatraz.getInstance(), maxHeight + selfDestructTicks);
+        } else if (recoverTime > 0 && !originals.isEmpty()) {
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    for (Map.Entry<Location, Material> e : originals.entrySet()) {
+                        e.getKey().getBlock().setType(e.getValue(), false);
+                    }
+                }
+            }.runTaskLater(Alkatraz.getInstance(), recoverTime * 20);
         }
     }
 

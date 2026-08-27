@@ -61,7 +61,9 @@ public enum Permission {
     /** Permission to access all spells. */
     ALL_SPELLS("alkatraz.allspells"),
     /** Permission to cast spells without a cooldown. */
-    NO_COOLDOWN("alkatraz.nocooldown");
+    NO_COOLDOWN("alkatraz.nocooldown"),
+    /** Permission to bypass WorldGuard region constraints for spells and engravings. */
+    REGION_BYPASS("alkatraz.bypass.regions");
 
 
     private final String permission;

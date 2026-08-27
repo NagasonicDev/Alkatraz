@@ -36,4 +36,7 @@ mastery_bar_color: 'RED'
 gui_item: 'MAGMA_CREAM'
 gui_custom_model_data: 4134
 
+# WHETHER THIS SPELL CAN DESTROY/modify BLOCKS. DEFAULT: TRUE
+block_damage: true
+
 

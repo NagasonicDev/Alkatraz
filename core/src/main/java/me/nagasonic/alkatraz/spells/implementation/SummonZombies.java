@@ -10,6 +10,7 @@ import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
+import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
@@ -70,6 +71,8 @@ public class SummonZombies extends AttackSpell implements Listener {
             Location spawnLoc = findSpawnLocation(caster.getLocation());
             if (spawnLoc == null) continue;
 
+            if (!Protection.spawnMob(caster, spawnLoc)) continue;
+
             Zombie zombie = (Zombie) spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.ZOMBIE);
             zombie.setAdult();
             zombie.setCustomName(ChatColor.DARK_RED + caster.getName() + "'s Zombie");
@@ -87,6 +90,11 @@ public class SummonZombies extends AttackSpell implements Listener {
             zombieIds.add(zombie.getUniqueId());
 
             spawnSummonParticles(spawnLoc);
+        }
+
+        if (zombieIds.isEmpty()) {
+            cancelCast(caster);
+            return;
         }
 
         summonedZombies.put(caster.getUniqueId(), zombieIds);
@@ -134,6 +142,8 @@ public class SummonZombies extends AttackSpell implements Listener {
         for (int i = 0; i < zombieCount; i++) {
             Location spawnLoc = findSpawnLocation(caster.getLocation());
             if (spawnLoc == null) continue;
+
+            if (!Protection.spawnMob(caster, spawnLoc)) continue;
 
             Zombie zombie = (Zombie) spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.ZOMBIE);
             zombie.setAdult();

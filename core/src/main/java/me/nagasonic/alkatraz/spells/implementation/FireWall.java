@@ -18,6 +18,7 @@ import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
+import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -159,7 +160,9 @@ public class FireWall extends AttackSpell implements Listener {
                         SpellComponentHandler.register(comp);
 
                         if (loc.getBlock().getType() == Material.AIR && (boolean) getOption("fire_blocks").getSelectedValue(player).getValue()) {
-                            loc.getBlock().setType(Material.FIRE);
+                            if (Protection.ignite(player, loc)) {
+                                loc.getBlock().setType(Material.FIRE);
+                            }
                         }
 
                         for (Entity entity : loc.getWorld().getNearbyEntities(loc, 0.6, 0.6, 0.6)) {
@@ -271,7 +274,9 @@ public class FireWall extends AttackSpell implements Listener {
                         SpellComponentHandler.register(comp);
 
                         if (loc.getBlock().getType() == Material.AIR) {
-                            loc.getBlock().setType(Material.FIRE);
+                            if (Protection.ignite(caster, loc)) {
+                                loc.getBlock().setType(Material.FIRE);
+                            }
                         }
 
                         for (Entity entity : loc.getWorld().getNearbyEntities(loc, 0.6, 0.6, 0.6)) {

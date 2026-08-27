@@ -3,6 +3,7 @@ package me.nagasonic.alkatraz.items.magic.effect.implementation;
 import me.nagasonic.alkatraz.api.magic.effect.Effect;
 
 import me.nagasonic.alkatraz.api.magic.trigger.TriggerContext;
+import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.items.magic.effect.EffectExecutor;
 import org.bukkit.entity.LivingEntity;
 
@@ -20,6 +21,9 @@ public final class IgniteEffect implements Effect {
     public void execute(TriggerContext context) {
         LivingEntity target = EffectExecutor.resolveTarget(context);
         if (target != null) {
+            if (!Protection.ignite(context.actor(), target.getLocation())) {
+                return;
+            }
             target.setFireTicks(durationTicks);
         }
     }

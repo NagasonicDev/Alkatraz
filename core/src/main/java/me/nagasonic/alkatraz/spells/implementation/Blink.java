@@ -6,6 +6,7 @@ import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.Spell;
+import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.util.ParticleUtils;
@@ -60,6 +61,12 @@ public class Blink extends Spell {
             return;
         }
 
+        if (!Protection.teleport(caster, target)) {
+            Utils.sendActionBar(caster, lang().get("spells.blink.no_valid_location"));
+            cancelCast(caster);
+            return;
+        }
+
         spawnTeleportParticles(start);
         caster.teleport(target);
         spawnTeleportParticles(target);
@@ -80,6 +87,10 @@ public class Blink extends Spell {
         Location target = findTeleportLocation(start, direction, blinkDistance);
 
         if (target == null) return;
+
+        if (!Protection.teleport(caster instanceof Player ? (Player) caster : null, target)) {
+            return;
+        }
 
         spawnTeleportParticles(start);
         caster.teleport(target);

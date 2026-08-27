@@ -3,6 +3,7 @@ package me.nagasonic.alkatraz.items.magic.effect.implementation;
 import me.nagasonic.alkatraz.api.magic.effect.Effect;
 
 import me.nagasonic.alkatraz.api.magic.trigger.TriggerContext;
+import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.items.magic.adapter.MagicDamageListener;
 import me.nagasonic.alkatraz.items.magic.attribute.MagicDamage;
 import org.bukkit.Location;
@@ -35,6 +36,9 @@ public final class ExplosionEffect implements Effect {
         double magicDamage = actor != null ? MagicDamage.of(context.sourceItem()) : 0.0;
         if (magicDamage > 0) {
             MagicDamageListener.registerExplosionBonus(actor.getUniqueId(), magicDamage);
+        }
+        if (!Protection.explosion(context.actor(), loc)) {
+            return;
         }
         try {
             world.createExplosion(loc, power, setFire, breakBlocks, actor);

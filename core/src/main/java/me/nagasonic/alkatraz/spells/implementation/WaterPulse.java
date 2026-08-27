@@ -15,6 +15,7 @@ import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.util.ParticleUtils;
+import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -96,13 +97,17 @@ public class WaterPulse extends AttackSpell implements Listener {
                     SpellComponentHandler.register(comp);
                     for (Block b : Utils.blocksInRadius(loc, 2)){
                         if (b.getType() == Material.FIRE){
-                            b.setType(Material.AIR);
+                            if (Protection.blockEdit(p, b.getLocation())){
+                                b.setType(Material.AIR);
+                            }
                         }else if (b.getType() == Material.LAVA){
                             Levelled blockdata = (Levelled) b.getBlockData();
-                            if (blockdata.getLevel() == 0){
-                                b.setType(Material.OBSIDIAN);
-                            }else{
-                                b.setType(Material.COBBLESTONE);
+                            if (Protection.blockEdit(p, b.getLocation())){
+                                if (blockdata.getLevel() == 0){
+                                    b.setType(Material.OBSIDIAN);
+                                }else{
+                                    b.setType(Material.COBBLESTONE);
+                                }
                             }
                         }
                     }
@@ -164,13 +169,17 @@ public class WaterPulse extends AttackSpell implements Listener {
                     SpellComponentHandler.register(comp);
                     for (Block b : Utils.blocksInRadius(loc, 2)){
                         if (b.getType() == Material.FIRE){
-                            b.setType(Material.AIR);
+                            if (Protection.blockEdit(caster, b.getLocation())){
+                                b.setType(Material.AIR);
+                            }
                         }else if (b.getType() == Material.LAVA){
                             Levelled blockdata = (Levelled) b.getBlockData();
-                            if (blockdata.getLevel() == 0){
-                                b.setType(Material.OBSIDIAN);
-                            }else{
-                                b.setType(Material.COBBLESTONE);
+                            if (Protection.blockEdit(caster, b.getLocation())){
+                                if (blockdata.getLevel() == 0){
+                                    b.setType(Material.OBSIDIAN);
+                                }else{
+                                    b.setType(Material.COBBLESTONE);
+                                }
                             }
                         }
                     }

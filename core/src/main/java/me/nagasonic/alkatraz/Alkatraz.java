@@ -41,6 +41,7 @@ import me.nagasonic.alkatraz.mobs.MagicEntitySpawnListener;
 import me.nagasonic.alkatraz.mobs.MobModifier;
 import me.nagasonic.alkatraz.nms.NMS;
 import me.nagasonic.alkatraz.hooks.PlaceholderAPIHook;
+import me.nagasonic.alkatraz.hooks.WorldGuardHook;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileRegistry;
 import me.nagasonic.alkatraz.progression.ProgressionService;
@@ -203,6 +204,10 @@ public final class Alkatraz extends JavaPlugin {
         PlaceholderAPIHook placeholderHook = new PlaceholderAPIHook();
         if (placeholderHook.isPresent()) {
             placeholderHook.ifPresent();
+        }
+        WorldGuardHook worldGuardHook = WorldGuardHook.getInstance();
+        if (worldGuardHook.isPresent()) {
+            worldGuardHook.ifPresent();
         }
         long elapsed = (System.nanoTime() - enableStart) / 1_000_000;
         logVeryHigh("Alkatraz enabled in " + elapsed + "ms");

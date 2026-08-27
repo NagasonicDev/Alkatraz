@@ -16,6 +16,7 @@ import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
+import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -177,7 +178,9 @@ public class FlamingVolley extends AttackSpell implements Listener {
                     hit.add(entity.getUniqueId());
                     double damage = getPower(caster, target, props.getRemainingPower());
                     SpellDamageUtil.damageWithSpell(target, damage, caster, wand, FlamingVolley.this);
-                    target.setFireTicks(100);
+                    if (Protection.ignite(caster, target.getLocation())) {
+                        target.setFireTicks(100);
+                    }
 
                     spawnImpact(position, caster);
                     cancel();
@@ -204,7 +207,9 @@ public class FlamingVolley extends AttackSpell implements Listener {
         if (caster instanceof Player p
                 && (boolean) getOption("fire_blocks").getSelectedValue(p).getValue()) {
             if (loc.getBlock().getType() == Material.AIR) {
-                loc.getBlock().setType(Material.FIRE);
+                if (Protection.ignite(caster, loc)) {
+                    loc.getBlock().setType(Material.FIRE);
+                }
             }
         }
     }

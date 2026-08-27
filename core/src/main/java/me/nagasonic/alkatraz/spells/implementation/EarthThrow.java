@@ -21,8 +21,10 @@ import me.nagasonic.alkatraz.spells.types.properties.SpellProperties;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
+import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -38,12 +40,18 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class EarthThrow extends AttackSpell implements Listener {
+    private static final Map<UUID, Map<Location, Material>> recoverData = new ConcurrentHashMap<>();
     private static LangManager lang() {
         return Alkatraz.getLangManager();
     }
+
+    private boolean blockDamage;
+    private long recoverTime;
 
     public EarthThrow(String type){
         super(type);
@@ -69,6 +77,8 @@ public class EarthThrow extends AttackSpell implements Listener {
 
         loadCommonConfig(spellConfig);
         loadOptions();
+        this.blockDamage = spellConfig.getBoolean("block_damage", true);
+        this.recoverTime = spellConfig.getLong("recover_time", 0);
         Alkatraz.getInstance().getServer().getPluginManager().registerEvents(this, Alkatraz.getInstance());
     }
 
@@ -82,9 +92,14 @@ public class EarthThrow extends AttackSpell implements Listener {
                 Block block = p.getLocation().subtract(0,0.5,0).getBlock();
                 if (Ground.isGround(block.getType())) {
                     BlockData data = Bukkit.createBlockData(block.getType());
-                    FallingBlock b = loc.getWorld().spawnFallingBlock(loc, data);
-                    b.setHurtEntities(false);
-                    b.setVelocity(direction.multiply((Double) getOption("throw_force").getSelectedValue(p).getValue()).setY(0.3));
+                    if (blockDamage) {
+                        if (!Protection.blockEdit(p, block.getLocation())) return;
+                        Map<Location, Material> originals = new java.util.HashMap<>();
+                        originals.put(block.getLocation(), block.getType());
+                        FallingBlock b = loc.getWorld().spawnFallingBlock(loc, data);
+                        recoverData.put(b.getUniqueId(), originals);
+                        b.setHurtEntities(false);
+                        b.setVelocity(direction.multiply((Double) getOption("throw_force").getSelectedValue(p).getValue()).setY(0.3));
                     SpellEntityComponent comp = new SpellEntityComponent(
                             this,
                             props,
@@ -97,6 +112,7 @@ public class EarthThrow extends AttackSpell implements Listener {
                     NBT.modifyPersistentData(b, nbt -> {
                         nbt.setString("componentID", comp.getComponentID().toString());
                     });
+                    }
                 }
             }
         }
@@ -115,9 +131,14 @@ public class EarthThrow extends AttackSpell implements Listener {
                 Block block = caster.getLocation().subtract(0,0.5,0).getBlock();
                 if (Ground.isGround(block.getType())) {
                     BlockData data = Bukkit.createBlockData(block.getType());
-                    FallingBlock b = loc.getWorld().spawnFallingBlock(loc, data);
-                    b.setHurtEntities(false);
-                    b.setVelocity(direction.multiply(1).setY(0.3));
+                    if (blockDamage) {
+                        if (!Protection.blockEdit(caster, block.getLocation())) return;
+                        Map<Location, Material> originals = new java.util.HashMap<>();
+                        originals.put(block.getLocation(), block.getType());
+                        FallingBlock b = loc.getWorld().spawnFallingBlock(loc, data);
+                        recoverData.put(b.getUniqueId(), originals);
+                        b.setHurtEntities(false);
+                        b.setVelocity(direction.multiply(1).setY(0.3));
                     SpellEntityComponent comp = new SpellEntityComponent(
                             this,
                             props,
@@ -130,6 +151,7 @@ public class EarthThrow extends AttackSpell implements Listener {
                     NBT.modifyPersistentData(b, nbt -> {
                         nbt.setString("componentID", comp.getComponentID().toString());
                     });
+                    }
                 }
             }
         }
@@ -183,8 +205,16 @@ public class EarthThrow extends AttackSpell implements Listener {
                 if (!(comp instanceof SpellEntityComponent eComp)) return;
                 SpellProperties p = eComp.getProperties();
                 if (!(p instanceof AttackProperties props)) return;
-                e.getBlock().setType(Material.AIR);
+                if (blockDamage) {
+                    if (Protection.blockEdit(comp.getCaster(), e.getBlock().getLocation())) {
+                        Map<Location, Material> originals = recoverData.computeIfAbsent(
+                                ((FallingBlock) e.getEntity()).getUniqueId(), k -> new java.util.HashMap<>());
+                        originals.putIfAbsent(e.getBlock().getLocation(), e.getBlock().getType());
+                        e.getBlock().setType(Material.AIR);
+                    }
+                }
                 Location loc = e.getBlock().getLocation();
+                UUID entityUUID = ((FallingBlock) e.getEntity()).getUniqueId();
                 double radius = comp.getCaster() instanceof Player player ? (Double) getOption("impact_radius").getSelectedValue(player).getValue() : 3.0;
                 List<Location> locs = ParticleUtils.circle(loc, radius, 1, 0, 0);
                 for (Location l : locs){
@@ -196,6 +226,19 @@ public class EarthThrow extends AttackSpell implements Listener {
                     direction = Utils.safeNormalize(direction);
                     direction.setY(1.25);
                     le.setVelocity(direction);
+                }
+                if (blockDamage && recoverTime > 0) {
+                    Map<Location, Material> originals = recoverData.remove(entityUUID);
+                    if (originals != null && !originals.isEmpty()) {
+                        new BukkitRunnable() {
+                            @Override
+                            public void run() {
+                                for (Map.Entry<Location, Material> entry : originals.entrySet()) {
+                                    entry.getKey().getBlock().setType(entry.getValue(), false);
+                                }
+                            }
+                        }.runTaskLater(Alkatraz.getInstance(), recoverTime * 20);
+                    }
                 }
             }
         }
@@ -215,7 +258,23 @@ public class EarthThrow extends AttackSpell implements Listener {
                     if (!(p instanceof AttackProperties props)) return;
                     e.setCancelled(true);
                     Location loc = b.getLocation();
+                    UUID entityUUID = b.getUniqueId();
                     b.remove();
+                    if (blockDamage && recoverTime > 0) {
+                        Map<Location, Material> originals = recoverData.remove(entityUUID);
+                        if (originals != null && !originals.isEmpty()) {
+                            new BukkitRunnable() {
+                                @Override
+                                public void run() {
+                                    for (Map.Entry<Location, Material> entry : originals.entrySet()) {
+                                        entry.getKey().getBlock().setType(entry.getValue(), false);
+                                    }
+                                }
+                            }.runTaskLater(Alkatraz.getInstance(), recoverTime * 20);
+                        }
+                    } else {
+                        recoverData.remove(entityUUID);
+                    }
                     double radius = comp.getCaster() instanceof Player player ? (Double) getOption("impact_radius").getSelectedValue(player).getValue() : 3.0;
                     List<Location> locs = ParticleUtils.circle(loc, radius, 1, 0, 0);
                     for (Location l : locs){

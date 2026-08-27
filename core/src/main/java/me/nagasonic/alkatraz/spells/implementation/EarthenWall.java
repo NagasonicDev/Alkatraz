@@ -17,6 +17,7 @@ import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
+import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -45,6 +46,8 @@ public class EarthenWall extends AttackSpell implements Listener {
     private double height;
     private double length;
     private long selfDestructTicks;
+    private boolean blockDamage;
+    private long recoverTime;
 
     public EarthenWall(String type) {
         super(type);
@@ -71,6 +74,8 @@ public class EarthenWall extends AttackSpell implements Listener {
         this.height = spellConfig.getDouble("height");
         this.length = spellConfig.getDouble("length");
         this.selfDestructTicks = spellConfig.getLong("self_destruct_ticks", 100);
+        this.blockDamage = spellConfig.getBoolean("block_damage", true);
+        this.recoverTime = spellConfig.getLong("recover_time", 0);
         Alkatraz.getInstance().getServer().getPluginManager().registerEvents(this, Alkatraz.getInstance());
         loadOptions();
     }
@@ -121,7 +126,7 @@ public class EarthenWall extends AttackSpell implements Listener {
                     Location ground = Utils.findTopSolid(currentPos.clone().add(0, 3, 0), 10);
                     if (ground != null) {
                         wallPoints.add(new WallSegment(ground));
-                        if (selfDestruct) {
+                        if (selfDestruct || recoverTime > 0) {
                             for (int dy = -heightBlocks; dy <= heightBlocks; dy++) {
                                 Location l = ground.clone().add(0, dy, 0);
                                 originals.putIfAbsent(l.getBlock().getLocation(), l.getBlock().getType());
@@ -142,13 +147,20 @@ public class EarthenWall extends AttackSpell implements Listener {
                             int y = segment.base.getBlockY();
                             int z = segment.base.getBlockZ();
 
-                            for (int i = 0; i <= heightBlocks; i++) {
-                                Block from = world.getBlockAt(x, y - i + segment.step, z);
-                                Block to = world.getBlockAt(x, y - i + segment.step + 1, z);
-                                if (Ground.isGround(from.getType())) to.setType(from.getType(), false);
-                            }
+                            if (blockDamage) {
+                                for (int i = 0; i <= heightBlocks; i++) {
+                                    Block from = world.getBlockAt(x, y - i + segment.step, z);
+                                    Block to = world.getBlockAt(x, y - i + segment.step + 1, z);
+                                    if (Ground.isGround(from.getType()) && Protection.blockEdit(player, to.getLocation())) {
+                                        to.setType(from.getType(), false);
+                                    }
+                                }
 
-                            world.getBlockAt(x, y - heightBlocks + segment.step, z).setType(Material.AIR, false);
+                                Block clearBlock = world.getBlockAt(x, y - heightBlocks + segment.step, z);
+                                if (Protection.blockEdit(player, clearBlock.getLocation())) {
+                                    clearBlock.setType(Material.AIR, false);
+                                }
+                            }
 
                             Block topBlock = world.getBlockAt(x, y + segment.step, z);
                             SpellParticleComponent comp = new SpellParticleComponent(
@@ -236,6 +248,17 @@ public class EarthenWall extends AttackSpell implements Listener {
                 }
             }
         }.runTaskTimer(Alkatraz.getInstance(), 0, 1);
+
+        if (recoverTime > 0 && !selfDestruct) {
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    for (Map.Entry<Location, Material> e : originals.entrySet()) {
+                        e.getKey().getBlock().setType(e.getValue(), false);
+                    }
+                }
+            }.runTaskLater(Alkatraz.getInstance(), recoverTime * 20);
+        }
     }
 
     @Override
@@ -291,13 +314,20 @@ public class EarthenWall extends AttackSpell implements Listener {
                             int y = segment.base.getBlockY();
                             int z = segment.base.getBlockZ();
 
-                            for (int i = 0; i <= heightBlocks; i++) {
-                                Block from = world.getBlockAt(x, y - i + segment.step, z);
-                                Block to = world.getBlockAt(x, y - i + segment.step + 1, z);
-                                if (Ground.isGround(from.getType())) to.setType(from.getType(), false);
-                            }
+                            if (blockDamage) {
+                                for (int i = 0; i <= heightBlocks; i++) {
+                                    Block from = world.getBlockAt(x, y - i + segment.step, z);
+                                    Block to = world.getBlockAt(x, y - i + segment.step + 1, z);
+                                    if (Ground.isGround(from.getType()) && Protection.blockEdit(caster, to.getLocation())) {
+                                        to.setType(from.getType(), false);
+                                    }
+                                }
 
-                            world.getBlockAt(x, y - heightBlocks + segment.step, z).setType(Material.AIR, false);
+                                Block clearBlock = world.getBlockAt(x, y - heightBlocks + segment.step, z);
+                                if (Protection.blockEdit(caster, clearBlock.getLocation())) {
+                                    clearBlock.setType(Material.AIR, false);
+                                }
+                            }
 
                             Block topBlock = world.getBlockAt(x, y + segment.step, z);
                             for (Entity entity : topBlock.getWorld().getNearbyEntities(topBlock.getLocation(), 0.5, 0.5, 0.5)) {
@@ -367,6 +397,17 @@ public class EarthenWall extends AttackSpell implements Listener {
                 }
             }
         }.runTaskTimer(Alkatraz.getInstance(), 0, 1);
+
+        if (recoverTime > 0) {
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    for (Map.Entry<Location, Material> e : originals.entrySet()) {
+                        e.getKey().getBlock().setType(e.getValue(), false);
+                    }
+                }
+            }.runTaskLater(Alkatraz.getInstance(), recoverTime * 20);
+        }
     }
 
     @Override

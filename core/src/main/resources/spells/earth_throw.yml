@@ -36,4 +36,10 @@ mastery_bar_color: 'GREEN'
 gui_item: 'DIRT'
 gui_custom_model_data: 4123
 
+# WHETHER THIS SPELL CAN DESTROY/modify BLOCKS. DEFAULT: TRUE
+block_damage: true
+
+# IF > 0, DESTROYED BLOCKS REAPPEAR AFTER THIS MANY SECONDS (FORCED RECOVER). SET TO 0 TO DISABLE.
+recover_time: 0
+
 

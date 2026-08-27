@@ -13,6 +13,7 @@ import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
+import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
@@ -26,7 +27,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Fissure extends AttackSpell {
     private static LangManager lang() {
@@ -34,6 +37,8 @@ public class Fissure extends AttackSpell {
     }
 
     private int windUpDuration;
+    private boolean blockDamage;
+    private long recoverTime;
 
     public Fissure(String type) {
         super(type);
@@ -47,12 +52,15 @@ public class Fissure extends AttackSpell {
         loadCommonConfig(spellConfig);
         loadOptions();
         this.windUpDuration = spellConfig.getInt("wind_up_duration", 6) * 20;
+        this.blockDamage = spellConfig.getBoolean("block_damage", true);
+        this.recoverTime = spellConfig.getLong("recover_time", 0);
     }
 
     private void launchFissureAttack(Player caster, ItemStack wand, AttackProperties props, double range, Vector direction, Vector perpendicular, Location startLoc, double maxWidth) {
         double totalPower = getPower(caster, getBasePower()) * getWandPower(wand, caster);
         caster.getWorld().playSound(caster.getLocation(), Sound.BLOCK_GRINDSTONE_USE, 1.2f, 0.4f);
         caster.getWorld().playSound(caster.getLocation(), Sound.BLOCK_STONE_BREAK, 1.0f, 0.6f);
+        Map<Location, Material> brokenBlocks = new HashMap<>();
 
         new BukkitRunnable() {
             double distance = 0;
@@ -62,6 +70,7 @@ public class Fissure extends AttackSpell {
             public void run() {
                 if (props.isCancelled() || props.isCountered() || distance > range) {
                     cancel();
+                    scheduleRecover(brokenBlocks);
                     return;
                 }
 
@@ -84,10 +93,13 @@ public class Fissure extends AttackSpell {
                     if (!foundation.getType().isSolid()) continue;
                     for (int depth = 0; depth < 2; depth++) {
                         Block target = foundation.getRelative(0, -depth, 0);
-                        if (Ground.isGround(target.getType())) {
-                            target.breakNaturally();
-                            target.getWorld().spawnParticle(Utils.BLOCK, target.getLocation().add(0.5, 0.5, 0.5),
-                                    5, 0.2, 0.2, 0.2, 0.3, target.getBlockData());
+                        if (blockDamage && Ground.isGround(target.getType())) {
+                            if (Protection.blockEdit(caster, target.getLocation())) {
+                                brokenBlocks.putIfAbsent(target.getLocation(), target.getType());
+                                target.breakNaturally();
+                                target.getWorld().spawnParticle(Utils.BLOCK, target.getLocation().add(0.5, 0.5, 0.5),
+                                        5, 0.2, 0.2, 0.2, 0.3, target.getBlockData());
+                            }
                         }
                     }
                 }
@@ -175,6 +187,18 @@ public class Fissure extends AttackSpell {
                 }
             }
         }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
+    }
+
+    private void scheduleRecover(Map<Location, Material> brokenBlocks) {
+        if (recoverTime <= 0 || brokenBlocks.isEmpty()) return;
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                for (Map.Entry<Location, Material> entry : brokenBlocks.entrySet()) {
+                    entry.getKey().getBlock().setType(entry.getValue(), false);
+                }
+            }
+        }.runTaskLater(Alkatraz.getInstance(), recoverTime * 20);
     }
 
     private void launchMobFissureAttack(Mob caster, ItemStack wand, AttackProperties props) {

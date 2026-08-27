@@ -39,6 +39,12 @@ gui_custom_model_data: 4122
 # SELF-DESTRUCT: Ticks after spike finishes rising before blocks are restored (20 ticks = 1 second)
 self_destruct_ticks: 100
 
+# WHETHER THIS SPELL CAN DESTROY/modify BLOCKS. DEFAULT: TRUE
+block_damage: true
+
+# IF > 0, DESTROYED/MOVED BLOCKS REAPPEAR AFTER THIS MANY SECONDS (FORCED RECOVER). SET TO 0 TO DISABLE.
+recover_time: 0
+
 cast_sound: 'BLOCK_GRAVEL_BREAK'
 cast_sound_volume: 0.6
 

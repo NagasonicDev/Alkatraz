@@ -17,3 +17,6 @@ gui_item: 'FIREWORK_STAR'
 gui_custom_model_data: 4105
 cast_sound: 'ENTITY_FIREWORK_ROCKET_BLAST'
 wind_up_duration: 2
+
+# WHETHER THIS SPELL CAN DESTROY/modify BLOCKS. DEFAULT: TRUE
+block_damage: true

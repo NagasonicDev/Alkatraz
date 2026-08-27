@@ -17,6 +17,7 @@ import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.util.ParticleUtils;
+import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -39,6 +40,8 @@ public class FireBlast extends AttackSpell implements Listener {
     private static LangManager lang() {
         return Alkatraz.getLangManager();
     }
+
+    private boolean blockDamage;
 
     public FireBlast(String type){
         super(type);
@@ -63,6 +66,7 @@ public class FireBlast extends AttackSpell implements Listener {
 
         loadCommonConfig(spellConfig);
         loadOptions();
+        this.blockDamage = spellConfig.getBoolean("block_damage", true);
         Alkatraz.getInstance().getServer().getPluginManager().registerEvents(this, Alkatraz.getInstance());
     }
 
@@ -169,10 +173,14 @@ public class FireBlast extends AttackSpell implements Listener {
         if (comp.getSpell() != this) return;
         Location loc = e.getHitBlock() != null ? e.getHitBlock().getLocation() : e.getHitEntity().getLocation();
         double radius = comp.getCaster() instanceof Player player ? (Double) getOption("fire_spread").getSelectedValue(player).getValue() : 3.0;
-        List<Block> blocks = Utils.blocksInRadius(loc, (int) Math.round(radius));
-        for (Block block : blocks){
-            if (block.getType() == Material.AIR){
-                block.setType(Material.FIRE);
+        if (blockDamage) {
+            List<Block> blocks = Utils.blocksInRadius(loc, (int) Math.round(radius));
+            for (Block block : blocks){
+                if (block.getType() == Material.AIR){
+                    if (Protection.ignite(comp.getCaster(), block.getLocation())) {
+                        block.setType(Material.FIRE);
+                    }
+                }
             }
         }
     }
