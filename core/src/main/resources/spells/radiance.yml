@@ -7,6 +7,7 @@ enabled: true
 element: 'LIGHT'
 code: 'LRLRS'
 level: 5
+required_focus: 140
 cooldown: 30
 cast_time: 1.5
 mana_cost: 95

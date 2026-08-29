@@ -104,6 +104,34 @@ public interface MagicProfileView {
     void setManaRegeneration(double value);
 
     /**
+     * Returns the player's current focus.
+     *
+     * @return the current focus value
+     */
+    double getFocus();
+
+    /**
+     * Sets the player's current focus.
+     *
+     * @param value the new focus value
+     */
+    void setFocus(double value);
+
+    /**
+     * Returns the player's maximum focus (capped by the focus.max_focus config).
+     *
+     * @return the max focus value
+     */
+    double getMaxFocus();
+
+    /**
+     * Sets the player's maximum focus.
+     *
+     * @param value the new max focus value
+     */
+    void setMaxFocus(double value);
+
+    /**
      * Returns the player's experience points.
      *
      * @return the experience value

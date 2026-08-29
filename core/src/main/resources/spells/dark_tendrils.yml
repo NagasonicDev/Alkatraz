@@ -15,6 +15,7 @@ code: 'RLRLS'
 
 # THE MAGIC CIRCLE REQUIRED TO CAST
 level: 3
+required_focus: 70
 
 # COOLDOWN BEFORE CASTING AGAIN (SECONDS)
 cooldown: 15

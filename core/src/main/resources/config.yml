@@ -133,3 +133,34 @@ recipes:
     actionbar: false
     sound: true
     particles: true
+
+# ==============================
+# Focus System
+# Players need enough focus to cast spells. Focus regenerates exponentially
+# while standing still, drops while moving (scaled by velocity) and when
+# taking damage, and is halved below 3 hearts. Regeneration pauses while
+# casting; dropping below a spell's required_focus mid-cast cancels it.
+# ==============================
+focus:
+  # Master toggle. When false the focus gate, regen, penalties and bossbar
+  # are all disabled.
+  enabled: true
+  # Absolute cap on max focus. Circle and research maxFocus bonuses clamp here.
+  max_focus: 250
+  # Exponential stationary regeneration.
+  regen_base: 2.0          # focus gained per second at t=0 of standing still
+  regen_growth_factor: 1.5 # multiplier per stationary second
+  regen_max: 25.0          # upper bound on the per-second regen rate
+  movement:
+    # penalty ratio = min(speed * penalty_per_speed, max_penalty_ratio)
+    # where speed is blocks/second derived from player velocity.
+    penalty_per_speed: 0.02
+    max_penalty_ratio: 0.55
+  damage:
+    # loss = maxFocus * factor * (finalDamage / maxHealth)
+    factor: 1.0
+  low_health:
+    # Regen is multiplied by `multiplier` while health is below `threshold`
+    # (6.0 HP = 3 hearts).
+    threshold: 6.0
+    multiplier: 0.5

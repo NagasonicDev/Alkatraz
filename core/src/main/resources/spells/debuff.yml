@@ -8,6 +8,7 @@ code: LSLSS
 cast_time: 1.5
 mana_cost: 45
 level: 2
+required_focus: 45
 enabled: true
 maximum_mastery: 100
 cooldown: 25

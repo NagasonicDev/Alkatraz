@@ -4,11 +4,13 @@ import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.playerdata.SpellHotbarManager;
 import me.nagasonic.alkatraz.api.Element;
 import me.nagasonic.alkatraz.api.playerdata.Profile;
+import me.nagasonic.alkatraz.config.FocusConfig;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.util.StatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.boss.BossBar;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
 
@@ -17,6 +19,10 @@ public class MagicProfile extends Profile {
     private transient List<SpellModifier> spellModifiers;
     private transient Map<SpellModifier, String> spellModifierTypes;
     private transient int manaRegenTaskId = -1;
+    private transient Spell castingSpell;
+    private transient ItemStack castingWand;
+    private transient int currentCircleTaskId = -1;
+    private transient int completionTaskId = -1;
 
     {
         // Core stats
@@ -37,6 +43,10 @@ public class MagicProfile extends Profile {
         doubleStat("maxMana", 100);
         doubleStat("mana", 100);
         doubleStat("manaRegeneration", 1);
+
+        // Focus stats
+        doubleStat("focus", 100);
+        doubleStat("maxFocus", 100);
 
         doubleStat("experience", 0);
         doubleStat("arcaneKnowledge", 0);
@@ -167,6 +177,64 @@ public class MagicProfile extends Profile {
 
     public double getManaRegeneration() { return getDouble("manaRegeneration"); }
     public void setManaRegeneration(double value) { setDouble("manaRegeneration", value); }
+
+    // ============================================
+    // Focus Stats Getters/Setters
+    // ============================================
+
+    public double getFocus() {
+        return getDouble("focus");
+    }
+
+    public void setFocus(double value) {
+        setDouble("focus", Math.max(0, Math.min(value, getMaxFocus())));
+    }
+
+    public double getMaxFocus() {
+        return getDouble("maxFocus");
+    }
+
+    public void setMaxFocus(double value) {
+        double capped = Math.max(0, Math.min(value, FocusConfig.getMaxFocus()));
+        setDouble("maxFocus", capped);
+        if (getFocus() > capped) {
+            setDouble("focus", capped);
+        }
+    }
+
+    // Transient mid-cast tracking (never persisted)
+
+    public Spell getCastingSpell() {
+        return castingSpell;
+    }
+
+    public void setCastingSpell(Spell spell) {
+        this.castingSpell = spell;
+    }
+
+    public ItemStack getCastingWand() {
+        return castingWand;
+    }
+
+    public void setCastingWand(ItemStack wand) {
+        this.castingWand = wand;
+    }
+
+    public int getCurrentCircleTaskId() {
+        return currentCircleTaskId;
+    }
+
+    public void setCurrentCircleTaskId(int taskId) {
+        this.currentCircleTaskId = taskId;
+    }
+
+    public int getCompletionTaskId() {
+        return completionTaskId;
+    }
+
+    public void setCompletionTaskId(int taskId) {
+        this.completionTaskId = taskId;
+    }
 
     public double getExperience() { return getDouble("experience"); }
     public void setExperience(double value) {
@@ -454,6 +522,14 @@ public class MagicProfile extends Profile {
     public boolean addMagicStat(String stat, double amount, String operation) {
         if (stat == null || stat.isBlank()) return false;
         String mode = operation == null ? "add" : operation.toLowerCase();
+        if ("focus".equals(stat)) {
+            setFocus(applyRewardOperation(getFocus(), amount, mode));
+            return true;
+        }
+        if ("maxFocus".equals(stat)) {
+            setMaxFocus(applyRewardOperation(getMaxFocus(), amount, mode));
+            return true;
+        }
         if (isInt(stat)) {
             int value = getInt(stat);
             setInt(stat, (int) Math.round(applyRewardOperation(value, amount, mode)));

@@ -7,6 +7,7 @@ enabled: true
 element: 'WATER'
 code: 'LLRSS'
 level: 5
+required_focus: 140
 cooldown: 25
 cast_time: 1.5
 mana_cost: 90

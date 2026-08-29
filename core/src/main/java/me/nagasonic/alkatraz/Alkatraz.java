@@ -8,6 +8,7 @@ import me.nagasonic.alkatraz.api.config.ConfigUpdater;
 import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.config.VerbosityLevel;
 import me.nagasonic.alkatraz.dom.MinecraftVersion;
+import me.nagasonic.alkatraz.focus.FocusManager;
 import me.nagasonic.alkatraz.gui.EnchantingTableListener;
 import me.nagasonic.alkatraz.gui.MenuListener;
 import me.nagasonic.alkatraz.items.magic.MagicItemBootstrap;
@@ -88,6 +89,8 @@ public final class Alkatraz extends JavaPlugin {
     private static me.nagasonic.alkatraz.texturepack.TexturePackManager texturePackManager = null;
     private static me.nagasonic.alkatraz.gui.GUIItemRegistry guiItemRegistry = null;
     private static me.nagasonic.alkatraz.lang.LangManager langManager = null;
+
+    private FocusManager focusManager;
 
     {
         instance = this;
@@ -181,6 +184,9 @@ public final class Alkatraz extends JavaPlugin {
         WorldGuardTriggerListener worldGuardTriggerListener = new WorldGuardTriggerListener();
         registerListener(worldGuardTriggerListener);
         new PeriodicTriggerListener().start();
+        focusManager = new FocusManager();
+        registerListener(focusManager);
+        focusManager.start();
         registerListener(new MagicItemComponentListener());
         registerListener(new EnchantingTableListener());
         registerListener(new RecipeCraftListener());
@@ -216,6 +222,9 @@ public final class Alkatraz extends JavaPlugin {
     @Override
     public void onDisable() {
         ProfileManager.shutdown();
+        if (focusManager != null) {
+            focusManager.shutdown();
+        }
         for (Player p : Bukkit.getOnlinePlayers()){
             ItemStack wand = p.getInventory().getItem(p.getInventory().getHeldItemSlot());
             if (wand != null && !wand.getType().isAir()){

@@ -14,6 +14,7 @@ code: 'LSLRS'
 
 # THE MAGIC CIRCLE REQUIRED TO CAST
 level: 2
+required_focus: 55
 
 # COOLDOWN BEFORE CASTING AGAIN
 cooldown: 15

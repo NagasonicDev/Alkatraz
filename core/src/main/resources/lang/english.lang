@@ -482,6 +482,11 @@ spells.cast.debuffs_applied = &5Debuffs applied to %target%!
 spells.cast.buffs_faded = &eThe buff on you has faded.
 spells.cast.debuffs_faded = &5The debuff on you has faded.
 spells.cast.blessed_by = &eYou have been blessed by %spell%!
+spells.cast.not_enough_focus = &cNot enough focus to cast this spell.
+spells.cast.focus_lost = &cYou lost your focus and the spell was cancelled!
+
+# --- Focus System ---
+focus.bar.title = &dFocus
 
 # --- Spellbook ---
 spellbook.corrupted = &cThis spellbook appears to be corrupted!

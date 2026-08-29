@@ -12,6 +12,8 @@ import me.nagasonic.alkatraz.gui.Menu;
 import me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack;
 import me.nagasonic.alkatraz.api.magic.registry.MagicItemRegistries;
 import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
+import me.nagasonic.alkatraz.config.ConfigManager;
+import me.nagasonic.alkatraz.config.FocusConfig;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.configuration.SpellOption;
@@ -49,6 +51,7 @@ public abstract class Spell {
     protected double castTime;
     protected int level;
     protected int requiredCircle;
+    protected double requiredFocus = 0;
     protected boolean enabled;
     protected int maxMastery;
 
@@ -58,6 +61,11 @@ public abstract class Spell {
     // Tracks players whose cast was cancelled by the spell itself (e.g. invalid position)
     // so the framework can refund mana and skip cooldown/mastery.
     private final Set<UUID> castCancelledPlayers = new HashSet<>();
+
+    // Tracks players whose cast was cancelled because focus dropped below this
+    // spell's required focus mid-cast. Unlike castCancelledPlayers there is no
+    // mana refund, cooldown or mastery.
+    private final Set<UUID> focusCancelledPlayers = new HashSet<>();
 
     public Spell(String type) {
         this.type = type;
@@ -130,6 +138,13 @@ public abstract class Spell {
             return;
         }
 
+        // Check focus requirement
+        if (FocusConfig.isEnabled() && profile.getFocus() < getRequiredFocus()) {
+            Utils.sendActionBar(p, lang().get("spells.cast.not_enough_focus"));
+            fireSpellFail(p, wand, "NOT_ENOUGH_FOCUS");
+            return;
+        }
+
         // Check Cooldown
         if (!Permission.hasPermission(p, Permission.NO_COOLDOWN) && profile.getCooldown(this) != null) {
             long timePassed = System.currentTimeMillis() - profile.getCooldown(this);
@@ -155,6 +170,8 @@ public abstract class Spell {
         }
         // Set casting state
         profile.setCasting(true);
+        profile.setCastingSpell(this);
+        profile.setCastingWand(wand);
 
 
 
@@ -169,6 +186,7 @@ public abstract class Spell {
 
         // Start circle animation
         int circleTaskId = circleAction(p, castEvent);
+        profile.setCurrentCircleTaskId(circleTaskId);
 
         // Play the preparation sound
         playSound(p, prepareSound, prepareSoundVolume, prepareSoundPitch);
@@ -178,8 +196,14 @@ public abstract class Spell {
         long  finalCastTime = calculateFinalCastTime(profile, baseCastTime);
 
         // Schedule spell execution after cast time
-        Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(
+        int completionTaskId = Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(
                 Alkatraz.getInstance(), () -> {
+                    UUID uuid = p.getUniqueId();
+                    if (focusCancelledPlayers.remove(uuid)) {
+                        profile.setCasting(false);
+                        profile.setCastingSpell(null);
+                        return;
+                    }
                     Bukkit.getServer().getScheduler().cancelTask(circleTaskId);
                     if (!castEvent.isCancelled()) {
                         PlayerCastEvent playerCastEvent = new PlayerCastEvent(p, Spell.this, wand);
@@ -190,7 +214,6 @@ public abstract class Spell {
                             Alkatraz.logVeryHigh("Spell cast completed: " + getId() + " by " + p.getName() + " in " + ((castEnd - startTime) / 1_000_000) + "ms");
                             castAction(p, wand);
                             // Only grant cooldown/mastery if the spell didn't self-cancel
-                            UUID uuid = p.getUniqueId();
                             if (castCancelledPlayers.remove(uuid)) {
                                 // Refund mana
                                 StatUtils.addMana(p, manaCost);
@@ -203,7 +226,9 @@ public abstract class Spell {
                         }
                     }
                     profile.setCasting(false);
+                    profile.setCastingSpell(null);
                 }, finalCastTime);
+        profile.setCompletionTaskId(completionTaskId);
     }
 
     /**
@@ -236,6 +261,12 @@ public abstract class Spell {
         this.cost          = spellConfig.getInt("mana_cost");
         this.level         = spellConfig.getInt("level");
         this.requiredCircle = spellConfig.getInt("required_circle", this.level);
+        if (spellConfig.contains("required_focus")) {
+            this.requiredFocus = spellConfig.getDouble("required_focus");
+        } else {
+            YamlConfiguration bundled = ConfigManager.getDefault("spells/" + this.id + ".yml");
+            this.requiredFocus = bundled != null ? bundled.getDouble("required_focus", 0) : 0;
+        }
         this.enabled       = spellConfig.getBoolean("enabled");
         this.maxMastery    = spellConfig.getInt("maximum_mastery");
         this.cooldown      = spellConfig.getLong("cooldown");
@@ -274,6 +305,27 @@ public abstract class Spell {
      */
     protected final void cancelCast(Player p) {
         castCancelledPlayers.add(p.getUniqueId());
+    }
+
+    /**
+     * Cancels an ongoing cast because the player's focus dropped below this
+     * spell's required focus. The circle animation and the completion task are
+     * cancelled immediately; mana is NOT refunded and no cooldown or mastery
+     * is granted.
+     */
+    public final void cancelCastByFocus(Player p) {
+        UUID uuid = p.getUniqueId();
+        if (!focusCancelledPlayers.add(uuid)) return;
+        MagicProfile profile = ProfileManager.getProfile(p, MagicProfile.class);
+        if (profile == null) return;
+        ItemStack wand = profile.getCastingWand();
+        Bukkit.getServer().getScheduler().cancelTask(profile.getCurrentCircleTaskId());
+        Bukkit.getServer().getScheduler().cancelTask(profile.getCompletionTaskId());
+        focusCancelledPlayers.remove(uuid);
+        profile.setCasting(false);
+        profile.setCastingSpell(null);
+        Utils.sendActionBar(p, lang().get("spells.cast.focus_lost"));
+        fireSpellFail(p, wand, "FOCUS_LOST");
     }
 
     /**
@@ -440,6 +492,7 @@ public abstract class Spell {
     public int getMaxMastery()       { return maxMastery; }
     public int getLevel()            { return level; }
     public int getRequiredCircleLevel() { return requiredCircle; }
+    public double getRequiredFocus() { return requiredFocus; }
     public BarColor getMasteryBarColor() { return masteryBarColor; }
     public ItemStack getGuiItem()    { return guiItem; }
     public int getGuiCustomModelData() { return guiCustomModelData; }

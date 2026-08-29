@@ -13,6 +13,7 @@ public final class CircleDefinition {
     private final double manaRegeneration;
     private final double magicAffinity;
     private final double magicResistance;
+    private final double maxFocus;
 
     public CircleDefinition(
             int circle,
@@ -21,7 +22,8 @@ public final class CircleDefinition {
             double maxMana,
             double manaRegeneration,
             double magicAffinity,
-            double magicResistance
+            double magicResistance,
+            double maxFocus
     ) {
         this.circle = circle;
         this.requirements = List.copyOf(requirements);
@@ -30,6 +32,7 @@ public final class CircleDefinition {
         this.manaRegeneration = manaRegeneration;
         this.magicAffinity = magicAffinity;
         this.magicResistance = magicResistance;
+        this.maxFocus = maxFocus;
     }
 
     public int getCircle() {
@@ -58,5 +61,9 @@ public final class CircleDefinition {
 
     public double getMagicResistance() {
         return magicResistance;
+    }
+
+    public double getMaxFocus() {
+        return maxFocus;
     }
 }

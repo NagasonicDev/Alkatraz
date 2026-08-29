@@ -8,6 +8,7 @@ enabled: true
 element: 'WATER'
 code: 'RLLSR'
 level: 4
+required_focus: 85
 cooldown: 25
 cast_time: 1.5
 mana_cost: 55

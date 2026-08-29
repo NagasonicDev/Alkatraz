@@ -5,6 +5,7 @@ import me.nagasonic.alkatraz.api.dom.Permission;
 import me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack;
 import me.nagasonic.alkatraz.api.magic.registry.MagicItemRegistries;
 import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
+import me.nagasonic.alkatraz.config.FocusConfig;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.lang.LangManager;
@@ -42,6 +43,12 @@ public final class SpellCastValidator {
         if (profile.getCircleLevel() < spell.getRequiredCircleLevel()) {
             Utils.sendActionBar(player, lang().get("spells.cast.too_low_circle"));
             me.nagasonic.alkatraz.Alkatraz.logDebug("[Grimoire] SpellCastValidator: FAILED player circle level too low");
+            return false;
+        }
+
+        if (FocusConfig.isEnabled() && profile.getFocus() < spell.getRequiredFocus()) {
+            Utils.sendActionBar(player, lang().get("spells.cast.not_enough_focus"));
+            me.nagasonic.alkatraz.Alkatraz.logDebug("[Grimoire] SpellCastValidator: FAILED not enough focus");
             return false;
         }
 

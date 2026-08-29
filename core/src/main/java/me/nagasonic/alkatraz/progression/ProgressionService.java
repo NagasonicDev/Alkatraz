@@ -195,7 +195,8 @@ public final class ProgressionService {
                     circleSection.getDouble("max_mana", 100),
                     circleSection.getDouble("mana_regeneration", 1),
                     circleSection.getDouble("magic_affinity", 0),
-                    circleSection.getDouble("magic_resistance", 0)
+                    circleSection.getDouble("magic_resistance", 0),
+                    circleSection.getDouble("max_focus", 100)
             ));
         }
     }
@@ -217,11 +218,13 @@ public final class ProgressionService {
         double previousManaRegen = previous != null ? previous.getManaRegeneration() : 1;
         double previousMagicAffinity = previous != null ? previous.getMagicAffinity() : 0;
         double previousMagicResistance = previous != null ? previous.getMagicResistance() : 0;
+        double previousMaxFocus = previous != null ? previous.getMaxFocus() : 100;
 
         profile.setMaxMana(profile.getMaxMana() + (next.getMaxMana() - previousMaxMana));
         profile.setManaRegeneration(profile.getManaRegeneration() + (next.getManaRegeneration() - previousManaRegen));
         profile.setMagicAffinity(profile.getMagicAffinity() + (next.getMagicAffinity() - previousMagicAffinity));
         profile.setMagicResistance(profile.getMagicResistance() + (next.getMagicResistance() - previousMagicResistance));
+        profile.setMaxFocus(profile.getMaxFocus() + (next.getMaxFocus() - previousMaxFocus));
         profile.setCircleLevel(circle);
         profile.setStatPoints(profile.getStatPoints() + next.getStatPoints());
     }

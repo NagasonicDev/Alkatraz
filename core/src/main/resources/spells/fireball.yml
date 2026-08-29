@@ -14,6 +14,7 @@ code: 'LLLLL'
 
 # THE MAGIC CIRCLE REQUIRED TO CAST
 level: 1
+required_focus: 20
 
 # COOLDOWN BEFORE CASTING AGAIN
 cooldown: 3

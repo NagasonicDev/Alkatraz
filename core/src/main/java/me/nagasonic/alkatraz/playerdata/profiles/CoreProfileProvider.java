@@ -52,6 +52,10 @@ public class CoreProfileProvider implements ProfileProvider {
         @Override public void setMana(double value) { delegate.setMana(value); }
         @Override public double getManaRegeneration() { return delegate.getManaRegeneration(); }
         @Override public void setManaRegeneration(double value) { delegate.setManaRegeneration(value); }
+        @Override public double getFocus() { return delegate.getFocus(); }
+        @Override public void setFocus(double value) { delegate.setFocus(value); }
+        @Override public double getMaxFocus() { return delegate.getMaxFocus(); }
+        @Override public void setMaxFocus(double value) { delegate.setMaxFocus(value); }
         @Override public double getExperience() { return delegate.getExperience(); }
         @Override public void setExperience(double value) { delegate.setExperience(value); }
         @Override public double getArcaneKnowledge() { return delegate.getArcaneKnowledge(); }

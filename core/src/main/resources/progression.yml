@@ -38,6 +38,7 @@ circle:
     1:
       stat_points: 5
       max_mana: 200
+      max_focus: 110
       mana_regeneration: 2
       magic_affinity: 2
       magic_resistance: 1
@@ -51,6 +52,7 @@ circle:
     2:
       stat_points: 5
       max_mana: 400
+      max_focus: 120
       mana_regeneration: 2.5
       magic_affinity: 3
       magic_resistance: 2
@@ -64,6 +66,7 @@ circle:
     3:
       stat_points: 7
       max_mana: 800
+      max_focus: 130
       mana_regeneration: 3
       magic_affinity: 6
       magic_resistance: 4
@@ -77,6 +80,7 @@ circle:
     4:
       stat_points: 10
       max_mana: 1250
+      max_focus: 140
       mana_regeneration: 5
       magic_affinity: 9
       magic_resistance: 7
@@ -93,6 +97,7 @@ circle:
     5:
       stat_points: 10
       max_mana: 2000
+      max_focus: 150
       mana_regeneration: 6.25
       magic_affinity: 13
       magic_resistance: 10
@@ -109,6 +114,7 @@ circle:
     6:
       stat_points: 15
       max_mana: 2750
+      max_focus: 160
       mana_regeneration: 7.5
       magic_affinity: 18
       magic_resistance: 14
@@ -124,6 +130,7 @@ circle:
     7:
       stat_points: 15
       max_mana: 4000
+      max_focus: 170
       mana_regeneration: 10
       magic_affinity: 24
       magic_resistance: 18
@@ -139,6 +146,7 @@ circle:
     8:
       stat_points: 20
       max_mana: 7500
+      max_focus: 180
       mana_regeneration: 12.5
       magic_affinity: 30
       magic_resistance: 24
@@ -154,6 +162,7 @@ circle:
     9:
       stat_points: 25
       max_mana: 10000
+      max_focus: 190
       mana_regeneration: 15
       magic_affinity: 37
       magic_resistance: 30

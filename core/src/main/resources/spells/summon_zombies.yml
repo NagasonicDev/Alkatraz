@@ -7,6 +7,7 @@ enabled: true
 element: 'DARK'
 code: 'SRSRS'
 level: 4
+required_focus: 120
 cooldown: 30
 cast_time: 2.5
 mana_cost: 90

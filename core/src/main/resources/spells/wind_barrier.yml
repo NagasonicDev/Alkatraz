@@ -7,6 +7,7 @@ enabled: true
 element: 'AIR'
 code: 'RRSSR'
 level: 4
+required_focus: 120
 cooldown: 25
 cast_time: 2.0
 mana_cost: 80

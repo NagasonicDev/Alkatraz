@@ -7,6 +7,7 @@ enabled: true
 element: 'EARTH'
 code: 'LLRSR'
 level: 4
+required_focus: 95
 cooldown: 15
 cast_time: 2.0
 mana_cost: 70

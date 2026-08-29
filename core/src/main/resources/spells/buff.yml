@@ -9,6 +9,7 @@ code: SRLSS
 cast_time: 1.5
 mana_cost: 40
 level: 2
+required_focus: 40
 enabled: true
 maximum_mastery: 100
 cooldown: 30

@@ -246,6 +246,7 @@ public class CastEventListener implements Listener {
         }
         MagicProfile data = ProfileManager.getProfile(e.getPlayer().getUniqueId(), MagicProfile.class);
         if (data.isCasting()){ data.setCasting(false); }
+        data.setCastingSpell(null);
     }
 
     @EventHandler

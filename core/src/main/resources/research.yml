@@ -49,6 +49,11 @@ nodes:
         target: maxMana
         amount: 10
         display: +10 Maximum Mana.
+      max_focus:
+        type: magic_stat
+        target: maxFocus
+        amount: 20
+        display: +20 Maximum Focus.
     unlocks:
     - Reveals the first elemental studies.
     visibility:
@@ -218,6 +223,11 @@ nodes:
         target: magicAffinity
         amount: 2
         display: +2 Magic Affinity.
+      max_focus:
+        type: magic_stat
+        target: maxFocus
+        amount: 10
+        display: +10 Maximum Focus.
     unlocks:
     - Opens the path to applied combat magic.
     visibility:

@@ -14,6 +14,7 @@ code: 'SSSRR'
 
 # THE MAGIC CIRCLE REQUIRED TO CAST
 level: 3
+required_focus: 110
 
 # COOLDOWN BEFORE CASTING AGAIN
 cooldown: 12.5
