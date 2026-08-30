@@ -45,78 +45,104 @@ custom_model_data:
     fireball_scroll: 1103
     earth_spike_scroll: 1104
     
-    # Jewelry (1201-2799)
-    # Rings (1201-1216)
-    zephyr_ring: 1201
-    void_ring: 1202
-    titan_ring: 1203
-    storm_ring: 1204
-    inferno_ring: 1205
-    abyss_ring: 1206
-    tempest_ring: 1207
-    divine_ring: 1208
-    nether_ring: 1209
-    mystic_ring: 1210
-    arcane_ring: 1211
-    ethereal_ring: 1212
-    ember_ring: 1213
-    frost_ring: 1214
-    boulder_ring: 1215
-    mountain_ring: 1216
-    
-    # Necklaces (1217-1232)
-    zephyr_necklace: 1217
-    void_necklace: 1218
-    titan_necklace: 1219
-    storm_necklace: 1220
-    inferno_necklace: 1221
+    # Jewelry (1201-1284)
+    # Fire (1201-1212)
+    ember_ring: 1201
+    ember_necklace: 1202
+    ember_bracelet: 1203
+    ember_pendant: 1204
+    blaze_ring: 1205
+    blaze_necklace: 1206
+    blaze_bracelet: 1207
+    blaze_pendant: 1208
+    inferno_ring: 1209
+    inferno_necklace: 1210
+    inferno_bracelet: 1211
+    inferno_pendant: 1212
+
+    # Frost (1213-1224)
+    frost_ring: 1213
+    frost_necklace: 1214
+    frost_bracelet: 1215
+    frost_pendant: 1216
+    glacier_ring: 1217
+    glacier_necklace: 1218
+    glacier_bracelet: 1219
+    glacier_pendant: 1220
+    abyss_ring: 1221
     abyss_necklace: 1222
-    tempest_necklace: 1223
-    divine_necklace: 1224
-    nether_necklace: 1225
-    mystic_necklace: 1226
-    arcane_necklace: 1227
-    ethereal_necklace: 1228
-    ember_necklace: 1229
-    frost_necklace: 1230
-    boulder_necklace: 1231
-    mountain_necklace: 1232
-    
-    # Pendants (1233-1248)
-    zephyr_pendant: 1233
-    void_pendant: 1234
-    titan_pendant: 1235
-    storm_pendant: 1236
-    inferno_pendant: 1237
-    abyss_pendant: 1238
-    tempest_pendant: 1239
-    divine_pendant: 1240
-    nether_pendant: 1241
-    mystic_pendant: 1242
-    arcane_pendant: 1243
-    ethereal_pendant: 1244
-    ember_pendant: 1245
-    frost_pendant: 1246
-    boulder_pendant: 1247
-    mountain_pendant: 1248
-    
-    # Bracelets (1249-1264)
-    zephyr_bracelet: 1249
-    void_bracelet: 1250
-    titan_bracelet: 1251
-    storm_bracelet: 1252
-    inferno_bracelet: 1253
-    abyss_bracelet: 1254
-    tempest_bracelet: 1255
-    divine_bracelet: 1256
-    nether_bracelet: 1257
-    mystic_bracelet: 1258
-    arcane_bracelet: 1259
-    ethereal_bracelet: 1260
-    ember_bracelet: 1261
-    frost_bracelet: 1262
-    boulder_bracelet: 1263
-    mountain_bracelet: 1264
+    abyss_bracelet: 1223
+    abyss_pendant: 1224
+
+    # Storm (1225-1236)
+    zephyr_ring: 1225
+    zephyr_necklace: 1226
+    zephyr_bracelet: 1227
+    zephyr_pendant: 1228
+    storm_ring: 1229
+    storm_necklace: 1230
+    storm_bracelet: 1231
+    storm_pendant: 1232
+    tempest_ring: 1233
+    tempest_necklace: 1234
+    tempest_bracelet: 1235
+    tempest_pendant: 1236
+
+    # Earth (1237-1248)
+    boulder_ring: 1237
+    boulder_necklace: 1238
+    boulder_bracelet: 1239
+    boulder_pendant: 1240
+    mountain_ring: 1241
+    mountain_necklace: 1242
+    mountain_bracelet: 1243
+    mountain_pendant: 1244
+    titan_ring: 1245
+    titan_necklace: 1246
+    titan_bracelet: 1247
+    titan_pendant: 1248
+
+    # Light (1249-1260)
+    radiant_ring: 1249
+    radiant_necklace: 1250
+    radiant_bracelet: 1251
+    radiant_pendant: 1252
+    luminous_ring: 1253
+    luminous_necklace: 1254
+    luminous_bracelet: 1255
+    luminous_pendant: 1256
+    divine_ring: 1257
+    divine_necklace: 1258
+    divine_bracelet: 1259
+    divine_pendant: 1260
+
+    # Shadow (1261-1272)
+    shadow_ring: 1261
+    shadow_necklace: 1262
+    shadow_bracelet: 1263
+    shadow_pendant: 1264
+    void_ring: 1265
+    void_necklace: 1266
+    void_bracelet: 1267
+    void_pendant: 1268
+    nether_ring: 1269
+    nether_necklace: 1270
+    nether_bracelet: 1271
+    nether_pendant: 1272
+
+    # Arcane (1273-1284)
+    mystic_ring: 1273
+    mystic_necklace: 1274
+    mystic_bracelet: 1275
+    mystic_pendant: 1276
+    arcane_ring: 1277
+    arcane_necklace: 1278
+    arcane_bracelet: 1279
+    arcane_pendant: 1280
+    ethereal_ring: 1281
+    ethereal_necklace: 1282
+    ethereal_bracelet: 1283
+    ethereal_pendant: 1284
     
     # Equipment (2801-2899)
     scholar_hat: 2801

@@ -1,5 +1,6 @@
 key: alkatraz:shadow_pendant
 material: AMETHYST_SHARD
+custom_model_data: 1264
 display_name: '&r&8Shadow Pendant'
 lore:
   - 'A simple piece of Dark jewelry.'

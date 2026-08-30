@@ -1,6 +1,6 @@
 key: alkatraz:frost_necklace
 material: STRING
-custom_model_data: 1230
+custom_model_data: 1214
 display_name: '&r&bFrost Necklace'
 lore:
   - 'A simple piece of Water jewelry.'

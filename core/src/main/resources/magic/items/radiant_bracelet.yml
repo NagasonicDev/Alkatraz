@@ -1,5 +1,6 @@
 key: alkatraz:radiant_bracelet
 material: IRON_NUGGET
+custom_model_data: 1251
 display_name: '&r&eRadiant Bracelet'
 lore:
   - 'A simple piece of Light jewelry.'

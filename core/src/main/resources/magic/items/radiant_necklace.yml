@@ -1,5 +1,6 @@
 key: alkatraz:radiant_necklace
 material: STRING
+custom_model_data: 1250
 display_name: '&r&eRadiant Necklace'
 lore:
   - 'A simple piece of Light jewelry.'
