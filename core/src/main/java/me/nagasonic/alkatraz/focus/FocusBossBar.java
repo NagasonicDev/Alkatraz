@@ -46,6 +46,7 @@ public final class FocusBossBar {
     public void update(Player player, double focus, double max) {
         BossBar bar = bars.get(player.getUniqueId());
         if (bar == null) return;
+        bar.setTitle(Alkatraz.getLangManager().get("focus.bar.title", "focus", Math.round(focus), "max", Math.round(max)));
         double progress = max <= 0 ? 0.0 : Math.max(0.0, Math.min(1.0, focus / max));
         bar.setProgress(progress);
         if (progress >= 0.5) {

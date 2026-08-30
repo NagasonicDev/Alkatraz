@@ -486,7 +486,7 @@ spells.cast.not_enough_focus = &cNot enough focus to cast this spell.
 spells.cast.focus_lost = &cYou lost your focus and the spell was cancelled!
 
 # --- Focus System ---
-focus.bar.title = &dFocus
+focus.bar.title = &dFocus %focus%/%max%
 
 # --- Spellbook ---
 spellbook.corrupted = &cThis spellbook appears to be corrupted!

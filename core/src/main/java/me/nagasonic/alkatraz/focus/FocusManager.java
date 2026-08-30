@@ -120,7 +120,7 @@ public final class FocusManager implements Listener {
 
     private void refreshBar(Player player, MagicProfile profile) {
         if (!bossBar.isVisible(player)) return;
-        bossBar.update(player, profile.getFocus(), effectiveMax(profile, player.getUniqueId()));
+        bossBar.update(player, profile.getFocus(), profile.getMaxFocus());
     }
 
     // ============================
