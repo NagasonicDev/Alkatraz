@@ -4,8 +4,10 @@ import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
-import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.types.BarrierType;
+import me.nagasonic.alkatraz.spells.types.DamageableBarrier;
+import me.nagasonic.alkatraz.spells.Spell;
+import me.nagasonic.alkatraz.spells.types.properties.SpellProperties;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.BarrierProperties;
 import org.bukkit.Location;
@@ -60,6 +62,8 @@ public class SpellComponentHandler implements Listener {
                         p.tick();
                     }else if (comp instanceof SpellBlockComponent b){
                         b.tick();
+                    }else if (comp instanceof BarrierWallComponent w){
+                        w.tick();
                     }
                 }
             }
@@ -134,6 +138,8 @@ public class SpellComponentHandler implements Listener {
             return p.getLocation();
         } else if (comp instanceof SpellBlockComponent b) {
             return b.getBlock().getLocation();
+        } else if (comp instanceof BarrierWallComponent w) {
+            return w.getLocation();
         }
         return null;
     }
@@ -170,88 +176,94 @@ public class SpellComponentHandler implements Listener {
 
         if (offenseComp != null && defenseComp != null &&
                 offenseComp.getSpell() instanceof AttackSpell attack &&
-                defenseComp.getSpell() instanceof BarrierSpell barrier &&
-                offenseComp.getProperties() instanceof AttackProperties attackProps &&
-                defenseComp.getProperties() instanceof BarrierProperties barrierProps) {
+                offenseComp.getProperties() instanceof AttackProperties attackProps) {
+
+            BarrierDefense def = resolveDefense(defenseComp);
+            if (def == null) {
+                return;
+            }
+
+            DamageableBarrier barrier = def.barrier();
+            SpellProperties barrierProps = def.props();
+            BarrierSpell bspell = def.spell();
 
             if (attackProps.getCollided().contains(barrierProps)) return;
             if (attackProps.getType() == AttackType.MAGIC){
-                if (barrierProps.getType() == BarrierType.PHYSICAL) return;
-                attackProps.getCollided().add(barrierProps);
-                barrierProps.getCollided().add(attackProps);
-
-                LivingEntity caster = offenseComp.getCaster();
-                double damage = attackProps.getRemainingPower();
-                double barrierHP = barrierProps.getHitpoints();
-
-                barrierProps.damage(damage);
-                barrier.onHit(damage, attack);
-                attack.onHitBarrier(barrier, defenseLoc, caster);
-
-                if (!barrierProps.isBroken()) {
-                    attack.onCountered(offenseLoc);
-                    attackProps.counter();
-                    if (offenseComp instanceof SpellEntityComponent sec){
-                        sec.getEntity().remove();
-                    }
-                    SpellComponentHandler.remove(offenseComp.getComponentID());
-                    return;
-                }
-
-                double ratio = damage / barrierHP;
-                if (ratio >= 1.25) {
-                    attackProps.reducePower(barrierHP / damage);
-                    return;
-                }
-
-                attack.onCountered(offenseLoc);
-                attackProps.counter();
-                if (offenseComp instanceof SpellEntityComponent sec){
-                    sec.getEntity().remove();
-                }
-                SpellComponentHandler.remove(offenseComp.getComponentID());
+                if (barrier.type() == BarrierType.PHYSICAL) return;
             } else if (attackProps.getType() == AttackType.PHYSICAL){
-                if (barrierProps.getType() == BarrierType.MAGIC) return;
-                attackProps.getCollided().add(barrierProps);
-                barrierProps.getCollided().add(attackProps);
+                if (barrier.type() == BarrierType.MAGIC) return;
+            } else {
+                return;
+            }
+            attackProps.getCollided().add(barrierProps);
+            barrierProps.getCollided().add(attackProps);
 
-                LivingEntity caster = offenseComp.getCaster();
-                double damage = attackProps.getRemainingPower();
-                double barrierHP = barrierProps.getHitpoints();
+            LivingEntity caster = offenseComp.getCaster();
+            double damage = attackProps.getRemainingPower();
+            double barrierHP = barrier.hitpoints();
 
-                barrierProps.damage(damage);
-                barrier.onHit(damage, attack);
-                attack.onHitBarrier(barrier, defenseLoc, caster);
-
-                if (!barrierProps.isBroken()) {
-                    attack.onCountered(offenseLoc);
-                    attackProps.counter();
-                    if (offenseComp instanceof SpellEntityComponent sec){
-                        sec.getEntity().remove();
-                    }else if (offenseComp instanceof SpellBlockComponent sbc){
-                        sbc.getBlock().setType(Material.AIR);
-                    }
-                    SpellComponentHandler.remove(offenseComp.getComponentID());
-                    return;
-                }
-
-                double ratio = damage / barrierHP;
-                if (ratio >= 1.25) {
-                    attackProps.reducePower(barrierHP / damage);
-                    return;
-                }
-
-                attack.onCountered(offenseLoc);
-                attackProps.counter();
-                if (offenseComp instanceof SpellEntityComponent sec){
-                    sec.getEntity().remove();
-                } else if (offenseComp instanceof SpellBlockComponent sbc) {
-                    sbc.getBlock().setType(Material.AIR);
-                }
-                SpellComponentHandler.remove(offenseComp.getComponentID());
+            barrier.damage(damage);
+            barrier.onHit(damage, attack);
+            if (bspell != null) {
+                attack.onHitBarrier(bspell, defenseLoc, caster);
             }
 
+            if (!barrier.isBroken()) {
+                attack.onCountered(offenseLoc);
+                attackProps.counter();
+                removeOffenseComponent(offenseComp);
+                SpellComponentHandler.remove(offenseComp.getComponentID());
+                return;
+            }
+
+            double ratio = damage / barrierHP;
+            if (ratio >= 1.25) {
+                attackProps.reducePower(barrierHP / damage);
+                return;
+            }
+
+            attack.onCountered(offenseLoc);
+            attackProps.counter();
+            removeOffenseComponent(offenseComp);
+            SpellComponentHandler.remove(offenseComp.getComponentID());
         }
+    }
+
+    private static void removeOffenseComponent(SpellComponent comp) {
+        if (comp instanceof SpellEntityComponent sec) {
+            sec.getEntity().remove();
+        } else if (comp instanceof SpellBlockComponent sbc) {
+            sbc.getBlock().setType(Material.AIR);
+        }
+    }
+
+    private record BarrierDefense(DamageableBarrier barrier, SpellProperties props, BarrierSpell spell) {}
+
+    private static BarrierDefense resolveDefense(SpellComponent defenseComp) {
+        if (defenseComp.getSpell() instanceof BarrierSpell spell
+                && defenseComp.getProperties() instanceof BarrierProperties props) {
+            return new BarrierDefense(new SpellBarrierAdapter(spell, props), props, spell);
+        }
+        if (defenseComp.getProperties() instanceof DamageableBarrier d) {
+            SpellProperties sp = defenseComp.getProperties();
+            if (sp == null) return null;
+            return new BarrierDefense(d, sp, null);
+        }
+        return null;
+    }
+
+    private record SpellBarrierAdapter(BarrierSpell spell, BarrierProperties props) implements DamageableBarrier {
+        public double hitpoints() { return props.getHitpoints(); }
+        public double initialHitpoints() { return props.getInitialHitpoints(); }
+        public boolean isBroken() { return props.isBroken(); }
+        public BarrierType type() { return props.getType(); }
+        public void damage(double amount) { props.damage(amount); }
+        public void onHit(double damage, AttackSpell source) { spell.onHit(damage, source); }
+        public void onBreak(Location center) { spell.onBarrierBreak(center); }
+        public Set<SpellProperties> collided() { return props.getCollided(); }
+        public double barrierRadius() { return props.getRadius(); }
+        public void setCastLocation(Location location) { props.setCastLocation(location); }
+        public LivingEntity getCaster() { return props.getCaster(); }
     }
 
 }

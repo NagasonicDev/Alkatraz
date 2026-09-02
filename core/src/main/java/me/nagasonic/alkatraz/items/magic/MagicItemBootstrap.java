@@ -31,6 +31,7 @@ import me.nagasonic.alkatraz.items.magic.effect.implementation.CommandEffect;
 import me.nagasonic.alkatraz.items.magic.effect.implementation.DamageEffect;
 import me.nagasonic.alkatraz.api.magic.effect.EffectType;
 import me.nagasonic.alkatraz.items.magic.effect.implementation.ExplosionEffect;
+import me.nagasonic.alkatraz.items.magic.effect.implementation.SummonedBarrierEffect;
 import me.nagasonic.alkatraz.items.magic.effect.implementation.HealEffect;
 import me.nagasonic.alkatraz.items.magic.effect.implementation.IgniteEffect;
 import me.nagasonic.alkatraz.items.magic.effect.implementation.MessageEffect;
@@ -463,6 +464,8 @@ public final class MagicItemBootstrap {
                 MagicKeys.alkatraz("message"), MessageEffect::fromConfig));
         MagicItemRegistries.EFFECT_TYPES.register(new EffectType(
                 MagicKeys.alkatraz("explosion"), ExplosionEffect::fromConfig));
+        MagicItemRegistries.EFFECT_TYPES.register(new EffectType(
+                MagicKeys.alkatraz("barrier"), SummonedBarrierEffect::fromConfig));
     }
 
     private static void registerComponent(String key, String description) {

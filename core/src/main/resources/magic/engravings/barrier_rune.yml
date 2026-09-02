@@ -1,21 +1,82 @@
 key: barrier_rune
-allowed_item_types:
-  - helmet
-  - chestplate
-  - leggings
-  - boots
-triggers: []
+allowed_item_types: [helmet, chestplate, leggings, boots]
+triggers: [on_sneak]
 item:
-  material: SHIELD
-  display_name: '&bBarrier Rune'
+  material: GLASS_BOTTLE
+  display_name: '&eGlass Ward Rune'
   lore:
-    - '&7&oAn energy shield that absorbs incoming damage.'
-    - '&7&oConsumes the item''s durability instead of health.'
-barrier_config:
-  durability_cost: 1.0
+    - '&7Hold &fShift&7 to summon a wall of'
+    - '&7magical glass that wards incoming'
+    - '&7spells. Regenerates using your mana.'
 conditions:
   - type: circle_level
     min_circle: 2
+effects:
+  - type: barrier
+    hold_mode: sneaking
+    max_duration_ticks: 0
+    max_simultaneous: 1
+    refresh_on_resummon: true
+    max_hitpoints: 40
+    hitpoints: 40
+    persist_hp_across_summons: true
+    reset_on: [shatter, death, quit, unequip]
+    affinity_scaling:
+      enabled: true
+      element: LIGHT
+      bonus_per_10_affinity: 1
+    barrier_type: COMBINED
+    health_bar:
+      enabled: true
+      title_lang_key: spells.barrier.health_bar
+      color: PINK
+      style: SOLID
+      visible_to: [CASTER]
+      view_radius: 15
+      clear_delay_ticks: 20
+    regen:
+      enabled: true
+      hp_per_second: 0.75
+      mana_cost_per_hp: 2.0
+      active_only: true
+      partial_on_low_mana: true
+    shape: CAP
+    radius: 3.0
+    vertical_offset: 1.0
+    cap:
+      yaw_arc_degrees: 110
+      pitch_min_degrees: -25
+      pitch_max_degrees: 25
+    follow:
+      player: true
+      facing: true
+      pitch: false
+    render_interval_ticks: 4
+    particles:
+      type: DUST
+      color: '#ffff87'
+      color2: '#ffffff'
+      count_per_render: 60
+      size: 1.0
+      collision_radius: 0.6
+      component_lifetime_ticks: 8
+    physical:
+      push_entities: false
+      push_strength: 0.3
+      ignore_tags: [summoned_zombie]
+      deflect_projectiles: false
+      deflect_speed_multiplier: 1.2
+    cooldown:
+      on: shatter
+      seconds: 90
+      deny_sound: BLOCK_GLASS_BREAK
+    sfx:
+      on_shatter:
+        particle: DUST
+        color: '#ff0000'
+        count: 200
+        size: 1.0
+        sound: BLOCK_GLASS_BREAK
 recipe:
   shape:
     - " O "

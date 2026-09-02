@@ -50,9 +50,6 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.persistence.PersistentDataType;
 
 import me.nagasonic.alkatraz.api.magic.equipment.EquipmentProfile;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -151,76 +148,6 @@ public final class MagicItemTriggerAdapter implements Listener {
             EffectExecutor.executeAll(def.effects(), ctx);
             CooldownCondition.commitPending(def.conditions(), ctx);
             return;
-        }
-    }
-
-    /**
-     * Handles damage absorption for the Barrier Rune.
-     * Fires at LOWEST priority so damage can be reduced/cancelled before armor applies.
-     * Absorbed damage consumes the item's durability instead of a separate HP pool.
-     */
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onDamageWithBarrier(EntityDamageEvent event) {
-        if (event.isCancelled()) return;
-        if (!(event.getEntity() instanceof Player player)) return;
-
-        EquipmentProfile profile = MagicItemServices.equipment().profile(player);
-        var barrierKey = MagicKeys.alkatraz("barrier_rune");
-
-        for (EquipmentSlot slot : List.of(
-                EquipmentSlot.FEET, EquipmentSlot.LEGS,
-                EquipmentSlot.CHEST, EquipmentSlot.HEAD)) {
-            var optInstance = profile.instance(slot);
-            if (optInstance.isEmpty()) continue;
-
-            MagicItemInstance instance = optInstance.get();
-            for (Engraving engraving : instance.engravings()) {
-                if (!engraving.engravingKey().equals(barrierKey)) continue;
-
-                EngravingDefinition def = MagicItemRegistries.ENGRAVING_DEFINITIONS.get(
-                        engraving.engravingKey()).orElse(null);
-                if (def == null) continue;
-
-                TriggerContext ctx = TriggerContext.empty(player).withSource(instance, slot);
-                if (!ConditionEvaluator.allMatch(def.conditions(), ctx)) continue;
-
-                double durabilityCost = 1.0;
-                Object configRaw = def.staticConfig().get("barrier_config");
-                if (configRaw instanceof ConfigurationSection barrierConfig) {
-                    durabilityCost = barrierConfig.getDouble("durability_cost", 1.0);
-                }
-                if (durabilityCost <= 0) continue;
-
-                double damage = event.getDamage();
-                ItemStack itemStack = profile.item(slot).orElse(null);
-                if (itemStack == null) continue;
-
-                int remainingDurability = itemStack.getType().getMaxDurability() - itemStack.getDurability();
-                int durabilityNeeded = (int) Math.ceil(damage * durabilityCost);
-                int durabilityToUse = Math.min(durabilityNeeded, remainingDurability);
-                if (durabilityToUse <= 0) continue;
-
-                double damageAbsorbed = durabilityToUse / durabilityCost;
-                double remainingDamage = damage - damageAbsorbed;
-
-                // Sync instance data (PDC, lore) then damage the item
-                MagicItemStack.writeInstance(itemStack, instance);
-                itemStack.setDurability((short) (itemStack.getDurability() + durabilityToUse));
-
-                int amp = (int) Math.ceil(damageAbsorbed / 2.0) - 1;
-                if (damageAbsorbed > 0) {
-                    player.addPotionEffect(new PotionEffect(
-                            PotionEffectType.ABSORPTION, 100, Math.max(0, amp), false, false, true));
-                }
-
-                if (remainingDamage <= 0) {
-                    event.setCancelled(true);
-                } else {
-                    event.setDamage(remainingDamage);
-                }
-                CooldownCondition.commitPending(def.conditions(), ctx);
-                return;
-            }
         }
     }
 

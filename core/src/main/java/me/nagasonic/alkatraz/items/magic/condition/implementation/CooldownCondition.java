@@ -86,7 +86,7 @@ public final class CooldownCondition implements Condition {
      * from the item's identity-relevant state (definition, modifiers, engravings), which is
      * deterministic across reads of the same physical item.
      */
-    static String stableItemKey(MagicItemInstance instance) {
+    public static String stableItemKey(MagicItemInstance instance) {
         StringBuilder key = new StringBuilder(instance.definitionKey().toString());
         for (NamespacedKey modifier : instance.modifiers()) {
             key.append('|').append(modifier);
