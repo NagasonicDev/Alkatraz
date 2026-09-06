@@ -40,6 +40,8 @@ menu.confirm_engraving = &8Confirm Engraving
 menu.item_editor = &8Item Editor
 menu.rune_editor = &b&lRune Editor
 menu.circle_up_confirm = &5&lConfirm Circle Up
+menu.warp_points = &5Warp Points
+menu.warp_destination = &5Warp - Destination
 
 # --- Spells Menu ---
 spells.configure_hotbar = &5Configure Spell Hotbar
@@ -586,6 +588,17 @@ spells.blink.book_name = &5Voidwalk Codex
 spells.blink.lore1 = &8&oStep between the folds of reality.
 spells.blink.lore2 = &8short-range teleportation.
 spells.blink.no_valid_location = &cNo valid teleport location found!
+
+# --- Warp ---
+spells.warp.book_name = &6Codex of the Folded Path
+spells.warp.lore1 = &8&oFold reality to cross vast distances.
+spells.warp.lore2 = &8long-range teleportation.
+spells.warp.no_points = &cYou have no warp points set! Configure them in the spell options.
+spells.warp.interrupted = &cWarp interrupted!
+spells.warp.too_far = &cThat warp point is too far away!
+spells.warp.blocked = &cYou cannot warp there!
+spells.warp.point_set = &aWarp point set!
+spells.warp.point_cleared = &7Warp point cleared.
 
 # --- Buff ---
 spells.buff.book_name = &bTome of Fortification

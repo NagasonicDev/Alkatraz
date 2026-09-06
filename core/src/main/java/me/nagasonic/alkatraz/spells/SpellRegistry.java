@@ -55,6 +55,7 @@ public class SpellRegistry {
         registerIfEnabled("tornado", new Tornado("TORNADO"));
         registerIfEnabled("radiance", new Radiance("RADIANCE"));
         registerIfEnabled("shadow_realm", new ShadowRealm("SHADOW_REALM"));
+        registerIfEnabled("warp", new Warp("WARP"));
         Alkatraz.logInfo("Registered " + registeredCount + " spells.");
     }
 
