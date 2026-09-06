@@ -8,6 +8,8 @@ import me.nagasonic.alkatraz.config.FocusConfig;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.util.StatUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.boss.BossBar;
 import org.bukkit.inventory.ItemStack;
@@ -97,6 +99,7 @@ public class MagicProfile extends Profile {
         stringSetStat("researchObjectiveProgress");
         stringSetStat("researchRewardsApplied");
         stringSetStat("hotbarSpells"); // Format: "slotIndex:spellId"
+        stringSetStat("warpPoints");   // Stores warp points (format: "slot:world:x:y:z:yaw:pitch")
 
         // Note: Spell masteries are stored as dynamic int stats (see getSpellMastery/setSpellMastery)
     }
@@ -108,6 +111,76 @@ public class MagicProfile extends Profile {
         this.spellModifierTypes = new HashMap<>();
         addManaPerSecond();
         // Map-based approach initialized inline above
+    }
+
+    // ============================================
+    // Warp Points
+    // ============================================
+
+    /**
+     * A single stored warp destination, persisted as the string
+     * "slot:world:x:y:z:yaw:pitch".
+     */
+    public record WarpPoint(int slot, String world, double x, double y, double z, float yaw, float pitch) {
+
+        public static String serialize(WarpPoint p) {
+            return p.slot + ":" + p.world + ":" + p.x + ":" + p.y + ":" + p.z + ":" + p.yaw + ":" + p.pitch;
+        }
+
+        public static WarpPoint parse(String s) {
+            String[] parts = s.split(":");
+            return new WarpPoint(
+                    Integer.parseInt(parts[0].trim()),
+                    parts[1].trim(),
+                    Double.parseDouble(parts[2].trim()),
+                    Double.parseDouble(parts[3].trim()),
+                    Double.parseDouble(parts[4].trim()),
+                    Float.parseFloat(parts[5].trim()),
+                    Float.parseFloat(parts[6].trim()));
+        }
+
+        public Location toLocation() {
+            World worldObj = Bukkit.getWorld(world);
+            if (worldObj == null) return null;
+            return new Location(worldObj, x, y, z, yaw, pitch);
+        }
+    }
+
+    public Map<Integer, WarpPoint> getWarpPoints() {
+        Map<Integer, WarpPoint> result = new LinkedHashMap<>();
+        for (String s : getStringSet("warpPoints")) {
+            try {
+                WarpPoint p = WarpPoint.parse(s);
+                result.put(p.slot(), p);
+            } catch (RuntimeException ignored) {
+            }
+        }
+        return result;
+    }
+
+    public void setWarpPoint(WarpPoint point) {
+        Set<String> entries = new HashSet<>();
+        for (String s : getStringSet("warpPoints")) {
+            if (!sameSlot(s, point.slot())) entries.add(s);
+        }
+        entries.add(WarpPoint.serialize(point));
+        setStringSet("warpPoints", entries);
+    }
+
+    public void removeWarpPoint(int slot) {
+        Set<String> entries = new HashSet<>();
+        for (String s : getStringSet("warpPoints")) {
+            if (!sameSlot(s, slot)) entries.add(s);
+        }
+        setStringSet("warpPoints", entries);
+    }
+
+    private static boolean sameSlot(String s, int slot) {
+        try {
+            return WarpPoint.parse(s).slot() == slot;
+        } catch (RuntimeException e) {
+            return true;
+        }
     }
 
     // ============================================
