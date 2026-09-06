@@ -1,0 +1,8 @@
+options:
+
+  warp_points:
+    description: "Set & manage your warp points."
+    display_name: "Warp Points"
+    icon: COMPASS
+    use_custom_menu: true
+    custom_menu: "me.nagasonic.alkatraz.gui.implementation.options.WarpPointsMenu"

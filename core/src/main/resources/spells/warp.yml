@@ -1,0 +1,31 @@
+id: 'warp'
+display_name: '&5Warp'
+description:
+  - '&7Fold space to teleport across'
+  - '&7great distances in an instant.'
+enabled: true
+element: 'NONE'
+code: 'SRSSR'
+level: 6
+required_focus: 75
+cooldown: 20
+cast_time: 1.0
+mana_cost: 60
+maximum_mastery: 100
+base_slots: 2
+mastery_bonus_slots:
+  - 25
+  - 50
+  - 75
+base_distance: 500.0
+distance_per_circle: 100.0
+mastery_distance_bonus: 0.5
+wind_up_duration: 2
+move_cancel_threshold: 0.25
+mastery_bar_color: 'PURPLE'
+gui_item: 'ENDER_EYE'
+gui_custom_model_data: 4118
+prepare_sound: 'ENTITY_ENDERMAN_TELEPORT'
+prepare_sound_volume: 0.3
+prepare_sound_pitch: 1.2
+cast_sound: 'ENTITY_ENDERMAN_TELEPORT'
