@@ -132,22 +132,30 @@ public final class FocusManager implements Listener {
         if (!FocusConfig.isEnabled()) return;
         Player player = event.getPlayer();
         Location to = event.getTo();
-        if (to == null || sameBlock(event.getFrom(), to)) return;
+        if (to == null || event.getFrom().getWorld() != to.getWorld()) return;
 
         UUID uuid = player.getUniqueId();
         MagicProfile profile = ProfileManager.getProfile(uuid, MagicProfile.class);
         if (profile == null) return;
 
+        // React on any real movement change (horizontal or vertical) so running,
+        // falling and rising all reduce focus. A near-zero displacement is
+        // treated as stationary and does not reset the recovery timer.
+        double dx = to.getX() - event.getFrom().getX();
+        double dy = to.getY() - event.getFrom().getY();
+        double dz = to.getZ() - event.getFrom().getZ();
+        double horizontal = Math.sqrt(dx * dx + dz * dz);
+        double effectiveSpeed = (horizontal + Math.abs(dy) * 0.5) / 0.05;
+        if (effectiveSpeed <= STATIONARY_SPEED_EPSILON) {
+            return;
+        }
+
         lastMoveTime.put(uuid, System.currentTimeMillis());
 
-        org.bukkit.util.Vector velocity = player.getVelocity();
-        double speedBps = Math.hypot(velocity.getX(), velocity.getZ()) / 0.05;
         double penaltyRatio = Math.min(
-                speedBps * FocusConfig.getMovementPenaltyPerSpeed(),
+                effectiveSpeed * FocusConfig.getMovementPenaltyPerSpeed(),
                 FocusConfig.getMovementMaxPenaltyRatio());
-        double penalty = speedBps <= STATIONARY_SPEED_EPSILON
-                ? 0.0
-                : profile.getMaxFocus() * penaltyRatio;
+        double penalty = profile.getMaxFocus() * penaltyRatio * 2;
         movementPenalty.put(uuid, penalty);
 
         double effectiveMax = effectiveMax(profile, uuid);
@@ -212,12 +220,5 @@ public final class FocusManager implements Listener {
     private static boolean isCastingTool(ItemStack item) {
         if (item == null || item.getType() == Material.AIR || item.getAmount() == 0) return false;
         return WandUtils.isWand(item) || WandUtils.isGrimoire(item);
-    }
-
-    private static boolean sameBlock(Location a, Location b) {
-        return a.getWorld() == b.getWorld()
-                && a.getBlockX() == b.getBlockX()
-                && a.getBlockY() == b.getBlockY()
-                && a.getBlockZ() == b.getBlockZ();
     }
 }

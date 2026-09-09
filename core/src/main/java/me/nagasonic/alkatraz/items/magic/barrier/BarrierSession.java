@@ -77,6 +77,8 @@ public final class BarrierSession extends SpellProperties implements DamageableB
         if (config.healthBar().enabled() && config.healthBar().visibleTo().contains("CASTER")) {
             this.healthBar.addPlayer(caster);
         }
+        me.nagasonic.alkatraz.Alkatraz.logInfo("[DBG barrier] session ctor: bossbar created, initialHitpoints=" + initialHitpoints
+                + " hitpoints=" + hitpoints + " shape=" + config.shape() + " holdMode=" + config.holdMode());
     }
 
     public void start() {

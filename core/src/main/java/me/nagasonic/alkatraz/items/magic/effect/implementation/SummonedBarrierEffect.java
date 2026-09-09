@@ -24,12 +24,17 @@ public final class SummonedBarrierEffect implements Effect {
     @Override
     public void execute(TriggerContext context) {
         if (!(context.actor() instanceof Player player)) {
+            me.nagasonic.alkatraz.Alkatraz.logInfo("[DBG barrier] execute: actor is not a Player, returning");
             return;
         }
         if (context.sourceItem() == null) {
+            me.nagasonic.alkatraz.Alkatraz.logInfo("[DBG barrier] execute: sourceItem is null, returning");
             return;
         }
+        me.nagasonic.alkatraz.Alkatraz.logInfo("[DBG barrier] execute: actor=" + player.getName()
+                + " slot=" + context.equipmentSlot() + " calling BarrierManager.start");
         String itemKey = CooldownCondition.stableItemKey(context.sourceItem());
-        BarrierManager.start(player, context.sourceItem(), context.equipmentSlot(), config, itemKey);
+        boolean created = BarrierManager.start(player, context.sourceItem(), context.equipmentSlot(), config, itemKey);
+        me.nagasonic.alkatraz.Alkatraz.logInfo("[DBG barrier] execute: BarrierManager.start returned " + created);
     }
 }

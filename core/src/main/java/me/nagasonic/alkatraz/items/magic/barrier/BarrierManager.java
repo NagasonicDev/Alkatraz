@@ -38,6 +38,7 @@ public final class BarrierManager {
                                 BarrierConfig config, String itemKey) {
         long now = System.currentTimeMillis();
         if (CooldownTracker.isOnCooldown(caster.getUniqueId(), itemKey, now)) {
+            me.nagasonic.alkatraz.Alkatraz.logInfo("[DBG barrier] start: cooldown active for " + itemKey + ", denied");
             playDenySound(caster, config);
             return false;
         }
@@ -45,6 +46,7 @@ public final class BarrierManager {
         Map<String, BarrierSession> byItem = SESSIONS.computeIfAbsent(uuid, k -> new ConcurrentHashMap<>());
         BarrierSession existing = byItem.get(itemKey);
         if (existing != null && !existing.isDisposed()) {
+            me.nagasonic.alkatraz.Alkatraz.logInfo("[DBG barrier] start: existing active session for " + itemKey + ", refresh=" + config.refreshOnResummon());
             if (config.refreshOnResummon()) {
                 existing.refresh();
             }
@@ -52,17 +54,21 @@ public final class BarrierManager {
         }
         long active = byItem.values().stream().filter(s -> s != null && !s.isDisposed()).count();
         if (config.maxSimultaneous() > 0 && active >= config.maxSimultaneous()) {
+            me.nagasonic.alkatraz.Alkatraz.logInfo("[DBG barrier] start: maxSimultaneous reached (" + active + "), silent return");
             return true;
         }
         double startHp = config.persistHpAcrossSummons()
                 ? persistedHpOf(uuid, itemKey, config.hitpoints())
                 : config.hitpoints();
+        me.nagasonic.alkatraz.Alkatraz.logInfo("[DBG barrier] start: constructing session hp=" + startHp + " maxHp=" + config.maxHitpoints());
         BarrierSession session = new BarrierSession(caster, sourceItem, slot, config, itemKey, null, startHp);
+        me.nagasonic.alkatraz.Alkatraz.logInfo("[DBG barrier] start: session constructed, calling start()");
         session.start();
         byItem.put(itemKey, session);
         if (config.cooldown().on() == BarrierConfig.CooldownConfig.CooldownMoment.SUMMON) {
             markShatterCooldown(uuid, itemKey, now, config.cooldown().seconds());
         }
+        me.nagasonic.alkatraz.Alkatraz.logInfo("[DBG barrier] start: session created successfully");
         return true;
     }
 
