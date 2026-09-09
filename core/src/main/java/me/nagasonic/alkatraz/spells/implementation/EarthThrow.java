@@ -19,6 +19,7 @@ import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.SpellProperties;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
+import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
 import me.nagasonic.alkatraz.hooks.Protection;
@@ -59,12 +60,12 @@ public class EarthThrow extends AttackSpell implements Listener {
 
     @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
-        location.getWorld().spawnParticle(Utils.BLOCK_DUST, location, 15, Material.DIRT.createBlockData());
+        ParticleCaster.spawn(caster, location.getWorld(), Utils.BLOCK_DUST, location, 15, Material.DIRT.createBlockData());
     }
 
     @Override
     public void onCountered(Location location) {
-        location.getWorld().spawnParticle(Utils.BLOCK_DUST, location, 30, Material.DIRT.createBlockData());
+        ParticleCaster.spawn(null, location.getWorld(), Utils.BLOCK_DUST, location, 30, Material.DIRT.createBlockData());
     }
 
 
@@ -174,7 +175,7 @@ public class EarthThrow extends AttackSpell implements Listener {
             // Spawn particles at all calculated points
             for (int i = 0; i < 100; i++){
                 for (Location loc : magicCirclePoints) {
-                    loc.getWorld().spawnParticle(Utils.DUST, loc, 0, new Particle.DustOptions(Color.fromRGB(78, 47, 0), 0.4F));
+                    ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, new Particle.DustOptions(Color.fromRGB(78, 47, 0), 0.4F));
                 }
             }
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());
@@ -218,7 +219,7 @@ public class EarthThrow extends AttackSpell implements Listener {
                 double radius = comp.getCaster() instanceof Player player ? (Double) getOption("impact_radius").getSelectedValue(player).getValue() : 3.0;
                 List<Location> locs = ParticleUtils.circle(loc, radius, 1, 0, 0);
                 for (Location l : locs){
-                    l.getWorld().spawnParticle(Utils.EXPLOSION, l, 1);
+                    ParticleCaster.spawn(comp.getCaster(), l.getWorld(), Utils.EXPLOSION, l, 1);
                 }
                 for (LivingEntity le : me.nagasonic.alkatraz.util.Utils.getNearbyLivingEntities(loc, radius)){
                     SpellDamageUtil.damageWithSpell(le, props.getRemainingPower(), comp.getCaster(), comp.getWand(), EarthThrow.this);
@@ -278,7 +279,7 @@ public class EarthThrow extends AttackSpell implements Listener {
                     double radius = comp.getCaster() instanceof Player player ? (Double) getOption("impact_radius").getSelectedValue(player).getValue() : 3.0;
                     List<Location> locs = ParticleUtils.circle(loc, radius, 1, 0, 0);
                     for (Location l : locs){
-                        l.getWorld().spawnParticle(Utils.EXPLOSION, l, 5);
+                        ParticleCaster.spawn(comp.getCaster(), l.getWorld(), Utils.EXPLOSION, l, 5);
                     }
                     for (LivingEntity le : me.nagasonic.alkatraz.util.Utils.getNearbyLivingEntities(loc, radius)){
                         SpellDamageUtil.damageWithSpell(le, props.getRemainingPower(), comp.getCaster(), comp.getWand(), EarthThrow.this);

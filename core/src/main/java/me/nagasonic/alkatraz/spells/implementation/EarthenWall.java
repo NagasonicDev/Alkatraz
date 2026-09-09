@@ -15,6 +15,7 @@ import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
+import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
 import me.nagasonic.alkatraz.hooks.Protection;
@@ -55,13 +56,13 @@ public class EarthenWall extends AttackSpell implements Listener {
 
     @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
-        location.getWorld().spawnParticle(Utils.BLOCK, location, 15, Material.DIRT.createBlockData());
+        ParticleCaster.spawn(caster, location.getWorld(), Utils.BLOCK, location, 15, Material.DIRT.createBlockData());
     }
 
     @Override
     public void onCountered(Location location) {
-        location.getWorld().spawnParticle(Utils.BLOCK, location, 30, 1, 1, 1, 0.1, Material.STONE.createBlockData());
-        location.getWorld().spawnParticle(Utils.EXPLOSION, location, 1);
+        ParticleCaster.spawn(null, location.getWorld(), Utils.BLOCK, location, 30, 1, 1, 1, 0.1, Material.STONE.createBlockData());
+        ParticleCaster.spawn(null, location.getWorld(), Utils.EXPLOSION, location, 1);
     }
 
     @Override
@@ -421,7 +422,7 @@ public class EarthenWall extends AttackSpell implements Listener {
             List<Location> points = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 3, 0);
             for (int i = 0; i < 100; i++) {
                 for (Location loc : points) {
-                    loc.getWorld().spawnParticle(Utils.DUST, loc, 0,
+                    ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0,
                             new Particle.DustOptions(Color.fromRGB(139, 69, 19), 0.4F));
                 }
             }

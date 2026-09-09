@@ -1,6 +1,7 @@
 package me.nagasonic.alkatraz.progression;
 
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.Color;
 import org.bukkit.Location;
@@ -30,9 +31,9 @@ public final class CircleUpAnimation {
                 if (!player.isOnline() || ticks >= DURATION_TICKS) {
                     if (player.isOnline() && ticks >= DURATION_TICKS) {
                         Location center = player.getLocation().add(0, 1, 0);
-                        center.getWorld().spawnParticle(Utils.ENCHANT,
+                        ParticleCaster.spawn(player, center.getWorld(), Utils.ENCHANT,
                                 center, 80, 1, 1, 1, 0.5);
-                        center.getWorld().spawnParticle(Particle.END_ROD,
+                        ParticleCaster.spawn(player, center.getWorld(), Particle.END_ROD,
                                 center, 40, 0.5, 0.5, 0.5, 0.1);
                         center.getWorld().playSound(center, Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
                         onComplete.run();
@@ -51,7 +52,7 @@ public final class CircleUpAnimation {
                     double x = Math.cos(angle) * radius;
                     double z = Math.sin(angle) * radius;
                     Location particleLoc = playerLoc.clone().add(x, height, z);
-                    particleLoc.getWorld().spawnParticle(Utils.ENCHANT,
+                    ParticleCaster.spawn(player, particleLoc.getWorld(), Utils.ENCHANT,
                             particleLoc, 2, 0, 0, 0, 0.1);
                 }
 
@@ -62,7 +63,7 @@ public final class CircleUpAnimation {
                         double x = Math.cos(angle) * radius;
                         double z = Math.sin(angle) * radius;
                         Location ringLoc = origin.clone().add(x, 0.1, z);
-                        ringLoc.getWorld().spawnParticle(Utils.DUST, ringLoc, 1, 0, 0, 0, 0,
+                        ParticleCaster.spawn(player, ringLoc.getWorld(), Utils.DUST, ringLoc, 1, 0, 0, 0, 0,
                                 new Particle.DustOptions(Color.fromRGB(200, 180, 255), 0.8f));
                     }
                 }

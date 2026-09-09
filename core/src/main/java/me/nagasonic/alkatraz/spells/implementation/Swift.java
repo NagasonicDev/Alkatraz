@@ -8,6 +8,7 @@ import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
+import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.Bukkit;
@@ -61,7 +62,7 @@ public class Swift extends Spell {
             AtomicInteger i = new AtomicInteger(0);
             taskID = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
                 if (i.get() < 8){
-                    p.getWorld().spawnParticle(Particle.CLOUD, p.getLocation(), 10, 0.5, 0.5, 0.5, 0.25);
+                    ParticleCaster.spawn(p, p.getWorld(), Particle.CLOUD, p.getLocation(), 10, 0.5, 0.5, 0.5, 0.25);
                     i.set(i.get() + 1);
                 }else{
                     stop();
@@ -82,7 +83,7 @@ public class Swift extends Spell {
             AtomicInteger i = new AtomicInteger(0);
             taskID = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
                 if (i.get() < 8){
-                    caster.getWorld().spawnParticle(Particle.CLOUD, caster.getLocation(), 10, 0.5, 0.5, 0.5, 0.25);
+                    ParticleCaster.spawn(caster, caster.getWorld(), Particle.CLOUD, caster.getLocation(), 10, 0.5, 0.5, 0.5, 0.25);
                     i.set(i.get() + 1);
                 }else{
                     stop();
@@ -108,7 +109,7 @@ public class Swift extends Spell {
             // Spawn particles at all calculated points
             for (int i = 0; i < 100; i++){
                 for (Location loc : magicCirclePoints) {
-                    loc.getWorld().spawnParticle(Utils.DUST, loc, 0, new Particle.DustOptions(Color.WHITE, 0.4F));
+                    ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, new Particle.DustOptions(Color.WHITE, 0.4F));
                 }
             }
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());

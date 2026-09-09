@@ -18,6 +18,7 @@ import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
+import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
 import me.nagasonic.alkatraz.hooks.Protection;
@@ -55,12 +56,12 @@ public class EarthSpike extends AttackSpell implements Listener {
 
     @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
-        location.getWorld().spawnParticle(Utils.BLOCK_DUST, location, 15, Material.DIRT.createBlockData());
+        ParticleCaster.spawn(caster, location.getWorld(), Utils.BLOCK_DUST, location, 15, Material.DIRT.createBlockData());
     }
 
     @Override
     public void onCountered(Location location) {
-        location.getWorld().spawnParticle(Utils.BLOCK_DUST, location, 30, Material.DIRT.createBlockData());
+        ParticleCaster.spawn(null, location.getWorld(), Utils.BLOCK_DUST, location, 30, Material.DIRT.createBlockData());
     }
 
 
@@ -352,7 +353,7 @@ public class EarthSpike extends AttackSpell implements Listener {
             List<Location> magicCirclePoints = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 3, 0);
             for (int i = 0; i < 100; i++){
                 for (Location loc : magicCirclePoints) {
-                    loc.getWorld().spawnParticle(Utils.DUST, loc, 10, new Particle.DustOptions(Color.fromRGB(78, 47, 0), 0.4F));
+                    ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 10, new Particle.DustOptions(Color.fromRGB(78, 47, 0), 0.4F));
                 }
             }
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());

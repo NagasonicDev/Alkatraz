@@ -9,6 +9,7 @@ import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
+import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
@@ -67,9 +68,9 @@ public class Blink extends Spell {
             return;
         }
 
-        spawnTeleportParticles(start);
+        spawnTeleportParticles(caster, start);
         caster.teleport(target);
-        spawnTeleportParticles(target);
+        spawnTeleportParticles(caster, target);
 
         caster.getWorld().playSound(target, Sound.ENTITY_ENDERMAN_TELEPORT, 0.8f, 1.2f);
     }
@@ -92,9 +93,9 @@ public class Blink extends Spell {
             return;
         }
 
-        spawnTeleportParticles(start);
+        spawnTeleportParticles(caster, start);
         caster.teleport(target);
-        spawnTeleportParticles(target);
+        spawnTeleportParticles(caster, target);
 
         caster.getWorld().playSound(target, Sound.ENTITY_ENDERMAN_TELEPORT, 0.8f, 1.2f);
     }
@@ -126,9 +127,9 @@ public class Blink extends Spell {
         return end;
     }
 
-    private void spawnTeleportParticles(Location loc) {
-        loc.getWorld().spawnParticle(Particle.PORTAL, loc, 40, 0.5, 0.5, 0.5, 0.5);
-        loc.getWorld().spawnParticle(Utils.DUST, loc, 15, 0.3, 0.3, 0.3, 0,
+    private void spawnTeleportParticles(LivingEntity caster, Location loc) {
+        ParticleCaster.spawn(caster, loc.getWorld(), Particle.PORTAL, loc, 40, 0.5, 0.5, 0.5, 0.5);
+        ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 15, 0.3, 0.3, 0.3, 0,
                 new Particle.DustOptions(Color.fromRGB(120, 50, 200), 0.6F));
     }
 
@@ -143,7 +144,7 @@ public class Blink extends Spell {
             List<Location> points = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 3, 0);
             for (int i = 0; i < 100; i++) {
                 for (Location loc : points) {
-                    loc.getWorld().spawnParticle(Utils.DUST, loc, 0,
+                    ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0,
                             new Particle.DustOptions(Color.fromRGB(120, 50, 200), 0.4F));
                 }
             }

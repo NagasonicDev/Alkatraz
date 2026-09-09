@@ -12,6 +12,7 @@ import me.nagasonic.alkatraz.api.Element;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
+import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.StatUtils;
 import me.nagasonic.alkatraz.util.Utils;
@@ -109,7 +110,7 @@ public class Stealth extends Spell implements Listener {
                                 if (player != p){
                                     MagicProfile td = ProfileManager.getProfile(player.getUniqueId(), MagicProfile.class);
                                     if (td.getCircleLevel() <= data.getCircleLevel()){
-                                        player.spawnParticle(Particle.ASH, p.getLocation(), td.getCircleLevel() - data.getCircleLevel() + 11);
+                                        ParticleCaster.spawnForPlayer(player, p.getWorld(), Particle.ASH, p.getLocation(), td.getCircleLevel() - data.getCircleLevel() + 11);
                                     }
                                 }
                             }
@@ -185,7 +186,7 @@ public class Stealth extends Spell implements Listener {
             // Spawn particles at all calculated points
             for (int i = 0; i < 100; i++){
                 for (Location loc : magicCirclePoints) {
-                    loc.getWorld().spawnParticle(Utils.DUST, loc, 0, new Particle.DustOptions(Color.GRAY, 0.4F));
+                    ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, new Particle.DustOptions(Color.GRAY, 0.4F));
                 }
             }
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());
@@ -272,7 +273,7 @@ public class Stealth extends Spell implements Listener {
             for (Player other : Bukkit.getOnlinePlayers()){
                 MagicProfile odata = ProfileManager.getProfile(other.getUniqueId(), MagicProfile.class);
                 if (odata.getCircleLevel() >= data.getCircleLevel()){
-                    other.spawnParticle(Utils.DUST, e.getPlayer().getLocation().add(0, 0.3, 0), 5, new Particle.DustOptions(Color.fromRGB(36, 36, 36), 0.5F));
+                    ParticleCaster.spawnForPlayer(other, e.getPlayer().getWorld(), Utils.DUST, e.getPlayer().getLocation().add(0, 0.3, 0), 5, new Particle.DustOptions(Color.fromRGB(36, 36, 36), 0.5F));
                 }
             }
         }

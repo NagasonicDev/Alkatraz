@@ -17,6 +17,7 @@ import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProper
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
 import me.nagasonic.alkatraz.hooks.Protection;
+import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -161,14 +162,14 @@ public class WaterSphere extends AttackSpell {
                     // Blue glow ring on the outer edge
                     double dist = Math.sqrt(rx * rx + point.getY() * point.getY() + rz * rz);
                     if (dist > radius * 0.85) {
-                        worldLoc.getWorld().spawnParticle(Utils.DUST, worldLoc, 0,
+                        ParticleCaster.spawn(caster, worldLoc.getWorld(), Utils.DUST, worldLoc, 0,
                                 new Particle.DustOptions(Color.fromRGB(60, 180, 255), 0.5F));
                     }
 
                     // Core water particles - fewer toward the center
-                    worldLoc.getWorld().spawnParticle(Utils.RAIN, worldLoc, 1, 0, 0, 0, 0);
+                    ParticleCaster.spawn(caster, worldLoc.getWorld(), Utils.RAIN, worldLoc, 1, 0, 0, 0, 0);
                     if (step % 2 == 0 && dist > radius * 0.4) {
-                        worldLoc.getWorld().spawnParticle(Utils.SPLASH, worldLoc, 1,
+                        ParticleCaster.spawn(caster, worldLoc.getWorld(), Utils.SPLASH, worldLoc, 1,
                                 0.05, 0.05, 0.05, 0);
                     }
 
@@ -234,9 +235,9 @@ public class WaterSphere extends AttackSpell {
         World world = center.getWorld();
         double r = sphereRadius * sizeScale;
 
-        world.spawnParticle(Utils.SPLASH, center, (int) (80 * sizeScale), r, r, r, 0.5);
-        world.spawnParticle(Utils.RAIN, center, (int) (120 * sizeScale), r, r, r, 1);
-        world.spawnParticle(Particle.BUBBLE_POP, center, (int) (40 * sizeScale), r, r, r, 0.3);
+        ParticleCaster.spawn(null, world, Utils.SPLASH, center, (int) (80 * sizeScale), r, r, r, 0.5);
+        ParticleCaster.spawn(null, world, Utils.RAIN, center, (int) (120 * sizeScale), r, r, r, 1);
+        ParticleCaster.spawn(null, world, Particle.BUBBLE_POP, center, (int) (40 * sizeScale), r, r, r, 0.3);
         world.playSound(center, Sound.ENTITY_FISHING_BOBBER_SPLASH, 1.5f, 0.8f);
         world.playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 0.5f, 1.5f);
     }
@@ -285,7 +286,7 @@ public class WaterSphere extends AttackSpell {
             Vector forward = playerLoc.getDirection().normalize().multiply(1.5);
             List<Location> points = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 2, 0);
             for (Location loc : points) {
-                loc.getWorld().spawnParticle(Utils.DUST, loc, 0,
+                ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0,
                         new Particle.DustOptions(Color.fromRGB(60, 180, 255), 0.4F));
             }
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());

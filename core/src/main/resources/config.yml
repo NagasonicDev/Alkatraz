@@ -164,3 +164,22 @@ focus:
     # (6.0 HP = 3 hearts).
     threshold: 6.0
     multiplier: 0.5
+
+# ==============================
+# Particle Performance
+# Reduces lag when many players cast spells near each other by sending
+# particles per-player with distance-based density falloff, instead of
+# broadcasting to everyone within ~64 blocks.
+# ==============================
+particles:
+  # Master toggle. When false, spawnParticle behaves exactly as before.
+  enabled: true
+  # Within this radius (blocks) players see 100% of the particles.
+  dense_radius: 12
+  # Beyond this radius (blocks) players receive no particles.
+  max_radius: 32
+  # Density fraction (0.0-1.0) of the original count sent at max_radius.
+  # Density falls off linearly between dense_radius and max_radius.
+  min_scale: 0.25
+  # The spell caster always receives full density regardless of distance.
+  caster_full_density: true

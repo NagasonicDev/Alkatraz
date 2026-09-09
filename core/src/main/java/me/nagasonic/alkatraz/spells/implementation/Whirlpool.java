@@ -14,6 +14,7 @@ import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
+import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
 import me.nagasonic.alkatraz.util.Utils;
@@ -96,7 +97,7 @@ public class Whirlpool extends AttackSpell {
                     double z = Math.sin(a) * r;
                     double y = Math.sin(ticks * 0.2 + i) * 1.5 + 1.0;
                     Location particleLoc = targetLoc.clone().add(x, y, z);
-                    particleLoc.getWorld().spawnParticle(Utils.DUST, particleLoc, 0,
+                    ParticleCaster.spawn(caster, particleLoc.getWorld(), Utils.DUST, particleLoc, 0,
                             new Particle.DustOptions(Color.fromRGB(30, 120, 200), 0.8F));
 
                     SpellParticleComponent comp = new SpellParticleComponent(
@@ -113,16 +114,16 @@ public class Whirlpool extends AttackSpell {
 
                     if (i % 4 == 0) {
                         Location surfaceLoc = targetLoc.clone().add(x, 0, z);
-                        surfaceLoc.getWorld().spawnParticle(Utils.SPLASH, surfaceLoc, 2, 0.3, 0.1, 0.3, 0);
+                        ParticleCaster.spawn(caster, surfaceLoc.getWorld(), Utils.SPLASH, surfaceLoc, 2, 0.3, 0.1, 0.3, 0);
                     }
                 }
 
                 if (ticks % 2 == 0) {
-                    targetLoc.getWorld().spawnParticle(Particle.BUBBLE_COLUMN_UP, targetLoc, 8, activeRadius, 2, activeRadius, 0);
+                    ParticleCaster.spawn(caster, targetLoc.getWorld(), Particle.BUBBLE_COLUMN_UP, targetLoc, 8, activeRadius, 2, activeRadius, 0);
                 }
 
                 if (ticks % 3 == 0) {
-                    targetLoc.getWorld().spawnParticle(Utils.SPLASH, targetLoc, 15, activeRadius, 0.5, activeRadius, 0);
+                    ParticleCaster.spawn(caster, targetLoc.getWorld(), Utils.SPLASH, targetLoc, 15, activeRadius, 0.5, activeRadius, 0);
                 }
 
                 for (Entity entity : targetLoc.getWorld().getNearbyEntities(targetLoc, activeRadius, activeRadius, activeRadius)) {
@@ -140,7 +141,7 @@ public class Whirlpool extends AttackSpell {
                     if (dist < 1.5) {
                         SpellDamageUtil.damageWithSpell(le, activeDamage, caster, wand, Whirlpool.this);
                         if (Math.random() < 0.3) {
-                            le.getWorld().spawnParticle(Utils.SPLASH, le.getLocation().add(0, 1, 0), 5, 0.3, 0.3, 0.3, 0);
+                            ParticleCaster.spawn(caster, le.getWorld(), Utils.SPLASH, le.getLocation().add(0, 1, 0), 5, 0.3, 0.3, 0.3, 0);
                         }
                     }
                 }
@@ -187,7 +188,7 @@ public class Whirlpool extends AttackSpell {
                     double z = Math.sin(a) * r;
                     double y = Math.sin(ticks * 0.2 + i) * 1.0 + 0.5;
                     Location particleLoc = targetLoc.clone().add(x, y, z);
-                    particleLoc.getWorld().spawnParticle(Utils.DUST, particleLoc, 0,
+                    ParticleCaster.spawn(caster, particleLoc.getWorld(), Utils.DUST, particleLoc, 0,
                             new Particle.DustOptions(Color.fromRGB(30, 120, 200), 0.6F));
                 }
 
@@ -216,12 +217,12 @@ public class Whirlpool extends AttackSpell {
 
     @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
-        location.getWorld().spawnParticle(Utils.SPLASH, location, 30, 0.5, 0.5, 0.5, 0);
+        ParticleCaster.spawn(caster, location.getWorld(), Utils.SPLASH, location, 30, 0.5, 0.5, 0.5, 0);
     }
 
     @Override
     public void onCountered(Location location) {
-        location.getWorld().spawnParticle(Utils.SPLASH, location, 50, 1, 1, 1, 0.5);
+        ParticleCaster.spawn(null, location.getWorld(), Utils.SPLASH, location, 50, 1, 1, 1, 0.5);
         location.getWorld().playSound(location, Sound.ENTITY_GENERIC_EXPLODE, 0.6f, 1.5f);
     }
 
@@ -236,7 +237,7 @@ public class Whirlpool extends AttackSpell {
             List<Location> points = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 3, 0);
             for (int i = 0; i < 100; i++) {
                 for (Location loc : points) {
-                    loc.getWorld().spawnParticle(Utils.DUST, loc, 0,
+                    ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0,
                             new Particle.DustOptions(Color.fromRGB(30, 120, 200), 0.4F));
                 }
             }

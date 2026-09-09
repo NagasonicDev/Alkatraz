@@ -14,6 +14,7 @@ import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.BarrierType;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.BarrierProperties;
+import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import de.tr7zw.changeme.nbtapi.NBT;
@@ -116,7 +117,7 @@ public class Barrier extends BarrierSpell implements Listener {
                             );
                     SpellComponentHandler.register(particle);
 
-                    loc.getWorld().spawnParticle(Utils.WITCH, loc, 1, 0, 0, 0, 0);
+                    ParticleCaster.spawn(p, loc.getWorld(), Utils.WITCH, loc, 1, 0, 0, 0, 0);
                 }
 
                 ticksPassed++;
@@ -160,7 +161,7 @@ public class Barrier extends BarrierSpell implements Listener {
                     SpellComponentHandler.register(particle);
 
                     // Spawn visual particle
-                    loc.getWorld().spawnParticle(Utils.WITCH, loc, 1, 0, 0, 0, 0);
+                    ParticleCaster.spawn(caster, loc.getWorld(), Utils.WITCH, loc, 1, 0, 0, 0, 0);
                 }
 
                 ticksPassed++;
@@ -187,7 +188,7 @@ public class Barrier extends BarrierSpell implements Listener {
             // Spawn particles at all calculated points
             for (int i = 0; i < 100; i++){
                 for (Location loc : magicCirclePoints) {
-                    loc.getWorld().spawnParticle(Utils.DUST, loc, 0, new Particle.DustOptions(Color.WHITE, 0.4F));
+                    ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, new Particle.DustOptions(Color.WHITE, 0.4F));
                 }
             }
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());
@@ -217,7 +218,7 @@ public class Barrier extends BarrierSpell implements Listener {
     private void onBarrierBreak(Location center, double breakRadius) {
         List<Location> particleLocations = ParticleUtils.sphere(center, breakRadius, 200);
         for (Location loc : particleLocations){
-            loc.getWorld().spawnParticle(Utils.DUST, loc, 1, new Particle.DustOptions(Color.RED, 0.4F));
+            ParticleCaster.spawn(null, loc.getWorld(), Utils.DUST, loc, 1, new Particle.DustOptions(Color.RED, 0.4F));
         }
     }
 }

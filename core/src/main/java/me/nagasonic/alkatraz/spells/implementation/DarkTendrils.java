@@ -15,6 +15,7 @@ import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
+import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
@@ -61,15 +62,15 @@ public class DarkTendrils extends AttackSpell implements Listener {
     @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
         // Spawn dark particles when hitting barrier
-        location.getWorld().spawnParticle(Particle.SQUID_INK, location, 20);
+        ParticleCaster.spawn(caster, location.getWorld(), Particle.SQUID_INK, location, 20);
         location.getWorld().playSound(location, Sound.ENTITY_PHANTOM_HURT, 1.0f, 0.5f);
     }
 
     @Override
     public void onCountered(Location location) {
         // Explode into dark particles when countered
-        location.getWorld().spawnParticle(Particle.SQUID_INK, location, 50);
-        location.getWorld().spawnParticle(Particle.SOUL, location, 30);
+        ParticleCaster.spawn(null, location.getWorld(), Particle.SQUID_INK, location, 50);
+        ParticleCaster.spawn(null, location.getWorld(), Particle.SOUL, location, 30);
         location.getWorld().playSound(location, Sound.ENTITY_PHANTOM_DEATH, 1.0f, 0.8f);
     }
 
@@ -225,7 +226,7 @@ public class DarkTendrils extends AttackSpell implements Listener {
 
             for (int i = 0; i < 100; i++) {
                 for (Location loc : magicCirclePoints) {
-                    loc.getWorld().spawnParticle(Utils.DUST, loc, 0, 
+                    ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, 
                             new Particle.DustOptions(Color.fromRGB(75, 0, 130), 0.4F));
                 }
             }
@@ -268,8 +269,8 @@ public class DarkTendrils extends AttackSpell implements Listener {
         SpellComponentHandler.remove(ecomp.getComponentID());
 
         Location hitLoc = target.getLocation().add(0, 1, 0);
-        hitLoc.getWorld().spawnParticle(Particle.SQUID_INK, hitLoc, 30, 0.5, 0.5, 0.5);
-        hitLoc.getWorld().spawnParticle(Particle.SOUL, hitLoc, 15, 0.3, 0.3, 0.3);
+        ParticleCaster.spawn(comp.getCaster(), hitLoc.getWorld(), Particle.SQUID_INK, hitLoc, 30, 0.5, 0.5, 0.5);
+        ParticleCaster.spawn(comp.getCaster(), hitLoc.getWorld(), Particle.SOUL, hitLoc, 15, 0.3, 0.3, 0.3);
         hitLoc.getWorld().playSound(hitLoc, Sound.ENTITY_PHANTOM_BITE, 1.0f, 0.8f);
     }
 
@@ -465,24 +466,11 @@ public class DarkTendrils extends AttackSpell implements Listener {
         private void spawnTendrilParticles() {
             Location loc = tendril.getLocation().add(0, 0.5, 0);
             
-            // Dark swirling particles
-            loc.getWorld().spawnParticle(
-                    Particle.SQUID_INK, 
-                    loc, 
-                    3, 
-                    0.2, 0.2, 0.2, 
-                    0.01
-            );
+            ParticleCaster.spawn(caster, loc.getWorld(), Particle.SQUID_INK, loc, 3, 0.2, 0.2, 0.2, 0.01);
             
             // Soul particles for locked on state
             if (target != null) {
-                loc.getWorld().spawnParticle(
-                        Particle.SOUL, 
-                        loc, 
-                        2, 
-                        0.1, 0.1, 0.1, 
-                        0.02
-                );
+                ParticleCaster.spawn(caster, loc.getWorld(), Particle.SOUL, loc, 2, 0.1, 0.1, 0.1, 0.02);
                 
                 // Draw a line toward target
                 Vector toTarget = target.getEyeLocation().toVector().subtract(loc.toVector());
@@ -492,13 +480,7 @@ public class DarkTendrils extends AttackSpell implements Listener {
                 
                 for (int i = 0; i < Math.min(distance * 2, 10); i++) {
                     Location particleLoc = loc.clone().add(toTarget.clone().multiply(i));
-                    particleLoc.getWorld().spawnParticle(
-                            Utils.WITCH, 
-                            particleLoc, 
-                            1, 
-                            0, 0, 0, 
-                            0
-                    );
+                    ParticleCaster.spawn(caster, particleLoc.getWorld(), Utils.WITCH, particleLoc, 1, 0, 0, 0, 0);
                 }
             }
         }

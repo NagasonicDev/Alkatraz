@@ -11,6 +11,7 @@ import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
+import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
@@ -64,7 +65,7 @@ public class Detect extends Spell {
                 if (l.get() < r){
                     List<Location> locs = ParticleUtils.circle(a, l.get(), 4/l.get(), 0, 0);
                     for (Location loc : locs){
-                        loc.getWorld().spawnParticle(Utils.DUST, loc, 0, new Particle.DustOptions(Color.WHITE, 0.4F));
+                        ParticleCaster.spawn(p, loc.getWorld(), Utils.DUST, loc, 0, new Particle.DustOptions(Color.WHITE, 0.4F));
                     }
                     l.addAndGet(0.5);
                     if (l.get() == (double) r /2){
@@ -133,7 +134,7 @@ public class Detect extends Spell {
             // Spawn particles at all calculated points
             for (int i = 0; i < 100; i++){
                 for (Location loc : magicCirclePoints) {
-                    loc.getWorld().spawnParticle(Utils.DUST, loc, 0, new Particle.DustOptions(Color.WHITE, 0.4F));
+                    ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, new Particle.DustOptions(Color.WHITE, 0.4F));
                 }
             }
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());

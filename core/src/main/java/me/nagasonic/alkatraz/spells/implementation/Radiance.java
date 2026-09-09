@@ -10,6 +10,7 @@ import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.Num
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
 import me.nagasonic.alkatraz.util.ParticleUtils;
+import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
@@ -102,18 +103,18 @@ public class Radiance extends Spell {
                         double x = Math.cos(angle) * currentDistance;
                         double z = Math.sin(angle) * currentDistance;
                         Location rayLoc = casterLoc.clone().add(x, 0.5 + Math.sin(ticks * 0.15 + i) * 1.0, z);
-                        rayLoc.getWorld().spawnParticle(Particle.GLOW, rayLoc, 2, 0.1, 0.1, 0.1, 0);
+                        ParticleCaster.spawn(caster, rayLoc.getWorld(), Particle.GLOW, rayLoc, 2, 0.1, 0.1, 0.1, 0);
 
                         Vector inward = casterLoc.toVector().subtract(rayLoc.toVector()).normalize().multiply(0.3);
                         Location trailLoc = rayLoc.clone().add(inward);
-                        trailLoc.getWorld().spawnParticle(Particle.GLOW, trailLoc, 1, 0.05, 0.05, 0.05, 0);
+                        ParticleCaster.spawn(caster, trailLoc.getWorld(), Particle.GLOW, trailLoc, 1, 0.05, 0.05, 0.05, 0);
                     }
 
                     for (int i = 0; i < 5; i++) {
                         double a = Math.random() * 2 * Math.PI;
                         double r = Math.random() * 1.5;
                         Location hazeLoc = casterLoc.clone().add(Math.cos(a) * r, 0.1, Math.sin(a) * r);
-                        hazeLoc.getWorld().spawnParticle(Utils.DUST, hazeLoc, 1, 0.3, 0.1, 0.3, 0,
+                        ParticleCaster.spawn(caster, hazeLoc.getWorld(), Utils.DUST, hazeLoc, 1, 0.3, 0.1, 0.3, 0,
                                 new Particle.DustOptions(Color.fromRGB(255, 255, 200), 0.4F));
                     }
 
@@ -131,14 +132,14 @@ public class Radiance extends Spell {
                         double x = Math.cos(angle) * distance;
                         double z = Math.sin(angle) * distance;
                         Location convergeLoc = casterLoc.clone().add(x, 0.5 + Math.sin(ticks * 0.2 + i) * 1.0, z);
-                        convergeLoc.getWorld().spawnParticle(Particle.GLOW, convergeLoc, 3, 0.05, 0.05, 0.05, 0);
+                        ParticleCaster.spawn(caster, convergeLoc.getWorld(), Particle.GLOW, convergeLoc, 3, 0.05, 0.05, 0.05, 0);
                     }
 
                     for (int i = 0; i < (int)(3 * phaseProgress); i++) {
                         double a = Math.random() * 2 * Math.PI;
                         double r = Math.random() * 1.0;
                         Location sparkleLoc = casterLoc.clone().add(Math.cos(a) * r, Math.random() * 2, Math.sin(a) * r);
-                        sparkleLoc.getWorld().spawnParticle(Particle.END_ROD, sparkleLoc, 1, 0.05, 0.05, 0.05, 0.02);
+                        ParticleCaster.spawn(caster, sparkleLoc.getWorld(), Particle.END_ROD, sparkleLoc, 1, 0.05, 0.05, 0.05, 0.02);
                     }
 
                     if (phaseProgress > 0.8) {
@@ -147,7 +148,7 @@ public class Radiance extends Spell {
                             double a = Math.random() * 2 * Math.PI;
                             double r = Math.random() * 0.5;
                             Location burstLoc = casterLoc.clone().add(Math.cos(a) * r, 1.0 + Math.random(), Math.sin(a) * r);
-                            burstLoc.getWorld().spawnParticle(Particle.GLOW, burstLoc, 2, 0.1, 0.1, 0.1, 0.1);
+                            ParticleCaster.spawn(caster, burstLoc.getWorld(), Particle.GLOW, burstLoc, 2, 0.1, 0.1, 0.1, 0.1);
                         }
                     }
 
@@ -205,8 +206,8 @@ public class Radiance extends Spell {
                         double z = Math.sin(a) * r;
                         Location ringLoc = center.clone().add(x, 0.5 + Math.sin(tick * 0.1 + ring) * 0.3, z);
 
-                        ringLoc.getWorld().spawnParticle(Particle.GLOW, ringLoc, 1, 0, 0, 0, 0);
-                        ringLoc.getWorld().spawnParticle(Utils.DUST, ringLoc, 0,
+                        ParticleCaster.spawn(caster, ringLoc.getWorld(), Particle.GLOW, ringLoc, 1, 0, 0, 0, 0);
+                        ParticleCaster.spawn(caster, ringLoc.getWorld(), Utils.DUST, ringLoc, 0,
                                 new Particle.DustOptions(Color.fromRGB(255, 255, 200), 0.5F + ring * 0.2F));
                     }
                 }
@@ -217,7 +218,7 @@ public class Radiance extends Spell {
                     double x = Math.cos(a) * r;
                     double z = Math.sin(a) * r;
                     Location orbLoc = center.clone().add(x, 1.0 + Math.sin(tick * 0.2 + i) * 1.5, z);
-                    orbLoc.getWorld().spawnParticle(Particle.END_ROD, orbLoc, 2, 0.1, 0.1, 0.1, 0.02);
+                    ParticleCaster.spawn(caster, orbLoc.getWorld(), Particle.END_ROD, orbLoc, 2, 0.1, 0.1, 0.1, 0.02);
                 }
 
                 for (int i = 0; i < 5; i++) {
@@ -226,7 +227,7 @@ public class Radiance extends Spell {
                     double x = Math.cos(a) * r;
                     double z = Math.sin(a) * r;
                     Location radiantLoc = center.clone().add(x, Math.random() * 3 + 0.5, z);
-                    radiantLoc.getWorld().spawnParticle(Particle.GLOW, radiantLoc, 1, 0.05, 0.05, 0.05, 0);
+                    ParticleCaster.spawn(caster, radiantLoc.getWorld(), Particle.GLOW, radiantLoc, 1, 0.05, 0.05, 0.05, 0);
                 }
 
                 for (Entity entity : world.getNearbyEntities(center, activeRadius, activeRadius, activeRadius)) {
@@ -236,7 +237,7 @@ public class Radiance extends Spell {
                             caster.setHealth(Math.min(maxHealth, caster.getHealth() + healPerTick));
 
                             Location eyes = caster.getEyeLocation();
-                            eyes.getWorld().spawnParticle(Particle.HEART, eyes.clone().add(0, 0.5, 0), 2, 0.3, 0.3, 0.3, 0);
+                            ParticleCaster.spawn(caster, eyes.getWorld(), Particle.HEART, eyes.clone().add(0, 0.5, 0), 2, 0.3, 0.3, 0.3, 0);
                         }
                         continue;
                     }
@@ -249,13 +250,13 @@ public class Radiance extends Spell {
                                     le, calcPower(healPerTick, le, caster),
                                     caster, wand, Radiance.this
                             );
-                            le.getWorld().spawnParticle(Particle.FLAME, le.getLocation().add(0, 1, 0), 8, 0.3, 0.5, 0.3, 0.05);
+                            ParticleCaster.spawn(caster, le.getWorld(), Particle.FLAME, le.getLocation().add(0, 1, 0), 8, 0.3, 0.5, 0.3, 0.05);
                         }
                     } else if (entity instanceof Player targetPlayer) {
                         if (tick % 10 == 0) {
                             double maxHealth = targetPlayer.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
                             targetPlayer.setHealth(Math.min(maxHealth, targetPlayer.getHealth() + healPerTick));
-                            targetPlayer.getWorld().spawnParticle(Particle.HEART, targetPlayer.getLocation().add(0, 1, 0), 3, 0.3, 0.3, 0.3, 0);
+                            ParticleCaster.spawn(caster, targetPlayer.getWorld(), Particle.HEART, targetPlayer.getLocation().add(0, 1, 0), 3, 0.3, 0.3, 0.3, 0);
                         }
                     }
                 }
@@ -269,7 +270,7 @@ public class Radiance extends Spell {
                             yaw, pitch, forward, 1.0 + Math.random() * 0.5, 0);
                     for (Location loc : circlePoints) {
                         if (Math.random() < 0.3) {
-                            loc.getWorld().spawnParticle(Utils.DUST, loc, 0,
+                            ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0,
                                     new Particle.DustOptions(Color.YELLOW, 0.3F));
                         }
                     }
@@ -311,7 +312,7 @@ public class Radiance extends Spell {
                     double x = Math.cos(angle) * distance;
                     double z = Math.sin(angle) * distance;
                     Location rayLoc = casterLoc.clone().add(x, 0.5, z);
-                    rayLoc.getWorld().spawnParticle(Particle.GLOW, rayLoc, 2, 0.1, 0.1, 0.1, 0);
+                    ParticleCaster.spawn(caster, rayLoc.getWorld(), Particle.GLOW, rayLoc, 2, 0.1, 0.1, 0.1, 0);
                 }
 
                 if (ticks % 20 == 0) {
@@ -340,7 +341,7 @@ public class Radiance extends Spell {
                     double healPerTick = totalHeal / duration;
                     double maxHealth = caster.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
                     caster.setHealth(Math.min(maxHealth, caster.getHealth() + healPerTick));
-                    caster.getWorld().spawnParticle(Particle.GLOW, caster.getLocation(), 10, 2, 1, 2, 0);
+                    ParticleCaster.spawn(caster, caster.getWorld(), Particle.GLOW, caster.getLocation(), 10, 2, 1, 2, 0);
                 }
 
                 healTicks++;
@@ -359,7 +360,7 @@ public class Radiance extends Spell {
             List<Location> points = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 3, 0);
             for (int i = 0; i < 100; i++) {
                 for (Location loc : points) {
-                    loc.getWorld().spawnParticle(Utils.DUST, loc, 0,
+                    ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0,
                             new Particle.DustOptions(Color.fromRGB(255, 255, 150), 0.4F));
                 }
             }

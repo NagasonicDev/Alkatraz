@@ -13,6 +13,7 @@ import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
 import me.nagasonic.alkatraz.hooks.Protection;
+import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
@@ -104,8 +105,8 @@ public class Tsunami extends AttackSpell {
                                     h,
                                     Math.sin(angle + j * 0.4) * r
                             );
-                            spiralLoc.getWorld().spawnParticle(Utils.SPLASH, spiralLoc, 2, 0.1, 0.1, 0.1, 0);
-                            spiralLoc.getWorld().spawnParticle(Particle.BUBBLE_COLUMN_UP, spiralLoc, 1, 0.05, 0.05, 0.05, 0);
+                            ParticleCaster.spawn(caster, spiralLoc.getWorld(), Utils.SPLASH, spiralLoc, 2, 0.1, 0.1, 0.1, 0);
+                            ParticleCaster.spawn(caster, spiralLoc.getWorld(), Particle.BUBBLE_COLUMN_UP, spiralLoc, 1, 0.05, 0.05, 0.05, 0);
                         }
                     }
 
@@ -113,7 +114,7 @@ public class Tsunami extends AttackSpell {
                         double a = Math.random() * 2 * Math.PI;
                         double r = Math.random() * 1.5;
                         Location bubbleLoc = casterLoc.clone().add(Math.cos(a) * r, Math.random() * 2, Math.sin(a) * r);
-                        bubbleLoc.getWorld().spawnParticle(Particle.BUBBLE_COLUMN_UP, bubbleLoc, 1, 0.1, 0.1, 0.1, 0);
+                        ParticleCaster.spawn(caster, bubbleLoc.getWorld(), Particle.BUBBLE_COLUMN_UP, bubbleLoc, 1, 0.1, 0.1, 0.1, 0);
                     }
 
                     if (ticks % 20 == 0) {
@@ -130,16 +131,16 @@ public class Tsunami extends AttackSpell {
                                 1.0 + Math.random() * 2.0,
                                 Math.sin(a) * r
                         );
-                        spiralLoc.getWorld().spawnParticle(Utils.SPLASH, spiralLoc, 3, 0.1, 0.1, 0.1, 0);
-                        spiralLoc.getWorld().spawnParticle(Particle.BUBBLE_POP, spiralLoc, 1, 0.05, 0.05, 0.05, 0);
+                        ParticleCaster.spawn(caster, spiralLoc.getWorld(), Utils.SPLASH, spiralLoc, 3, 0.1, 0.1, 0.1, 0);
+                        ParticleCaster.spawn(caster, spiralLoc.getWorld(), Particle.BUBBLE_POP, spiralLoc, 1, 0.05, 0.05, 0.05, 0);
                     }
 
                     for (int i = 0; i < 6; i++) {
                         double a = Math.random() * 2 * Math.PI;
                         double r = 2.0 * (1.0 - phaseProgress);
                         Location forwardLoc = casterLoc.clone().add(direction.clone().multiply(1.5)).add(Math.cos(a) * r, 1.0 + Math.random(), Math.sin(a) * r);
-                        forwardLoc.getWorld().spawnParticle(Utils.SPLASH, forwardLoc, 2, 0.1, 0.1, 0.1, 0);
-                        forwardLoc.getWorld().spawnParticle(Particle.BUBBLE_COLUMN_UP, forwardLoc, 1, 0.05, 0.05, 0.05, 0);
+                        ParticleCaster.spawn(caster, forwardLoc.getWorld(), Utils.SPLASH, forwardLoc, 2, 0.1, 0.1, 0.1, 0);
+                        ParticleCaster.spawn(caster, forwardLoc.getWorld(), Particle.BUBBLE_COLUMN_UP, forwardLoc, 1, 0.05, 0.05, 0.05, 0);
                     }
 
                     if (ticks % 12 == 0) {
@@ -230,19 +231,19 @@ public class Tsunami extends AttackSpell {
                     for (int h = 0; h < height; h++) {
                         Location sprayLoc = colLoc.clone().add(0, h, 0);
                         sprayLoc.setY(colBaseY + h);
-                        sprayLoc.getWorld().spawnParticle(Utils.SPLASH, sprayLoc, 3, 0.5, 0.2, 0.5, 0);
-                        sprayLoc.getWorld().spawnParticle(Particle.BUBBLE_COLUMN_UP, sprayLoc, 2, 0.3, 0.2, 0.3, 0);
+                        ParticleCaster.spawn(caster, sprayLoc.getWorld(), Utils.SPLASH, sprayLoc, 3, 0.5, 0.2, 0.5, 0);
+                        ParticleCaster.spawn(caster, sprayLoc.getWorld(), Particle.BUBBLE_COLUMN_UP, sprayLoc, 2, 0.3, 0.2, 0.3, 0);
                     }
 
                     if (Math.abs(w) <= 1) {
-                        colLoc.getWorld().spawnParticle(Utils.DUST, colLoc, 0, new Particle.DustOptions(Color.fromRGB(0, 120, 255), 1.2F));
+                        ParticleCaster.spawn(caster, colLoc.getWorld(), Utils.DUST, colLoc, 0, new Particle.DustOptions(Color.fromRGB(0, 120, 255), 1.2F));
                     }
                 }
 
                 for (int i = -1; i <= 1; i += 2) {
                     Location edgeLoc = waveCenter.clone().add(perpendicular.clone().multiply((waveWidth + 1) * i));
                     for (int h = 1; h <= 4; h++) {
-                        edgeLoc.getWorld().spawnParticle(Utils.SPLASH, edgeLoc.clone().add(0, h, 0), 5, 0.5, 0.1, 0.5, 0.1);
+                        ParticleCaster.spawn(caster, edgeLoc.getWorld(), Utils.SPLASH, edgeLoc.clone().add(0, h, 0), 5, 0.5, 0.1, 0.5, 0.1);
                     }
                 }
 
@@ -253,7 +254,7 @@ public class Tsunami extends AttackSpell {
                                 .add(0, 0.5, 0);
                         for (int w = -waveWidth; w <= waveWidth; w++) {
                             Location foamLoc = trailLoc.clone().add(perpendicular.clone().multiply(w));
-                            foamLoc.getWorld().spawnParticle(Particle.BUBBLE_POP, foamLoc, 1, 0.3, 0.1, 0.3, 0);
+                            ParticleCaster.spawn(caster, foamLoc.getWorld(), Particle.BUBBLE_POP, foamLoc, 1, 0.3, 0.1, 0.3, 0);
                         }
                     }
                 }
@@ -372,7 +373,7 @@ public class Tsunami extends AttackSpell {
                         }
                     }
 
-                    waveCenter.getWorld().spawnParticle(Utils.SPLASH, waveCenter, 5, 3, 1, 0.5, 0);
+                    ParticleCaster.spawn(caster, waveCenter.getWorld(), Utils.SPLASH, waveCenter, 5, 3, 1, 0.5, 0);
                 }
 
                 if (activeColumns.size() > 6) {
@@ -452,7 +453,7 @@ public class Tsunami extends AttackSpell {
                                     h,
                                     Math.sin(angle + j * 0.4) * r
                             );
-                            spiralLoc.getWorld().spawnParticle(Utils.SPLASH, spiralLoc, 2, 0.1, 0.1, 0.1, 0);
+                            ParticleCaster.spawn(caster, spiralLoc.getWorld(), Utils.SPLASH, spiralLoc, 2, 0.1, 0.1, 0.1, 0);
                         }
                     }
 
@@ -470,7 +471,7 @@ public class Tsunami extends AttackSpell {
                                 1.0 + Math.random() * 2.0,
                                 Math.sin(a) * r
                         );
-                        spiralLoc.getWorld().spawnParticle(Utils.SPLASH, spiralLoc, 3, 0.1, 0.1, 0.1, 0);
+                        ParticleCaster.spawn(caster, spiralLoc.getWorld(), Utils.SPLASH, spiralLoc, 3, 0.1, 0.1, 0.1, 0);
                     }
 
                     if (ticks % 12 == 0) {
@@ -485,14 +486,14 @@ public class Tsunami extends AttackSpell {
 
     @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
-        location.getWorld().spawnParticle(Utils.SPLASH, location, 40, 0.5, 0.5, 0.5, 0.2);
-        location.getWorld().spawnParticle(Particle.BUBBLE_POP, location, 20, 0.5, 0.5, 0.5, 0);
+        ParticleCaster.spawn(caster, location.getWorld(), Utils.SPLASH, location, 40, 0.5, 0.5, 0.5, 0.2);
+        ParticleCaster.spawn(caster, location.getWorld(), Particle.BUBBLE_POP, location, 20, 0.5, 0.5, 0.5, 0);
     }
 
     @Override
     public void onCountered(Location location) {
-        location.getWorld().spawnParticle(Utils.SPLASH, location, 60, 1, 1, 1, 0.5);
-        location.getWorld().spawnParticle(Particle.BUBBLE_COLUMN_UP, location, 30, 1, 1, 1, 0);
+        ParticleCaster.spawn(null, location.getWorld(), Utils.SPLASH, location, 60, 1, 1, 1, 0.5);
+        ParticleCaster.spawn(null, location.getWorld(), Particle.BUBBLE_COLUMN_UP, location, 30, 1, 1, 1, 0);
     }
 
     @Override
@@ -506,7 +507,7 @@ public class Tsunami extends AttackSpell {
             List<Location> points = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 3, 0);
             for (int i = 0; i < 100; i++) {
                 for (Location loc : points) {
-                    loc.getWorld().spawnParticle(Utils.DUST, loc, 0,
+                    ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0,
                             new Particle.DustOptions(Color.fromRGB(0, 100, 255), 0.4F));
                 }
             }

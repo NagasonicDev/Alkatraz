@@ -15,6 +15,7 @@ import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
+import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
 import me.nagasonic.alkatraz.util.Utils;
@@ -84,7 +85,7 @@ public class Geyser extends AttackSpell {
             Vector forward = eye.getDirection().normalize().multiply(1.5);
             List<Location> points = ParticleUtils.magicCircle(eye, eye.getYaw(), eye.getPitch(), forward, 2, 0);
             for (Location loc : points) {
-                loc.getWorld().spawnParticle(Utils.DUST, loc, 0,
+                ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0,
                         new Particle.DustOptions(Color.fromRGB(80, 180, 255), 0.4F));
             }
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());
@@ -198,8 +199,7 @@ public class Geyser extends AttackSpell {
             int upTo = (int) Math.min(tick[0] * pointsPerTick, totalPoints);
             for (int i = 0; i < upTo; i++) {
                 Location loc = spiralPoints.get(i).clone().add(0, 0.05, 0);
-                epicentre.getWorld().spawnParticle(
-                        Utils.DUST, loc, 1, 0, 0, 0,
+                ParticleCaster.spawn(caster, epicentre.getWorld(), Utils.DUST, loc, 1, 0, 0, 0,
                         new Particle.DustOptions(Color.fromRGB(80, 180, 255), 0.55F));
             }
 
@@ -240,7 +240,7 @@ public class Geyser extends AttackSpell {
         // Impact sound and ground burst particles
         world.playSound(epicentre, Sound.ENTITY_GENERIC_SPLASH, 1.4f, 0.6f);
         world.playSound(epicentre, Sound.ENTITY_PLAYER_SPLASH_HIGH_SPEED, 1.0f, 0.7f);
-        world.spawnParticle(Utils.SPLASH, epicentre.clone().add(0, 0.1, 0),
+        ParticleCaster.spawn(caster, world, Utils.SPLASH, epicentre.clone().add(0, 0.1, 0),
                 60, radius * 0.6, 0.1, radius * 0.6, 0.2);
 
         // Build column — tight spiral rising from 0 to height, expands slightly
@@ -261,8 +261,8 @@ public class Geyser extends AttackSpell {
             int upTo = (int) Math.min(tick[0] * pointsPerTick, columnPoints.size());
             for (int i = 0; i < upTo; i++) {
                 Location loc = columnPoints.get(i);
-                world.spawnParticle(Utils.SPLASH,     loc, 3, 0.15, 0, 0.15, 0.08);
-                world.spawnParticle(Particle.BUBBLE_POP, loc, 1, 0.1,  0, 0.1,  0.02);
+                ParticleCaster.spawn(caster, world, Utils.SPLASH,     loc, 3, 0.15, 0, 0.15, 0.08);
+                ParticleCaster.spawn(caster, world, Particle.BUBBLE_POP, loc, 1, 0.1,  0, 0.1,  0.02);
             }
 
             // Damage + launch on the very first eruption tick
@@ -287,8 +287,8 @@ public class Geyser extends AttackSpell {
 
                 // Dissipation — spray particles at the top of the column
                 Location top = epicentre.clone().add(0, height, 0);
-                world.spawnParticle(Utils.SPLASH,     top, 40, radius * 0.5, 0.3, radius * 0.5, 0.25);
-                world.spawnParticle(Particle.BUBBLE_POP, top, 20, radius * 0.3, 0.2, radius * 0.3, 0.1);
+                ParticleCaster.spawn(caster, world, Utils.SPLASH,     top, 40, radius * 0.5, 0.3, radius * 0.5, 0.25);
+                ParticleCaster.spawn(caster, world, Particle.BUBBLE_POP, top, 20, radius * 0.3, 0.2, radius * 0.3, 0.1);
                 world.playSound(top, Sound.ENTITY_GENERIC_SPLASH, 0.8f, 1.2f);
             }
 
@@ -297,11 +297,11 @@ public class Geyser extends AttackSpell {
 
     @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
-        location.getWorld().spawnParticle(Utils.SPLASH, location, 25, 0.3, 0.3, 0.3, 0.1);
+        ParticleCaster.spawn(caster, location.getWorld(), Utils.SPLASH, location, 25, 0.3, 0.3, 0.3, 0.1);
     }
 
     @Override
     public void onCountered(Location location) {
-        location.getWorld().spawnParticle(Utils.SPLASH, location, 40, 0.4, 0.4, 0.4, 0.15);
+        ParticleCaster.spawn(null, location.getWorld(), Utils.SPLASH, location, 40, 0.4, 0.4, 0.4, 0.15);
     }
 }

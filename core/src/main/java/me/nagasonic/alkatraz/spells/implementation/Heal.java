@@ -16,6 +16,7 @@ import me.nagasonic.alkatraz.spells.configuration.impact.implementation.StatModi
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.util.ParticleUtils;
+import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
@@ -79,7 +80,7 @@ public class Heal extends Spell {
                         } catch (IndexOutOfBoundsException e) {
                         }
                         if (a != null){
-                            a.getWorld().spawnParticle(Utils.TOTEM, a, 1, 0, 0, 0, 0);
+                            ParticleCaster.spawn(p, a.getWorld(), Utils.TOTEM, a, 1, 0, 0, 0, 0);
                             l.addAndGet(1);
                         }
                     }else{ stopCast();}
@@ -105,7 +106,7 @@ public class Heal extends Spell {
                         } catch (IndexOutOfBoundsException e) {
                         }
                         if (a != null){
-                            a.getWorld().spawnParticle(Utils.TOTEM, a, 1, 0, 0, 0, 0);
+                            ParticleCaster.spawn(target, a.getWorld(), Utils.TOTEM, a, 1, 0, 0, 0, 0);
                             l.addAndGet(1);
                         }
                     }else{ stopCast();}
@@ -134,7 +135,7 @@ public class Heal extends Spell {
                 } catch (IndexOutOfBoundsException e) {
                 }
                 if (a != null){
-                    a.getWorld().spawnParticle(Utils.TOTEM, a, 1, 0, 0, 0, 0);
+                    ParticleCaster.spawn(caster, a.getWorld(), Utils.TOTEM, a, 1, 0, 0, 0, 0);
                     l.addAndGet(1);
                 }
             }else{ stopCast();}
@@ -162,7 +163,7 @@ public class Heal extends Spell {
                     // Spawn particles at all calculated points
                     for (int i = 0; i < magicCirclePoints.size(); i++){
                         for (Location loc1 : magicCirclePoints) {
-                            loc1.getWorld().spawnParticle(Utils.DUST, loc1, 1, new Particle.DustOptions(Color.YELLOW, 0.4F));
+                            ParticleCaster.spawn(p, loc1.getWorld(), Utils.DUST, loc1, 1, new Particle.DustOptions(Color.YELLOW, 0.4F));
                         }
                     }
                 }else{
@@ -181,7 +182,7 @@ public class Heal extends Spell {
                     // Spawn particles at all calculated points
                     for (int i = 0; i < magicCirclePoints.size(); i++){
                         for (Location loc1 : magicCirclePoints) {
-                            loc1.getWorld().spawnParticle(Utils.DUST, loc1, 1, new Particle.DustOptions(Color.YELLOW, 0.4F));
+                            ParticleCaster.spawn(p, loc1.getWorld(), Utils.DUST, loc1, 1, new Particle.DustOptions(Color.YELLOW, 0.4F));
                         }
                     }
                 }
@@ -197,7 +198,7 @@ public class Heal extends Spell {
                 // Spawn particles at all calculated points
                 for (int i = 0; i < magicCirclePoints.size(); i++){
                     for (Location loc1 : magicCirclePoints) {
-                        loc1.getWorld().spawnParticle(Utils.DUST, loc1, 1, new Particle.DustOptions(Color.YELLOW, 0.4F));
+                        ParticleCaster.spawn(caster, loc1.getWorld(), Utils.DUST, loc1, 1, new Particle.DustOptions(Color.YELLOW, 0.4F));
                     }
                 }
             }

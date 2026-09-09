@@ -9,6 +9,7 @@ import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.modifier.AppliedModifier;
 import me.nagasonic.alkatraz.spells.modifier.PooledModifierSpellSupport;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
+import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
@@ -103,7 +104,7 @@ public class Buff extends Spell {
             List<Location> points = ParticleUtils.magicCircle(loc, yaw, pitch, forward, 3, 0);
 
             for (Location point : points) {
-                point.getWorld().spawnParticle(Utils.DUST, point, 0,
+                ParticleCaster.spawn(caster, point.getWorld(), Utils.DUST, point, 0,
                         new Particle.DustOptions(PARTICLE_COLOR, 0.5F));
             }
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());

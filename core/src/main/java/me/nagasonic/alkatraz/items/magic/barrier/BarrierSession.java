@@ -12,6 +12,7 @@ import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.types.BarrierType;
 import me.nagasonic.alkatraz.spells.types.DamageableBarrier;
 import me.nagasonic.alkatraz.spells.types.properties.SpellProperties;
+import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.StatUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.Bukkit;
@@ -345,11 +346,11 @@ public final class BarrierSession extends SpellProperties implements DamageableB
             Particle particle = parseParticle(fx.particle());
             if (particle != null && at != null && at.getWorld() != null) {
                 if (particle == Utils.DUST) {
-                    at.getWorld().spawnParticle(particle, at, Math.max(0, fx.count()),
+                    ParticleCaster.spawn(caster, at.getWorld(), particle, at, Math.max(0, fx.count()),
                             new Particle.DustOptions(colorOf(fx.color(), Color.WHITE),
                                     (float) Math.max(0.05, fx.size())));
                 } else {
-                    at.getWorld().spawnParticle(particle, at, Math.max(0, fx.count()), 0, 0, 0, 0);
+                    ParticleCaster.spawn(caster, at.getWorld(), particle, at, Math.max(0, fx.count()), 0, 0, 0, 0);
                 }
             }
         }
@@ -367,11 +368,11 @@ public final class BarrierSession extends SpellProperties implements DamageableB
         Particle type = config.particles().type();
         if (type == null) return;
         if (type == Utils.DUST) {
-            loc.getWorld().spawnParticle(type, loc, 0,
+            ParticleCaster.spawn(caster, loc.getWorld(), type, loc, 0,
                     new Particle.DustOptions(colorOf(config.particles().color(), Color.WHITE),
                             (float) Math.max(0.05, config.particles().size())));
         } else {
-            loc.getWorld().spawnParticle(type, loc, 0, 0, 0, 0);
+            ParticleCaster.spawn(caster, loc.getWorld(), type, loc, 0, 0, 0, 0);
         }
     }
 

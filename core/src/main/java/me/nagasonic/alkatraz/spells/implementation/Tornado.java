@@ -10,6 +10,7 @@ import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.Num
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
 import me.nagasonic.alkatraz.util.ColorFormat;
+import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
@@ -112,9 +113,9 @@ public class Tornado extends Spell {
                                     h,
                                     Math.sin(angle + j * 0.4) * r
                             );
-                            spiralLoc.getWorld().spawnParticle(Particle.CLOUD, spiralLoc, 2, 0.1, 0.1, 0.1, 0);
+                            ParticleCaster.spawn(caster, spiralLoc.getWorld(), Particle.CLOUD, spiralLoc, 2, 0.1, 0.1, 0.1, 0);
                             if (Math.random() < 0.3) {
-                                spiralLoc.getWorld().spawnParticle(Particle.SWEEP_ATTACK, spiralLoc, 1, 0.05, 0.05, 0.05, 0);
+                                ParticleCaster.spawn(caster, spiralLoc.getWorld(), Particle.SWEEP_ATTACK, spiralLoc, 1, 0.05, 0.05, 0.05, 0);
                             }
                         }
                     }
@@ -123,7 +124,7 @@ public class Tornado extends Spell {
                         double a = Math.random() * 2 * Math.PI;
                         double r = Math.random() * 2.0;
                         Location airLoc = casterLoc.clone().add(Math.cos(a) * r, Math.random() * 1.5, Math.sin(a) * r);
-                        airLoc.getWorld().spawnParticle(Particle.CLOUD, airLoc, 1, 0.1, 0.1, 0.1, 0);
+                        ParticleCaster.spawn(caster, airLoc.getWorld(), Particle.CLOUD, airLoc, 1, 0.1, 0.1, 0.1, 0);
                     }
 
                     if (ticks % 15 == 0) {
@@ -144,12 +145,12 @@ public class Tornado extends Spell {
                                 1.0 + Math.random() * 1.5,
                                 Math.sin(angle) * r * 0.5
                         );
-                        airLoc.getWorld().spawnParticle(Particle.SWEEP_ATTACK, airLoc, 1, 0.05, 0.05, 0.05, 0);
+                        ParticleCaster.spawn(caster, airLoc.getWorld(), Particle.SWEEP_ATTACK, airLoc, 1, 0.05, 0.05, 0.05, 0);
 
                         Vector toTornado = tornadoCenter.toVector().subtract(airLoc.toVector());
                         if (toTornado.length() > 0.1) {
                             Location streamLoc = airLoc.clone().add(toTornado.normalize().multiply(0.5));
-                            streamLoc.getWorld().spawnParticle(Particle.CLOUD, streamLoc, 1, 0.05, 0.05, 0.05, 0);
+                            ParticleCaster.spawn(caster, streamLoc.getWorld(), Particle.CLOUD, streamLoc, 1, 0.05, 0.05, 0.05, 0);
                         }
                     }
 
@@ -165,9 +166,9 @@ public class Tornado extends Spell {
                             double px = Math.cos(angle) * r;
                             double pz = Math.sin(angle) * r;
                             Location particleLoc = tornadoCenter.clone().add(px, y, pz);
-                            particleLoc.getWorld().spawnParticle(Particle.CLOUD, particleLoc, 1, 0.05, 0.05, 0.05, 0.01);
+                            ParticleCaster.spawn(caster, particleLoc.getWorld(), Particle.CLOUD, particleLoc, 1, 0.05, 0.05, 0.05, 0.01);
                             if (i % 2 == 0 && Math.random() < 0.5) {
-                                particleLoc.getWorld().spawnParticle(Utils.DUST, particleLoc, 0,
+                                ParticleCaster.spawn(caster, particleLoc.getWorld(), Utils.DUST, particleLoc, 0,
                                         new Particle.DustOptions(Color.fromRGB(200, 220, 255), (float)(0.2 + t * 0.3)));
                             }
                         }
@@ -305,9 +306,9 @@ public class Tornado extends Spell {
                         double pz = Math.sin(a) * r * variance;
                         Location particleLoc = tornadoLoc.clone().add(px, y, pz);
 
-                        particleLoc.getWorld().spawnParticle(Particle.CLOUD, particleLoc, 1, 0.05, 0.05, 0.05, 0.01);
+                        ParticleCaster.spawn(caster, particleLoc.getWorld(), Particle.CLOUD, particleLoc, 1, 0.05, 0.05, 0.05, 0.01);
                         if (i % 2 == 0) {
-                            particleLoc.getWorld().spawnParticle(Utils.DUST, particleLoc, 0,
+                            ParticleCaster.spawn(caster, particleLoc.getWorld(), Utils.DUST, particleLoc, 0,
                                     new Particle.DustOptions(Color.fromRGB(180 + (int)(t * 75), 200, 230), (float)(0.3 + t * 0.5)));
                         }
                     }
@@ -321,13 +322,13 @@ public class Tornado extends Spell {
                     for (double y = 0; y < coneHeight; y += 1.5) {
                         Location debrisLoc = tornadoLoc.clone().add(x, y, z);
                         if (Math.random() < 0.3) {
-                            debrisLoc.getWorld().spawnParticle(Particle.FALLING_DUST, debrisLoc, 1, 0.1, 0.1, 0.1, 0,
+                            ParticleCaster.spawn(caster, debrisLoc.getWorld(), Particle.FALLING_DUST, debrisLoc, 1, 0.1, 0.1, 0.1, 0,
                                     Material.CLAY.createBlockData());
                         }
                     }
                 }
 
-                tornadoLoc.getWorld().spawnParticle(Utils.DUST, tornadoLoc, 0,
+                ParticleCaster.spawn(caster, tornadoLoc.getWorld(), Utils.DUST, tornadoLoc, 0,
                         new Particle.DustOptions(Color.fromRGB(200, 220, 255), 1.5F));
 
                 for (Entity entity : tornadoLoc.getWorld().getNearbyEntities(
@@ -349,17 +350,17 @@ public class Tornado extends Spell {
                         SpellDamageUtil.damageWithSpell(
                                 le, finalActiveDamage, caster, wand, Tornado.this
                         );
-                        le.getWorld().spawnParticle(Particle.CRIT, le.getLocation().add(0, 1, 0), 5, 0.3, 0.5, 0.3, 0.2);
+                        ParticleCaster.spawn(caster, le.getWorld(), Particle.CRIT, le.getLocation().add(0, 1, 0), 5, 0.3, 0.5, 0.3, 0.2);
                     }
 
-                    le.getWorld().spawnParticle(Particle.CLOUD, le.getLocation().add(0, 0.5, 0), 2, 0.2, 0.2, 0.2, 0);
+                    ParticleCaster.spawn(caster, le.getWorld(), Particle.CLOUD, le.getLocation().add(0, 0.5, 0), 2, 0.2, 0.2, 0.2, 0);
                 }
 
                 for (double x = -0.5; x <= 0.5; x += 1.0) {
                     for (double z = -0.5; z <= 0.5; z += 1.0) {
                         Location baseLoc = tornadoLoc.clone().add(x, 0, z);
                         if (Math.random() < 0.4) {
-                            baseLoc.getWorld().spawnParticle(Particle.SWEEP_ATTACK, baseLoc, 1, 0.2, 0.05, 0.2, 0);
+                            ParticleCaster.spawn(caster, baseLoc.getWorld(), Particle.SWEEP_ATTACK, baseLoc, 1, 0.2, 0.05, 0.2, 0);
                         }
                     }
                 }
@@ -408,7 +409,7 @@ public class Tornado extends Spell {
                                 h,
                                 Math.sin(angle + j * 0.5) * r
                         );
-                        spiralLoc.getWorld().spawnParticle(Particle.CLOUD, spiralLoc, 1, 0.1, 0.1, 0.1, 0);
+                        ParticleCaster.spawn(caster, spiralLoc.getWorld(), Particle.CLOUD, spiralLoc, 1, 0.1, 0.1, 0.1, 0);
                     }
                 }
 
@@ -455,7 +456,7 @@ public class Tornado extends Spell {
                         double px = Math.cos(angle) * r;
                         double pz = Math.sin(angle) * r;
                         Location loc = tornadoLoc.clone().add(px, y, pz);
-                        loc.getWorld().spawnParticle(Particle.CLOUD, loc, 1, 0, 0, 0, 0);
+                        ParticleCaster.spawn(caster, loc.getWorld(), Particle.CLOUD, loc, 1, 0, 0, 0, 0);
                     }
                 }
 
@@ -495,7 +496,7 @@ public class Tornado extends Spell {
             List<Location> points = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 3, 0);
             for (int i = 0; i < 100; i++) {
                 for (Location loc : points) {
-                    loc.getWorld().spawnParticle(Utils.DUST, loc, 0,
+                    ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0,
                             new Particle.DustOptions(Color.fromRGB(200, 220, 255), 0.4F));
                 }
             }

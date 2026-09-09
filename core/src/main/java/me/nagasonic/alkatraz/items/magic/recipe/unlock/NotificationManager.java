@@ -5,6 +5,7 @@ import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.items.magic.recipe.AlkatrazRecipe;
 import me.nagasonic.alkatraz.items.magic.recipe.RecipeRegistry;
+import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.StringUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.Location;
@@ -71,7 +72,7 @@ public final class NotificationManager {
 
     private static void spawnUnlockParticles(Player player) {
         Location location = player.getEyeLocation();
-        player.getWorld().spawnParticle(Utils.ENCHANT, location, 30, 0.4, 0.6, 0.4, 0.1);
-        player.getWorld().spawnParticle(Utils.TOTEM, location, 12, 0.3, 0.5, 0.3, 0.05);
+        ParticleCaster.spawn(player, player.getWorld(), Utils.ENCHANT, location, 30, 0.4, 0.6, 0.4, 0.1);
+        ParticleCaster.spawn(player, player.getWorld(), Utils.TOTEM, location, 12, 0.3, 0.5, 0.3, 0.05);
     }
 }

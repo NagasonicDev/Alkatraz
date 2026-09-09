@@ -14,6 +14,7 @@ import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
+import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
 import me.nagasonic.alkatraz.hooks.Protection;
@@ -47,14 +48,14 @@ public class FlamingVolley extends AttackSpell implements Listener {
 
     @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
-        location.getWorld().spawnParticle(Particle.FLAME, location, 15);
-        location.getWorld().spawnParticle(Particle.LAVA, location, 5);
+        ParticleCaster.spawn(caster, location.getWorld(), Particle.FLAME, location, 15);
+        ParticleCaster.spawn(caster, location.getWorld(), Particle.LAVA, location, 5);
     }
 
     @Override
     public void onCountered(Location location) {
-        location.getWorld().spawnParticle(Particle.FLAME, location, 30);
-        location.getWorld().spawnParticle(Particle.LAVA, location, 10);
+        ParticleCaster.spawn(null, location.getWorld(), Particle.FLAME, location, 30);
+        ParticleCaster.spawn(null, location.getWorld(), Particle.LAVA, location, 10);
     }
 
     @Override
@@ -191,17 +192,17 @@ public class FlamingVolley extends AttackSpell implements Listener {
     }
 
     private void spawnArrowParticles(Location center) {
-        center.getWorld().spawnParticle(Particle.FLAME, center, 2, 0.05, 0.05, 0.05, 0.01);
-        center.getWorld().spawnParticle(Utils.SMOKE, center, 1, 0.05, 0.05, 0.05, 0.01);
+        ParticleCaster.spawn(null, center.getWorld(), Particle.FLAME, center, 2, 0.05, 0.05, 0.05, 0.01);
+        ParticleCaster.spawn(null, center.getWorld(), Utils.SMOKE, center, 1, 0.05, 0.05, 0.05, 0.01);
     }
 
     private void spawnDisperse(Location loc) {
-        loc.getWorld().spawnParticle(Utils.SMOKE, loc, 8, 0.3, 0.3, 0.3, 0.05);
+        ParticleCaster.spawn(null, loc.getWorld(), Utils.SMOKE, loc, 8, 0.3, 0.3, 0.3, 0.05);
     }
 
     private void spawnImpact(Location loc, LivingEntity caster) {
-        loc.getWorld().spawnParticle(Particle.FLAME, loc, 20, 0.5, 0.5, 0.5, 0.1);
-        loc.getWorld().spawnParticle(Particle.LAVA, loc, 10, 0.3, 0.3, 0.3, 0);
+        ParticleCaster.spawn(caster, loc.getWorld(), Particle.FLAME, loc, 20, 0.5, 0.5, 0.5, 0.1);
+        ParticleCaster.spawn(caster, loc.getWorld(), Particle.LAVA, loc, 10, 0.3, 0.3, 0.3, 0);
         loc.getWorld().playSound(loc, Sound.ENTITY_FIREWORK_ROCKET_BLAST, 0.6f, 1.2f);
 
         if (caster instanceof Player p
@@ -225,7 +226,7 @@ public class FlamingVolley extends AttackSpell implements Listener {
             List<Location> points = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 3, 0);
             for (int i = 0; i < 100; i++) {
                 for (Location loc : points) {
-                    loc.getWorld().spawnParticle(Utils.DUST, loc, 0,
+                    ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0,
                             new Particle.DustOptions(Color.RED, 0.4F));
                 }
             }

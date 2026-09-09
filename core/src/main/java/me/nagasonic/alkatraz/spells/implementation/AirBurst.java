@@ -17,6 +17,7 @@ import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
+import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
@@ -41,12 +42,12 @@ public class AirBurst extends AttackSpell {
 
     @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
-        location.getWorld().spawnParticle(Particle.CLOUD, location, 15);
+        ParticleCaster.spawn(caster, location.getWorld(), Particle.CLOUD, location, 15);
     }
 
     @Override
     public void onCountered(Location location) {
-        location.getWorld().spawnParticle(Particle.CLOUD, location, 30);
+        ParticleCaster.spawn(null, location.getWorld(), Particle.CLOUD, location, 30);
     }
 
 
@@ -114,9 +115,7 @@ public class AirBurst extends AttackSpell {
                     if (properties.isCountered()) {
                         return;
                     }
-                    loc.getWorld().spawnParticle(
-                            Particle.CLOUD,
-                            loc,
+                    ParticleCaster.spawn(caster, loc.getWorld(), Particle.CLOUD, loc,
                             2,
                             0, 0, 0,
                             0.1
@@ -188,9 +187,7 @@ public class AirBurst extends AttackSpell {
                     if (properties.isCountered()) {
                         return;
                     }
-                    loc.getWorld().spawnParticle(
-                            Particle.CLOUD,
-                            loc,
+                    ParticleCaster.spawn(caster, loc.getWorld(), Particle.CLOUD, loc,
                             2,
                             0, 0, 0,
                             0.1
@@ -223,7 +220,7 @@ public class AirBurst extends AttackSpell {
             // Spawn particles at all calculated points
             for (int i = 0; i < 100; i++){
                 for (Location loc : magicCirclePoints) {
-                    loc.getWorld().spawnParticle(Utils.DUST, loc, 0, new Particle.DustOptions(Color.WHITE, 0.4F));
+                    ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, new Particle.DustOptions(Color.WHITE, 0.4F));
                 }
             }
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());

@@ -12,6 +12,7 @@ import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
+import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
 import me.nagasonic.alkatraz.util.Utils;
@@ -44,12 +45,12 @@ public class MagicMissile extends AttackSpell {
 
     @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
-        location.getWorld().spawnParticle(Utils.DUST, location, 15, new Particle.DustOptions(Color.AQUA, 0.6F));
+        ParticleCaster.spawn(caster, location.getWorld(), Utils.DUST, location, 15, new Particle.DustOptions(Color.AQUA, 0.6F));
     }
 
     @Override
     public void onCountered(Location location) {
-        location.getWorld().spawnParticle(Utils.DUST, location, 30, new Particle.DustOptions(Color.AQUA, 0.6F));
+        ParticleCaster.spawn(null, location.getWorld(), Utils.DUST, location, 30, new Particle.DustOptions(Color.AQUA, 0.6F));
     }
 
     @Override
@@ -98,8 +99,7 @@ public class MagicMissile extends AttackSpell {
                         return;
                     }
 
-                    p.getWorld().spawnParticle(
-                            Utils.DUST,
+                    ParticleCaster.spawn(p, p.getWorld(), Utils.DUST,
                             loc,
                             50,
                             new Particle.DustOptions(Color.AQUA, 0.5F)
@@ -175,8 +175,7 @@ public class MagicMissile extends AttackSpell {
                         return;
                     }
 
-                    caster.getWorld().spawnParticle(
-                            Utils.DUST,
+                    ParticleCaster.spawn(caster, caster.getWorld(), Utils.DUST,
                             loc,
                             50,
                             new Particle.DustOptions(Color.AQUA, 0.5F)
@@ -233,7 +232,7 @@ public class MagicMissile extends AttackSpell {
             // Spawn particles at all calculated points
             for (int i = 0; i < magicCirclePoints.size(); i++){
                 for (Location loc1 : magicCirclePoints) {
-                    loc1.getWorld().spawnParticle(Utils.DUST, loc1, 0, new Particle.DustOptions(Color.AQUA, 0.4F));
+                    ParticleCaster.spawn(caster, loc1.getWorld(), Utils.DUST, loc1, 0, new Particle.DustOptions(Color.AQUA, 0.4F));
                 }
             }
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());

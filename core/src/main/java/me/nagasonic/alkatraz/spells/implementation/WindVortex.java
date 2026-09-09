@@ -18,6 +18,7 @@ import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
+import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
@@ -64,15 +65,15 @@ public class WindVortex extends AttackSpell implements Listener {
     @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
         // Wind disperses on barrier
-        location.getWorld().spawnParticle(Particle.CLOUD, location, 30, 1, 1, 1, 0.1);
-        location.getWorld().spawnParticle(Particle.SWEEP_ATTACK, location, 5);
+        ParticleCaster.spawn(caster, location.getWorld(), Particle.CLOUD, location, 30, 1, 1, 1, 0.1);
+        ParticleCaster.spawn(caster, location.getWorld(), Particle.SWEEP_ATTACK, location, 5);
     }
 
     @Override
     public void onCountered(Location location) {
         // Vortex disperses
-        location.getWorld().spawnParticle(Particle.CLOUD, location, 50, 2, 2, 2, 0.2);
-        location.getWorld().spawnParticle(Utils.EXPLOSION, location, 1);
+        ParticleCaster.spawn(null, location.getWorld(), Particle.CLOUD, location, 50, 2, 2, 2, 0.2);
+        ParticleCaster.spawn(null, location.getWorld(), Utils.EXPLOSION, location, 1);
         location.getWorld().playSound(location, Sound.ENTITY_GENERIC_EXPLODE, 0.5f, 1.5f);
     }
 
@@ -161,7 +162,7 @@ public class WindVortex extends AttackSpell implements Listener {
             // White/gray color for air
             for (int i = 0; i < 100; i++) {
                 for (Location loc : magicCirclePoints) {
-                    loc.getWorld().spawnParticle(Utils.DUST, loc, 0, 
+                    ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, 
                             new Particle.DustOptions(Color.fromRGB(220, 220, 220), 0.4F));
                 }
             }
@@ -250,7 +251,7 @@ public class WindVortex extends AttackSpell implements Listener {
             // Main spiral - register each particle as a component for collision
             List<Location> spiralPoints = createVortexSpiral(center, radius, radius * 0.8, 3, rotation);
             for (Location loc : spiralPoints) {
-                loc.getWorld().spawnParticle(Particle.CLOUD, loc, 1, 0, 0, 0, 0);
+                ParticleCaster.spawn(caster, loc.getWorld(), Particle.CLOUD, loc, 1, 0, 0, 0, 0);
                 
                 // Register as spell particle component (like WaterPulse)
                 SpellParticleComponent comp = new SpellParticleComponent(
@@ -270,7 +271,7 @@ public class WindVortex extends AttackSpell implements Listener {
             if (ticksElapsed % 5 == 0) {
                 List<Location> ringPoints = createVortexRings(center, radius, radius * 0.6, 4, rotation);
                 for (Location loc : ringPoints) {
-                    loc.getWorld().spawnParticle(Utils.DUST, loc, 1, 0, 0, 0, 0,
+                    ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 1, 0, 0, 0, 0,
                             new Particle.DustOptions(Color.fromRGB(200, 200, 200), 0.8f));
                 }
             }
@@ -284,7 +285,7 @@ public class WindVortex extends AttackSpell implements Listener {
                     double z = Math.sin(angle) * radius;
                     
                     Location particleLoc = center.clone().add(x, 0.1, z);
-                    particleLoc.getWorld().spawnParticle(Particle.SWEEP_ATTACK, particleLoc, 1);
+                    ParticleCaster.spawn(caster, particleLoc.getWorld(), Particle.SWEEP_ATTACK, particleLoc, 1);
                 }
             }
         }
@@ -410,7 +411,7 @@ public class WindVortex extends AttackSpell implements Listener {
                 double z = Math.sin(angle) * entityRadius;
                 
                 Location particleLoc = entityLoc.clone().add(x, 1, z);
-                particleLoc.getWorld().spawnParticle(Particle.CLOUD, particleLoc, 1, 0, 0, 0, 0);
+                ParticleCaster.spawn(caster, particleLoc.getWorld(), Particle.CLOUD, particleLoc, 1, 0, 0, 0, 0);
             }
             
             // Pull line effect
@@ -422,7 +423,7 @@ public class WindVortex extends AttackSpell implements Listener {
                 for (int i = 0; i < segments; i++) {
                     double progress = (double) i / segments;
                     Location lineLoc = entityLoc.clone().add(direction.clone().multiply(distance * progress));
-                    lineLoc.getWorld().spawnParticle(Utils.DUST, lineLoc, 1, 0, 0, 0, 0,
+                    ParticleCaster.spawn(caster, lineLoc.getWorld(), Utils.DUST, lineLoc, 1, 0, 0, 0, 0,
                             new Particle.DustOptions(Color.WHITE, 0.5f));
                 }
             }
@@ -435,9 +436,9 @@ public class WindVortex extends AttackSpell implements Listener {
             Location center = caster.getLocation();
             
             // Final particle burst
-            center.getWorld().spawnParticle(Particle.CLOUD, center, 100, 
+            ParticleCaster.spawn(caster, center.getWorld(), Particle.CLOUD, center, 100, 
                     radius * 0.5, radius * 0.3, radius * 0.5, 0.1);
-            center.getWorld().spawnParticle(Particle.SWEEP_ATTACK, center, 10, 
+            ParticleCaster.spawn(caster, center.getWorld(), Particle.SWEEP_ATTACK, center, 10, 
                     radius * 0.3, 0.5, radius * 0.3);
             
             // Sound effect

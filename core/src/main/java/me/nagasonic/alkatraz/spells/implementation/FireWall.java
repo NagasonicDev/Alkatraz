@@ -19,6 +19,7 @@ import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProper
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
 import me.nagasonic.alkatraz.hooks.Protection;
+import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -45,12 +46,12 @@ public class FireWall extends AttackSpell implements Listener {
 
     @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
-        location.getWorld().spawnParticle(Particle.FLAME, location, 15);
+        ParticleCaster.spawn(caster, location.getWorld(), Particle.FLAME, location, 15);
     }
 
     @Override
     public void onCountered(Location location) {
-        location.getWorld().spawnParticle(Particle.FLAME, location, 30);
+        ParticleCaster.spawn(null, location.getWorld(), Particle.FLAME, location, 30);
     }
 
     private double duration;
@@ -131,16 +132,14 @@ public class FireWall extends AttackSpell implements Listener {
                         Location loc = segment.base.clone().add(0, h, 0);
 
                         if (h == currentHeight - 0.5){
-                            player.getWorld().spawnParticle(
-                                    Particle.LAVA,
+                            ParticleCaster.spawn(player, player.getWorld(), Particle.LAVA,
                                     loc,
                                     2,
                                     0.05, 0.05, 0.05,
                                     0
                             );
                         }else{
-                            player.getWorld().spawnParticle(
-                                    Particle.FLAME,
+                            ParticleCaster.spawn(player, player.getWorld(), Particle.FLAME,
                                     loc,
                                     2,
                                     0.05, 0.05, 0.05,
@@ -245,16 +244,14 @@ public class FireWall extends AttackSpell implements Listener {
                         Location loc = segment.base.clone().add(0, h, 0);
 
                         if (h == currentHeight - 0.5){
-                            caster.getWorld().spawnParticle(
-                                    Particle.LAVA,
+                            ParticleCaster.spawn(caster, caster.getWorld(), Particle.LAVA,
                                     loc,
                                     2,
                                     0.05, 0.05, 0.05,
                                     0
                             );
                         }else{
-                            caster.getWorld().spawnParticle(
-                                    Particle.FLAME,
+                            ParticleCaster.spawn(caster, caster.getWorld(), Particle.FLAME,
                                     loc,
                                     2,
                                     0.05, 0.05, 0.05,
@@ -317,7 +314,7 @@ public class FireWall extends AttackSpell implements Listener {
             // Spawn particles at all calculated points
             for (int i = 0; i < 100; i++){
                 for (Location loc : magicCirclePoints) {
-                    loc.getWorld().spawnParticle(Utils.DUST, loc, 0, new Particle.DustOptions(Color.RED, 0.4F));
+                    ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, new Particle.DustOptions(Color.RED, 0.4F));
                 }
             }
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());

@@ -7,6 +7,7 @@ import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.api.Element;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
 import me.nagasonic.alkatraz.util.ColorFormat;
+import me.nagasonic.alkatraz.util.ParticleCaster;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -336,7 +337,7 @@ public class RandomSpellbook {
                     double z = Math.sin(angle) * radius;
                     
                     org.bukkit.Location particleLoc = loc.clone().add(x, 0, z);
-                    loc.getWorld().spawnParticle(org.bukkit.Particle.PORTAL, particleLoc, 3, 0, 0, 0, 0.1);
+                    ParticleCaster.spawn(player, loc.getWorld(), org.bukkit.Particle.PORTAL, particleLoc, 3, 0, 0, 0, 0.1);
                 }
                 
                 // Sound effects
@@ -346,7 +347,7 @@ public class RandomSpellbook {
                 
                 if (ticks == maxTicks - 1) {
                     // Final flash
-                    loc.getWorld().spawnParticle(org.bukkit.Particle.FLASH, loc, 1, 0, 0, 0, Color.WHITE);
+                    ParticleCaster.spawn(player, loc.getWorld(), org.bukkit.Particle.FLASH, loc, 1, 0, 0, 0, Color.WHITE);
                     loc.getWorld().playSound(loc, Sound.ENTITY_PLAYER_LEVELUP, 0.8f, 1.5f);
                 }
                 

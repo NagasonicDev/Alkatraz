@@ -11,6 +11,7 @@ import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.Num
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.hooks.Protection;
+import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
@@ -89,7 +90,7 @@ public class SummonZombies extends AttackSpell implements Listener {
 
             zombieIds.add(zombie.getUniqueId());
 
-            spawnSummonParticles(spawnLoc);
+            spawnSummonParticles(caster, spawnLoc);
         }
 
         if (zombieIds.isEmpty()) {
@@ -108,7 +109,7 @@ public class SummonZombies extends AttackSpell implements Listener {
                 if (ticks >= zombieDuration * 20) {
                     for (UUID id : zombieIds) {
                         Entity e = Bukkit.getEntity(id);
-                        if (e != null) despawnZombie(e);
+                        if (e != null) despawnZombie(caster, e);
                     }
                     summonedZombies.remove(caster.getUniqueId());
                     cancel();
@@ -159,7 +160,7 @@ public class SummonZombies extends AttackSpell implements Listener {
             });
 
             zombieIds.add(zombie.getUniqueId());
-            spawnSummonParticles(spawnLoc);
+            spawnSummonParticles(caster, spawnLoc);
         }
 
         summonedZombies.put(caster.getUniqueId(), zombieIds);
@@ -173,7 +174,7 @@ public class SummonZombies extends AttackSpell implements Listener {
                 if (ticks >= zombieDuration * 20) {
                     for (UUID id : zombieIds) {
                         Entity e = Bukkit.getEntity(id);
-                        if (e != null) despawnZombie(e);
+                        if (e != null) despawnZombie(caster, e);
                     }
                     summonedZombies.remove(caster.getUniqueId());
                     cancel();
@@ -209,15 +210,15 @@ public class SummonZombies extends AttackSpell implements Listener {
         return null;
     }
 
-    private void spawnSummonParticles(Location loc) {
-        loc.getWorld().spawnParticle(Utils.WITCH, loc, 20, 0.5, 0.5, 0.5, 0);
-        loc.getWorld().spawnParticle(Utils.LARGE_SMOKE, loc, 10, 0.3, 0.3, 0.3, 0.05);
+    private void spawnSummonParticles(LivingEntity caster, Location loc) {
+        ParticleCaster.spawn(caster, loc.getWorld(), Utils.WITCH, loc, 20, 0.5, 0.5, 0.5, 0);
+        ParticleCaster.spawn(caster, loc.getWorld(), Utils.LARGE_SMOKE, loc, 10, 0.3, 0.3, 0.3, 0.05);
     }
 
-    private void despawnZombie(Entity e) {
+    private void despawnZombie(LivingEntity caster, Entity e) {
         if (!e.isDead()) {
-            e.getWorld().spawnParticle(Utils.LARGE_SMOKE, e.getLocation(), 15, 0.3, 0.3, 0.3, 0.05);
-            e.getWorld().spawnParticle(Utils.WITCH, e.getLocation(), 10, 0.3, 0.3, 0.3, 0);
+            ParticleCaster.spawn(caster, e.getWorld(), Utils.LARGE_SMOKE, e.getLocation(), 15, 0.3, 0.3, 0.3, 0.05);
+            ParticleCaster.spawn(caster, e.getWorld(), Utils.WITCH, e.getLocation(), 10, 0.3, 0.3, 0.3, 0);
             e.getWorld().playSound(e.getLocation(), Sound.ENTITY_ZOMBIE_DEATH, 0.6f, 0.8f);
             e.remove();
         }
@@ -279,7 +280,7 @@ public class SummonZombies extends AttackSpell implements Listener {
             List<Location> points = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 3, 0);
             for (int i = 0; i < 100; i++) {
                 for (Location loc : points) {
-                    loc.getWorld().spawnParticle(Utils.DUST, loc, 0,
+                    ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0,
                             new Particle.DustOptions(Color.fromRGB(50, 100, 50), 0.4F));
                 }
             }

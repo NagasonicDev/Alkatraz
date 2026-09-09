@@ -16,6 +16,7 @@ import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
+import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.util.Utils;
@@ -49,12 +50,12 @@ public class FireBlast extends AttackSpell implements Listener {
 
     @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
-        location.getWorld().spawnParticle(Particle.FLAME, location, 15);
+        ParticleCaster.spawn(caster, location.getWorld(), Particle.FLAME, location, 15);
     }
 
     @Override
     public void onCountered(Location location) {
-        location.getWorld().spawnParticle(Particle.FLAME, location, 30);
+        ParticleCaster.spawn(null, location.getWorld(), Particle.FLAME, location, 30);
     }
 
     @Override
@@ -132,7 +133,7 @@ public class FireBlast extends AttackSpell implements Listener {
             // Spawn particles at all calculated points
             for (int i = 0; i < 100; i++){
                 for (Location loc : magicCirclePoints) {
-                    loc.getWorld().spawnParticle(Utils.DUST, loc, 0, new Particle.DustOptions(Color.RED, 0.4F));
+                    ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, new Particle.DustOptions(Color.RED, 0.4F));
                 }
             }
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());

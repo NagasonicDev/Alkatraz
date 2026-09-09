@@ -18,6 +18,7 @@ import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
+import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
 import me.nagasonic.alkatraz.util.Utils;
@@ -213,7 +214,7 @@ public class AirBlades extends AttackSpell implements Listener {
                     SpellDamageUtil.damageWithSpell(target, damage, caster, wand, AirBlades.this);
 
                     // Hit sound & particles
-                    position.getWorld().spawnParticle(Particle.SWEEP_ATTACK, position, 3, 0.2, 0.2, 0.2, 0);
+                    ParticleCaster.spawn(caster, position.getWorld(), Particle.SWEEP_ATTACK, position, 3, 0.2, 0.2, 0.2, 0);
                     position.getWorld().playSound(position, Sound.ENTITY_PLAYER_ATTACK_SWEEP, 0.8f, 1.4f);
 
                     // One blade, one entity — stop after first hit
@@ -242,7 +243,7 @@ public class AirBlades extends AttackSpell implements Listener {
         for (int i = -steps; i <= steps; i++) {
             double t = ((double) i / steps) * halfLen;
             Location loc = center.clone().add(perp.clone().multiply(t));
-            loc.getWorld().spawnParticle(
+            ParticleCaster.spawn(null, loc.getWorld(),
                     Utils.DUST, loc, 1, 0, 0, 0, 0,
                     new Particle.DustOptions(Color.fromRGB(220, 235, 255), 0.7f)
             );
@@ -252,7 +253,7 @@ public class AirBlades extends AttackSpell implements Listener {
         for (int i = -2; i <= 2; i++) {
             double t = ((double) i / 2) * 0.3;
             Location loc = center.clone().add(0, t, 0);
-            loc.getWorld().spawnParticle(
+            ParticleCaster.spawn(null, loc.getWorld(),
                     Utils.DUST, loc, 1, 0, 0, 0, 0,
                     new Particle.DustOptions(Color.WHITE, 0.5f)
             );
@@ -263,8 +264,8 @@ public class AirBlades extends AttackSpell implements Listener {
      * Dispersal burst when a blade stops.
      */
     private void spawnDisperse(Location loc) {
-        loc.getWorld().spawnParticle(Particle.CLOUD, loc, 8, 0.3, 0.3, 0.3, 0.05);
-        loc.getWorld().spawnParticle(Particle.SWEEP_ATTACK, loc, 2, 0.2, 0.2, 0.2, 0);
+        ParticleCaster.spawn(null, loc.getWorld(), Particle.CLOUD, loc, 8, 0.3, 0.3, 0.3, 0.05);
+        ParticleCaster.spawn(null, loc.getWorld(), Particle.SWEEP_ATTACK, loc, 2, 0.2, 0.2, 0.2, 0);
     }
 
     // ============================================
@@ -273,15 +274,15 @@ public class AirBlades extends AttackSpell implements Listener {
 
     @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
-        location.getWorld().spawnParticle(Particle.CLOUD, location, 20, 0.5, 0.5, 0.5, 0.1);
-        location.getWorld().spawnParticle(Particle.SWEEP_ATTACK, location, 4);
+        ParticleCaster.spawn(caster, location.getWorld(), Particle.CLOUD, location, 20, 0.5, 0.5, 0.5, 0.1);
+        ParticleCaster.spawn(caster, location.getWorld(), Particle.SWEEP_ATTACK, location, 4);
         location.getWorld().playSound(location, Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1f, 1.6f);
     }
 
     @Override
     public void onCountered(Location location) {
-        location.getWorld().spawnParticle(Particle.CLOUD, location, 40, 1, 1, 1, 0.15);
-        location.getWorld().spawnParticle(Utils.EXPLOSION, location, 1);
+        ParticleCaster.spawn(null, location.getWorld(), Particle.CLOUD, location, 40, 1, 1, 1, 0.15);
+        ParticleCaster.spawn(null, location.getWorld(), Utils.EXPLOSION, location, 1);
         location.getWorld().playSound(location, Sound.ENTITY_GENERIC_EXPLODE, 0.5f, 1.8f);
     }
 
@@ -302,7 +303,7 @@ public class AirBlades extends AttackSpell implements Listener {
 
             for (int i = 0; i < 100; i++) {
                 for (Location loc : circlePoints) {
-                    loc.getWorld().spawnParticle(Utils.DUST, loc, 0,
+                    ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0,
                             new Particle.DustOptions(Color.fromRGB(210, 230, 255), 0.4F));
                 }
             }

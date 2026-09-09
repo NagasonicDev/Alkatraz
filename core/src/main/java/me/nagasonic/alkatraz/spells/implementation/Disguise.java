@@ -94,7 +94,7 @@ public class Disguise extends Spell implements Listener {
 
             for (int i = 0; i < 100; i++) {
                 for (Location loc : magicCirclePoints) {
-                    loc.getWorld().spawnParticle(Utils.DUST, loc, 0,
+                    ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0,
                             new Particle.DustOptions(Color.WHITE, 0.4F));
                 }
             }

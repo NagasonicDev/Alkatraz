@@ -14,6 +14,7 @@ import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.BarrierType;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.BarrierProperties;
+import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import de.tr7zw.changeme.nbtapi.NBT;
@@ -116,9 +117,9 @@ public class WindBarrier extends BarrierSpell implements Listener {
                     );
                     SpellComponentHandler.register(particle);
 
-                    loc.getWorld().spawnParticle(Particle.CLOUD, loc, 1, 0, 0, 0, 0);
+                    ParticleCaster.spawn(p, loc.getWorld(), Particle.CLOUD, loc, 1, 0, 0, 0, 0);
                     if (Math.random() < 0.1) {
-                        loc.getWorld().spawnParticle(Particle.SWEEP_ATTACK, loc, 1);
+                        ParticleCaster.spawn(p, loc.getWorld(), Particle.SWEEP_ATTACK, loc, 1);
                     }
                 }
 
@@ -159,7 +160,7 @@ public class WindBarrier extends BarrierSpell implements Listener {
                     );
                     SpellComponentHandler.register(particle);
 
-                    loc.getWorld().spawnParticle(Particle.CLOUD, loc, 1, 0, 0, 0, 0);
+                    ParticleCaster.spawn(caster, loc.getWorld(), Particle.CLOUD, loc, 1, 0, 0, 0, 0);
                 }
 
                 ticksPassed++;
@@ -178,7 +179,7 @@ public class WindBarrier extends BarrierSpell implements Listener {
             List<Location> points = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 3, 0);
             for (int i = 0; i < 100; i++) {
                 for (Location loc : points) {
-                    loc.getWorld().spawnParticle(Utils.DUST, loc, 0,
+                    ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0,
                             new Particle.DustOptions(Color.fromRGB(200, 220, 255), 0.4F));
                 }
             }
@@ -201,8 +202,8 @@ public class WindBarrier extends BarrierSpell implements Listener {
 
     @Override
     public void onBarrierBreak(Location center) {
-        center.getWorld().spawnParticle(Particle.CLOUD, center, 50, radius, 1, radius, 0.2);
-        center.getWorld().spawnParticle(Utils.EXPLOSION, center, 1);
+        ParticleCaster.spawn(null, center.getWorld(), Particle.CLOUD, center, 50, radius, 1, radius, 0.2);
+        ParticleCaster.spawn(null, center.getWorld(), Utils.EXPLOSION, center, 1);
         center.getWorld().playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 0.8f, 1.2f);
     }
 }

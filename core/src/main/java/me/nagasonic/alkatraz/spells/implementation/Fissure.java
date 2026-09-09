@@ -14,6 +14,7 @@ import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
 import me.nagasonic.alkatraz.hooks.Protection;
+import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
@@ -97,7 +98,7 @@ public class Fissure extends AttackSpell {
                             if (Protection.blockEdit(caster, target.getLocation())) {
                                 brokenBlocks.putIfAbsent(target.getLocation(), target.getType());
                                 target.breakNaturally();
-                                target.getWorld().spawnParticle(Utils.BLOCK, target.getLocation().add(0.5, 0.5, 0.5),
+                                ParticleCaster.spawn(caster, target.getWorld(), Utils.BLOCK, target.getLocation().add(0.5, 0.5, 0.5),
                                         5, 0.2, 0.2, 0.2, 0.3, target.getBlockData());
                             }
                         }
@@ -109,16 +110,16 @@ public class Fissure extends AttackSpell {
                             .add(0, -0.5, 0)
                             .add(perpendicular.clone().multiply(w));
 
-                    fissureLoc.getWorld().spawnParticle(Utils.BLOCK, fissureLoc, 3, 0.2, 0.2, 0.2, 0.3,
+                    ParticleCaster.spawn(caster, fissureLoc.getWorld(), Utils.BLOCK, fissureLoc, 3, 0.2, 0.2, 0.2, 0.3,
                             Material.STONE.createBlockData());
 
                     if (Math.random() < 0.3) {
-                        fissureLoc.getWorld().spawnParticle(Particle.FALLING_DUST, fissureLoc, 1, 0.1, 0.1, 0.1, 0,
+                        ParticleCaster.spawn(caster, fissureLoc.getWorld(), Particle.FALLING_DUST, fissureLoc, 1, 0.1, 0.1, 0.1, 0,
                                 Material.DIRT.createBlockData());
                     }
 
                     if (Math.abs(w) > fissureWidth - 0.8) {
-                        fissureLoc.getWorld().spawnParticle(Utils.DUST, fissureLoc.clone().add(0, 0.2, 0), 0,
+                        ParticleCaster.spawn(caster, fissureLoc.getWorld(), Utils.DUST, fissureLoc.clone().add(0, 0.2, 0), 0,
                                 new Particle.DustOptions(Color.fromRGB(139, 90, 43), 0.8F));
                     }
                 }
@@ -127,7 +128,7 @@ public class Fissure extends AttackSpell {
                     Location deepLoc = startLoc.clone().add(direction.clone().multiply(distance))
                             .add(0, -1, 0)
                             .add(perpendicular.clone().multiply(w));
-                    deepLoc.getWorld().spawnParticle(Utils.DUST, deepLoc, 0,
+                    ParticleCaster.spawn(caster, deepLoc.getWorld(), Utils.DUST, deepLoc, 0,
                             new Particle.DustOptions(Color.BLACK, 0.5F));
                 }
 
@@ -136,13 +137,13 @@ public class Fissure extends AttackSpell {
                     Location edgeLoc = startLoc.clone().add(direction.clone().multiply(distance))
                             .add(0, 0.5, 0)
                             .add(perpendicular.clone().multiply(edgeWidth));
-                    edgeLoc.getWorld().spawnParticle(Utils.BLOCK, edgeLoc, 6, 0.4, 0.3, 0.4, 0.2,
+                    ParticleCaster.spawn(caster, edgeLoc.getWorld(), Utils.BLOCK, edgeLoc, 6, 0.4, 0.3, 0.4, 0.2,
                             Material.STONE.createBlockData());
 
                     for (double s = -0.5; s <= 0.5; s += 0.5) {
                         Location sideRaise = edgeLoc.clone().add(0, 0.5 + Math.abs(s), 0)
                                 .add(perpendicular.clone().multiply(s * 0.3));
-                        sideRaise.getWorld().spawnParticle(Particle.FALLING_DUST, sideRaise, 1, 0.1, 0.1, 0.1, 0,
+                        ParticleCaster.spawn(caster, sideRaise.getWorld(), Particle.FALLING_DUST, sideRaise, 1, 0.1, 0.1, 0.1, 0,
                                 Material.STONE.createBlockData());
                     }
                 }
@@ -155,7 +156,7 @@ public class Fissure extends AttackSpell {
                                 .add(0, -0.3, 0)
                                 .add(perpendicular.clone().multiply(w));
                         if (Math.random() < 0.1) {
-                            trailLoc.getWorld().spawnParticle(Utils.BLOCK, trailLoc, 1, 0.1, 0.05, 0.1, 0.2,
+                            ParticleCaster.spawn(caster, trailLoc.getWorld(), Utils.BLOCK, trailLoc, 1, 0.1, 0.05, 0.1, 0.2,
                                     Material.STONE.createBlockData());
                         }
                     }
@@ -226,7 +227,7 @@ public class Fissure extends AttackSpell {
 
                 for (double w = -fissureWidth; w <= fissureWidth; w += 0.5) {
                     Location loc = fissureLoc.clone().add(perpendicular.clone().multiply(w));
-                    loc.getWorld().spawnParticle(Utils.BLOCK, loc, 4, 0.3, 0.1, 0.3, 0.3,
+                    ParticleCaster.spawn(caster, loc.getWorld(), Utils.BLOCK, loc, 4, 0.3, 0.1, 0.3, 0.3,
                             Material.STONE.createBlockData());
                 }
 
@@ -301,7 +302,7 @@ public class Fissure extends AttackSpell {
                                     0.05,
                                     Math.sin(angle) * d
                             );
-                            crackLoc.getWorld().spawnParticle(Utils.DUST, crackLoc, 0,
+                            ParticleCaster.spawn(caster, crackLoc.getWorld(), Utils.DUST, crackLoc, 0,
                                     new Particle.DustOptions(Color.fromRGB(50, 30, 10), 0.8F));
                         }
                     }
@@ -310,7 +311,7 @@ public class Fissure extends AttackSpell {
                         double a = Math.random() * 2 * Math.PI;
                         double r = Math.random() * 2.0;
                         Location tremorLoc = casterLoc.clone().add(Math.cos(a) * r, 0.1, Math.sin(a) * r);
-                        tremorLoc.getWorld().spawnParticle(Particle.FALLING_DUST, tremorLoc, 2, 0.2, 0.1, 0.2, 0,
+                        ParticleCaster.spawn(caster, tremorLoc.getWorld(), Particle.FALLING_DUST, tremorLoc, 2, 0.2, 0.1, 0.2, 0,
                                 Material.DIRT.createBlockData());
                     }
 
@@ -318,7 +319,7 @@ public class Fissure extends AttackSpell {
                         double a = Math.random() * 2 * Math.PI;
                         double r = Math.random() * 1.5;
                         Location stoneLoc = casterLoc.clone().add(Math.cos(a) * r, 0.5 + Math.random() * 1.5, Math.sin(a) * r);
-                        stoneLoc.getWorld().spawnParticle(Utils.BLOCK, stoneLoc, 2, 0.1, 0.1, 0.1, 0.1,
+                        ParticleCaster.spawn(caster, stoneLoc.getWorld(), Utils.BLOCK, stoneLoc, 2, 0.1, 0.1, 0.1, 0.1,
                                 Material.STONE.createBlockData());
                     }
 
@@ -337,7 +338,7 @@ public class Fissure extends AttackSpell {
                                 0.05,
                                 Math.sin(angle) * r
                         );
-                        crackLoc.getWorld().spawnParticle(Utils.DUST, crackLoc, 0,
+                        ParticleCaster.spawn(caster, crackLoc.getWorld(), Utils.DUST, crackLoc, 0,
                                 new Particle.DustOptions(Color.fromRGB(30, 15, 0), 1.0F));
                     }
 
@@ -346,7 +347,7 @@ public class Fissure extends AttackSpell {
                             Location crackLoc = casterLoc.clone().add(
                                     direction.clone().multiply(d)
                             ).add(perpendicular.clone().multiply(side * 0.3 * (d / crackExtend)));
-                            crackLoc.getWorld().spawnParticle(Utils.DUST, crackLoc, 0,
+                            ParticleCaster.spawn(caster, crackLoc.getWorld(), Utils.DUST, crackLoc, 0,
                                     new Particle.DustOptions(Color.fromRGB(80, 50, 20), 0.6F));
                         }
                     }
@@ -410,7 +411,7 @@ public class Fissure extends AttackSpell {
                                     0.05,
                                     Math.sin(angle) * d
                             );
-                            crackLoc.getWorld().spawnParticle(Utils.DUST, crackLoc, 0,
+                            ParticleCaster.spawn(caster, crackLoc.getWorld(), Utils.DUST, crackLoc, 0,
                                     new Particle.DustOptions(Color.fromRGB(50, 30, 10), 0.8F));
                         }
                     }
@@ -419,7 +420,7 @@ public class Fissure extends AttackSpell {
                         double a = Math.random() * 2 * Math.PI;
                         double r = Math.random() * 2.0;
                         Location tremorLoc = casterLoc.clone().add(Math.cos(a) * r, 0.1, Math.sin(a) * r);
-                        tremorLoc.getWorld().spawnParticle(Particle.FALLING_DUST, tremorLoc, 2, 0.2, 0.1, 0.2, 0,
+                        ParticleCaster.spawn(caster, tremorLoc.getWorld(), Particle.FALLING_DUST, tremorLoc, 2, 0.2, 0.1, 0.2, 0,
                                 Material.DIRT.createBlockData());
                     }
 
@@ -435,7 +436,7 @@ public class Fissure extends AttackSpell {
                             Location crackLoc = casterLoc.clone().add(
                                     direction.clone().multiply(d)
                             ).add(perpendicular.clone().multiply(side * 0.3 * (d / crackExtend)));
-                            crackLoc.getWorld().spawnParticle(Utils.DUST, crackLoc, 0,
+                            ParticleCaster.spawn(caster, crackLoc.getWorld(), Utils.DUST, crackLoc, 0,
                                     new Particle.DustOptions(Color.fromRGB(80, 50, 20), 0.6F));
                         }
                     }
@@ -452,17 +453,17 @@ public class Fissure extends AttackSpell {
 
     @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
-        location.getWorld().spawnParticle(Utils.BLOCK, location, 30, 0.5, 0.5, 0.5, 0.5,
+        ParticleCaster.spawn(caster, location.getWorld(), Utils.BLOCK, location, 30, 0.5, 0.5, 0.5, 0.5,
                 Material.STONE.createBlockData());
-        location.getWorld().spawnParticle(Particle.FALLING_DUST, location, 15, 0.5, 0.5, 0.5, 0,
+        ParticleCaster.spawn(caster, location.getWorld(), Particle.FALLING_DUST, location, 15, 0.5, 0.5, 0.5, 0,
                 Material.STONE.createBlockData());
     }
 
     @Override
     public void onCountered(Location location) {
-        location.getWorld().spawnParticle(Utils.BLOCK, location, 50, 1, 1, 1, 0.5,
+        ParticleCaster.spawn(null, location.getWorld(), Utils.BLOCK, location, 50, 1, 1, 1, 0.5,
                 Material.STONE.createBlockData());
-        location.getWorld().spawnParticle(Utils.TOTEM, location, 20, 1, 1, 1, 0);
+        ParticleCaster.spawn(null, location.getWorld(), Utils.TOTEM, location, 20, 1, 1, 1, 0);
     }
 
     @Override
@@ -476,7 +477,7 @@ public class Fissure extends AttackSpell {
             List<Location> points = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 3, 0);
             for (int i = 0; i < 100; i++) {
                 for (Location loc : points) {
-                    loc.getWorld().spawnParticle(Utils.DUST, loc, 0,
+                    ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0,
                             new Particle.DustOptions(Color.fromRGB(139, 90, 43), 0.4F));
                 }
             }

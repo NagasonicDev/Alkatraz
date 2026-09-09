@@ -3,6 +3,7 @@ package me.nagasonic.alkatraz.items.magic.effect.implementation;
 import me.nagasonic.alkatraz.api.magic.effect.Effect;
 
 import me.nagasonic.alkatraz.api.magic.trigger.TriggerContext;
+import me.nagasonic.alkatraz.util.ParticleCaster;
 import org.bukkit.Particle;
 import org.bukkit.entity.LivingEntity;
 
@@ -27,7 +28,7 @@ public final class ParticleEffect implements Effect {
     public void execute(TriggerContext context) {
         LivingEntity origin = context.actor();
         if (origin == null) return;
-        origin.getWorld().spawnParticle(particle, origin.getLocation(), count, offsetX, offsetY, offsetZ, speed);
+        ParticleCaster.spawn(origin, origin.getWorld(), particle, origin.getLocation(), count, offsetX, offsetY, offsetZ, speed);
     }
 
     public static Effect fromConfig(Map<String, Object> config) {

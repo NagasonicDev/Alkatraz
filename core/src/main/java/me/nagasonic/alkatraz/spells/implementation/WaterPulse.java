@@ -14,6 +14,7 @@ import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
+import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.util.Utils;
@@ -44,12 +45,12 @@ public class WaterPulse extends AttackSpell implements Listener {
 
     @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
-        location.getWorld().spawnParticle(Utils.SPLASH, location, 15);
+        ParticleCaster.spawn(caster, location.getWorld(), Utils.SPLASH, location, 15);
     }
 
     @Override
     public void onCountered(Location location) {
-        location.getWorld().spawnParticle(Utils.SPLASH, location, 30);
+        ParticleCaster.spawn(null, location.getWorld(), Utils.SPLASH, location, 30);
     }
 
 
@@ -83,7 +84,7 @@ public class WaterPulse extends AttackSpell implements Listener {
                 r += step;
                 List<Location> circle = ParticleUtils.circle(centre, r, 4/r, 0, 0);
                 for (Location loc : circle){
-                    loc.getWorld().spawnParticle(Utils.SPLASH, loc, 5, 0, 0, 0,0);
+                    ParticleCaster.spawn(p, loc.getWorld(), Utils.SPLASH, loc, 5, 0, 0, 0, 0);
                     SpellParticleComponent comp = new SpellParticleComponent(
                             WaterPulse.this,
                             props,
@@ -155,7 +156,7 @@ public class WaterPulse extends AttackSpell implements Listener {
                 r += 0.5;
                 List<Location> circle = ParticleUtils.circle(centre, r, 4/r, 0, 0);
                 for (Location loc : circle){
-                    loc.getWorld().spawnParticle(Utils.SPLASH, loc, 5, 0, 0, 0,0);
+                    ParticleCaster.spawn(caster, loc.getWorld(), Utils.SPLASH, loc, 5, 0, 0, 0, 0);
                     SpellParticleComponent comp = new SpellParticleComponent(
                             WaterPulse.this,
                             props,
@@ -224,7 +225,7 @@ public class WaterPulse extends AttackSpell implements Listener {
             // Spawn particles at all calculated points
             for (int i = 0; i < 100; i++){
                 for (Location loc : magicCirclePoints) {
-                    loc.getWorld().spawnParticle(Utils.DUST, loc, 0, new Particle.DustOptions(Color.BLUE, 0.4F));
+                    ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, new Particle.DustOptions(Color.BLUE, 0.4F));
                 }
             }
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());

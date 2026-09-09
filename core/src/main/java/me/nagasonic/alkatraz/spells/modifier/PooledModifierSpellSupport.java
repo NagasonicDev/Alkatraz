@@ -4,6 +4,7 @@ import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.util.ColorFormat;
+import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.Color;
 import org.bukkit.Particle;
@@ -144,9 +145,9 @@ public final class PooledModifierSpellSupport {
                     double z = Math.sin(a) * 0.8;
                     double y = ticks * 0.1;
                     var pLoc = loc.clone().add(x, y, z);
-                    pLoc.getWorld().spawnParticle(Utils.DUST, pLoc, 0,
+                    ParticleCaster.spawn(entity, pLoc.getWorld(), Utils.DUST, pLoc, 0,
                             new Particle.DustOptions(color, 0.6F));
-                    pLoc.getWorld().spawnParticle(Particle.END_ROD, pLoc, 1, 0, 0, 0, 0.02);
+                    ParticleCaster.spawn(entity, pLoc.getWorld(), Particle.END_ROD, pLoc, 1, 0, 0, 0, 0.02);
                 }
                 angle += 0.4;
             }

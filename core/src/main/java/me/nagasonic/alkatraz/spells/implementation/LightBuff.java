@@ -8,6 +8,7 @@ import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
+import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
@@ -86,7 +87,7 @@ public class LightBuff extends Spell {
         caster.getWorld().playSound(caster.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 0.8f, 1.5f);
         caster.getWorld().playSound(caster.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.6f, 1.8f);
 
-        spawnBurstParticles(caster.getLocation(), radius);
+        spawnBurstParticles(caster, caster.getLocation(), radius);
     }
 
     @Override
@@ -118,23 +119,23 @@ public class LightBuff extends Spell {
         caster.getWorld().playSound(caster.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 0.8f, 1.2f);
     }
 
-    private void spawnBurstParticles(Location center, double radius) {
+    private void spawnBurstParticles(Player caster, Location center, double radius) {
         int particles = 60;
         for (int i = 0; i < particles; i++) {
             double angle = 2 * Math.PI * i / particles;
             double x = Math.cos(angle) * radius;
             double z = Math.sin(angle) * radius;
             Location loc = center.clone().add(x, 0.5, z);
-            loc.getWorld().spawnParticle(Utils.DUST, loc, 0,
+            ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0,
                     new Particle.DustOptions(PARTICLE_COLOR, 0.8F));
-            loc.getWorld().spawnParticle(Utils.ENTITY_EFFECT, loc, 0, 0.8, 0.8, 0.3, 0);
+            ParticleCaster.spawn(caster, loc.getWorld(), Utils.ENTITY_EFFECT, loc, 0, 0.8, 0.8, 0.3, 0);
         }
 
         for (int i = 0; i < 20; i++) {
             double x = (Math.random() - 0.5) * radius * 2;
             double z = (Math.random() - 0.5) * radius * 2;
             Location loc = center.clone().add(x, Math.random() * 3, z);
-            loc.getWorld().spawnParticle(Utils.DUST, loc, 0,
+            ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0,
                     new Particle.DustOptions(PARTICLE_COLOR, 0.5F));
         }
     }
@@ -150,7 +151,7 @@ public class LightBuff extends Spell {
             List<Location> points = ParticleUtils.magicCircle(loc, yaw, pitch, forward, 3, 0);
             for (int i = 0; i < 100; i++) {
                 for (Location point : points) {
-                    point.getWorld().spawnParticle(Utils.DUST, point, 0,
+                    ParticleCaster.spawn(caster, point.getWorld(), Utils.DUST, point, 0,
                             new Particle.DustOptions(PARTICLE_COLOR, 0.5F));
                 }
             }

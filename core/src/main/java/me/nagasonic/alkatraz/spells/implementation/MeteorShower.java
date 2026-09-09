@@ -13,6 +13,7 @@ import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
 import me.nagasonic.alkatraz.hooks.Protection;
+import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
@@ -119,7 +120,7 @@ public class MeteorShower extends AttackSpell implements Listener {
                                     ringHeight,
                                     Math.sin(angle) * ringRadius
                             );
-                            flameLoc.getWorld().spawnParticle(Particle.FLAME, flameLoc, 2, 0.1, 0.1, 0.1, 0.02);
+                            ParticleCaster.spawn(caster, flameLoc.getWorld(), Particle.FLAME, flameLoc, 2, 0.1, 0.1, 0.1, 0.02);
                         }
                     }
 
@@ -127,7 +128,7 @@ public class MeteorShower extends AttackSpell implements Listener {
                         double a = Math.random() * 2 * Math.PI;
                         double r = Math.random() * 2.5;
                         Location groundLoc = casterLoc.clone().add(Math.cos(a) * r, 0.1, Math.sin(a) * r);
-                        groundLoc.getWorld().spawnParticle(Utils.SMOKE, groundLoc, 1, 0.2, 0.1, 0.2, 0.01);
+                        ParticleCaster.spawn(caster, groundLoc.getWorld(), Utils.SMOKE, groundLoc, 1, 0.2, 0.1, 0.2, 0.01);
                     }
 
                     if (ticks % 20 == 0) {
@@ -146,7 +147,7 @@ public class MeteorShower extends AttackSpell implements Listener {
                                 columnHeight + Math.random() * 2,
                                 Math.sin(angle) * r
                         );
-                        colLoc.getWorld().spawnParticle(Particle.FLAME, colLoc, 2, 0.05, 0.05, 0.05, 0.03);
+                        ParticleCaster.spawn(caster, colLoc.getWorld(), Particle.FLAME, colLoc, 2, 0.05, 0.05, 0.05, 0.03);
                     }
 
                     if (targetLoc != null) {
@@ -159,7 +160,7 @@ public class MeteorShower extends AttackSpell implements Listener {
                                     0.1,
                                     Math.sin(angle) * markerRadius
                             );
-                            markerLoc.getWorld().spawnParticle(Utils.DUST, markerLoc, 0,
+                            ParticleCaster.spawn(caster, markerLoc.getWorld(), Utils.DUST, markerLoc, 0,
                                     new Particle.DustOptions(Color.fromRGB(255, 100, 0), 1.0F));
                         }
                     }
@@ -187,10 +188,10 @@ public class MeteorShower extends AttackSpell implements Listener {
             double a = Math.random() * 2 * Math.PI;
             double r = Math.random() * radius * 1.5;
             Location glowLoc = targetLoc.clone().add(Math.cos(a) * r, Math.random() * 12 + 4, Math.sin(a) * r);
-            glowLoc.getWorld().spawnParticle(Particle.FLAME, glowLoc, 1, 0, 0, 0, 0);
+            ParticleCaster.spawn(caster, glowLoc.getWorld(), Particle.FLAME, glowLoc, 1, 0, 0, 0, 0);
         }
 
-        targetLoc.getWorld().spawnParticle(Utils.DUST, targetLoc, 0, new Particle.DustOptions(Color.fromRGB(255, 100, 0), 2.0F));
+        ParticleCaster.spawn(caster, targetLoc.getWorld(), Utils.DUST, targetLoc, 0, new Particle.DustOptions(Color.fromRGB(255, 100, 0), 2.0F));
 
         MeteorData meteorData = new MeteorData(caster, totalPower, wand);
 
@@ -258,11 +259,11 @@ public class MeteorShower extends AttackSpell implements Listener {
     private void triggerMeteorExplosion(Location explodeLoc, Player caster, double totalPower, ItemStack wand) {
         World world = explodeLoc.getWorld();
 
-        world.spawnParticle(Utils.EXPLOSION_EMITTER, explodeLoc, 0, 0, 0, 0, 0);
-        world.spawnParticle(Particle.LAVA, explodeLoc, 30, 2, 1, 2, 0);
-        world.spawnParticle(Particle.FLAME, explodeLoc, 60, 3, 1.5, 3, 0.05);
-        world.spawnParticle(Utils.LARGE_SMOKE, explodeLoc, 20, 2, 1, 2, 0);
-        world.spawnParticle(Utils.DUST, explodeLoc, 0, new Particle.DustOptions(Color.fromRGB(255, 100, 0), 2.0F));
+        ParticleCaster.spawn(caster, world, Utils.EXPLOSION_EMITTER, explodeLoc, 0, 0, 0, 0, 0);
+        ParticleCaster.spawn(caster, world, Particle.LAVA, explodeLoc, 30, 2, 1, 2, 0);
+        ParticleCaster.spawn(caster, world, Particle.FLAME, explodeLoc, 60, 3, 1.5, 3, 0.05);
+        ParticleCaster.spawn(caster, world, Utils.LARGE_SMOKE, explodeLoc, 20, 2, 1, 2, 0);
+        ParticleCaster.spawn(caster, world, Utils.DUST, explodeLoc, 0, new Particle.DustOptions(Color.fromRGB(255, 100, 0), 2.0F));
         world.playSound(explodeLoc, Sound.ENTITY_GENERIC_EXPLODE, 2.0f, 0.6f);
         world.playSound(explodeLoc, Sound.ENTITY_BLAZE_SHOOT, 1.0f, 0.3f);
 
@@ -286,7 +287,7 @@ public class MeteorShower extends AttackSpell implements Listener {
                         Location blockLoc = explodeLoc.clone().add(dx, dy, dz);
                         Block b = blockLoc.getBlock();
                         if (b.getType().isSolid() && !b.getType().toString().contains("BEDROCK")) {
-                            b.getWorld().spawnParticle(Utils.BLOCK, blockLoc.clone().add(0.5, 0.5, 0.5),
+                            ParticleCaster.spawn(caster, b.getWorld(), Utils.BLOCK, blockLoc.clone().add(0.5, 0.5, 0.5),
                                     8, 0.3, 0.3, 0.3, 0.3, b.getBlockData());
                             if (Protection.blockEdit(caster, b.getLocation())) {
                                 if (Math.random() < 0.3) {
@@ -366,7 +367,7 @@ public class MeteorShower extends AttackSpell implements Listener {
                                     ringHeight,
                                     Math.sin(angle) * ringRadius
                             );
-                            flameLoc.getWorld().spawnParticle(Particle.FLAME, flameLoc, 2, 0.1, 0.1, 0.1, 0.02);
+                            ParticleCaster.spawn(caster, flameLoc.getWorld(), Particle.FLAME, flameLoc, 2, 0.1, 0.1, 0.1, 0.02);
                         }
                     }
 
@@ -386,7 +387,7 @@ public class MeteorShower extends AttackSpell implements Listener {
                                 columnHeight + Math.random() * 2,
                                 Math.sin(angle) * r
                         );
-                        colLoc.getWorld().spawnParticle(Particle.FLAME, colLoc, 2, 0.05, 0.05, 0.05, 0.03);
+                        ParticleCaster.spawn(caster, colLoc.getWorld(), Particle.FLAME, colLoc, 2, 0.05, 0.05, 0.05, 0.03);
                     }
 
                     if (targetLoc != null) {
@@ -399,7 +400,7 @@ public class MeteorShower extends AttackSpell implements Listener {
                                     0.1,
                                     Math.sin(angle) * markerRadius
                             );
-                            markerLoc.getWorld().spawnParticle(Utils.DUST, markerLoc, 0,
+                            ParticleCaster.spawn(caster, markerLoc.getWorld(), Utils.DUST, markerLoc, 0,
                                     new Particle.DustOptions(Color.fromRGB(255, 100, 0), 1.0F));
                         }
                     }
@@ -435,8 +436,8 @@ public class MeteorShower extends AttackSpell implements Listener {
                     double x = Math.cos(angle) * r;
                     double z = Math.sin(angle) * r;
                     Location impactLoc = targetLoc.clone().add(x, 0, z);
-                    impactLoc.getWorld().spawnParticle(Particle.FLAME, impactLoc, 10, 0.5, 0.5, 0.5, 0.05);
-                    impactLoc.getWorld().spawnParticle(Particle.LAVA, impactLoc, 5, 0.5, 0.5, 0.5, 0);
+                    ParticleCaster.spawn(caster, impactLoc.getWorld(), Particle.FLAME, impactLoc, 10, 0.5, 0.5, 0.5, 0.05);
+                    ParticleCaster.spawn(caster, impactLoc.getWorld(), Particle.LAVA, impactLoc, 5, 0.5, 0.5, 0.5, 0);
 
                     for (LivingEntity le : Utils.getNearbyLivingEntities(impactLoc, 2.5)) {
                         if (le.equals(caster)) continue;
@@ -457,12 +458,12 @@ public class MeteorShower extends AttackSpell implements Listener {
 
     @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
-        location.getWorld().spawnParticle(Particle.LAVA, location, 20, 0.5, 0.5, 0.5, 0);
+        ParticleCaster.spawn(caster, location.getWorld(), Particle.LAVA, location, 20, 0.5, 0.5, 0.5, 0);
     }
 
     @Override
     public void onCountered(Location location) {
-        location.getWorld().spawnParticle(Utils.LARGE_SMOKE, location, 30, 1, 1, 1, 0);
+        ParticleCaster.spawn(null, location.getWorld(), Utils.LARGE_SMOKE, location, 30, 1, 1, 1, 0);
     }
 
     @Override
@@ -476,7 +477,7 @@ public class MeteorShower extends AttackSpell implements Listener {
             List<Location> points = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 3, 0);
             for (int i = 0; i < 100; i++) {
                 for (Location loc : points) {
-                    loc.getWorld().spawnParticle(Utils.DUST, loc, 0,
+                    ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0,
                             new Particle.DustOptions(Color.fromRGB(255, 69, 0), 0.4F));
                 }
             }

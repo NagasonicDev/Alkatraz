@@ -12,6 +12,7 @@ import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
+import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.StatUtils;
 import me.nagasonic.alkatraz.util.Utils;
@@ -174,9 +175,9 @@ public class Warp extends Spell implements Listener {
             return;
         }
 
-        spawnTeleportParticles(start);
+        spawnTeleportParticles(caster, start);
         caster.teleport(destination);
-        spawnTeleportParticles(destination);
+        spawnTeleportParticles(caster, destination);
         caster.getWorld().playSound(destination, Sound.ENTITY_ENDERMAN_TELEPORT, 0.8f, 1.2f);
 
         profile.setCooldown(this, System.currentTimeMillis());
@@ -190,7 +191,7 @@ public class Warp extends Spell implements Listener {
         Vector forward = eye.getDirection().normalize().multiply(1.5);
         List<Location> points = ParticleUtils.magicCircle(eye, eye.getYaw(), eye.getPitch(), forward, 3, 0);
         for (Location loc : points) {
-            loc.getWorld().spawnParticle(Utils.DUST, loc, 0,
+            ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0,
                     new Particle.DustOptions(Color.fromRGB(120, 50, 200), 0.4F));
         }
 
@@ -201,10 +202,10 @@ public class Warp extends Spell implements Listener {
             List<Location> destPoints = ParticleUtils.magicCircle(
                     destCenter, destination.getYaw(), destination.getPitch(), destForward, 3, 0);
             for (Location loc : destPoints) {
-                loc.getWorld().spawnParticle(Utils.DUST, loc, 0,
+                ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0,
                         new Particle.DustOptions(Color.fromRGB(120, 50, 200), 0.6F));
             }
-            spawnInboundSpiral(eye, destCenter, ticks);
+            spawnInboundSpiral(caster, eye, destCenter, ticks);
         }
 
         int every = Math.max(1, ((Long) Configs.CIRCLE_TICKS.get()).intValue());
@@ -218,7 +219,7 @@ public class Warp extends Spell implements Listener {
         }
     }
 
-    private void spawnInboundSpiral(Location start, Location dest, int ticks) {
+    private void spawnInboundSpiral(Player caster, Location start, Location dest, int ticks) {
         Vector direction = dest.toVector().subtract(start.toVector());
         double length = direction.length();
         if (length < 1) return;
@@ -229,13 +230,13 @@ public class Warp extends Spell implements Listener {
             Location point = start.clone().add(unit.clone().multiply(length * t));
             double angle = ticks * 0.35 + i;
             point.add(Math.cos(angle) * 0.6, Math.sin(angle) * 0.6, 0);
-            start.getWorld().spawnParticle(Particle.PORTAL, point, 1, 0, 0, 0, 0);
+            ParticleCaster.spawn(caster, start.getWorld(), Particle.PORTAL, point, 1, 0, 0, 0, 0);
         }
     }
 
-    private void spawnTeleportParticles(Location loc) {
-        loc.getWorld().spawnParticle(Particle.PORTAL, loc, 40, 0.5, 0.5, 0.5, 0.5);
-        loc.getWorld().spawnParticle(Utils.DUST, loc, 15, 0.3, 0.3, 0.3, 0,
+    private void spawnTeleportParticles(Player caster, Location loc) {
+        ParticleCaster.spawn(caster, loc.getWorld(), Particle.PORTAL, loc, 40, 0.5, 0.5, 0.5, 0.5);
+        ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 15, 0.3, 0.3, 0.3, 0,
                 new Particle.DustOptions(Color.fromRGB(120, 50, 200), 0.6F));
     }
 
@@ -293,7 +294,7 @@ public class Warp extends Spell implements Listener {
             List<Location> points = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 3, 0);
             for (int i = 0; i < 100; i++) {
                 for (Location loc : points) {
-                    loc.getWorld().spawnParticle(Utils.DUST, loc, 0,
+                    ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0,
                             new Particle.DustOptions(Color.fromRGB(120, 50, 200), 0.4F));
                 }
             }
