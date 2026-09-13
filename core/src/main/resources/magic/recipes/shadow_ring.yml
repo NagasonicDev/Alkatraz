@@ -6,9 +6,4 @@ shape:
 ingredients:
   B: GOLD_NUGGET
   E: BLACK_DYE
-requirements:
-  - type: number_stat
-    stat: circleLevel
-    minimum: 1
-    description: "Requires Circle Level 1"
 hidden_when_locked: true

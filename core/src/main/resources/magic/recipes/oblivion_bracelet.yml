@@ -1,0 +1,14 @@
+definition: alkatraz:oblivion_bracelet
+shape:
+  - "EEE"
+  - "EUE"
+  - "EEE"
+ingredients:
+  E: ENDER_PEARL
+  U: nether_bracelet
+requirements:
+  - type: number_stat
+    stat: circleLevel
+    minimum: 8
+    description: "Requires Circle Level 8"
+hidden_when_locked: true

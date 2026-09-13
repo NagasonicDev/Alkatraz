@@ -1,0 +1,14 @@
+definition: alkatraz:primordial_bracelet
+shape:
+  - "EEE"
+  - "EUE"
+  - "EEE"
+ingredients:
+  E: ECHO_SHARD
+  U: ethereal_bracelet
+requirements:
+  - type: number_stat
+    stat: circleLevel
+    minimum: 8
+    description: "Requires Circle Level 8"
+hidden_when_locked: true

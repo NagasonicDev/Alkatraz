@@ -1,0 +1,14 @@
+definition: alkatraz:cyclone_pendant
+shape:
+  - "EEE"
+  - "EUE"
+  - "EEE"
+ingredients:
+  E: PHANTOM_MEMBRANE
+  U: tempest_pendant
+requirements:
+  - type: number_stat
+    stat: circleLevel
+    minimum: 8
+    description: "Requires Circle Level 8"
+hidden_when_locked: true

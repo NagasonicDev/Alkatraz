@@ -6,9 +6,4 @@ shape:
 ingredients:
   B: IRON_NUGGET
   E: BLAZE_POWDER
-requirements:
-  - type: number_stat
-    stat: circleLevel
-    minimum: 1
-    description: "Requires Circle Level 1"
 hidden_when_locked: true

@@ -1,0 +1,16 @@
+definition: alkatraz:astral_wand
+shape:
+  - "N B"
+  - " R "
+  - "F  "
+ingredients:
+  N: NETHER_STAR
+  B: BLAZE_ROD
+  R: alkatraz:runic_wand
+  F: NETHERITE_INGOT
+requirements:
+  - type: number_stat
+    stat: circleLevel
+    minimum: 8
+    description: "Requires Circle Level 8"
+hidden_when_locked: true

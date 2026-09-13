@@ -1,0 +1,14 @@
+definition: alkatraz:seraphic_necklace
+shape:
+  - "EEE"
+  - "EUE"
+  - "EEE"
+ingredients:
+  E: GLOWSTONE
+  U: divine_necklace
+requirements:
+  - type: number_stat
+    stat: circleLevel
+    minimum: 8
+    description: "Requires Circle Level 8"
+hidden_when_locked: true

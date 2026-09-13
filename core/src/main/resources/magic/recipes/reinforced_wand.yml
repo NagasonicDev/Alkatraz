@@ -10,6 +10,6 @@ ingredients:
 requirements:
   - type: number_stat
     stat: circleLevel
-    minimum: 1
-    description: "Requires Circle Level 1"
+    minimum: 3
+    description: "Requires Circle Level 3"
 hidden_when_locked: true

@@ -197,3 +197,59 @@ set_bonuses:
       alkatraz:max_mana: 100
       alkatraz:mana_regeneration: 4
       alkatraz:cast_time_multiplier: -0.08
+  phoenix:
+    2:
+      alkatraz:fire_affinity: 16
+      alkatraz:max_mana: 80
+    4:
+      alkatraz:fire_affinity: 40
+      alkatraz:spell_power: 4
+      alkatraz:max_mana: 160
+  leviathan:
+    2:
+      alkatraz:water_affinity: 24
+      alkatraz:max_mana: 80
+    4:
+      alkatraz:water_affinity: 50
+      alkatraz:spell_power: 4
+      alkatraz:max_mana: 160
+  cyclone:
+    2:
+      alkatraz:air_affinity: 24
+      alkatraz:max_mana: 80
+    4:
+      alkatraz:air_affinity: 50
+      alkatraz:spell_power: 4
+      alkatraz:max_mana: 160
+  colossus:
+    2:
+      alkatraz:earth_affinity: 24
+      alkatraz:max_mana: 80
+    4:
+      alkatraz:earth_affinity: 50
+      alkatraz:spell_power: 4
+      alkatraz:max_mana: 160
+  seraphic:
+    2:
+      alkatraz:light_affinity: 24
+      alkatraz:max_mana: 80
+    4:
+      alkatraz:light_affinity: 50
+      alkatraz:spell_power: 4
+      alkatraz:max_mana: 160
+  oblivion:
+    2:
+      alkatraz:dark_affinity: 24
+      alkatraz:max_mana: 80
+    4:
+      alkatraz:dark_affinity: 50
+      alkatraz:spell_power: 4
+      alkatraz:max_mana: 160
+  primordial:
+    2:
+      alkatraz:magic_affinity: 10
+      alkatraz:max_mana: 60
+    4:
+      alkatraz:magic_affinity: 20
+      alkatraz:spell_power: 1
+      alkatraz:max_mana: 150

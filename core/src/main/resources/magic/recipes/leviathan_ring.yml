@@ -1,0 +1,14 @@
+definition: alkatraz:leviathan_ring
+shape:
+  - "EEE"
+  - "EUE"
+  - "EEE"
+ingredients:
+  E: NAUTILUS_SHELL
+  U: abyss_ring
+requirements:
+  - type: number_stat
+    stat: circleLevel
+    minimum: 8
+    description: "Requires Circle Level 8"
+hidden_when_locked: true

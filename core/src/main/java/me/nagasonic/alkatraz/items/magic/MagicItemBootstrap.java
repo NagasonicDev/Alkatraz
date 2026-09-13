@@ -148,13 +148,13 @@ public final class MagicItemBootstrap {
         }
 
         String[][] setTiers = {
-                {"ember", "blaze", "inferno"},
-                {"frost", "glacier", "abyss"},
-                {"zephyr", "storm", "tempest"},
-                {"boulder", "mountain", "titan"},
-                {"radiant", "luminous", "divine"},
-                {"shadow", "void", "nether"},
-                {"mystic", "arcane", "ethereal"}
+                {"ember", "blaze", "inferno", "phoenix"},
+                {"frost", "glacier", "abyss", "leviathan"},
+                {"zephyr", "storm", "tempest", "cyclone"},
+                {"boulder", "mountain", "titan", "colossus"},
+                {"radiant", "luminous", "divine", "seraphic"},
+                {"shadow", "void", "nether", "oblivion"},
+                {"mystic", "arcane", "ethereal", "primordial"}
         };
         String[] pieces = {"ring", "necklace", "bracelet", "pendant"};
         for (String[] tiers : setTiers) {
@@ -170,7 +170,7 @@ public final class MagicItemBootstrap {
         String[] recipes = {
                 "wooden_wand", "reinforced_wand",
                 "runic_wand", "blaze_wand", "glacier_wand", "mountain_wand",
-                "storm_wand", "luminous_wand", "void_wand",
+                "storm_wand", "luminous_wand", "void_wand", "astral_wand",
                 "runic_grimoire", "blaze_grimoire", "glacier_grimoire", "mountain_grimoire",
                 "storm_grimoire", "luminous_grimoire", "void_grimoire",
                 "apprentice_hat", "apprentice_robe", "apprentice_leggings", "apprentice_boots",
@@ -183,13 +183,13 @@ public final class MagicItemBootstrap {
         }
 
         String[][] setTiers = {
-                {"ember", "blaze", "inferno"},
-                {"frost", "glacier", "abyss"},
-                {"zephyr", "storm", "tempest"},
-                {"boulder", "mountain", "titan"},
-                {"radiant", "luminous", "divine"},
-                {"shadow", "void", "nether"},
-                {"mystic", "arcane", "ethereal"}
+                {"ember", "blaze", "inferno", "phoenix"},
+                {"frost", "glacier", "abyss", "leviathan"},
+                {"zephyr", "storm", "tempest", "cyclone"},
+                {"boulder", "mountain", "titan", "colossus"},
+                {"radiant", "luminous", "divine", "seraphic"},
+                {"shadow", "void", "nether", "oblivion"},
+                {"mystic", "arcane", "ethereal", "primordial"}
         };
         String[] pieces = {"ring", "necklace", "bracelet", "pendant"};
         for (String[] tiers : setTiers) {
@@ -226,6 +226,7 @@ public final class MagicItemBootstrap {
         MagicItemService.saveDefaultResource("magic/items/storm_wand.yml");
         MagicItemService.saveDefaultResource("magic/items/luminous_wand.yml");
         MagicItemService.saveDefaultResource("magic/items/void_wand.yml");
+        MagicItemService.saveDefaultResource("magic/items/astral_wand.yml");
         MagicItemService.saveDefaultResource("magic/items/magic_stone.yml");
         MagicItemService.saveDefaultResource("magic/items/imbued_tier1.yml");
         MagicItemService.saveDefaultResource("magic/items/imbued_tier2.yml");

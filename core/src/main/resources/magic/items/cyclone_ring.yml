@@ -1,0 +1,14 @@
+key: alkatraz:cyclone_ring
+material: DIAMOND
+custom_model_data: 1293
+display_name: '&r&bCyclone Ring'
+lore:
+  - 'A legendary Air artifact of immense power.'
+components:
+  - alkatraz:equipment
+attributes:
+  alkatraz:air_affinity: 16
+  alkatraz:max_mana: 120
+  alkatraz:mana_regeneration: 2
+  alkatraz:spell_power: 1
+max_engravings: 3

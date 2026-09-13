@@ -1,0 +1,14 @@
+key: alkatraz:primordial_pendant
+material: ECHO_SHARD
+custom_model_data: 1312
+display_name: '&r&3Primordial Pendant'
+lore:
+  - 'A legendary Magic artifact of immense power.'
+components:
+  - alkatraz:equipment
+attributes:
+  alkatraz:magic_affinity: 16
+  alkatraz:max_mana: 120
+  alkatraz:mana_regeneration: 2
+  alkatraz:spell_power: 1
+max_engravings: 3

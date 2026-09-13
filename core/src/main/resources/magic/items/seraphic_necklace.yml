@@ -1,0 +1,14 @@
+key: alkatraz:seraphic_necklace
+material: GOLD_INGOT
+custom_model_data: 1302
+display_name: '&r&6Seraphic Necklace'
+lore:
+  - 'A legendary Light artifact of immense power.'
+components:
+  - alkatraz:equipment
+attributes:
+  alkatraz:light_affinity: 16
+  alkatraz:max_mana: 120
+  alkatraz:mana_regeneration: 2
+  alkatraz:spell_power: 1
+max_engravings: 3

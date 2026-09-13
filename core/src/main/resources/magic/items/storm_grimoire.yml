@@ -10,7 +10,7 @@ components:
   - alkatraz:grimoire
 attributes:
   alkatraz:spell_power: 10
-  alkatraz:max_circle: 5
+  alkatraz:max_circle: 7
   alkatraz:cast_time_multiplier: 0.7
   alkatraz:fire_affinity: 0
   alkatraz:air_affinity: 15

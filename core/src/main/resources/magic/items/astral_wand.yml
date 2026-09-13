@@ -1,0 +1,21 @@
+key: alkatraz:astral_wand
+material: END_ROD
+custom_model_data: 1010
+display_name: '&r&dAstral Wand'
+lore:
+  - '&7A wand of purest celestial energy,'
+  - '&7carved from the heart of a fallen star.'
+max_engravings: 3
+components:
+  - alkatraz:wand
+  - alkatraz:mana_container
+attributes:
+  alkatraz:spell_power: 20
+  alkatraz:max_circle: 9
+  alkatraz:cast_time_multiplier: 0.6
+  alkatraz:fire_affinity: 4
+  alkatraz:air_affinity: 4
+  alkatraz:water_affinity: 4
+  alkatraz:earth_affinity: 4
+  alkatraz:light_affinity: 4
+  alkatraz:dark_affinity: 4
