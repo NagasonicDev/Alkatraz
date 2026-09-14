@@ -208,4 +208,25 @@ public class ParticleUtils {
 
         return locs;
     }
+
+    public static List<Location> ellipse(Location center, float yaw, double width, double height, int points) {
+        List<Location> locs = new ArrayList<>();
+        if (points < 1) return locs;
+
+        double yawRad = Math.toRadians(yaw);
+        double facingX = -Math.sin(yawRad);
+        double facingZ = Math.cos(yawRad);
+        double leftX = facingZ;
+        double leftZ = -facingX;
+        double halfWidth = width / 2.0;
+        double halfHeight = height / 2.0;
+
+        for (int i = 0; i < points; i++) {
+            double angle = 2 * Math.PI * i / points;
+            double spanX = Math.cos(angle) * halfWidth;
+            double spanY = Math.sin(angle) * halfHeight;
+            locs.add(center.clone().add(leftX * spanX, spanY, leftZ * spanX));
+        }
+        return locs;
+    }
 }

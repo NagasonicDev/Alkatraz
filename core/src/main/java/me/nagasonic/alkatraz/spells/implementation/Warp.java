@@ -149,7 +149,7 @@ public class Warp extends Spell implements Listener {
                     abortChannel(uuid, false);
                     return;
                 }
-                animate(caster, start, point, ticks, windUpTicks);
+                animate(caster, start, ticks, windUpTicks);
                 ticks++;
             }
         };
@@ -175,10 +175,12 @@ public class Warp extends Spell implements Listener {
             return;
         }
 
-        spawnTeleportParticles(caster, start);
+        Location originRift = caster.getLocation().add(caster.getLocation().getDirection().multiply(1.8));
+        spawnCollapseBurst(caster, originRift);
         caster.teleport(destination);
-        spawnTeleportParticles(caster, destination);
         caster.getWorld().playSound(destination, Sound.ENTITY_ENDERMAN_TELEPORT, 0.8f, 1.2f);
+        spawnTeleportParticles(caster, destination);
+        spawnArrivalExpand(caster, destination, point.yaw());
 
         profile.setCooldown(this, System.currentTimeMillis());
         if (profile.getSpellMastery(this) < getMaxMastery()) {
@@ -186,51 +188,40 @@ public class Warp extends Spell implements Listener {
         }
     }
 
-    private void animate(Player caster, Location start, MagicProfile.WarpPoint point, int ticks, int windUpTicks) {
+    private void animate(Player caster, Location start, int ticks, int windUpTicks) {
         Location eye = caster.getEyeLocation();
-        Vector forward = eye.getDirection().normalize().multiply(1.5);
-        List<Location> points = ParticleUtils.magicCircle(eye, eye.getYaw(), eye.getPitch(), forward, 3, 0);
-        for (Location loc : points) {
-            ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0,
-                    new Particle.DustOptions(Color.fromRGB(120, 50, 200), 0.4F));
-        }
+        Location center = eye.clone().add(eye.getDirection().multiply(1.8));
+        float yaw = eye.getYaw();
+        float progress = (float) ticks / windUpTicks;
+        int remaining = windUpTicks - ticks;
+        double shrink = remaining <= 10 ? Math.max(0.15, remaining / 10.0) : 1.0;
 
-        Location destination = point.toLocation();
-        if (destination != null) {
-            Location destCenter = destination.clone().add(0, 1.2, 0);
-            Vector destForward = destination.getDirection().normalize().multiply(1.5);
-            List<Location> destPoints = ParticleUtils.magicCircle(
-                    destCenter, destination.getYaw(), destination.getPitch(), destForward, 3, 0);
-            for (Location loc : destPoints) {
-                ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0,
-                        new Particle.DustOptions(Color.fromRGB(120, 50, 200), 0.6F));
-            }
-            spawnInboundSpiral(caster, eye, destCenter, ticks);
+        double hw = (1.2 + 1.2 * progress) * shrink;
+        double halfH = hw * 1.1;
+        List<Location> outer = ParticleUtils.ellipse(center, yaw, hw * 2, halfH * 2, 28);
+        List<Location> inner = ParticleUtils.ellipse(center, yaw, hw * 1.2, halfH * 1.2, 20);
+
+        for (int i = 0; i < outer.size(); i++) {
+            ParticleCaster.spawn(caster, center.getWorld(), Particle.PORTAL,
+                    outer.get((i + ticks) % outer.size()), 1);
+        }
+        for (int i = 0; i < inner.size(); i++) {
+            ParticleCaster.spawn(caster, center.getWorld(), Utils.DUST,
+                    inner.get(Math.floorMod(i - ticks * 2, inner.size())), 0,
+                    new Particle.DustOptions(Color.fromRGB(120, 50, 200), 0.6F));
+        }
+        for (int s = 0; s < 6; s++) {
+            Location tip = outer.get(s * (outer.size() / 6));
+            double frac = 1.0 - ((ticks + s) % 10) / 10.0;
+            Vector dir = tip.toVector().subtract(center.toVector()).multiply(frac);
+            ParticleCaster.spawn(caster, center.getWorld(), Particle.PORTAL,
+                    center.clone().add(dir), 1);
         }
 
         int every = Math.max(1, ((Long) Configs.CIRCLE_TICKS.get()).intValue());
         if (ticks % every == 0) {
-            float progress = (float) ticks / windUpTicks;
             float pitch = 0.6f + progress * 0.6f;
             caster.getWorld().playSound(eye, Sound.ENTITY_ENDERMAN_TELEPORT, 0.4f, pitch);
-            if (destination != null) {
-                destination.getWorld().playSound(destination, Sound.ENTITY_ENDERMAN_TELEPORT, 0.4f, pitch);
-            }
-        }
-    }
-
-    private void spawnInboundSpiral(Player caster, Location start, Location dest, int ticks) {
-        Vector direction = dest.toVector().subtract(start.toVector());
-        double length = direction.length();
-        if (length < 1) return;
-        Vector unit = direction.clone().normalize();
-        double progress = (ticks % 16) / 16.0;
-        for (int i = 0; i < 8; i++) {
-            double t = (progress + (double) i / 8.0) % 1.0;
-            Location point = start.clone().add(unit.clone().multiply(length * t));
-            double angle = ticks * 0.35 + i;
-            point.add(Math.cos(angle) * 0.6, Math.sin(angle) * 0.6, 0);
-            ParticleCaster.spawn(caster, start.getWorld(), Particle.PORTAL, point, 1, 0, 0, 0, 0);
         }
     }
 
@@ -238,6 +229,35 @@ public class Warp extends Spell implements Listener {
         ParticleCaster.spawn(caster, loc.getWorld(), Particle.PORTAL, loc, 40, 0.5, 0.5, 0.5, 0.5);
         ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 15, 0.3, 0.3, 0.3, 0,
                 new Particle.DustOptions(Color.fromRGB(120, 50, 200), 0.6F));
+    }
+
+    private void spawnCollapseBurst(Player caster, Location loc) {
+        ParticleCaster.spawn(caster, loc.getWorld(), Particle.PORTAL, loc, 40, 0.4, 0.4, 0.4, 0.05);
+        ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 20, 0.3, 0.3, 0.3, 0,
+                new Particle.DustOptions(Color.fromRGB(120, 50, 200), 0.8F));
+    }
+
+    private void spawnArrivalExpand(Player caster, Location destination, float yaw) {
+        World world = destination.getWorld();
+        if (world == null || !world.isChunkLoaded(destination.getBlockX() >> 4, destination.getBlockZ() >> 4)) return;
+        Location center = destination.clone().add(0, 1.1, 0);
+        new BukkitRunnable() {
+            int expand = 0;
+
+            @Override
+            public void run() {
+                if (expand >= 10) {
+                    cancel();
+                    return;
+                }
+                double hw = 0.6 + expand * 0.18;
+                List<Location> ring = ParticleUtils.ellipse(center, yaw, hw * 2, hw * 2.2, 36);
+                for (Location loc : ring) {
+                    ParticleCaster.spawn(caster, world, Particle.PORTAL, loc, 1);
+                }
+                expand++;
+            }
+        }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
     }
 
     private void playFailSound(Player player) {
@@ -287,16 +307,12 @@ public class Warp extends Spell implements Listener {
     public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
         return Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
             if (e.isCancelled()) return;
-            Location playerLoc = caster.getEyeLocation();
-            float yaw = playerLoc.getYaw();
-            float pitch = playerLoc.getPitch();
-            Vector forward = playerLoc.getDirection().normalize().multiply(1.5);
-            List<Location> points = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 3, 0);
-            for (int i = 0; i < 100; i++) {
-                for (Location loc : points) {
-                    ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0,
-                            new Particle.DustOptions(Color.fromRGB(120, 50, 200), 0.4F));
-                }
+            Location eye = caster.getEyeLocation();
+            Location center = eye.clone().add(eye.getDirection().multiply(1.8));
+            List<Location> points = ParticleUtils.ellipse(center, eye.getYaw(), 1.6, 2.0, 28);
+            for (Location loc : points) {
+                ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0,
+                        new Particle.DustOptions(Color.fromRGB(120, 50, 200), 0.4F));
             }
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());
     }
