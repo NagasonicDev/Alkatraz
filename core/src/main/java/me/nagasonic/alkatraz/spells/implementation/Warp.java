@@ -149,7 +149,7 @@ public class Warp extends Spell implements Listener {
                     abortChannel(uuid, false);
                     return;
                 }
-                animate(caster, start, ticks, windUpTicks);
+                animate(caster, ticks, windUpTicks);
                 ticks++;
             }
         };
@@ -175,7 +175,7 @@ public class Warp extends Spell implements Listener {
             return;
         }
 
-        Location originRift = caster.getLocation().add(caster.getLocation().getDirection().multiply(1.8));
+        Location originRift = caster.getEyeLocation().add(caster.getEyeLocation().getDirection().multiply(1.8));
         spawnCollapseBurst(caster, originRift);
         caster.teleport(destination);
         caster.getWorld().playSound(destination, Sound.ENTITY_ENDERMAN_TELEPORT, 0.8f, 1.2f);
@@ -188,7 +188,7 @@ public class Warp extends Spell implements Listener {
         }
     }
 
-    private void animate(Player caster, Location start, int ticks, int windUpTicks) {
+    private void animate(Player caster, int ticks, int windUpTicks) {
         Location eye = caster.getEyeLocation();
         Location center = eye.clone().add(eye.getDirection().multiply(1.8));
         float yaw = eye.getYaw();
@@ -211,7 +211,7 @@ public class Warp extends Spell implements Listener {
                     new Particle.DustOptions(Color.fromRGB(120, 50, 200), 0.6F));
         }
         for (int s = 0; s < 6; s++) {
-            Location tip = outer.get(s * (outer.size() / 6));
+            Location tip = outer.get((s * outer.size()) / 6);
             double frac = 1.0 - ((ticks + s) % 10) / 10.0;
             Vector dir = tip.toVector().subtract(center.toVector()).multiply(frac);
             ParticleCaster.spawn(caster, center.getWorld(), Particle.PORTAL,
