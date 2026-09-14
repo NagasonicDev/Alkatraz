@@ -29,7 +29,7 @@ public record WarpConfig(
                 doubleOf(map.get("base_distance"), 500.0),
                 doubleOf(map.get("distance_per_circle"), 100.0),
                 doubleOf(map.get("mastery_distance_bonus"), 0.5),
-                intOf(map.get("wind_up_duration"), 2),
+                intOf(map.get("wind_up_duration"), 6),
                 doubleOf(map.get("move_cancel_threshold"), 0.25));
     }
 

@@ -44,6 +44,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Warp extends Spell implements Listener {
 
     private static final Map<UUID, WarpData> channels = new ConcurrentHashMap<>();
+    private static final Color LIGHT_BLUE = Color.fromRGB(150, 210, 255);
+    private static final Color AQUA = Color.fromRGB(0, 210, 255);
+    private static final Color DEEP_BLUE = Color.fromRGB(45, 110, 230);
 
     private record WarpData(MagicProfile.WarpPoint destination, Location start,
                             MagicProfile profile, BukkitRunnable runnable) {}
@@ -189,52 +192,88 @@ public class Warp extends Spell implements Listener {
     }
 
     private void animate(Player caster, int ticks, int windUpTicks) {
-        Location eye = caster.getEyeLocation();
-        Location center = eye.clone().add(eye.getDirection().multiply(1.8));
-        float yaw = eye.getYaw();
-        float progress = (float) ticks / windUpTicks;
+        int actSwitch = Math.max(1, windUpTicks / 2);
         int remaining = windUpTicks - ticks;
         double shrink = remaining <= 10 ? Math.max(0.15, remaining / 10.0) : 1.0;
+        double fullProgress = (double) ticks / windUpTicks;
 
-        double hw = (1.2 + 1.2 * progress) * shrink;
-        double halfH = hw * 1.1;
-        List<Location> outer = ParticleUtils.ellipse(center, yaw, hw * 2, halfH * 2, 28);
-        List<Location> inner = ParticleUtils.ellipse(center, yaw, hw * 1.2, halfH * 1.2, 20);
+        Location feet = caster.getLocation();
+        double floorR = Math.min(2.2, 0.8 + 1.4 * (ticks / (double) actSwitch)) * shrink;
+        spawnFloorCircle(caster, feet, floorR, ticks);
+        spawnHexGlyphs(caster, feet, floorR, ticks);
 
-        for (int i = 0; i < outer.size(); i++) {
-            ParticleCaster.spawn(caster, center.getWorld(), Particle.PORTAL,
-                    outer.get((i + ticks) % outer.size()), 1);
-        }
-        for (int i = 0; i < inner.size(); i++) {
-            ParticleCaster.spawn(caster, center.getWorld(), Utils.DUST,
-                    inner.get(Math.floorMod(i - ticks * 2, inner.size())), 0,
-                    new Particle.DustOptions(Color.fromRGB(120, 50, 200), 0.6F));
-        }
-        for (int s = 0; s < 6; s++) {
-            Location tip = outer.get((s * outer.size()) / 6);
-            double frac = 1.0 - ((ticks + s) % 10) / 10.0;
-            Vector dir = tip.toVector().subtract(center.toVector()).multiply(frac);
-            ParticleCaster.spawn(caster, center.getWorld(), Particle.PORTAL,
-                    center.clone().add(dir), 1);
+        if (ticks >= actSwitch) {
+            Location eye = caster.getEyeLocation();
+            Location center = eye.clone().add(eye.getDirection().multiply(1.8));
+            float yaw = eye.getYaw();
+            double p2 = (double) (ticks - actSwitch) / (windUpTicks - actSwitch);
+            double hw = (1.2 + 1.2 * p2) * shrink;
+            double halfH = hw * 1.1;
+            List<Location> outer = ParticleUtils.ellipse(center, yaw, hw * 2, halfH * 2, 28);
+            List<Location> inner = ParticleUtils.ellipse(center, yaw, hw * 1.2, halfH * 1.2, 20);
+
+            for (int i = 0; i < outer.size(); i++) {
+                ParticleCaster.spawn(caster, center.getWorld(), Utils.DUST,
+                        outer.get((i + ticks) % outer.size()), 0,
+                        new Particle.DustOptions(AQUA, 0.6F));
+            }
+            for (int i = 0; i < inner.size(); i++) {
+                ParticleCaster.spawn(caster, center.getWorld(), Utils.DUST,
+                        inner.get(Math.floorMod(i - ticks * 2, inner.size())), 0,
+                        new Particle.DustOptions(LIGHT_BLUE, 0.6F));
+            }
+            for (int s = 0; s < 6; s++) {
+                Location tip = outer.get((s * outer.size()) / 6);
+                double frac = 1.0 - ((ticks + s) % 10) / 10.0;
+                Vector dir = tip.toVector().subtract(center.toVector()).multiply(frac);
+                ParticleCaster.spawn(caster, center.getWorld(), Utils.DUST,
+                        center.clone().add(dir), 0,
+                        new Particle.DustOptions(DEEP_BLUE, 0.6F));
+            }
         }
 
         int every = Math.max(1, ((Long) Configs.CIRCLE_TICKS.get()).intValue());
         if (ticks % every == 0) {
-            float pitch = 0.6f + progress * 0.6f;
-            caster.getWorld().playSound(eye, Sound.ENTITY_ENDERMAN_TELEPORT, 0.4f, pitch);
+            float pitch = 0.6f + (float) fullProgress * 0.6f;
+            caster.getWorld().playSound(caster.getEyeLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 0.4f, pitch);
+        }
+    }
+
+    private void spawnFloorCircle(Player caster, Location feet, double radius, int ticks) {
+        float spin = ticks * 6;
+        List<Location> outer = ParticleUtils.circle(feet, radius, 15, spin, 0);
+        List<Location> inner = ParticleUtils.circle(feet, radius * 0.7, 15, -spin, 0);
+        for (Location loc : outer) {
+            ParticleCaster.spawn(caster, feet.getWorld(), Utils.DUST, loc, 0,
+                    new Particle.DustOptions(LIGHT_BLUE, 0.5F));
+        }
+        for (Location loc : inner) {
+            ParticleCaster.spawn(caster, feet.getWorld(), Utils.DUST, loc, 0,
+                    new Particle.DustOptions(AQUA, 0.5F));
+        }
+    }
+
+    private void spawnHexGlyphs(Player caster, Location feet, double radius, int ticks) {
+        double glyphR = radius * 0.85;
+        double baseAngle = Math.toRadians(ticks * 3);
+        for (int k = 0; k < 6; k++) {
+            double a = baseAngle + k * Math.PI / 3.0;
+            Location loc = feet.clone().add(Math.cos(a) * glyphR, 0, Math.sin(a) * glyphR);
+            ParticleCaster.spawn(caster, feet.getWorld(), Utils.DUST, loc, 0,
+                    new Particle.DustOptions(DEEP_BLUE, 0.6F));
         }
     }
 
     private void spawnTeleportParticles(Player caster, Location loc) {
         ParticleCaster.spawn(caster, loc.getWorld(), Particle.PORTAL, loc, 40, 0.5, 0.5, 0.5, 0.5);
         ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 15, 0.3, 0.3, 0.3, 0,
-                new Particle.DustOptions(Color.fromRGB(120, 50, 200), 0.6F));
+                new Particle.DustOptions(AQUA, 0.6F));
     }
 
     private void spawnCollapseBurst(Player caster, Location loc) {
         ParticleCaster.spawn(caster, loc.getWorld(), Particle.PORTAL, loc, 40, 0.4, 0.4, 0.4, 0.05);
         ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 20, 0.3, 0.3, 0.3, 0,
-                new Particle.DustOptions(Color.fromRGB(120, 50, 200), 0.8F));
+                new Particle.DustOptions(AQUA, 0.8F));
     }
 
     private void spawnArrivalExpand(Player caster, Location destination, float yaw) {
@@ -253,7 +292,8 @@ public class Warp extends Spell implements Listener {
                 double hw = 0.6 + expand * 0.18;
                 List<Location> ring = ParticleUtils.ellipse(center, yaw, hw * 2, hw * 2.2, 36);
                 for (Location loc : ring) {
-                    ParticleCaster.spawn(caster, world, Particle.PORTAL, loc, 1);
+                    ParticleCaster.spawn(caster, world, Utils.DUST, loc, 0,
+                            new Particle.DustOptions(AQUA, 0.8F));
                 }
                 expand++;
             }
@@ -310,9 +350,9 @@ public class Warp extends Spell implements Listener {
             Location eye = caster.getEyeLocation();
             Location center = eye.clone().add(eye.getDirection().multiply(1.8));
             List<Location> points = ParticleUtils.ellipse(center, eye.getYaw(), 1.6, 2.0, 28);
-            for (Location loc : points) {
-                ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0,
-                        new Particle.DustOptions(Color.fromRGB(120, 50, 200), 0.4F));
+            for (int i = 0; i < points.size(); i++) {
+                ParticleCaster.spawn(caster, points.get(i).getWorld(), Utils.DUST, points.get(i), 0,
+                        new Particle.DustOptions(i % 2 == 0 ? LIGHT_BLUE : AQUA, 0.4F));
             }
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());
     }

@@ -17,7 +17,7 @@ class WarpConfigTest {
         assertEquals(500.0, cfg.baseDistance());
         assertEquals(100.0, cfg.distancePerCircle());
         assertEquals(0.5, cfg.masteryDistanceBonus());
-        assertEquals(2, cfg.windUpSeconds());
+        assertEquals(6, cfg.windUpSeconds());
         assertEquals(0.25, cfg.moveCancelThreshold());
     }
 
@@ -27,7 +27,7 @@ class WarpConfigTest {
         assertEquals(2, cfg.baseSlots());
         assertEquals(List.of(25, 50, 75), cfg.masteryBonusSlots());
         assertEquals(500.0, cfg.baseDistance());
-        assertEquals(2, cfg.windUpSeconds());
+        assertEquals(6, cfg.windUpSeconds());
     }
 
     @Test
@@ -106,8 +106,8 @@ class WarpConfigTest {
     @Test
     void windUpTicks() {
         WarpConfig cfg = WarpConfig.fromConfig(Map.of());
-        assertEquals(40, cfg.windUpTicks(0, 100));
-        assertEquals(30, cfg.windUpTicks(100, 100));
+        assertEquals(120, cfg.windUpTicks(0, 100));
+        assertEquals(90, cfg.windUpTicks(100, 100));
         WarpConfig threeSec = WarpConfig.fromConfig(Map.of("wind_up_duration", 3));
         assertEquals(60, threeSec.windUpTicks(0, 100));
         assertEquals(45, threeSec.windUpTicks(100, 100));

@@ -20,7 +20,7 @@ mastery_bonus_slots:
 base_distance: 500.0
 distance_per_circle: 100.0
 mastery_distance_bonus: 0.5
-wind_up_duration: 2
+wind_up_duration: 6
 move_cancel_threshold: 0.25
 mastery_bar_color: 'PURPLE'
 gui_item: 'ENDER_EYE'
