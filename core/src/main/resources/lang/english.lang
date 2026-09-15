@@ -600,6 +600,12 @@ spells.warp.blocked = &cYou cannot warp there!
 spells.warp.point_set = &aWarp point set!
 spells.warp.point_cleared = &7Warp point cleared.
 
+# --- Skeletal Knights ---
+spells.skeletal_knights.book_name = &2Codex of the Black Steeds
+spells.skeletal_knights.lore1 = &8&oRide forth, servants of bone.
+spells.skeletal_knights.lore2 = &7Summon three iron-clad knights upon skeletal steeds.
+spells.skeletal_knights.interrupted = &cSummoning interrupted!
+
 # --- Buff ---
 spells.buff.book_name = &bTome of Fortification
 spells.buff.lore1 = &8&oStrength flows to those who seek it.

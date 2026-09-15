@@ -42,6 +42,7 @@ public class SpellRegistry {
         registerIfEnabled("magic_missile", new MagicMissile("MAGIC_MISSILE"));
         registerIfEnabled("stealth", new Stealth("STEALTH"));
         registerIfEnabled("summon_zombies", new SummonZombies("SUMMON_ZOMBIES"));
+        registerIfEnabled("skeletal_knights", new SkeletalKnights("SKELETAL_KNIGHTS"));
         registerIfEnabled("swift", new Swift("SWIFT"));
         registerIfEnabled("tremor", new Tremor("TREMOR"));
         registerIfEnabled("whirlpool", new Whirlpool("WHIRLPOOL"));
