@@ -79,6 +79,10 @@ public class SkeletalKnights extends AttackSpell implements Listener {
         if (caster.isDead()) return;
         MagicProfile profile = ProfileManager.getProfile(caster, MagicProfile.class);
         if (profile == null) return;
+        if (!Protection.spawnMob(caster, caster.getLocation())) {
+            cancelCast(caster);
+            return;
+        }
         UUID uuid = caster.getUniqueId();
         if (channels.containsKey(uuid)) return;
 
@@ -213,7 +217,9 @@ public class SkeletalKnights extends AttackSpell implements Listener {
                         if (!(e instanceof Skeleton knight) || knight.isDead()) continue;
                         LivingEntity target = knight.getTarget();
                         if (target == null || !target.isValid() || target.isDead()) {
-                            if (knight.getLocation().distanceSquared(caster.getLocation()) > FOLLOW_RANGE * FOLLOW_RANGE) {
+                            if (target instanceof Player tp && tp.getUniqueId().equals(caster.getUniqueId())) {
+                                knight.setTarget(null);
+                            } else if (knight.getLocation().distanceSquared(caster.getLocation()) > FOLLOW_RANGE * FOLLOW_RANGE) {
                                 knight.setTarget(caster);
                             }
                         }
@@ -401,8 +407,11 @@ public class SkeletalKnights extends AttackSpell implements Listener {
         if (!NBT.getPersistentData(skeleton, nbt -> nbt.getBoolean("summoned_knight"))) return;
         String summonerId = NBT.getPersistentData(skeleton, nbt -> nbt.getString("summoner_uuid"));
         if (summonerId == null) return;
-        if (e.getEntity() instanceof Player p && p.getUniqueId().equals(UUID.fromString(summonerId))) {
-            e.setCancelled(true);
+        try {
+            if (e.getEntity() instanceof Player p && p.getUniqueId().equals(UUID.fromString(summonerId))) {
+                e.setCancelled(true);
+            }
+        } catch (IllegalArgumentException ignored) {
         }
     }
 
