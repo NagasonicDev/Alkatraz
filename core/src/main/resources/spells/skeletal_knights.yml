@@ -1,0 +1,29 @@
+id: 'skeletal_knights'
+display_name: '&2Skeletal Knights'
+description:
+  - '&7Summon 3 iron-clad skeleton knights'
+  - '&7mounted on skeletal steeds.'
+enabled: true
+element: 'DARK'
+code: 'SRRLS'
+level: 6
+required_focus: 100
+cooldown: 45
+cast_time: 1.0
+mana_cost: 120
+maximum_mastery: 100
+knight_count: 3
+knight_duration: 30
+knight_power: 6.0
+summon_range: 5.0
+wind_up_duration: 6
+move_cancel_threshold: 0.25
+mastery_bar_color: 'PURPLE'
+gui_item: 'SKELETON_HORSE'
+gui_custom_model_data: 4130
+prepare_sound: 'ENTITY_SKELETON_AMBIENT'
+prepare_sound_volume: 0.4
+prepare_sound_pitch: 1.0
+cast_sound: 'ENTITY_SKELETON_HORSE_AMBIENT'
+cast_sound_volume: 1.0
+cast_sound_pitch: 0.8
