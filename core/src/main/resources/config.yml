@@ -152,8 +152,11 @@ focus:
   regen_growth_factor: 1.5 # multiplier per stationary second
   regen_max: 25.0          # upper bound on the per-second regen rate
   movement:
-    # penalty ratio = min(speed * penalty_per_speed, max_penalty_ratio)
-    # where speed is blocks/second derived from player velocity.
+    # penalty = 100 * min(speed * penalty_per_speed, max_penalty_ratio) * 2
+    # where speed is blocks/second derived from player velocity. The penalty is
+    # a fixed amount computed against a base of 100 focus — it does NOT scale
+    # with the player's max focus, so moving drains the same absolute amount of
+    # focus at any circle.
     penalty_per_speed: 0.02
     max_penalty_ratio: 0.55
   damage:

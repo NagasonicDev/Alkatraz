@@ -254,6 +254,7 @@ public class StatUtils {
                         - getMagicResistance(previousCircle))
         );
 
+        profile.setMaxFocus(profile.getMaxFocus() + (10.0 * circle));
         profile.setCircleLevel(previousCircle + circle);
 
         ItemStack item = p.getInventory().getItemInMainHand();

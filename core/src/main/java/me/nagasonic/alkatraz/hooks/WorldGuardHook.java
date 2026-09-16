@@ -55,27 +55,45 @@ public final class WorldGuardHook extends PluginHook {
     }
 
     public boolean canBuild(LivingEntity doer, Location loc) {
+        if (!present) {
+            return true;
+        }
         return allows(loc, asPlayer(doer), Flags.BUILD);
     }
 
     public boolean canDamage(LivingEntity victim, LivingEntity doer, Location loc) {
+        if (!present) {
+            return true;
+        }
         StateFlag flag = (victim instanceof Player) ? Flags.PVP : Flags.MOB_DAMAGE;
         return allows(loc, asPlayer(doer), flag);
     }
 
     public boolean canExplode(LivingEntity doer, Location loc) {
+        if (!present) {
+            return true;
+        }
         return allows(loc, asPlayer(doer), Flags.OTHER_EXPLOSION);
     }
 
     public boolean canTeleport(Player player, Location to) {
+        if (!present) {
+            return true;
+        }
         return allows(to, player, Flags.ENTRY);
     }
 
     public boolean canSpawnMob(LivingEntity doer, Location loc) {
+        if (!present) {
+            return true;
+        }
         return allows(loc, asPlayer(doer), Flags.MOB_SPAWNING);
     }
 
     public boolean canIgnite(LivingEntity doer, Location loc) {
+        if (!present) {
+            return true;
+        }
         return allows(loc, asPlayer(doer), Flags.FIRE_SPREAD) && allows(loc, asPlayer(doer), Flags.LAVA_FIRE);
     }
 }

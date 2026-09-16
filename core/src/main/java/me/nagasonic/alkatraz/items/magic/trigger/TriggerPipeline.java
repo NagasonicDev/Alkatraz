@@ -42,20 +42,13 @@ public final class TriggerPipeline {
         }
 
         List<ResolvedBinding> bindings = collectBindings(baseContext, event.triggerType());
-        me.nagasonic.alkatraz.Alkatraz.logInfo("[DBG barrier] dispatch: trigger=" + event.triggerType().getKey()
-                + " actor=" + (baseContext.actor() instanceof Player ? ((Player) baseContext.actor()).getName() : baseContext.actor())
-                + " bindings=" + bindings.size());
         bindings.sort(Comparator.comparingInt(ResolvedBinding::priority));
 
         for (ResolvedBinding binding : bindings) {
             TriggerContext scoped = baseContext.withSource(binding.instance(), binding.slot());
             if (!ConditionEvaluator.allMatch(binding.binding().conditions(), scoped)) {
-                me.nagasonic.alkatraz.Alkatraz.logInfo("[DBG barrier] dispatch: binding for " + binding.instance().definitionKey()
-                        + "@" + binding.slot().getKey().getKey() + " FAILED conditions, skipped");
                 continue;
             }
-            me.nagasonic.alkatraz.Alkatraz.logInfo("[DBG barrier] dispatch: running effects for " + binding.instance().definitionKey()
-                    + "@" + binding.slot().getKey().getKey());
             EffectExecutor.executeAll(binding.binding().effects(), scoped);
             if (scoped.isCancelled()) {
                 baseContext.setCancelled(true);
@@ -75,11 +68,6 @@ public final class TriggerPipeline {
 
         if (actor instanceof Player player) {
             EquipmentProfile profile = equipmentService.profile(player);
-            me.nagasonic.alkatraz.Alkatraz.logInfo("[DBG barrier] collectBindings: equipment profile has "
-                    + profile.instances().size() + " magic instances for " + player.getName());
-            profile.instances().forEach((slot, inst) ->
-                    me.nagasonic.alkatraz.Alkatraz.logInfo("[DBG barrier] collectBindings:   slot=" + slot.getKey().getKey()
-                            + " def=" + inst.definitionKey() + " engravings=" + inst.engravings()));
             for (var entry : profile.instances().entrySet()) {
                 collectForInstance(entry.getValue(), entry.getKey(), triggerType, resolved);
             }

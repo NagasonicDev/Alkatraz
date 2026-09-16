@@ -104,6 +104,7 @@ public class SpellsMenu extends PagedMenu<Spell> {
         lore.add(lang().get("spells.mastery", "value", profile.getSpellMastery(spell) + "/" + spell.getMaxMastery()));
         lore.add("");
         lore.add(lang().get("spells.circle", "value", String.valueOf(spell.getRequiredCircleLevel())));
+        lore.add(lang().get("spells.focus", "value", String.valueOf(spell.getRequiredFocus())));
 
         if (!spell.getAllOptions().isEmpty()) {
             lore.add("");

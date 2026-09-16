@@ -53,6 +53,7 @@ spells.cast_time = &bCast Time: %value%
 spells.element = &bElement: %value%
 spells.mastery = &bMastery: %value%
 spells.circle = &eCircle: %value%
+spells.focus = &3Focus: %value%
 spells.has_options = &aHas Spell Options
 spells.has_options_lore = &7Click to configure
 spells.locked_name = &8???
@@ -786,7 +787,7 @@ progression.click_for_details = &eClick for details
 progression.complete_previous_circle = &cComplete the previous circle first
 progression.circle_name = %circle%
 progression.requirement_arcane_knowledge = Arcane Knowledge: %current%/%needed%
-progression.requirement_spell_mastery = Spell Mastery (%spell%): %current%/%needed%
+progression.requirement_spell_mastery = Spell Mastery (%spell%%metColor%): %current%/%needed%
 
 # ==============================
 # YAML Overrides (optional)

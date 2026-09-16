@@ -3,6 +3,7 @@ package me.nagasonic.alkatraz.focus;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.FocusConfig;
 import me.nagasonic.alkatraz.events.PlayerFocusChangeEvent;
+import me.nagasonic.alkatraz.playerdata.SpellHotbarManager;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.Spell;
@@ -29,15 +30,22 @@ import java.util.UUID;
 /**
  * Drives the Focus resource: exponential stationary regeneration, a
  * velocity-scaled movement penalty (non-recursive, instantly restored when the
- * player stops), and damage-based focus loss. Every focus change funnels
- * through {@link #setFocus(Player, MagicProfile, double)} so the mid-cast
- * cancel latch and {@link PlayerFocusChangeEvent} always fire.
+ * player stops), and damage-based focus loss. The movement penalty is computed
+ * against a fixed baseline rather than the player's max focus, so it drains a
+ * constant amount at any circle. Every focus change funnels through
+ * {@link #setFocus(Player, MagicProfile, double)} so the mid-cast cancel latch
+ * and {@link PlayerFocusChangeEvent} always fire.
  */
 public final class FocusManager implements Listener {
 
     private static final long REGEN_INTERVAL_TICKS = 20L;
     private static final long STATIONARY_THRESHOLD_MS = 500L;
     private static final double STATIONARY_SPEED_EPSILON = 1e-6;
+
+    /** Fixed baseline used for the movement penalty calculation instead of maxFocus,
+     *  so that moving drains a constant amount of focus regardless of the player's
+     *  maximum. At higher maxFocus values the same penalty is proportionally smaller. */
+    private static final double MOVEMENT_PENALTY_BASE = 100.0;
 
     private final Map<UUID, Long> lastMoveTime = new HashMap<>();
     private final Map<UUID, Double> movementPenalty = new HashMap<>();
@@ -155,7 +163,7 @@ public final class FocusManager implements Listener {
         double penaltyRatio = Math.min(
                 effectiveSpeed * FocusConfig.getMovementPenaltyPerSpeed(),
                 FocusConfig.getMovementMaxPenaltyRatio());
-        double penalty = profile.getMaxFocus() * penaltyRatio * 2;
+        double penalty = MOVEMENT_PENALTY_BASE * penaltyRatio * 2;
         movementPenalty.put(uuid, penalty);
 
         double effectiveMax = effectiveMax(profile, uuid);
@@ -188,7 +196,7 @@ public final class FocusManager implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onItemHeld(PlayerItemHeldEvent event) {
         Player player = event.getPlayer();
-        if (isCastingTool(player.getInventory().getItem(event.getNewSlot()))) {
+        if (isCastingTool(player, player.getInventory().getItem(event.getNewSlot()))) {
             bossBar.show(player);
             MagicProfile profile = ProfileManager.getProfile(player.getUniqueId(), MagicProfile.class);
             if (profile != null) refreshBar(player, profile);
@@ -201,7 +209,7 @@ public final class FocusManager implements Listener {
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
-        if (isCastingTool(player.getInventory().getItem(player.getInventory().getHeldItemSlot()))) {
+        if (isCastingTool(player, player.getInventory().getItem(player.getInventory().getHeldItemSlot()))) {
             bossBar.show(player);
             MagicProfile profile = ProfileManager.getProfile(uuid, MagicProfile.class);
             if (profile != null) refreshBar(player, profile);
@@ -217,7 +225,13 @@ public final class FocusManager implements Listener {
         movementPenalty.remove(uuid);
     }
 
-    private static boolean isCastingTool(ItemStack item) {
+    /**
+     * A held item is a "casting tool" if it is a wand, a grimoire, or the player
+     * is in spell-hotbar mode (where the wand sits in slot 8 and the held slot
+     * shows a spell item instead).
+     */
+    private static boolean isCastingTool(Player player, ItemStack item) {
+        if (SpellHotbarManager.isActive(player)) return true;
         if (item == null || item.getType() == Material.AIR || item.getAmount() == 0) return false;
         return WandUtils.isWand(item) || WandUtils.isGrimoire(item);
     }

@@ -173,7 +173,7 @@ public class ProgressionMenu extends Menu {
             int needed = smReq.getMastery();
             boolean met = req.isMet(context);
             String metColor = met ? "&a" : "&c";
-            return ColorFormat.format(metColor + lang().get("progression.requirement_spell_mastery", "spell", spellName, "current", String.valueOf(Math.max(0, current)), "needed", String.valueOf(needed)));
+            return ColorFormat.format(metColor + lang().get("progression.requirement_spell_mastery", "spell", spellName, "metColor", metColor, "current", String.valueOf(Math.max(0, current)), "needed", String.valueOf(needed)));
         }
         return req.describe();
     }

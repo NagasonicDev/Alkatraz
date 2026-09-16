@@ -356,8 +356,6 @@ public final class MagicItemTriggerAdapter implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onToggleSneak(org.bukkit.event.player.PlayerToggleSneakEvent event) {
         Player player = event.getPlayer();
-        me.nagasonic.alkatraz.Alkatraz.logInfo("[DBG barrier] onToggleSneak: player=" + player.getName()
-                + " sneaking=" + event.isSneaking() + " dispatching on_sneak/on_stop_sneak");
         TriggerContext context = new TriggerContext(player, null, null, null, null, Map.of());
         MagicItemServices.get().dispatchTrigger(
                 new InternalTriggerEvent(MagicKeys.alkatraz(event.isSneaking() ? "on_sneak" : "on_stop_sneak"), context));
