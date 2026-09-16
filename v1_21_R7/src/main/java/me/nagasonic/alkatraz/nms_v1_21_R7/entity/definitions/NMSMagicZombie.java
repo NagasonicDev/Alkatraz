@@ -1,91 +1,88 @@
 package me.nagasonic.alkatraz.nms_v1_21_R7.entity.definitions;
 
+import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
+import me.nagasonic.alkatraz.api.mobs.MagicEntityType;
+import me.nagasonic.alkatraz.api.mobs.MobBrain;
+import me.nagasonic.alkatraz.items.magic.MagicItemServices;
+import me.nagasonic.alkatraz.mobs.MagicBrains;
 import me.nagasonic.alkatraz.mobs.MagicEntity;
 import me.nagasonic.alkatraz.mobs.MagicEntityRegistry;
-import me.nagasonic.alkatraz.api.mobs.MagicEntityType;
 import me.nagasonic.alkatraz.mobs.MobProfile;
-import me.nagasonic.alkatraz.api.mobs.MobBrain;
 import me.nagasonic.alkatraz.nms_v1_21_R7.entity.GoalBuilder;
+import me.nagasonic.alkatraz.util.ColorFormat;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.level.Level;
+import org.bukkit.Location;
+import org.bukkit.craftbukkit.v1_21_R7.CraftWorld;
+import org.bukkit.craftbukkit.v1_21_R7.inventory.CraftItemStack;
 
 /**
- * Abstract NMS base for all zombie-based magic mobs in this version module.
- *
- * <p>Subclasses supply their identity and AI shape via {@link #entityType()} and
- * {@link #brain()} respectively. All boilerplate â€” profile loading, NBT stamping,
- * goal registration â€” lives here and never needs to be repeated.
- *
- * <p>Example subclass:
- * <pre>
- *   public final class ZombieMage extends NmsMagicZombie {
- *
- *       private static final MobBrain BRAIN = MobBrain.builder()
- *           .canSwim(true)
- *           .spellCast(new SpellCastConfig(6.0, 12.0, 14.0, 40))
- *           .meleeAttack(false)
- *           .build();
- *
- *       public ZombieMage(EntityType&lt;? extends Zombie&gt; type, Level level) {
- *           super(type, level);
- *       }
- *
- *       &#64;Override protected MagicEntityType entityType() { return MagicEntityType.ZOMBIE_MAGE; }
- *       &#64;Override protected MobBrain        brain()      { return BRAIN; }
- *   }
- * </pre>
+ * NMS base for all zombie-based magic mobs. Identity and AI come from core
+ * ({@link MagicBrains}) keyed by the stored {@link MagicEntityType}; this class
+ * is no longer subclassed per mob.
  */
-public abstract class NMSMagicZombie extends Zombie implements MagicEntity {
-
-    // -------------------------------------------------------------------------
-    // MagicEntity state
-    // -------------------------------------------------------------------------
+public class NMSMagicZombie extends Zombie implements MagicEntity {
 
     private final MagicData magicData = new MagicData();
+    private final MagicEntityType magicType;
 
     @Override
     public final MagicData getMagicData() { return magicData; }
 
-    // -------------------------------------------------------------------------
-    // Subclass contract
-    // -------------------------------------------------------------------------
+    public MagicEntityType entityType() { return magicType; }
 
-    /** The canonical type of this mob, used to look up its {@link MobProfile}. */
-    protected abstract MagicEntityType entityType();
+    public MobBrain brain() { return MagicBrains.brain(magicType); }
 
-    /** Declarative description of this mob's AI â€” evaluated once in {@link #registerGoals()}. */
-    protected abstract MobBrain brain();
-
-    // -------------------------------------------------------------------------
-    // Constructor
-    // -------------------------------------------------------------------------
-
-    protected NMSMagicZombie(EntityType<? extends Zombie> type, Level level) {
+    protected NMSMagicZombie(EntityType<? extends Zombie> type, Level level, MagicEntityType magicType) {
         super(type, level);
+        this.magicType = magicType;
 
-        MobProfile profile = MagicEntityRegistry.getProfile(entityType())
+        MobProfile profile = MagicEntityRegistry.getProfile(magicType)
                 .orElseThrow(() -> new IllegalStateException(
-                        entityType().getId() + " profile not loaded â€” did you call MagicEntities.registerProfiles()?"));
+                        magicType.getId() + " profile not loaded - did you call MagicEntities.registerProfiles()?"));
 
-        initMagic(profile, entityType(), (org.bukkit.entity.LivingEntity) getBukkitEntity());
+        initMagic(profile, magicType, (org.bukkit.entity.LivingEntity) getBukkitEntity());
     }
-
-    // -------------------------------------------------------------------------
-    // Goals
-    // -------------------------------------------------------------------------
 
     @Override
     protected final void registerGoals() {
         GoalBuilder.apply(this, this, brain());
-        registerExtraGoals();
     }
 
-    /**
-     * Hook for subclasses that need goals beyond what {@link MobBrain} covers.
-     * The default implementation does nothing. Called immediately after
-     * {@link GoalBuilder#apply} so subclasses can add to the already-populated
-     * goal selector without overriding {@link #registerGoals()} directly.
-     */
-    protected void registerExtraGoals() {}
+    @Override
+    public boolean doHurtTarget(ServerLevel level, net.minecraft.world.entity.Entity target) {
+        double range = MagicBrains.meleeRange(magicType);
+        if (range > 0 && distanceTo(target) >= range) return false;
+        return super.doHurtTarget(level, target);
+    }
+
+    @Override
+    public net.minecraft.network.chat.Component getDisplayName() {
+        return Component.literal(ColorFormat.format(MagicBrains.displayName(magicType)));
+    }
+
+    public static NMSMagicZombie spawn(MagicEntityType magicType, Location location) {
+        ServerLevel level = ((CraftWorld) location.getWorld()).getHandle();
+
+        NMSMagicZombie mob = new NMSMagicZombie(EntityType.ZOMBIE, level, magicType);
+        mob.setPos(location.getX(), location.getY(), location.getZ());
+
+        mob.finalizeSpawn(level,
+                level.getCurrentDifficultyAt(mob.blockPosition()),
+                EntitySpawnReason.COMMAND, null);
+
+        String wand = MagicBrains.wand(magicType);
+        if (wand != null) {
+            mob.setItemInHand(InteractionHand.MAIN_HAND,
+                    CraftItemStack.asNMSCopy(MagicItemServices.get().createItem(MagicKeys.alkatraz(wand))));
+        }
+
+        level.addFreshEntityWithPassengers(mob);
+        return mob;
+    }
 }

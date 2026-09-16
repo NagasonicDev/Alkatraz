@@ -40,6 +40,7 @@ public final class MagicEntities {
     /** Loads and caches all magic mob profiles from disk. Call once at startup. */
     public static void registerProfiles() {
         MagicEntityRegistry.registerAll();
+        MagicBrains.registerAll();
     }
 
     // -------------------------------------------------------------------------

@@ -39,7 +39,9 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
 import me.nagasonic.alkatraz.commands.CastCommand;
+import me.nagasonic.alkatraz.mobs.NativeGoalRegistry;
 import me.nagasonic.alkatraz.nms_v1_21_R4.entity.MagicEntitySpawner;
+import me.nagasonic.alkatraz.nms_v1_21_R4.entity.NativeGoalFactory;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -133,7 +135,8 @@ public final class NMS_v1_21_R4 implements NMS {
 
     @Override
     public void registerMagicEntities() {
-
+        NativeGoalFactory.registerCoverage();
+        NativeGoalRegistry.assertAllSupported();
     }
 
     @Override

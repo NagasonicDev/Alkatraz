@@ -2,63 +2,34 @@ package me.nagasonic.alkatraz.nms_v26_R2.entity;
 
 import me.nagasonic.alkatraz.mobs.MagicEntity;
 import me.nagasonic.alkatraz.api.mobs.MobBrain;
-import me.nagasonic.alkatraz.api.mobs.SpellCastConfig;
-import me.nagasonic.alkatraz.nms_v26_R2.entity.goals.CastSpellGoal;
-import me.nagasonic.alkatraz.nms_v26_R2.entity.goals.KeepSpellRangeGoal;
+import me.nagasonic.alkatraz.api.mobs.NativeGoalSpec;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.entity.ai.goal.*;
-import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
-import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.ai.goal.Goal;
 
 public class GoalBuilder {
     private GoalBuilder() {}
 
     public static void apply(Mob mob, MagicEntity magic, MobBrain brain) {
-        mob.getGoalSelector().removeAllGoals(g -> true);
+        mob.goalSelector.removeAllGoals(g -> true);
         mob.targetSelector.removeAllGoals(g -> true);
 
-        int p = 1;
+        NmsMobBrainContext ctx = new NmsMobBrainContext(mob);
 
-        if (brain.canSwim()) {
-            mob.getGoalSelector().addGoal(p++, new FloatGoal(mob));
-        }
-
-        SpellCastConfig sc = brain.spellCast();
-        if (sc != null) {
-            if (sc.hasRangeKeeping()) {
-                mob.getGoalSelector().addGoal(p++, new KeepSpellRangeGoal(
-                        mob,
-                        sc.minCastDist(),
-                        sc.maxCastDist(),
-                        1.1D
-                ));
+        for (MobBrain.Entry entry : brain.entries()) {
+            Goal goal;
+            if (entry.goalOrSpec() instanceof NativeGoalSpec spec) {
+                goal = NativeGoalFactory.build(spec, mob);
+            } else if (entry.goalOrSpec() instanceof me.nagasonic.alkatraz.api.mobs.Goal apiGoal) {
+                goal = new GoalBridge(apiGoal, ctx);
+            } else {
+                throw new IllegalArgumentException("Unknown goal type: " + entry.goalOrSpec().getClass());
             }
-            mob.getGoalSelector().addGoal(p++, new CastSpellGoal(
-                    mob,
-                    magic,
-                    sc.castRange(),
-                    sc.cooldownTicks()
-            ));
-        }
 
-        if (brain.meleeAttack() && mob instanceof PathfinderMob pm) {
-            mob.getGoalSelector().addGoal(p++, new MeleeAttackGoal(pm, 1.0D, false));
-        }
-
-        if (brain.randomStroll()) {
-            if (mob instanceof PathfinderMob pmob) {
-                mob.getGoalSelector().addGoal(p++, new WaterAvoidingRandomStrollGoal(pmob, 0.8D));
+            if (entry.isTargetGoal()) {
+                mob.targetSelector.addGoal(entry.priority(), goal);
+            } else {
+                mob.goalSelector.addGoal(entry.priority(), goal);
             }
         }
-
-        mob.getGoalSelector().addGoal(p++, new LookAtPlayerGoal(mob, Player.class, brain.lookAtPlayerRange()));
-        mob.getGoalSelector().addGoal(p,   new RandomLookAroundGoal(mob));
-
-        if (mob instanceof PathfinderMob pmob) {
-            mob.targetSelector.addGoal(1, new HurtByTargetGoal(pmob));
-        }
-        mob.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(mob, Player.class, true));
     }
 }

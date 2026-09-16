@@ -1,0 +1,38 @@
+display-name: "&8Zombie Fighter"
+melee-range: 0
+goals:
+  - priority: 1
+    type: float
+  - priority: 2
+    type: cast_spell
+    min-cast-dist: 0.0
+    max-cast-dist: 0.0
+    cast-range: 14.0
+    cooldown-ticks: 1800
+  - priority: 3
+    type: melee_attack
+    speed: 1.0
+    pause-when-mob-idle: false
+  - priority: 4
+    type: water_avoiding_stroll
+    speed: 0.8
+  - priority: 5
+    type: look_at_player
+    range: 8.0
+  - priority: 6
+    type: random_look_around
+targets:
+  - priority: 1
+    type: hurt_by_target
+  - priority: 2
+    type: nearest_attackable_target
+    target-class: org.bukkit.entity.Player
+    must-see: true
+  - priority: 3
+    type: nearest_attackable_target
+    target-class: org.bukkit.entity.AbstractVillager
+    must-see: false
+  - priority: 3
+    type: nearest_attackable_target
+    target-class: org.bukkit.entity.IronGolem
+    must-see: true

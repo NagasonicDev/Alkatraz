@@ -1,5 +1,7 @@
 package me.nagasonic.alkatraz.nms_v1_21_R1;
 import me.nagasonic.alkatraz.nms.NMS;
+import me.nagasonic.alkatraz.mobs.NativeGoalRegistry;
+import me.nagasonic.alkatraz.nms_v1_21_R1.entity.NativeGoalFactory;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
@@ -131,7 +133,8 @@ public final class NMS_v1_21_R1 implements NMS {
 
     @Override
     public void registerMagicEntities() {
-
+        NativeGoalFactory.registerCoverage();
+        NativeGoalRegistry.assertAllSupported();
     }
 
     @Override

@@ -110,6 +110,7 @@ public final class Alkatraz extends JavaPlugin {
         verbosity = VerbosityLevel.fromString(pluginConfig.getString("verbose"));
         saveSpellConfigs();
         saveMobConfigs();
+        saveBrainConfigs();
         if (!setupNMS()){
             enabled = false;
             return;
@@ -420,6 +421,7 @@ public final class Alkatraz extends JavaPlugin {
         saveConfig("spells/tornado.yml");
         saveConfig("spells/tsunami.yml");
         saveConfig("spells/tremor.yml");
+        saveConfig("spells/warp.yml");
         saveConfig("spells/water_pulse.yml");
         saveConfig("spells/water_sphere.yml");
         saveConfig("spells/whirlpool.yml");
@@ -511,5 +513,11 @@ public final class Alkatraz extends JavaPlugin {
         saveConfig("mobs/zombie_mage.yml");
         saveConfig("mobs/zombie_villager.yml");
         saveConfig("mobs/zombified_piglin.yml");
+    }
+
+    private void saveBrainConfigs() {
+        saveConfig("brains/zombie_mage.yml");
+        saveConfig("brains/zombie_fighter.yml");
+        saveConfig("brains/skeletal_mage.yml");
     }
 }

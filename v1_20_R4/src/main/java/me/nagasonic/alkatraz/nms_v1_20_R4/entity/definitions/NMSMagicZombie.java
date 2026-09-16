@@ -1,41 +1,83 @@
 package me.nagasonic.alkatraz.nms_v1_20_R4.entity.definitions;
 
+import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
+import me.nagasonic.alkatraz.api.mobs.MagicEntityType;
+import me.nagasonic.alkatraz.api.mobs.MobBrain;
+import me.nagasonic.alkatraz.items.magic.MagicItemServices;
+import me.nagasonic.alkatraz.mobs.MagicBrains;
 import me.nagasonic.alkatraz.mobs.MagicEntity;
 import me.nagasonic.alkatraz.mobs.MagicEntityRegistry;
-import me.nagasonic.alkatraz.api.mobs.MagicEntityType;
 import me.nagasonic.alkatraz.mobs.MobProfile;
-import me.nagasonic.alkatraz.api.mobs.MobBrain;
 import me.nagasonic.alkatraz.nms_v1_20_R4.entity.GoalBuilder;
+import me.nagasonic.alkatraz.util.ColorFormat;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.level.Level;
+import org.bukkit.Location;
+import org.bukkit.craftbukkit.v1_20_R4.CraftWorld;
+import org.bukkit.craftbukkit.v1_20_R4.inventory.CraftItemStack;
 
-public abstract class NMSMagicZombie extends Zombie implements MagicEntity {
+public class NMSMagicZombie extends Zombie implements MagicEntity {
 
     private final MagicData magicData = new MagicData();
+    private final MagicEntityType magicType;
 
     @Override
     public final MagicData getMagicData() { return magicData; }
 
-    protected abstract MagicEntityType entityType();
+    public MagicEntityType entityType() { return magicType; }
 
-    protected abstract MobBrain brain();
+    public MobBrain brain() { return MagicBrains.brain(magicType); }
 
-    protected NMSMagicZombie(EntityType<? extends Zombie> type, Level level) {
+    protected NMSMagicZombie(EntityType<? extends Zombie> type, Level level, MagicEntityType magicType) {
         super(type, level);
+        this.magicType = magicType;
 
-        MobProfile profile = MagicEntityRegistry.getProfile(entityType())
+        MobProfile profile = MagicEntityRegistry.getProfile(magicType)
                 .orElseThrow(() -> new IllegalStateException(
-                        entityType().getId() + " profile not loaded â€” did you call MagicEntities.registerProfiles()?"));
+                        magicType.getId() + " profile not loaded - did you call MagicEntities.registerProfiles()?"));
 
-        initMagic(profile, entityType(), (org.bukkit.entity.LivingEntity) getBukkitEntity());
+        initMagic(profile, magicType, (org.bukkit.entity.LivingEntity) getBukkitEntity());
     }
 
     @Override
     protected final void registerGoals() {
         GoalBuilder.apply(this, this, brain());
-        registerExtraGoals();
     }
 
-    protected void registerExtraGoals() {}
+    @Override
+    public boolean doHurtTarget(net.minecraft.world.entity.Entity target) {
+        double range = MagicBrains.meleeRange(magicType);
+        if (range > 0 && distanceTo(target) >= range) return false;
+        return super.doHurtTarget(target);
+    }
+
+    @Override
+    public net.minecraft.network.chat.Component getDisplayName() {
+        return Component.literal(ColorFormat.format(MagicBrains.displayName(magicType)));
+    }
+
+    public static NMSMagicZombie spawn(MagicEntityType magicType, Location location) {
+        ServerLevel level = (ServerLevel) ((CraftWorld) location.getWorld()).getHandle();
+
+        NMSMagicZombie mob = new NMSMagicZombie(EntityType.ZOMBIE, level, magicType);
+        mob.setPos(location.getX(), location.getY(), location.getZ());
+
+        mob.finalizeSpawn(level,
+                level.getCurrentDifficultyAt(mob.blockPosition()),
+                MobSpawnType.COMMAND, null);
+
+        String wand = MagicBrains.wand(magicType);
+        if (wand != null) {
+            mob.setItemInHand(InteractionHand.MAIN_HAND,
+                    CraftItemStack.asNMSCopy(MagicItemServices.get().createItem(MagicKeys.alkatraz(wand))));
+        }
+
+        level.addFreshEntityWithPassengers(mob);
+        return mob;
+    }
 }

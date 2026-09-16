@@ -5,7 +5,9 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.datafixers.util.Pair;
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.mobs.NativeGoalRegistry;
 import me.nagasonic.alkatraz.nms_v1_19_R1.entity.MagicEntitySpawner;
+import me.nagasonic.alkatraz.nms_v1_19_R1.entity.NativeGoalFactory;
 import me.nagasonic.alkatraz.util.Skin;
 import me.nagasonic.alkatraz.commands.CastCommand;
 import me.nagasonic.alkatraz.gui.grimoire.GrimoireLecternState;
@@ -132,7 +134,8 @@ public final class NMS_v1_19_R1 implements NMS {
 
     @Override
     public void registerMagicEntities() {
-        
+        NativeGoalFactory.registerCoverage();
+        NativeGoalRegistry.assertAllSupported();
     }
 
     @Override

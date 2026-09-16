@@ -2,9 +2,8 @@ package me.nagasonic.alkatraz.nms_v1_21_R6.entity;
 
 import me.nagasonic.alkatraz.api.mobs.MagicEntityType;
 import me.nagasonic.alkatraz.api.mobs.NmsMobFactory;
-import me.nagasonic.alkatraz.nms_v1_21_R6.entity.implementation.SkeletalMage;
-import me.nagasonic.alkatraz.nms_v1_21_R6.entity.implementation.ZombieFighter;
-import me.nagasonic.alkatraz.nms_v1_21_R6.entity.implementation.ZombieMage;
+import me.nagasonic.alkatraz.nms_v1_21_R6.entity.definitions.NMSMagicSkeleton;
+import me.nagasonic.alkatraz.nms_v1_21_R6.entity.definitions.NMSMagicZombie;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 
@@ -24,9 +23,8 @@ public class MagicEntitySpawner implements NmsMobFactory {
 
     private Optional<Entity> spawnByType(MagicEntityType type, Location location) {
         return switch (type) {
-            case ZOMBIE_MAGE    -> Optional.of(ZombieMage.spawn(location).getBukkitEntity());
-            case ZOMBIE_FIGHTER -> Optional.of(ZombieFighter.spawn(location).getBukkitEntity());
-            case SKELETAL_MAGE  -> Optional.of(SkeletalMage.spawn(location).getBukkitEntity());
+            case ZOMBIE_MAGE, ZOMBIE_FIGHTER -> Optional.of(NMSMagicZombie.spawn(type, location).getBukkitEntity());
+            case SKELETAL_MAGE -> Optional.of(NMSMagicSkeleton.spawn(type, location).getBukkitEntity());
         };
     }
 }
