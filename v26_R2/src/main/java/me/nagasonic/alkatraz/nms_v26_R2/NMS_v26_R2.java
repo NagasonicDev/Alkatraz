@@ -26,6 +26,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.entity.CraftEntity;
+import org.bukkit.craftbukkit.entity.CraftLivingEntity;
+import me.nagasonic.alkatraz.nms_v26_R2.entity.GoalBuilder;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.entity.*;
@@ -132,6 +134,13 @@ public final class NMS_v26_R2 implements NMS {
     @Override
     public Optional<org.bukkit.entity.Entity> spawnMagicEntity(String key, Location location) {
         return MagicEntitySpawner.INSTANCE.spawnMagicEntity(key, location);
+    }
+
+    @Override
+    public void applyBrain(org.bukkit.entity.LivingEntity entity, me.nagasonic.alkatraz.api.mobs.MobBrain brain) {
+        if (!(entity instanceof org.bukkit.entity.Mob)) return;
+        net.minecraft.world.entity.Mob handle = (net.minecraft.world.entity.Mob) ((CraftLivingEntity) entity).getHandle();
+        GoalBuilder.apply(handle, null, brain);
     }
 
     public void refresh(Player player) {

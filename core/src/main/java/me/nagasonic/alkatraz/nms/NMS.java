@@ -31,6 +31,16 @@ public interface NMS extends Listener {
     default Optional<Entity> spawnMagicEntity(MagicEntityType type, Location location) {
         return spawnMagicEntity(type.getId(), location);
     }
+
+    /**
+     * Applies a declarative brain (goals + target goals) to a living mob,
+     * replacing ALL current goals. Vanilla mobs are supported: the brain's
+     * {@code MagicEntity} parameter is unused by the goal builders.
+     *
+     * @param entity the mob to re-wire (must be a {@link org.bukkit.entity.Mob})
+     * @param brain  the brain to apply; an empty brain makes the mob passive
+     */
+    void applyBrain(org.bukkit.entity.LivingEntity entity, me.nagasonic.alkatraz.api.mobs.MobBrain brain);
     default void onEnable(){
         // default: do nothing
     }

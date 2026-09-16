@@ -28,6 +28,8 @@ public final class MagicBrains {
     private static final Map<String, Double> meleeRangeCache = new HashMap<>();
     private static final Map<String, String> wandCache = new HashMap<>();
 
+    public static final String BRAIN_KEY = "alkatraz_brain";
+
     private MagicBrains() {}
 
     /** (Re)loads every magic mob brain from disk. Call once at startup and on reload. */
@@ -37,27 +39,28 @@ public final class MagicBrains {
         meleeRangeCache.clear();
         wandCache.clear();
         for (MagicEntityType type : MagicEntityType.values()) {
-            register(type);
+            reload(type.getId());
         }
         Alkatraz.logInfo("Loaded " + MagicEntityType.values().length + " magic mob brain(s)");
     }
 
-    private static void register(MagicEntityType type) {
-        Config cfg = ConfigManager.getConfig("brains/" + type.getId() + ".yml");
+    /** (Re)loads one brain (and its display-name / melee-range / wand) from disk. */
+    public static void reload(String id) {
+        Config cfg = ConfigManager.getConfig("brains/" + id + ".yml");
         var root = cfg.get();
 
-        displayNameCache.put(type.getId(), root.getString("display-name", "&f" + type.getId()));
-        meleeRangeCache.put(type.getId(), root.getDouble("melee-range", 0));
+        displayNameCache.put(id, root.getString("display-name", "&f" + id));
+        meleeRangeCache.put(id, root.getDouble("melee-range", 0));
         String wand = root.getString("wand");
-        wandCache.put(type.getId(), wand);
+        wandCache.put(id, wand);
 
         MobBrain.Builder builder = MobBrain.builder();
         applySection(builder, root.getConfigurationSection("goals"), false);
         applySection(builder, root.getConfigurationSection("targets"), true);
-        brainCache.put(type.getId(), builder.build());
+        brainCache.put(id, builder.build());
 
-        Alkatraz.logHigh("Registered brain '" + type.getId() + "' (wand=" + wand + ", melee-range="
-                + meleeRangeCache.get(type.getId()) + ")");
+        Alkatraz.logHigh("Registered brain '" + id + "' (wand=" + wand + ", melee-range="
+                + meleeRangeCache.get(id) + ")");
     }
 
     private static void applySection(MobBrain.Builder builder, ConfigurationSection section, boolean target) {
@@ -71,7 +74,12 @@ public final class MagicBrains {
     }
 
     public static MobBrain brain(MagicEntityType type) {
-        return brainCache.get(type.getId());
+        return brain(type.getId());
+    }
+
+    /** Returns the cached brain for an arbitrary id, or {@code null} if never loaded. */
+    public static MobBrain brain(String id) {
+        return brainCache.get(id);
     }
 
     public static String displayName(MagicEntityType type) {

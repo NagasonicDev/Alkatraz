@@ -41,6 +41,8 @@ import org.bukkit.scoreboard.Team;
 import me.nagasonic.alkatraz.commands.CastCommand;
 import me.nagasonic.alkatraz.mobs.NativeGoalRegistry;
 import me.nagasonic.alkatraz.nms_v1_21_R4.entity.MagicEntitySpawner;
+import me.nagasonic.alkatraz.nms_v1_21_R4.entity.GoalBuilder;
+import org.bukkit.craftbukkit.v1_21_R4.entity.CraftLivingEntity;
 import me.nagasonic.alkatraz.nms_v1_21_R4.entity.NativeGoalFactory;
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -142,6 +144,13 @@ public final class NMS_v1_21_R4 implements NMS {
     @Override
     public Optional<org.bukkit.entity.Entity> spawnMagicEntity(String key, Location location) {
         return MagicEntitySpawner.INSTANCE.spawnMagicEntity(key, location);
+    }
+
+    @Override
+    public void applyBrain(org.bukkit.entity.LivingEntity entity, me.nagasonic.alkatraz.api.mobs.MobBrain brain) {
+        if (!(entity instanceof org.bukkit.entity.Mob)) return;
+        net.minecraft.world.entity.Mob handle = (net.minecraft.world.entity.Mob) ((CraftLivingEntity) entity).getHandle();
+        GoalBuilder.apply(handle, null, brain);
     }
 
 

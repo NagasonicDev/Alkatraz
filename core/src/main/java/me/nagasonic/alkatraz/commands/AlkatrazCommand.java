@@ -5,6 +5,7 @@ import me.nagasonic.alkatraz.events.SpellDiscoveredEvent;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.mobs.MagicEntities;
 import me.nagasonic.alkatraz.api.mobs.MagicEntityType;
+import me.nagasonic.alkatraz.api.mobs.MagicBrainService;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.api.dom.Permission;
 import me.nagasonic.alkatraz.gui.implementation.EquipmentMenu;
@@ -369,6 +370,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
         SpellRegistry.reload();
         ProgressionService.reload();
         MagicEntities.registerProfiles();
+        MagicBrainService.getInstance().reloadBrains();
         MagicItemBootstrap.reload();
         sender.sendMessage(lang().get("commands.reload_success"));
     }

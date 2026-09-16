@@ -2,6 +2,7 @@ package me.nagasonic.alkatraz.nms_v1_20_R4;
 import me.nagasonic.alkatraz.nms.NMS;
 import me.nagasonic.alkatraz.mobs.NativeGoalRegistry;
 import me.nagasonic.alkatraz.nms_v1_20_R4.entity.NativeGoalFactory;
+import me.nagasonic.alkatraz.nms_v1_20_R4.entity.GoalBuilder;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
@@ -24,6 +25,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_20_R4.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_20_R4.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_20_R4.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.v1_20_R4.inventory.CraftItemStack;
 import org.bukkit.entity.*;
 import net.minecraft.world.item.ItemStack;
@@ -130,6 +132,13 @@ public final class NMS_v1_20_R4 implements NMS {
     @Override
     public Optional<Entity> spawnMagicEntity(String key, Location location) {
         return MagicEntitySpawner.INSTANCE.spawnMagicEntity(key, location);
+    }
+
+    @Override
+    public void applyBrain(org.bukkit.entity.LivingEntity entity, me.nagasonic.alkatraz.api.mobs.MobBrain brain) {
+        if (!(entity instanceof org.bukkit.entity.Mob)) return;
+        net.minecraft.world.entity.Mob handle = (net.minecraft.world.entity.Mob) ((CraftLivingEntity) entity).getHandle();
+        GoalBuilder.apply(handle, null, brain);
     }
 
     @SuppressWarnings("UnstableApiUsage")

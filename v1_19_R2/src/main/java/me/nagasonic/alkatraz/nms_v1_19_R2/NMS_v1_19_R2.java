@@ -8,6 +8,7 @@ import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.mobs.NativeGoalRegistry;
 import me.nagasonic.alkatraz.nms_v1_19_R2.entity.MagicEntitySpawner;
 import me.nagasonic.alkatraz.nms_v1_19_R2.entity.NativeGoalFactory;
+import me.nagasonic.alkatraz.nms_v1_19_R2.entity.GoalBuilder;
 import me.nagasonic.alkatraz.util.Skin;
 import me.nagasonic.alkatraz.commands.CastCommand;
 import me.nagasonic.alkatraz.gui.grimoire.GrimoireLecternState;
@@ -32,6 +33,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_19_R2.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_19_R2.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_19_R2.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.v1_19_R2.inventory.CraftItemStack;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.HumanEntity;
@@ -141,6 +143,13 @@ public final class NMS_v1_19_R2 implements NMS {
     @Override
     public Optional<org.bukkit.entity.Entity> spawnMagicEntity(String key, Location location) {
         return MagicEntitySpawner.INSTANCE.spawnMagicEntity(key, location);
+    }
+
+    @Override
+    public void applyBrain(org.bukkit.entity.LivingEntity entity, me.nagasonic.alkatraz.api.mobs.MobBrain brain) {
+        if (!(entity instanceof org.bukkit.entity.Mob)) return;
+        net.minecraft.world.entity.Mob handle = (net.minecraft.world.entity.Mob) ((CraftLivingEntity) entity).getHandle();
+        GoalBuilder.apply(handle, null, brain);
     }
 
     public void refresh(Player player){
