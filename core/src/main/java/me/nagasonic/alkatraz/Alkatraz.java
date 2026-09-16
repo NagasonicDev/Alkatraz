@@ -155,6 +155,16 @@ public final class Alkatraz extends JavaPlugin {
         MagicEntities.registerProfiles();
         MagicBrainService.setInstance(new MagicBrainServiceImpl());
         nms.registerMagicEntities();
+        me.nagasonic.alkatraz.mobs.ai.AiSpecRegistry.assertAllSupported(
+                me.nagasonic.alkatraz.api.mobs.NativeGoalSpec.Float.class,
+                me.nagasonic.alkatraz.api.mobs.NativeGoalSpec.MeleeAttack.class,
+                me.nagasonic.alkatraz.api.mobs.NativeGoalSpec.WaterAvoidingRandomStroll.class,
+                me.nagasonic.alkatraz.api.mobs.NativeGoalSpec.LookAtPlayer.class,
+                me.nagasonic.alkatraz.api.mobs.NativeGoalSpec.RandomLookAround.class,
+                me.nagasonic.alkatraz.api.mobs.NativeGoalSpec.HurtByTarget.class,
+                me.nagasonic.alkatraz.api.mobs.NativeGoalSpec.NearestAttackableTarget.class,
+                me.nagasonic.alkatraz.api.mobs.NativeGoalSpec.Panic.class,
+                me.nagasonic.alkatraz.api.mobs.NativeGoalSpec.AvoidEntity.class);
         logVeryHigh("Initializing ProfileManager...");
         ProfileManager.initialize();
         logVeryHigh("Initializing ProgressionService...");

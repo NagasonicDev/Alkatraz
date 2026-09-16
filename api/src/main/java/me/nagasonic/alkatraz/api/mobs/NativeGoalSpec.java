@@ -4,10 +4,10 @@ import org.bukkit.entity.LivingEntity;
 
 /**
  * Declarative description of a vanilla mob goal. A {@code NativeGoalSpec} is a
- * closed set of records; each version module translates the spec into its own
- * native {@code net.minecraft.world.entity.ai.goal.Goal} via a
- * {@code NativeGoalFactory} switch. This keeps the goal inventory reachable from
- * the api without leaking NMS types.
+ * closed set of records; each version module registers a leaf-builder for it
+ * into core's {@code AiSpecRegistry} that turns the spec into its own native
+ * {@code net.minecraft.world.entity.ai.goal.Goal}. This keeps the goal inventory
+ * reachable from the api without leaking NMS types.
  *
  * <p>Behaviour notes:
  * <ul>

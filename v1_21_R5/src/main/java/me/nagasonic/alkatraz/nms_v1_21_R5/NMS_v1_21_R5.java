@@ -1,7 +1,8 @@
 package me.nagasonic.alkatraz.nms_v1_21_R5;
 import me.nagasonic.alkatraz.nms.NMS;
-import me.nagasonic.alkatraz.mobs.NativeGoalRegistry;
-import me.nagasonic.alkatraz.nms_v1_21_R5.entity.NativeGoalFactory;
+import me.nagasonic.alkatraz.nms_v1_21_R5.entity.AiSpecRegistration;
+import me.nagasonic.alkatraz.nms_v1_21_R5.entity.GoalBridge;
+import me.nagasonic.alkatraz.nms_v1_21_R5.entity.NmsMobBrainContext;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
@@ -42,8 +43,9 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
 import me.nagasonic.alkatraz.nms_v1_21_R5.entity.MagicEntitySpawner;
-import me.nagasonic.alkatraz.nms_v1_21_R5.entity.GoalBuilder;
 import org.bukkit.craftbukkit.v1_21_R5.entity.CraftLivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.goal.Goal;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -137,8 +139,7 @@ public final class NMS_v1_21_R5 implements NMS {
 
     @Override
     public void registerMagicEntities() {
-        NativeGoalFactory.registerCoverage();
-        NativeGoalRegistry.assertAllSupported();
+        AiSpecRegistration.registerAll();
     }
 
     @Override
@@ -147,10 +148,29 @@ public final class NMS_v1_21_R5 implements NMS {
     }
 
     @Override
-    public void applyBrain(org.bukkit.entity.LivingEntity entity, me.nagasonic.alkatraz.api.mobs.MobBrain brain) {
-        if (!(entity instanceof org.bukkit.entity.Mob)) return;
-        net.minecraft.world.entity.Mob handle = (net.minecraft.world.entity.Mob) ((CraftLivingEntity) entity).getHandle();
-        GoalBuilder.apply(handle, null, brain);
+    public Object unwrapMob(org.bukkit.entity.LivingEntity entity) {
+        return ((CraftLivingEntity) entity).getHandle();
+    }
+
+    @Override
+    public void wipeGoals(Object nativeMob) {
+        Mob mob = (Mob) nativeMob;
+        mob.goalSelector.removeAllGoals(g -> true);
+        mob.targetSelector.removeAllGoals(g -> true);
+    }
+
+    @Override
+    public void addGoal(Object nativeMob, Object nativeGoal, int priority, boolean target) {
+        Mob mob = (Mob) nativeMob;
+        Goal goal = (Goal) nativeGoal;
+        if (target) mob.targetSelector.addGoal(priority, goal);
+        else mob.goalSelector.addGoal(priority, goal);
+    }
+
+    @Override
+    public Object bridgeCustomGoal(Object nativeMob, me.nagasonic.alkatraz.api.mobs.Goal apiGoal) {
+        Mob mob = (Mob) nativeMob;
+        return new GoalBridge(apiGoal, new NmsMobBrainContext(mob));
     }
 
     public void refresh(Player player) {

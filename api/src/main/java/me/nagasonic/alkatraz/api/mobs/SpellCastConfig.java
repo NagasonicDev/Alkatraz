@@ -2,7 +2,7 @@ package me.nagasonic.alkatraz.api.mobs;
 
 /**
  * Configuration for a magic mob's spell-casting AI. Consumed by the
- * version-specific {@code GoalBuilder} to wire up {@code KeepSpellRangeGoal}
+ * custom-goal bridge to wire up {@code KeepSpellRangeGoal}
  * and {@code CastSpellGoal}.
  *
  * <p>Set {@code minCastDist} and {@code maxCastDist} to {@code 0} to skip the

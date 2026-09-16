@@ -2,7 +2,7 @@ package me.nagasonic.alkatraz.mobs;
 
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.api.mobs.MagicEntityType;
-import me.nagasonic.alkatraz.api.mobs.MobBrain;
+import me.nagasonic.alkatraz.api.mobs.GoalBrain;
 import me.nagasonic.alkatraz.config.Config;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.mobs.goals.GoalFactory;
@@ -13,7 +13,7 @@ import java.util.Map;
 
 /**
  * Loads each magic mob's declarative AI from {@code brains/<id>.yml} into a
- * cached {@link MobBrain}, plus the display-name / melee-range / wand values
+ * cached {@link GoalBrain}, plus the display-name / melee-range / wand values
  * the NMS base classes read at spawn time.
  *
  * <pre>
@@ -23,7 +23,7 @@ import java.util.Map;
  */
 public final class MagicBrains {
 
-    private static final Map<String, MobBrain> brainCache = new HashMap<>();
+    private static final Map<String, GoalBrain> brainCache = new HashMap<>();
     private static final Map<String, String> displayNameCache = new HashMap<>();
     private static final Map<String, Double> meleeRangeCache = new HashMap<>();
     private static final Map<String, String> wandCache = new HashMap<>();
@@ -54,7 +54,7 @@ public final class MagicBrains {
         String wand = root.getString("wand");
         wandCache.put(id, wand);
 
-        MobBrain.Builder builder = MobBrain.builder();
+        GoalBrain.Builder builder = GoalBrain.builder();
         applySection(builder, root.getConfigurationSection("goals"), false);
         applySection(builder, root.getConfigurationSection("targets"), true);
         brainCache.put(id, builder.build());
@@ -63,7 +63,7 @@ public final class MagicBrains {
                 + meleeRangeCache.get(id) + ")");
     }
 
-    private static void applySection(MobBrain.Builder builder, ConfigurationSection section, boolean target) {
+    private static void applySection(GoalBrain.Builder builder, ConfigurationSection section, boolean target) {
         if (section == null) return;
         for (String key : section.getKeys(false)) {
             ConfigurationSection entry = section.getConfigurationSection(key);
@@ -73,12 +73,12 @@ public final class MagicBrains {
         }
     }
 
-    public static MobBrain brain(MagicEntityType type) {
+    public static GoalBrain brain(MagicEntityType type) {
         return brain(type.getId());
     }
 
     /** Returns the cached brain for an arbitrary id, or {@code null} if never loaded. */
-    public static MobBrain brain(String id) {
+    public static GoalBrain brain(String id) {
         return brainCache.get(id);
     }
 

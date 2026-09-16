@@ -2,13 +2,13 @@ package me.nagasonic.alkatraz.nms_v1_19_R3.entity.definitions;
 
 import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
 import me.nagasonic.alkatraz.api.mobs.MagicEntityType;
-import me.nagasonic.alkatraz.api.mobs.MobBrain;
+import me.nagasonic.alkatraz.api.mobs.GoalBrain;
+import me.nagasonic.alkatraz.mobs.ai.AiApplier;
 import me.nagasonic.alkatraz.items.magic.MagicItemServices;
 import me.nagasonic.alkatraz.mobs.MagicBrains;
 import me.nagasonic.alkatraz.mobs.MagicEntity;
 import me.nagasonic.alkatraz.mobs.MagicEntityRegistry;
 import me.nagasonic.alkatraz.mobs.MobProfile;
-import me.nagasonic.alkatraz.nms_v1_19_R3.entity.GoalBuilder;
 import me.nagasonic.alkatraz.util.ColorFormat;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -31,11 +31,12 @@ public class NMSMagicZombie extends Zombie implements MagicEntity {
 
     public MagicEntityType entityType() { return magicType; }
 
-    public MobBrain brain() { return MagicBrains.brain(magicType); }
+    public GoalBrain brain() { return MagicBrains.brain(magicType); }
 
     protected NMSMagicZombie(EntityType<? extends Zombie> type, Level level, MagicEntityType magicType) {
         super(type, level);
         this.magicType = magicType;
+        registerGoals();
 
         MobProfile profile = MagicEntityRegistry.getProfile(magicType)
                 .orElseThrow(() -> new IllegalStateException(
@@ -46,7 +47,8 @@ public class NMSMagicZombie extends Zombie implements MagicEntity {
 
     @Override
     protected final void registerGoals() {
-        GoalBuilder.apply(this, this, brain());
+        if (magicType == null) return;
+        AiApplier.applyGoalBrain(this, brain());
     }
 
     @Override

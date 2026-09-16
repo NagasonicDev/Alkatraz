@@ -6,22 +6,25 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Declarative description of a magic mob's AI behaviour. An open, ordered list
- * of {@link Entry entries}; each entry is either an api {@link Goal} (version-
- * agnostic, implemented in core or a plugin) or a {@link NativeGoalSpec}
- * (a vanilla goal description the version module translates into its own NMS
- * goal). Ordering is meaningful: a later entry is registered at a higher
- * priority number.
+ * Declarative description of a magic mob's goal-based AI behaviour (the
+ * "Goal Brain"). An open, ordered list of {@link Entry entries}; each entry is
+ * either an api {@link Goal} (version-agnostic, implemented in core or a
+ * plugin) or a {@link NativeGoalSpec} (a vanilla goal description the version
+ * module translates into its own NMS goal). Ordering is meaningful: a later
+ * entry is registered at a higher priority number.
+ *
+ * <p>Applicability is decided in core ({@code me.nagasonic.alkatraz.mobs.ai.AiApplier});
+ * modules only supply native leaf-builders via the AiSpecRegistry.
  *
  * <pre>
- *   private static final MobBrain BRAIN = MobBrain.builder()
+ *   private static final GoalBrain BRAIN = GoalBrain.builder()
  *       .addNative(1, new NativeGoalSpec.Float())
  *       .addGoal(2, new CastSpellGoal(new SpellCastConfig(6.0, 12.0, 14.0, 40)))
  *       .addNativeTarget(2, new NativeGoalSpec.NearestAttackableTarget(Player.class, true))
  *       .build();
  * </pre>
  */
-public final class MobBrain {
+public final class GoalBrain {
 
     /**
      * One goal registration.
@@ -34,7 +37,7 @@ public final class MobBrain {
 
     private final List<Entry> entries;
 
-    private MobBrain(List<Entry> entries) {
+    private GoalBrain(List<Entry> entries) {
         this.entries = new ArrayList<>(entries);
     }
 
@@ -78,8 +81,8 @@ public final class MobBrain {
             return this;
         }
 
-        public MobBrain build() {
-            return new MobBrain(entries);
+        public GoalBrain build() {
+            return new GoalBrain(entries);
         }
     }
 }

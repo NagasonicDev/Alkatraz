@@ -1,6 +1,7 @@
 package me.nagasonic.alkatraz.nms;
 
 import me.nagasonic.alkatraz.api.mobs.MagicEntityType;
+import me.nagasonic.alkatraz.mobs.ai.AiApplier;
 import me.nagasonic.alkatraz.util.Skin;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -33,14 +34,36 @@ public interface NMS extends Listener {
     }
 
     /**
-     * Applies a declarative brain (goals + target goals) to a living mob,
-     * replacing ALL current goals. Vanilla mobs are supported: the brain's
-     * {@code MagicEntity} parameter is unused by the goal builders.
+     * Applies a declarative goal brain to a living mob, replacing ALL current
+     * goals. Vanilla mobs are supported. Core-driven: delegates to
+     * {@link AiApplier#applyGoalBrain(LivingEntity, GoalBrain)}.
      *
      * @param entity the mob to re-wire (must be a {@link org.bukkit.entity.Mob})
      * @param brain  the brain to apply; an empty brain makes the mob passive
      */
-    void applyBrain(org.bukkit.entity.LivingEntity entity, me.nagasonic.alkatraz.api.mobs.MobBrain brain);
+    default void applyBrain(org.bukkit.entity.LivingEntity entity, me.nagasonic.alkatraz.api.mobs.GoalBrain brain) {
+        AiApplier.applyGoalBrain(entity, brain);
+    }
+
+    // -----------------------------------------------------------------------
+    // Core-driven AI primitives (implemented once per module, called by core)
+    // -----------------------------------------------------------------------
+
+    /**
+     * Unwraps a Bukkit living entity into its native
+     * {@code net.minecraft.world.entity.Mob} handle, returned as Object so core
+     * stays NMS-free.
+     */
+    Object unwrapMob(org.bukkit.entity.LivingEntity entity);
+
+    /** Removes every goal and target-goal from the native mob's selectors. */
+    void wipeGoals(Object nativeMob);
+
+    /** Adds a built native goal to the regular ({@code target=false}) or target selector. */
+    void addGoal(Object nativeMob, Object nativeGoal, int priority, boolean target);
+
+    /** Wraps an api {@code Goal} into a native goal using the module's own bridge + context. */
+    Object bridgeCustomGoal(Object nativeMob, me.nagasonic.alkatraz.api.mobs.Goal apiGoal);
     default void onEnable(){
         // default: do nothing
     }

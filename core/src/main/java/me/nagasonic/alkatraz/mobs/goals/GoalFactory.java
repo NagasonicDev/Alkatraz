@@ -1,7 +1,7 @@
 package me.nagasonic.alkatraz.mobs.goals;
 
 import me.nagasonic.alkatraz.api.mobs.Goal;
-import me.nagasonic.alkatraz.api.mobs.MobBrain;
+import me.nagasonic.alkatraz.api.mobs.GoalBrain;
 import me.nagasonic.alkatraz.api.mobs.NativeGoalSpec;
 import me.nagasonic.alkatraz.api.mobs.SpellCastConfig;
 import org.bukkit.configuration.ConfigurationSection;
@@ -81,7 +81,7 @@ public final class GoalFactory {
         NATIVE.put(type, factory);
     }
 
-    public static void applyFromConfig(MobBrain.Builder builder, ConfigurationSection section) {
+    public static void applyFromConfig(GoalBrain.Builder builder, ConfigurationSection section) {
         int priority = section.getInt("priority", 1);
         String type = section.getString("type", "");
         boolean target = section.getBoolean("target", false);

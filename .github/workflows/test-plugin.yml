@@ -89,6 +89,7 @@ jobs:
           distribution: temurin
           java-version: '26'
           cache: maven
+          cache-dependency-path: .github/workflows/maven-cache-key.txt
 
       - name: Download and install all NMS artifacts
         uses: actions/download-artifact@v4
@@ -102,7 +103,7 @@ jobs:
           if [ -d nms-merged/m2 ]; then cp -r nms-merged/m2/. "$HOME/.m2/repository/"; fi
 
       - name: Run unit tests
-        run: mvn -B test
+        run: mvn -B -T 1C test
 
   # ---------------------------------------------------------------------
   # 3. Build the plugin jar once, share it across every integration test.
@@ -117,6 +118,7 @@ jobs:
           distribution: temurin
           java-version: '26'
           cache: maven
+          cache-dependency-path: .github/workflows/maven-cache-key.txt
 
       - name: Download and install all NMS artifacts
         uses: actions/download-artifact@v4
@@ -130,7 +132,7 @@ jobs:
           if [ -d nms-merged/m2 ]; then cp -r nms-merged/m2/. "$HOME/.m2/repository/"; fi
 
       - name: Build plugin jar
-        run: mvn -B package -DskipTests
+        run: mvn -B -T 1C package -DskipTests
       - name: Upload plugin artifact
         uses: actions/upload-artifact@v4
         with:

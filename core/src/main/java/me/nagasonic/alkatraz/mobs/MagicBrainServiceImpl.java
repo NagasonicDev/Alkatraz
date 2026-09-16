@@ -4,7 +4,7 @@ import de.tr7zw.changeme.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.api.mobs.MagicBrainService;
 import me.nagasonic.alkatraz.api.mobs.MagicEntityType;
-import me.nagasonic.alkatraz.api.mobs.MobBrain;
+import me.nagasonic.alkatraz.api.mobs.GoalBrain;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.LivingEntity;
@@ -42,7 +42,7 @@ public final class MagicBrainServiceImpl implements MagicBrainService {
         if (!(entity instanceof Mob)) return false;
         if (Bukkit.isPrimaryThread()) {
             MagicBrains.reload(brainId);
-            MobBrain brain = MagicBrains.brain(brainId);
+            GoalBrain brain = MagicBrains.brain(brainId);
             if (brain == null) return false;
             NBT.modifyPersistentData(entity, nbt -> { nbt.setString(MagicBrains.BRAIN_KEY, brainId); });
             Alkatraz.getNms().applyBrain(entity, brain);
@@ -50,7 +50,7 @@ public final class MagicBrainServiceImpl implements MagicBrainService {
         }
         ensureMainThread(() -> {
             MagicBrains.reload(brainId);
-            MobBrain brain = MagicBrains.brain(brainId);
+            GoalBrain brain = MagicBrains.brain(brainId);
             if (brain == null) return;
             NBT.modifyPersistentData(entity, nbt -> { nbt.setString(MagicBrains.BRAIN_KEY, brainId); });
             Alkatraz.getNms().applyBrain(entity, brain);
@@ -69,7 +69,7 @@ public final class MagicBrainServiceImpl implements MagicBrainService {
         String brainId = resolveBrainId(entity);
         if (brainId == null) return false;
         MagicBrains.reload(brainId);
-        MobBrain brain = MagicBrains.brain(brainId);
+        GoalBrain brain = MagicBrains.brain(brainId);
         if (brain == null) return false;
         Alkatraz.getNms().applyBrain(entity, brain);
         return true;
@@ -88,7 +88,7 @@ public final class MagicBrainServiceImpl implements MagicBrainService {
                 String brainId = resolveBrainId(entity);
                 if (brainId == null) continue;
                 MagicBrains.reload(brainId);
-                MobBrain brain = MagicBrains.brain(brainId);
+                GoalBrain brain = MagicBrains.brain(brainId);
                 if (brain == null) continue;
                 Alkatraz.getNms().applyBrain(entity, brain);
                 count++;
@@ -103,7 +103,7 @@ public final class MagicBrainServiceImpl implements MagicBrainService {
         if (!(entity instanceof Mob)) return false;
         ensureMainThread(() -> {
             NBT.modifyPersistentData(entity, nbt -> { nbt.removeKey(MagicBrains.BRAIN_KEY); });
-            Alkatraz.getNms().applyBrain(entity, MobBrain.builder().build());
+            Alkatraz.getNms().applyBrain(entity, GoalBrain.builder().build());
         });
         return true;
     }
