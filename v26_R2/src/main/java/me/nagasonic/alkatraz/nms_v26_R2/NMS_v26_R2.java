@@ -7,6 +7,7 @@ import me.nagasonic.alkatraz.nms_v26_R2.entity.NmsMobBrainContext;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.datafixers.util.Pair;
+import java.lang.reflect.Field;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.commands.CastCommand;
 import me.nagasonic.alkatraz.nms_v26_R2.entity.MagicEntitySpawner;
@@ -21,6 +22,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PositionMoveRotation;
 import net.minecraft.world.entity.Relative;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.goal.GoalSelector;
 import net.minecraft.world.inventory.LecternMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.SimpleContainer;
@@ -145,16 +147,34 @@ public final class NMS_v26_R2 implements NMS {
     @Override
     public void wipeGoals(Object nativeMob) {
         Mob mob = (Mob) nativeMob;
-        mob.goalSelector.removeAllGoals(g -> true);
-        mob.targetSelector.removeAllGoals(g -> true);
+        goalSelector(mob).removeAllGoals(g -> true);
+        targetSelector(mob).removeAllGoals(g -> true);
     }
 
     @Override
     public void addGoal(Object nativeMob, Object nativeGoal, int priority, boolean target) {
         Mob mob = (Mob) nativeMob;
         Goal goal = (Goal) nativeGoal;
-        if (target) mob.targetSelector.addGoal(priority, goal);
-        else mob.goalSelector.addGoal(priority, goal);
+        if (target) targetSelector(mob).addGoal(priority, goal);
+        else goalSelector(mob).addGoal(priority, goal);
+    }
+
+    private static GoalSelector goalSelector(Mob mob) {
+        return (GoalSelector) accessField(mob, "goalSelector");
+    }
+
+    private static GoalSelector targetSelector(Mob mob) {
+        return (GoalSelector) accessField(mob, "targetSelector");
+    }
+
+    private static Object accessField(Mob mob, String name) {
+        try {
+            Field field = Mob.class.getDeclaredField(name);
+            field.setAccessible(true);
+            return field.get(mob);
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException("Cannot access Mob." + name, e);
+        }
     }
 
     @Override
