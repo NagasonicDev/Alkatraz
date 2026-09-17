@@ -3,6 +3,7 @@ package me.nagasonic.alkatraz.mobs;
 import de.tr7zw.changeme.nbtapi.NBT;
 import me.nagasonic.alkatraz.api.Element;
 import me.nagasonic.alkatraz.api.mobs.MagicEntityType;
+import me.nagasonic.alkatraz.mobs.ai.task.TaskBrainTicker;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
 import org.bukkit.entity.LivingEntity;
@@ -59,6 +60,8 @@ public interface MagicEntity {
                     data.spells.stream().map(Spell::getId).toList()));
             nbt.setString(MagicEntityType.NBT_KEY, type.getId());
         });
+
+        TaskBrainTicker.attach(self);
     }
 
     default double getAffinity(Element element) {

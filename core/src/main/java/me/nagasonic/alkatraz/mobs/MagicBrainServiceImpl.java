@@ -18,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
  * <p>Id resolution order: explicit {@link MagicBrains#BRAIN_KEY} tag, then the
  * {@link MagicEntityType#NBT_KEY} tag of a magic mob, then {@code null}.
  */
-public final class MagicBrainServiceImpl implements MagicBrainService {
+public class MagicBrainServiceImpl implements MagicBrainService {
 
     private static void ensureMainThread(Runnable task) {
         if (Bukkit.isPrimaryThread()) {

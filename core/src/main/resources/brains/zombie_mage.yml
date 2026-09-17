@@ -1,32 +1,54 @@
 display-name: "&8Zombie Mage"
 melee-range: 3.0
 wand: wooden_wand
-goals:
-  - priority: 1
-    type: float
-  - priority: 2
-    type: keep_spell_range
-    min-distance: 6.0
-    max-distance: 12.0
-    speed: 1.1
-  - priority: 3
-    type: cast_spell
-    min-cast-dist: 6.0
-    max-cast-dist: 12.0
-    cast-range: 14.0
-    cooldown-ticks: 40
-  - priority: 4
-    type: water_avoiding_stroll
-    speed: 0.8
-  - priority: 5
-    type: look_at_player
-    range: 8.0
-  - priority: 6
-    type: random_look_around
-targets:
-  - priority: 1
-    type: hurt_by_target
-  - priority: 2
-    type: nearest_attackable_target
-    target-class: org.bukkit.entity.Player
-    must-see: true
+tasks:
+  core-memories:
+    - nearest_hostiles
+    - is_hurt
+  core-sensors:
+    - type: nearest_living
+      radius: 16.0
+    - type: hurt_by
+  default-activity: IDLE
+  activities:
+    IDLE:
+      priority: 1
+      schedule: DAY
+      goals:
+        wander:
+          type: water_avoiding_stroll
+          priority: 4
+          speed: 0.8
+        look:
+          type: look_at_player
+          priority: 5
+          range: 8.0
+        look_around:
+          type: random_look_around
+          priority: 6
+    FIGHT:
+      priority: 10
+      activation-memories:
+        - nearest_hostiles
+      goals:
+        float:
+          type: float
+          priority: 1
+        keep_range:
+          type: keep_spell_range
+          priority: 2
+          min-distance: 6
+          max-distance: 12
+          speed: 1.1
+        cast:
+          type: cast_spell
+          priority: 3
+      targets:
+        hurt:
+          type: hurt_by_target
+          priority: 1
+        attacker:
+          type: nearest_attackable_target
+          priority: 2
+          target-class: org.bukkit.entity.Player
+          must-see: true

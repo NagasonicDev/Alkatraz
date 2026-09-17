@@ -39,10 +39,11 @@ import me.nagasonic.alkatraz.items.magic.recipe.unlock.UnlockSweep;
 import me.nagasonic.alkatraz.loot.LootInjector;
 import me.nagasonic.alkatraz.loot.MobLootInjector;
 import me.nagasonic.alkatraz.loot.implementation.SpellbookLoot;
+import me.nagasonic.alkatraz.mobs.MagicAiServiceImpl;
 import me.nagasonic.alkatraz.mobs.MagicEntities;
 import me.nagasonic.alkatraz.mobs.MagicEntitySpawnListener;
-import me.nagasonic.alkatraz.mobs.MagicBrainServiceImpl;
 import me.nagasonic.alkatraz.mobs.MobModifier;
+import me.nagasonic.alkatraz.mobs.ai.task.TaskBrainTicker;
 import me.nagasonic.alkatraz.nms.NMS;
 import me.nagasonic.alkatraz.hooks.PlaceholderAPIHook;
 import me.nagasonic.alkatraz.hooks.WorldGuardHook;
@@ -60,6 +61,7 @@ import me.nagasonic.alkatraz.spells.spellbooks.SpellbookVillagerListener;
 import me.nagasonic.alkatraz.texturepack.ResourcePackListener;
 import me.nagasonic.alkatraz.tutorial.FirstJoinTutorial;
 import me.nagasonic.alkatraz.api.SpellAPI;
+import me.nagasonic.alkatraz.api.mobs.MagicAiService;
 import me.nagasonic.alkatraz.api.mobs.MagicBrainService;
 import me.nagasonic.alkatraz.util.UpdateChecker;
 import me.nagasonic.alkatraz.util.Utils;
@@ -153,7 +155,10 @@ public final class Alkatraz extends JavaPlugin {
         logVeryHigh("Registering profiles...");
         ProfileRegistry.registerProfiles();
         MagicEntities.registerProfiles();
-        MagicBrainService.setInstance(new MagicBrainServiceImpl());
+        MagicAiServiceImpl ai = new MagicAiServiceImpl();
+        MagicBrainService.setInstance(ai);
+        MagicAiService.setInstance(ai);
+        TaskBrainTicker.start();
         nms.registerMagicEntities();
         me.nagasonic.alkatraz.mobs.ai.AiSpecRegistry.assertAllSupported(
                 me.nagasonic.alkatraz.api.mobs.NativeGoalSpec.Float.class,
@@ -239,6 +244,7 @@ public final class Alkatraz extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        TaskBrainTicker.shutdown();
         ProfileManager.shutdown();
         BarrierManager.disposeAll();
         if (focusManager != null) {

@@ -1,5 +1,6 @@
 package me.nagasonic.alkatraz.api.ai.task;
 
+import me.nagasonic.alkatraz.api.mobs.GoalBrain;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -12,10 +13,10 @@ class TaskBrainTest {
         return new ActivitySpec(
                 "IDLE", 0,
                 List.of(new Sensor.HurtBy()),
-                List.of(new PrioritizedBehavior(1, new NativeBehaviorSpec.SleepInBed(), -1)),
+                List.of(new GoalBrain.Entry(1, new NativeBehaviorSpec.SleepInBed(), false)),
                 List.of(),
                 List.of(MemoryKey.IS_HURT),
-                List.of(new TimedMemory(MemoryKey.IS_HURT, 40)),
+                List.of(new TimedMemory(MemoryKey.IS_HURT, Boolean.TRUE, 40)),
                 List.of(MemoryKey.IS_HURT),
                 TimeOfDayPredicate.NIGHT);
     }
@@ -24,7 +25,7 @@ class TaskBrainTest {
         return new ActivitySpec(
                 "hunt", 10,
                 List.of(new Sensor.NearestLivingEntities(16)),
-                List.of(new PrioritizedBehavior(1, new NativeBehaviorSpec.MoveToTargetSink(2, 1), -1)),
+                List.of(new GoalBrain.Entry(1, new NativeBehaviorSpec.MoveToTargetSink(2, 1), false)),
                 List.of(activation),
                 List.of(),
                 List.of(),
@@ -94,7 +95,7 @@ class TaskBrainTest {
                 .addActivity(new ActivitySpec(
                         "guarded", 1, List.of(), List.of(),
                         List.of(MemoryKey.IS_HURT), List.of(),
-                        List.of(new TimedMemory(MemoryKey.IS_HURT, 10)),
+                        List.of(new TimedMemory(MemoryKey.IS_HURT, Boolean.TRUE, 10)),
                         List.of(), TimeOfDayPredicate.NIGHT))
                 .build();
         assertEquals(1, brain.activities().size());
@@ -129,10 +130,13 @@ class TaskBrainTest {
 
         ActivitySpec spec = idle();
         assertThrows(UnsupportedOperationException.class, () -> spec.sensors().add(new Sensor.HurtBy()));
-        assertThrows(UnsupportedOperationException.class, () -> spec.behaviors().add(
-                new PrioritizedBehavior(1, new NativeBehaviorSpec.SleepInBed(), -1)));
+        assertThrows(UnsupportedOperationException.class, () -> spec.goals().add(
+                new GoalBrain.Entry(1, new NativeBehaviorSpec.SleepInBed(), false)));
+        assertThrows(NullPointerException.class,
+                () -> new ActivitySpec("x", 1, List.of(), List.of((GoalBrain.Entry) null),
+                        List.of(), List.of(), List.of(), List.of(), TimeOfDayPredicate.DAY));
         assertThrows(UnsupportedOperationException.class, () -> spec.activationMemories().add(MemoryKey.IS_HURT));
-        assertThrows(UnsupportedOperationException.class, () -> spec.memoriesOnEnter().add(new TimedMemory(MemoryKey.IS_HURT, 1)));
+        assertThrows(UnsupportedOperationException.class, () -> spec.memoriesOnEnter().add(new TimedMemory(MemoryKey.IS_HURT, Boolean.TRUE, 1)));
         assertThrows(UnsupportedOperationException.class, () -> spec.memoriesOnExit().add(MemoryKey.IS_HURT));
         assertThrows(UnsupportedOperationException.class, () -> spec.deactivationMemories().add(MemoryKey.IS_HURT));
     }

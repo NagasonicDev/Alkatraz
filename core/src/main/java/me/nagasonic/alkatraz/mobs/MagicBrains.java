@@ -1,10 +1,12 @@
 package me.nagasonic.alkatraz.mobs;
 
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.api.ai.task.TaskBrain;
 import me.nagasonic.alkatraz.api.mobs.MagicEntityType;
 import me.nagasonic.alkatraz.api.mobs.GoalBrain;
 import me.nagasonic.alkatraz.config.Config;
 import me.nagasonic.alkatraz.config.ConfigManager;
+import me.nagasonic.alkatraz.mobs.ai.task.TaskBrainFactory;
 import me.nagasonic.alkatraz.mobs.goals.GoalFactory;
 import org.bukkit.configuration.ConfigurationSection;
 
@@ -27,6 +29,8 @@ public final class MagicBrains {
     private static final Map<String, String> displayNameCache = new HashMap<>();
     private static final Map<String, Double> meleeRangeCache = new HashMap<>();
     private static final Map<String, String> wandCache = new HashMap<>();
+    private static final Map<String, TaskBrain> taskBrainCache = new HashMap<>();
+    private static final Map<String, Map<String, GoalBrain>> activityBrainCache = new HashMap<>();
 
     public static final String BRAIN_KEY = "alkatraz_brain";
 
@@ -38,6 +42,8 @@ public final class MagicBrains {
         displayNameCache.clear();
         meleeRangeCache.clear();
         wandCache.clear();
+        taskBrainCache.clear();
+        activityBrainCache.clear();
         for (MagicEntityType type : MagicEntityType.values()) {
             reload(type.getId());
         }
@@ -59,6 +65,16 @@ public final class MagicBrains {
         applySection(builder, root.getConfigurationSection("targets"), true);
         brainCache.put(id, builder.build());
 
+        ConfigurationSection tasks = root.getConfigurationSection("tasks");
+        if (tasks != null) {
+            TaskBrainFactory.Result result = TaskBrainFactory.load(tasks);
+            taskBrainCache.put(id, result.brain());
+            activityBrainCache.put(id, result.activityBrains());
+        } else {
+            taskBrainCache.remove(id);
+            activityBrainCache.remove(id);
+        }
+
         Alkatraz.logHigh("Registered brain '" + id + "' (wand=" + wand + ", melee-range="
                 + meleeRangeCache.get(id) + ")");
     }
@@ -77,9 +93,33 @@ public final class MagicBrains {
         return brain(type.getId());
     }
 
-    /** Returns the cached brain for an arbitrary id, or {@code null} if never loaded. */
+    /** Returns the default activity's brain for a task brain, else the flat cached brain, or {@code null} if never loaded. */
     public static GoalBrain brain(String id) {
+        GoalBrain defaultActivity = defaultActivityBrain(id);
+        if (defaultActivity != null) return defaultActivity;
         return brainCache.get(id);
+    }
+
+    /** Whether {@code id} loaded a {@code tasks:} section. */
+    public static boolean isTaskBrain(String id) {
+        return taskBrainCache.containsKey(id);
+    }
+
+    public static TaskBrain taskBrain(String id) {
+        return taskBrainCache.get(id);
+    }
+
+    public static Map<String, GoalBrain> activityBrains(String id) {
+        return activityBrainCache.get(id);
+    }
+
+    public static GoalBrain defaultActivityBrain(String id) {
+        TaskBrain taskBrain = taskBrainCache.get(id);
+        if (taskBrain == null) return null;
+        Map<String, GoalBrain> brains = activityBrainCache.get(id);
+        if (brains == null) return null;
+        GoalBrain goalBrain = brains.get(taskBrain.defaultActivity());
+        return goalBrain != null ? goalBrain : GoalBrain.builder().build();
     }
 
     public static String displayName(MagicEntityType type) {

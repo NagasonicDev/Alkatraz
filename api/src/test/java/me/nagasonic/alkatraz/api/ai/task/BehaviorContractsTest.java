@@ -136,32 +136,13 @@ class BehaviorContractsTest {
     }
 
     @Test
-    void prioritizedBehavior_acceptsBehaviorAndNativeSpec() {
-        PrioritizedBehavior fromBehavior = new PrioritizedBehavior(3, new FakeBehavior(), -1);
-        assertEquals(3, fromBehavior.priority());
-        assertEquals(-1, fromBehavior.chancePerRun());
-        assertTrue(fromBehavior.behaviorOrSpec() instanceof Behavior);
-
-        PrioritizedBehavior fromSpec = new PrioritizedBehavior(1, new NativeBehaviorSpec.SleepInBed(), 50);
-        assertTrue(fromSpec.behaviorOrSpec() instanceof NativeBehaviorSpec);
-        assertEquals(50, fromSpec.chancePerRun());
-    }
-
-    @Test
-    void prioritizedBehavior_rejectsBadArguments() {
-        assertThrows(IllegalArgumentException.class, () -> new PrioritizedBehavior(-1, new FakeBehavior(), -1));
-        assertThrows(NullPointerException.class, () -> new PrioritizedBehavior(1, null, -1));
-        assertThrows(IllegalArgumentException.class, () -> new PrioritizedBehavior(1, new Object(), -1));
-        assertThrows(IllegalArgumentException.class, () -> new PrioritizedBehavior(1, new FakeBehavior(), 101));
-        assertThrows(IllegalArgumentException.class, () -> new PrioritizedBehavior(1, new FakeBehavior(), -2));
-    }
-
-    @Test
     void timedMemory_validatesArguments() {
-        assertThrows(NullPointerException.class, () -> new TimedMemory(null, 10));
-        assertThrows(IllegalArgumentException.class, () -> new TimedMemory(MemoryKey.IS_HURT, -1));
-        TimedMemory m = new TimedMemory(MemoryKey.IS_HURT, 200);
+        assertThrows(NullPointerException.class, () -> new TimedMemory(null, Boolean.TRUE, 10));
+        assertThrows(NullPointerException.class, () -> new TimedMemory(MemoryKey.IS_HURT, null, 10));
+        assertThrows(IllegalArgumentException.class, () -> new TimedMemory(MemoryKey.IS_HURT, Boolean.TRUE, -42));
+        TimedMemory m = new TimedMemory(MemoryKey.IS_HURT, Boolean.TRUE, 200);
         assertEquals(MemoryKey.IS_HURT, m.key());
+        assertEquals(Boolean.TRUE, m.value());
         assertEquals(200, m.expireTicks());
     }
 }
