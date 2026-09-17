@@ -1,6 +1,6 @@
 display-name: "&fCI Skeletal Mage"
 melee-range: 0
-wand: ci_wand2
+wand: blaze_wand
 goals:
   - priority: 2
     type: keep_spell_range

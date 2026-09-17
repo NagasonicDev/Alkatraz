@@ -55,11 +55,11 @@ assert_log_not_contains "Error.*brain|Error.*goal|Error.*magic.*mob|Error.*MobPr
     "brain/goal system loaded without errors"
 assert_log_contains "Loaded [0-9]+ magic mob brain\(s\)" "brain count summary logged"
 
-assert_log_contains "Registered brain 'zombie_mage' \(wand=ci_wand_test, melee-range=2\.5\)" \
+assert_log_contains "Registered brain 'zombie_mage' \(wand=runic_wand, melee-range=2\.5\)" \
     "zombie_mage fixture read over bundled resource"
 assert_log_contains "Registered brain 'zombie_fighter' \(wand=null, melee-range=0\.0\)" \
     "zombie_fighter uses default wand and melee-range"
-assert_log_contains "Registered brain 'skeletal_mage' \(wand=ci_wand2, melee-range=0\.0\)" \
+assert_log_contains "Registered brain 'skeletal_mage' \(wand=blaze_wand, melee-range=0\.0\)" \
     "skeletal_mage registers despite unknown goal type"
 
 end_test_section
@@ -71,8 +71,7 @@ MARKER=$(wc -l < "$LOG_FILE")
 send_command "alkatraz reload"
 wait_for_new_log_match $((MARKER + 1)) "Loaded [0-9]+ magic mob brain\(s\)" "reload re-registers brains"
 
-MARKER=$(wc -l < "$LOG_FILE")
-assert_window_contains $((MARKER + 1)) "Registered brain 'zombie_mage' \(wand=ci_wand_test, melee-range=2\.5\)" \
+assert_window_contains $((MARKER + 1)) "Registered brain 'zombie_mage' \(wand=runic_wand, melee-range=2\.5\)" \
     "reload keeps fixture brain values"
 assert_window_not_contains $((MARKER + 1)) "Error.*brain|Error.*goal" \
     "no brain errors during reload"
