@@ -50,6 +50,18 @@ if [ -d "${SCRIPT_DIR}/test-fixtures/recipes" ]; then
     cp "${SCRIPT_DIR}/test-fixtures/recipes/"*.yml "${WORKDIR}/plugins/Alkatraz/magic/recipes/"
 fi
 
+# Copy brain test fixtures into the plugin's brain data folder (no-op when absent)
+if [ -d "${SCRIPT_DIR}/test-fixtures/brains" ]; then
+    mkdir -p "${WORKDIR}/plugins/Alkatraz/brains"
+    cp "${SCRIPT_DIR}/test-fixtures/brains/"*.yml "${WORKDIR}/plugins/Alkatraz/brains/"
+fi
+
+# Pre-place a config.yml fixture so brain registration lines (logHigh) are visible (no-op when absent)
+if [ -f "${SCRIPT_DIR}/test-fixtures/config.yml" ]; then
+    mkdir -p "${WORKDIR}/plugins/Alkatraz"
+    cp "${SCRIPT_DIR}/test-fixtures/config.yml" "${WORKDIR}/plugins/Alkatraz/config.yml"
+fi
+
 cd "${WORKDIR}"
 
 mkfifo cmd_pipe

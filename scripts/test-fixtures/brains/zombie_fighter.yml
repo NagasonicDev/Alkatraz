@@ -1,0 +1,6 @@
+display-name: "&fCI Zombie Fighter"
+goals:
+  - priority: 1
+    type: float
+  - priority: 5
+    type: look_at_player

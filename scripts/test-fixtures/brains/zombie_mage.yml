@@ -1,0 +1,15 @@
+display-name: "&fCI Zombie Mage"
+melee-range: 2.5
+wand: ci_wand_test
+goals:
+  - priority: 2
+    type: water_avoiding_stroll
+  - priority: 3
+    type: cast_spell
+    min-cast-dist: 4.0
+    max-cast-dist: 10.0
+    cast-range: 14.0
+    cooldown-ticks: 60
+targets:
+  - priority: 1
+    type: nearest_attackable_target

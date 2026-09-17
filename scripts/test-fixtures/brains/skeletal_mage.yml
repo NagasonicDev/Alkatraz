@@ -1,0 +1,14 @@
+display-name: "&fCI Skeletal Mage"
+melee-range: 0
+wand: ci_wand2
+goals:
+  - priority: 2
+    type: keep_spell_range
+    min-distance: 5.0
+    max-distance: 11.0
+    speed: 1.2
+  - priority: 9
+    type: does_not_exist_goal
+targets:
+  - priority: 1
+    type: hurt_by_target
