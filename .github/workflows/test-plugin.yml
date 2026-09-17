@@ -2,6 +2,7 @@ name: Test Plugin Compatibility
 
 on:
   workflow_dispatch:
+  push:
 
 jobs:
   # ---------------------------------------------------------------------
