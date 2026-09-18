@@ -340,4 +340,42 @@ class GoalFactoryTest {
         assertEquals(1, brain.entries().size());
         assertSame(nativeSpec, brain.entries().get(0).goalOrSpec());
     }
+
+    // ── 19. customFollowEntity ─────────────────────────────────────────
+
+    @Test
+    void customFollowEntityDefaults() throws Exception {
+        GoalBrain brain = build(yaml("type", "follow_entity"));
+        assertEquals(1, brain.entries().size());
+        GoalBrain.Entry entry = brain.entries().get(0);
+        assertTrue(entry.goalOrSpec() instanceof FollowEntityGoal,
+                "Expected FollowEntityGoal instance");
+        assertEquals(1, entry.priority());
+        assertFalse(entry.isTargetGoal());
+
+        FollowEntityGoal.FollowEntityConfig config = reflect(entry.goalOrSpec(), "config");
+        assertEquals("summoner_uuid", config.followEntityUuidKey());
+        assertEquals(16.0, config.followRange());
+        assertEquals(32.0, config.teleportRange());
+        assertEquals(1.0, config.speed());
+        assertTrue(config.clearTargetWhenFollowed());
+    }
+
+    @Test
+    void customFollowEntityHonorsCustomValues() throws Exception {
+        GoalBrain brain = build(yaml(
+                "type", "follow_entity",
+                "follow-entity-uuid-key", "target_uuid",
+                "follow-range", 10.0,
+                "teleport-range", 64.0,
+                "speed", 1.4,
+                "clear-target-when-followed", false
+        ));
+        FollowEntityGoal.FollowEntityConfig config = reflect(brain.entries().get(0).goalOrSpec(), "config");
+        assertEquals("target_uuid", config.followEntityUuidKey());
+        assertEquals(10.0, config.followRange());
+        assertEquals(64.0, config.teleportRange());
+        assertEquals(1.4, config.speed());
+        assertFalse(config.clearTargetWhenFollowed());
+    }
 }

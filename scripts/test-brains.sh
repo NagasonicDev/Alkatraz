@@ -61,6 +61,12 @@ assert_log_contains "Registered brain 'zombie_fighter' \(wand=null, melee-range=
     "zombie_fighter uses default wand and melee-range"
 assert_log_contains "Registered brain 'skeletal_mage' \(wand=blaze_wand, melee-range=0\.0\)" \
     "skeletal_mage registers despite unknown goal type"
+assert_log_contains "Registered brain 'summoned_zombie' \(wand=null, melee-range=2\.5\)" \
+    "summoned_zombie summon brain preloaded"
+assert_log_contains "Registered brain 'summoned_knight' \(wand=null, melee-range=2\.5\)" \
+    "summoned_knight summon brain preloaded"
+assert_log_contains "Registered brain 'summoned_horse' \(wand=null, melee-range=2\.5\)" \
+    "summoned_horse summon brain preloaded"
 
 end_test_section
 

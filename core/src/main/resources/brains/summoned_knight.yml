@@ -1,0 +1,24 @@
+display-name: "&8Summoned Knight"
+melee-range: 2.5
+goals:
+  - priority: 1
+    type: float
+  - priority: 2
+    type: follow_entity
+    follow-entity-uuid-key: summoner_uuid
+    follow-range: 16.0
+    teleport-range: 32.0
+    speed: 1.0
+    clear-target-when-followed: true
+  - priority: 3
+    type: melee_attack
+    speed: 1.2
+    pause-when-mob-idle: true
+  - priority: 4
+    type: look_at_player
+    range: 8.0
+  - priority: 5
+    type: random_look_around
+targets:
+  - priority: 1
+    type: hurt_by_target

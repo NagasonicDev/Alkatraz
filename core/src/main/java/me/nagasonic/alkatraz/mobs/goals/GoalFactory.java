@@ -30,6 +30,15 @@ public final class GoalFactory {
             double speed = section.getDouble("speed", 1.1);
             return new KeepSpellRangeGoal(minDist, maxDist, speed);
         });
+        CUSTOM.put("follow_entity", section -> {
+            String uuidKey = section.getString("follow-entity-uuid-key", "summoner_uuid");
+            double followRange = section.getDouble("follow-range", 16.0);
+            double teleportRange = section.getDouble("teleport-range", 32.0);
+            double speed = section.getDouble("speed", 1.0);
+            boolean clearTarget = section.getBoolean("clear-target-when-followed", true);
+            return new FollowEntityGoal(new FollowEntityGoal.FollowEntityConfig(
+                    uuidKey, followRange, teleportRange, speed, clearTarget));
+        });
 
         NATIVE.put("float", section -> new NativeGoalSpec.Float());
         NATIVE.put("melee_attack", section -> new NativeGoalSpec.MeleeAttack(

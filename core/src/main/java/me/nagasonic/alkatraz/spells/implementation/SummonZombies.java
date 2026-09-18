@@ -14,6 +14,7 @@ import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
+import me.nagasonic.alkatraz.api.mobs.MagicAiService;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -37,7 +38,6 @@ public class SummonZombies extends AttackSpell implements Listener {
     private int zombieDuration;
     private double zombiePower;
     private double summonRange;
-    private static final double FOLLOW_RANGE = 16.0;
 
     private final Map<UUID, List<UUID>> summonedZombies = new HashMap<>();
 
@@ -87,6 +87,7 @@ public class SummonZombies extends AttackSpell implements Listener {
                 nbt.setString("summoner_uuid", caster.getUniqueId().toString());
                 nbt.setBoolean("summoned_zombie", true);
             });
+            MagicAiService.getInstance().setBrain(zombie, "summoned_zombie");
 
             zombieIds.add(zombie.getUniqueId());
 
@@ -114,19 +115,6 @@ public class SummonZombies extends AttackSpell implements Listener {
                     summonedZombies.remove(caster.getUniqueId());
                     cancel();
                     return;
-                }
-
-                if (ticks % 10 == 0) {
-                    for (UUID id : zombieIds) {
-                        Entity e = Bukkit.getEntity(id);
-                        if (!(e instanceof Zombie zombie) || zombie.isDead()) continue;
-                        LivingEntity target = zombie.getTarget();
-                        if (target == null || !target.isValid() || target.isDead()) {
-                            if (zombie.getLocation().distanceSquared(caster.getLocation()) > 16) {
-                                zombie.setTarget(caster);
-                            }
-                        }
-                    }
                 }
             }
         }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
@@ -158,6 +146,7 @@ public class SummonZombies extends AttackSpell implements Listener {
                 nbt.setString("summoner_uuid", caster.getUniqueId().toString());
                 nbt.setBoolean("summoned_zombie", true);
             });
+            MagicAiService.getInstance().setBrain(zombie, "summoned_zombie");
 
             zombieIds.add(zombie.getUniqueId());
             spawnSummonParticles(caster, spawnLoc);
@@ -179,19 +168,6 @@ public class SummonZombies extends AttackSpell implements Listener {
                     summonedZombies.remove(caster.getUniqueId());
                     cancel();
                     return;
-                }
-
-                if (ticks % 10 == 0) {
-                    for (UUID id : zombieIds) {
-                        Entity e = Bukkit.getEntity(id);
-                        if (!(e instanceof Zombie zombie) || zombie.isDead()) continue;
-                        LivingEntity target = zombie.getTarget();
-                        if (target == null || !target.isValid() || target.isDead()) {
-                            if (zombie.getLocation().distanceSquared(caster.getLocation()) > 16) {
-                                zombie.setTarget(caster);
-                            }
-                        }
-                    }
                 }
             }
         }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);

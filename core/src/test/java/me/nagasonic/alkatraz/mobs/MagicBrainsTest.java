@@ -15,6 +15,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.mockito.MockedStatic;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -129,6 +131,9 @@ class MagicBrainsTest {
                 .getConfigurationSection("hunt").getBoolean("target"));
     }
 
+    private static final List<String> EXPECTED_SUMMON_BRAIN_IDS =
+            List.of("summoned_zombie", "summoned_knight", "summoned_horse");
+
     @Test
     @Order(6)
     void registerAllReloadsEveryType() {
@@ -140,6 +145,12 @@ class MagicBrainsTest {
         for (MagicEntityType type : MagicEntityType.values()) {
             cmMock.verify(() -> ConfigManager.getConfig("brains/" + type.getId() + ".yml"));
             assertNotNull(MagicBrains.brain(type));
+        }
+
+        assertEquals(EXPECTED_SUMMON_BRAIN_IDS, MagicBrains.SUMMON_BRAIN_IDS);
+        for (String id : MagicBrains.SUMMON_BRAIN_IDS) {
+            cmMock.verify(() -> ConfigManager.getConfig("brains/" + id + ".yml"));
+            assertNotNull(MagicBrains.brain(id));
         }
     }
 

@@ -538,5 +538,8 @@ public final class Alkatraz extends JavaPlugin {
         saveConfig("brains/zombie_mage.yml");
         saveConfig("brains/zombie_fighter.yml");
         saveConfig("brains/skeletal_mage.yml");
+        saveConfig("brains/summoned_zombie.yml");
+        saveConfig("brains/summoned_knight.yml");
+        saveConfig("brains/summoned_horse.yml");
     }
 }

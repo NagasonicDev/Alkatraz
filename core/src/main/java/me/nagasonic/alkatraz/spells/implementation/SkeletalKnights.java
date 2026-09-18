@@ -5,6 +5,7 @@ import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
+import me.nagasonic.alkatraz.api.mobs.MagicAiService;
 import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
@@ -47,7 +48,6 @@ public class SkeletalKnights extends AttackSpell implements Listener {
     private static final Color LIGHT_BLUE = Color.fromRGB(150, 210, 255);
     private static final Color AQUA = Color.fromRGB(0, 210, 255);
     private static final Color DEEP_BLUE = Color.fromRGB(45, 110, 230);
-    private static final double FOLLOW_RANGE = 16.0;
 
     private static final Map<UUID, ChannelData> channels = new ConcurrentHashMap<>();
     private final Map<UUID, List<UUID>> summonedKnights = new HashMap<>();
@@ -163,10 +163,12 @@ public class SkeletalKnights extends AttackSpell implements Listener {
                 nbt.setString("summoner_uuid", caster.getUniqueId().toString());
                 nbt.setBoolean("summoned_mount", true);
             });
+            MagicAiService.getInstance().setBrain(horse, "summoned_horse");
             NBT.modifyPersistentData(knight, nbt -> {
                 nbt.setString("summoner_uuid", caster.getUniqueId().toString());
                 nbt.setBoolean("summoned_knight", true);
             });
+            MagicAiService.getInstance().setBrain(knight, "summoned_knight");
 
             horse.addPassenger(knight);
             ids.add(knight.getUniqueId());
@@ -210,20 +212,6 @@ public class SkeletalKnights extends AttackSpell implements Listener {
                     summonedKnights.remove(caster.getUniqueId());
                     cancel();
                     return;
-                }
-                if (ticks % 10 == 0) {
-                    for (UUID id : ids) {
-                        Entity e = Bukkit.getEntity(id);
-                        if (!(e instanceof Skeleton knight) || knight.isDead()) continue;
-                        LivingEntity target = knight.getTarget();
-                        if (target == null || !target.isValid() || target.isDead()) {
-                            if (target instanceof Player tp && tp.getUniqueId().equals(caster.getUniqueId())) {
-                                knight.setTarget(null);
-                            } else if (knight.getLocation().distanceSquared(caster.getLocation()) > FOLLOW_RANGE * FOLLOW_RANGE) {
-                                knight.setTarget(caster);
-                            }
-                        }
-                    }
                 }
             }
         }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
@@ -438,8 +426,8 @@ public class SkeletalKnights extends AttackSpell implements Listener {
 
         for (UUID id : ids) {
             Entity entity = Bukkit.getEntity(id);
-            if (entity instanceof Skeleton knight && !knight.isDead()) {
-                knight.setTarget(target);
+            if (entity instanceof Mob mob && !mob.isDead()) {
+                mob.setTarget(target);
             }
         }
     }

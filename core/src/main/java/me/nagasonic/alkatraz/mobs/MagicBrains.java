@@ -11,6 +11,7 @@ import me.nagasonic.alkatraz.mobs.goals.GoalFactory;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -34,6 +35,10 @@ public final class MagicBrains {
 
     public static final String BRAIN_KEY = "alkatraz_brain";
 
+    /** Extra flat brains preloaded alongside the {@link MagicEntityType} brains. */
+    public static final List<String> SUMMON_BRAIN_IDS =
+            List.of("summoned_zombie", "summoned_knight", "summoned_horse");
+
     private MagicBrains() {}
 
     /** (Re)loads every magic mob brain from disk. Call once at startup and on reload. */
@@ -47,7 +52,11 @@ public final class MagicBrains {
         for (MagicEntityType type : MagicEntityType.values()) {
             reload(type.getId());
         }
-        Alkatraz.logInfo("Loaded " + MagicEntityType.values().length + " magic mob brain(s)");
+        for (String id : SUMMON_BRAIN_IDS) {
+            reload(id);
+        }
+        Alkatraz.logInfo("Loaded " + (MagicEntityType.values().length + SUMMON_BRAIN_IDS.size())
+                + " magic mob brain(s)");
     }
 
     /** (Re)loads one brain (and its display-name / melee-range / wand) from disk. */
