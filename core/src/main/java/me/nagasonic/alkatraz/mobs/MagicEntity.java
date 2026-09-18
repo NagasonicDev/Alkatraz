@@ -6,6 +6,8 @@ import me.nagasonic.alkatraz.api.mobs.MagicEntityType;
 import me.nagasonic.alkatraz.mobs.ai.task.TaskBrainTicker;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.LivingEntity;
 
 import java.util.ArrayList;
@@ -60,6 +62,22 @@ public interface MagicEntity {
                     data.spells.stream().map(Spell::getId).toList()));
             nbt.setString(MagicEntityType.NBT_KEY, type.getId());
         });
+
+        if (profile.getMaxHealth() > 0) {
+            AttributeInstance maxHealth = self.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+            if (maxHealth != null) {
+                maxHealth.setBaseValue(profile.getMaxHealth());
+                self.setHealth(profile.getMaxHealth());
+            }
+        }
+        if (profile.getAttackDamage() > 0) {
+            AttributeInstance attackDamage = self.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE);
+            if (attackDamage != null) attackDamage.setBaseValue(profile.getAttackDamage());
+        }
+        if (profile.getKnockbackResistance() > 0) {
+            AttributeInstance kb = self.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE);
+            if (kb != null) kb.setBaseValue(profile.getKnockbackResistance());
+        }
 
         TaskBrainTicker.attach(self);
     }

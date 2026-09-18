@@ -1,0 +1,19 @@
+replaces: pillager
+spawn_chance: 1.0
+spawn_reasons:
+  - NATURAL
+
+air_affinity: 32.0
+air_resistance: 50.0
+magic_affinity: 8.0
+magic_resistance: 10.0
+earth_resistance: -30.0
+water_resistance: -10.0
+
+max_health: 24.0
+attack_damage: 5.0
+
+spells:
+  - 'blink'
+  - 'air_burst'
+  - 'magic_missile'

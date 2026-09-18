@@ -32,6 +32,9 @@ public class MobProfile {
     private final EntityType           replaces;
     private final double               spawnChance;
     private final Set<CreatureSpawnEvent.SpawnReason> spawnReasons;
+    private final double               maxHealth;
+    private final double               attackDamage;
+    private final double               knockbackResistance;
 
     public MobProfile(YamlConfiguration cfg) {
         for (Element element : Element.values()) {
@@ -43,6 +46,9 @@ public class MobProfile {
         replaces = parseReplaces(cfg.getString("replaces"));
         spawnChance = parseSpawnChance(cfg.getDouble("spawn_chance", 0.0));
         spawnReasons = parseSpawnReasons(cfg.getStringList("spawn_reasons"));
+        maxHealth = cfg.getDouble("max_health", 0.0);
+        attackDamage = cfg.getDouble("attack_damage", 0.0);
+        knockbackResistance = cfg.getDouble("knockback_resistance", 0.0);
     }
 
     public double getAffinity(Element element) {
@@ -67,6 +73,18 @@ public class MobProfile {
 
     public Set<CreatureSpawnEvent.SpawnReason> getSpawnReasons() {
         return spawnReasons;
+    }
+
+    public double getMaxHealth() {
+        return maxHealth;
+    }
+
+    public double getAttackDamage() {
+        return attackDamage;
+    }
+
+    public double getKnockbackResistance() {
+        return knockbackResistance;
     }
 
     public boolean canReplaceNaturally() {

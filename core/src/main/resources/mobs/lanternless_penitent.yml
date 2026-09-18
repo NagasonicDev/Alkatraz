@@ -1,0 +1,19 @@
+replaces: skeleton
+spawn_chance: 0.5
+spawn_reasons:
+  - NATURAL
+
+dark_affinity: 35.0
+dark_resistance: 55.0
+magic_affinity: 10.0
+magic_resistance: 20.0
+light_resistance: -35.0
+fire_resistance: -10.0
+
+max_health: 30.0
+attack_damage: 4.0
+
+spells:
+  - 'stealth'
+  - 'debuff'
+  - 'magic_missile'

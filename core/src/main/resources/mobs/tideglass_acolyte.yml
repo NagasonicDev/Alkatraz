@@ -1,0 +1,19 @@
+replaces: drowned
+spawn_chance: 1.0
+spawn_reasons:
+  - NATURAL
+
+water_affinity: 28.0
+water_resistance: 50.0
+light_affinity: 8.0
+light_resistance: 15.0
+magic_resistance: 10.0
+earth_resistance: -25.0
+
+max_health: 32.0
+attack_damage: 6.0
+
+spells:
+  - 'water_sphere'
+  - 'buff'
+  - 'whirlpool'

@@ -1,0 +1,19 @@
+replaces: zombie
+spawn_chance: 1.5
+spawn_reasons:
+  - NATURAL
+
+fire_affinity: 18.0
+fire_resistance: 45.0
+dark_affinity: 10.0
+dark_resistance: 20.0
+magic_resistance: 10.0
+water_resistance: -30.0
+
+max_health: 28.0
+attack_damage: 7.0
+
+spells:
+  - 'fireball'
+  - 'debuff'
+  - 'air_burst'

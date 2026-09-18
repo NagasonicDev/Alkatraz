@@ -1,0 +1,20 @@
+replaces: iron_golem
+spawn_chance: 0.0
+spawn_reasons:
+  - NATURAL
+
+earth_affinity: 40.0
+earth_resistance: 60.0
+magic_affinity: 15.0
+fire_resistance: 10.0
+air_resistance: -25.0
+dark_resistance: -20.0
+
+max_health: 80.0
+attack_damage: 10.0
+knockback_resistance: 0.8
+
+spells:
+  - 'earthen_wall'
+  - 'wind_barrier'
+  - 'earth_spike'

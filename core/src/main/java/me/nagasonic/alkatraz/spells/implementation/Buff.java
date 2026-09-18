@@ -14,8 +14,10 @@ import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
+import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
@@ -88,9 +90,29 @@ public class Buff extends Spell {
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
         int durationTicks = baseDuration * 20;
-        caster.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, durationTicks, 1, false, false));
-        caster.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, durationTicks, 0, false, false));
+        LivingEntity target = findBuffTarget(caster);
+        if (target == null) target = caster;
+        target.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, durationTicks, 1, false, false));
+        target.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, durationTicks, 0, false, false));
         caster.getWorld().playSound(caster.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 0.8f, 1.2f);
+    }
+
+    private LivingEntity findBuffTarget(Mob caster) {
+        LivingEntity best = null;
+        double bestDist = Double.MAX_VALUE;
+        for (Entity e : caster.getNearbyEntities(10, 10, 10)) {
+            if (!(e instanceof Mob m)) continue;
+            if (m.equals(caster)) continue;
+            if (!m.isValid() || m.isDead()) continue;
+            if (m.getHealth() >= m.getMaxHealth() * 0.7) continue;
+            if (!(m instanceof Monster)) continue;
+            double dist = m.getLocation().distanceSquared(caster.getLocation());
+            if (dist < bestDist) {
+                bestDist = dist;
+                best = m;
+            }
+        }
+        return best;
     }
 
     @Override

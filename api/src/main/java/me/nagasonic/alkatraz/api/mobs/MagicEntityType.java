@@ -10,7 +10,12 @@ import java.util.Optional;
 public enum MagicEntityType {
     ZOMBIE_MAGE("zombie_mage"),
     ZOMBIE_FIGHTER("zombie_fighter"),
-    SKELETAL_MAGE("skeletal_mage");
+    SKELETAL_MAGE("skeletal_mage"),
+    CINDERBOUND_HEXER("cinderbound_hexer"),
+    TIDEGLASS_ACOLYTE("tideglass_acolyte"),
+    RUNEBOUND_WARDEN("runebound_warden"),
+    GALEHOOK_MARAUDER("galehook_marauder"),
+    LANTERNLESS_PENITENT("lanternless_penitent");
 
     public static final String NBT_KEY = "magic_entity_type";
 
