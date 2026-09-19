@@ -233,6 +233,7 @@ public class SummonZombies extends AttackSpell implements Listener {
         }
 
         if (player == null || target == null) return;
+        if (SummonCombatGuard.isSummon(target)) return;
 
         List<UUID> zombieIds = summonedZombies.get(player.getUniqueId());
         if (zombieIds == null || zombieIds.isEmpty()) return;

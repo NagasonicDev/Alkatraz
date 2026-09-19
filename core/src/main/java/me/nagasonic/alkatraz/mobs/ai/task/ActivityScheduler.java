@@ -55,7 +55,7 @@ public final class ActivityScheduler {
     }
 
     private static boolean matches(ActivitySpec activity, TimeOfDayPredicate now, Predicate<MemoryKey<?>> present) {
-        if (activity.schedule() != now) return false;
+        if (activity.schedule() != TimeOfDayPredicate.ALL && activity.schedule() != now) return false;
         for (MemoryKey<?> key : activity.activationMemories()) {
             if (!present.test(key)) return false;
         }

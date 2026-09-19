@@ -3,6 +3,7 @@ package me.nagasonic.alkatraz.mobs.ai.task;
 import me.nagasonic.alkatraz.api.ai.task.ActivitySpec;
 import me.nagasonic.alkatraz.api.ai.task.Sensor;
 import me.nagasonic.alkatraz.api.ai.task.TaskBrain;
+import me.nagasonic.alkatraz.api.ai.task.TimeOfDayPredicate;
 import me.nagasonic.alkatraz.api.mobs.GoalBrain;
 import me.nagasonic.alkatraz.mobs.goals.CastSpellGoal;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -89,6 +90,32 @@ class TaskBrainFactoryTest {
         yaml.set("tasks.activities.FIGHT.activation-memories", java.util.List.of("ghost_target"));
         assertThrows(IllegalArgumentException.class,
                 () -> TaskBrainFactory.load(yaml.getConfigurationSection("tasks")));
+    }
+
+    @Test
+    void omittedScheduleDefaultsToAlwaysEligible() {
+        TaskBrainFactory.Result result = TaskBrainFactory.load(fixture().getConfigurationSection("tasks"));
+
+        TaskBrain brain = result.brain();
+        assertNotNull(brain);
+        ActivitySpec fight = brain.activities().stream()
+                .filter(a -> a.id().equals("FIGHT"))
+                .findFirst().orElseThrow();
+        assertEquals(TimeOfDayPredicate.ALL, fight.schedule());
+    }
+
+    @Test
+    void explicitScheduleIsKept() {
+        YamlConfiguration yaml = fixture();
+        yaml.set("tasks.activities.IDLE.schedule", "DAY");
+        TaskBrainFactory.Result result = TaskBrainFactory.load(yaml.getConfigurationSection("tasks"));
+
+        TaskBrain brain = result.brain();
+        assertNotNull(brain);
+        ActivitySpec idle = brain.activities().stream()
+                .filter(a -> a.id().equals("IDLE"))
+                .findFirst().orElseThrow();
+        assertEquals(TimeOfDayPredicate.DAY, idle.schedule());
     }
 
     @Test

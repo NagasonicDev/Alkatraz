@@ -28,4 +28,18 @@ class SummonBrainYmlTest {
             }
         }
     }
+
+    @Test
+    void summonBrainsHaveAWanderGoalSoTheyDoNotStandStill() throws Exception {
+        for (String id : MagicBrains.SUMMON_BRAIN_IDS) {
+            try (InputStreamReader reader = new InputStreamReader(
+                    getClass().getResourceAsStream("/brains/" + id + ".yml"), StandardCharsets.UTF_8)) {
+                YamlConfiguration yaml = YamlConfiguration.loadConfiguration(reader);
+                List<?> goals = yaml.getList("goals");
+                boolean wanders = goals.stream().anyMatch(entry -> entry instanceof Map<?, ?> map
+                        && "water_avoiding_stroll".equals(String.valueOf(map.get("type"))));
+                assertTrue(wanders, id + ": summon brain must have a water_avoiding_stroll goal");
+            }
+        }
+    }
 }

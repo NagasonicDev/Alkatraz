@@ -15,9 +15,12 @@ goals:
     speed: 1.2
     pause-when-mob-idle: true
   - priority: 4
+    type: water_avoiding_stroll
+    speed: 0.8
+  - priority: 5
     type: look_at_player
     range: 8.0
-  - priority: 5
+  - priority: 6
     type: random_look_around
 targets:
   - priority: 1

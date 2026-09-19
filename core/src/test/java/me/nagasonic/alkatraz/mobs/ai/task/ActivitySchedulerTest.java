@@ -85,6 +85,18 @@ class ActivitySchedulerTest {
     }
 
     @Test
+    void allScheduleIsAlwaysEligible() {
+        TaskBrain b = brain(
+                act("FIGHT", 10, TimeOfDayPredicate.ALL, List.of(MemoryKey.NEAREST_HOSTILES), List.of()),
+                act("IDLE", 1, TimeOfDayPredicate.DAY, List.of(), List.of()));
+        assertEquals("FIGHT", ActivityScheduler.select(b, null, key -> key.equals(MemoryKey.NEAREST_HOSTILES), TimeOfDayPredicate.DAY));
+        assertEquals("FIGHT", ActivityScheduler.select(b, null, key -> key.equals(MemoryKey.NEAREST_HOSTILES), TimeOfDayPredicate.DUSK));
+        assertEquals("FIGHT", ActivityScheduler.select(b, null, key -> key.equals(MemoryKey.NEAREST_HOSTILES), TimeOfDayPredicate.NIGHT));
+        assertEquals("FIGHT", ActivityScheduler.select(b, null, key -> key.equals(MemoryKey.NEAREST_HOSTILES), TimeOfDayPredicate.MIDNIGHT));
+        assertEquals("IDLE", ActivityScheduler.select(b, null, key -> false, TimeOfDayPredicate.NIGHT));
+    }
+
+    @Test
     void scheduleGatesEligibility() {
         TaskBrain b = brain(
                 act("IDLE", 1, TimeOfDayPredicate.DAY, List.of(), List.of()),

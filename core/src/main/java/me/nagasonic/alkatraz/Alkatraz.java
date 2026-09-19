@@ -54,6 +54,7 @@ import me.nagasonic.alkatraz.progression.research.ResearchObjectiveListener;
 import me.nagasonic.alkatraz.progression.research.ResearchService;
 import me.nagasonic.alkatraz.spells.CoreSpellRegistryProvider;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
+import me.nagasonic.alkatraz.spells.implementation.SummonCombatGuard;
 import me.nagasonic.alkatraz.playerdata.profiles.CoreProfileProvider;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.spellbooks.SpellbookListener;
@@ -63,6 +64,8 @@ import me.nagasonic.alkatraz.tutorial.FirstJoinTutorial;
 import me.nagasonic.alkatraz.api.SpellAPI;
 import me.nagasonic.alkatraz.api.mobs.MagicAiService;
 import me.nagasonic.alkatraz.api.mobs.MagicBrainService;
+import me.nagasonic.alkatraz.api.mobs.MagicEntityType;
+import me.nagasonic.alkatraz.mobs.MagicBrains;
 import me.nagasonic.alkatraz.util.UpdateChecker;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.Bukkit;
@@ -76,7 +79,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import static me.nagasonic.alkatraz.items.magic.listener.CastEventListener.switchFrom;
 
@@ -198,6 +203,7 @@ public final class Alkatraz extends JavaPlugin {
         registerListener(new BarrierEventListener());
         registerListener(new CombatTriggerListener());
         registerListener(new MagicDamageListener());
+        registerListener(new SummonCombatGuard());
         registerListener(new MovementTriggerListener());
         registerListener(new EnvironmentTriggerListener());
         registerListener(new InventoryTriggerListener());
@@ -449,97 +455,113 @@ public final class Alkatraz extends JavaPlugin {
     }
 
     private void saveMobConfigs() {
-        saveConfig("mobs/allay.yml");
-        saveConfig("mobs/armadillo.yml");
-        saveConfig("mobs/axolotl.yml");
-        saveConfig("mobs/bat.yml");
-        saveConfig("mobs/bee.yml");
-        saveConfig("mobs/blaze.yml");
-        saveConfig("mobs/bogged.yml");
-        saveConfig("mobs/breeze.yml");
-        saveConfig("mobs/camel.yml");
-        saveConfig("mobs/cat.yml");
-        saveConfig("mobs/cave_spider.yml");
-        saveConfig("mobs/chicken.yml");
-        saveConfig("mobs/cod.yml");
-        saveConfig("mobs/cow.yml");
-        saveConfig("mobs/creeper.yml");
-        saveConfig("mobs/dolphin.yml");
-        saveConfig("mobs/donkey.yml");
-        saveConfig("mobs/drowned.yml");
-        saveConfig("mobs/elder_guardian.yml");
-        saveConfig("mobs/ender_dragon.yml");
-        saveConfig("mobs/enderman.yml");
-        saveConfig("mobs/evoker.yml");
-        saveConfig("mobs/fox.yml");
-        saveConfig("mobs/frog.yml");
-        saveConfig("mobs/ghast.yml");
-        saveConfig("mobs/glow_squid.yml");
-        saveConfig("mobs/goat.yml");
-        saveConfig("mobs/guardian.yml");
-        saveConfig("mobs/hoglin.yml");
-        saveConfig("mobs/horse.yml");
-        saveConfig("mobs/husk.yml");
-        saveConfig("mobs/illusioner.yml");
-        saveConfig("mobs/iron_golem.yml");
-        saveConfig("mobs/llama.yml");
-        saveConfig("mobs/magma_cube.yml");
-        saveConfig("mobs/mooshroom.yml");
-        saveConfig("mobs/mule.yml");
-        saveConfig("mobs/ocelot.yml");
-        saveConfig("mobs/panda.yml");
-        saveConfig("mobs/parrot.yml");
-        saveConfig("mobs/phantom.yml");
-        saveConfig("mobs/pig.yml");
-        saveConfig("mobs/piglin.yml");
-        saveConfig("mobs/piglin_brute.yml");
-        saveConfig("mobs/pillager.yml");
-        saveConfig("mobs/polar_bear.yml");
-        saveConfig("mobs/pufferfish.yml");
-        saveConfig("mobs/rabbit.yml");
-        saveConfig("mobs/ravager.yml");
-        saveConfig("mobs/salmon.yml");
-        saveConfig("mobs/sheep.yml");
-        saveConfig("mobs/shulker.yml");
-        saveConfig("mobs/silverfish.yml");
-        saveConfig("mobs/skeletal_mage.yml");
-        saveConfig("mobs/skeleton.yml");
-        saveConfig("mobs/skeleton_horse.yml");
-        saveConfig("mobs/slime.yml");
-        saveConfig("mobs/sniffer.yml");
-        saveConfig("mobs/snow_golem.yml");
-        saveConfig("mobs/spider.yml");
-        saveConfig("mobs/squid.yml");
-        saveConfig("mobs/stray.yml");
-        saveConfig("mobs/strider.yml");
-        saveConfig("mobs/tadpole.yml");
-        saveConfig("mobs/trader_llama.yml");
-        saveConfig("mobs/tropical_fish.yml");
-        saveConfig("mobs/turtle.yml");
-        saveConfig("mobs/vex.yml");
-        saveConfig("mobs/villager.yml");
-        saveConfig("mobs/vindicator.yml");
-        saveConfig("mobs/wandering_trader.yml");
-        saveConfig("mobs/warden.yml");
-        saveConfig("mobs/witch.yml");
-        saveConfig("mobs/wither.yml");
-        saveConfig("mobs/wither_skeleton.yml");
-        saveConfig("mobs/wolf.yml");
-        saveConfig("mobs/zoglin.yml");
-        saveConfig("mobs/zombie.yml");
-        saveConfig("mobs/zombie_fighter.yml");
-        saveConfig("mobs/zombie_horse.yml");
-        saveConfig("mobs/zombie_mage.yml");
-        saveConfig("mobs/zombie_villager.yml");
-        saveConfig("mobs/zombified_piglin.yml");
+        for (String path : mobConfigPaths()) {
+            saveConfig(path);
+        }
     }
 
     private void saveBrainConfigs() {
-        saveConfig("brains/zombie_mage.yml");
-        saveConfig("brains/zombie_fighter.yml");
-        saveConfig("brains/skeletal_mage.yml");
-        saveConfig("brains/summoned_zombie.yml");
-        saveConfig("brains/summoned_knight.yml");
-        saveConfig("brains/summoned_horse.yml");
+        for (String path : brainConfigPaths()) {
+            saveConfig(path);
+        }
+    }
+
+    public static Set<String> mobConfigPaths() {
+        Set<String> paths = new LinkedHashSet<>(List.of(
+                "mobs/allay.yml",
+                "mobs/armadillo.yml",
+                "mobs/axolotl.yml",
+                "mobs/bat.yml",
+                "mobs/bee.yml",
+                "mobs/blaze.yml",
+                "mobs/bogged.yml",
+                "mobs/breeze.yml",
+                "mobs/camel.yml",
+                "mobs/cat.yml",
+                "mobs/cave_spider.yml",
+                "mobs/chicken.yml",
+                "mobs/cod.yml",
+                "mobs/cow.yml",
+                "mobs/creeper.yml",
+                "mobs/dolphin.yml",
+                "mobs/donkey.yml",
+                "mobs/drowned.yml",
+                "mobs/elder_guardian.yml",
+                "mobs/ender_dragon.yml",
+                "mobs/enderman.yml",
+                "mobs/evoker.yml",
+                "mobs/fox.yml",
+                "mobs/frog.yml",
+                "mobs/ghast.yml",
+                "mobs/glow_squid.yml",
+                "mobs/goat.yml",
+                "mobs/guardian.yml",
+                "mobs/hoglin.yml",
+                "mobs/horse.yml",
+                "mobs/husk.yml",
+                "mobs/illusioner.yml",
+                "mobs/iron_golem.yml",
+                "mobs/llama.yml",
+                "mobs/magma_cube.yml",
+                "mobs/mooshroom.yml",
+                "mobs/mule.yml",
+                "mobs/ocelot.yml",
+                "mobs/panda.yml",
+                "mobs/parrot.yml",
+                "mobs/phantom.yml",
+                "mobs/pig.yml",
+                "mobs/piglin.yml",
+                "mobs/piglin_brute.yml",
+                "mobs/pillager.yml",
+                "mobs/polar_bear.yml",
+                "mobs/pufferfish.yml",
+                "mobs/rabbit.yml",
+                "mobs/ravager.yml",
+                "mobs/salmon.yml",
+                "mobs/sheep.yml",
+                "mobs/shulker.yml",
+                "mobs/silverfish.yml",
+                "mobs/skeleton.yml",
+                "mobs/skeleton_horse.yml",
+                "mobs/slime.yml",
+                "mobs/sniffer.yml",
+                "mobs/snow_golem.yml",
+                "mobs/spider.yml",
+                "mobs/squid.yml",
+                "mobs/stray.yml",
+                "mobs/strider.yml",
+                "mobs/tadpole.yml",
+                "mobs/trader_llama.yml",
+                "mobs/tropical_fish.yml",
+                "mobs/turtle.yml",
+                "mobs/vex.yml",
+                "mobs/villager.yml",
+                "mobs/vindicator.yml",
+                "mobs/wandering_trader.yml",
+                "mobs/warden.yml",
+                "mobs/witch.yml",
+                "mobs/wither.yml",
+                "mobs/wither_skeleton.yml",
+                "mobs/wolf.yml",
+                "mobs/zoglin.yml",
+                "mobs/zombie.yml",
+                "mobs/zombie_horse.yml",
+                "mobs/zombie_villager.yml",
+                "mobs/zombified_piglin.yml"));
+        for (MagicEntityType type : MagicEntityType.values()) {
+            paths.add(type.getConfigPath());
+        }
+        return paths;
+    }
+
+    public static Set<String> brainConfigPaths() {
+        Set<String> paths = new LinkedHashSet<>();
+        for (MagicEntityType type : MagicEntityType.values()) {
+            paths.add("brains/" + type.getId() + ".yml");
+        }
+        for (String id : MagicBrains.SUMMON_BRAIN_IDS) {
+            paths.add("brains/" + id + ".yml");
+        }
+        return paths;
     }
 }

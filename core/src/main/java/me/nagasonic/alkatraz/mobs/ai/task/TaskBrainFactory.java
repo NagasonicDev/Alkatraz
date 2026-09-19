@@ -107,7 +107,7 @@ public final class TaskBrainFactory {
     }
 
     private static TimeOfDayPredicate scheduleOf(String value) {
-        if (value == null || value.isBlank()) return TimeOfDayPredicate.DAY;
+        if (value == null || value.isBlank()) return TimeOfDayPredicate.ALL;
         try {
             return TimeOfDayPredicate.valueOf(value.trim().toUpperCase());
         } catch (IllegalArgumentException e) {

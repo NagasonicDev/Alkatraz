@@ -421,6 +421,7 @@ public class SkeletalKnights extends AttackSpell implements Listener {
         }
 
         if (player == null || target == null) return;
+        if (SummonCombatGuard.isSummon(target)) return;
         List<UUID> ids = summonedKnights.get(player.getUniqueId());
         if (ids == null || ids.isEmpty()) return;
 

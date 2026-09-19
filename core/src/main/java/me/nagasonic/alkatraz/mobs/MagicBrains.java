@@ -9,6 +9,7 @@ import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.mobs.ai.task.TaskBrainFactory;
 import me.nagasonic.alkatraz.mobs.goals.GoalFactory;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.util.HashMap;
 import java.util.List;
@@ -70,8 +71,8 @@ public final class MagicBrains {
         wandCache.put(id, wand);
 
         GoalBrain.Builder builder = GoalBrain.builder();
-        applySection(builder, root.getConfigurationSection("goals"), false);
-        applySection(builder, root.getConfigurationSection("targets"), true);
+        applySection(builder, root, "goals", false);
+        applySection(builder, root, "targets", true);
         brainCache.put(id, builder.build());
 
         ConfigurationSection tasks = root.getConfigurationSection("tasks");
@@ -88,14 +89,35 @@ public final class MagicBrains {
                 + meleeRangeCache.get(id) + ")");
     }
 
-    private static void applySection(GoalBrain.Builder builder, ConfigurationSection section, boolean target) {
-        if (section == null) return;
-        for (String key : section.getKeys(false)) {
-            ConfigurationSection entry = section.getConfigurationSection(key);
-            if (entry == null) continue;
-            if (target) entry.set("target", true);
-            GoalFactory.applyFromConfig(builder, entry);
+    private static void applySection(GoalBrain.Builder builder, ConfigurationSection root, String path, boolean target) {
+        Object raw = root.get(path);
+        if (raw instanceof ConfigurationSection section) {
+            for (String key : section.getKeys(false)) {
+                ConfigurationSection entry = section.getConfigurationSection(key);
+                if (entry == null) continue;
+                if (target) entry.set("target", true);
+                GoalFactory.applyFromConfig(builder, entry);
+            }
+        } else if (raw instanceof List<?> list) {
+            for (Object item : list) {
+                ConfigurationSection entry = toEntry(item);
+                if (entry == null) continue;
+                if (target) entry.set("target", true);
+                GoalFactory.applyFromConfig(builder, entry);
+            }
         }
+    }
+
+    private static ConfigurationSection toEntry(Object item) {
+        if (item instanceof ConfigurationSection section) return section;
+        if (item instanceof Map<?, ?> map) {
+            YamlConfiguration entry = new YamlConfiguration();
+            for (Map.Entry<?, ?> pair : map.entrySet()) {
+                entry.set(String.valueOf(pair.getKey()), pair.getValue());
+            }
+            return entry;
+        }
+        return null;
     }
 
     public static GoalBrain brain(MagicEntityType type) {
