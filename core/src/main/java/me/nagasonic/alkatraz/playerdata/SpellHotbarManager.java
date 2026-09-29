@@ -19,6 +19,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Manages the spell hotbar mode that activates when a player equips a wand.
@@ -45,13 +46,13 @@ public class SpellHotbarManager {
     /** Number of configurable spell slots (slots 0-7). */
     public static final int SPELL_SLOT_COUNT = 8;
 
-    private static final Map<UUID, ItemStack[]> savedInventories = new HashMap<>();
-    private static final Map<UUID, ItemStack> savedOffhand = new HashMap<>();
-    private static final Map<UUID, Integer> savedHeldSlot = new HashMap<>();
+    private static final Map<UUID, ItemStack[]> savedInventories = new ConcurrentHashMap<>();
+    private static final Map<UUID, ItemStack> savedOffhand = new ConcurrentHashMap<>();
+    private static final Map<UUID, Integer> savedHeldSlot = new ConcurrentHashMap<>();
 
-    private static final Map<UUID, ItemStack> hotbarActive = new HashMap<>();
-    private static final Map<UUID, Long> justEntered = new HashMap<>();
-    private static final Map<UUID, Long> justExited = new HashMap<>();
+    private static final Map<UUID, ItemStack> hotbarActive = new ConcurrentHashMap<>();
+    private static final Map<UUID, Long> justEntered = new ConcurrentHashMap<>();
+    private static final Map<UUID, Long> justExited = new ConcurrentHashMap<>();
 
     // -------------------------------------------------------------------------
     // Public API
@@ -68,8 +69,13 @@ public class SpellHotbarManager {
         if (hotbarActive.containsKey(player.getUniqueId())) return;
         Long exitDeadline = justExited.get(player.getUniqueId());
         if (exitDeadline != null && System.currentTimeMillis() < exitDeadline) return;
-        hotbarActive.put(player.getUniqueId(), wand);
         MagicProfile profile = ProfileManager.getProfile(player, MagicProfile.class);
+        if (profile == null) {
+            Alkatraz.getInstance().getLogger().warning(
+                    "Cannot enter hotbar mode for " + player.getName() + ": no loaded profile");
+            return;
+        }
+        hotbarActive.put(player.getUniqueId(), wand);
         profile.setCanCast(false);
 
         UUID uuid = player.getUniqueId();
@@ -80,7 +86,11 @@ public class SpellHotbarManager {
         int heldSlot = player.getInventory().getHeldItemSlot();
 
         savedInventories.put(uuid, storageContents);
-        savedOffhand.put(uuid, offhand);
+        if (offhand != null) {
+            savedOffhand.put(uuid, offhand);
+        } else {
+            savedOffhand.remove(uuid);
+        }
         savedHeldSlot.put(uuid, heldSlot);
 
         persistSnapshot(uuid, storageContents, offhand, heldSlot);
@@ -90,9 +100,9 @@ public class SpellHotbarManager {
         player.getInventory().setStorageContents(new ItemStack[36]);
 
         // Place configured spells into slots 0-7
-
+        Map<Integer, String> hotbarSpells = profile.getHotbarSpellIds();
         for (int slot = 0; slot < SPELL_SLOT_COUNT; slot++) {
-            String spellId = profile.getHotbarSpellIds().get(slot);
+            String spellId = hotbarSpells.get(slot);
             Spell spell = SpellRegistry.getSpell(spellId);
             if (spell != null) {
                 player.getInventory().setItem(slot, buildSpellItem(spell));
@@ -138,6 +148,11 @@ public class SpellHotbarManager {
      */
     public static void exitForQuit(Player player) {
         exit(player, false);
+        // The persisted backup snapshot is intentionally kept so the next join
+        // can still recover, but the in-memory debounce markers have no purpose
+        // once the player has left and would otherwise leak a UUID forever.
+        justEntered.remove(player.getUniqueId());
+        justExited.remove(player.getUniqueId());
     }
 
     private static void exit(Player player, boolean clearPersisted) {
@@ -149,7 +164,9 @@ public class SpellHotbarManager {
         justExited.put(uuid, System.currentTimeMillis() + 500);
 
         MagicProfile profile = ProfileManager.getProfile(player, MagicProfile.class);
-        profile.setCanCast(true);
+        if (profile != null) {
+            profile.setCanCast(true);
+        }
 
         restoreFromMemory(player, uuid);
 
@@ -180,7 +197,9 @@ public class SpellHotbarManager {
         justExited.remove(uuid);
 
         MagicProfile profile = ProfileManager.getProfile(player, MagicProfile.class);
-        profile.setCanCast(true);
+        if (profile != null) {
+            profile.setCanCast(true);
+        }
 
         if (fromMemory) {
             restoreFromMemory(player, uuid);
@@ -325,8 +344,10 @@ public class SpellHotbarManager {
         if (!isActive(player)) return;
 
         MagicProfile profile = ProfileManager.getProfile(player, MagicProfile.class);
+        if (profile == null) return;
+        Map<Integer, String> hotbarSpells = profile.getHotbarSpellIds();
         for (int slot = 0; slot < SPELL_SLOT_COUNT; slot++) {
-            String spellId = profile.getHotbarSpellIds().get(slot);
+            String spellId = hotbarSpells.get(slot);
             Spell spell = SpellRegistry.getSpell(spellId);
             if (spell != null) {
                 player.getInventory().setItem(slot, buildSpellItem(spell));
@@ -356,7 +377,9 @@ public class SpellHotbarManager {
         savedHeldSlot.remove(uuid);
 
         MagicProfile profile = ProfileManager.getProfile(player, MagicProfile.class);
-        profile.setCanCast(true);
+        if (profile != null) {
+            profile.setCanCast(true);
+        }
 
         deletePersistedSnapshot(uuid);
     }
