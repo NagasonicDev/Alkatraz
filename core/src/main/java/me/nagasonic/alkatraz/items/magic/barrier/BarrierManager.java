@@ -6,6 +6,7 @@ import me.nagasonic.alkatraz.api.magic.instance.MagicItemInstance;
 import me.nagasonic.alkatraz.items.magic.condition.implementation.CooldownTracker;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -17,15 +18,17 @@ public final class BarrierManager {
     private static final Map<UUID, Map<String, BarrierSession>> SESSIONS = new ConcurrentHashMap<>();
     private static final Map<UUID, Map<String, Double>> PERSISTED_HP = new ConcurrentHashMap<>();
     private static boolean scheduled = false;
+    private static BukkitTask tickTask = null;
 
     private BarrierManager() {}
 
     public static void initialize() {
         if (scheduled) return;
         scheduled = true;
-        Alkatraz.getInstance().getServer().getScheduler().runTaskTimer(Alkatraz.getInstance(), () -> {
-            for (Map<String, BarrierSession> byItem : new ArrayList<>(SESSIONS.values())) {
-                for (BarrierSession session : new ArrayList<>(byItem.values())) {
+        tickTask = Alkatraz.getInstance().getServer().getScheduler().runTaskTimer(Alkatraz.getInstance(), () -> {
+            if (SESSIONS.isEmpty()) return;
+            for (Map<String, BarrierSession> byItem : SESSIONS.values()) {
+                for (BarrierSession session : byItem.values()) {
                     if (session != null && !session.isDisposed()) {
                         session.tick();
                     }
@@ -81,14 +84,20 @@ public final class BarrierManager {
     }
 
     public static void disposeAll() {
-        for (Map<String, BarrierSession> byItem : new ArrayList<>(SESSIONS.values())) {
-            for (BarrierSession session : new ArrayList<>(byItem.values())) {
+        for (Map<String, BarrierSession> byItem : SESSIONS.values()) {
+            for (BarrierSession session : byItem.values()) {
                 if (session != null) {
                     session.dispose(false);
                 }
             }
         }
         PERSISTED_HP.clear();
+        BukkitTask current = tickTask;
+        tickTask = null;
+        scheduled = false;
+        if (current != null) {
+            current.cancel();
+        }
     }
 
     static void onDisposed(BarrierSession session, boolean shatter) {
