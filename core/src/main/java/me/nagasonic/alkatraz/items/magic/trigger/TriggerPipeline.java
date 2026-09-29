@@ -1,5 +1,6 @@
 package me.nagasonic.alkatraz.items.magic.trigger;
 
+import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.api.magic.trigger.InternalTriggerEvent;
 import me.nagasonic.alkatraz.api.magic.trigger.TriggerContext;
 import me.nagasonic.alkatraz.api.magic.trigger.TriggerBinding;
@@ -15,13 +16,17 @@ import me.nagasonic.alkatraz.api.magic.instance.Engraving;
 import me.nagasonic.alkatraz.api.magic.instance.MagicItemInstance;
 import me.nagasonic.alkatraz.api.magic.modifier.EngravingDefinition;
 import me.nagasonic.alkatraz.api.magic.registry.MagicItemRegistries;
+import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -29,15 +34,85 @@ import java.util.Set;
  */
 public final class TriggerPipeline {
 
+    /**
+     * Union of every trigger type declared by a registered item definition or engraving
+     * definition. While non-empty, a dispatch whose trigger type is absent from this set
+     * can be skipped entirely: no equipped item could possibly produce a binding for it.
+     * An empty set means "index unavailable" and disables the shortcut, preserving the
+     * behaviour of resolving bindings for every dispatch.
+     */
+    private static volatile Set<NamespacedKey> BOUND_TRIGGERS = Set.of();
+
     private final EquipmentService equipmentService;
 
     public TriggerPipeline(EquipmentService equipmentService) {
         this.equipmentService = equipmentService;
     }
 
+    /** Replaces the bound-trigger index. Passing {@code null} or an empty set disables the shortcut. */
+    public static void setBoundTriggers(Set<NamespacedKey> types) {
+        BOUND_TRIGGERS = (types == null || types.isEmpty()) ? Set.of() : Set.copyOf(types);
+    }
+
+    /**
+     * Rebuilds the bound-trigger index from the registries that back item and engraving
+     * definitions. Any definition whose trigger declarations cannot be read is treated as
+     * "may bind anything", which collapses the index to empty and disables the shortcut
+     * rather than silently dropping a trigger.
+     */
+    public static void refreshBoundTriggers() {
+        Set<NamespacedKey> types = new HashSet<>();
+        for (ItemDefinition definition : MagicItemRegistries.ITEM_DEFINITIONS.values()) {
+            if (definition.triggers() == null) {
+                BOUND_TRIGGERS = Set.of();
+                return;
+            }
+            for (TriggerBinding binding : definition.triggers()) {
+                if (binding == null || binding.triggerType() == null) {
+                    BOUND_TRIGGERS = Set.of();
+                    return;
+                }
+                types.add(binding.triggerType());
+            }
+        }
+        for (EngravingDefinition engraving : MagicItemRegistries.ENGRAVING_DEFINITIONS.values()) {
+            for (String raw : declaredEngravingTriggers(engraving)) {
+                Optional<NamespacedKey> parsed = MagicKeys.parse(raw);
+                if (parsed.isEmpty()) {
+                    BOUND_TRIGGERS = Set.of();
+                    return;
+                }
+                types.add(parsed.get());
+            }
+        }
+        types.add(MagicKeys.alkatraz("passive"));
+        BOUND_TRIGGERS = Set.copyOf(types);
+        Alkatraz.logInfo("Bound-trigger index built for " + types.size() + " trigger type(s).");
+    }
+
+    private static Collection<String> declaredEngravingTriggers(EngravingDefinition engraving) {
+        Object raw = engraving.staticConfig().get("triggers");
+        if (raw == null) {
+            return List.of();
+        }
+        if (!(raw instanceof List<?> list)) {
+            return List.of(String.valueOf(raw));
+        }
+        List<String> out = new ArrayList<>(list.size());
+        for (Object entry : list) {
+            out.add(String.valueOf(entry));
+        }
+        return out;
+    }
+
     public void dispatch(InternalTriggerEvent event) {
         TriggerContext baseContext = event.context();
         if (baseContext.isCancelled() || baseContext.actor() == null) {
+            return;
+        }
+
+        Set<NamespacedKey> bound = BOUND_TRIGGERS;
+        if (!bound.isEmpty() && !bound.contains(event.triggerType())) {
             return;
         }
 

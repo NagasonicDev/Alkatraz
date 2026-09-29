@@ -38,6 +38,7 @@ import me.nagasonic.alkatraz.items.magic.effect.implementation.MessageEffect;
 import me.nagasonic.alkatraz.items.magic.effect.implementation.ParticleEffect;
 import me.nagasonic.alkatraz.items.magic.effect.implementation.PlaySoundEffect;
 import me.nagasonic.alkatraz.items.magic.effect.implementation.TeleportEffect;
+import me.nagasonic.alkatraz.items.magic.equipment.EquipmentCacheListener;
 import me.nagasonic.alkatraz.items.magic.equipment.EquipmentChangeListener;
 import me.nagasonic.alkatraz.items.magic.equipment.EquipmentReconcileTask;
 import me.nagasonic.alkatraz.items.magic.equipment.EquipmentService;
@@ -86,6 +87,7 @@ public final class MagicItemBootstrap {
         ComponentHandlerRegistry.register(new GrimoireComponentHandler());
 
         MagicItemServices.initialize(itemService, attributeService, equipmentService);
+        EquipmentCacheListener.tryRegister(Alkatraz.getInstance());
         EquipmentChangeListener.tryRegister(Alkatraz.getInstance());
         EquipmentReconcileTask.start();
         int registeredRecipes = MagicItemRecipeManager.registerRecipes();
@@ -275,6 +277,7 @@ public final class MagicItemBootstrap {
         });
 
         me.nagasonic.alkatraz.items.magic.util.ItemTypeMapper.load();
+        TriggerPipeline.refreshBoundTriggers();
 
         Alkatraz.logInfo("Loaded " + itemCount[0] + " item definitions, " + recipeCount[0] + " recipes, " + engravingCount[0] + " engravings.");
     }
