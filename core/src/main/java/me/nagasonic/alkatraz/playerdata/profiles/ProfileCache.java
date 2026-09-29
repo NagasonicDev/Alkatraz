@@ -155,11 +155,13 @@ public class ProfileCache {
     /**
      * Gets all profiles for a player by UUID
      * @param uuid The player UUID
-     * @return Collection of all cached profiles for the player
+     * @return Unmodifiable view of all cached profiles for the player
      */
     public Collection<Profile> getAllProfiles(UUID uuid) {
         Map<Class<? extends Profile>, Profile> playerProfiles = cache.get(uuid);
-        return playerProfiles != null ? new ArrayList<>(playerProfiles.values()) : Collections.emptyList();
+        return playerProfiles != null
+                ? Collections.unmodifiableCollection(playerProfiles.values())
+                : Collections.emptyList();
     }
 
     /**

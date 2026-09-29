@@ -71,7 +71,7 @@ public class ProfileRegistry {
      * @return Set of registered profile classes
      */
     public static Set<Class<? extends Profile>> getRegisteredProfiles() {
-        return new HashSet<>(registeredProfiles.keySet());
+        return Collections.unmodifiableSet(registeredProfiles.keySet());
     }
 
     /**
