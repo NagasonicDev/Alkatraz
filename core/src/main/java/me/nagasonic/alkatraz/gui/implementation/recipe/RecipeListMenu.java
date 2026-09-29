@@ -20,12 +20,17 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class RecipeListMenu extends PagedMenu<AlkatrazRecipe> {
 
     private final RecipeCategory category;
     private final String searchQuery;
     private SortMode sortMode = SortMode.KEY;
+    private Set<String> unlockedKeys = Set.of();
 
     private static final int SORT_SLOT = 47;
     private static final int CLEAR_SLOT = 51;
@@ -80,8 +85,46 @@ public class RecipeListMenu extends PagedMenu<AlkatrazRecipe> {
         return recipes;
     }
 
+    private static final Map<UUID, UnlockSnapshot> UNLOCK_CACHE = new ConcurrentHashMap<>();
+    private static final long UNLOCK_CACHE_TTL_MS = 1000L;
+
+    private record UnlockSnapshot(Set<String> keys, long stamp) {}
+
+    private static Set<String> unlockedKeys(Player viewer, List<AlkatrazRecipe> recipes) {
+        UUID uuid = viewer.getUniqueId();
+        long now = System.currentTimeMillis();
+        UnlockSnapshot cached = UNLOCK_CACHE.get(uuid);
+        UnlockSnapshot snapshot;
+        if (cached == null) {
+            snapshot = new UnlockSnapshot(ConcurrentHashMap.newKeySet(), now);
+            UNLOCK_CACHE.put(uuid, snapshot);
+        } else if (now - cached.stamp() >= UNLOCK_CACHE_TTL_MS) {
+            snapshot = new UnlockSnapshot(cached.keys(), now);
+            UNLOCK_CACHE.put(uuid, snapshot);
+        } else {
+            snapshot = cached;
+        }
+        for (AlkatrazRecipe recipe : recipes) {
+            if (recipe.getRequirements().isEmpty()) continue;
+            String key = recipe.getKey().toString();
+            if (snapshot.keys().contains(key)) continue;
+            if (UnlockManager.isUnlocked(viewer, key)) {
+                snapshot.keys().add(key);
+            }
+        }
+        return snapshot.keys();
+    }
+
+    private List<AlkatrazRecipe> currentPageItems() {
+        int start = Math.max(0, (currentPage - 1) * itemsPerPage);
+        int end = Math.min(start + itemsPerPage, allItems.size());
+        if (start >= end) return List.of();
+        return allItems.subList(start, end);
+    }
+
     @Override
     protected void addDecorations() {
+        this.unlockedKeys = unlockedKeys(viewer, currentPageItems());
         fillAll();
         if (searchQuery == null) {
             ItemStack sort = Alkatraz.getGuiItemRegistry().getItem("sort_button").clone();
@@ -112,7 +155,7 @@ public class RecipeListMenu extends PagedMenu<AlkatrazRecipe> {
         lore.add(ColorFormat.format("&7" + recipe.getType().name().toLowerCase()));
         if (recipe.getRequirements().isEmpty()) {
             lore.add(ColorFormat.format(lang().get("recipes.unlocked")));
-        } else if (UnlockManager.isUnlocked(viewer, recipe.getKey().toString())) {
+        } else if (unlockedKeys.contains(recipe.getKey().toString())) {
             lore.add(ColorFormat.format(lang().get("recipes.unlocked")));
         } else {
             lore.add(ColorFormat.format(lang().get("recipes.locked")));

@@ -17,7 +17,9 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -84,8 +86,12 @@ public class HotbarSpellSelectionMenu extends PagedMenu<Spell> {
     // Menu building
     // -------------------------------------------------------------------------
 
+    private Set<String> assignedIds = Set.of();
+
     @Override
     protected void addDecorations() {
+        assignedIds = new HashSet<>(ProfileManager.getProfile(viewer, MagicProfile.class)
+                .getHotbarSpellIds().values());
         ItemStack blank = Alkatraz.getGuiItemRegistry().getItem("blank");
         for (int i = 0; i < 54; i++) {
             if (isReserved(i)) continue;
@@ -158,10 +164,7 @@ public class HotbarSpellSelectionMenu extends PagedMenu<Spell> {
 
     @Override
     protected ItemStack createDisplayItem(Spell spell, int index) {
-        MagicProfile profile = ProfileManager.getProfile(viewer, MagicProfile.class);
-        List<String> spellIds = profile.getHotbarSpellIds().values().stream().toList();
-
-        boolean alreadyAssigned = spellIds.contains(spell.getId());
+        boolean alreadyAssigned = assignedIds.contains(spell.getId());
         boolean canAssign = !alreadyAssigned;
 
         ItemBuilder builder = ItemBuilder.of(spell.getGuiItem().clone())

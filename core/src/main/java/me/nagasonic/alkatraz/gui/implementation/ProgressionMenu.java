@@ -85,7 +85,6 @@ public class ProgressionMenu extends Menu {
         CircleDefinition definition = ProgressionService.getCircleDefinition(circle);
         boolean completed = circle <= currentCircle;
         boolean isNext = circle == currentCircle + 1;
-        boolean canAdvance = isNext && ProgressionService.canAdvance(viewer, circle);
 
         Material material;
         String color;
@@ -119,7 +118,7 @@ public class ProgressionMenu extends Menu {
                 for (ProgressionRequirement req : definition.getRequirements()) {
                     boolean met = req.isMet(context);
                     String metColor = met ? "&a" : "&c";
-                    String desc = getRequirementDisplay(req, context);
+                    String desc = getRequirementDisplay(req, context, met);
                     String checkmark = met ? lang().get("progression.requirement_met") : lang().get("progression.requirement_unmet");
                     lore.add(ColorFormat.format(metColor + "  ") + checkmark + " " + desc);
                 }
@@ -137,7 +136,7 @@ public class ProgressionMenu extends Menu {
             lore.add(ColorFormat.format("&7-------------------"));
 
             if (isNext) {
-                if (canAdvance) {
+                if (ProgressionService.canAdvance(viewer, circle)) {
                     lore.add(lang().get("progression.click_to_advance"));
                 } else {
                     lore.add(lang().get("progression.click_for_details"));
@@ -160,7 +159,7 @@ public class ProgressionMenu extends Menu {
         return item;
     }
 
-    private String getRequirementDisplay(ProgressionRequirement req, RequirementContext context) {
+    private String getRequirementDisplay(ProgressionRequirement req, RequirementContext context, boolean met) {
         if (req instanceof ArcaneKnowledgeRequirement akReq) {
             double current = context.getProfile().getArcaneKnowledge();
             double needed = akReq.getAmount();
@@ -171,7 +170,6 @@ public class ProgressionMenu extends Menu {
             String spellName = spell != null ? spell.getDisplayName() : smReq.getSpellId();
             int current = context.getProfile().getSpellMastery(spell);
             int needed = smReq.getMastery();
-            boolean met = req.isMet(context);
             String metColor = met ? "&a" : "&c";
             return ColorFormat.format(metColor + lang().get("progression.requirement_spell_mastery", "spell", spellName, "metColor", metColor, "current", String.valueOf(Math.max(0, current)), "needed", String.valueOf(needed)));
         }
