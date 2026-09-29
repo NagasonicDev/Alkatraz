@@ -52,15 +52,23 @@ public class ResourcePackListener implements Listener {
         }
     }
 
+    private static final java.util.regex.Pattern NON_HEX = java.util.regex.Pattern.compile("[^0-9a-fA-F]");
+
+    private static volatile String cachedHash;
+    private static volatile byte[] cachedBytes;
+
     private static byte[] hexStringToByteArray(String hex) {
         if (hex == null || hex.isEmpty()) return new byte[0];
-        hex = hex.replaceAll("[^0-9a-fA-F]", "");
-        int len = hex.length();
+        if (hex.equals(cachedHash) && cachedBytes != null) return cachedBytes.clone();
+        String cleaned = NON_HEX.matcher(hex).replaceAll("");
+        int len = cleaned.length();
         byte[] data = new byte[len / 2];
-        for (int i = 0; i < len; i += 2) {
-            data[i / 2] = (byte) ((Character.digit(hex.charAt(i), 16) << 4)
-                    + Character.digit(hex.charAt(i + 1), 16));
+        for (int i = 0; i + 1 < len; i += 2) {
+            data[i / 2] = (byte) ((Character.digit(cleaned.charAt(i), 16) << 4)
+                    + Character.digit(cleaned.charAt(i + 1), 16));
         }
+        cachedHash = hex;
+        cachedBytes = data;
         return data;
     }
 }
