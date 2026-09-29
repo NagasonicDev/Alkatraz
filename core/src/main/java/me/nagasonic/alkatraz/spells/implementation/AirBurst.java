@@ -108,10 +108,12 @@ public class AirBurst extends AttackSpell {
                         SpellComponentType.OFFENSE,
                         point,
                         1.75,                    // collision radius
-                        40                       // lifespan (ticks)
+                        2                        // lifespan (ticks)
                 );
 
-                for (Location loc : ParticleUtils.circle(point, getModifiedStat(caster, "blast_size", 1), 16, yaw, pitch)) {
+                double blastSize = getModifiedStat(caster, "blast_size", 1);
+
+                for (Location loc : ParticleUtils.circle(point, blastSize, 16, yaw, pitch)) {
                     if (properties.isCountered()) {
                         return;
                     }
@@ -121,7 +123,7 @@ public class AirBurst extends AttackSpell {
                             0.1
                     );
                 }
-                for (LivingEntity le : me.nagasonic.alkatraz.util.Utils.getNearbyLivingEntities(point, getModifiedStat(caster, "blast_size", 1))){
+                for (LivingEntity le : me.nagasonic.alkatraz.util.Utils.getNearbyLivingEntities(point, blastSize)){
                     le.setVelocity(caster.getEyeLocation().getDirection().multiply(getPower(caster, le, properties.getRemainingPower())));
                 }
 
@@ -218,10 +220,9 @@ public class AirBurst extends AttackSpell {
             List<Location> magicCirclePoints = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 2, 0);
 
             // Spawn particles at all calculated points
-            for (int i = 0; i < 100; i++){
-                for (Location loc : magicCirclePoints) {
-                    ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, new Particle.DustOptions(Color.WHITE, 0.4F));
-                }
+            Particle.DustOptions options = new Particle.DustOptions(Color.WHITE, 0.4F);
+            for (Location loc : magicCirclePoints) {
+                ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, options);
             }
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());
         return d;
