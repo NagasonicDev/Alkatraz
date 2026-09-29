@@ -12,6 +12,8 @@ import org.bukkit.inventory.PlayerInventory;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Resolves equipped magic items for a player across vanilla and virtual slots.
@@ -24,11 +26,42 @@ public final class EquipmentService {
 
     private final Map<EquipmentSlot, VirtualSlotResolver> virtualResolvers = new LinkedHashMap<>();
 
+    /**
+     * Per-player profile cache. Resolving a profile deserializes every equipped magic
+     * item, which is far too costly to redo on every trigger dispatch. Entries are
+     * dropped by {@link #invalidate(UUID)} from every hook that can change a player's
+     * equipment (see {@link EquipmentCacheListener}).
+     */
+    private static final Map<UUID, EquipmentProfile> PROFILE_CACHE = new ConcurrentHashMap<>();
+
     public void registerVirtualSlot(EquipmentSlot slot, VirtualSlotResolver resolver) {
         virtualResolvers.put(slot, resolver);
     }
 
+    /** Drops the cached profile for a player so the next {@link #profile(Player)} rebuilds it. */
+    public static void invalidate(UUID uuid) {
+        if (uuid != null) {
+            PROFILE_CACHE.remove(uuid);
+        }
+    }
+
+    /** Drops every cached profile. */
+    public static void invalidateAll() {
+        PROFILE_CACHE.clear();
+    }
+
     public EquipmentProfile profile(Player player) {
+        UUID uuid = player.getUniqueId();
+        EquipmentProfile cached = PROFILE_CACHE.get(uuid);
+        if (cached != null) {
+            return cached;
+        }
+        EquipmentProfile built = buildProfile(player);
+        EquipmentProfile existing = PROFILE_CACHE.putIfAbsent(uuid, built);
+        return existing != null ? existing : built;
+    }
+
+    private EquipmentProfile buildProfile(Player player) {
         Map<EquipmentSlot, ItemStack> items = new LinkedHashMap<>();
         Map<EquipmentSlot, MagicItemInstance> instances = new LinkedHashMap<>();
 
