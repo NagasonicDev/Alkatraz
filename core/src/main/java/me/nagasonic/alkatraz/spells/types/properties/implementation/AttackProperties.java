@@ -7,8 +7,9 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 public class AttackProperties extends SpellProperties {
 
@@ -16,7 +17,7 @@ public class AttackProperties extends SpellProperties {
     private final double initialPower;
     private boolean countered;
     private AttackType type;
-    private List<Entity> hit = new ArrayList<>();
+    private final Set<UUID> hit = new HashSet<>();
 
     public AttackProperties(LivingEntity caster, Location castLocation, double initialPower, AttackType type) {
         super(caster, castLocation);
@@ -55,10 +56,11 @@ public class AttackProperties extends SpellProperties {
     }
 
     public boolean hasHit(Entity entity){
-        return hit.contains(entity);
+        return entity != null && hit.contains(entity.getUniqueId());
     }
 
     public void hit(Entity entity){
-        hit.add(entity);
+        if (entity == null) return;
+        hit.add(entity.getUniqueId());
     }
 }
