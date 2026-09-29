@@ -2,6 +2,7 @@ package me.nagasonic.alkatraz.tutorial;
 
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.Configs;
+import me.nagasonic.alkatraz.config.VerbosityLevel;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
@@ -11,8 +12,18 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.scheduler.BukkitTask;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class FirstJoinTutorial implements Listener {
+
+    private static final Map<UUID, List<BukkitTask>> pendingTasks = new HashMap<>();
 
     private static LangManager lang() { return Alkatraz.getLangManager(); }
 
@@ -26,46 +37,72 @@ public class FirstJoinTutorial implements Listener {
         if (profile.getBool("tutorialSeen")) return;
 
         profile.setBool("tutorialSeen", true);
-        Alkatraz.logHigh("Starting first-join tutorial for " + player.getName());
+        if (Alkatraz.getVerbosity().isAtLeast(VerbosityLevel.HIGH)) {
+            Alkatraz.logHigh("Starting first-join tutorial for " + player.getName());
+        }
         scheduleSteps(player);
     }
 
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        cancelPending(event.getPlayer().getUniqueId());
+    }
+
+    private static void cancelPending(UUID uuid) {
+        List<BukkitTask> tasks = pendingTasks.remove(uuid);
+        if (tasks == null) return;
+        for (BukkitTask task : tasks) {
+            task.cancel();
+        }
+    }
+
     private void scheduleSteps(Player player) {
+        UUID uuid = player.getUniqueId();
+        List<BukkitTask> tasks = new ArrayList<>(7);
+        pendingTasks.put(uuid, tasks);
+
         int delay = 0;
         int gap = 100;
 
-        Bukkit.getScheduler().runTaskLater(Alkatraz.getInstance(), () -> {
+        tasks.add(step(player, () -> {
             sendTitle(player, lang().get("tutorial.welcome_title"), lang().get("tutorial.welcome_subtitle"), 80, 20);
-        }, delay += 20);
+        }, delay += 20));
 
-        Bukkit.getScheduler().runTaskLater(Alkatraz.getInstance(), () -> {
+        tasks.add(step(player, () -> {
             sendTitle(player, lang().get("tutorial.step1_title"), lang().get("tutorial.step1_subtitle"), 60, 10);
             sendMessage(player, lang().get("tutorial.step1_chat"));
-        }, delay += gap);
+        }, delay += gap));
 
-        Bukkit.getScheduler().runTaskLater(Alkatraz.getInstance(), () -> {
+        tasks.add(step(player, () -> {
             sendTitle(player, lang().get("tutorial.step2_title"), lang().get("tutorial.step2_subtitle"), 60, 10);
             sendMessage(player, lang().get("tutorial.step2_chat"));
-        }, delay += gap);
+        }, delay += gap));
 
-        Bukkit.getScheduler().runTaskLater(Alkatraz.getInstance(), () -> {
+        tasks.add(step(player, () -> {
             sendTitle(player, lang().get("tutorial.step3_title"), lang().get("tutorial.step3_subtitle"), 60, 10);
             sendMessage(player, lang().get("tutorial.step3_chat"));
-        }, delay += gap);
+        }, delay += gap));
 
-        Bukkit.getScheduler().runTaskLater(Alkatraz.getInstance(), () -> {
+        tasks.add(step(player, () -> {
             sendTitle(player, lang().get("tutorial.step4_title"), lang().get("tutorial.step4_subtitle"), 60, 10);
             sendMessage(player, lang().get("tutorial.step4_chat"));
-        }, delay += gap);
+        }, delay += gap));
 
-        Bukkit.getScheduler().runTaskLater(Alkatraz.getInstance(), () -> {
+        tasks.add(step(player, () -> {
             sendTitle(player, lang().get("tutorial.step5_title"), lang().get("tutorial.step5_subtitle"), 60, 10);
             sendMessage(player, lang().get("tutorial.step5_chat"));
-        }, delay += gap);
+        }, delay += gap));
 
-        Bukkit.getScheduler().runTaskLater(Alkatraz.getInstance(), () -> {
+        tasks.add(step(player, () -> {
             sendTitle(player, lang().get("tutorial.done_title"), lang().get("tutorial.done_subtitle"), 80, 20);
-        }, delay += gap);
+        }, delay += gap));
+    }
+
+    private static BukkitTask step(Player player, Runnable body, int delayTicks) {
+        return Bukkit.getScheduler().runTaskLater(Alkatraz.getInstance(), () -> {
+            if (!player.isOnline()) return;
+            body.run();
+        }, delayTicks);
     }
 
     private void sendTitle(Player player, String title, String subtitle, int duration, int fade) {
