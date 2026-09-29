@@ -11,8 +11,10 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.Vector;
 
 import java.util.EnumSet;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Follows whatever entity is recorded in a configurable persistent-NBT UUID key
@@ -29,6 +31,8 @@ public class FollowEntityGoal implements Goal {
     private static final double TELEPORT_OFFSET = 1.5;
     private static final double CROSS_WORLD_OFFSET_X = 1.0;
     private static final double CROSS_WORLD_OFFSET_Z = 1.0;
+    private static final int UUID_CACHE_LIMIT = 4096;
+    private static final Map<String, UUID> UUID_CACHE = new ConcurrentHashMap<>();
 
     private final FollowEntityConfig config;
 
@@ -107,11 +111,30 @@ public class FollowEntityGoal implements Goal {
     private LivingEntity resolveFollowed(MobBrainContext ctx) {
         String rawUuid = NBT.<String>getPersistentData(ctx.self(), nbt -> nbt.getString(config.followEntityUuidKey()));
         if (rawUuid == null || rawUuid.isBlank()) return null;
-        try {
-            Entity entity = Bukkit.getEntity(UUID.fromString(rawUuid));
-            if (entity instanceof LivingEntity living && !living.isDead()) return living;
-        } catch (IllegalArgumentException ignored) {}
+        UUID followed = parseUuid(rawUuid);
+        if (followed == null) return null;
+        Entity entity = Bukkit.getEntity(followed);
+        if (entity instanceof LivingEntity living && !living.isDead()) return living;
         return null;
+    }
+
+    /**
+     * Parses (and memoises) the followed UUID. The cache holds strings only, so
+     * the goal stays stateless per mob and safe to share between mobs; entries
+     * are bounded by the number of distinct followers and the cache is dropped
+     * wholesale if it ever grows past a sane limit.
+     */
+    private static UUID parseUuid(String rawUuid) {
+        UUID cached = UUID_CACHE.get(rawUuid);
+        if (cached != null) return cached;
+        try {
+            UUID parsed = UUID.fromString(rawUuid);
+            if (UUID_CACHE.size() >= UUID_CACHE_LIMIT) UUID_CACHE.clear();
+            UUID_CACHE.put(rawUuid, parsed);
+            return parsed;
+        } catch (IllegalArgumentException ignored) {
+            return null;
+        }
     }
 
     /** Immutable per-goal configuration; safe to share across mobs. */
