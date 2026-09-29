@@ -21,6 +21,7 @@ import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
@@ -59,7 +60,9 @@ public class LesserHeal extends Spell {
     @Override
     public void castAction(Player p, ItemStack wand) {
         if (!p.isDead()){
-            if (p.isSneaking() || me.nagasonic.alkatraz.util.Utils.getTargetEntity(p, (int) getModifiedStat(p, "target_range", 20)) == null || !(me.nagasonic.alkatraz.util.Utils.getTargetEntity(p, (int) getModifiedStat(p, "target_range", 20)) instanceof Player)){
+            Entity lookedAt = p.isSneaking() ? null
+                    : me.nagasonic.alkatraz.util.Utils.getTargetEntity(p, (int) getModifiedStat(p, "target_range", 20));
+            if (!(lookedAt instanceof Player)){
                 double wandPower = getWandPower(wand, p);
                 double base = (baseHeal * wandPower) * (1 + ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class).getAffinity(Element.LIGHT) / 100);
                 double heal = getModifiedStat(p, "heal", base);
@@ -85,7 +88,7 @@ public class LesserHeal extends Spell {
                     }else{ stopCast();}
                 }, 0L, 1L);
             }else{
-                Player target = (Player) me.nagasonic.alkatraz.util.Utils.getTargetEntity(p, (int) getModifiedStat(p, "target_range", 20));
+                Player target = (Player) lookedAt;
                 double wandPower = getWandPower(wand, p);
                 double base = (baseHeal * wandPower) * (1 + ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class).getAffinity(Element.LIGHT) / 100);
                 double heal = getModifiedStat(p, "heal", base);
@@ -150,7 +153,9 @@ public class LesserHeal extends Spell {
         int d = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
             if (e.isCancelled()) return;
             if (caster instanceof Player p){
-                if (p.isSneaking() || me.nagasonic.alkatraz.util.Utils.getTargetEntity(p, (int) getModifiedStat(p, "target_range", 20)) == null || !(me.nagasonic.alkatraz.util.Utils.getTargetEntity(p, (int) getModifiedStat(p, "target_range", 20)) instanceof Player)){
+                Entity lookedAt = p.isSneaking() ? null
+                        : me.nagasonic.alkatraz.util.Utils.getTargetEntity(p, (int) getModifiedStat(p, "target_range", 20));
+                if (!(lookedAt instanceof Player)){
                     Location playerLoc = p.getLocation();
                     float yaw = playerLoc.getYaw();
                     float pitch = 0;
@@ -160,13 +165,12 @@ public class LesserHeal extends Spell {
                     magicCirclePoints.add(playerLoc);
 
                     // Spawn particles at all calculated points
-                    for (int i = 0; i < magicCirclePoints.size(); i++){
-                        for (Location loc1 : magicCirclePoints) {
-                            ParticleCaster.spawn(p, loc1.getWorld(), Utils.DUST, loc1, 1, new Particle.DustOptions(Color.YELLOW, 0.4F));
-                        }
+                    Particle.DustOptions options = new Particle.DustOptions(Color.YELLOW, 0.4F);
+                    for (Location loc1 : magicCirclePoints) {
+                        ParticleCaster.spawn(p, loc1.getWorld(), Utils.DUST, loc1, 1, options);
                     }
                 }else{
-                    Location playerLoc = me.nagasonic.alkatraz.util.Utils.getTargetEntity(p, (int) getModifiedStat(p, "target_range", 20)).getLocation();
+                    Location playerLoc = lookedAt.getLocation();
                     float yaw = playerLoc.getYaw();
                     float pitch = 0;
 
@@ -179,10 +183,9 @@ public class LesserHeal extends Spell {
                     magicCirclePoints.add(loc);
 
                     // Spawn particles at all calculated points
-                    for (int i = 0; i < magicCirclePoints.size(); i++){
-                        for (Location loc1 : magicCirclePoints) {
-                            ParticleCaster.spawn(p, loc1.getWorld(), Utils.DUST, loc1, 1, new Particle.DustOptions(Color.YELLOW, 0.4F));
-                        }
+                    Particle.DustOptions options = new Particle.DustOptions(Color.YELLOW, 0.4F);
+                    for (Location loc1 : magicCirclePoints) {
+                        ParticleCaster.spawn(p, loc1.getWorld(), Utils.DUST, loc1, 1, options);
                     }
                 }
             }else{
@@ -195,11 +198,10 @@ public class LesserHeal extends Spell {
                 magicCirclePoints.add(playerLoc);
 
                 // Spawn particles at all calculated points
-                for (int i = 0; i < magicCirclePoints.size(); i++){
-                    for (Location loc1 : magicCirclePoints) {
-                        ParticleCaster.spawn(caster, loc1.getWorld(), Utils.DUST, loc1, 1, new Particle.DustOptions(Color.YELLOW, 0.4F));
-                    }
-                }
+            Particle.DustOptions options = new Particle.DustOptions(Color.YELLOW, 0.4F);
+            for (Location loc1 : magicCirclePoints) {
+                ParticleCaster.spawn(caster, loc1.getWorld(), Utils.DUST, loc1, 1, options);
+            }
             }
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());
         return d;
