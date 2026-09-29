@@ -6,6 +6,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLevelChangeEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 public class UnlockListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
@@ -21,5 +22,10 @@ public class UnlockListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onWorldChange(PlayerChangedWorldEvent event) {
         UnlockManager.refresh(event.getPlayer());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onQuit(PlayerQuitEvent event) {
+        UnlockManager.invalidate(event.getPlayer().getUniqueId());
     }
 }

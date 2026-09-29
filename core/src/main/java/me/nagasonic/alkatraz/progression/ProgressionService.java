@@ -75,11 +75,11 @@ public final class ProgressionService {
 
     public static void addArcaneKnowledge(OfflinePlayer player, double amount) {
         if (player == null || amount == 0) return;
-        MagicProfile profile = ProfileManager.getProfile(player.getUniqueId(), MagicProfile.class);
+        MagicProfile profile = ProfileManager.getOrLoadProfile(player.getUniqueId(), MagicProfile.class);
         profile.setArcaneKnowledge(Math.max(0, profile.getArcaneKnowledge() + amount));
         showArcaneKnowledgeBar(player, profile);
         if (player instanceof Player online) {
-            UnlockManager.refresh(online);
+            UnlockManager.evaluate(online);
         }
     }
 
