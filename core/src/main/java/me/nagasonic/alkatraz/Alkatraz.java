@@ -95,6 +95,7 @@ public final class Alkatraz extends JavaPlugin {
     private static boolean resourcePackForced = false;
     private static VerbosityLevel verbosity = VerbosityLevel.NORMAL;
     private static RecipeManagerAPI recipeManager = new RecipeManager();
+    private static Metrics metrics;
     
     // Texture pack system
     private static me.nagasonic.alkatraz.texturepack.TexturePackManager texturePackManager = null;
@@ -156,7 +157,7 @@ public final class Alkatraz extends JavaPlugin {
         guiItemRegistry = new me.nagasonic.alkatraz.gui.GUIItemRegistry();
         guiItemRegistry.init();
         
-        Metrics metrics = new Metrics(this, 27657);
+        metrics = new Metrics(this, 27657);
         logVeryHigh("Registering profiles...");
         ProfileRegistry.registerProfiles();
         MagicEntities.registerProfiles();
@@ -250,7 +251,12 @@ public final class Alkatraz extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        if (metrics != null) {
+            metrics.shutdown();
+            metrics = null;
+        }
         TaskBrainTicker.shutdown();
+        SpellComponentHandler.shutdown();
         ProfileManager.shutdown();
         BarrierManager.disposeAll();
         if (focusManager != null) {
@@ -297,9 +303,21 @@ public final class Alkatraz extends JavaPlugin {
     }
 
     public static void log(VerbosityLevel level, String message) {
-        if (verbosity.isAtLeast(level)) {
+        if (isLoggable(level)) {
             instance.getServer().getLogger().info("[Alkatraz][" + level.name() + "] " + message);
         }
+    }
+
+    /**
+     * Returns whether a message at the given level would actually be printed.
+     * Use this to guard expensive message construction (string concatenation,
+     * UUID formatting, etc.) on hot paths.
+     *
+     * @param level the level to test
+     * @return true if a message at that level would be logged
+     */
+    public static boolean isLoggable(VerbosityLevel level) {
+        return verbosity.isAtLeast(level);
     }
 
     public static void logInfo(String message){
@@ -440,6 +458,7 @@ public final class Alkatraz extends JavaPlugin {
         saveConfig("spells/meteor_shower.yml");
         saveConfig("spells/radiance.yml");
         saveConfig("spells/shadow_realm.yml");
+        saveConfig("spells/skeletal_knights.yml");
         saveConfig("spells/stealth.yml");
         saveConfig("spells/summon_zombies.yml");
         saveConfig("spells/swift.yml");
