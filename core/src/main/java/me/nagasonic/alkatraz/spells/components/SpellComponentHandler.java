@@ -12,12 +12,15 @@ import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProper
 import me.nagasonic.alkatraz.spells.types.properties.implementation.BarrierProperties;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.Listener;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
 import java.util.*;
@@ -27,6 +30,14 @@ public class SpellComponentHandler implements Listener {
 
     private static final Map<UUID, SpellComponent> activeComponents = new ConcurrentHashMap<>();
     private static int deflectTickCounter = 0;
+    private static BukkitTask tickTask = null;
+
+    private static SpellComponent[] snapComp = new SpellComponent[0];
+    private static World[] snapWorld = new World[0];
+    private static double[] snapX = new double[0];
+    private static double[] snapY = new double[0];
+    private static double[] snapZ = new double[0];
+    private static double[] snapRadius = new double[0];
 
     public static void register(SpellComponent component) {
         activeComponents.put(component.getComponentID(), component);
@@ -51,6 +62,8 @@ public class SpellComponentHandler implements Listener {
         BukkitRunnable task = new BukkitRunnable() {
             @Override
             public void run() {
+                if (activeComponents.isEmpty()) return;
+
                 detectCollisions();
                 deflectTickCounter++;
                 if (deflectTickCounter >= 2) {
@@ -68,7 +81,21 @@ public class SpellComponentHandler implements Listener {
                 }
             }
         };
-        task.runTaskTimer(Alkatraz.getInstance(), 0, 1);
+        tickTask = task.runTaskTimer(Alkatraz.getInstance(), 0, 1);
+    }
+
+    /**
+     * Cancels the tick loop and drops every tracked component. Must be called
+     * from {@code onDisable()} so a plugin reload does not leave a zombie task.
+     */
+    public static void shutdown() {
+        BukkitTask current = tickTask;
+        tickTask = null;
+        if (current != null) {
+            current.cancel();
+        }
+        activeComponents.clear();
+        deflectTickCounter = 0;
     }
 
     private static void deflectProjectiles() {
@@ -78,24 +105,37 @@ public class SpellComponentHandler implements Listener {
             if (props.getType() != BarrierType.PHYSICAL && props.getType() != BarrierType.COMBINED) continue;
 
             Location center = props.getCastLocation();
+            if (center == null) continue;
+            World world = center.getWorld();
+            if (world == null) continue;
             double radius = props.getRadius();
+            double cx = center.getX();
+            double cy = center.getY();
+            double cz = center.getZ();
 
-            for (Entity entity : center.getWorld().getNearbyEntities(center, radius, radius, radius)) {
+            for (Entity entity : world.getNearbyEntities(center, radius, radius, radius)) {
                 if (!(entity instanceof Projectile projectile)) continue;
 
                 Vector vel = projectile.getVelocity();
                 if (!Double.isFinite(vel.getX()) || !Double.isFinite(vel.getY()) || !Double.isFinite(vel.getZ())) continue;
 
-                Vector fromCenter = projectile.getLocation().toVector().subtract(center.toVector());
-                if (fromCenter.lengthSquared() < 0.0001) continue;
+                Location pLoc = projectile.getLocation();
+                double fx = pLoc.getX() - cx;
+                double fy = pLoc.getY() - cy;
+                double fz = pLoc.getZ() - cz;
+                double lenSq = fx * fx + fy * fy + fz * fz;
+                if (lenSq < 0.0001) continue;
 
-                if (vel.dot(fromCenter) > 0) continue;
+                double invLen = 1.0 / Math.sqrt(lenSq);
+                fx *= invLen;
+                fy *= invLen;
+                fz *= invLen;
+
+                if (vel.getX() * fx + vel.getY() * fy + vel.getZ() * fz > 0) continue;
 
                 double speed = Math.max(vel.length(), 0.5) * 1.2;
 
-                Vector deflected = fromCenter.normalize().multiply(speed);
-                deflected.setY(deflected.getY() + 0.3);
-
+                Vector deflected = new Vector(fx * speed, fy * speed + 0.3, fz * speed);
                 if (!Double.isFinite(deflected.getX()) || !Double.isFinite(deflected.getY()) || !Double.isFinite(deflected.getZ())) continue;
 
                 projectile.setVelocity(deflected);
@@ -104,44 +144,108 @@ public class SpellComponentHandler implements Listener {
     }
 
     public static void detectCollisions(){
-        List<SpellComponent> components = new ArrayList<>(activeComponents.values());
+        int count = fillSnapshot();
 
-        for (int i = 0; i < components.size(); i++) {
-            SpellComponent comp = components.get(i);
-            if (comp == null) continue;
-            Location loc = getLocation(comp);
-            if (loc == null) continue;
+        for (int i = 0; i < count; i++) {
+            SpellComponent comp = snapComp[i];
+            SpellComponentType typeI = comp.getType();
+            Spell spellI = comp.getSpell();
+            LivingEntity casterI = comp.getCaster();
+            World worldI = snapWorld[i];
+            double xi = snapX[i];
+            double yi = snapY[i];
+            double zi = snapZ[i];
+            double ri = snapRadius[i];
 
-            for (int j = i + 1; j < components.size(); j++) {
-                SpellComponent other = components.get(j);
-                if (other == null) continue;
-                Location otherLoc = getLocation(other);
-                if (otherLoc == null) continue;
+            for (int j = i + 1; j < count; j++) {
+                if (snapWorld[j] != worldI) continue;
+                SpellComponent other = snapComp[j];
+                SpellComponentType typeJ = other.getType();
+                if (!((typeI == SpellComponentType.OFFENSE && typeJ == SpellComponentType.DEFENSE)
+                        || (typeI == SpellComponentType.DEFENSE && typeJ == SpellComponentType.OFFENSE))) continue;
+                if (spellI == other.getSpell()) continue;
+                if (casterI == other.getCaster()) continue;
 
-                if (loc.getWorld() != otherLoc.getWorld()) continue;
-
-                double collisionRadius = Math.max(
-                        comp.getCollisionRadius(),
-                        other.getCollisionRadius()
-                );
-                if (loc.distance(otherLoc) <= collisionRadius) {
-                    collide(comp, other, loc, otherLoc);
+                double dx = snapX[j] - xi;
+                double dy = snapY[j] - yi;
+                double dz = snapZ[j] - zi;
+                double collisionRadius = Math.max(ri, snapRadius[j]);
+                if (dx * dx + dy * dy + dz * dz <= collisionRadius * collisionRadius) {
+                    collide(comp, other,
+                            new Location(worldI, xi, yi, zi),
+                            new Location(worldI, snapX[j], snapY[j], snapZ[j]));
                 }
             }
         }
     }
 
-    private static Location getLocation(SpellComponent comp) {
-        if (comp instanceof SpellEntityComponent e) {
-            return e.getEntity().getLocation();
-        } else if (comp instanceof SpellParticleComponent p) {
-            return p.getLocation();
-        } else if (comp instanceof SpellBlockComponent b) {
-            return b.getBlock().getLocation();
-        } else if (comp instanceof BarrierWallComponent w) {
-            return w.getLocation();
+    /**
+     * Copies every live component into reusable primitive arrays so the
+     * all-pairs collision pass can run without allocating. Returns the count.
+     */
+    private static int fillSnapshot() {
+        int count = 0;
+        for (SpellComponent comp : activeComponents.values()) {
+            if (comp == null) continue;
+            World world;
+            double x;
+            double y;
+            double z;
+            if (comp instanceof SpellEntityComponent e) {
+                Entity entity = e.getEntity();
+                if (entity == null) continue;
+                Location eLoc = entity.getLocation();
+                world = eLoc.getWorld();
+                x = eLoc.getX();
+                y = eLoc.getY();
+                z = eLoc.getZ();
+            } else if (comp instanceof SpellParticleComponent p) {
+                Location loc = p.getLocation();
+                if (loc == null) continue;
+                world = loc.getWorld();
+                x = loc.getX();
+                y = loc.getY();
+                z = loc.getZ();
+            } else if (comp instanceof SpellBlockComponent b) {
+                Block block = b.getBlock();
+                if (block == null) continue;
+                world = block.getWorld();
+                x = block.getX();
+                y = block.getY();
+                z = block.getZ();
+            } else if (comp instanceof BarrierWallComponent w) {
+                Location loc = w.getLocation();
+                if (loc == null) continue;
+                world = loc.getWorld();
+                x = loc.getX();
+                y = loc.getY();
+                z = loc.getZ();
+            } else {
+                continue;
+            }
+            if (world == null) continue;
+
+            if (count == snapComp.length) growSnapshot(count + 1);
+            snapComp[count] = comp;
+            snapWorld[count] = world;
+            snapX[count] = x;
+            snapY[count] = y;
+            snapZ[count] = z;
+            snapRadius[count] = comp.getCollisionRadius();
+            count++;
         }
-        return null;
+        return count;
+    }
+
+    private static void growSnapshot(int required) {
+        int capacity = Math.max(16, snapComp.length * 2);
+        while (capacity < required) capacity *= 2;
+        snapComp = Arrays.copyOf(snapComp, capacity);
+        snapWorld = Arrays.copyOf(snapWorld, capacity);
+        snapX = Arrays.copyOf(snapX, capacity);
+        snapY = Arrays.copyOf(snapY, capacity);
+        snapZ = Arrays.copyOf(snapZ, capacity);
+        snapRadius = Arrays.copyOf(snapRadius, capacity);
     }
 
     /**
