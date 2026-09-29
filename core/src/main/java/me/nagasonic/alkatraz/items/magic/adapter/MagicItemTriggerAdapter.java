@@ -37,12 +37,14 @@ import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -54,13 +56,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Adapts existing Alkatraz/Bukkit events into internal trigger events.
  */
 public final class MagicItemTriggerAdapter implements Listener {
 
-    private final Map<UUID, Map<Integer, ItemStack>> previousEquipment = new HashMap<>();
+    private final Map<UUID, Map<Integer, ItemStack>> previousEquipment = new ConcurrentHashMap<>();
 
     // -----------------------------------------------------------------------
     // Existing adapters
@@ -315,6 +318,7 @@ public final class MagicItemTriggerAdapter implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onItemHeld(PlayerItemHeldEvent event) {
         Player player = event.getPlayer();
+        EquipmentService.invalidate(player.getUniqueId());
         PlayerInventory inv = player.getInventory();
 
         // --- on_item_held ---
@@ -367,9 +371,15 @@ public final class MagicItemTriggerAdapter implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerDeath(PlayerDeathEvent event) {
         Player player = event.getEntity();
+        EquipmentService.invalidate(player.getUniqueId());
         TriggerContext context = new TriggerContext(player, null, null, null, null, Map.of());
         MagicItemServices.get().dispatchTrigger(
                 new InternalTriggerEvent(MagicKeys.alkatraz("on_death"), context));
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        previousEquipment.remove(event.getPlayer().getUniqueId());
     }
 
     /**
@@ -378,6 +388,7 @@ public final class MagicItemTriggerAdapter implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
+        EquipmentService.invalidate(player.getUniqueId());
         TriggerContext context = new TriggerContext(player, null, null, null, null, Map.of());
         MagicItemServices.get().dispatchTrigger(
                 new InternalTriggerEvent(MagicKeys.alkatraz("on_join"), context));
@@ -421,11 +432,44 @@ public final class MagicItemTriggerAdapter implements Listener {
     /**
      * Records the current equipment state before any inventory click is processed,
      * so we can detect {@code on_equip} and {@code on_unequip} changes afterward.
+     * Clicks that provably cannot move armour, the off-hand or the main hand are
+     * skipped so no snapshot (and its ten {@code getItem} calls) is allocated.
      */
     @EventHandler(priority = EventPriority.LOWEST)
     public void preInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player player)) return;
+        if (!canAffectEquipment(event)) return;
         previousEquipment.put(player.getUniqueId(), snapshotEquipment(player));
+    }
+
+    /**
+     * Whether a click can change any slot the equipment profile is built from
+     * (main hand, off hand, and the four armour slots).
+     */
+    private static boolean canAffectEquipment(InventoryClickEvent event) {
+        if (!(event.getView().getTopInventory() instanceof PlayerInventory)) {
+            // Container views: shift-clicking auto-equips armour and can swap the off-hand.
+            return true;
+        }
+        if (event.getRawSlot() >= 36) {
+            // Armour (36-39) and off-hand (40) in the player's own inventory view.
+            return true;
+        }
+        // Main region of the player's own inventory: only a number-key swap, a drop,
+        // or a sweep can move the held item.
+        switch (event.getAction()) {
+            case HOTBAR_SWAP:
+            case DROP_ALL_SLOT:
+            case DROP_ONE_SLOT:
+            case DROP_ALL_CURSOR:
+            case DROP_ONE_CURSOR:
+            case COLLECT_TO_CURSOR:
+            case PICKUP_HALF:
+            case UNKNOWN:
+                return true;
+            default:
+                return false;
+        }
     }
 
     /**
@@ -436,6 +480,7 @@ public final class MagicItemTriggerAdapter implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void postInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player player)) return;
+        EquipmentService.invalidate(player.getUniqueId());
         Map<Integer, ItemStack> before = previousEquipment.remove(player.getUniqueId());
         if (before == null) return;
 
@@ -472,6 +517,17 @@ public final class MagicItemTriggerAdapter implements Listener {
     }
 
     /**
+     * Removes any stranded pre-click snapshot. The MONITOR comparison above ignores
+     * cancelled clicks, so without this sweep a cancelled click would leak an entry
+     * for every click the player ever cancels.
+     */
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void sweepInventoryClick(InventoryClickEvent event) {
+        if (!(event.getWhoClicked() instanceof Player player)) return;
+        previousEquipment.remove(player.getUniqueId());
+    }
+
+    /**
      * Same pre/post detection for drag events (e.g. dragging an item onto an armour slot).
      */
     @EventHandler(priority = EventPriority.LOWEST)
@@ -483,6 +539,7 @@ public final class MagicItemTriggerAdapter implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void postInventoryDrag(InventoryDragEvent event) {
         if (!(event.getWhoClicked() instanceof Player player)) return;
+        EquipmentService.invalidate(player.getUniqueId());
         Map<Integer, ItemStack> before = previousEquipment.remove(player.getUniqueId());
         if (before == null) return;
 
