@@ -199,22 +199,15 @@ public class SkeletalKnights extends AttackSpell implements Listener {
 
     private void startDespawnRunnable(Player caster, List<UUID> ids) {
         new BukkitRunnable() {
-            int ticks = 0;
-
             @Override
             public void run() {
-                ticks++;
-                if (ticks >= config.knightDuration() * 20) {
-                    for (UUID id : ids) {
-                        Entity e = Bukkit.getEntity(id);
-                        if (e != null) despawnKnight(caster, e);
-                    }
-                    summonedKnights.remove(caster.getUniqueId());
-                    cancel();
-                    return;
+                for (UUID id : ids) {
+                    Entity e = Bukkit.getEntity(id);
+                    if (e != null) despawnKnight(caster, e);
                 }
+                summonedKnights.remove(caster.getUniqueId());
             }
-        }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
+        }.runTaskLater(Alkatraz.getInstance(), config.knightDuration() * 20L);
     }
 
     private Location findSpawnLocation(Location center) {
