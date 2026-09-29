@@ -5,9 +5,11 @@ import java.util.regex.Pattern;
 
 public class ColorFormat {
     private static final Pattern HEX_PATTERN = Pattern.compile("#([A-Fa-f0-9]{6})");
+    private static final Pattern LEGACY_AMP = Pattern.compile("&([0-9a-fklmnorA-FKLMNOR])");
 
     public static String format(String s) {
         if (s == null) return null;
+        if (s.indexOf('&') < 0 && s.indexOf('#') < 0) return s;
 
         String result = s;
 
@@ -23,7 +25,7 @@ public class ColorFormat {
         }
 
         // 2️⃣ Handle legacy color codes (&a → §a)
-        result = result.replaceAll("&([0-9a-fklmnorA-FKLMNOR])", "§$1");
+        result = LEGACY_AMP.matcher(result).replaceAll("§$1");
 
         return result;
     }
