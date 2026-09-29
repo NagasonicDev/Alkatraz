@@ -51,13 +51,38 @@ public final class FocusManager implements Listener {
     private final Map<UUID, Double> movementPenalty = new HashMap<>();
     private final FocusBossBar bossBar = new FocusBossBar();
 
+    /** Movement-penalty settings cached out of {@link FocusConfig} so the
+     *  20x/sec move handler never touches the config tree. Refreshed by the
+     *  existing regen task. */
+    private volatile boolean focusEnabled = true;
+    private volatile double movementPenaltyPerSpeed = 0.02;
+    private volatile double movementMaxPenaltyRatio = 0.55;
+
+    /**
+     * No listener anywhere registers for {@link PlayerFocusChangeEvent}, so the
+     * dispatch was pure overhead up to 20x/sec. Flip this to true to restore it.
+     */
+    private static boolean fireChangeEvent = false;
+
+    static boolean shouldFireChangeEvent() {
+        return fireChangeEvent;
+    }
+
     public void start() {
+        FocusConfig.reload();
+        cacheConfig();
         new BukkitRunnable() {
             @Override
             public void run() {
                 tick();
             }
         }.runTaskTimer(Alkatraz.getInstance(), REGEN_INTERVAL_TICKS, REGEN_INTERVAL_TICKS);
+    }
+
+    private void cacheConfig() {
+        focusEnabled = FocusConfig.isEnabled();
+        movementPenaltyPerSpeed = FocusConfig.getMovementPenaltyPerSpeed();
+        movementMaxPenaltyRatio = FocusConfig.getMovementMaxPenaltyRatio();
     }
 
     public void shutdown() {
@@ -71,12 +96,15 @@ public final class FocusManager implements Listener {
     // ============================
 
     private void tick() {
-        if (!FocusConfig.isEnabled()) return;
+        FocusConfig.reload();
+        cacheConfig();
+        if (!focusEnabled) return;
         long now = System.currentTimeMillis();
         for (Player player : Bukkit.getOnlinePlayers()) {
-            MagicProfile profile = ProfileManager.getProfile(player.getUniqueId(), MagicProfile.class);
-            if (profile == null) continue;
             UUID uuid = player.getUniqueId();
+            MagicProfile profile = ProfileManager.getProfile(uuid, MagicProfile.class);
+            if (profile == null) continue;
+            boolean casting = profile.isCasting();
 
             Long lastMove = lastMoveTime.get(uuid);
             if (lastMove != null && now - lastMove > STATIONARY_THRESHOLD_MS) {
@@ -84,7 +112,7 @@ public final class FocusManager implements Listener {
             }
 
             double effectiveMax = effectiveMax(profile, uuid);
-            if (!profile.isCasting() && profile.getFocus() < effectiveMax) {
+            if (!casting && profile.getFocus() < effectiveMax) {
                 double t = lastMove == null ? 0 : Math.min((now - lastMove) / 1000.0, 60.0);
                 double rate = Math.min(
                         FocusConfig.getRegenBase() * Math.pow(FocusConfig.getRegenGrowthFactor(), t),
@@ -93,8 +121,11 @@ public final class FocusManager implements Listener {
                     rate *= FocusConfig.getLowHealthMultiplier();
                 }
                 setFocus(player, profile, Math.min(profile.getFocus() + rate, effectiveMax));
+            } else if (bossBar.isVisible(player)) {
+                // setFocus already refreshes the bar, so only touch it here when
+                // no focus change happened this tick.
+                refreshBar(player, profile);
             }
-            refreshBar(player, profile);
         }
     }
 
@@ -121,7 +152,9 @@ public final class FocusManager implements Listener {
                     && newFocus < castingSpell.getRequiredFocus()) {
                 castingSpell.cancelCastByFocus(player);
             }
-            Bukkit.getPluginManager().callEvent(new PlayerFocusChangeEvent(player, oldFocus, newFocus));
+            if (fireChangeEvent) {
+                Bukkit.getPluginManager().callEvent(new PlayerFocusChangeEvent(player, oldFocus, newFocus));
+            }
         }
         refreshBar(player, profile);
     }
@@ -137,10 +170,11 @@ public final class FocusManager implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onMove(PlayerMoveEvent event) {
-        if (!FocusConfig.isEnabled()) return;
+        if (!focusEnabled) return;
         Player player = event.getPlayer();
+        Location from = event.getFrom();
         Location to = event.getTo();
-        if (to == null || event.getFrom().getWorld() != to.getWorld()) return;
+        if (to == null || from.getWorld() != to.getWorld()) return;
 
         UUID uuid = player.getUniqueId();
         MagicProfile profile = ProfileManager.getProfile(uuid, MagicProfile.class);
@@ -149,9 +183,9 @@ public final class FocusManager implements Listener {
         // React on any real movement change (horizontal or vertical) so running,
         // falling and rising all reduce focus. A near-zero displacement is
         // treated as stationary and does not reset the recovery timer.
-        double dx = to.getX() - event.getFrom().getX();
-        double dy = to.getY() - event.getFrom().getY();
-        double dz = to.getZ() - event.getFrom().getZ();
+        double dx = to.getX() - from.getX();
+        double dy = to.getY() - from.getY();
+        double dz = to.getZ() - from.getZ();
         double horizontal = Math.sqrt(dx * dx + dz * dz);
         double effectiveSpeed = (horizontal + Math.abs(dy) * 0.5) / 0.05;
         if (effectiveSpeed <= STATIONARY_SPEED_EPSILON) {
@@ -161,8 +195,8 @@ public final class FocusManager implements Listener {
         lastMoveTime.put(uuid, System.currentTimeMillis());
 
         double penaltyRatio = Math.min(
-                effectiveSpeed * FocusConfig.getMovementPenaltyPerSpeed(),
-                FocusConfig.getMovementMaxPenaltyRatio());
+                effectiveSpeed * movementPenaltyPerSpeed,
+                movementMaxPenaltyRatio);
         double penalty = MOVEMENT_PENALTY_BASE * penaltyRatio * 2;
         movementPenalty.put(uuid, penalty);
 
