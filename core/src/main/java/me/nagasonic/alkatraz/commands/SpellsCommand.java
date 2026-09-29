@@ -22,17 +22,18 @@ public class SpellsCommand implements CommandExecutor {
             return true;
         }
         Player p = (Player) sender;
-        Player target;
         if (args.length == 1) {
-            if (Permission.hasPermission(p, Permission.COMMAND_SPELLS_OTHER)){
-                target = Bukkit.getPlayer(args[0]);
-            }else{
+            if (!Permission.hasPermission(p, Permission.COMMAND_SPELLS_OTHER)){
                 p.sendMessage(lang().get("commands.no_permission"));
                 return true;
             }
-        }else if (args.length == 0){
-            target = (Player) sender;
-        }else{
+            if (Bukkit.getPlayer(args[0]) == null) {
+                p.sendMessage(lang().get("commands.player_not_found", "name", args[0]));
+                return true;
+            }
+            p.sendMessage(lang().get("commands.no_permission"));
+            return true;
+        } else if (args.length != 0){
             sender.sendMessage(lang().get("commands.spells_usage"));
             return true;
         }

@@ -43,7 +43,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import static me.nagasonic.alkatraz.util.ColorFormat.format;
@@ -52,6 +52,11 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
 
     private static LangManager lang() { return Alkatraz.getLangManager(); }
     private static final List<String> CAST_MODES = List.of("code", "hotbar");
+
+    private static volatile List<String> spellIdCache;
+    private static volatile List<String> magicMobIdCache;
+    private static volatile List<String> cachedPlayerNames;
+    private static volatile long cachedPlayerNamesStamp;
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
@@ -354,7 +359,12 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                 p.sendMessage(lang().get("commands.stats_no_permission"));
                 return;
             }
-            new StatsMenu(p, Objects.requireNonNull(Bukkit.getPlayer(args[1]))).open();
+            Player target = Bukkit.getPlayer(args[1]);
+            if (target == null) {
+                p.sendMessage(lang().get("commands.player_not_found", "name", args[1]));
+                return;
+            }
+            new StatsMenu(p, target).open();
         } else {
             new StatsMenu(p, p).open();
         }
@@ -372,6 +382,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
         MagicEntities.registerProfiles();
         MagicBrainService.getInstance().reloadBrains();
         MagicItemBootstrap.reload();
+        refreshStaticCompletions();
         sender.sendMessage(lang().get("commands.reload_success"));
     }
 
@@ -484,25 +495,25 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage(format("&7Cast Mode: &f" + profile.getCastMode()));
         sender.sendMessage("");
         sender.sendMessage(format("&7Mana: &b" + (int) profile.getMana() + "&7/&b" + (int) profile.getMaxMana()));
-        sender.sendMessage(format("&7Mana Regen: &b" + String.format("%.1f", profile.getManaRegeneration()) + " &7per second"));
+        sender.sendMessage(format("&7Mana Regen: &b" + decimal(profile.getManaRegeneration()) + " &7per second"));
 
         double spellPower = profile.isDouble("spell_power") ? profile.getDouble("spell_power") : 0.0;
-        sender.sendMessage(format("&7Spell Power: &f" + String.format("%.1f", spellPower)));
+        sender.sendMessage(format("&7Spell Power: &f" + decimal(spellPower)));
         sender.sendMessage("");
-        sender.sendMessage(format("&7Magic Affinity: &f" + String.format("%.1f", profile.getMagicAffinity())
-                + "  &7Magic Resistance: &f" + String.format("%.1f", profile.getMagicResistance())));
-        sender.sendMessage(format("&7Affinities: &6Fire: &f" + String.format("%.1f", profile.getFireAffinity())
-                + "  &bWater: &f" + String.format("%.1f", profile.getWaterAffinity())
-                + "  &fAir: &f" + String.format("%.1f", profile.getAirAffinity())
-                + "  &2Earth: &f" + String.format("%.1f", profile.getEarthAffinity())
-                + "  &eLight: &f" + String.format("%.1f", profile.getLightAffinity())
-                + "  &5Dark: &f" + String.format("%.1f", profile.getDarkAffinity())));
-        sender.sendMessage(format("&7Resistances: &6Fire: &f" + String.format("%.1f", profile.getFireResistance())
-                + "  &bWater: &f" + String.format("%.1f", profile.getWaterResistance())
-                + "  &fAir: &f" + String.format("%.1f", profile.getAirResistance())
-                + "  &2Earth: &f" + String.format("%.1f", profile.getEarthResistance())
-                + "  &eLight: &f" + String.format("%.1f", profile.getLightResistance())
-                + "  &5Dark: &f" + String.format("%.1f", profile.getDarkResistance())));
+        sender.sendMessage(format("&7Magic Affinity: &f" + decimal(profile.getMagicAffinity())
+                + "  &7Magic Resistance: &f" + decimal(profile.getMagicResistance())));
+        sender.sendMessage(format("&7Affinities: &6Fire: &f" + decimal(profile.getFireAffinity())
+                + "  &bWater: &f" + decimal(profile.getWaterAffinity())
+                + "  &fAir: &f" + decimal(profile.getAirAffinity())
+                + "  &2Earth: &f" + decimal(profile.getEarthAffinity())
+                + "  &eLight: &f" + decimal(profile.getLightAffinity())
+                + "  &5Dark: &f" + decimal(profile.getDarkAffinity())));
+        sender.sendMessage(format("&7Resistances: &6Fire: &f" + decimal(profile.getFireResistance())
+                + "  &bWater: &f" + decimal(profile.getWaterResistance())
+                + "  &fAir: &f" + decimal(profile.getAirResistance())
+                + "  &2Earth: &f" + decimal(profile.getEarthResistance())
+                + "  &eLight: &f" + decimal(profile.getLightResistance())
+                + "  &5Dark: &f" + decimal(profile.getDarkResistance())));
         if (profile.canCast()) {
             sender.sendMessage("");
             sender.sendMessage(format("&7Element Points: &6" + profile.getFirePoints() + " &b" + profile.getWaterPoints()
@@ -520,7 +531,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
             allStats.put(name, String.valueOf(profile.getInt(name)));
         }
         for (String name : profile.getDoubles()) {
-            allStats.put(name, String.format("%.2f", profile.getDouble(name)));
+            allStats.put(name, String.format(Locale.ROOT, "%.2f", profile.getDouble(name)));
         }
         for (String name : profile.getFloats()) {
             allStats.put(name, String.valueOf(profile.getFloat(name)));
@@ -725,14 +736,39 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
     }
 
     private List<String> magicMobIds() {
-        return Arrays.stream(MagicEntityType.values()).map(MagicEntityType::getId).collect(Collectors.toList());
+        List<String> cached = magicMobIdCache;
+        if (cached == null) {
+            cached = Arrays.stream(MagicEntityType.values()).map(MagicEntityType::getId).collect(Collectors.toList());
+            magicMobIdCache = cached;
+        }
+        return cached;
     }
 
     private List<String> spellIds() {
-        return SpellRegistry.getAllSpells().values().stream().map(Spell::getId).collect(Collectors.toList());
+        List<String> cached = spellIdCache;
+        if (cached == null) {
+            cached = SpellRegistry.getAllSpells().values().stream().map(Spell::getId).collect(Collectors.toList());
+            spellIdCache = cached;
+        }
+        return cached;
     }
 
     private List<String> playerNames() {
-        return Bukkit.getOnlinePlayers().stream().map(Player::getName).collect(Collectors.toList());
+        long now = System.currentTimeMillis();
+        List<String> cached = cachedPlayerNames;
+        if (cached != null && now - cachedPlayerNamesStamp < 1000L) return cached;
+        List<String> names = Bukkit.getOnlinePlayers().stream().map(Player::getName).collect(Collectors.toList());
+        cachedPlayerNames = names;
+        cachedPlayerNamesStamp = now;
+        return names;
+    }
+
+    private static void refreshStaticCompletions() {
+        spellIdCache = SpellRegistry.getAllSpells().values().stream().map(Spell::getId).collect(Collectors.toList());
+        magicMobIdCache = Arrays.stream(MagicEntityType.values()).map(MagicEntityType::getId).collect(Collectors.toList());
+    }
+
+    private static String decimal(double value) {
+        return String.format(Locale.ROOT, "%.1f", value);
     }
 }
