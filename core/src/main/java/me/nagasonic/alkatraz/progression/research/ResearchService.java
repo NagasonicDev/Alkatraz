@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -44,6 +45,7 @@ public final class ResearchService {
     private static Map<String, ResearchCategory> categories = Map.of();
     private static Map<String, ResearchNode> nodes = Map.of();
     private static Map<String, List<ResearchNode>> nodesByCategory = Map.of();
+    private static Map<String, List<ResearchNode>> nodesByEvent = Map.of();
     private static Map<String, List<ResearchNode>> childrenByNode = Map.of();
 
     private ResearchService() {}
@@ -64,6 +66,7 @@ public final class ResearchService {
         categories = Collections.unmodifiableMap(loadedCategories);
         nodes = Collections.unmodifiableMap(loadedNodes);
         nodesByCategory = Collections.unmodifiableMap(indexByCategory(loadedNodes));
+        nodesByEvent = Collections.unmodifiableMap(indexByEvent(loadedNodes));
         childrenByNode = Collections.unmodifiableMap(indexChildren(loadedNodes));
     }
 
@@ -135,9 +138,11 @@ public final class ResearchService {
 
     public static void recordObjectiveEvent(Player player, String event, Map<String, Object> context) {
         if (player == null || event == null) return;
+        String key = event.toLowerCase(Locale.ROOT);
+        List<ResearchNode> candidates = nodesByEvent.getOrDefault(key, List.of());
+        if (candidates.isEmpty()) return;
         MagicProfile profile = ProfileManager.getProfile(player, MagicProfile.class);
-        String key = event.toLowerCase();
-        for (ResearchNode node : nodes.values()) {
+        for (ResearchNode node : candidates) {
             ResearchState state = getState(player, node);
             if (state != ResearchState.IN_PROGRESS) continue;
             for (ResearchObjective objective : node.getObjectives()) {
@@ -383,6 +388,27 @@ public final class ResearchService {
         }
         for (List<ResearchNode> value : index.values()) {
             value.sort(Comparator.comparingInt(ResearchNode::getY).thenComparingInt(ResearchNode::getX));
+        }
+        return index;
+    }
+
+    /**
+     * Reverse index from an objective event name to the nodes that declare it, so
+     * {@link #recordObjectiveEvent} only visits nodes that can actually match instead
+     * of the whole research graph.
+     */
+    private static Map<String, List<ResearchNode>> indexByEvent(Map<String, ResearchNode> loadedNodes) {
+        Map<String, List<ResearchNode>> index = new HashMap<>();
+        for (ResearchNode node : loadedNodes.values()) {
+            Set<String> events = new HashSet<>();
+            for (ResearchObjective objective : node.getObjectives()) {
+                if (objective != null && objective.getEvent() != null) {
+                    events.add(objective.getEvent().toLowerCase(Locale.ROOT));
+                }
+            }
+            for (String event : events) {
+                index.computeIfAbsent(event, ignored -> new ArrayList<>()).add(node);
+            }
         }
         return index;
     }
