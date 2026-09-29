@@ -9,6 +9,7 @@ import java.util.Map;
 
 public class LangManager {
     private final Map<String, String> messages = new HashMap<>();
+    private final Map<String, String> rawMessages = new HashMap<>();
     private final String language;
 
     public LangManager(String language) {
@@ -55,8 +56,21 @@ public class LangManager {
             if (eq <= 0) continue;
             String key = line.substring(0, eq).trim();
             String value = line.substring(eq + 1).trim();
-            messages.put(key, value);
+            messages.put(key, ColorFormat.format(value));
+            rawMessages.put(key, value);
         }
+    }
+
+    public String get(String key) {
+        String template = messages.get(key);
+        if (template == null) {
+            return key;
+        }
+        return template;
+    }
+
+    public String get(String key, String placeholderName, Object placeholderValue) {
+        return get(key, new Object[]{placeholderName, placeholderValue});
     }
 
     public String get(String key, Object... placeholders) {
@@ -66,16 +80,26 @@ public class LangManager {
             return key;
         }
         String result = template;
+        boolean injectedCodes = false;
         for (int i = 0; i < placeholders.length - 1; i += 2) {
             String placeholder = "%" + placeholders[i] + "%";
             String replacement = String.valueOf(placeholders[i + 1]);
+            if (!injectedCodes && (replacement.indexOf('&') >= 0 || replacement.indexOf('#') >= 0)) {
+                injectedCodes = true;
+            }
             result = result.replace(placeholder, replacement);
         }
-        return ColorFormat.format(result);
+        // Templates are pre-formatted at load time. Only a placeholder value that
+        // itself carries colour codes still needs formatting; ColorFormat.format is
+        // idempotent, so re-applying it here matches the previous behaviour exactly.
+        if (injectedCodes) {
+            result = ColorFormat.format(result);
+        }
+        return result;
     }
 
     public String getRaw(String key, Object... placeholders) {
-        String template = messages.get(key);
+        String template = rawMessages.get(key);
         if (template == null) {
             return key;
         }
