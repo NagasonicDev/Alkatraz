@@ -6,6 +6,7 @@ import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.flags.StateFlag;
+import com.sk89q.worldguard.protection.regions.RegionContainer;
 import com.sk89q.worldguard.protection.regions.RegionQuery;
 import me.nagasonic.alkatraz.Alkatraz;
 import org.bukkit.Location;
@@ -34,9 +35,12 @@ public final class WorldGuardHook extends PluginHook {
         super("WorldGuard");
     }
 
+    private volatile RegionContainer regionContainer;
+
     @Override
     public void ifPresent() {
         if (present) {
+            this.regionContainer = WorldGuard.getInstance().getPlatform().getRegionContainer();
             Alkatraz.logInfo("WorldGuard hook registered successfully!");
         }
     }
@@ -49,7 +53,12 @@ public final class WorldGuardHook extends PluginHook {
         if (!present) {
             return true;
         }
-        RegionQuery query = WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery();
+        RegionContainer container = regionContainer;
+        if (container == null) {
+            container = WorldGuard.getInstance().getPlatform().getRegionContainer();
+            regionContainer = container;
+        }
+        RegionQuery query = container.createQuery();
         LocalPlayer wgPlayer = subject == null ? null : WorldGuardPlugin.inst().wrapPlayer(subject);
         return query.testState(BukkitAdapter.adapt(loc), wgPlayer, flag);
     }
@@ -94,6 +103,16 @@ public final class WorldGuardHook extends PluginHook {
         if (!present) {
             return true;
         }
-        return allows(loc, asPlayer(doer), Flags.FIRE_SPREAD) && allows(loc, asPlayer(doer), Flags.LAVA_FIRE);
+        RegionContainer container = regionContainer;
+        if (container == null) {
+            container = WorldGuard.getInstance().getPlatform().getRegionContainer();
+            regionContainer = container;
+        }
+        RegionQuery query = container.createQuery();
+        Player subject = asPlayer(doer);
+        LocalPlayer wgPlayer = subject == null ? null : WorldGuardPlugin.inst().wrapPlayer(subject);
+        com.sk89q.worldedit.util.Location adapted = BukkitAdapter.adapt(loc);
+        return query.testState(adapted, wgPlayer, Flags.FIRE_SPREAD)
+                && query.testState(adapted, wgPlayer, Flags.LAVA_FIRE);
     }
 }

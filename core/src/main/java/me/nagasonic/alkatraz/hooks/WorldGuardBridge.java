@@ -84,9 +84,12 @@ public final class WorldGuardBridge {
             Object query = containerCreateQuery.invoke(container);
             Object weLocation = bukkitAdapterAdapt.invoke(null, location);
             Object result = queryGetApplicableRegions.invoke(query, weLocation);
-            Object regions = resultGetRegions.invoke(result);
-            Set<String> ids = new HashSet<>();
-            for (Object region : (Set<?>) regions) {
+            Set<?> regions = (Set<?>) resultGetRegions.invoke(result);
+            if (regions.isEmpty()) {
+                return Collections.emptySet();
+            }
+            Set<String> ids = new HashSet<>(Math.max(2, regions.size() << 1));
+            for (Object region : regions) {
                 ids.add((String) regionGetId.invoke(region));
             }
             return ids;
