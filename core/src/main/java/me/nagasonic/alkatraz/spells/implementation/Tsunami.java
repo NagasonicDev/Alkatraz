@@ -157,10 +157,6 @@ public class Tsunami extends AttackSpell {
         caster.getWorld().playSound(caster.getLocation(), Sound.ENTITY_DROWNED_SWIM, 1.5f, 0.5f);
         caster.getWorld().playSound(caster.getLocation(), Sound.ENTITY_ELDER_GUARDIAN_CURSE, 1.0f, 0.3f);
 
-        for (double d = 0; d <= range + 2; d++) {
-            startLoc.clone().add(direction.clone().multiply(d)).getChunk().load(true);
-        }
-
         List<WaveColumn> activeColumns = new ArrayList<>();
 
         new BukkitRunnable() {
@@ -302,9 +298,18 @@ public class Tsunami extends AttackSpell {
         }
     }
 
+    private static final double FAKE_BLOCK_CULL_R2 = 64.0 * 64.0;
+
     private static void sendFakeBlock(Location loc, BlockData data) {
-        loc.getChunk().load(true);
+        double x = loc.getX();
+        double y = loc.getY();
+        double z = loc.getZ();
         for (Player p : loc.getWorld().getPlayers()) {
+            Location pl = p.getLocation();
+            double dx = pl.getX() - x;
+            double dy = pl.getY() - y;
+            double dz = pl.getZ() - z;
+            if (dx * dx + dy * dy + dz * dz > FAKE_BLOCK_CULL_R2) continue;
             p.sendBlockChange(loc, data);
         }
     }
@@ -505,11 +510,9 @@ public class Tsunami extends AttackSpell {
             float pitch = playerLoc.getPitch();
             Vector forward = playerLoc.getDirection().normalize().multiply(1.5);
             List<Location> points = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 3, 0);
-            for (int i = 0; i < 100; i++) {
-                for (Location loc : points) {
-                    ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0,
-                            new Particle.DustOptions(Color.fromRGB(0, 100, 255), 0.4F));
-                }
+            Particle.DustOptions options = new Particle.DustOptions(Color.fromRGB(0, 100, 255), 0.4F);
+            for (Location loc : points) {
+                ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, options);
             }
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());
     }
