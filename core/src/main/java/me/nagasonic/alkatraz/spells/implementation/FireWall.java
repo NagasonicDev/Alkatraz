@@ -121,56 +121,77 @@ public class FireWall extends AttackSpell implements Listener {
                 }
 
                 // === RENDER + DAMAGE PHASE ===
+                boolean placeFireBlocks = (boolean) getOption("fire_blocks").getSelectedValue(player).getValue();
+
                 for (WallSegment segment : wallPoints) {
                     segment.age++;
 
                     double riseProgress = Math.min(1.0, segment.age / 30.0);
                     double currentHeight = height * riseProgress;
+                    boolean settled = segment.age >= 30;
 
                     for (double h = 0; h < currentHeight; h += 0.5) {
 
                         Location loc = segment.base.clone().add(0, h, 0);
 
-                        if (h == currentHeight - 0.5){
-                            ParticleCaster.spawn(player, player.getWorld(), Particle.LAVA,
+                        if (!settled) {
+                            if (h == currentHeight - 0.5) {
+                                ParticleCaster.spawn(player, player.getWorld(), Particle.LAVA,
+                                        loc,
+                                        2,
+                                        0.05, 0.05, 0.05,
+                                        0
+                                );
+                            } else {
+                                ParticleCaster.spawn(player, player.getWorld(), Particle.FLAME,
+                                        loc,
+                                        2,
+                                        0.05, 0.05, 0.05,
+                                        0
+                                );
+                            }
+                            SpellParticleComponent comp = new SpellParticleComponent(
+                                    FireWall.this,
+                                    props,
+                                    player,
+                                    wand,
+                                    SpellComponentType.OFFENSE,
                                     loc,
-                                    2,
-                                    0.05, 0.05, 0.05,
-                                    0
+                                    0.25,
+                                    2
                             );
-                        }else{
-                            ParticleCaster.spawn(player, player.getWorld(), Particle.FLAME,
-                                    loc,
-                                    2,
-                                    0.05, 0.05, 0.05,
-                                    0
-                            );
+                            SpellComponentHandler.register(comp);
                         }
-                        SpellParticleComponent comp = new SpellParticleComponent(
-                                FireWall.this,
-                                props,
-                                player,
-                                wand,
-                                SpellComponentType.OFFENSE,
-                                loc,
-                                0.25,
-                                2
-                        );
-                        SpellComponentHandler.register(comp);
 
-                        if (loc.getBlock().getType() == Material.AIR && (boolean) getOption("fire_blocks").getSelectedValue(player).getValue()) {
+                        if (placeFireBlocks && loc.getBlock().getType() == Material.AIR) {
                             if (Protection.ignite(player, loc)) {
                                 loc.getBlock().setType(Material.FIRE);
                             }
                         }
+                    }
 
-                        for (Entity entity : loc.getWorld().getNearbyEntities(loc, 0.6, 0.6, 0.6)) {
+                    if (settled) {
+                        if (currentHeight <= 0) continue;
+                        for (Entity entity : segment.base.getWorld().getNearbyEntities(
+                                segment.base.clone().add(0, currentHeight / 2.0, 0), 0.6, currentHeight / 2.0, 0.6)) {
                             if (!(entity instanceof LivingEntity)) continue;
                             if (entity.equals(player)) continue;
 
                             LivingEntity target = (LivingEntity) entity;
                             SpellDamageUtil.damageWithSpell(target, props.getRemainingPower(), player, wand, FireWall.this);
                             target.setFireTicks(40);
+                        }
+                    } else {
+                        for (double h = 0; h < currentHeight; h += 0.5) {
+                            Location loc = segment.base.clone().add(0, h, 0);
+                            for (Entity entity : loc.getWorld().getNearbyEntities(loc, 0.6, 0.6, 0.6)) {
+                                if (!(entity instanceof LivingEntity)) continue;
+                                if (entity.equals(player)) continue;
+
+                                LivingEntity target = (LivingEntity) entity;
+                                SpellDamageUtil.damageWithSpell(target, props.getRemainingPower(), player, wand, FireWall.this);
+                                target.setFireTicks(40);
+                            }
                         }
                     }
                 }
@@ -238,51 +259,70 @@ public class FireWall extends AttackSpell implements Listener {
 
                     double riseProgress = Math.min(1.0, segment.age / 30.0);
                     double currentHeight = height * riseProgress;
+                    boolean settled = segment.age >= 30;
 
                     for (double h = 0; h < currentHeight; h += 0.5) {
 
                         Location loc = segment.base.clone().add(0, h, 0);
 
-                        if (h == currentHeight - 0.5){
-                            ParticleCaster.spawn(caster, caster.getWorld(), Particle.LAVA,
+                        if (!settled) {
+                            if (h == currentHeight - 0.5) {
+                                ParticleCaster.spawn(caster, caster.getWorld(), Particle.LAVA,
+                                        loc,
+                                        2,
+                                        0.05, 0.05, 0.05,
+                                        0
+                                );
+                            } else {
+                                ParticleCaster.spawn(caster, caster.getWorld(), Particle.FLAME,
+                                        loc,
+                                        2,
+                                        0.05, 0.05, 0.05,
+                                        0
+                                );
+                            }
+                            SpellParticleComponent comp = new SpellParticleComponent(
+                                    FireWall.this,
+                                    props,
+                                    caster,
+                                    wand,
+                                    SpellComponentType.OFFENSE,
                                     loc,
-                                    2,
-                                    0.05, 0.05, 0.05,
-                                    0
+                                    0.25,
+                                    2
                             );
-                        }else{
-                            ParticleCaster.spawn(caster, caster.getWorld(), Particle.FLAME,
-                                    loc,
-                                    2,
-                                    0.05, 0.05, 0.05,
-                                    0
-                            );
+                            SpellComponentHandler.register(comp);
                         }
-                        SpellParticleComponent comp = new SpellParticleComponent(
-                                FireWall.this,
-                                props,
-                                caster,
-                                wand,
-                                SpellComponentType.OFFENSE,
-                                loc,
-                                0.25,
-                                2
-                        );
-                        SpellComponentHandler.register(comp);
 
                         if (loc.getBlock().getType() == Material.AIR) {
                             if (Protection.ignite(caster, loc)) {
                                 loc.getBlock().setType(Material.FIRE);
                             }
                         }
+                    }
 
-                        for (Entity entity : loc.getWorld().getNearbyEntities(loc, 0.6, 0.6, 0.6)) {
+                    if (settled) {
+                        if (currentHeight <= 0) continue;
+                        for (Entity entity : segment.base.getWorld().getNearbyEntities(
+                                segment.base.clone().add(0, currentHeight / 2.0, 0), 0.6, currentHeight / 2.0, 0.6)) {
                             if (!(entity instanceof LivingEntity)) continue;
                             if (entity.equals(caster)) continue;
 
                             LivingEntity target = (LivingEntity) entity;
                             SpellDamageUtil.damageWithSpell(target, props.getRemainingPower(), caster, wand, FireWall.this);
                             target.setFireTicks(40);
+                        }
+                    } else {
+                        for (double h = 0; h < currentHeight; h += 0.5) {
+                            Location loc = segment.base.clone().add(0, h, 0);
+                            for (Entity entity : loc.getWorld().getNearbyEntities(loc, 0.6, 0.6, 0.6)) {
+                                if (!(entity instanceof LivingEntity)) continue;
+                                if (entity.equals(caster)) continue;
+
+                                LivingEntity target = (LivingEntity) entity;
+                                SpellDamageUtil.damageWithSpell(target, props.getRemainingPower(), caster, wand, FireWall.this);
+                                target.setFireTicks(40);
+                            }
                         }
                     }
                 }
@@ -312,10 +352,9 @@ public class FireWall extends AttackSpell implements Listener {
             List<Location> magicCirclePoints = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 4, 0);
 
             // Spawn particles at all calculated points
-            for (int i = 0; i < 100; i++){
-                for (Location loc : magicCirclePoints) {
-                    ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, new Particle.DustOptions(Color.RED, 0.4F));
-                }
+            Particle.DustOptions options = new Particle.DustOptions(Color.RED, 0.4F);
+            for (Location loc : magicCirclePoints) {
+                ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, options);
             }
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());
         return d;
