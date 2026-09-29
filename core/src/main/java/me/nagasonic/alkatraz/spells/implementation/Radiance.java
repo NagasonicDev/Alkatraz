@@ -261,6 +261,7 @@ public class Radiance extends Spell {
                     }
                 }
 
+                Particle.DustOptions sparkOptions = new Particle.DustOptions(Color.YELLOW, 0.3F);
                 for (int i = 0; i < 2; i++) {
                     float yaw = (float) (Math.random() * 360);
                     float pitch = (float) (Math.random() * 360);
@@ -268,11 +269,10 @@ public class Radiance extends Spell {
                     List<Location> circlePoints = ParticleUtils.magicCircle(
                             center.clone().add(0, 0.5 + Math.random() * 2, 0),
                             yaw, pitch, forward, 1.0 + Math.random() * 0.5, 0);
-                    for (Location loc : circlePoints) {
-                        if (Math.random() < 0.3) {
-                            ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0,
-                                    new Particle.DustOptions(Color.YELLOW, 0.3F));
-                        }
+                    int wanted = (int) (circlePoints.size() * 0.3);
+                    for (int k = 0; k < wanted; k++) {
+                        Location loc = circlePoints.get((int) (Math.random() * circlePoints.size()));
+                        ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, sparkOptions);
                     }
                 }
 
@@ -358,11 +358,9 @@ public class Radiance extends Spell {
             float pitch = playerLoc.getPitch();
             Vector forward = playerLoc.getDirection().normalize().multiply(1.5);
             List<Location> points = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 3, 0);
-            for (int i = 0; i < 100; i++) {
-                for (Location loc : points) {
-                    ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0,
-                            new Particle.DustOptions(Color.fromRGB(255, 255, 150), 0.4F));
-                }
+            Particle.DustOptions options = new Particle.DustOptions(Color.fromRGB(255, 255, 150), 0.4F);
+            for (Location loc : points) {
+                ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, options);
             }
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());
     }
