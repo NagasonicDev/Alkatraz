@@ -28,10 +28,28 @@ public class ItemDetailMenu extends Menu {
     private static LangManager lang() { return Alkatraz.getLangManager(); }
 
     private static final int PREVIEW_SLOT = 22;
+    private static final int SAVE_SLOT = 39;
+    private static final int FIELD_SLOT_UNBREAKABLE = 15;
+    private static final int FIELD_SLOT_HIDE_ATTRIBUTES = 16;
     private static final int[] FIELD_SLOTS = {10, 11, 12, 13, 14, 15, 16,
             19, 20, 21, 23, 24, 25,
             28, 29, 30, 32, 33, 34,
             39, 40, 41, 43};
+
+    private static ItemStack backgroundPane;
+
+    private static ItemStack backgroundPane() {
+        if (backgroundPane == null) {
+            ItemStack item = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
+            ItemMeta meta = item.getItemMeta();
+            if (meta != null) {
+                meta.setDisplayName(ColorFormat.format("&7"));
+                item.setItemMeta(meta);
+            }
+            backgroundPane = item;
+        }
+        return backgroundPane;
+    }
 
     final ItemDefinition definition;
     final String defKey;
@@ -55,7 +73,7 @@ public class ItemDetailMenu extends Menu {
     @Override
     protected void build() {
         for (int i = 0; i < size; i++) {
-            inventory.setItem(i, createBackgroundPane());
+            inventory.setItem(i, backgroundPane());
         }
 
         inventory.setItem(PREVIEW_SLOT, createPreviewItem());
@@ -74,12 +92,8 @@ public class ItemDetailMenu extends Menu {
         inventory.setItem(14, createFieldItem(Material.REPEATER, lang().get("editor.custom_model_data"),
                 "&7Current: &f" + getConfigInt("custom_model_data", 0),
                 "&7Click to edit", "edit_cmd"));
-        inventory.setItem(15, createFieldItem(Material.SHIELD, lang().get("editor.unbreakable"),
-                "&7Current: &f" + getConfigBool("unbreakable", false),
-                "&7Click to toggle", "toggle_unbreakable"));
-        inventory.setItem(16, createFieldItem(Material.ENDER_EYE, lang().get("editor.hide_attributes"),
-                "&7Current: &f" + getConfigBool("hide_attributes", true),
-                "&7Click to toggle", "toggle_hide_attributes"));
+        inventory.setItem(FIELD_SLOT_UNBREAKABLE, createUnbreakableField());
+        inventory.setItem(FIELD_SLOT_HIDE_ATTRIBUTES, createHideAttributesField());
 
         inventory.setItem(19, createFieldItem(Material.CRAFTING_TABLE, lang().get("editor.components"),
                 "&7" + getConfigListSize("components") + " component(s)", "&7Click to edit", "edit_components"));
@@ -103,9 +117,7 @@ public class ItemDetailMenu extends Menu {
         inventory.setItem(30, createFieldItem(Material.BOOK, lang().get("editor.recipe_requirements"),
                 "&7" + getRecipeRequirementsCount() + " requirement(s)", "&7Click to edit", "edit_requirements"));
 
-        inventory.setItem(39, createActionItem(Material.LIME_DYE, lang().get("editor.save"),
-                "&7Save changes to config file",
-                needsSave ? "&eYou have unsaved changes!" : "", "save"));
+        inventory.setItem(SAVE_SLOT, createSaveItem());
         inventory.setItem(40, createActionItem(Material.YELLOW_DYE, lang().get("editor.reload"),
                 "&7Discard changes and reload from file", "", "reload"));
         inventory.setItem(41, createActionItem(Material.BARRIER, lang().get("common.back"),
@@ -114,14 +126,22 @@ public class ItemDetailMenu extends Menu {
                 "&7Get a copy of this item", "", "get_item"));
     }
 
-    private ItemStack createBackgroundPane() {
-        ItemStack item = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
-        ItemMeta meta = item.getItemMeta();
-        if (meta != null) {
-            meta.setDisplayName(ColorFormat.format("&7"));
-            item.setItemMeta(meta);
-        }
-        return item;
+    private ItemStack createUnbreakableField() {
+        return createFieldItem(Material.SHIELD, lang().get("editor.unbreakable"),
+                "&7Current: &f" + getConfigBool("unbreakable", false),
+                "&7Click to toggle", "toggle_unbreakable");
+    }
+
+    private ItemStack createHideAttributesField() {
+        return createFieldItem(Material.ENDER_EYE, lang().get("editor.hide_attributes"),
+                "&7Current: &f" + getConfigBool("hide_attributes", true),
+                "&7Click to toggle", "toggle_hide_attributes");
+    }
+
+    private ItemStack createSaveItem() {
+        return createActionItem(Material.LIME_DYE, lang().get("editor.save"),
+                "&7Save changes to config file",
+                needsSave ? "&eYou have unsaved changes!" : "", "save");
     }
 
     private ItemStack createPreviewItem() {
@@ -221,7 +241,8 @@ public class ItemDetailMenu extends Menu {
         session.config().set("unbreakable", !current);
         needsSave = true;
         viewer.playSound(viewer.getLocation(), Sound.BLOCK_STONE_BUTTON_CLICK_ON, 1.0f, 1.0f);
-        refresh();
+        refreshSlot(FIELD_SLOT_UNBREAKABLE, createUnbreakableField());
+        refreshSlot(SAVE_SLOT, createSaveItem());
     }
 
     private void toggleHideAttributes() {
@@ -229,7 +250,8 @@ public class ItemDetailMenu extends Menu {
         session.config().set("hide_attributes", !current);
         needsSave = true;
         viewer.playSound(viewer.getLocation(), Sound.BLOCK_STONE_BUTTON_CLICK_ON, 1.0f, 1.0f);
-        refresh();
+        refreshSlot(FIELD_SLOT_HIDE_ATTRIBUTES, createHideAttributesField());
+        refreshSlot(SAVE_SLOT, createSaveItem());
     }
 
     public void markNeedsSave() {

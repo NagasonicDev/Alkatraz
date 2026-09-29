@@ -19,6 +19,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +53,7 @@ public class ResearchGraphMenu extends Menu {
     private String category;
     private int viewCenterX;
     private int viewCenterY;
+    private final boolean[] occupied = new boolean[54];
 
     public ResearchGraphMenu(Player viewer) {
         this(viewer, firstCategory(), 0, 0);
@@ -74,6 +76,7 @@ public class ResearchGraphMenu extends Menu {
 
     @Override
     protected void build() {
+        Arrays.fill(occupied, false);
         fillAll();
         drawEdges();
         drawNodes();
@@ -305,6 +308,7 @@ public class ResearchGraphMenu extends Menu {
             slotFor(x, y).ifPresent(slot -> {
                 if (isBlankSlot(slot)) {
                     inventory.setItem(slot, createConnectorItem(piece, stateKey));
+                    occupied[slot] = true;
                 }
             });
         }
@@ -315,6 +319,7 @@ public class ResearchGraphMenu extends Menu {
         slotFor(x, y).ifPresent(slot -> {
             if (isBlankSlot(slot)) {
                 inventory.setItem(slot, createConnectorItem(piece, stateKey));
+                occupied[slot] = true;
             }
         });
     }
@@ -462,8 +467,6 @@ public class ResearchGraphMenu extends Menu {
     }
 
     private boolean isBlankSlot(int slot) {
-        ItemStack existing = inventory.getItem(slot);
-        if (existing == null || existing.getType() == Material.AIR) return true;
-        return existing.isSimilar(Alkatraz.getGuiItemRegistry().getItem("blank"));
+        return !occupied[slot];
     }
 }

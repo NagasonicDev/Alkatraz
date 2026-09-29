@@ -19,7 +19,10 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
 
 public class ItemEditorMenu extends PagedMenu<Object> {
 
@@ -30,10 +33,13 @@ public class ItemEditorMenu extends PagedMenu<Object> {
             28, 29, 30, 31, 32, 33, 34,
             37, 38, 39, 40, 41, 42, 43};
 
+    private static final Map<String, ItemStack> PROTOTYPES = new HashMap<>();
+
     private boolean showingRunes = false;
 
     public ItemEditorMenu(Player viewer) {
         super(viewer, lang().get("menu.item_editor"), 54, getSortedItems(), 28);
+        clearPrototypes();
         this.contentSlots = CONTENT_SLOTS;
         this.nextPageSlot = 53;
         this.previousPageSlot = 45;
@@ -79,39 +85,56 @@ public class ItemEditorMenu extends PagedMenu<Object> {
     @Override
     protected ItemStack createDisplayItem(Object item, int index) {
         if (item instanceof EngravingDefinition rune) {
-            ItemStack display = MagicItemStack.createEngravingItem(rune);
-            ItemMeta meta = display.getItemMeta();
-            if (meta != null) {
-                List<String> lore = meta.getLore();
-                if (lore == null) lore = new ArrayList<>();
-                lore.add(ColorFormat.format(""));
-                lore.add(ColorFormat.format("&8" + MagicKeys.format(rune.getKey())));
-                if (showingRunes) {
-                    lore.add(ColorFormat.format("&7Click to view rune details"));
+            return prototype(rune.getKey().getKey() + (showingRunes ? ":rune_mode" : ""), () -> {
+                ItemStack display = MagicItemStack.createEngravingItem(rune);
+                ItemMeta meta = display.getItemMeta();
+                if (meta != null) {
+                    List<String> lore = meta.getLore();
+                    if (lore == null) lore = new ArrayList<>();
+                    lore.add(ColorFormat.format(""));
+                    lore.add(ColorFormat.format("&8" + MagicKeys.format(rune.getKey())));
+                    if (showingRunes) {
+                        lore.add(ColorFormat.format("&7Click to view rune details"));
+                    }
+                    meta.setLore(lore);
+                    display.setItemMeta(meta);
                 }
-                meta.setLore(lore);
-                display.setItemMeta(meta);
-            }
-            return display;
+                return display;
+            });
         }
 
         if (item instanceof ItemDefinition def) {
-            MagicItemInstance instance = MagicItemInstance.createDefault(def.getKey());
-            ItemStack display = MagicItemStack.create(def, instance);
-            ItemMeta meta = display.getItemMeta();
-            if (meta != null) {
-                List<String> lore = meta.getLore();
-                if (lore == null) lore = new ArrayList<>();
-                lore.add(ColorFormat.format(""));
-                lore.add(ColorFormat.format("&8" + MagicKeys.format(def.getKey())));
-                lore.add(lang().get("editor.click_edit_item"));
-                meta.setLore(lore);
-                display.setItemMeta(meta);
-            }
-            return display;
+            return prototype(def.getKey().getKey(), () -> {
+                MagicItemInstance instance = MagicItemInstance.createDefault(def.getKey());
+                ItemStack display = MagicItemStack.create(def, instance);
+                ItemMeta meta = display.getItemMeta();
+                if (meta != null) {
+                    List<String> lore = meta.getLore();
+                    if (lore == null) lore = new ArrayList<>();
+                    lore.add(ColorFormat.format(""));
+                    lore.add(ColorFormat.format("&8" + MagicKeys.format(def.getKey())));
+                    lore.add(lang().get("editor.click_edit_item"));
+                    meta.setLore(lore);
+                    display.setItemMeta(meta);
+                }
+                return display;
+            });
         }
 
         return new ItemStack(Material.BARRIER);
+    }
+
+    private static synchronized ItemStack prototype(String cacheKey, Supplier<ItemStack> builder) {
+        ItemStack cached = PROTOTYPES.get(cacheKey);
+        if (cached == null) {
+            cached = builder.get();
+            PROTOTYPES.put(cacheKey, cached);
+        }
+        return cached.clone();
+    }
+
+    private static synchronized void clearPrototypes() {
+        PROTOTYPES.clear();
     }
 
     @Override

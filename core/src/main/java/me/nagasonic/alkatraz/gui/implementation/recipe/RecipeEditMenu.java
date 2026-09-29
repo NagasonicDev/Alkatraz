@@ -21,6 +21,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class RecipeEditMenu extends Menu {
@@ -42,6 +43,31 @@ public class RecipeEditMenu extends Menu {
     private static final int FIELD_SLOT_SPECIAL_A = 20;
     private static final int FIELD_SLOT_SPECIAL_B = 21;
     private static final int FIELD_SLOT_SPECIAL_C = 23;
+
+    private static final Map<RecipeField, Integer> TOGGLE_SLOTS = Map.of(
+            RecipeField.OVERRIDE_VANILLA, FIELD_SLOT_OVERRIDE,
+            RecipeField.HIDDEN_WHEN_LOCKED, FIELD_SLOT_HIDDEN
+    );
+
+    private static final Map<RecipeField, Material> TOGGLE_ICONS = Map.of(
+            RecipeField.OVERRIDE_VANILLA, Material.ENDER_EYE,
+            RecipeField.HIDDEN_WHEN_LOCKED, Material.LEATHER
+    );
+
+    private static ItemStack blankPanePrototype;
+
+    private static ItemStack blankPane() {
+        if (blankPanePrototype == null) {
+            ItemStack pane = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
+            ItemMeta meta = pane.getItemMeta();
+            if (meta != null) {
+                meta.setDisplayName(ColorFormat.format("&7"));
+                pane.setItemMeta(meta);
+            }
+            blankPanePrototype = pane;
+        }
+        return blankPanePrototype;
+    }
 
     private final RecipeEditorSession session;
     private final AlkatrazRecipe recipe;
@@ -177,16 +203,6 @@ public class RecipeEditMenu extends Menu {
         }
         setMenuData(back, "action", "back");
         inventory.setItem(BACK_SLOT, back);
-    }
-
-    private ItemStack blankPane() {
-        ItemStack pane = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
-        ItemMeta meta = pane.getItemMeta();
-        if (meta != null) {
-            meta.setDisplayName(ColorFormat.format("&7"));
-            pane.setItemMeta(meta);
-        }
-        return pane;
     }
 
     private ItemStack createTextField(Material material, RecipeField field, String currentValue) {
@@ -386,7 +402,12 @@ public class RecipeEditMenu extends Menu {
         boolean current = config().getBoolean(field.configPath(type), false);
         config().set(field.configPath(type), !current);
         viewer.playSound(viewer.getLocation(), Sound.BLOCK_STONE_BUTTON_CLICK_ON, 1.0f, 1.0f);
-        refresh();
+        Integer slot = TOGGLE_SLOTS.get(field);
+        if (slot != null) {
+            refreshSlot(slot, createBoolField(TOGGLE_ICONS.get(field), field, !current));
+        } else {
+            refresh();
+        }
     }
 
     private void handleSave() {
