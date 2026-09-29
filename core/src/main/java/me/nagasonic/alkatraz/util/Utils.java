@@ -213,17 +213,14 @@ public class Utils {
 
     public static String vanillaChat(String message) {
         if (StringUtils.isEmpty(message)) return "";
-        char COLOR_CHAR = ChatColor.COLOR_CHAR;
+        if (!message.contains("&#")) {
+            return ChatColor.translateAlternateColorCodes('&', message);
+        }
         Matcher matcher = hexPattern.matcher(message);
         StringBuilder buffer = new StringBuilder(message.length() + 4 * 8);
         while (matcher.find())
         {
-            String group = matcher.group(1);
-            matcher.appendReplacement(buffer, COLOR_CHAR + "x"
-                    + COLOR_CHAR + group.charAt(0) + COLOR_CHAR + group.charAt(1)
-                    + COLOR_CHAR + group.charAt(2) + COLOR_CHAR + group.charAt(3)
-                    + COLOR_CHAR + group.charAt(4) + COLOR_CHAR + group.charAt(5)
-            );
+            matcher.appendReplacement(buffer, Matcher.quoteReplacement(ChatColor.of("#" + matcher.group(1)).toString()));
         }
         return ChatColor.translateAlternateColorCodes('&', matcher.appendTail(buffer).toString());
     }
@@ -279,7 +276,9 @@ public class Utils {
     }
 
     public static void sendActionBar(Player whomst, String message){
-        if (!StringUtils.isEmpty(ChatColor.stripColor(chat(message)))) whomst.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(chat(message)));
+        if (StringUtils.isEmpty(message)) return;
+        String chat = chat(message);
+        if (!StringUtils.isEmpty(ChatColor.stripColor(chat))) whomst.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(chat));
     }
 
     public static void sendTitle(Player whomst, String title, String subtitle, int duration, int fade){
@@ -375,10 +374,12 @@ public class Utils {
      * Paper's Location.getNearbyLivingEntities(double) replacement.
      */
     public static List<LivingEntity> getNearbyLivingEntities(Location location, double rangeX, double rangeY, double rangeZ) {
-        return location.getWorld().getNearbyEntities(location, rangeX, rangeY, rangeZ).stream()
-                .filter(e -> e instanceof LivingEntity)
-                .map(e -> (LivingEntity) e)
-                .collect(java.util.stream.Collectors.toList());
+        Collection<Entity> nearby = location.getWorld().getNearbyEntities(location, rangeX, rangeY, rangeZ);
+        List<LivingEntity> result = new ArrayList<>(nearby.size());
+        for (Entity entity : nearby) {
+            if (entity instanceof LivingEntity living) result.add(living);
+        }
+        return result;
     }
 
     /**
@@ -416,10 +417,8 @@ public class Utils {
         if (element == Element.NONE){
             name = "magic";
         }else { name = element.name().toLowerCase(); }
-        if (NBT.getPersistentData(entity, nbt -> nbt.getDouble(name + "_affinity")) != null){
-            return NBT.getPersistentData(entity, nbt -> nbt.getDouble(name + "_affinity"));
-        }
-        return 0;
+        String key = name + "_affinity";
+        return NBT.getPersistentData(entity, nbt -> nbt.getDouble(key));
     }
 
     public static double getEntityResistance(Element element, LivingEntity entity){
@@ -427,10 +426,8 @@ public class Utils {
         if (element == Element.NONE){
             name = "magic";
         }else { name = element.name().toLowerCase(); }
-        if (NBT.getPersistentData(entity, nbt -> nbt.getDouble(name + "_resistance")) != null){
-            return NBT.getPersistentData(entity, nbt -> nbt.getDouble(name + "_resistance"));
-        }
-        return 0;
+        String key = name + "_resistance";
+        return NBT.getPersistentData(entity, nbt -> nbt.getDouble(key));
     }
 
     public static List<Block> blocksInRadius(Location center, int radius) {
