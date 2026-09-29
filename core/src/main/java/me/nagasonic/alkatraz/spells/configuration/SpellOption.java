@@ -12,7 +12,9 @@ import org.bukkit.entity.Player;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
 
@@ -37,6 +39,8 @@ public class SpellOption {
     private String displayName;
     private final Material icon;
     private List<OptionValue<?>> optionValues;
+    private final Map<String, OptionValue<?>> valuesById = new HashMap<>();
+    private String profileKey;
     private OptionRole role = OptionRole.NORMAL;
     private int slotIndex = 0;
     /**
@@ -291,6 +295,23 @@ public class SpellOption {
     public void addValue(OptionValue<?> optionValue) {
         optionValue.setParentOption(this);
         optionValues.add(optionValue);
+        valuesById.putIfAbsent(optionValue.getId(), optionValue);
+    }
+
+    /**
+     * The profile key this option persists its selection under. Built once and
+     * reused, since it is read on every option lookup during a cast.
+     */
+    private String profileKey() {
+        String key = profileKey;
+        if (key != null) return key;
+        String spellId = spell == null ? null : spell.getId();
+        if (spellId == null) {
+            return String.valueOf(spellId) + "." + getId();
+        }
+        key = spellId + "." + getId();
+        profileKey = key;
+        return key;
     }
 
     public List<OptionValue<?>> getOptionValues() {
@@ -324,15 +345,13 @@ public class SpellOption {
      * @return true if successful, false if requirements not met.
      */
     public boolean selectValue(Player player, String valueId) {
-        Optional<OptionValue<?>> value = optionValues.stream()
-                .filter(v -> v.getId().equals(valueId))
-                .findFirst();
+        OptionValue<?> value = valuesById.get(valueId);
 
         if (!meetsRequirements(player)) {
             return false;
         }
 
-        if (value.isPresent() && value.get().meetsRequirements(player)) {
+        if (value != null && value.meetsRequirements(player)) {
             MagicProfile profile = ProfileManager.getProfile(player, MagicProfile.class);
 
             // Unapply the old selection's impacts
@@ -343,11 +362,11 @@ public class SpellOption {
             }
 
             // Persist the new selection
-            profile.setSpellOption(spell.getId() + "." + getId(), valueId);
+            profile.setSpellOption(profileKey(), valueId);
 
             // Apply the new selection's impacts (skipped for pool/slot bookkeeping options)
             if (appliesSelectionImpacts()) {
-                value.get().applyImpacts(player);
+                value.applyImpacts(player);
             }
 
             return true;
@@ -359,10 +378,10 @@ public class SpellOption {
      * Gets the currently selected value ID for a player from their profile.
      */
     public String getSelectedValueId(Player player) {
-        String key = spell.getId() + "." + getId();
+        String key = profileKey();
         MagicProfile profile = ProfileManager.getProfile(player, MagicProfile.class);
         if (profile.getSpellOption(key) == null) {
-            profile.setSpellOption(key, getOptionValues().get(getDefIndex()).getId());
+            profile.setSpellOption(key, optionValues.get(getDefIndex()).getId());
         }
         return profile.getSpellOption(key);
     }
@@ -372,19 +391,17 @@ public class SpellOption {
      */
     public OptionValue<?> getSelectedValue(Player player) {
         String valueId = getSelectedValueId(player);
-        if (valueId == null && !optionValues.isEmpty()) {
-            return optionValues.get(defIndex);
+        if (valueId != null) {
+            OptionValue<?> selected = valuesById.get(valueId);
+            if (selected != null) return selected;
         }
-        return getValueById(valueId)
-                .orElse(optionValues.isEmpty() ? null : optionValues.get(defIndex));
+        return optionValues.isEmpty() ? null : optionValues.get(defIndex);
     }
 
     /**
      * Gets a specific value by ID.
      */
     public Optional<OptionValue<?>> getValueById(String valueId) {
-        return optionValues.stream()
-                .filter(v -> v.getId().equals(valueId))
-                .findFirst();
+        return Optional.ofNullable(valuesById.get(valueId));
     }
 }
