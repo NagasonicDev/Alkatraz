@@ -102,22 +102,15 @@ public class SummonZombies extends AttackSpell implements Listener {
         summonedZombies.put(caster.getUniqueId(), zombieIds);
 
         new BukkitRunnable() {
-            int ticks = 0;
-
             @Override
             public void run() {
-                ticks++;
-                if (ticks >= zombieDuration * 20) {
-                    for (UUID id : zombieIds) {
-                        Entity e = Bukkit.getEntity(id);
-                        if (e != null) despawnZombie(caster, e);
-                    }
-                    summonedZombies.remove(caster.getUniqueId());
-                    cancel();
-                    return;
+                for (UUID id : zombieIds) {
+                    Entity e = Bukkit.getEntity(id);
+                    if (e != null) despawnZombie(caster, e);
                 }
+                summonedZombies.remove(caster.getUniqueId());
             }
-        }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
+        }.runTaskLater(Alkatraz.getInstance(), zombieDuration * 20L);
 
         caster.getWorld().playSound(caster.getLocation(), Sound.ENTITY_ZOMBIE_VILLAGER_CURE, 0.8f, 0.6f);
     }
@@ -155,22 +148,15 @@ public class SummonZombies extends AttackSpell implements Listener {
         summonedZombies.put(caster.getUniqueId(), zombieIds);
 
         new BukkitRunnable() {
-            int ticks = 0;
-
             @Override
             public void run() {
-                ticks++;
-                if (ticks >= zombieDuration * 20) {
-                    for (UUID id : zombieIds) {
-                        Entity e = Bukkit.getEntity(id);
-                        if (e != null) despawnZombie(caster, e);
-                    }
-                    summonedZombies.remove(caster.getUniqueId());
-                    cancel();
-                    return;
+                for (UUID id : zombieIds) {
+                    Entity e = Bukkit.getEntity(id);
+                    if (e != null) despawnZombie(caster, e);
                 }
+                summonedZombies.remove(caster.getUniqueId());
             }
-        }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
+        }.runTaskLater(Alkatraz.getInstance(), zombieDuration * 20L);
     }
 
     private Location findSpawnLocation(Location center) {
@@ -255,11 +241,9 @@ public class SummonZombies extends AttackSpell implements Listener {
             float pitch = playerLoc.getPitch();
             Vector forward = playerLoc.getDirection().normalize().multiply(1.5);
             List<Location> points = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 3, 0);
-            for (int i = 0; i < 100; i++) {
-                for (Location loc : points) {
-                    ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0,
-                            new Particle.DustOptions(Color.fromRGB(50, 100, 50), 0.4F));
-                }
+            Particle.DustOptions options = new Particle.DustOptions(Color.fromRGB(50, 100, 50), 0.4F);
+            for (Location loc : points) {
+                ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, options);
             }
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());
     }

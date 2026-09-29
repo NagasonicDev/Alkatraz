@@ -230,10 +230,9 @@ public class MagicMissile extends AttackSpell {
             magicCirclePoints.add(loc);
 
             // Spawn particles at all calculated points
-            for (int i = 0; i < magicCirclePoints.size(); i++){
-                for (Location loc1 : magicCirclePoints) {
-                    ParticleCaster.spawn(caster, loc1.getWorld(), Utils.DUST, loc1, 0, new Particle.DustOptions(Color.AQUA, 0.4F));
-                }
+            Particle.DustOptions options = new Particle.DustOptions(Color.AQUA, 0.4F);
+            for (Location loc1 : magicCirclePoints) {
+                ParticleCaster.spawn(caster, loc1.getWorld(), Utils.DUST, loc1, 0, options);
             }
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());
         return d;

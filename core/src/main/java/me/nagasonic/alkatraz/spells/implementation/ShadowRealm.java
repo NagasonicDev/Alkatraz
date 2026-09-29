@@ -358,11 +358,9 @@ public class ShadowRealm extends Spell {
             float pitch = playerLoc.getPitch();
             Vector forward = playerLoc.getDirection().normalize().multiply(1.5);
             List<Location> points = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 3, 0);
-            for (int i = 0; i < 100; i++) {
-                for (Location loc : points) {
-                    ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0,
-                            new Particle.DustOptions(Color.fromRGB(80, 0, 120), 0.4F));
-                }
+            Particle.DustOptions options = new Particle.DustOptions(Color.fromRGB(80, 0, 120), 0.4F);
+            for (Location loc : points) {
+                ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, options);
             }
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());
     }

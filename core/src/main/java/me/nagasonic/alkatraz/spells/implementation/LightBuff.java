@@ -149,11 +149,9 @@ public class LightBuff extends Spell {
             float pitch = loc.getPitch();
             Vector forward = loc.getDirection().normalize().multiply(1.5);
             List<Location> points = ParticleUtils.magicCircle(loc, yaw, pitch, forward, 3, 0);
-            for (int i = 0; i < 100; i++) {
-                for (Location point : points) {
-                    ParticleCaster.spawn(caster, point.getWorld(), Utils.DUST, point, 0,
-                            new Particle.DustOptions(PARTICLE_COLOR, 0.5F));
-                }
+            Particle.DustOptions options = new Particle.DustOptions(PARTICLE_COLOR, 0.5F);
+            for (Location point : points) {
+                ParticleCaster.spawn(caster, point.getWorld(), Utils.DUST, point, 0, options);
             }
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());
     }
