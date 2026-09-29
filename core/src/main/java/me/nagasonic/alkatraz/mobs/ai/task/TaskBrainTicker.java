@@ -17,9 +17,9 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The TaskBrain heartbeat: a Bukkit-main-thread task that ticks every attached
@@ -36,7 +36,7 @@ public final class TaskBrainTicker implements Listener {
     public static final long TICK_INTERVAL = 20;
 
     private static final TaskBrainTicker LISTENER = new TaskBrainTicker();
-    private static final Map<UUID, TaskBrainEngine> attached = new HashMap<>();
+    private static final Map<UUID, TaskBrainEngine> attached = new ConcurrentHashMap<>();
     private static final Object lock = new Object();
     private static int taskId = -1;
     private static long currentTick;
@@ -135,11 +135,8 @@ public final class TaskBrainTicker implements Listener {
     }
 
     private static void tickAll() {
-        Map<UUID, TaskBrainEngine> snapshot;
-        synchronized (lock) {
-            snapshot = Map.copyOf(attached);
-        }
-        for (TaskBrainEngine engine : snapshot.values()) {
+        if (attached.isEmpty()) return;
+        for (TaskBrainEngine engine : attached.values()) {
             LivingEntity entity = engine.getEntity();
             if (entity.isDead() || !entity.isValid()) {
                 detach(entity, true);
