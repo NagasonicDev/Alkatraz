@@ -19,7 +19,17 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class EquipmentStorage {
 
     private static final String STORAGE_FOLDER = "playerdata";
+    private static final long FLUSH_DELAY_TICKS = 40L;
     private static final Map<UUID, Map<String, ItemStack>> cache = new ConcurrentHashMap<>();
+
+    /**
+     * Players whose in-memory equipment map has unsaved changes, mapped to the time the
+     * pending flush was scheduled for. Serialising and writing the YAML file is a blocking
+     * disk operation, so accessory changes only mark the player dirty and coalesce into a
+     * single write. {@link #unload(Player)} still saves synchronously and is the crash-safety
+     * net.
+     */
+    private static final Map<UUID, Long> DIRTY = new ConcurrentHashMap<>();
 
     private EquipmentStorage() {}
 
@@ -36,6 +46,44 @@ public final class EquipmentStorage {
         return Optional.ofNullable(playerItems.get(slot.getKey().getKey()));
     }
 
+    /** Null-returning variant of {@link #getItem(Player, EquipmentSlot)} that avoids an Optional allocation. */
+    public static ItemStack getItemOrNull(Player player, EquipmentSlot slot) {
+        return getItemOrNull(player.getUniqueId(), slot);
+    }
+
+    public static ItemStack getItemOrNull(UUID uuid, EquipmentSlot slot) {
+        Map<String, ItemStack> playerItems = cache.get(uuid);
+        if (playerItems == null) {
+            playerItems = load(uuid);
+            cache.put(uuid, playerItems);
+        }
+        return playerItems.get(slot.getKey().getKey());
+    }
+
+    private static void markDirty(UUID uuid) {
+        if (uuid == null) return;
+        if (DIRTY.putIfAbsent(uuid, System.nanoTime()) != null) {
+            return;
+        }
+        try {
+            Bukkit.getScheduler().runTaskLater(Alkatraz.getInstance(), () -> {
+                if (DIRTY.remove(uuid) == null) {
+                    return;
+                }
+                Map<String, ItemStack> playerItems = cache.get(uuid);
+                if (playerItems != null) {
+                    save(uuid, playerItems);
+                }
+            }, FLUSH_DELAY_TICKS);
+        } catch (RuntimeException e) {
+            // Scheduler unavailable (shutdown or reload); fall back to an immediate write.
+            Map<String, ItemStack> playerItems = cache.get(uuid);
+            if (playerItems != null) {
+                save(uuid, playerItems);
+            }
+        }
+    }
+
     public static void setItem(Player player, EquipmentSlot slot, ItemStack item) {
         Map<String, ItemStack> playerItems = cache.computeIfAbsent(player.getUniqueId(), EquipmentStorage::load);
         ItemStack oldItem = playerItems.get(slot.getKey().getKey());
@@ -50,7 +98,8 @@ public final class EquipmentStorage {
         if (changed) {
             Alkatraz.logDebug("Equipment change for " + player.getName() + " [" + slot.getKey().getKey() + "]");
         }
-        save(player.getUniqueId(), playerItems);
+        markDirty(player.getUniqueId());
+        EquipmentService.invalidate(player.getUniqueId());
         EquipmentStatService service = EquipmentStatService.getInstance();
         service.syncEquipmentStats(player);
         if (oldItem != null && !areItemsSimilar(oldItem, item)) {
@@ -124,6 +173,7 @@ public final class EquipmentStorage {
 
     public static void unload(Player player) {
         save(player);
+        DIRTY.remove(player.getUniqueId());
         cache.remove(player.getUniqueId());
     }
 

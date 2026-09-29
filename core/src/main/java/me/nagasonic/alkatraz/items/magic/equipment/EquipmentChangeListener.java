@@ -29,10 +29,10 @@ public final class EquipmentChangeListener {
             PluginManager pm = Bukkit.getPluginManager();
             pm.registerEvent(eventClass, new Listener() {}, EventPriority.MONITOR,
                     (listener, event) -> {
-                        if (!eventClass.isInstance(event)) return;
                         try {
                             Player player = (Player) getPlayer.invoke(event);
                             if (player != null) {
+                                EquipmentService.invalidate(player.getUniqueId());
                                 EquipmentStatService.getInstance().syncEquipmentStats(player);
                             }
                         } catch (ReflectiveOperationException e) {
