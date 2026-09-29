@@ -96,36 +96,39 @@ public class WaterPulse extends AttackSpell implements Listener {
                             1
                     );
                     SpellComponentHandler.register(comp);
-                    for (Block b : Utils.blocksInRadius(loc, 2)){
-                        if (b.getType() == Material.FIRE){
-                            if (Protection.blockEdit(p, b.getLocation())){
-                                b.setType(Material.AIR);
-                            }
-                        }else if (b.getType() == Material.LAVA){
-                            Levelled blockdata = (Levelled) b.getBlockData();
-                            if (Protection.blockEdit(p, b.getLocation())){
-                                if (blockdata.getLevel() == 0){
-                                    b.setType(Material.OBSIDIAN);
-                                }else{
-                                    b.setType(Material.COBBLESTONE);
-                                }
-                            }
-                        }
-                    }
-                    for (Entity entity : loc.getWorld().getNearbyEntities(loc, 1, 1, 1)) {
-                        if (props.isCountered() || props.isCancelled()) {
-                            cancel();
-                            return;
-                        }
-                        if (!(entity instanceof LivingEntity)) continue;
-                        if (entity.equals(p)) continue;
+                }
 
-                        LivingEntity target = (LivingEntity) entity;
-                        Vector direction = Utils.safeNormalize(target.getLocation().toVector().subtract(loc.toVector()));
-                        direction.multiply(props.getRemainingPower());
-                        direction.setY(0.5);
-                        target.setVelocity(direction);
+                int blockRadius = (int) Math.ceil(r + 1);
+                for (Block b : Utils.blocksInRadius(centre, blockRadius)){
+                    if (b.getType() == Material.FIRE){
+                        if (Protection.blockEdit(p, b.getLocation())){
+                            b.setType(Material.AIR);
+                        }
+                    }else if (b.getType() == Material.LAVA){
+                        Levelled blockdata = (Levelled) b.getBlockData();
+                        if (Protection.blockEdit(p, b.getLocation())){
+                            if (blockdata.getLevel() == 0){
+                                b.setType(Material.OBSIDIAN);
+                            }else{
+                                b.setType(Material.COBBLESTONE);
+                            }
+                        }
                     }
+                }
+
+                for (Entity entity : centre.getWorld().getNearbyEntities(centre, r + 1, 1, r + 1)) {
+                    if (props.isCountered() || props.isCancelled()) {
+                        cancel();
+                        return;
+                    }
+                    if (!(entity instanceof LivingEntity)) continue;
+                    if (entity.equals(p)) continue;
+
+                    LivingEntity target = (LivingEntity) entity;
+                    Vector direction = Utils.safeNormalize(target.getLocation().toVector().subtract(centre.toVector()));
+                    direction.multiply(props.getRemainingPower());
+                    direction.setY(0.5);
+                    target.setVelocity(direction);
                 }
                 if (r >= maxRadius){
                     cancel();
@@ -168,36 +171,39 @@ public class WaterPulse extends AttackSpell implements Listener {
                             1
                     );
                     SpellComponentHandler.register(comp);
-                    for (Block b : Utils.blocksInRadius(loc, 2)){
-                        if (b.getType() == Material.FIRE){
-                            if (Protection.blockEdit(caster, b.getLocation())){
-                                b.setType(Material.AIR);
-                            }
-                        }else if (b.getType() == Material.LAVA){
-                            Levelled blockdata = (Levelled) b.getBlockData();
-                            if (Protection.blockEdit(caster, b.getLocation())){
-                                if (blockdata.getLevel() == 0){
-                                    b.setType(Material.OBSIDIAN);
-                                }else{
-                                    b.setType(Material.COBBLESTONE);
-                                }
-                            }
-                        }
-                    }
-                    for (Entity entity : loc.getWorld().getNearbyEntities(loc, 1, 1, 1)) {
-                        if (props.isCountered() || props.isCancelled()) {
-                            cancel();
-                            return;
-                        }
-                        if (!(entity instanceof LivingEntity)) continue;
-                        if (entity.equals(caster)) continue;
+                }
 
-                        LivingEntity target = (LivingEntity) entity;
-                        Vector direction = Utils.safeNormalize(target.getLocation().toVector().subtract(loc.toVector()));
-                        direction.multiply(props.getRemainingPower());
-                        direction.setY(0.5);
-                        target.setVelocity(direction);
+                int blockRadius = (int) Math.ceil(r + 1);
+                for (Block b : Utils.blocksInRadius(centre, blockRadius)){
+                    if (b.getType() == Material.FIRE){
+                        if (Protection.blockEdit(caster, b.getLocation())){
+                            b.setType(Material.AIR);
+                        }
+                    }else if (b.getType() == Material.LAVA){
+                        Levelled blockdata = (Levelled) b.getBlockData();
+                        if (Protection.blockEdit(caster, b.getLocation())){
+                            if (blockdata.getLevel() == 0){
+                                b.setType(Material.OBSIDIAN);
+                            }else{
+                                b.setType(Material.COBBLESTONE);
+                            }
+                        }
                     }
+                }
+
+                for (Entity entity : centre.getWorld().getNearbyEntities(centre, r + 1, 1, r + 1)) {
+                    if (props.isCountered() || props.isCancelled()) {
+                        cancel();
+                        return;
+                    }
+                    if (!(entity instanceof LivingEntity)) continue;
+                    if (entity.equals(caster)) continue;
+
+                    LivingEntity target = (LivingEntity) entity;
+                    Vector direction = Utils.safeNormalize(target.getLocation().toVector().subtract(centre.toVector()));
+                    direction.multiply(props.getRemainingPower());
+                    direction.setY(0.5);
+                    target.setVelocity(direction);
                 }
                 if (r == 10){
                     cancel();
@@ -223,10 +229,9 @@ public class WaterPulse extends AttackSpell implements Listener {
             List<Location> magicCirclePoints = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 3, 0);
 
             // Spawn particles at all calculated points
-            for (int i = 0; i < 100; i++){
-                for (Location loc : magicCirclePoints) {
-                    ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, new Particle.DustOptions(Color.BLUE, 0.4F));
-                }
+            Particle.DustOptions options = new Particle.DustOptions(Color.BLUE, 0.4F);
+            for (Location loc : magicCirclePoints) {
+                ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, options);
             }
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());
         return d;
