@@ -60,8 +60,31 @@ public abstract class Menu {
      * Refreshes the menu contents without closing
      */
     public void refresh() {
-        inventory.clear();
+        if (!clearsInventoryInBuild()) inventory.clear();
         build();
+    }
+
+    /**
+     * Whether {@link #build()} clears the inventory itself. When true, {@link #refresh()}
+     * skips its own clear so the inventory is not wiped twice per rebuild.
+     */
+    protected boolean clearsInventoryInBuild() {
+        return false;
+    }
+
+    /**
+     * Replaces a single slot without rebuilding the whole menu.
+     */
+    protected void refreshSlot(int slot, ItemStack item) {
+        inventory.setItem(slot, item);
+    }
+
+    /**
+     * Whether {@link #handleClick} needs to see clicks in the player's own inventory.
+     * When false, {@code MenuListener} cancels those clicks without invoking the handler.
+     */
+    protected boolean usesBottomInventory() {
+        return false;
     }
 
     /**

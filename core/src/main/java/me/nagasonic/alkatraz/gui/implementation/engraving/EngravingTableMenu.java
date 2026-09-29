@@ -78,6 +78,11 @@ public class EngravingTableMenu extends Menu {
     }
 
     @Override
+    protected boolean usesBottomInventory() {
+        return true;
+    }
+
+    @Override
     protected void build() {
         fillAll();
 

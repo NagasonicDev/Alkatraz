@@ -26,6 +26,11 @@ public class EngravingTableMenuSelector extends Menu {
     }
 
     @Override
+    protected boolean usesBottomInventory() {
+        return true;
+    }
+
+    @Override
     protected void build() {
         for (int i = 0; i < 27; i++) {
             inventory.setItem(i, createBackgroundPane());

@@ -1,6 +1,12 @@
 package me.nagasonic.alkatraz.gui;
 
 import me.nagasonic.alkatraz.gui.grimoire.GrimoireLecternState;
+import me.nagasonic.alkatraz.gui.implementation.EquipmentMenu;
+import me.nagasonic.alkatraz.gui.implementation.editor.EditorChatHandler;
+import me.nagasonic.alkatraz.gui.implementation.editor.EditorSession;
+import me.nagasonic.alkatraz.gui.implementation.engraving.EngravingSession;
+import me.nagasonic.alkatraz.gui.implementation.recipe.RecipeChatHandler;
+import me.nagasonic.alkatraz.gui.implementation.recipe.RecipeEditorSession;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -8,10 +14,12 @@ import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Global listener for all menu interactions
@@ -65,6 +73,13 @@ public class MenuListener implements Listener {
                 event.setCancelled(true);
                 return;
             }
+        }
+
+        // Menus that never read the player's own inventory get their bottom-inventory
+        // clicks cancelled outright, so handleClick (and its NBT parse) is skipped.
+        if (!inTop && !menu.usesBottomInventory()) {
+            event.setCancelled(true);
+            return;
         }
 
         ItemStack clicked = event.getCurrentItem();
@@ -123,5 +138,17 @@ public class MenuListener implements Listener {
         } else if (GrimoireLecternState.isActive(player)) {
             GrimoireLecternState.remove(player);
         }
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        UUID uuid = event.getPlayer().getUniqueId();
+        Menu.removeActiveMenu(event.getPlayer());
+        EquipmentMenu.clearPending(event.getPlayer());
+        EditorSession.remove(uuid);
+        EngravingSession.remove(uuid);
+        RecipeEditorSession.remove(uuid);
+        EditorChatHandler.clear(uuid);
+        RecipeChatHandler.clear(uuid);
     }
 }

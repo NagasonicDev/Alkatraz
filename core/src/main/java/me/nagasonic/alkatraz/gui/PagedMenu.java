@@ -49,6 +49,11 @@ public abstract class PagedMenu<T> extends Menu {
     }
 
     @Override
+    protected boolean clearsInventoryInBuild() {
+        return true;
+    }
+
+    @Override
     protected void build() {
         // Clear inventory
         inventory.clear();

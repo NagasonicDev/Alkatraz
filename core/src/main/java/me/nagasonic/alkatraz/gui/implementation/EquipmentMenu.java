@@ -48,6 +48,11 @@ public class EquipmentMenu extends Menu {
     }
 
     @Override
+    protected boolean usesBottomInventory() {
+        return true;
+    }
+
+    @Override
     protected void build() {
         fillAll();
 
@@ -226,7 +231,10 @@ public class EquipmentMenu extends Menu {
         pendingEquip.remove(player.getUniqueId());
     }
 
-    // Cleanup handled by MenuListener.onInventoryClose + clearPending()
+    @Override
+    public void onClose() {
+        pendingEquip.remove(viewer.getUniqueId());
+    }
 
     private static boolean isEquipmentItem(ItemStack item) {
         return MagicItemStack.readDefinition(item)
