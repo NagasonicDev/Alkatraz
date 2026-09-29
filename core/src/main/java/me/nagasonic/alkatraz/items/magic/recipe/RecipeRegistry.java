@@ -12,6 +12,7 @@ import org.bukkit.inventory.RecipeChoice;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -24,6 +25,14 @@ public final class RecipeRegistry {
     private static final Map<Material, Set<NamespacedKey>> BY_OUTPUT_MATERIAL = new HashMap<>();
     private static final Map<RecipeType, Set<NamespacedKey>> BY_STATION = new HashMap<>();
     private static final Map<Material, Set<NamespacedKey>> BY_INGREDIENT = new HashMap<>();
+
+    /**
+     * Recipes holding at least one ingredient that cannot be expressed as a
+     * {@code MaterialChoice} (exact-item matches). They are absent from
+     * {@link #BY_INGREDIENT} and must always be considered when narrowing candidates.
+     */
+    private static final Set<NamespacedKey> UNINDEXED = new HashSet<>();
+
     private static final Map<NamespacedKey, File> BY_FILE = new HashMap<>();
 
     private RecipeRegistry() {}
@@ -47,6 +56,7 @@ public final class RecipeRegistry {
         BY_OUTPUT_MATERIAL.clear();
         BY_STATION.clear();
         BY_INGREDIENT.clear();
+        UNINDEXED.clear();
         BY_FILE.clear();
     }
 
@@ -58,8 +68,12 @@ public final class RecipeRegistry {
         return BY_KEY.values();
     }
 
+    /**
+     * Live view of the registered recipe keys. The backing map is only mutated during
+     * load/reload, so the view does not need to be copied per call.
+     */
     public static Set<NamespacedKey> getAllKeys() {
-        return new HashSet<>(BY_KEY.keySet());
+        return Collections.unmodifiableSet(BY_KEY.keySet());
     }
 
     public static List<Requirement> getRequirements(NamespacedKey key) {
@@ -78,6 +92,11 @@ public final class RecipeRegistry {
 
     public static Set<NamespacedKey> getByIngredient(Material material) {
         return BY_INGREDIENT.getOrDefault(material, Set.of());
+    }
+
+    /** Recipes that the ingredient index cannot narrow, because they use exact-item matches. */
+    public static Set<NamespacedKey> getUnindexed() {
+        return Collections.unmodifiableSet(UNINDEXED);
     }
 
     public static File fileOf(NamespacedKey key) {
@@ -149,9 +168,17 @@ public final class RecipeRegistry {
     private static void indexIngredient(NamespacedKey key, Ingredient ingredient) {
         RecipeChoice choice = ingredient.toChoice();
         if (choice instanceof RecipeChoice.MaterialChoice materialChoice) {
-            for (Material material : materialChoice.getChoices()) {
+            List<Material> materials = materialChoice.getChoices();
+            if (materials.isEmpty()) {
+                // A type/tag choice that resolved to nothing cannot narrow anything.
+                UNINDEXED.add(key);
+                return;
+            }
+            for (Material material : materials) {
                 BY_INGREDIENT.computeIfAbsent(material, k -> new HashSet<>()).add(key);
             }
+        } else {
+            UNINDEXED.add(key);
         }
     }
 }

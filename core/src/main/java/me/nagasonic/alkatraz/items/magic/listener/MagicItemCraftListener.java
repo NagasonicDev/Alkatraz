@@ -7,6 +7,7 @@ import me.nagasonic.alkatraz.items.magic.recipe.RecipeRegistry;
 import me.nagasonic.alkatraz.items.magic.recipe.RecipeType;
 import me.nagasonic.alkatraz.items.magic.recipe.adapter.RecipeGate;
 import org.bukkit.Keyed;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -18,7 +19,12 @@ import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Matches shaped recipes whose magic-item ingredients are checked by item
@@ -101,7 +107,8 @@ public final class MagicItemCraftListener implements Listener {
     }
 
     private static AlkatrazRecipe findMatchingRecipe(ItemStack[] matrix) {
-        for (AlkatrazRecipe recipe : RecipeRegistry.getAll()) {
+        Collection<AlkatrazRecipe> candidates = candidateRecipes(matrix);
+        for (AlkatrazRecipe recipe : candidates) {
             if (recipe.getType() != RecipeType.SHAPED) {
                 continue;
             }
@@ -110,6 +117,52 @@ public final class MagicItemCraftListener implements Listener {
             }
         }
         return null;
+    }
+
+    /**
+     * Narrows the scan to recipes indexed under every material present in the matrix,
+     * plus any recipe the ingredient index could not describe (exact-item matches).
+     * A magic-item ingredient is not necessarily a material the recipe registry could
+     * index ({@code ExactItemIngredient} yields an exact choice), so any matrix
+     * containing a magic item falls back to the full scan.
+     */
+    private static Collection<AlkatrazRecipe> candidateRecipes(ItemStack[] matrix) {
+        Set<NamespacedKey> candidates = null;
+        for (ItemStack cell : matrix) {
+            if (cell == null || cell.getType().isAir()) continue;
+            if (MagicItemStack.isMagicItem(cell)) {
+                return RecipeRegistry.getAll();
+            }
+            Set<NamespacedKey> byMaterial = RecipeRegistry.getByIngredient(cell.getType());
+            if (byMaterial.isEmpty()) {
+                candidates = null;
+                break;
+            }
+            if (candidates == null) {
+                candidates = new HashSet<>(byMaterial);
+            } else {
+                candidates.retainAll(byMaterial);
+                if (candidates.isEmpty()) {
+                    break;
+                }
+            }
+        }
+        List<AlkatrazRecipe> recipes = new ArrayList<>();
+        if (candidates != null) {
+            for (NamespacedKey key : candidates) {
+                AlkatrazRecipe recipe = RecipeRegistry.get(key);
+                if (recipe != null) {
+                    recipes.add(recipe);
+                }
+            }
+        }
+        for (NamespacedKey key : RecipeRegistry.getUnindexed()) {
+            AlkatrazRecipe recipe = RecipeRegistry.get(key);
+            if (recipe != null && !recipes.contains(recipe)) {
+                recipes.add(recipe);
+            }
+        }
+        return recipes;
     }
 
     private static boolean matchesShape(ItemStack[] matrix, AlkatrazRecipe recipe) {
