@@ -109,7 +109,7 @@ public class MagicProfile extends Profile {
         // Initialize record-based approach
         this.spellModifiers = new ArrayList<>();
         this.spellModifierTypes = new HashMap<>();
-        addManaPerSecond();
+        // Mana regen is started by ProfileManager once the profile is cached for an online player
         // Map-based approach initialized inline above
     }
 
