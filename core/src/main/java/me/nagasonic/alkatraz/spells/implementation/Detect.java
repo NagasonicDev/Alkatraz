@@ -63,9 +63,12 @@ public class Detect extends Spell {
             int r = 20;
             taskID = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
                 if (l.get() < r){
-                    List<Location> locs = ParticleUtils.circle(a, l.get(), 4/l.get(), 0, 0);
+                    double ringRadius = l.get();
+                    double freq = Math.max(4 / ringRadius, 0.5);
+                    List<Location> locs = ParticleUtils.circle(a, ringRadius, freq, 0, 0);
+                    Particle.DustOptions options = new Particle.DustOptions(Color.WHITE, 0.4F);
                     for (Location loc : locs){
-                        ParticleCaster.spawn(p, loc.getWorld(), Utils.DUST, loc, 0, new Particle.DustOptions(Color.WHITE, 0.4F));
+                        ParticleCaster.spawn(p, loc.getWorld(), Utils.DUST, loc, 0, options);
                     }
                     l.addAndGet(0.5);
                     if (l.get() == (double) r /2){
@@ -101,7 +104,9 @@ public class Detect extends Spell {
                 }else { stopCast();}
             }, 0L, 1L);
             Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(Alkatraz.getInstance(), () -> {
-                for (LivingEntity le : entities){
+                List<LivingEntity> revealed = new ArrayList<>(entities);
+                entities.clear();
+                for (LivingEntity le : revealed){
                     Alkatraz.getNms().unsetGlowing(le, p);
                 }
             }, activeDuration * 20);
@@ -132,10 +137,9 @@ public class Detect extends Spell {
             List<Location> magicCirclePoints = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 2, 0);
 
             // Spawn particles at all calculated points
-            for (int i = 0; i < 100; i++){
-                for (Location loc : magicCirclePoints) {
-                    ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, new Particle.DustOptions(Color.WHITE, 0.4F));
-                }
+            Particle.DustOptions options = new Particle.DustOptions(Color.WHITE, 0.4F);
+            for (Location loc : magicCirclePoints) {
+                ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, options);
             }
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());
         return d;
