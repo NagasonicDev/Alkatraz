@@ -2,6 +2,7 @@ package me.nagasonic.alkatraz.loot;
 
 import me.nagasonic.alkatraz.Alkatraz;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -13,6 +14,7 @@ import org.bukkit.loot.LootTable;
 import org.bukkit.plugin.Plugin;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
 /**
@@ -40,13 +42,19 @@ public class LootInjector implements Listener {
     private final List<WeightedItem> items;
     private final int maxItems;
     private final boolean replace; // If true, replaces loot instead of adding to it
-    
+    private final double totalWeight; // Loop-invariant sum of all entry weights
+
     public LootInjector(Predicate<LootTable> filter, List<WeightedItem> items,
                         int maxItems, boolean replace) {
         this.filter = filter;
         this.items = items;
         this.maxItems = maxItems;
         this.replace = replace;
+        double total = 0;
+        for (WeightedItem wi : items) {
+            total += wi.getWeight();
+        }
+        this.totalWeight = total;
     }
 
     public static void register(Plugin plugin){
@@ -206,28 +214,28 @@ public class LootInjector implements Listener {
      */
     private List<ItemStack> selectItems() {
         List<ItemStack> selected = new ArrayList<>();
-        Random random = new Random();
-        
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        double totalWeight = this.totalWeight;
+
         for (int i = 0; i < maxItems; i++) {
-            // Calculate total weight
-            double totalWeight = 0;
-            for (WeightedItem wi : items) {
-                totalWeight += wi.getWeight();
-            }
-            
             // Select random item based on weight
             double randomValue = random.nextDouble() * totalWeight;
             double currentWeight = 0;
-            
+
             for (WeightedItem wi : items) {
                 currentWeight += wi.getWeight();
                 if (randomValue <= currentWeight) {
-                    selected.add(wi.getItem());
+                    ItemStack item = wi.getItem();
+                    // Air entries are pure weight ballast; emitting an AIR stack would
+                    // only allocate a throwaway clone.
+                    if (item != null && item.getType() != Material.AIR) {
+                        selected.add(item);
+                    }
                     break;
                 }
             }
         }
-        
+
         return selected;
     }
     
