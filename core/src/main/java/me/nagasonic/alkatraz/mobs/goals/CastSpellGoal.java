@@ -15,8 +15,6 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -93,9 +91,10 @@ public class CastSpellGoal implements Goal {
 
     private Spell selectSpell(MobBrainContext ctx, List<Spell> spells) {
         if (spells == null || spells.isEmpty()) return null;
-        List<Spell> copy = new ArrayList<>(spells);
-        Collections.shuffle(copy, ThreadLocalRandom.current());
-        for (Spell spell : copy) {
+        int size = spells.size();
+        int start = ThreadLocalRandom.current().nextInt(size);
+        for (int i = 0; i < size; i++) {
+            Spell spell = spells.get((start + i) % size);
             if (spell.canMobCast(ctx.self())) return spell;
         }
         return null;
