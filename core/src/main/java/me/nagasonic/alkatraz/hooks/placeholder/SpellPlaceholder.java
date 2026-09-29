@@ -61,7 +61,7 @@ public class SpellPlaceholder implements Placeholder {
         // has_, name_, element_, circle_, mana_cost_, code_
         if (params.startsWith("has_")) {
             String spellId = params.substring(4);
-            return String.valueOf(profile.getAllDiscoveredSpellTypes().contains(spellId.toLowerCase()));
+            return String.valueOf(profile.getStringSet("discoveredSpells").contains(spellId.toLowerCase()));
         }
 
         if (params.startsWith("name_")) {

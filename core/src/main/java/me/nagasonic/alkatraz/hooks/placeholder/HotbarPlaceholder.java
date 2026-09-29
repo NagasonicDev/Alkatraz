@@ -17,11 +17,11 @@ public class HotbarPlaceholder implements Placeholder {
     public String onPlaceholderRequest(Player player, String params) {
         MagicProfile profile = ProfileManager.getProfile(player, MagicProfile.class);
         if (profile == null) return "";
-        Map<Integer, String> hotbar = profile.getHotbarSpellIds();
 
         if (params.startsWith("slot_")) {
             try {
                 int slot = Integer.parseInt(params.substring(5));
+                Map<Integer, String> hotbar = profile.getHotbarSpellIds();
                 return hotbar.getOrDefault(slot - 1, "");
             } catch (NumberFormatException e) {
                 return "";
@@ -29,7 +29,9 @@ public class HotbarPlaceholder implements Placeholder {
         }
 
         if (params.equals("count")) {
-            return String.valueOf(hotbar.size());
+            // getHotbarSpellIds() collapses malformed entries onto the same slot, so
+            // the raw set size is not equivalent; the map still has to be built.
+            return String.valueOf(profile.getHotbarSpellIds().size());
         }
 
         return "";

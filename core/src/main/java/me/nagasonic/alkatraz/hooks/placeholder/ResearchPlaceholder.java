@@ -7,6 +7,7 @@ import me.nagasonic.alkatraz.api.progression.research.definition.ResearchNode;
 import me.nagasonic.alkatraz.progression.research.ResearchService;
 import org.bukkit.entity.Player;
 
+import java.util.Collection;
 import java.util.Optional;
 
 public class ResearchPlaceholder implements Placeholder {
@@ -22,7 +23,17 @@ public class ResearchPlaceholder implements Placeholder {
         if (profile == null) return "";
 
         if (params.equals("completed_count")) {
-            return String.valueOf(profile.getCompletedResearchIds().size());
+            // Equivalent to getCompletedResearchIds().size() (the union of the two
+            // sets) without allocating a third collection on every resolution.
+            Collection<String> completed = profile.getStringSet("researchCompleted");
+            Collection<String> progressed = profile.getStringSet("researchProgress");
+            Collection<String> smaller = completed.size() <= progressed.size() ? completed : progressed;
+            Collection<String> larger = smaller == completed ? progressed : completed;
+            int shared = 0;
+            for (String id : smaller) {
+                if (larger.contains(id)) shared++;
+            }
+            return String.valueOf(completed.size() + progressed.size() - shared);
         }
 
         if (params.startsWith("has_")) {

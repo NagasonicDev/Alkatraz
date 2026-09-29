@@ -47,10 +47,11 @@ public class AlkatrazPlaceholder extends PlaceholderExpansion {
         if (sep <= 0) return "";
 
         String handlerName = identifier.substring(0, sep);
-        String params = identifier.substring(sep + 1);
 
         Placeholder handler = handlers.get(handlerName);
         if (handler == null) return "";
+
+        String params = identifier.substring(sep + 1);
 
         try {
             return handler.onPlaceholderRequest(player, params);
