@@ -109,17 +109,29 @@ public interface NMS extends Listener {
 
     /**
      * Makes an entity appear with a coloured glow outline for a specific player.
-     * Uses a per-viewer scoreboard team for colour and a raw entity metadata
-     * packet to set the glowing flag on only the viewer's client.
+     * Uses one scoreboard team per (viewer, colour) pair - reused across every
+     * entity glowing in that colour for that viewer - and a raw entity metadata
+     * packet to set the glowing flag on only the viewer's client. Registering or
+     * unregistering a scoreboard team is expensive and re-broadcasts to every
+     * viewer, so the call is idempotent: it only touches the team when something
+     * actually changed. Keying on the colour keeps distinct outline colours for
+     * the same viewer while still bounding the team count to the palette in use.
      */
     default void setGlowing(Entity entity, Player viewer, ChatColor color) {
         Scoreboard scoreboard = viewer.getScoreboard();
-        String teamName = "ge-" + viewer.getUniqueId() + "-" + entity.getUniqueId();
+        String teamName = glowTeamName(viewer, color);
         Team team = scoreboard.getTeam(teamName);
-        if (team != null) team.unregister();
-        team = scoreboard.registerNewTeam(teamName);
-        team.setColor(color);
-        team.addEntry(entity.getUniqueId().toString());
+        if (team == null) {
+            team = scoreboard.registerNewTeam(teamName);
+            team.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
+        }
+        if (color != null && team.getColor() != color) {
+            team.setColor(color);
+        }
+        String entry = entity.getUniqueId().toString();
+        if (!team.hasEntry(entry)) {
+            team.addEntry(entry);
+        }
         sendGlowingPacket(entity, viewer, true);
     }
 
@@ -127,10 +139,45 @@ public interface NMS extends Listener {
      * Removes the per-player glow effect from an entity for a specific viewer.
      */
     default void unsetGlowing(Entity entity, Player viewer) {
-        String teamName = "ge-" + viewer.getUniqueId() + "-" + entity.getUniqueId();
-        Team team = viewer.getScoreboard().getTeam(teamName);
-        if (team != null) team.unregister();
+        Scoreboard scoreboard = viewer.getScoreboard();
+        String entry = entity.getUniqueId().toString();
+        for (ChatColor color : ChatColor.values()) {
+            String teamName = glowTeamName(viewer, color);
+            Team team = scoreboard.getTeam(teamName);
+            if (team == null) continue;
+            if (team.hasEntry(entry)) {
+                team.removeEntry(entry);
+            }
+            if (team.getEntries().isEmpty()) {
+                team.unregister();
+            }
+        }
         sendGlowingPacket(entity, viewer, false);
+    }
+
+    /**
+     * Team name for a viewer's glow teams. The colour is folded into the name so
+     * each outline colour gets its own team (a team carries a single colour),
+     * which keeps the per-viewer team count bounded by the palette in use rather
+     * than by the number of glowing entities.
+     */
+    private static String glowTeamName(Player viewer, ChatColor color) {
+        return "ge-" + viewer.getUniqueId() + (color == null ? "" : "-" + color.name());
+    }
+
+    /**
+     * Drops the viewer's glow team entirely, clearing every glowing entry that
+     * was registered through {@link #setGlowing(Entity, Player, ChatColor)}.
+     * Safe to call when the viewer has no team.
+     */
+    default void clearGlowing(Player viewer) {
+        Scoreboard scoreboard = viewer.getScoreboard();
+        for (ChatColor color : ChatColor.values()) {
+            Team team = scoreboard.getTeam(glowTeamName(viewer, color));
+            if (team != null) {
+                team.unregister();
+            }
+        }
     }
 
     /**
