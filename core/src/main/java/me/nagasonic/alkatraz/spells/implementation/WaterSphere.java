@@ -215,12 +215,14 @@ public class WaterSphere extends AttackSpell {
                 }
 
                 // Hydrate nearby farmland
-                for (Block b : Utils.blocksInRadius(center, (int) Math.ceil(radius))) {
-                    if (b.getType() == Material.FARMLAND) {
-                        if (b.getBlockData() instanceof Farmland farm) {
-                            farm.setMoisture(farm.getMaximumMoisture());
-                            if (Protection.blockEdit(caster, b.getLocation())) {
-                                b.setBlockData(farm);
+                if (step % 5 == 0) {
+                    for (Block b : Utils.blocksInRadius(center, (int) Math.ceil(radius))) {
+                        if (b.getType() == Material.FARMLAND) {
+                            if (b.getBlockData() instanceof Farmland farm) {
+                                farm.setMoisture(farm.getMaximumMoisture());
+                                if (Protection.blockEdit(caster, b.getLocation())) {
+                                    b.setBlockData(farm);
+                                }
                             }
                         }
                     }
