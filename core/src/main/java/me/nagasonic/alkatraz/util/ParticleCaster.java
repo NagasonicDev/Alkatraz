@@ -17,7 +17,35 @@ import org.bukkit.entity.Player;
  */
 public final class ParticleCaster {
 
+    private static final long CONFIG_REFRESH_MS = 1000L;
+
+    private static volatile boolean configLoaded = false;
+    private static volatile double denseRadius = 12.0;
+    private static volatile double maxRadius = 32.0;
+    private static volatile double minScale = 0.25;
+    private static volatile boolean casterFullDensity = true;
+    private static long lastConfigRead = 0L;
+
     private ParticleCaster() {}
+
+    /**
+     * Re-reads the particle settings from config at most once per second so a
+     * live {@code /alkatraz reload} still takes effect without paying for four
+     * YAML lookups on every particle dispatch.
+     */
+    private static void refreshConfig() {
+        long now = System.currentTimeMillis();
+        if (configLoaded && now - lastConfigRead < CONFIG_REFRESH_MS) return;
+        synchronized (ParticleCaster.class) {
+            if (configLoaded && now - lastConfigRead < CONFIG_REFRESH_MS) return;
+            denseRadius = ParticleConfig.getDenseRadius();
+            maxRadius = ParticleConfig.getMaxRadius();
+            minScale = ParticleConfig.getMinScale();
+            casterFullDensity = ParticleConfig.isCasterFullDensity();
+            lastConfigRead = now;
+            configLoaded = true;
+        }
+    }
 
     public static void spawn(LivingEntity caster, World world, Particle particle, Location location, int count) {
         dispatch(caster, world, particle, location, count, 0, 0, 0, 0, null);
@@ -71,16 +99,24 @@ public final class ParticleCaster {
             return;
         }
 
-        double dense = ParticleConfig.getDenseRadius();
-        double max = ParticleConfig.getMaxRadius();
-        double minScale = ParticleConfig.getMinScale();
-        boolean casterFull = ParticleConfig.isCasterFullDensity();
+        refreshConfig();
+        double dense = denseRadius;
+        double max = maxRadius;
+        double minScale = ParticleCaster.minScale;
+        boolean casterFull = casterFullDensity;
         double denseSq = dense * dense;
         double maxSq = max * max;
         Player casterPlayer = caster instanceof Player ? (Player) caster : null;
+        double lx = location.getX();
+        double ly = location.getY();
+        double lz = location.getZ();
 
         for (Player player : world.getPlayers()) {
-            double distSq = player.getLocation().distanceSquared(location);
+            Location pl = player.getLocation();
+            double pdx = pl.getX() - lx;
+            double pdy = pl.getY() - ly;
+            double pdz = pl.getZ() - lz;
+            double distSq = pdx * pdx + pdy * pdy + pdz * pdz;
             boolean isCaster = casterPlayer != null && player.equals(casterPlayer);
             if (distSq > maxSq && !isCaster) continue;
 
