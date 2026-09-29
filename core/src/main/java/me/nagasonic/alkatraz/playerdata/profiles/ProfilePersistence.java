@@ -12,6 +12,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Handles saving and loading profiles to/from YAML files
@@ -20,16 +21,22 @@ public class ProfilePersistence {
     
     private static final String PLAYERDATA_FOLDER = "playerdata";
 
+    private static final Map<UUID, File> playerFolders = new ConcurrentHashMap<>();
+
     /**
      * Gets the folder path for a player's data
      * @param uuid Player UUID
      * @return File object for player's folder
      */
     private static File getPlayerFolder(UUID uuid) {
+        File cached = playerFolders.get(uuid);
+        if (cached != null) return cached;
+
         File folder = new File(Alkatraz.getInstance().getDataFolder().getParentFile(), "Alkatraz/" + PLAYERDATA_FOLDER + "/" + uuid);
         if (!folder.exists()) {
             folder.mkdirs();
         }
+        playerFolders.put(uuid, folder);
         return folder;
     }
 
@@ -72,7 +79,7 @@ public class ProfilePersistence {
      */
     public static void saveProfile(UUID uuid, Profile profile) {
         File file = getProfileFile(uuid, profile.getClass());
-        FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+        FileConfiguration config = new YamlConfiguration();
 
         // Save all integer stats
         for (String stat : profile.getInts()) {
@@ -108,8 +115,7 @@ public class ProfilePersistence {
             config.set("stats.stringSets." + stat, new ArrayList<>(profile.getStringSet(stat)));
         }
 
-        MagicProfile mprofile = (MagicProfile) profile;
-        if (mprofile != null) {
+        if (profile instanceof MagicProfile mprofile) {
             Map<Integer, String> hotbarSpells = mprofile.getHotbarSpellIds();
             ConfigurationSection hotbarSection = config.createSection("hotbar");
             for (Map.Entry<Integer, String> entry : hotbarSpells.entrySet()) {
@@ -235,8 +241,7 @@ public class ProfilePersistence {
                 try {
                     int slotIndex = Integer.parseInt(key);
                     String spellId = hotbarSection.getString(key);
-                    MagicProfile mp = (MagicProfile) profile;
-                    if (mp != null) {
+                    if (profile instanceof MagicProfile mp) {
                         mp.setHotbarSpell(slotIndex, spellId);
                     }
                 } catch (NumberFormatException e) {
@@ -290,17 +295,20 @@ public class ProfilePersistence {
      */
     public static boolean deleteAllProfiles(UUID uuid) {
         File playerFolder = getPlayerFolder(uuid);
+        playerFolders.remove(uuid);
         if (!playerFolder.exists()) return true;
 
         boolean success = true;
-        for (File file : playerFolder.listFiles()) {
+        File[] files = playerFolder.listFiles();
+        if (files == null) return true;
+        for (File file : files) {
             if (file.isFile() && file.getName().endsWith(".yml")) {
                 success &= file.delete();
             }
         }
-        
+
         // Try to delete the folder if it's empty
-        if (playerFolder.listFiles().length == 0) {
+        if (playerFolder.listFiles() != null && playerFolder.listFiles().length == 0) {
             playerFolder.delete();
         }
         
@@ -315,6 +323,7 @@ public class ProfilePersistence {
      */
     public static boolean deleteProfile(UUID uuid, Class<? extends Profile> profileClass) {
         File file = getProfileFile(uuid, profileClass);
+        playerFolders.remove(uuid);
         return !file.exists() || file.delete();
     }
 
