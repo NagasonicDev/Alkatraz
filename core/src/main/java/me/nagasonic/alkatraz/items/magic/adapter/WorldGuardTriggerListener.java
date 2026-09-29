@@ -8,6 +8,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -55,6 +56,11 @@ public final class WorldGuardTriggerListener implements Listener {
         }
 
         lastRegions.put(player.getUniqueId(), current);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onQuit(PlayerQuitEvent event) {
+        lastRegions.remove(event.getPlayer().getUniqueId());
     }
 
     private static boolean sameBlock(Location a, Location b) {

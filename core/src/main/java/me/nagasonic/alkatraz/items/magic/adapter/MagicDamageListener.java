@@ -6,14 +6,20 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.player.PlayerQuitEvent;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class MagicDamageListener implements Listener {
 
-    private static final Map<UUID, Double> EXPLOSION_BONUS = new HashMap<>();
+    private static final Map<UUID, Double> EXPLOSION_BONUS = new ConcurrentHashMap<>();
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onQuit(PlayerQuitEvent event) {
+        EXPLOSION_BONUS.remove(event.getPlayer().getUniqueId());
+    }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onMagicExplosionDamage(EntityDamageByEntityEvent event) {

@@ -26,22 +26,25 @@ import org.bukkit.event.player.*;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static me.nagasonic.alkatraz.util.Utils.notAir;
 
 public class CastEventListener implements Listener {
     private static final Map<String, Integer> level = new HashMap<>();
     private static final Map<String, Float> exp = new HashMap<>();
-    private static final Map<String, Integer> changedExp = new HashMap<>();
+    private static final Map<UUID, Integer> changedExp = new ConcurrentHashMap<>();
 
-    private static final Set<UUID> spellDamageTargets = new HashSet<>();
+    private static final Set<UUID> spellDamageTargets = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
     public static void markSpellDamage(LivingEntity target) {
+        sweepSpellDamageTargets();
         spellDamageTargets.add(target.getUniqueId());
     }
 
@@ -222,13 +225,8 @@ public class CastEventListener implements Listener {
 
     @EventHandler
     private void onExp(PlayerExpChangeEvent e) {
-        Player p = e.getPlayer();
-        if (!changedExp.containsKey(p.getUniqueId().toString())){
-            changedExp.put(p.getUniqueId().toString(), e.getAmount());
-        }else {
-            int current = changedExp.get(p.getUniqueId().toString());
-            changedExp.replace(p.getUniqueId().toString(), current + e.getAmount());
-        }
+        UUID uuid = e.getPlayer().getUniqueId();
+        changedExp.merge(uuid, e.getAmount(), Integer::sum);
     }
 
     // ============================
@@ -247,6 +245,9 @@ public class CastEventListener implements Listener {
         MagicProfile data = ProfileManager.getProfile(e.getPlayer().getUniqueId(), MagicProfile.class);
         if (data.isCasting()){ data.setCasting(false); }
         data.setCastingSpell(null);
+        changedExp.remove(p.getUniqueId());
+        level.remove(p.getUniqueId().toString());
+        exp.remove(p.getUniqueId().toString());
     }
 
     @EventHandler
@@ -440,6 +441,24 @@ public class CastEventListener implements Listener {
     public static void resetExperience(Player p){
         level.remove(p.getUniqueId().toString());
         exp.remove(p.getUniqueId().toString());
+        changedExp.remove(p.getUniqueId());
+    }
+
+    /**
+     * Drops spell-damage marks whose entity no longer exists. A spell that lands on an
+     * entity that never takes damage (a blocked hit, a dead target) would otherwise leave
+     * the mark behind forever.
+     */
+    private static void sweepSpellDamageTargets() {
+        if (spellDamageTargets.isEmpty()) {
+            return;
+        }
+        Iterator<UUID> iterator = spellDamageTargets.iterator();
+        while (iterator.hasNext()) {
+            if (Bukkit.getEntity(iterator.next()) == null) {
+                iterator.remove();
+            }
+        }
     }
 
     public static void switchTo(Player p, ItemStack wand) {

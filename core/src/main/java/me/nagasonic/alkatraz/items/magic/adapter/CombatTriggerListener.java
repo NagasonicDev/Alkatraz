@@ -178,6 +178,10 @@ public final class CombatTriggerListener implements Listener {
         if (!(event.getEntity() instanceof LivingEntity victim)) return;
 
         MagicItemInstance weapon = TriggerDispatch.resolveProjectileWeapon(projectile);
+        long now = System.currentTimeMillis();
+        // Prune expired records as we go: a victim that never dies would otherwise
+        // leave its entry behind indefinitely.
+        rangedKills.cleanup(now);
         rangedKills.record(victim.getUniqueId(), shooter.getUniqueId(), weapon);
     }
 

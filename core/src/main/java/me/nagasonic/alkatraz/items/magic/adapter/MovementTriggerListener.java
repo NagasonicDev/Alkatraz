@@ -14,6 +14,7 @@ import org.bukkit.event.player.PlayerBedLeaveEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPortalEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
 import org.bukkit.event.player.PlayerToggleSprintEvent;
@@ -106,6 +107,11 @@ public final class MovementTriggerListener implements Listener {
     public void onBedLeave(PlayerBedLeaveEvent event) {
         Player player = event.getPlayer();
         TriggerDispatch.dispatch(player, "on_bed_leave");
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onQuit(PlayerQuitEvent event) {
+        tracker.remove(event.getPlayer().getUniqueId());
     }
 
     /**

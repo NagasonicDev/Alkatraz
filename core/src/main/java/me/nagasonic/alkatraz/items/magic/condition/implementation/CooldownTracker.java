@@ -24,7 +24,18 @@ public final class CooldownTracker {
             return false;
         }
         Long endsAt = byItem.get(itemKey);
-        return endsAt != null && nowMillis < endsAt;
+        if (endsAt == null) {
+            return false;
+        }
+        if (nowMillis < endsAt) {
+            return true;
+        }
+        // Expired entries are dead weight; drop them and the actor map if it empties.
+        byItem.remove(itemKey, endsAt);
+        if (byItem.isEmpty()) {
+            COOLDOWN_ENDS.remove(actorId, byItem);
+        }
+        return false;
     }
 
     public static void markCooldown(UUID actorId, String itemKey, long endMillis) {
@@ -35,6 +46,13 @@ public final class CooldownTracker {
         Map<String, Long> byItem = COOLDOWN_ENDS.get(actorId);
         if (byItem != null) {
             byItem.remove(itemKey);
+        }
+    }
+
+    /** Drops every cooldown tracked for a single actor. */
+    public static void clear(UUID actorId) {
+        if (actorId != null) {
+            COOLDOWN_ENDS.remove(actorId);
         }
     }
 
