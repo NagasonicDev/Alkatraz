@@ -224,11 +224,9 @@ public class DarkTendrils extends AttackSpell implements Listener {
             Vector forward = playerLoc.getDirection().normalize().multiply(1.5);
             List<Location> magicCirclePoints = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 3, 0);
 
-            for (int i = 0; i < 100; i++) {
-                for (Location loc : magicCirclePoints) {
-                    ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, 
-                            new Particle.DustOptions(Color.fromRGB(75, 0, 130), 0.4F));
-                }
+            Particle.DustOptions options = new Particle.DustOptions(Color.fromRGB(75, 0, 130), 0.4F);
+            for (Location loc : magicCirclePoints) {
+                ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, options);
             }
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());
         return d;
@@ -373,7 +371,7 @@ public class DarkTendrils extends AttackSpell implements Listener {
             }
 
             // Check for nearby targets if not locked on
-            if (target == null || target.isDead() || !target.isValid()) {
+            if ((target == null || target.isDead() || !target.isValid()) && lifetime % 10 == 0) {
                 findNearestTarget();
             }
 
@@ -420,10 +418,13 @@ public class DarkTendrils extends AttackSpell implements Listener {
         private void moveTowardTarget() {
             Vector direction = Utils.safeNormalize(target.getEyeLocation()
                     .toVector()
-                    .subtract(tendril.getLocation().toVector()))
-                    .multiply(lockSpeed);
+                    .subtract(tendril.getLocation().toVector()));
 
-            tendril.teleport(tendril.getLocation().add(direction));
+            if (lifetime % 3 == 0) {
+                tendril.teleport(tendril.getLocation().add(direction.clone().multiply(lockSpeed * 3)));
+            } else {
+                tendril.setVelocity(direction.multiply(lockSpeed));
+            }
 
             // Check if close enough to hit
             if (tendril.getLocation().distance(target.getLocation()) < 2) {
