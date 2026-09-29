@@ -46,7 +46,7 @@ public class StatsMenu extends Menu {
 
     @Override
     protected void build() {
-        MagicProfile profile = ProfileManager.getProfile(target, MagicProfile.class);
+        MagicProfile profile = ProfileManager.getOrLoadProfile(target.getUniqueId(), MagicProfile.class);
 
         fillAll();
 
@@ -193,7 +193,7 @@ public class StatsMenu extends Menu {
             return true;
         }
 
-        MagicProfile profile = ProfileManager.getProfile(target, MagicProfile.class);
+        MagicProfile profile = ProfileManager.getOrLoadProfile(target.getUniqueId(), MagicProfile.class);
         String action = getStringData(clicked, "action");
 
         if ("confirm_reset".equals(action)) {

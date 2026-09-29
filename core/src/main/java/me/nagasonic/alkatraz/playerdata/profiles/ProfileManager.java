@@ -2,6 +2,7 @@ package me.nagasonic.alkatraz.playerdata.profiles;
 
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.api.playerdata.Profile;
+import me.nagasonic.alkatraz.config.VerbosityLevel;
 import me.nagasonic.alkatraz.events.SpellDiscoveredEvent;
 import me.nagasonic.alkatraz.items.magic.equipment.EquipmentStorage;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
@@ -64,17 +65,24 @@ public class ProfileManager implements Listener {
      * Gets a profile for a player, loading from disk if needed
      * @param player The player
      * @param profileClass The profile class type
-     * @return The profile (never null)
+     * @return The cached profile, or null if the player is not online
      */
     public static <T extends Profile> T getProfile(OfflinePlayer player, Class<T> profileClass) {
         return getProfile(player.getUniqueId(), profileClass);
     }
 
     /**
-     * Gets a profile for a player by UUID, loading from disk if needed
+     * Gets a profile for a player by UUID, loading from disk if needed.
+     *
+     * <p>Never performs disk I/O for a player that is not online. Hot call
+     * sites (movement, combat, spell casts) can query entities that have no
+     * loaded profile, and a cache miss there must not trigger a blocking YAML
+     * parse. Use {@link #getOrLoadProfile(UUID, Class)} on admin/command paths
+     * that legitimately target offline players.
+     *
      * @param uuid The player UUID
      * @param profileClass The profile class type
-     * @return The profile (never null)
+     * @return The cached profile, or null if the player is not online
      */
     public static <T extends Profile> T getProfile(UUID uuid, Class<T> profileClass) {
         ensureInitialized();
@@ -85,11 +93,49 @@ public class ProfileManager implements Listener {
             return profile;
         }
         
+        if (Bukkit.getPlayer(uuid) == null) {
+            if (Alkatraz.isLoggable(VerbosityLevel.DEBUG)) {
+                Alkatraz.logDebug("Profile cache miss for non-online player " + uuid
+                        + " (" + profileClass.getSimpleName() + ") - skipped disk load");
+            }
+            return null;
+        }
+        
         // Load from disk
-        Alkatraz.logHigh("Loading profile " + profileClass.getSimpleName() + " for " + uuid);
+        if (Alkatraz.isLoggable(VerbosityLevel.HIGH)) {
+            Alkatraz.logHigh("Loading profile " + profileClass.getSimpleName() + " for " + uuid);
+        }
         profile = ProfilePersistence.loadProfile(uuid, profileClass);
         cache.cacheProfile(uuid, profile);
         
+        return profile;
+    }
+
+    /**
+     * Gets a profile for a player by UUID, falling back to a blocking disk load
+     * even when the player is offline.
+     *
+     * <p>Intended for admin/command paths that operate on offline players. Do
+     * not call this from per-tick or per-event hot paths.
+     *
+     * @param uuid The player UUID
+     * @param profileClass The profile class type
+     * @return The profile (never null)
+     */
+    public static <T extends Profile> T getOrLoadProfile(UUID uuid, Class<T> profileClass) {
+        ensureInitialized();
+
+        T profile = cache.getProfile(uuid, profileClass);
+        if (profile != null) {
+            return profile;
+        }
+
+        if (Alkatraz.isLoggable(VerbosityLevel.HIGH)) {
+            Alkatraz.logHigh("Loading profile " + profileClass.getSimpleName() + " for " + uuid);
+        }
+        profile = ProfilePersistence.loadProfile(uuid, profileClass);
+        cache.cacheProfile(uuid, profile);
+
         return profile;
     }
 
@@ -113,7 +159,10 @@ public class ProfileManager implements Listener {
         Map<Class<? extends Profile>, Profile> profiles = new HashMap<>();
         
         for (Class<? extends Profile> profileClass : ProfileRegistry.getRegisteredProfiles()) {
-            profiles.put(profileClass, getProfile(uuid, profileClass));
+            Profile profile = getProfile(uuid, profileClass);
+            if (profile != null) {
+                profiles.put(profileClass, profile);
+            }
         }
         
         return profiles;
@@ -170,6 +219,13 @@ public class ProfileManager implements Listener {
         for (Class<? extends Profile> profileClass : ProfileRegistry.getRegisteredProfiles()) {
             Profile profile = ProfilePersistence.loadProfile(uuid, profileClass);
             cache.cacheProfile(uuid, profile);
+            startProfileTasks(profile);
+        }
+    }
+
+    private static void startProfileTasks(Profile profile) {
+        if (profile instanceof MagicProfile magicProfile) {
+            magicProfile.addManaPerSecond();
         }
     }
 
@@ -232,7 +288,11 @@ public class ProfileManager implements Listener {
     public static void reloadPlayer(UUID uuid) {
         ensureInitialized();
         
-        // Remove from cache
+        // Remove from cache (cancelling any task owned by the outgoing instance)
+        MagicProfile existing = cache.getProfile(uuid, MagicProfile.class);
+        if (existing != null) {
+            existing.cancelManaRegenTask();
+        }
         cache.removePlayer(uuid);
         
         // Load fresh from disk
@@ -296,7 +356,7 @@ public class ProfileManager implements Listener {
 
         // Grant starter spells to new players
         MagicProfile magicProfile = getProfile(player.getUniqueId(), MagicProfile.class);
-        if (magicProfile.getAllDiscoveredSpellTypes().isEmpty()) {
+        if (magicProfile != null && magicProfile.getAllDiscoveredSpellTypes().isEmpty()) {
             Spell magicMissile = SpellRegistry.getSpell("magic_missile");
             if (magicMissile != null) {
                 magicProfile.setDiscoveredSpell(magicMissile, true);
@@ -313,8 +373,22 @@ public class ProfileManager implements Listener {
 
         try {
             MagicProfile magicProfile = getProfile(player.getUniqueId(), MagicProfile.class);
-            magicProfile.cancelManaRegenTask();
+            if (magicProfile != null) {
+                magicProfile.cancelManaRegenTask();
+            }
+        } catch (Exception e) {
+            Alkatraz.getInstance().getLogger().log(Level.SEVERE, 
+                "Failed to cancel mana regen task for player: " + player.getName(), e);
+        }
+
+        try {
             EquipmentStorage.unload(player);
+        } catch (Exception e) {
+            Alkatraz.getInstance().getLogger().log(Level.SEVERE, 
+                "Failed to unload equipment for player: " + player.getName(), e);
+        }
+
+        try {
             unloadPlayer(player);
             Alkatraz.getInstance().getLogger().log(Level.FINE, 
                 "Saved and unloaded profiles for player: " + player.getName());
