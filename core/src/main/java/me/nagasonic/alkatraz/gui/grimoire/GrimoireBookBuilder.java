@@ -17,6 +17,7 @@ import org.bukkit.inventory.meta.BookMeta;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class GrimoireBookBuilder {
 
@@ -43,16 +44,23 @@ public class GrimoireBookBuilder {
         if (meta == null || !meta.hasPages()) return;
 
         List<String> rawPages = meta.getPages();
+        boolean changed = false;
         for (int i = 0; i < rawPages.size(); i++) {
             String page = rawPages.get(i);
             try {
                 JsonElement element = JsonParser.parseString(page);
                 addShadowFalse(element);
-                meta.setPage(i, element.toString());
+                String updated = element.toString();
+                if (!updated.equals(page)) {
+                    meta.setPage(i, updated);
+                    changed = true;
+                }
             } catch (Exception ignored) {
             }
         }
-        book.setItemMeta(meta);
+        if (changed) {
+            book.setItemMeta(meta);
+        }
     }
 
     private static void addShadowFalse(JsonElement element) {
@@ -138,10 +146,13 @@ public class GrimoireBookBuilder {
         return ChatColor.WHITE;
     }
 
+    private static final Pattern AMPERSAND_COLOR = Pattern.compile("&[0-9a-fk-orA-FK-OR]");
+    private static final Pattern SECTION_COLOR = Pattern.compile("\u00A7[0-9a-fk-orA-FK-OR]");
+    private static final Pattern HEX_COLOR = Pattern.compile("#[0-9a-fA-F]{6}");
+
     private static String stripColor(String text) {
         if (text == null) return "";
-        return text.replaceAll("&[0-9a-fk-orA-FK-OR]", "")
-                   .replaceAll("\u00A7[0-9a-fk-orA-FK-OR]", "")
-                   .replaceAll("#[0-9a-fA-F]{6}", "");
+        return HEX_COLOR.matcher(SECTION_COLOR.matcher(AMPERSAND_COLOR.matcher(text).replaceAll(""))
+                .replaceAll("")).replaceAll("");
     }
 }
