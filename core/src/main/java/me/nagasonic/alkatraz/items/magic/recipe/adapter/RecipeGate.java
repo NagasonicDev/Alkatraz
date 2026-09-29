@@ -10,8 +10,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class RecipeGate {
+
+    /**
+     * Permission requirements are immutable value objects, so one instance per
+     * permission string is reused instead of rebuilding a HashMap, a YAML section
+     * and a fresh requirement on every unmet-permission craft check.
+     */
+    private static final Map<String, Requirement> PERMISSION_CACHE = new ConcurrentHashMap<>();
 
     private RecipeGate() {}
 
@@ -48,9 +56,11 @@ public final class RecipeGate {
     }
 
     private static Requirement permissionRequirement(String permission) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("type", "permission");
-        map.put("permission", permission);
-        return RequirementFactory.create(null, RequirementFactory.toSection(map));
+        return PERMISSION_CACHE.computeIfAbsent(permission, key -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("type", "permission");
+            map.put("permission", key);
+            return RequirementFactory.create(null, RequirementFactory.toSection(map));
+        });
     }
 }

@@ -13,6 +13,11 @@ import java.util.*;
 
 public class SetBonusService {
 
+    private static final String[] SUFFIXES = {
+            "_necklace", "_bracelet", "_leggings", "_pendant",
+            "_ring", "_robe", "_boots", "_hat"
+    };
+
     private static SetBonusService instance;
     private Map<String, SetBonusConfig.SetBonusData> setBonuses;
     private boolean loaded = false;
@@ -74,15 +79,9 @@ public class SetBonusService {
     }
 
     public static String extractSetName(String itemKey) {
-        String[] parts = itemKey.split(":");
-        String namespaceAware = parts.length > 1 ? parts[1] : parts[0];
-        String itemName = namespaceAware;
-        for (String suffix : new String[]{"_necklace", "_bracelet", "_leggings", "_pendant"}) {
-            if (itemName.endsWith(suffix)) {
-                return itemName.substring(0, itemName.length() - suffix.length());
-            }
-        }
-        for (String suffix : new String[]{"_ring", "_robe", "_boots", "_hat"}) {
+        int separator = itemKey.indexOf(':');
+        String itemName = separator >= 0 ? itemKey.substring(separator + 1) : itemKey;
+        for (String suffix : SUFFIXES) {
             if (itemName.endsWith(suffix)) {
                 return itemName.substring(0, itemName.length() - suffix.length());
             }
