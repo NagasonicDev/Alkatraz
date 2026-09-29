@@ -56,9 +56,13 @@ public class EditorChatHandler implements Listener {
         player.sendMessage(lang().get("editor.chat_prompt"));
     }
 
+    public static void clear(UUID uuid) {
+        awaitingInput.remove(uuid);
+        callbacks.remove(uuid);
+    }
+
     @EventHandler
-    public void onChat(AsyncPlayerChatEvent event) {
-        Player player = event.getPlayer();
+    public void onChat(AsyncPlayerChatEvent event) {        Player player = event.getPlayer();
         if (!awaitingInput.contains(player.getUniqueId())) return;
         event.setCancelled(true);
         BiConsumer<Player, String> callback = callbacks.remove(player.getUniqueId());

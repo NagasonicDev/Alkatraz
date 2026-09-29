@@ -31,6 +31,10 @@ public class RecipeChatHandler implements Listener {
         player.sendMessage(lang().get("editor.chat_prompt"));
     }
 
+    public static void clear(UUID uuid) {
+        callbacks.remove(uuid);
+    }
+
     @EventHandler
     public void onChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
