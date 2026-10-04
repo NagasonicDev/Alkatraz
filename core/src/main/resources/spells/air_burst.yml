@@ -1,8 +1,8 @@
 ﻿id: 'air_burst'
 display_name: '&7Air Burst'
 description:
-  - '&7A burst of air that launches enemies backward.'
-  - '&7Doesn''t do any damage.'
+  - '&7A burst of air that damages and'
+  - '&7launches enemies backward.'
 # WHETHER THE PLUGIN SHOULD LOAD THE SPELL. DEFAULT: TRUE
 enabled: true
 
@@ -17,7 +17,7 @@ level: 1
 required_focus: 20
 
 # COOLDOWN BEFORE CASTING AGAIN
-cooldown: 3
+cooldown: 4
 
 # BASE CAST TIME (SECONDS)
 cast_time: 0.5
@@ -25,7 +25,13 @@ cast_time: 0.5
 # MANA COST
 mana_cost: 15
 
-power: 1.5
+# BASE DAMAGE PER BLAST POINT. air_burst now deals damage as well as shoving
+# targets away from the caster.
+power: 3.0
+
+# WHAT THE SPELL IS JUDGED ON. AIR's damage is a by-product of moving something,
+# so BURST is its damage role - see spec section 5.2.
+role: 'BURST'
 
 # MAXIMUM MASTERY ACHIEVABLE. NOT RECOMMENDED TO CHANGE
 maximum_mastery: 100

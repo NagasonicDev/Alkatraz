@@ -14,7 +14,7 @@ code: 'RLLRS'
 
 # THE MAGIC CIRCLE REQUIRED TO CAST
 level: 2
-required_focus: 30
+required_focus: 40
 
 # COOLDOWN BEFORE CASTING AGAIN
 cooldown: 5
@@ -23,10 +23,14 @@ cooldown: 5
 cast_time: 0.25
 
 # MANA COST
-mana_cost: 35
+mana_cost: 24
 
 # MAXIMUM MASTERY ACHIEVABLE. NOT RECOMMENDED TO CHANGE
 maximum_mastery: 500
+
+# WHAT THE SPELL IS JUDGED ON. Swift is a mobility dash and correctly extends bare
+# Spell, so it carries NO power key at all.
+role: 'UTILITY'
 
 #THE COLOR OF THE SPELL MASTERY BOSSBAR. OPTIONS ARE: RED, BLUE, YELLOW, PINK, PURPLE, WHITE AND GREEN
 mastery_bar_color: 'WHITE'

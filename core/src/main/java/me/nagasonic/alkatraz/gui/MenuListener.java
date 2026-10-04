@@ -1,5 +1,6 @@
 package me.nagasonic.alkatraz.gui;
 
+import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.gui.grimoire.GrimoireLecternState;
 import me.nagasonic.alkatraz.gui.implementation.EquipmentMenu;
 import me.nagasonic.alkatraz.gui.implementation.editor.EditorChatHandler;
@@ -7,6 +8,8 @@ import me.nagasonic.alkatraz.gui.implementation.editor.EditorSession;
 import me.nagasonic.alkatraz.gui.implementation.engraving.EngravingSession;
 import me.nagasonic.alkatraz.gui.implementation.recipe.RecipeChatHandler;
 import me.nagasonic.alkatraz.gui.implementation.recipe.RecipeEditorSession;
+import me.nagasonic.alkatraz.gui.implementation.recipe.RecipeListMenu;
+import me.nagasonic.alkatraz.gui.implementation.research.ResearchGraphMenu;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -15,6 +18,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -150,5 +154,22 @@ public class MenuListener implements Listener {
         RecipeEditorSession.remove(uuid);
         EditorChatHandler.clear(uuid);
         RecipeChatHandler.clear(uuid);
+        RecipeListMenu.clearUnlockCache(uuid);
+        GrimoireLecternState.remove(event.getPlayer());
+    }
+
+    @EventHandler
+    public void onPluginDisable(PluginDisableEvent event) {
+        if (!event.getPlugin().equals(Alkatraz.getInstance())) return;
+        Menu.clearActiveMenus();
+        EquipmentMenu.clearAllPending();
+        EditorSession.clearAll();
+        EngravingSession.clearAll();
+        RecipeEditorSession.clearAll();
+        EditorChatHandler.clearAll();
+        RecipeChatHandler.clearAll();
+        RecipeListMenu.clearAllUnlockCaches();
+        GrimoireLecternState.clearAll();
+        ResearchGraphMenu.clearCaches();
     }
 }

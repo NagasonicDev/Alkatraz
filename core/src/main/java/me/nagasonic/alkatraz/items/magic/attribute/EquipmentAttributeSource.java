@@ -47,9 +47,9 @@ public final class EquipmentAttributeSource implements AttributeSource {
         List<AttributeContribution> contributions = new ArrayList<>();
         if (entity == null) return contributions;
         if (!(entity instanceof Player player)) {
-            for (NamespacedKey attr : MagicItemRegistries.ATTRIBUTE_TYPES.keySet()) {
-                MagicProfile profile = ProfileManager.getProfile(entity.getUniqueId(), MagicProfile.class);
-                if (profile != null) {
+            MagicProfile profile = ProfileManager.getProfile(entity.getUniqueId(), MagicProfile.class);
+            if (profile != null) {
+                for (NamespacedKey attr : MagicItemRegistries.ATTRIBUTE_TYPES.keySet()) {
                     double value = getAttributeFromProfile(profile, attr);
                     contributions.add(new AttributeContribution(attr, value, AttributeContribution.AttributeOperation.ADD, 
                             AttributeContribution.AttributeSourceType.BASE, 0));

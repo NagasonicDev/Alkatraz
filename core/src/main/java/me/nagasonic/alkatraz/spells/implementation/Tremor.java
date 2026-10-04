@@ -3,7 +3,6 @@ package me.nagasonic.alkatraz.spells.implementation;
 import de.tr7zw.changeme.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
-import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.api.dom.Ground;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.lang.LangManager;
@@ -15,9 +14,12 @@ import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
+import me.nagasonic.alkatraz.spells.vfx.CastCircle;
+import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
+import me.nagasonic.alkatraz.spells.util.TerrainEditor;
 import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
@@ -29,7 +31,9 @@ import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityDropItemEvent;
+import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
@@ -42,6 +46,31 @@ import java.util.UUID;
 public class Tremor extends AttackSpell implements Listener {
 
     private static final Map<UUID, Map<Location, Material>> recoverData = new java.util.concurrent.ConcurrentHashMap<>();
+
+    /**
+     * Who raised each falling block. The restore has to be re-gated on the caster,
+     * and a FallingBlock is not a LivingEntity, so the caster is recorded alongside
+     * the originals rather than read off the event.
+     */
+    private static final Map<UUID, LivingEntity> recoverCasters = new java.util.concurrent.ConcurrentHashMap<>();
+
+    /**
+     * The signature {@code ground} tell: WIDE, LOW and multi-lane, advancing along the cast
+     * direction as the lanes collapse. {@code ground} takes lanes, width and yaw, so tremor uses
+     * many lanes across a broad width and earth_spike uses few across a tight one - the same
+     * builder, two clearly different pictures.
+     *
+     * <p>{@code TREMOR_LANES} matches the five gameplay lanes so the dust falls exactly where the
+     * damage does.
+     */
+    private static final int TREMOR_LANES = 5;
+    private static final double TREMOR_REACH_EXTRA = 3.0;
+    private static final double TREMOR_DUST_LIFT = 0.05;
+
+    /** The mob path's fixed lane count; its lanes are one block apart, unlike the option width. */
+    private static final int TREMOR_MOB_STEPS = 11;
+    private static final double TREMOR_MOB_LANE_WIDTH = 1.0;
+
     private static LangManager lang() {
         return Alkatraz.getLangManager();
     }
@@ -95,6 +124,7 @@ public class Tremor extends AttackSpell implements Listener {
             new BukkitRunnable(){
                 private int counter = 0;
                 private List<Location> previous = new ArrayList<>(locations);
+                private final double reach = maxSteps + 3;
 
                 @Override
                 public void run() {
@@ -103,6 +133,7 @@ public class Tremor extends AttackSpell implements Listener {
                         return;
                     }
                     List<Location> toAdd = new ArrayList<>();
+                    List<Location> dead = new ArrayList<>();
                     if (previous.isEmpty()) {
                         cancel();
                         return;
@@ -134,7 +165,7 @@ public class Tremor extends AttackSpell implements Listener {
                                 BlockData data = Bukkit.createBlockData(loc.getBlock().getType());
                                 if (Protection.blockEdit(p, loc)) {
                                     FallingBlock b = loc.getWorld().spawnFallingBlock(loc.add(0, 0.5, 0), data);
-                                    recoverData.put(b.getUniqueId(), originals);
+                                    registerRecoverData(b.getUniqueId(), originals, p);
                                     b.setHurtEntities(false);
                                     b.setVelocity(new Vector(0, 0.5, 0));
                                     NBT.modifyPersistentData(b, nbt -> {
@@ -146,17 +177,19 @@ public class Tremor extends AttackSpell implements Listener {
                             for (Location l : locs){
                                 ParticleCaster.spawn(p, l.getWorld(), Utils.EXPLOSION, l, 1);
                             }
-                            for (LivingEntity entity : me.nagasonic.alkatraz.util.Utils.getNearbyLivingEntities(loc, 2)) {
-                                if (entity != p && !props.hasHit(entity)) {
-                                    entity.setVelocity(new Vector(0, 1, 0));
-                                    SpellDamageUtil.damageWithSpell(entity, getPower(p, entity, props.getRemainingPower()), p, wand, Tremor.this);
-                                    props.hit(entity);
-                                }
-                            }
 
                             toAdd.add(loc);
                         }else{
-                            previous.remove(prev);
+                            dead.add(prev);
+                        }
+                    }
+                    previous.removeAll(dead);
+                    drawTremorLanes(p, base, dir, laneWidth, maxSteps, counter);
+                    for (LivingEntity entity : me.nagasonic.alkatraz.util.Utils.getNearbyLivingEntities(base, reach, 20, reach)) {
+                        if (entity != p && !props.hasHit(entity) && nearAnyLane(entity, toAdd)) {
+                            entity.setVelocity(new Vector(0, 1, 0));
+                            SpellDamageUtil.damageWithSpell(entity, getPower(p, entity, props.getRemainingPower()), p, wand, Tremor.this);
+                            props.hit(entity);
                         }
                     }
                     previous.clear();
@@ -174,9 +207,11 @@ public class Tremor extends AttackSpell implements Listener {
     public void mobCastAction(Mob caster, ItemStack wand) {
         if (!caster.isDead() && caster.getTarget() != null){
             double wandp = getWandPowerOrDefault(wand);
-            double power = getPower(caster, getBasePower())
-                    * wandp;
-            AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster), power, AttackType.PHYSICAL);
+            // RAW base power into AttackProperties - getPower is applied once per
+            // damage instance, in the lane loop. It used to be pre-scaled here too,
+            // which squared the option modifiers and the affinity term.
+            AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster),
+                    getBasePower() * wandp, AttackType.PHYSICAL);
             final Location base = caster.getLocation().subtract(0, 0.5, 0);
             Vector dir = Utils.safeNormalize(caster.getTarget().getLocation().toVector().subtract(caster.getLocation().toVector()));
             Vector perp = dir.clone().rotateAroundY(90);
@@ -189,6 +224,7 @@ public class Tremor extends AttackSpell implements Listener {
             new BukkitRunnable(){
                 private int counter = 0;
                 private List<Location> previous = new ArrayList<>(locations);
+                private final double reach = 14.0;
 
                 @Override
                 public void run() {
@@ -197,6 +233,7 @@ public class Tremor extends AttackSpell implements Listener {
                         return;
                     }
                     List<Location> toAdd = new ArrayList<>();
+                    List<Location> dead = new ArrayList<>();
                     if (previous.isEmpty()) {
                         cancel();
                         return;
@@ -228,7 +265,7 @@ public class Tremor extends AttackSpell implements Listener {
                                 BlockData data = Bukkit.createBlockData(loc.getBlock().getType());
                                 if (Protection.blockEdit(caster, loc)) {
                                     FallingBlock b = loc.getWorld().spawnFallingBlock(loc.add(0, 0.5, 0), data);
-                                    recoverData.put(b.getUniqueId(), originals);
+                                    registerRecoverData(b.getUniqueId(), originals, caster);
                                     b.setHurtEntities(false);
                                     b.setVelocity(new Vector(0, 0.5, 0));
                                     NBT.modifyPersistentData(b, nbt -> {
@@ -240,17 +277,19 @@ public class Tremor extends AttackSpell implements Listener {
                             for (Location l : locs){
                                 ParticleCaster.spawn(caster, l.getWorld(), Utils.EXPLOSION, l, 1);
                             }
-                            for (LivingEntity entity : me.nagasonic.alkatraz.util.Utils.getNearbyLivingEntities(loc, 2)) {
-                                if (entity != caster && !props.hasHit(entity)) {
-                                    entity.setVelocity(new Vector(0, 1, 0));
-                                    SpellDamageUtil.damageWithSpell(entity, getPower(caster, entity, props.getRemainingPower()), caster, wand, Tremor.this);
-                                    props.hit(entity);
-                                }
-                            }
 
                             toAdd.add(loc);
                         }else{
-                            previous.remove(prev);
+                            dead.add(prev);
+                        }
+                    }
+                    previous.removeAll(dead);
+                    drawTremorLanes(caster, base, dir, TREMOR_MOB_LANE_WIDTH, TREMOR_MOB_STEPS, counter);
+                    for (LivingEntity entity : me.nagasonic.alkatraz.util.Utils.getNearbyLivingEntities(base, reach, 20, reach)) {
+                        if (entity != caster && !props.hasHit(entity) && nearAnyLane(entity, toAdd)) {
+                            entity.setVelocity(new Vector(0, 1, 0));
+                            SpellDamageUtil.damageWithSpell(entity, getPower(caster, entity, props.getRemainingPower()), caster, wand, Tremor.this);
+                            props.hit(entity);
                         }
                     }
                     previous.clear();
@@ -266,23 +305,64 @@ public class Tremor extends AttackSpell implements Listener {
 
     @Override
     public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
-        int d = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
-            if (e.isCancelled()) return;
-            Location playerLoc = caster.getEyeLocation(); // Player eye location
-            float yaw = playerLoc.getYaw();
-            float pitch = playerLoc.getPitch();
+        return CastCircle.start(this, caster, e);
+    }
 
-            // Calculate offset vector pointing forward relative to player orientation
-            Vector forward = playerLoc.getDirection().normalize().multiply(1.5); // 1.5 blocks in front
+    /**
+     * Draws tremor's signature {@code ground} tell: a wide, low, multi-lane slab of earth dust
+     * advancing down the cast direction, one block of reveal per lane step.
+     *
+     * <p>Visual only. The slab is flat at the caster's foot level - the lane blocks themselves
+     * resolve their own height with {@code findTopSolid}, and the dust is the tell on the ground
+     * the caster is standing on rather than a per-lane surface.
+     *
+     * @param caster    the entity casting, used for per-player density falloff
+     * @param base      the caster's ground point
+     * @param direction the lane advance direction; only its X/Z yaw is used
+     * @param laneWidth the spacing between gameplay lanes, which sets the slab's total width
+     * @param maxSteps  how many lane steps this cast runs
+     * @param step      the step this tick
+     */
+    private void drawTremorLanes(LivingEntity caster, Location base, Vector direction,
+                                 double laneWidth, int maxSteps, int step) {
+        double length = Math.max(1.0, maxSteps + TREMOR_REACH_EXTRA);
+        // The outermost gameplay lane sits at 2 * laneWidth either side of the centre lane.
+        double width = 4.0 * Math.max(0.1, laneWidth);
+        int stations = Math.max(1, (int) Math.ceil(length));
+        double advance = Math.min(1.0, (double) step / Math.max(1, maxSteps));
+        float yaw = (float) Math.toDegrees(Math.atan2(direction.getZ(), direction.getX()));
+        Location ground = base.clone().add(0.0, TREMOR_DUST_LIFT, 0.0);
+        SpellVfx.ground(Tremor.this, caster, ground, length, width, stations, TREMOR_LANES, yaw, advance);
+    }
 
-            // Call magicCircle with proper center, yaw, pitch and offset
-            List<Location> magicCirclePoints = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 3, 0);
-            Particle.DustOptions options = new Particle.DustOptions(Color.fromRGB(78, 47, 0), 0.4F);
-            for (Location loc : magicCirclePoints) {
-                ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 10, options);
-            }
-        }, 0L, (Long) Configs.CIRCLE_TICKS.get());
-        return d;
+    private static boolean nearAnyLane(LivingEntity entity, List<Location> lanes) {
+        Location entityLoc = entity.getLocation();
+        for (Location lane : lanes) {
+            if (entityLoc.distanceSquared(lane) <= 4.0) return true;
+        }
+        return false;
+    }
+
+    private void registerRecoverData(UUID entityUUID, Map<Location, Material> originals, LivingEntity caster) {
+        recoverData.put(entityUUID, originals);
+        recoverCasters.put(entityUUID, caster);
+        Bukkit.getScheduler().runTaskLater(Alkatraz.getInstance(), () -> {
+            recoverData.remove(entityUUID);
+            recoverCasters.remove(entityUUID);
+        }, 40L);
+    }
+
+    @EventHandler
+    private void onEntityDeath(EntityDeathEvent e) {
+        recoverData.remove(e.getEntity().getUniqueId());
+        recoverCasters.remove(e.getEntity().getUniqueId());
+    }
+
+    @EventHandler
+    private void onPluginDisable(PluginDisableEvent e) {
+        if (e.getPlugin() != Alkatraz.getInstance()) return;
+        recoverData.clear();
+        recoverCasters.clear();
     }
 
     @Override
@@ -308,18 +388,21 @@ public class Tremor extends AttackSpell implements Listener {
                 b.remove();
                 if (blockDamage && recoverTime > 0) {
                     Map<Location, Material> originals = recoverData.remove(entityUUID);
-                    if (originals != null && !originals.isEmpty()) {
+                    LivingEntity caster = recoverCasters.remove(entityUUID);
+                    if (originals != null && !originals.isEmpty() && caster != null) {
                         new BukkitRunnable() {
                             @Override
                             public void run() {
-                                for (Map.Entry<Location, Material> entry : originals.entrySet()) {
-                                    entry.getKey().getBlock().setType(entry.getValue(), false);
-                                }
+                                // WAS an unconditional setType(original, false) loop with
+                                // no Protection re-check - it could rewrite a region the
+                                // caster lost build permission in after casting.
+                                TerrainEditor.restoreAll(caster, new TerrainEditor.RestoreTicket(originals));
                             }
                         }.runTaskLater(Alkatraz.getInstance(), recoverTime * 20);
                     }
                 } else {
                     recoverData.remove(entityUUID);
+                    recoverCasters.remove(entityUUID);
                 }
             }
         }

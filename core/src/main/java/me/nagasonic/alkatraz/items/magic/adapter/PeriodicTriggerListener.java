@@ -3,6 +3,7 @@ package me.nagasonic.alkatraz.items.magic.adapter;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
 import me.nagasonic.alkatraz.items.magic.trigger.TriggerDispatch;
+import me.nagasonic.alkatraz.items.magic.trigger.TriggerPipeline;
 import me.nagasonic.alkatraz.items.magic.trigger.WorldTimeTracker;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
@@ -28,6 +29,10 @@ public final class PeriodicTriggerListener {
      */
     private static final Map<String, NamespacedKey> KEY_CACHE = new ConcurrentHashMap<>();
 
+    private static final NamespacedKey ON_INTERVAL = MagicKeys.alkatraz("on_interval");
+    private static final NamespacedKey ON_DAY = MagicKeys.alkatraz("on_day");
+    private static final NamespacedKey ON_NIGHT = MagicKeys.alkatraz("on_night");
+
     private final WorldTimeTracker timeTracker = new WorldTimeTracker();
 
     private static String triggerKey(String path) {
@@ -45,9 +50,17 @@ public final class PeriodicTriggerListener {
     }
 
     void tick() {
+        boolean intervalBound = TriggerPipeline.isBound(ON_INTERVAL);
+        boolean dayBound = TriggerPipeline.isBound(ON_DAY);
+        boolean nightBound = TriggerPipeline.isBound(ON_NIGHT);
+        if (!intervalBound && !dayBound && !nightBound) return;
+
+        String interval = triggerKey("on_interval");
         for (World world : Bukkit.getWorlds()) {
             String transition = timeTracker.update(world.getUID(), world.getTime());
             if (transition == null) continue;
+            boolean transitionBound = ON_NIGHT.getKey().equals(transition) ? nightBound : dayBound;
+            if (!transitionBound) continue;
             Map<String, Object> params = new HashMap<>();
             params.put("world", world.getName());
             params.put("is_night", transition.equals(triggerKey("on_night")));
@@ -56,7 +69,7 @@ public final class PeriodicTriggerListener {
             }
         }
 
-        String interval = triggerKey("on_interval");
+        if (!intervalBound) return;
         for (Player player : Bukkit.getOnlinePlayers()) {
             TriggerDispatch.dispatch(player, interval);
         }

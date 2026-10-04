@@ -49,6 +49,7 @@ import me.nagasonic.alkatraz.hooks.PlaceholderAPIHook;
 import me.nagasonic.alkatraz.hooks.WorldGuardHook;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileRegistry;
+import me.nagasonic.alkatraz.playerdata.SpellHotbarManager;
 import me.nagasonic.alkatraz.progression.ProgressionService;
 import me.nagasonic.alkatraz.progression.research.ResearchObjectiveListener;
 import me.nagasonic.alkatraz.progression.research.ResearchService;
@@ -59,6 +60,7 @@ import me.nagasonic.alkatraz.playerdata.profiles.CoreProfileProvider;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.spellbooks.SpellbookListener;
 import me.nagasonic.alkatraz.spells.spellbooks.SpellbookVillagerListener;
+import me.nagasonic.alkatraz.spells.vfx.ChannelRegistry;
 import me.nagasonic.alkatraz.texturepack.ResourcePackListener;
 import me.nagasonic.alkatraz.tutorial.FirstJoinTutorial;
 import me.nagasonic.alkatraz.api.SpellAPI;
@@ -197,6 +199,7 @@ public final class Alkatraz extends JavaPlugin {
         MobLootInjector.register(this);
         SpellbookLoot.registerAll();
         registerListener(new CastEventListener());
+        registerListener(new SpellHotbarManager.QuitListener());
         registerListener(new ResearchObjectiveListener());
         registerListener(new FirstJoinTutorial());
         registerListener(new MagicItemTriggerAdapter());
@@ -226,6 +229,7 @@ public final class Alkatraz extends JavaPlugin {
         registerListener(new CraftingEventRouter());
         registerListener(new ImbueAnvilListener());
         registerListener(new ResourcePackListener());
+        registerListener(ChannelRegistry.INSTANCE);
         Bukkit.getPluginManager().registerEvents(new MenuListener(), this);
         logInfo("NMS version " + nms.getClass().getSimpleName() + " registered!");
         getCommand("spells").setExecutor(new SpellsCommand());
@@ -262,6 +266,7 @@ public final class Alkatraz extends JavaPlugin {
         if (focusManager != null) {
             focusManager.shutdown();
         }
+        ChannelRegistry.shutdown();
         for (Player p : Bukkit.getOnlinePlayers()){
             ItemStack wand = p.getInventory().getItem(p.getInventory().getHeldItemSlot());
             if (wand != null && !wand.getType().isAir()){

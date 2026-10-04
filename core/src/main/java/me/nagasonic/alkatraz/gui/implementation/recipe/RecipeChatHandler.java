@@ -35,12 +35,17 @@ public class RecipeChatHandler implements Listener {
         callbacks.remove(uuid);
     }
 
+    public static void clearAll() {
+        callbacks.clear();
+    }
+
     @EventHandler
     public void onChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
         BiConsumer<Player, String> callback = callbacks.remove(player.getUniqueId());
         if (callback == null) return;
         event.setCancelled(true);
-        callback.accept(player, event.getMessage());
+        String message = event.getMessage();
+        Bukkit.getScheduler().runTask(Alkatraz.getInstance(), () -> callback.accept(player, message));
     }
 }

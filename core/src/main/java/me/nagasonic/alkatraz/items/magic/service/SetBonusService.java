@@ -18,21 +18,20 @@ public class SetBonusService {
             "_ring", "_robe", "_boots", "_hat"
     };
 
-    private static SetBonusService instance;
-    private Map<String, SetBonusConfig.SetBonusData> setBonuses;
-    private boolean loaded = false;
+    private static final SetBonusService INSTANCE = new SetBonusService();
+
+    private volatile Map<String, SetBonusConfig.SetBonusData> setBonuses;
+    private volatile boolean loaded = false;
 
     public static SetBonusService getInstance() {
-        if (instance == null) {
-            instance = new SetBonusService();
-        }
-        return instance;
+        return INSTANCE;
     }
 
-    public void loadSetBonuses() {
-        this.setBonuses = SetBonusConfig.loadAll();
+    public synchronized void loadSetBonuses() {
+        Map<String, SetBonusConfig.SetBonusData> loadedBonuses = SetBonusConfig.loadAll();
+        this.setBonuses = loadedBonuses;
         this.loaded = true;
-        Alkatraz.logInfo("Loaded " + setBonuses.size() + " set bonus definitions.");
+        Alkatraz.logInfo("Loaded " + loadedBonuses.size() + " set bonus definitions.");
     }
 
     public void ensureLoaded() {

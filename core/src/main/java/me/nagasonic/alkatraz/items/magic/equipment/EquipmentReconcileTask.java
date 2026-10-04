@@ -2,6 +2,7 @@ package me.nagasonic.alkatraz.items.magic.equipment;
 
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.api.magic.equipment.EquipmentSlot;
+import me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack;
 import me.nagasonic.alkatraz.items.magic.persistence.ItemDataKeys;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -11,6 +12,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -34,6 +36,8 @@ public final class EquipmentReconcileTask implements Runnable, Listener {
 
     private static final long INTERVAL = 20L;
 
+    private static final int IDLE_SWEEPS_BEFORE_PROBE = 25;
+
     private static final EquipmentSlot[] VIRTUAL_SLOTS = {
             EquipmentSlot.RING, EquipmentSlot.NECKLACE, EquipmentSlot.BRACELET, EquipmentSlot.PENDANT
     };
@@ -43,6 +47,8 @@ public final class EquipmentReconcileTask implements Runnable, Listener {
     };
 
     private final Map<UUID, Long> fingerprints = new ConcurrentHashMap<>();
+
+    private int idleSweeps;
 
     private EquipmentReconcileTask() {}
 
@@ -60,6 +66,10 @@ public final class EquipmentReconcileTask implements Runnable, Listener {
 
     @Override
     public void run() {
+        if (!EquipmentService.isAnyMagicEquipped() && ++idleSweeps < IDLE_SWEEPS_BEFORE_PROBE) {
+            return;
+        }
+        idleSweeps = 0;
         for (Player player : Bukkit.getOnlinePlayers()) {
             UUID uuid = player.getUniqueId();
             long fingerprint = fingerprint(player);
@@ -67,17 +77,40 @@ public final class EquipmentReconcileTask implements Runnable, Listener {
             if (previous != null && previous.longValue() != fingerprint) {
                 fingerprints.put(uuid, fingerprint);
                 EquipmentService.invalidate(uuid);
+                if (wearsMagicItem(player)) {
+                    EquipmentService.markMagicEquipped();
+                }
                 EquipmentStatService.getInstance().syncEquipmentStats(player);
             }
         }
     }
 
+    private static boolean wearsMagicItem(Player player) {
+        PlayerInventory inventory = player.getInventory();
+        if (isMagicItem(inventory.getItemInMainHand()) || isMagicItem(inventory.getItemInOffHand())) {
+            return true;
+        }
+        for (EquipmentSlot slot : ARMOR_SLOTS) {
+            if (isMagicItem(inventory.getItem(slot.vanillaSlot()))) return true;
+        }
+        for (EquipmentSlot slot : VIRTUAL_SLOTS) {
+            if (isMagicItem(EquipmentStorage.getItemOrNull(player, slot))) return true;
+        }
+        return false;
+    }
+
+    private static boolean isMagicItem(ItemStack stack) {
+        return stack != null && !stack.getType().isAir() && stack.hasItemMeta()
+                && MagicItemStack.isMagicItem(stack);
+    }
+
     private static long fingerprint(Player player) {
         long hash = 1L;
-        hash = 31L * hash + stackHash(player.getInventory().getItemInMainHand());
-        hash = 31L * hash + stackHash(player.getInventory().getItemInOffHand());
+        PlayerInventory inventory = player.getInventory();
+        hash = 31L * hash + stackHash(inventory.getItemInMainHand());
+        hash = 31L * hash + stackHash(inventory.getItemInOffHand());
         for (EquipmentSlot slot : ARMOR_SLOTS) {
-            hash = 31L * hash + stackHash(player.getInventory().getItem(slot.vanillaSlot()));
+            hash = 31L * hash + stackHash(inventory.getItem(slot.vanillaSlot()));
         }
         for (EquipmentSlot slot : VIRTUAL_SLOTS) {
             hash = 31L * hash + stackHash(EquipmentStorage.getItemOrNull(player, slot));

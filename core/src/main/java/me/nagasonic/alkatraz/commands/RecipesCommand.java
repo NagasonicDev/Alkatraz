@@ -26,6 +26,11 @@ public class RecipesCommand implements CommandExecutor, TabCompleter {
 
     private static LangManager lang() { return Alkatraz.getLangManager(); }
 
+    private static volatile List<String> cachedPlayerNames;
+    private static volatile long cachedPlayerNamesStamp;
+    private static volatile List<String> cachedRecipeIds;
+    private static volatile int cachedRecipeIdCount = -1;
+
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (args.length == 0) {
@@ -110,6 +115,8 @@ public class RecipesCommand implements CommandExecutor, TabCompleter {
             return;
         }
         RecipeRegistry.reload();
+        cachedRecipeIds = null;
+        cachedRecipeIdCount = -1;
         int count = RecipeRegistry.getAll().size();
         sender.sendMessage(lang().get("recipes.commands.reload", "count", String.valueOf(count)));
     }
@@ -174,10 +181,25 @@ public class RecipesCommand implements CommandExecutor, TabCompleter {
     }
 
     private List<String> recipeIds() {
-        return RecipeRegistry.getAllKeys().stream().map(NamespacedKey::getKey).collect(Collectors.toList());
+        int count = RecipeRegistry.getAllKeys().size();
+        List<String> cached = cachedRecipeIds;
+        if (cached != null && count == cachedRecipeIdCount) return cached;
+        List<String> ids = new ArrayList<>();
+        for (NamespacedKey key : RecipeRegistry.getAllKeys()) {
+            ids.add(key.getKey());
+        }
+        cachedRecipeIds = ids;
+        cachedRecipeIdCount = count;
+        return ids;
     }
 
     private List<String> playerNames() {
-        return Bukkit.getOnlinePlayers().stream().map(Player::getName).collect(Collectors.toList());
+        long now = System.currentTimeMillis();
+        List<String> cached = cachedPlayerNames;
+        if (cached != null && now - cachedPlayerNamesStamp < 1000L) return cached;
+        List<String> names = Bukkit.getOnlinePlayers().stream().map(Player::getName).collect(Collectors.toList());
+        cachedPlayerNames = names;
+        cachedPlayerNamesStamp = now;
+        return names;
     }
 }

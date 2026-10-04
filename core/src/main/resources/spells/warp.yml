@@ -7,11 +7,13 @@ enabled: true
 element: 'NONE'
 code: 'SRSSR'
 level: 6
-required_focus: 75
-cooldown: 20
+required_focus: 135
+cooldown: 11
 cast_time: 1.0
-mana_cost: 60
+mana_cost: 165
 maximum_mastery: 100
+# WARP MOVES THE CASTER ACROSS THE WORLD, SO IT MANIPULATES THE CASTER
+role: 'UTILITY'
 base_slots: 2
 mastery_bonus_slots:
   - 25
@@ -24,7 +26,9 @@ wind_up_duration: 6
 move_cancel_threshold: 0.25
 mastery_bar_color: 'PURPLE'
 gui_item: 'ENDER_EYE'
-gui_custom_model_data: 4118
+# WAS 4118, the same value as dark_tendrils - a live collision. Spec section 10.2
+# assigns 4166.
+gui_custom_model_data: 4166
 prepare_sound: 'ENTITY_ENDERMAN_TELEPORT'
 prepare_sound_volume: 0.3
 prepare_sound_pitch: 1.2

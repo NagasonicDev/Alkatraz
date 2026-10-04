@@ -4,6 +4,7 @@ import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.gui.ItemBuilder;
 import me.nagasonic.alkatraz.gui.Menu;
+import me.nagasonic.alkatraz.items.magic.attribute.StatPointsAttributeSource;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
@@ -153,9 +154,15 @@ public class StatsMenu extends Menu {
             lore.add("");
             lore.add(lang().get("stats.bonus"));
             lore.add(ColorFormat.format("&7 - " + element.getColor() + "+" +
-                (((Number) Configs.AFFINITY_PER_POINT.get()).intValue() * points) + " " + element.getName() + " Affinity"));
+                (int) StatPointsAttributeSource.affinityFromPoints(points,
+                    ((Number) Configs.AFFINITY_PER_POINT.get()).doubleValue(),
+                    ((Number) Configs.AFFINITY_EXPONENT.get()).doubleValue())
+                + " " + element.getName() + " Affinity"));
             lore.add(ColorFormat.format("&7 - " + element.getColor() + "+" +
-                (((Number) Configs.RESISTANCE_PER_POINT.get()).intValue() * points) + " " + element.getName() + " Resistance"));
+                (int) StatPointsAttributeSource.resistanceFromPoints(points,
+                    ((Number) Configs.RESISTANCE_PER_POINT.get()).doubleValue(),
+                    ((Number) Configs.RESISTANCE_EXPONENT.get()).doubleValue())
+                + " " + element.getName() + " Resistance"));
         }
 
         if (profile.getStatPoints() > 0) {

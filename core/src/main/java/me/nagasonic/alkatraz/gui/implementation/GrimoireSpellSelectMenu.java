@@ -66,8 +66,9 @@ public class GrimoireSpellSelectMenu extends PagedMenu<Spell> {
 
     @Override
     protected void addDecorations() {
+        ItemStack blank = Utils.getBlank();
         for (int i = 0; i < 54; i++) {
-            inventory.setItem(i, Utils.getBlank());
+            inventory.setItem(i, blank);
         }
     }
 

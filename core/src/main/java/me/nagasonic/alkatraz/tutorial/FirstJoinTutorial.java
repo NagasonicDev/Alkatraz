@@ -13,6 +13,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
@@ -46,6 +47,14 @@ public class FirstJoinTutorial implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerQuit(PlayerQuitEvent event) {
         cancelPending(event.getPlayer().getUniqueId());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPluginDisable(PluginDisableEvent event) {
+        if (event.getPlugin() != Alkatraz.getInstance()) return;
+        for (UUID uuid : List.copyOf(pendingTasks.keySet())) {
+            cancelPending(uuid);
+        }
     }
 
     private static void cancelPending(UUID uuid) {
@@ -95,6 +104,7 @@ public class FirstJoinTutorial implements Listener {
 
         tasks.add(step(player, () -> {
             sendTitle(player, lang().get("tutorial.done_title"), lang().get("tutorial.done_subtitle"), 80, 20);
+            pendingTasks.remove(uuid);
         }, delay += gap));
     }
 

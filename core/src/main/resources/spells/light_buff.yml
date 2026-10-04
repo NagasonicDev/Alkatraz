@@ -7,13 +7,17 @@ enabled: true
 element: 'LIGHT'
 code: 'RRRLS'
 level: 4
-required_focus: 70
-cooldown: 20
+required_focus: 90
+cooldown: 7
 cast_time: 1.5
-mana_cost: 50
+mana_cost: 75
 maximum_mastery: 200
 buff_radius: 8.0
 base_duration: 15
 mastery_bar_color: 'YELLOW'
 gui_item: 'GLOWSTONE_DUST'
 gui_custom_model_data: 4111
+
+# UTILITY - light_buff grants effects to allies, it carries no budget and no
+# power: key.
+role: 'UTILITY'

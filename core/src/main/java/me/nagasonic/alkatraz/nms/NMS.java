@@ -141,7 +141,7 @@ public interface NMS extends Listener {
     default void unsetGlowing(Entity entity, Player viewer) {
         Scoreboard scoreboard = viewer.getScoreboard();
         String entry = entity.getUniqueId().toString();
-        for (ChatColor color : ChatColor.values()) {
+        for (ChatColor color : GlowPalette.COLORS) {
             String teamName = glowTeamName(viewer, color);
             Team team = scoreboard.getTeam(teamName);
             if (team == null) continue;
@@ -172,7 +172,7 @@ public interface NMS extends Listener {
      */
     default void clearGlowing(Player viewer) {
         Scoreboard scoreboard = viewer.getScoreboard();
-        for (ChatColor color : ChatColor.values()) {
+        for (ChatColor color : GlowPalette.COLORS) {
             Team team = scoreboard.getTeam(glowTeamName(viewer, color));
             if (team != null) {
                 team.unregister();
@@ -189,4 +189,10 @@ public interface NMS extends Listener {
     default void sendGlowingPacket(Entity entity, Player viewer, boolean glowing) {
         entity.setGlowing(glowing);
     }
+}
+
+final class GlowPalette {
+    private GlowPalette() {}
+
+    static final ChatColor[] COLORS = ChatColor.values();
 }

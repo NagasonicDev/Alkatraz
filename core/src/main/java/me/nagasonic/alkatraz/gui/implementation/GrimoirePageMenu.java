@@ -63,15 +63,15 @@ public class GrimoirePageMenu extends Menu {
         fillAll();
 
         for (int i = 0; i < 9; i++) {
-            inventory.setItem(i, cover.clone());
-            inventory.setItem(45 + i, cover.clone());
+            inventory.setItem(i, cover);
+            inventory.setItem(45 + i, cover);
         }
         for (int row = 1; row <= 4; row++) {
-            inventory.setItem(row * 9, cover.clone());
-            inventory.setItem(row * 9 + 8, cover.clone());
+            inventory.setItem(row * 9, cover);
+            inventory.setItem(row * 9 + 8, cover);
         }
         for (int row = 1; row <= 4; row++) {
-            inventory.setItem(row * 9 + 4, spine.clone());
+            inventory.setItem(row * 9 + 4, spine);
         }
 
         List<String> pages = getPages();

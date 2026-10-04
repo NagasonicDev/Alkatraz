@@ -2,8 +2,8 @@ package me.nagasonic.alkatraz.spells.implementation;
 
 import com.google.common.util.concurrent.AtomicDouble;
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.api.Element;
 import me.nagasonic.alkatraz.config.ConfigManager;
-import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
@@ -11,32 +11,51 @@ import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
-import me.nagasonic.alkatraz.util.ParticleCaster;
-import me.nagasonic.alkatraz.util.ParticleUtils;
-import me.nagasonic.alkatraz.util.Utils;
+import me.nagasonic.alkatraz.spells.vfx.CastCircle;
+import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
+import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.util.Vector;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Detect extends Spell {
     private static LangManager lang() {
         return Alkatraz.getLangManager();
     }
 
+    /**
+     * The single NONE palette. The scan ring was hardcoded white, which was indistinguishable
+     * from every other white ring in the plugin. It now takes {@code core} for the leading
+     * edge and {@code deep} for the ground shadow the ring lays underneath itself.
+     */
+    private static final ElementPalette.Palette PALETTE = ElementPalette.of(Element.NONE);
+
+    /** Ring density; {@link SpellVfx#ring} takes a fixed point count, not a frequency. */
+    private static final int RING_POINTS = 40;
+    /** Ground-shadow offset for the counter-rotating shadow ring, in blocks. */
+    private static final double RING_SHADOW_OFFSET = 0.35;
+    /** Largest scan radius, in blocks; drives how far the revealing ring travels. */
+    private static final int SCAN_MAX_RADIUS = 20;
+    /** Radius step per tick, in blocks. */
+    private static final double SCAN_STEP = 0.5;
+
     public Detect(String type){
         super(type);
     }
     private Map<Integer, Double> ranges = new HashMap<>();
-    private List<LivingEntity> entities = new ArrayList<>();
+    private final Map<UUID, List<LivingEntity>> entitiesByCaster = new ConcurrentHashMap<>();
     private long duration;
-    private int taskID;
 
     @Override
     public void loadConfiguration() {
@@ -60,52 +79,60 @@ public class Detect extends Spell {
             MagicProfile data = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
             double range = ranges.get(data.getCircleLevel()) * (Double) getOption("scan_range").getSelectedValue(p).getValue();
             long activeDuration = Math.round((Double) getOption("glow_duration").getSelectedValue(p).getValue());
-            int r = 20;
-            taskID = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
-                if (l.get() < r){
-                    double ringRadius = l.get();
-                    double freq = Math.max(4 / ringRadius, 0.5);
-                    List<Location> locs = ParticleUtils.circle(a, ringRadius, freq, 0, 0);
-                    Particle.DustOptions options = new Particle.DustOptions(Color.WHITE, 0.4F);
-                    for (Location loc : locs){
-                        ParticleCaster.spawn(p, loc.getWorld(), Utils.DUST, loc, 0, options);
+            int r = SCAN_MAX_RADIUS;
+            final List<LivingEntity> revealed = new ArrayList<>();
+            final Set<UUID> seen = new HashSet<>();
+            entitiesByCaster.put(p.getUniqueId(), revealed);
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    if (!p.isOnline() || p.isDead()) {
+                        cancel();
+                        return;
                     }
-                    l.addAndGet(0.5);
-                    if (l.get() == (double) r /2){
-                        for (Entity entity : a.getWorld().getNearbyEntities(a, range, range, range)){
-                            if (!entity.isDead() && entity != p && entity instanceof LivingEntity le){
-                                ChatColor color = ChatColor.WHITE;
-                                if (le instanceof Monster){
-                                    color = ChatColor.RED;
-                                } else if (le instanceof Player) {
-                                    color = ChatColor.YELLOW;
-                                }
-                                if (le instanceof Player target){
-                                    MagicProfile tdata = ProfileManager.getProfile(target.getUniqueId(), MagicProfile.class);
-                                    if (data.getCircleLevel() >= tdata.getCircleLevel()){
-                                        if (tdata.isStealth()){
-                                            Alkatraz.getNms().setGlowing(target, p, ChatColor.DARK_GRAY);
-                                        }else{
-                                            Alkatraz.getNms().setGlowing(target, p, color);
-                                        }
-                                        if (!entities.contains(le)){
-                                            entities.add(le);
-                                        }
+                    if (l.get() < r){
+                        double ringRadius = l.get();
+                        // The scan ring runs EVERY tick, not on circle_ticks, and expands to the
+                        // max radius before the task stops. That faster cadence is the whole
+                        // tell of this spell - it reads as a sweep, not a pulse.
+                        SpellVfx.ring(Detect.this, p, a, ringRadius, RING_POINTS,
+                                ringRadius * 0.3D, RING_SHADOW_OFFSET);
+                        l.addAndGet(SCAN_STEP);
+                        if (l.get() == (double) r / 2){
+                            for (Entity entity : a.getWorld().getNearbyEntities(a, range, range, range)){
+                                if (!entity.isDead() && entity != p && entity instanceof LivingEntity le){
+                                    ChatColor color = ChatColor.WHITE;
+                                    if (le instanceof Monster){
+                                        color = ChatColor.RED;
+                                    } else if (le instanceof Player) {
+                                        color = ChatColor.YELLOW;
                                     }
-                                }else{
-                                    Alkatraz.getNms().setGlowing(le, p, color);
-                                    if (!entities.contains(le)){
-                                        entities.add(le);
+                                    if (le instanceof Player target){
+                                        MagicProfile tdata = ProfileManager.getProfile(target.getUniqueId(), MagicProfile.class);
+                                        if (data.getCircleLevel() >= tdata.getCircleLevel()){
+                                            if (tdata.isStealth()){
+                                                Alkatraz.getNms().setGlowing(target, p, ChatColor.DARK_GRAY);
+                                            }else{
+                                                Alkatraz.getNms().setGlowing(target, p, color);
+                                            }
+                                            if (seen.add(le.getUniqueId())){
+                                                revealed.add(le);
+                                            }
+                                        }
+                                    }else{
+                                        Alkatraz.getNms().setGlowing(le, p, color);
+                                        if (seen.add(le.getUniqueId())){
+                                            revealed.add(le);
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
-                }else { stopCast();}
-            }, 0L, 1L);
+                    }else { cancel();}
+                }
+            }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
             Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(Alkatraz.getInstance(), () -> {
-                List<LivingEntity> revealed = new ArrayList<>(entities);
-                entities.clear();
+                entitiesByCaster.remove(p.getUniqueId(), revealed);
                 for (LivingEntity le : revealed){
                     Alkatraz.getNms().unsetGlowing(le, p);
                 }
@@ -118,31 +145,9 @@ public class Detect extends Spell {
 
     }
 
-    private void stopCast(){
-        Bukkit.getServer().getScheduler().cancelTask(taskID);
-    }
-
     @Override
     public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
-        int d = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
-            if (e.isCancelled()) return;
-            Location playerLoc = caster.getEyeLocation(); // Player eye location
-            float yaw = playerLoc.getYaw();
-            float pitch = playerLoc.getPitch();
-
-            // Calculate offset vector pointing forward relative to player orientation
-            Vector forward = playerLoc.getDirection().normalize().multiply(1.5); // 1.5 blocks in front
-
-            // Call magicCircle with proper center, yaw, pitch and offset
-            List<Location> magicCirclePoints = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 2, 0);
-
-            // Spawn particles at all calculated points
-            Particle.DustOptions options = new Particle.DustOptions(Color.WHITE, 0.4F);
-            for (Location loc : magicCirclePoints) {
-                ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, options);
-            }
-        }, 0L, (Long) Configs.CIRCLE_TICKS.get());
-        return d;
+        return CastCircle.start(this, caster, e);
     }
 
     @Override

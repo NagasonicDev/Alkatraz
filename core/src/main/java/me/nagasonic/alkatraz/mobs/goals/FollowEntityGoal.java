@@ -6,14 +6,19 @@ import me.nagasonic.alkatraz.api.mobs.GoalFlag;
 import me.nagasonic.alkatraz.api.mobs.MobBrainContext;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Mob;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -22,9 +27,12 @@ import java.util.concurrent.ConcurrentHashMap;
  * follow-range, teleport to a nearby spot beside it when beyond teleport-range
  * or in another world, and never treat the followed entity as an attack target.
  *
- * <p>The goal is stateless per mob: every evaluation re-resolves the followed
- * entity from NBT, so a shared cached {@code GoalBrain} instance is safe to
- * apply to many mobs at once.
+ * <p>A single goal instance is shared by every mob that gets the brain, so the
+ * resolved follower is memoised per mob in a weak map rather than on the goal:
+ * {@code canStart}, {@code shouldContinue} and {@code tick} would otherwise each
+ * re-read the same NBT tag three times per tick. The tag is re-read at most once
+ * every {@value #RESOLVE_INTERVAL_TICKS} ticks, and immediately whenever the
+ * cached follower is dead.
  */
 public class FollowEntityGoal implements Goal {
 
@@ -33,6 +41,9 @@ public class FollowEntityGoal implements Goal {
     private static final double CROSS_WORLD_OFFSET_Z = 1.0;
     private static final int UUID_CACHE_LIMIT = 4096;
     private static final Map<String, UUID> UUID_CACHE = new ConcurrentHashMap<>();
+    private static final int RESOLVE_INTERVAL_TICKS = 20;
+    private static final Map<Mob, FollowCacheEntry> FOLLOW_CACHE =
+            Collections.synchronizedMap(new WeakHashMap<>());
 
     private final FollowEntityConfig config;
 
@@ -109,13 +120,65 @@ public class FollowEntityGoal implements Goal {
     }
 
     private LivingEntity resolveFollowed(MobBrainContext ctx) {
-        String rawUuid = NBT.<String>getPersistentData(ctx.self(), nbt -> nbt.getString(config.followEntityUuidKey()));
+        Mob self = ctx.self();
+        if (self == null) return null;
+        int now = worldTime(self);
+
+        FollowCacheEntry cached = FOLLOW_CACHE.get(self);
+        if (cached != null
+                && cached.uuidKey.equals(config.followEntityUuidKey())
+                && isFresh(now, cached.resolvedAtTime)
+                && (cached.entity == null || !cached.entity.isDead())) {
+            return cached.entity;
+        }
+
+        String rawUuid = NBT.<String>getPersistentData(self, nbt -> nbt.getString(config.followEntityUuidKey()));
+        LivingEntity resolved = resolveEntity(rawUuid);
+        if (cached != null && cached.uuidKey.equals(config.followEntityUuidKey())) {
+            cached.entity = resolved;
+        } else {
+            cached = new FollowCacheEntry(config.followEntityUuidKey(), resolved, now);
+            FOLLOW_CACHE.put(self, cached);
+        }
+        cached.resolvedAtTime = now;
+        return resolved;
+    }
+
+    /**
+     * World time stands in for the tick counter; a backwards jump (a {@code /time
+     * set}) counts as stale so the tag is re-read immediately rather than pinning
+     * the entry until the clock catches back up.
+     */
+    private static boolean isFresh(int now, int resolvedAt) {
+        int delta = now - resolvedAt;
+        return delta >= 0 && delta < RESOLVE_INTERVAL_TICKS;
+    }
+
+    private static int worldTime(Mob self) {
+        World world = self.getWorld();
+        return world == null ? 0 : (int) world.getTime();
+    }
+
+    private static LivingEntity resolveEntity(String rawUuid) {
         if (rawUuid == null || rawUuid.isBlank()) return null;
         UUID followed = parseUuid(rawUuid);
         if (followed == null) return null;
         Entity entity = Bukkit.getEntity(followed);
         if (entity instanceof LivingEntity living && !living.isDead()) return living;
         return null;
+    }
+
+    /** Mutable per-mob memo of the last resolution; entries die with the mob. */
+    private static final class FollowCacheEntry {
+        final String uuidKey;
+        LivingEntity entity;
+        int resolvedAtTime;
+
+        FollowCacheEntry(String uuidKey, @Nullable LivingEntity entity, int resolvedAtTime) {
+            this.uuidKey = uuidKey;
+            this.entity = entity;
+            this.resolvedAtTime = resolvedAtTime;
+        }
     }
 
     /**

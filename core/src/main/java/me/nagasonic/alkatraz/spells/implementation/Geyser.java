@@ -1,20 +1,19 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.api.Element;
 import me.nagasonic.alkatraz.config.ConfigManager;
-import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.lang.LangManager;
-import me.nagasonic.alkatraz.spells.configuration.OptionValue;
-import me.nagasonic.alkatraz.spells.configuration.SpellOption;
-import me.nagasonic.alkatraz.spells.configuration.impact.implementation.ManaCostImpact;
-import me.nagasonic.alkatraz.spells.configuration.impact.implementation.StatModifierImpact;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
+import me.nagasonic.alkatraz.spells.vfx.CastCircle;
+import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
+import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
@@ -27,10 +26,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.UUID;
 
 /**
  * Geyser — Circle 3 Water Attack Spell
@@ -56,6 +52,23 @@ public class Geyser extends AttackSpell {
     // Warn duration in ticks before eruption fires
     private static final int WARN_TICKS = 20;
 
+    /**
+     * The single WATER palette. This spell used to name its own {@code (80,180,255)}, which was
+     * a sixth blue in an element that already had five. Nothing here may name an RGB value.
+     */
+    private static final ElementPalette.Palette PALETTE = ElementPalette.of(Element.WATER);
+
+    /** Cast-circle scale; this spell has always drawn a size-2 glyph. */
+    private static final double CIRCLE_SIZE = 2.0;
+    /** Vertical slices in the eruption column. */
+    private static final int COLUMN_LAYERS = 14;
+    /** Particles per column slice. */
+    private static final int COLUMN_POINTS_PER_LAYER = 16;
+    /** Radians each column slice is rotated against the one below it, for the twisting riser. */
+    private static final double COLUMN_PHASE_STEP = 0.45;
+    /** How many freshly revealed spiral points are drawn in the leading {@code core} shade. */
+    private static final int WARN_LEADING_POINTS = 8;
+
     public Geyser(String type) {
         super(type);
     }
@@ -77,18 +90,9 @@ public class Geyser extends AttackSpell {
     // Magic Circle Preparation
     // -------------------------------------------------------------------------
 
-    @Override
+@Override
     public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
-        return Bukkit.getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
-            if (e.isCancelled()) return;
-            Location eye = caster.getEyeLocation();
-            Vector forward = eye.getDirection().normalize().multiply(1.5);
-            List<Location> points = ParticleUtils.magicCircle(eye, eye.getYaw(), eye.getPitch(), forward, 2, 0);
-            for (Location loc : points) {
-                ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0,
-                        new Particle.DustOptions(Color.fromRGB(80, 180, 255), 0.4F));
-            }
-        }, 0L, (Long) Configs.CIRCLE_TICKS.get());
+        return CastCircle.start(this, caster, e, CIRCLE_SIZE, 0);
     }
 
     @Override
@@ -114,13 +118,12 @@ public class Geyser extends AttackSpell {
         double height = getModifiedStat(caster, "height",       10.0);
         double radius = getModifiedStat(caster, "radius",        2.5);
         double launchPower = getModifiedStat(caster, "launch_power",  1.0);
-        double basePower = getPower(caster, getBasePower())
-                * getWandPower(wand, caster);
 
+        // RAW base power. getPower is applied once, at impact, in playEruption.
         AttackProperties props = new AttackProperties(
                 caster,
                 Utils.castLocation(caster),
-                basePower,
+                getBasePower() * getWandPower(wand, caster),
                 AttackType.MAGIC
         );
 
@@ -145,13 +148,12 @@ public class Geyser extends AttackSpell {
         double radius = 2.5;
         double launchPower = 1;
         double wandp = getWandPowerOrDefault(wand);
-        double power = getPower(caster, getBasePower())
-                * wandp;
 
+        // RAW base power. getPower is applied once, at impact, in playEruption.
         AttackProperties props = new AttackProperties(
                 caster,
                 Utils.castLocation(caster),
-                power,
+                getBasePower() * wandp,
                 AttackType.MAGIC
         );
 
@@ -191,22 +193,32 @@ public class Geyser extends AttackSpell {
 
         int[] tick = {0};
         int[] taskId = {-1};
+        final int[] last = {0};
+        final World spiralWorld = epicentre.getWorld();
 
         taskId[0] = Bukkit.getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
             tick[0]++;
 
-            // Reveal points up to this tick's progress
-            int upTo = (int) Math.min(tick[0] * pointsPerTick, totalPoints);
-            for (int i = 0; i < upTo; i++) {
-                Location loc = spiralPoints.get(i).clone().add(0, 0.05, 0);
-                ParticleCaster.spawn(caster, epicentre.getWorld(), Utils.DUST, loc, 1, 0, 0, 0,
-                        new Particle.DustOptions(Color.fromRGB(80, 180, 255), 0.55F));
+            if (props.isCancelled() || props.isCountered() || caster.isDead()
+                    || (caster instanceof Player p && !p.isOnline())) {
+                Bukkit.getScheduler().cancelTask(taskId[0]);
+                return;
             }
+
+            // Reveal points up to this tick's progress. The newest points are the leading edge and
+            // take `core`; the trail behind them is ground structure and steps down to `deep`.
+            int upTo = (int) Math.min(tick[0] * pointsPerTick, totalPoints);
+            for (int i = last[0]; i < upTo; i++) {
+                Location loc = spiralPoints.get(i).clone().add(0, 0.05, 0);
+                ParticleCaster.spawn(caster, spiralWorld, Utils.DUST, loc, 1, 0, 0, 0,
+                        i >= upTo - WARN_LEADING_POINTS ? PALETTE.coreDust() : PALETTE.deepDust());
+            }
+            last[0] = upTo;
 
             // Rumble sound — grows louder as the spiral fills
             if (tick[0] % 4 == 0) {
                 float pitch = 0.6f + (tick[0] / (float) WARN_TICKS) * 0.6f;
-                epicentre.getWorld().playSound(epicentre, Sound.BLOCK_WATER_AMBIENT, 0.5f, pitch);
+                spiralWorld.playSound(epicentre, Sound.BLOCK_WATER_AMBIENT, 0.5f, pitch);
             }
 
             // When the warning is done, erupt
@@ -223,10 +235,13 @@ public class Geyser extends AttackSpell {
     // -------------------------------------------------------------------------
 
     /**
-     * Fires the geyser upward over several ticks. The column is built using
-     * the spiral() helper — a tight rising spiral from ground to full height
-     * — so the water looks like it's twisting as it erupts rather than just
-     * popping into existence all at once.
+     * Fires the geyser upward over several ticks.
+     *
+     * The shape is a {@link SpellVfx#column} whose <i>height</i> grows every tick, which is what
+     * preserves the old {@code spiral()} reveal: the column appears slice by slice from the ground
+     * up rather than popping into existence at full height. The per-slice phase step turns the
+     * stack of rings into a twist, which is the only thing that made the original read as water
+     * rather than as a lamp post.
      *
      * Damage and launch are applied on the first tick so entities are hit
      * the moment the eruption begins.
@@ -243,34 +258,36 @@ public class Geyser extends AttackSpell {
         ParticleCaster.spawn(caster, world, Utils.SPLASH, epicentre.clone().add(0, 0.1, 0),
                 60, radius * 0.6, 0.1, radius * 0.6, 0.2);
 
-        // Build column — tight spiral rising from 0 to height, expands slightly
-        List<Location> columnPoints = ParticleUtils.spiral(epicentre, height, 0.1, radius * 0.4, 3.0, 6.0);
-
-        // Reveal column over ERUPTION_TICKS — taller geysers take longer to peak
+        // Reveal the column over ERUPTION_TICKS — taller geysers take longer to peak
         int ERUPTION_TICKS = (int) Math.max(8, height * 0.8);
-        double pointsPerTick = (double) columnPoints.size() / ERUPTION_TICKS;
 
-        Set<UUID> damaged = new HashSet<>();
         int[] tick = {0};
         int[] taskId = {-1};
 
         taskId[0] = Bukkit.getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
             tick[0]++;
 
-            // Reveal column slice by slice
-            int upTo = (int) Math.min(tick[0] * pointsPerTick, columnPoints.size());
-            for (int i = 0; i < upTo; i++) {
-                Location loc = columnPoints.get(i);
-                ParticleCaster.spawn(caster, world, Utils.SPLASH,     loc, 3, 0.15, 0, 0.15, 0.08);
-                ParticleCaster.spawn(caster, world, Particle.BUBBLE_POP, loc, 1, 0.1,  0, 0.1,  0.02);
+            if (props.isCancelled() || props.isCountered() || caster.isDead()
+                    || (caster instanceof Player p && !p.isOnline())) {
+                Bukkit.getScheduler().cancelTask(taskId[0]);
+                return;
             }
+
+            // Growing height, fixed slice count: the column is revealed from the foot up.
+            double progress = Math.min(1.0, (double) tick[0] / ERUPTION_TICKS);
+            SpellVfx.column(Geyser.this, caster, epicentre, height * progress, radius * 0.4,
+                    COLUMN_LAYERS, COLUMN_POINTS_PER_LAYER, COLUMN_PHASE_STEP);
+
+            // Droplets riding the current, so the riser reads as liquid rather than as a tube.
+            ParticleCaster.spawn(caster, world, Utils.SPLASH, epicentre.clone().add(0, height * progress, 0),
+                    3, radius * 0.3, 0.15, radius * 0.3, 0.08);
 
             // Damage + launch on the very first eruption tick
             if (tick[0] == 1) {
                 for (LivingEntity target : me.nagasonic.alkatraz.util.Utils.getNearbyLivingEntities(epicentre, radius, height, radius)) {
                     if (target.equals(caster)) continue;
-                    if (damaged.contains(target.getUniqueId())) continue;
-                    damaged.add(target.getUniqueId());
+                    if (props.hasHit(target)) continue;
+                    props.hit(target);
 
                     double dmg = getPower(caster, target, props.getRemainingPower());
                     SpellDamageUtil.damageWithSpell(target, dmg, caster, wand, Geyser.this);
@@ -288,7 +305,7 @@ public class Geyser extends AttackSpell {
                 // Dissipation — spray particles at the top of the column
                 Location top = epicentre.clone().add(0, height, 0);
                 ParticleCaster.spawn(caster, world, Utils.SPLASH,     top, 40, radius * 0.5, 0.3, radius * 0.5, 0.25);
-                ParticleCaster.spawn(caster, world, Particle.BUBBLE_POP, top, 20, radius * 0.3, 0.2, radius * 0.3, 0.1);
+                ParticleCaster.spawn(caster, world, Utils.BUBBLE_POP, top, 20, radius * 0.3, 0.2, radius * 0.3, 0.1);
                 world.playSound(top, Sound.ENTITY_GENERIC_SPLASH, 0.8f, 1.2f);
             }
 

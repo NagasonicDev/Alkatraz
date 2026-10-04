@@ -130,7 +130,10 @@ public final class MagicItemCraftListener implements Listener {
         Set<NamespacedKey> candidates = null;
         for (ItemStack cell : matrix) {
             if (cell == null || cell.getType().isAir()) continue;
-            if (MagicItemStack.isMagicItem(cell)) {
+            // A magic item always carries meta (MagicItemStack reads its definition key from
+            // the PDC), so plain cells can skip the isMagicItem stack read entirely. The scan
+            // still short-circuits to the full recipe list on the first magic cell found.
+            if (cell.hasItemMeta() && MagicItemStack.isMagicItem(cell)) {
                 return RecipeRegistry.getAll();
             }
             Set<NamespacedKey> byMaterial = RecipeRegistry.getByIngredient(cell.getType());

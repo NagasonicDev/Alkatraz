@@ -1,8 +1,8 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.api.Element;
 import me.nagasonic.alkatraz.config.ConfigManager;
-import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
@@ -17,9 +17,13 @@ import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
+import me.nagasonic.alkatraz.spells.types.SpellAttackContext;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
+import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
+import me.nagasonic.alkatraz.spells.vfx.CastCircle;
+import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
+import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.util.ParticleCaster;
-import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -47,7 +51,21 @@ import java.util.*;
  * - Can be countered by other spells via SpellParticleComponent
  */
 public class WindVortex extends AttackSpell implements Listener {
-    
+
+    /** The AIR palette, resolved once so a per-tick vortex allocates no colour objects. */
+    private static final ElementPalette.Palette PALETTE = ElementPalette.of(Element.AIR);
+
+    /**
+     * Vortex geometry. The descending rings are drawn as a stack of {@link SpellVfx#orbit}
+     * bands rather than one flat ring, so the field reads as a funnel: the innermost body of
+     * each band sits at {@link #RING_INNER_FRACTION} of the radius and the outermost at the
+     * full radius, and each band is lifted by its own fraction of {@link #RING_SPAN}.
+     */
+    private static final int RING_COUNT = 4;
+    private static final int RING_POINTS = 30;
+    private static final double RING_SPAN = 0.6;
+    private static final double RING_INNER_FRACTION = 0.5;
+
     private static LangManager lang() {
         return Alkatraz.getLangManager();
     }
@@ -65,14 +83,14 @@ public class WindVortex extends AttackSpell implements Listener {
     @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
         // Wind disperses on barrier
-        ParticleCaster.spawn(caster, location.getWorld(), Particle.CLOUD, location, 30, 1, 1, 1, 0.1);
-        ParticleCaster.spawn(caster, location.getWorld(), Particle.SWEEP_ATTACK, location, 5);
+        ParticleCaster.spawn(caster, location.getWorld(), Utils.CLOUD, location, 30, 1, 1, 1, 0.1);
+        ParticleCaster.spawn(caster, location.getWorld(), Utils.SWEEP_ATTACK, location, 5);
     }
 
     @Override
     public void onCountered(Location location) {
         // Vortex disperses
-        ParticleCaster.spawn(null, location.getWorld(), Particle.CLOUD, location, 50, 2, 2, 2, 0.2);
+        ParticleCaster.spawn(null, location.getWorld(), Utils.CLOUD, location, 50, 2, 2, 2, 0.2);
         ParticleCaster.spawn(null, location.getWorld(), Utils.EXPLOSION, location, 1);
         location.getWorld().playSound(location, Sound.ENTITY_GENERIC_EXPLODE, 0.5f, 1.5f);
     }
@@ -103,17 +121,17 @@ public class WindVortex extends AttackSpell implements Listener {
         double pull = getModifiedStat(caster, "pull_strength", pullStrength);
         int duration = (int) getModifiedStat(caster, "duration", vortexDuration);
 
-        // Create attack properties
-        double power = getPower(caster, getBasePower()) * getWandPower(wand, caster);
+        // RAW base power. getPower is applied once per hit, in pullEntities.
         AttackProperties props = new AttackProperties(
                 caster,
                 caster.getLocation(),
-                power,
+                getBasePower() * getWandPower(wand, caster),
                 AttackType.MAGIC
         );
+        SpellAttackContext context = SpellAttackContext.of(this, props, caster, wand);
 
         // Start vortex behavior
-        VortexBehavior task = new VortexBehavior(caster, wand, props, radius, pull, duration, power);
+        VortexBehavior task = new VortexBehavior(caster, wand, props, context, radius, pull, duration);
         task.runTaskTimer(Alkatraz.getInstance(), 0L, tickRate);
 
         // Initial sound effect
@@ -131,17 +149,17 @@ public class WindVortex extends AttackSpell implements Listener {
 
         // Create attack properties
         double wandp = getWandPowerOrDefault(wand);
-        double power = getPower(caster, getBasePower())
-                * wandp;
+        // RAW base power - see the player branch.
         AttackProperties props = new AttackProperties(
                 caster,
                 caster.getLocation(),
-                power,
+                getBasePower() * wandp,
                 AttackType.MAGIC
         );
+        SpellAttackContext context = SpellAttackContext.of(this, props, caster, wand);
 
         // Start vortex behavior
-        VortexBehavior task = new VortexBehavior(caster, wand, props, radius, pull, duration, power);
+        VortexBehavior task = new VortexBehavior(caster, wand, props, context, radius, pull, duration);
         task.runTaskTimer(Alkatraz.getInstance(), 0L, tickRate);
 
         // Initial sound effect
@@ -150,22 +168,7 @@ public class WindVortex extends AttackSpell implements Listener {
 
     @Override
     public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
-        int d = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
-            if (e.isCancelled()) return;
-            Location playerLoc = caster.getEyeLocation();
-            float yaw = playerLoc.getYaw();
-            float pitch = playerLoc.getPitch();
-
-            Vector forward = playerLoc.getDirection().normalize().multiply(1.5);
-            List<Location> magicCirclePoints = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 2, 0);
-
-            // White/gray color for air
-            Particle.DustOptions options = new Particle.DustOptions(Color.fromRGB(220, 220, 220), 0.4F);
-            for (Location loc : magicCirclePoints) {
-                ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, options);
-            }
-        }, 0L, (Long) Configs.CIRCLE_TICKS.get());
-        return d;
+        return CastCircle.start(this, caster, e, 2.0, 0);
     }
 
     @Override
@@ -185,18 +188,31 @@ public class WindVortex extends AttackSpell implements Listener {
         private final LivingEntity caster;
         private final ItemStack wand;
         private final AttackProperties props;
+        private final SpellAttackContext context;
         private final double radius;
         private final double pullStrength;
         private final int maxDuration;
-        
+
         private int ticksElapsed = 0;
         private double rotation = 0;
 
+        // SUSTAIN CADENCE LEDGER - per TARGET. AttackProperties' hit Set is never
+        // cleared for the life of the cast, so gating the repeats on props.hasHit
+        // would allow ONE hit for the whole 5 second field instead of five. The
+        // once-per-interval clock is runnable-local; props.hit() is still called so
+        // a single counter still kills the whole vortex.
+        private final Map<UUID, Long> nextStrikeTick = new HashMap<>();
+
         public VortexBehavior(LivingEntity caster, ItemStack wand, AttackProperties props,
-                             double radius, double pullStrength, int duration, double damagePerTick) {
+                             SpellAttackContext context, double radius,
+                             double pullStrength, int duration) {
             this.caster = caster;
             this.wand = wand;
             this.props = props;
+            // The old constructor took a damagePerTick parameter and NEVER STORED
+            // IT. wind_vortex's power was silently dropped and the field dealt no
+            // damage at all. Scaling now happens per hit through the context.
+            this.context = context;
             this.radius = radius;
             this.pullStrength = pullStrength;
             this.maxDuration = duration * 20; // Convert to ticks
@@ -220,6 +236,9 @@ public class WindVortex extends AttackSpell implements Listener {
 
             // Check duration
             ticksElapsed++;
+            // Once per scheduler run, before any damage: SpellAttackContext.power()
+            // throws if it is asked to scale the same target twice inside one tick.
+            context.tick();
             if (ticksElapsed >= maxDuration) {
                 cleanup();
                 cancel();
@@ -246,32 +265,27 @@ public class WindVortex extends AttackSpell implements Listener {
          * Spawns the visual particles for the vortex and registers spell components
          */
         private void spawnVortexParticles(Location center) {
-            // Main spiral - register each particle as a component for collision
+            // Main spiral - a single component covers the whole vortex body
             List<Location> spiralPoints = createVortexSpiral(center, radius, radius * 0.8, 3, rotation);
             for (Location loc : spiralPoints) {
-                ParticleCaster.spawn(caster, loc.getWorld(), Particle.CLOUD, loc, 1, 0, 0, 0, 0);
-                
-                // Register as spell particle component (like WaterPulse)
-                SpellParticleComponent comp = new SpellParticleComponent(
-                        WindVortex.this,
-                        props,
-                        caster,
-                        wand,
-                        SpellComponentType.OFFENSE,
-                        loc,
-                        0.5,  // collision radius
-                        1     // lifetime (ticks)
-                );
-                SpellComponentHandler.register(comp);
+                ParticleCaster.spawn(caster, loc.getWorld(), Utils.CLOUD, loc, 1, 0, 0, 0, 0);
             }
-            
+
+            SpellParticleComponent comp = new SpellParticleComponent(
+                    WindVortex.this,
+                    props,
+                    caster,
+                    wand,
+                    SpellComponentType.OFFENSE,
+                    center,
+                    radius,
+                    Math.max(1, tickRate)
+            );
+            SpellComponentHandler.register(comp);
+
             // Rings at different heights (every 5 ticks)
             if (ticksElapsed % 5 == 0) {
-                List<Location> ringPoints = createVortexRings(center, radius, radius * 0.6, 4, rotation);
-                for (Location loc : ringPoints) {
-                    ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 1, 0, 0, 0, 0,
-                            new Particle.DustOptions(Color.fromRGB(200, 200, 200), 0.8f));
-                }
+                spawnVortexRings(center);
             }
 
             // Ground ring (every 10 ticks)
@@ -281,9 +295,9 @@ public class WindVortex extends AttackSpell implements Listener {
                     double angle = ((double) i / particles) * Math.PI * 2 + rotation;
                     double x = Math.cos(angle) * radius;
                     double z = Math.sin(angle) * radius;
-                    
+
                     Location particleLoc = center.clone().add(x, 0.1, z);
-                    ParticleCaster.spawn(caster, particleLoc.getWorld(), Particle.SWEEP_ATTACK, particleLoc, 1);
+                    ParticleCaster.spawn(caster, particleLoc.getWorld(), Utils.SWEEP_ATTACK, particleLoc, 1);
                 }
             }
         }
@@ -294,7 +308,7 @@ public class WindVortex extends AttackSpell implements Listener {
         private List<Location> createVortexSpiral(Location center, double radius, double height, 
                                                  int density, double rotation) {
             List<Location> points = new ArrayList<>();
-            int pointsPerSpiral = 50;
+            int pointsPerSpiral = 12;
             
             for (int spiral = 0; spiral < density; spiral++) {
                 double spiralOffset = (Math.PI * 2 * spiral) / density;
@@ -323,29 +337,25 @@ public class WindVortex extends AttackSpell implements Listener {
         }
 
         /**
-         * Creates circular rings at different heights
+         * Draws the funnel's descending rings as a stack of {@link SpellVfx#orbit} bands.
+         *
+         * <p>Each band is a flat orbit lifted to its own height, with bodies spread between
+         * {@link #RING_INNER_FRACTION} of the radius and the full radius, so the stack widens as
+         * it rises and reads as the mouth of a funnel rather than as four unrelated hoops.
+         * {@code orbit} alternates {@code core} and {@code accent} bodies by index, which gives
+         * the ring visible internal rhythm that a flat ring of one colour does not have.
+         *
+         * @param centre the vortex centre, on the ground under the caster
          */
-        private List<Location> createVortexRings(Location center, double radius, double height, 
-                                                int rings, double rotation) {
-            List<Location> points = new ArrayList<>();
-            int pointsPerRing = 30;
-            
-            for (int ring = 0; ring < rings; ring++) {
-                double ringProgress = (double) ring / rings;
-                double ringHeight = height * ringProgress;
-                double ringRadius = radius * (1 - ringProgress * 0.5);
-                
-                for (int i = 0; i < pointsPerRing; i++) {
-                    double angle = ((double) i / pointsPerRing) * Math.PI * 2 + rotation;
-                    
-                    double x = Math.cos(angle) * ringRadius;
-                    double z = Math.sin(angle) * ringRadius;
-                    
-                    points.add(center.clone().add(x, ringHeight, z));
-                }
+        private void spawnVortexRings(Location centre) {
+            double inner = radius * RING_INNER_FRACTION;
+            double bandRadius = radius - inner;
+            for (int ring = 0; ring < RING_COUNT; ring++) {
+                double ringProgress = (double) ring / RING_COUNT;
+                Location band = centre.clone().add(0.0, RING_SPAN * radius * ringProgress, 0.0);
+                SpellVfx.orbit(WindVortex.this, caster, band, inner, inner + bandRadius,
+                        RING_POINTS, rotation + ringProgress * Math.PI);
             }
-            
-            return points;
         }
 
         /**
@@ -361,18 +371,19 @@ public class WindVortex extends AttackSpell implements Listener {
             Collection<Entity> nearbyEntities = center.getWorld().getNearbyEntities(
                     center, radius, radius, radius
             );
+            Vector centerVec = center.toVector();
 
             for (Entity entity : nearbyEntities) {
                 if (!(entity instanceof LivingEntity living)) continue;
                 if (entity == caster) continue;
                 if (entity instanceof Player && ((Player) entity).getGameMode() == GameMode.SPECTATOR) continue;
 
-                double distance = entity.getLocation().distance(center);
+                Location eLoc = entity.getLocation();
+                double distance = eLoc.distance(center);
                 if (distance > radius) continue;
 
                 // Calculate pull direction (toward caster's feet)
-                Vector pullDirection = Utils.safeNormalize(center.toVector()
-                        .subtract(entity.getLocation().toVector()));
+                Vector pullDirection = Utils.safeNormalize(centerVec.subtract(eLoc.toVector()));
 
                 // Scale pull strength by distance (closer = stronger pull)
                 double distanceFactor = 1.0 - (distance / radius);
@@ -381,6 +392,19 @@ public class WindVortex extends AttackSpell implements Listener {
                 // Apply velocity
                 Vector currentVelocity = entity.getVelocity();
                 entity.setVelocity(currentVelocity.add(pullVector));
+
+                // SUSTAIN CADENCE: one hit per DAMAGE_INTERVAL_TICKS, per target.
+                // 5 seconds at one hit per second per target is 5 hits. Gating this
+                // on props.hasHit would allow ONE hit for the whole cast instead -
+                // AttackProperties' hit Set is never cleared. See "SUSTAIN cadence:
+                // hasHit must not gate the repeats" at the top of this wave.
+                Long nextStrike = nextStrikeTick.get(living.getUniqueId());
+                if (nextStrike == null || nextStrike <= ticksElapsed) {
+                    nextStrikeTick.put(living.getUniqueId(), ticksElapsed + SpellAttackContext.DAMAGE_INTERVAL_TICKS);
+                    props.hit(living);
+                    SpellDamageUtil.damageWithSpell(living, context.power(living),
+                            caster, wand, WindVortex.this);
+                }
 
                 // Apply slight levitation to lift them off ground
                 if (distance < radius * 0.5 && ticksElapsed % 40 == 0) {
@@ -391,7 +415,7 @@ public class WindVortex extends AttackSpell implements Listener {
 
                 // Spawn particles around caught entities
                 if (ticksElapsed % 3 == 0) {
-                    spawnEntityWindEffect(entity.getLocation(), center);
+                    spawnEntityWindEffect(eLoc, centerVec, center);
                 }
             }
         }
@@ -399,7 +423,7 @@ public class WindVortex extends AttackSpell implements Listener {
         /**
          * Spawns wind effect around entities
          */
-        private void spawnEntityWindEffect(Location entityLoc, Location center) {
+        private void spawnEntityWindEffect(Location entityLoc, Vector centerVec, Location center) {
             int particles = 8;
             double entityRadius = 0.5;
             
@@ -409,20 +433,19 @@ public class WindVortex extends AttackSpell implements Listener {
                 double z = Math.sin(angle) * entityRadius;
                 
                 Location particleLoc = entityLoc.clone().add(x, 1, z);
-                ParticleCaster.spawn(caster, particleLoc.getWorld(), Particle.CLOUD, particleLoc, 1, 0, 0, 0, 0);
+                ParticleCaster.spawn(caster, particleLoc.getWorld(), Utils.CLOUD, particleLoc, 1, 0, 0, 0, 0);
             }
-            
+
             // Pull line effect
             double distance = entityLoc.distance(center);
             if (distance > 2) {
-                Vector direction = Utils.safeNormalize(center.toVector().subtract(entityLoc.toVector()));
-                
+                Vector direction = Utils.safeNormalize(centerVec.subtract(entityLoc.toVector()));
+
                 int segments = 5;
                 for (int i = 0; i < segments; i++) {
                     double progress = (double) i / segments;
                     Location lineLoc = entityLoc.clone().add(direction.clone().multiply(distance * progress));
-                    ParticleCaster.spawn(caster, lineLoc.getWorld(), Utils.DUST, lineLoc, 1, 0, 0, 0, 0,
-                            new Particle.DustOptions(Color.WHITE, 0.5f));
+                    ParticleCaster.spawn(caster, lineLoc.getWorld(), Utils.DUST, lineLoc, 1, 0, 0, 0, 0, PALETTE.accentDust());
                 }
             }
         }
@@ -434,10 +457,11 @@ public class WindVortex extends AttackSpell implements Listener {
             Location center = caster.getLocation();
             
             // Final particle burst
-            ParticleCaster.spawn(caster, center.getWorld(), Particle.CLOUD, center, 100, 
+            ParticleCaster.spawn(caster, center.getWorld(), Utils.CLOUD, center, 100,
                     radius * 0.5, radius * 0.3, radius * 0.5, 0.1);
-            ParticleCaster.spawn(caster, center.getWorld(), Particle.SWEEP_ATTACK, center, 10, 
+            ParticleCaster.spawn(caster, center.getWorld(), Utils.SWEEP_ATTACK, center, 10,
                     radius * 0.3, 0.5, radius * 0.3);
+            ParticleCaster.spawn(caster, center.getWorld(), Utils.DUST, center, 0, PALETTE.coreDust());
             
             // Sound effect
             center.getWorld().playSound(center, Sound.ENTITY_ENDER_DRAGON_FLAP, 0.8f, 0.8f);

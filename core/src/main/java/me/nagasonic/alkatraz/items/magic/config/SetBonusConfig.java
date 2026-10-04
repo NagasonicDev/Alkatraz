@@ -24,10 +24,19 @@ public class SetBonusConfig {
     public static class SetBonusData {
         public final String setName;
         public final Map<Integer, List<BonusEntry>> bonuses;
+        private final List<Integer> sortedThresholds;
 
         public SetBonusData(String setName, Map<Integer, List<BonusEntry>> bonuses) {
             this.setName = setName;
             this.bonuses = bonuses;
+            List<Integer> thresholds = new ArrayList<>(bonuses.keySet());
+            thresholds.sort(Integer::compareTo);
+            this.sortedThresholds = List.copyOf(thresholds);
+        }
+
+        /** Threshold keys in ascending order, computed once at load time. */
+        public List<Integer> sortedThresholds() {
+            return sortedThresholds;
         }
     }
 

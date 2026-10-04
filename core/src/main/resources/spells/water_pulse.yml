@@ -15,22 +15,25 @@ code: 'RSLLR'
 
 # THE MAGIC CIRCLE REQUIRED TO CAST
 level: 2
-required_focus: 45
+required_focus: 40
 
 # COOLDOWN BEFORE CASTING AGAIN
-cooldown: 8
+cooldown: 5
 
 # BASE CAST TIME (SECONDS)
 cast_time: 1
 
 # MANA COST
-mana_cost: 50
+mana_cost: 24
 
 # MAXIMUM MASTERY ACHIEVABLE. NOT RECOMMENDED TO CHANGE
 maximum_mastery: 125
 
-# STRENGTH OF PUSHBACK. DEFAULT: 1.5
-power: 1.5
+# BASE DAMAGE PER PULSE. THIS IS NOT A PUSHBACK STRENGTH ANYMORE - water_pulse
+# now deals damage as well as knockback.
+power: 4.2
+
+role: 'BURST'
 
 #THE COLOR OF THE SPELL MASTERY BOSSBAR. OPTIONS ARE: RED, BLUE, YELLOW, PINK, PURPLE, WHITE AND GREEN
 mastery_bar_color: 'BLUE'

@@ -487,6 +487,7 @@ spells.cast.debuffs_faded = &5The debuff on you has faded.
 spells.cast.blessed_by = &eYou have been blessed by %spell%!
 spells.cast.not_enough_focus = &cNot enough focus to cast this spell.
 spells.cast.focus_lost = &cYou lost your focus and the spell was cancelled!
+spells.cast.interrupted = &cYour wind-up was interrupted!
 
 # --- Focus System ---
 focus.bar.title = &dFocus %focus%/%max%

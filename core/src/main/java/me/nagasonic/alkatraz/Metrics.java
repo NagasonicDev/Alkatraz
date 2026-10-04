@@ -49,6 +49,9 @@ import org.bukkit.plugin.Plugin;
 
 public class Metrics {
 
+    private static Method ONLINE_PLAYERS_METHOD;
+    private static boolean onlinePlayersMethodLookedUp;
+
     private final Plugin plugin;
 
     private final MetricsBase metricsBase;
@@ -160,7 +163,10 @@ public class Metrics {
             // Around MC 1.8 the return type was changed from an array to a collection,
             // This fixes java.lang.NoSuchMethodError:
             // org.bukkit.Bukkit.getOnlinePlayers()Ljava/util/Collection;
-            Method onlinePlayersMethod = Class.forName("org.bukkit.Server").getMethod("getOnlinePlayers");
+            Method onlinePlayersMethod = onlinePlayersMethod();
+            if (onlinePlayersMethod == null) {
+                return Bukkit.getOnlinePlayers().size();
+            }
             return onlinePlayersMethod.getReturnType().equals(Collection.class)
                     ? ((Collection<?>) onlinePlayersMethod.invoke(Bukkit.getServer())).size()
                     : ((Player[]) onlinePlayersMethod.invoke(Bukkit.getServer())).length;
@@ -168,6 +174,26 @@ public class Metrics {
             // Just use the new method if the reflection failed
             return Bukkit.getOnlinePlayers().size();
         }
+    }
+
+    /**
+     * Resolves {@code org.bukkit.Server#getOnlinePlayers} once. The lookup itself
+     * cannot sit in a static initialiser in case the class is absent, so it is
+     * memoised in a holder on first use.
+     */
+    private static Method onlinePlayersMethod() {
+        Method cached = ONLINE_PLAYERS_METHOD;
+        if (cached != null || onlinePlayersMethodLookedUp) {
+            return cached;
+        }
+        onlinePlayersMethodLookedUp = true;
+        try {
+            cached = Class.forName("org.bukkit.Server").getMethod("getOnlinePlayers");
+        } catch (Exception e) {
+            cached = null;
+        }
+        ONLINE_PLAYERS_METHOD = cached;
+        return cached;
     }
 
     public static class MetricsBase {
@@ -354,6 +380,8 @@ public class Metrics {
             }
             String url = String.format(REPORT_URL, platform);
             HttpsURLConnection connection = (HttpsURLConnection) new URL(url).openConnection();
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(5000);
             // Compress the data to save bandwidth
             byte[] compressedData = compress(data.toString());
             connection.setRequestMethod("POST");

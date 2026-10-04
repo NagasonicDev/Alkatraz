@@ -23,6 +23,7 @@ import me.nagasonic.alkatraz.items.magic.condition.implementation.CooldownCondit
 import me.nagasonic.alkatraz.items.magic.effect.EffectExecutor;
 import me.nagasonic.alkatraz.items.magic.persistence.ItemDataKeys;
 import me.nagasonic.alkatraz.items.magic.persistence.ItemInstanceSerializer;
+import me.nagasonic.alkatraz.items.magic.trigger.TriggerPipeline;
 import me.nagasonic.alkatraz.spells.Spell;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -64,6 +65,19 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class MagicItemTriggerAdapter implements Listener {
 
     private final Map<UUID, Map<Integer, ItemStack>> previousEquipment = new ConcurrentHashMap<>();
+
+    /**
+     * Fast paths for the damage triggers so the parameter {@link HashMap} and, for projectiles,
+     * the weapon-instance deserialisation are skipped when no definition declares them. These
+     * are {@code static final} on purpose: the bound-trigger index is only consulted for
+     * membership, and {@code isBound} fails open while the index is still unbuilt, so the worst
+     * case is the previous behaviour. Recomputing per event would risk caching a premature
+     * "unbound" verdict if the index is (re)built after this class loads.
+     */
+    private static final boolean DAMAGE_TAKEN_BOUND =
+            TriggerPipeline.isBound(TriggerPipeline.boundKey("on_damage_taken"));
+    private static final boolean DAMAGE_DEALT_BOUND =
+            TriggerPipeline.isBound(TriggerPipeline.boundKey("on_damage_dealt"));
 
     // -----------------------------------------------------------------------
     // Existing adapters
@@ -159,6 +173,7 @@ public final class MagicItemTriggerAdapter implements Listener {
      */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onDamageTaken(EntityDamageEvent event) {
+        if (!DAMAGE_TAKEN_BOUND) return;
         if (!(event.getEntity() instanceof Player player)) return;
 
         LivingEntity damager = event instanceof EntityDamageByEntityEvent de
@@ -195,13 +210,15 @@ public final class MagicItemTriggerAdapter implements Listener {
         } else if (event.getDamager() instanceof Projectile projectile
                 && projectile.getShooter() instanceof Player player) {
             attacker = player;
-            String raw = projectile.getPersistentDataContainer().get(
-                    ItemDataKeys.projectileWeaponInstance(), PersistentDataType.STRING);
-            if (raw != null && !raw.isBlank()) {
-                try {
-                    weaponInstance = ItemInstanceSerializer.deserialize(raw);
-                } catch (IllegalStateException ignored) {
-                    weaponInstance = null;
+            if (DAMAGE_DEALT_BOUND) {
+                String raw = projectile.getPersistentDataContainer().get(
+                        ItemDataKeys.projectileWeaponInstance(), PersistentDataType.STRING);
+                if (raw != null && !raw.isBlank()) {
+                    try {
+                        weaponInstance = ItemInstanceSerializer.deserialize(raw);
+                    } catch (IllegalStateException ignored) {
+                        weaponInstance = null;
+                    }
                 }
             }
         }
@@ -213,6 +230,8 @@ public final class MagicItemTriggerAdapter implements Listener {
             CastEventListener.clearSpellDamage(victim);
             return;
         }
+
+        if (!DAMAGE_DEALT_BOUND) return;
 
         Map<String, Object> params = new HashMap<>();
         params.put("damage", event.getFinalDamage());
@@ -451,19 +470,27 @@ public final class MagicItemTriggerAdapter implements Listener {
             // Container views: shift-clicking auto-equips armour and can swap the off-hand.
             return true;
         }
-        if (event.getRawSlot() >= 36) {
+        int rawSlot = event.getRawSlot();
+        if (rawSlot >= 36) {
             // Armour (36-39) and off-hand (40) in the player's own inventory view.
             return true;
         }
-        // Main region of the player's own inventory: only a number-key swap, a drop,
-        // or a sweep can move the held item.
+        if (rawSlot >= 0 && rawSlot < 9) {
+            // The hotbar holds the main hand, so any click on it can change the profile:
+            // a plain pickup empties the held slot, a place refills it, and a cursor swap
+            // moves a stack between hotbar slots.
+            return true;
+        }
+        // Slots 9-35 only reach the held item through a sweep, which drops the stack into
+        // the first free hotbar slot and can land on the held one.
         switch (event.getAction()) {
             case HOTBAR_SWAP:
+            case MOVE_TO_OTHER_INVENTORY:
+            case COLLECT_TO_CURSOR:
             case DROP_ALL_SLOT:
             case DROP_ONE_SLOT:
             case DROP_ALL_CURSOR:
             case DROP_ONE_CURSOR:
-            case COLLECT_TO_CURSOR:
             case PICKUP_HALF:
             case UNKNOWN:
                 return true;
@@ -480,9 +507,9 @@ public final class MagicItemTriggerAdapter implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void postInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player player)) return;
-        EquipmentService.invalidate(player.getUniqueId());
         Map<Integer, ItemStack> before = previousEquipment.remove(player.getUniqueId());
         if (before == null) return;
+        EquipmentService.invalidate(player.getUniqueId());
 
         Map<Integer, ItemStack> after = snapshotEquipment(player);
         boolean changed = false;
@@ -539,9 +566,9 @@ public final class MagicItemTriggerAdapter implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void postInventoryDrag(InventoryDragEvent event) {
         if (!(event.getWhoClicked() instanceof Player player)) return;
-        EquipmentService.invalidate(player.getUniqueId());
         Map<Integer, ItemStack> before = previousEquipment.remove(player.getUniqueId());
         if (before == null) return;
+        EquipmentService.invalidate(player.getUniqueId());
 
         Map<Integer, ItemStack> after = snapshotEquipment(player);
         boolean changed = false;

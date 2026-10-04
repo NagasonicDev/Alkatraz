@@ -17,6 +17,16 @@ affinity_per_point: 10
 # How much resistance you gain from investing 1 stat point. DEFAULT: 10
 resistance_per_point: 10
 
+# Diminishing-returns exponent applied to invested stat points.
+# affinity = affinity_per_point * points ^ affinity_exponent
+# At 0.65 this gives 28 affinity at 5 points and 215 at 112, so the multiplier
+# spans x1.28 to x3.15 across circles 1-9 and `power` in the spell ymls stays
+# load-bearing. Set to 1.0 to restore the old linear curve. DEFAULT: 0.65
+affinity_exponent: 0.65
+
+# Diminishing-returns exponent for resistance. Same formula. DEFAULT: 0.65
+resistance_exponent: 0.65
+
 # The delay (ticks) of spawning the magic circle particles. DEFAULT: 10
 circle_ticks: 10
 

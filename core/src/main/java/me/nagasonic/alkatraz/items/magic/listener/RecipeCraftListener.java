@@ -1,6 +1,7 @@
 package me.nagasonic.alkatraz.items.magic.listener;
 
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.config.VerbosityLevel;
 import me.nagasonic.alkatraz.items.magic.imbue.ImbueManager;
 import me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack;
 import me.nagasonic.alkatraz.items.magic.persistence.ItemDataKeys;
@@ -31,7 +32,10 @@ public class RecipeCraftListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onPrepareCraft(PrepareItemCraftEvent event) {
-        if (event.getView().getPlayer() instanceof Player player && matrixChanged(player, event.getInventory().getMatrix())) {
+        ItemStack[] matrix = event.getInventory().getMatrix();
+        Player player = event.getView().getPlayer() instanceof Player viewer ? viewer : null;
+        String[] definitionKeys = player != null ? new String[matrix.length] : null;
+        if (player != null && matrixChanged(player, matrix, definitionKeys)) {
             UnlockManager.evaluate(player);
         }
         Recipe recipe = event.getRecipe();
@@ -46,9 +50,11 @@ public class RecipeCraftListener implements Listener {
             return;
         }
 
-        if (hasMagicIngredient(event)) {
-            Alkatraz.logHigh("[CraftListener] Blocking non-alkatraz recipe because matrix contains magic item(s): " +
-                    Arrays.toString(Arrays.stream(event.getInventory().getMatrix()).map(RecipeCraftListener::describeStack).toArray()));
+        if (hasMagicIngredient(matrix, definitionKeys)) {
+            if (Alkatraz.isLoggable(VerbosityLevel.HIGH)) {
+                Alkatraz.logHigh("[CraftListener] Blocking non-alkatraz recipe because matrix contains magic item(s): " +
+                        Arrays.toString(Arrays.stream(matrix).map(RecipeCraftListener::describeStack).toArray()));
+            }
             event.getInventory().setResult(null);
         }
     }
@@ -65,16 +71,22 @@ public class RecipeCraftListener implements Listener {
      * and amount plus, for magic items, the definition and instance payload, which
      * covers every matrix change the unlock sweep could care about without paying
      * {@code ItemStack#hashCode}'s meta copy.
+     *
+     * <p>Each cell's meta is read once here and its raw definition string handed back in
+     * {@code definitionKeys}, so {@link #hasMagicIngredient} can reuse it instead of
+     * re-reading the meta of all nine cells. {@code definitionKeys} is {@code null} when the
+     * view is not a player, in which case no fingerprint pass ran and the caller has to
+     * probe every cell.
      */
-    private static boolean matrixChanged(Player player, ItemStack[] matrix) {
+    private static boolean matrixChanged(Player player, ItemStack[] matrix, String[] definitionKeys) {
         int hash = 1;
-        for (ItemStack cell : matrix) {
-            hash = 31 * hash + cellHash(cell);
+        for (int i = 0; i < matrix.length; i++) {
+            hash = 31 * hash + cellHash(matrix[i], definitionKeys, i);
         }
         return !Objects.equals(lastMatrix.put(player.getUniqueId(), hash), hash);
     }
 
-    private static int cellHash(ItemStack cell) {
+    private static int cellHash(ItemStack cell, String[] definitionKeys, int index) {
         if (cell == null || cell.getType().isAir()) {
             return 0;
         }
@@ -89,6 +101,7 @@ public class RecipeCraftListener implements Listener {
         PersistentDataContainer pdc = meta.getPersistentDataContainer();
         String definition = pdc.get(ItemDataKeys.itemDefinition(), PersistentDataType.STRING);
         if (definition != null) {
+            definitionKeys[index] = definition;
             hash = 31 * hash + definition.hashCode();
         }
         String instance = pdc.get(ItemDataKeys.itemInstance(), PersistentDataType.STRING);
@@ -98,9 +111,28 @@ public class RecipeCraftListener implements Listener {
         return hash;
     }
 
-    private static boolean hasMagicIngredient(PrepareItemCraftEvent event) {
-        for (ItemStack item : event.getInventory().getMatrix()) {
-            if (item != null && !item.getType().isAir() && MagicItemStack.isMagicItem(item)) {
+    /**
+     * Whether any matrix cell is a magic item. A cell whose raw definition string was
+     * already read by the fingerprint pass is confirmed with a single
+     * {@link MagicItemStack#isMagicItem} probe (needed because a blank or unparseable
+     * definition is not a magic item), and the scan stops at the first hit. When no
+     * fingerprint pass ran ({@code definitionKeys} is {@code null}) every cell is probed,
+     * because a cell with no cached definition string may still be a magic item.
+     */
+    private static boolean hasMagicIngredient(ItemStack[] matrix, String[] definitionKeys) {
+        boolean preRead = definitionKeys != null;
+        for (int i = 0; i < matrix.length; i++) {
+            if (preRead) {
+                String definition = definitionKeys[i];
+                if (definition == null || definition.isBlank()) {
+                    continue;
+                }
+            }
+            ItemStack cell = matrix[i];
+            if (cell == null || cell.getType().isAir()) {
+                continue;
+            }
+            if (MagicItemStack.isMagicItem(cell)) {
                 return true;
             }
         }

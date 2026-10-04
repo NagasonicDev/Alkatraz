@@ -90,6 +90,20 @@ public class RecipeListMenu extends PagedMenu<AlkatrazRecipe> {
 
     private record UnlockSnapshot(Set<String> keys, long stamp) {}
 
+    /**
+     * Drops one player's cached unlock snapshot. The TTL only refreshes the values,
+     * so the entry itself has to be evicted on quit or it is retained for the whole
+     * process lifetime.
+     */
+    public static void clearUnlockCache(UUID uuid) {
+        UNLOCK_CACHE.remove(uuid);
+    }
+
+    /** Drops every cached unlock snapshot (plugin disable). */
+    public static void clearAllUnlockCaches() {
+        UNLOCK_CACHE.clear();
+    }
+
     private static Set<String> unlockedKeys(Player viewer, List<AlkatrazRecipe> recipes) {
         UUID uuid = viewer.getUniqueId();
         long now = System.currentTimeMillis();

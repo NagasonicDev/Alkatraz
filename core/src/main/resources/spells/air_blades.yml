@@ -16,22 +16,27 @@ code: 'RLSRS'
 
 # THE MAGIC CIRCLE REQUIRED TO CAST
 level: 2
-required_focus: 50
+required_focus: 40
 
 # COOLDOWN BEFORE CASTING AGAIN (SECONDS)
-cooldown: 6
+cooldown: 5
 
 # BASE CAST TIME (SECONDS)
 cast_time: 0.8
 
 # MANA COST
-mana_cost: 40
+mana_cost: 24
 
 # MAXIMUM MASTERY ACHIEVABLE. NOT RECOMMENDED TO CHANGE
 maximum_mastery: 100
 
 # BASE POWER (DAMAGE PER BLADE HIT)
-power: 4.5
+power: 4.2
+
+# WHAT THE SPELL IS JUDGED ON. The whole volley shares ONE AttackProperties, so a
+# target caught by two blades of the same fan is only damaged once - see spec
+# section 5.2.
+role: 'BURST'
 
 # HOW FAST EACH BLADE TRAVELS (BLOCKS PER TICK)
 blade_speed: 1.2

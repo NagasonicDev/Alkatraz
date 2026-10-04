@@ -95,6 +95,10 @@ public final class EquipmentStorage {
             playerItems.put(slot.getKey().getKey(), item.clone());
             if (oldItem == null || !areItemsSimilar(oldItem, item)) changed = true;
         }
+        if (item != null && !item.getType().isAir() && item.hasItemMeta()
+                && me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack.isMagicItem(item)) {
+            EquipmentService.markMagicEquipped();
+        }
         if (changed) {
             Alkatraz.logDebug("Equipment change for " + player.getName() + " [" + slot.getKey().getKey() + "]");
         }
@@ -118,19 +122,17 @@ public final class EquipmentStorage {
 
     private static void fireOnUnequipEvent(Player player, EquipmentSlot slot, ItemStack item) {
         try {
-            me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack magicItemStack = null;
-            if (item != null && item.hasItemMeta() && me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack.isMagicItem(item)) {
-                java.util.Optional<me.nagasonic.alkatraz.api.magic.instance.MagicItemInstance> optionalInstance = me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack.readInstance(item);
-                if (optionalInstance.isPresent()) {
-                    me.nagasonic.alkatraz.api.magic.instance.MagicItemInstance instance = optionalInstance.get();
-                    java.util.Optional<me.nagasonic.alkatraz.api.magic.definition.ItemDefinition> optionalDefinition = me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack.readDefinition(item);
-                    if (optionalDefinition.isPresent()) {
-                        me.nagasonic.alkatraz.api.magic.definition.ItemDefinition definition = optionalDefinition.get();
-                        me.nagasonic.alkatraz.api.magic.trigger.TriggerContext ctx = new me.nagasonic.alkatraz.api.magic.trigger.TriggerContext(player, null, null, null, null, java.util.Map.of());
-                        me.nagasonic.alkatraz.api.magic.trigger.TriggerContext scoped = ctx.withSource(instance, slot);
-                        me.nagasonic.alkatraz.items.magic.MagicItemServices.get().dispatchTrigger(
-                                new me.nagasonic.alkatraz.api.magic.trigger.InternalTriggerEvent(me.nagasonic.alkatraz.api.magic.registry.MagicKeys.alkatraz("on_unequip"), scoped));
-                    }
+            if (item == null || !item.hasItemMeta()) return;
+            java.util.Optional<me.nagasonic.alkatraz.api.magic.instance.MagicItemInstance> optionalInstance = me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack.readInstance(item);
+            if (optionalInstance.isPresent()) {
+                me.nagasonic.alkatraz.api.magic.instance.MagicItemInstance instance = optionalInstance.get();
+                java.util.Optional<me.nagasonic.alkatraz.api.magic.definition.ItemDefinition> optionalDefinition = me.nagasonic.alkatraz.api.magic.registry.MagicItemRegistries.ITEM_DEFINITIONS.get(instance.definitionKey());
+                if (optionalDefinition.isPresent()) {
+                    me.nagasonic.alkatraz.api.magic.definition.ItemDefinition definition = optionalDefinition.get();
+                    me.nagasonic.alkatraz.api.magic.trigger.TriggerContext ctx = new me.nagasonic.alkatraz.api.magic.trigger.TriggerContext(player, null, null, null, null, java.util.Map.of());
+                    me.nagasonic.alkatraz.api.magic.trigger.TriggerContext scoped = ctx.withSource(instance, slot);
+                    me.nagasonic.alkatraz.items.magic.MagicItemServices.get().dispatchTrigger(
+                            new me.nagasonic.alkatraz.api.magic.trigger.InternalTriggerEvent(me.nagasonic.alkatraz.api.magic.registry.MagicKeys.alkatraz("on_unequip"), scoped));
                 }
             }
         } catch (Exception e) {
@@ -140,19 +142,17 @@ public final class EquipmentStorage {
 
     private static void fireOnEquipEvent(Player player, EquipmentSlot slot, ItemStack item) {
         try {
-            me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack magicItemStack = null;
-            if (item != null && item.hasItemMeta() && me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack.isMagicItem(item)) {
-                java.util.Optional<me.nagasonic.alkatraz.api.magic.instance.MagicItemInstance> optionalInstance = me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack.readInstance(item);
-                if (optionalInstance.isPresent()) {
-                    me.nagasonic.alkatraz.api.magic.instance.MagicItemInstance instance = optionalInstance.get();
-                    java.util.Optional<me.nagasonic.alkatraz.api.magic.definition.ItemDefinition> optionalDefinition = me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack.readDefinition(item);
-                    if (optionalDefinition.isPresent()) {
-                        me.nagasonic.alkatraz.api.magic.definition.ItemDefinition definition = optionalDefinition.get();
-                        me.nagasonic.alkatraz.api.magic.trigger.TriggerContext ctx = new me.nagasonic.alkatraz.api.magic.trigger.TriggerContext(player, null, null, null, null, java.util.Map.of());
-                        me.nagasonic.alkatraz.api.magic.trigger.TriggerContext scoped = ctx.withSource(instance, slot);
-                        me.nagasonic.alkatraz.items.magic.MagicItemServices.get().dispatchTrigger(
-                                new me.nagasonic.alkatraz.api.magic.trigger.event.EquipTriggerEvent(scoped));
-                    }
+            if (item == null || !item.hasItemMeta()) return;
+            java.util.Optional<me.nagasonic.alkatraz.api.magic.instance.MagicItemInstance> optionalInstance = me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack.readInstance(item);
+            if (optionalInstance.isPresent()) {
+                me.nagasonic.alkatraz.api.magic.instance.MagicItemInstance instance = optionalInstance.get();
+                java.util.Optional<me.nagasonic.alkatraz.api.magic.definition.ItemDefinition> optionalDefinition = me.nagasonic.alkatraz.api.magic.registry.MagicItemRegistries.ITEM_DEFINITIONS.get(instance.definitionKey());
+                if (optionalDefinition.isPresent()) {
+                    me.nagasonic.alkatraz.api.magic.definition.ItemDefinition definition = optionalDefinition.get();
+                    me.nagasonic.alkatraz.api.magic.trigger.TriggerContext ctx = new me.nagasonic.alkatraz.api.magic.trigger.TriggerContext(player, null, null, null, null, java.util.Map.of());
+                    me.nagasonic.alkatraz.api.magic.trigger.TriggerContext scoped = ctx.withSource(instance, slot);
+                    me.nagasonic.alkatraz.items.magic.MagicItemServices.get().dispatchTrigger(
+                            new me.nagasonic.alkatraz.api.magic.trigger.event.EquipTriggerEvent(scoped));
                 }
             }
         } catch (Exception e) {

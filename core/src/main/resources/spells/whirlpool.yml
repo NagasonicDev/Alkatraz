@@ -8,16 +8,20 @@ enabled: true
 element: 'WATER'
 code: 'RLLSR'
 level: 4
-required_focus: 85
-cooldown: 25
+required_focus: 90
+cooldown: 7
 cast_time: 1.5
-mana_cost: 55
+mana_cost: 75
 maximum_mastery: 200
-power: 3.0
+
+# DAMAGE PER HIT. The field damages a target at most once every
+# SpellAttackContext.DAMAGE_INTERVAL_TICKS (20) ticks, so over the default
+# 8 second duration that is 8 hits = 22 total, exactly the circle-4 SUSTAIN budget.
+power: 2.75
 radius: 5.0
 duration: 8
-damage_per_tick: 1.0
 pull_strength: 0.4
+role: 'SUSTAIN'
 mastery_bar_color: 'BLUE'
 gui_item: 'WATER_BUCKET'
 gui_custom_model_data: 4131

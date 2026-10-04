@@ -14,16 +14,16 @@ code: 'LRRSS'
 
 # THE MAGIC CIRCLE REQUIRED TO CAST
 level: 2
-required_focus: 50
+required_focus: 40
 
 # COOLDOWN BEFORE CASTING AGAIN
-cooldown: 20
+cooldown: 5
 
 # BASE CAST TIME (SECONDS)
 cast_time: 1.5
 
 # MANA COST
-mana_cost: 75
+mana_cost: 24
 
 # MAXIMUM MASTERY ACHIEVABLE. NOT RECOMMENDED TO CHANGE
 maximum_mastery: 150
@@ -33,6 +33,10 @@ base_heal: 2
 
 # THE MAXIMUM THAT CAN BE HEALED THROUGH THE SPELL
 max_heal: 5
+
+# UTILITY - healing is not a damage role, so it carries no budget and no
+# power: key. The base comes from base_heal below.
+role: 'UTILITY'
 
 #THE COLOR OF THE SPELL MASTERY BOSSBAR. OPTIONS ARE: RED, BLUE, YELLOW, PINK, PURPLE, WHITE AND GREEN
 mastery_bar_color: 'YELLOW'

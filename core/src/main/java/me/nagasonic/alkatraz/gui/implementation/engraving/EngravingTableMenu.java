@@ -24,6 +24,7 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -126,8 +127,9 @@ public class EngravingTableMenu extends Menu {
 
     private ItemStack createItemDisplay() {
         ItemStack display = targetStack.clone();
-        List<String> lore = display.hasItemMeta() && display.getItemMeta().hasLore()
-                ? display.getItemMeta().getLore()
+        ItemMeta displayMeta = display.hasItemMeta() ? display.getItemMeta() : null;
+        List<String> lore = displayMeta != null && displayMeta.hasLore()
+                ? displayMeta.getLore()
                 : new ArrayList<>();
         lore.add("");
         lore.add(ColorFormat.format(lang().get("engraving.engravings_header",

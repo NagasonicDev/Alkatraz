@@ -64,10 +64,12 @@ public class SpellComponentHandler implements Listener {
             public void run() {
                 if (activeComponents.isEmpty()) return;
 
-                detectCollisions();
+                int count = fillSnapshot();
+
+                detectCollisions(count);
                 deflectTickCounter++;
                 if (deflectTickCounter >= 2) {
-                    deflectProjectiles();
+                    deflectProjectiles(count);
                     deflectTickCounter = 0;
                 }
                 for (SpellComponent comp : activeComponents.values()){
@@ -77,6 +79,11 @@ public class SpellComponentHandler implements Listener {
                         b.tick();
                     }else if (comp instanceof BarrierWallComponent w){
                         w.tick();
+                    }else if (comp instanceof SpellEntityComponent e){
+                        Entity entity = e.getEntity();
+                        if (entity == null || entity.isDead() || !entity.isValid()) {
+                            remove(comp.getComponentID());
+                        }
                     }
                 }
             }
@@ -98,11 +105,14 @@ public class SpellComponentHandler implements Listener {
         deflectTickCounter = 0;
     }
 
-    private static void deflectProjectiles() {
-        for (SpellComponent comp : activeComponents.values()) {
+    private static void deflectProjectiles(int count) {
+        Set<SpellProperties> seen = Collections.newSetFromMap(new IdentityHashMap<>());
+        for (int i = 0; i < count; i++) {
+            SpellComponent comp = snapComp[i];
             if (comp.getType() != SpellComponentType.DEFENSE) continue;
             if (!(comp.getProperties() instanceof BarrierProperties props)) continue;
             if (props.getType() != BarrierType.PHYSICAL && props.getType() != BarrierType.COMBINED) continue;
+            if (!seen.add(props)) continue;
 
             Location center = props.getCastLocation();
             if (center == null) continue;
@@ -144,8 +154,10 @@ public class SpellComponentHandler implements Listener {
     }
 
     public static void detectCollisions(){
-        int count = fillSnapshot();
+        detectCollisions(fillSnapshot());
+    }
 
+    private static void detectCollisions(int count){
         for (int i = 0; i < count; i++) {
             SpellComponent comp = snapComp[i];
             SpellComponentType typeI = comp.getType();

@@ -16,6 +16,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.*;
 import java.util.logging.Level;
@@ -27,6 +28,12 @@ import java.util.logging.Level;
 public class ProfileManager implements Listener {
     private static ProfileCache cache;
     private static boolean initialized = false;
+    private static BukkitTask manaRegenTask;
+
+    /** One shared regeneration pass per second for every online player. */
+    private static final long MANA_REGEN_PERIOD_TICKS = 20L;
+    /** Offset from the focus regen task so both do not fire on the same tick. */
+    private static final long MANA_REGEN_INITIAL_DELAY_TICKS = 10L;
 
     /**
      * Initializes the profile system
@@ -43,7 +50,19 @@ public class ProfileManager implements Listener {
         // Register the event listener
         Bukkit.getPluginManager().registerEvents(new ProfileManager(), Alkatraz.getInstance());
         
+        startManaRegenTask();
+
         Alkatraz.getInstance().getLogger().info("ProfileManager initialized successfully");
+    }
+
+    private static void startManaRegenTask() {
+        manaRegenTask = Bukkit.getScheduler().runTaskTimer(Alkatraz.getInstance(), () -> {
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                MagicProfile profile = getProfile(player.getUniqueId(), MagicProfile.class);
+                if (profile == null) continue;
+                profile.regenMana();
+            }
+        }, MANA_REGEN_INITIAL_DELAY_TICKS, MANA_REGEN_PERIOD_TICKS);
     }
 
     /**
@@ -53,6 +72,11 @@ public class ProfileManager implements Listener {
      */
     public static void shutdown() {
         if (!initialized) return;
+
+        if (manaRegenTask != null) {
+            manaRegenTask.cancel();
+            manaRegenTask = null;
+        }
         
         saveAllCachedProfiles();
         cache.clear();
@@ -219,13 +243,6 @@ public class ProfileManager implements Listener {
         for (Class<? extends Profile> profileClass : ProfileRegistry.getRegisteredProfiles()) {
             Profile profile = ProfilePersistence.loadProfile(uuid, profileClass);
             cache.cacheProfile(uuid, profile);
-            startProfileTasks(profile);
-        }
-    }
-
-    private static void startProfileTasks(Profile profile) {
-        if (profile instanceof MagicProfile magicProfile) {
-            magicProfile.addManaPerSecond();
         }
     }
 
@@ -288,11 +305,7 @@ public class ProfileManager implements Listener {
     public static void reloadPlayer(UUID uuid) {
         ensureInitialized();
         
-        // Remove from cache (cancelling any task owned by the outgoing instance)
-        MagicProfile existing = cache.getProfile(uuid, MagicProfile.class);
-        if (existing != null) {
-            existing.cancelManaRegenTask();
-        }
+        // Remove from cache before loading fresh from disk
         cache.removePlayer(uuid);
         
         // Load fresh from disk
@@ -372,16 +385,6 @@ public class ProfileManager implements Listener {
         Player player = event.getPlayer();
 
         try {
-            MagicProfile magicProfile = getProfile(player.getUniqueId(), MagicProfile.class);
-            if (magicProfile != null) {
-                magicProfile.cancelManaRegenTask();
-            }
-        } catch (Exception e) {
-            Alkatraz.getInstance().getLogger().log(Level.SEVERE, 
-                "Failed to cancel mana regen task for player: " + player.getName(), e);
-        }
-
-        try {
             EquipmentStorage.unload(player);
         } catch (Exception e) {
             Alkatraz.getInstance().getLogger().log(Level.SEVERE, 
@@ -396,6 +399,11 @@ public class ProfileManager implements Listener {
             Alkatraz.getInstance().getLogger().log(Level.SEVERE, 
                 "Failed to save profiles for player: " + player.getName(), e);
         }
+
+        // Regeneration is shared, but the memoised player folder would otherwise
+        // keep an entry for this UUID for the lifetime of the process. Dropped
+        // last, because the save above re-memoises it.
+        ProfilePersistence.forgetPlayer(player.getUniqueId());
     }
 
     // Helper Methods

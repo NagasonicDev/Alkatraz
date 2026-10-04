@@ -55,6 +55,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
 
     private static volatile List<String> spellIdCache;
     private static volatile List<String> magicMobIdCache;
+    private static volatile List<String> giveItemIdCache;
     private static volatile List<String> cachedPlayerNames;
     private static volatile long cachedPlayerNamesStamp;
 
@@ -668,15 +669,22 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
     private List<String> tabGive(CommandSender sender, String[] args) {
         if (!Permission.hasPermission(sender, Permission.COMMAND_GIVE)) return List.of();
         return switch (args.length) {
-            case 2 -> {
-                java.util.List<String> ids = new java.util.ArrayList<>();
-                ids.addAll(MagicItemRegistries.ITEM_DEFINITIONS.values().stream().map(def -> def.getKey().getKey()).collect(Collectors.toList()));
-                ids.addAll(MagicItemRegistries.ENGRAVING_DEFINITIONS.values().stream().map(def -> def.getKey().getKey()).collect(Collectors.toList()));
-                yield ids;
-            }
+            case 2 -> giveItemIds();
             case 3, 4 -> playerNames();
             default -> List.of();
         };
+    }
+
+    private List<String> giveItemIds() {
+        List<String> cached = giveItemIdCache;
+        if (cached == null) {
+            java.util.List<String> ids = new java.util.ArrayList<>();
+            ids.addAll(MagicItemRegistries.ITEM_DEFINITIONS.values().stream().map(def -> def.getKey().getKey()).collect(Collectors.toList()));
+            ids.addAll(MagicItemRegistries.ENGRAVING_DEFINITIONS.values().stream().map(def -> def.getKey().getKey()).collect(Collectors.toList()));
+            cached = ids;
+            giveItemIdCache = cached;
+        }
+        return cached;
     }
 
     private List<String> tabConvert(CommandSender sender, String[] args) {
@@ -766,6 +774,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
     private static void refreshStaticCompletions() {
         spellIdCache = SpellRegistry.getAllSpells().values().stream().map(Spell::getId).collect(Collectors.toList());
         magicMobIdCache = Arrays.stream(MagicEntityType.values()).map(MagicEntityType::getId).collect(Collectors.toList());
+        giveItemIdCache = null;
     }
 
     private static String decimal(double value) {

@@ -17,7 +17,7 @@ level: 1
 required_focus: 20
 
 # COOLDOWN BEFORE CASTING AGAIN
-cooldown: 5
+cooldown: 4
 
 # BASE CAST TIME (SECONDS)
 cast_time: 0.5
@@ -28,7 +28,8 @@ mana_cost: 15
 # MAXIMUM MASTERY ACHIEVABLE. NOT RECOMMENDED TO CHANGE
 maximum_mastery: 100
 
-power: 2
+power: 3.0
+role: 'BURST'
 
 #THE COLOR OF THE SPELL MASTERY BOSSBAR. OPTIONS ARE: RED, BLUE, YELLOW, PINK, PURPLE, WHITE AND GREEN
 mastery_bar_color: 'BLUE'

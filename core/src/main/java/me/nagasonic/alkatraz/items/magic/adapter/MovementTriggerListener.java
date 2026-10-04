@@ -2,6 +2,7 @@ package me.nagasonic.alkatraz.items.magic.adapter;
 
 import me.nagasonic.alkatraz.items.magic.trigger.PlayerMoveTracker;
 import me.nagasonic.alkatraz.items.magic.trigger.TriggerDispatch;
+import me.nagasonic.alkatraz.items.magic.trigger.TriggerPipeline;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -31,6 +32,27 @@ import java.util.Set;
  * {@link PlayerMoveTracker}.
  */
 public final class MovementTriggerListener implements Listener {
+
+    /**
+     * Whether any loaded definition declares a movement-state trigger at all. Building a
+     * {@link PlayerMoveTracker.MoveState} costs two location clones, a block-key string, a
+     * biome lookup and a block-type read on every block boundary crossed, all of which the
+     * pipeline would discard when no movement trigger is bound. {@code isBound} fails open
+     * (returns {@code true} while the index is unavailable), so behaviour is unchanged there.
+     *
+     * <p>Evaluated per event rather than cached in a static field because the bound-trigger
+     * index is built after listener construction; the check is a short-circuiting chain of
+     * memoised key lookups and set probes, which is far cheaper than the work it guards.
+     */
+    private static boolean movementTriggersBound() {
+        return TriggerPipeline.isBound(TriggerPipeline.boundKey(PlayerMoveTracker.STEP_ON_BLOCK))
+                || TriggerPipeline.isBound(TriggerPipeline.boundKey(PlayerMoveTracker.JUMP))
+                || TriggerPipeline.isBound(TriggerPipeline.boundKey(PlayerMoveTracker.LAND))
+                || TriggerPipeline.isBound(TriggerPipeline.boundKey(PlayerMoveTracker.ENTER_WATER))
+                || TriggerPipeline.isBound(TriggerPipeline.boundKey(PlayerMoveTracker.ENTER_LAVA))
+                || TriggerPipeline.isBound(TriggerPipeline.boundKey(PlayerMoveTracker.CLIMB))
+                || TriggerPipeline.isBound(TriggerPipeline.boundKey(PlayerMoveTracker.ENTER_BIOME));
+    }
 
     private final PlayerMoveTracker tracker = new PlayerMoveTracker();
 
@@ -120,6 +142,8 @@ public final class MovementTriggerListener implements Listener {
      */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onMove(PlayerMoveEvent event) {
+        if (!movementTriggersBound()) return;
+
         Player player = event.getPlayer();
         Location from = event.getFrom();
         Location to = event.getTo();
@@ -127,13 +151,14 @@ public final class MovementTriggerListener implements Listener {
 
         if (sameBlock(from, to)) return;
 
+        org.bukkit.Material blockType = to.getBlock().getType();
         PlayerMoveTracker.MoveState state = new PlayerMoveTracker.MoveState(
                 blockKey(to),
-                to.getBlock().getType().name(),
+                blockType.name(),
                 player.isOnGround(),
                 player.isInWater(),
-                TriggerDispatch.inLava(player),
-                TriggerDispatch.isClimbing(player),
+                TriggerDispatch.inLava(to),
+                TriggerDispatch.isClimbing(to),
                 to.getWorld().getBiome(to.getBlockX(), to.getBlockZ()).name(),
                 to.getY()
         );

@@ -6,6 +6,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class OptionValue<T> {
@@ -123,10 +124,10 @@ public class OptionValue<T> {
     }
 
     public List<ValueRequirement> getRequirements() {
-        return new ArrayList<>(requirements);
+        return Collections.unmodifiableList(requirements);
     }
 
     public List<ValueImpact> getImpacts() {
-        return new ArrayList<>(impacts);
+        return Collections.unmodifiableList(impacts);
     }
 }

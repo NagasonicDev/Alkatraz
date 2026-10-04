@@ -1,10 +1,13 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.api.Element;
 import me.nagasonic.alkatraz.config.ConfigManager;
-import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.lang.LangManager;
+import me.nagasonic.alkatraz.spells.vfx.CastCircle;
+import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
+import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
 import me.nagasonic.alkatraz.spells.components.SpellParticleComponent;
@@ -33,6 +36,23 @@ import org.bukkit.util.Vector;
 import java.util.*;
 
 public class WaterSphere extends AttackSpell {
+
+    /**
+     * The single WATER palette. Every colour in this spell comes from here: the projectile head is
+     * the leading edge and takes {@code core}, and the palette's own tail shading darkens behind
+     * it. Nothing in this file may name an RGB value - five near-identical hand-picked blues is
+     * exactly how the WATER element ended up looking like five different elements.
+     */
+    private static final ElementPalette.Palette PALETTE = ElementPalette.of(Element.WATER);
+
+    /** Head-cluster density: one particle per this fraction of a block of radius. */
+    private static final int CLUSTER_POINTS_PER_BLOCK = 32;
+    /** Tail particles trailing behind the travelling head. */
+    private static final int TAIL_POINTS = 10;
+    /** Tail length as a multiple of the head cluster's radius. */
+    private static final double TAIL_LENGTH_PER_RADIUS = 2.5;
+    /** Cast-circle scale; this spell has always drawn a circle-1 sized glyph. */
+    private static final double CIRCLE_SIZE = 2.0;
 
     private static LangManager lang() {
         return Alkatraz.getLangManager();
@@ -72,15 +92,14 @@ public class WaterSphere extends AttackSpell {
     public void castAction(Player caster, ItemStack wand) {
         if (caster.isDead()) return;
 
-        double wandPower = getWandPower(wand, caster);
-        double power = getPower(caster, getBasePower()) * wandPower;
         double radius = getModifiedStat(caster, "sphere_size", sphereRadius);
         double range = getModifiedStat(caster, "sphere_range", sphereRange);
 
+        // RAW base power. getPower is applied once per impact, below.
         AttackProperties props = new AttackProperties(
                 caster,
                 Utils.castLocation(caster),
-                power,
+                getBasePower() * getWandPower(wand, caster),
                 AttackType.MAGIC
         );
 
@@ -95,12 +114,12 @@ public class WaterSphere extends AttackSpell {
         if (caster.isDead()) return;
 
         double wandp = getWandPowerOrDefault(wand);
-        double power = getPower(caster, getBasePower()) * wandp;
 
+        // RAW base power. getPower is applied once per impact, below.
         AttackProperties props = new AttackProperties(
                 caster,
                 Utils.castLocation(caster),
-                power,
+                getBasePower() * wandp,
                 AttackType.MAGIC
         );
 
@@ -120,15 +139,21 @@ public class WaterSphere extends AttackSpell {
         List<Location> path = ParticleUtils.line(1, caster.getEyeLocation(), targetLoc);
         int totalSteps = path.size();
 
-        // Pre-compute fibonacci sphere points for even distribution
-        int spherePoints = (int) (radius * 32);
-        List<Location> baseSphere = ParticleUtils.fibonacciSphere(new Location(null, 0, 0, 0), radius, spherePoints);
+        // Head-cluster density scales with the radius the stat mods asked for.
+        int clusterPoints = Math.max(6, (int) (radius * CLUSTER_POINTS_PER_BLOCK));
 
-        Set<UUID> damaged = new HashSet<>();
+        // One travel direction for the whole flight. The path is a straight line, so a per-step
+        // direction would only add noise to the tail.
+        Vector travel = targetLoc.toVector().subtract(caster.getEyeLocation().toVector());
+        if (travel.lengthSquared() < 1e-9) {
+            travel = new Vector(0.0, 0.0, 1.0);
+        } else {
+            travel.normalize();
+        }
+        final Vector travelDir = travel;
 
         new BukkitRunnable() {
             int step = 0;
-            float rotation = 0;
 
             @Override
             public void run() {
@@ -146,45 +171,31 @@ public class WaterSphere extends AttackSpell {
                 }
 
                 Location center = path.get(step);
-                rotation += 0.15f;
 
-                // Rotate sphere points for a swirling visual
-                for (Location point : baseSphere) {
-                    double x = point.getX();
-                    double z = point.getZ();
-                    double cos = Math.cos(rotation);
-                    double sin = Math.sin(rotation);
-                    double rx = x * cos - z * sin;
-                    double rz = x * sin + z * cos;
+                // Signature shape: a travelling cluster with a tail. The head is `core` (the
+                // leading edge - what the eye tracks from the caster to the impact) and the tail
+                // darkens toward `deep` behind it, so the orb reads as leaving, not as a blob.
+                SpellVfx.projectile(WaterSphere.this, caster, center, travelDir,
+                        radius, clusterPoints, TAIL_POINTS, radius * TAIL_LENGTH_PER_RADIUS);
 
-                    Location worldLoc = center.clone().add(rx, point.getY(), rz);
-
-                    // Blue glow ring on the outer edge
-                    double dist = Math.sqrt(rx * rx + point.getY() * point.getY() + rz * rz);
-                    if (dist > radius * 0.85) {
-                        ParticleCaster.spawn(caster, worldLoc.getWorld(), Utils.DUST, worldLoc, 0,
-                                new Particle.DustOptions(Color.fromRGB(60, 180, 255), 0.5F));
-                    }
-
-                    // Core water particles - fewer toward the center
-                    ParticleCaster.spawn(caster, worldLoc.getWorld(), Utils.RAIN, worldLoc, 1, 0, 0, 0, 0);
-                    if (step % 2 == 0 && dist > radius * 0.4) {
-                        ParticleCaster.spawn(caster, worldLoc.getWorld(), Utils.SPLASH, worldLoc, 1,
-                                0.05, 0.05, 0.05, 0);
-                    }
-
-                    SpellParticleComponent comp = new SpellParticleComponent(
-                            WaterSphere.this,
-                            props,
-                            caster,
-                            wand,
-                            SpellComponentType.OFFENSE,
-                            worldLoc,
-                            0.5,
-                            1
-                    );
-                    SpellComponentHandler.register(comp);
+                // Water spray around the head, so the orb reads as liquid rather than as dust.
+                if (step % 2 == 0) {
+                    ParticleCaster.spawn(caster, center.getWorld(), Utils.SPLASH, center, 3,
+                            radius * 0.6, radius * 0.6, radius * 0.6, 0.05);
                 }
+
+                SpellParticleComponent comp = new SpellParticleComponent(
+                        WaterSphere.this,
+                        props,
+                        caster,
+                        wand,
+                        SpellComponentType.OFFENSE,
+                        center,
+                        radius,
+                        1
+                );
+                SpellComponentHandler.register(comp);
+
 
                 // Water ambient sound
                 if (step % 3 == 0) {
@@ -199,10 +210,12 @@ public class WaterSphere extends AttackSpell {
                     }
                     if (entity.equals(caster)) continue;
                     if (!(entity instanceof LivingEntity le)) continue;
-                    if (damaged.contains(entity.getUniqueId())) continue;
-                    damaged.add(entity.getUniqueId());
+                    // One getPower per damage instance, deduped for the whole cast.
+                    if (props.hasHit(le)) continue;
+                    props.hit(le);
 
-                    SpellDamageUtil.damageWithSpell(le, props.getRemainingPower(), caster, wand, WaterSphere.this);
+                    SpellDamageUtil.damageWithSpell(le, getPower(caster, le, props.getRemainingPower()),
+                            caster, wand, WaterSphere.this);
 
                     Vector push = Utils.safeNormalize(le.getLocation().toVector()
                             .subtract(center.toVector()));
@@ -239,7 +252,7 @@ public class WaterSphere extends AttackSpell {
 
         ParticleCaster.spawn(null, world, Utils.SPLASH, center, (int) (80 * sizeScale), r, r, r, 0.5);
         ParticleCaster.spawn(null, world, Utils.RAIN, center, (int) (120 * sizeScale), r, r, r, 1);
-        ParticleCaster.spawn(null, world, Particle.BUBBLE_POP, center, (int) (40 * sizeScale), r, r, r, 0.3);
+        ParticleCaster.spawn(null, world, Utils.BUBBLE_POP, center, (int) (40 * sizeScale), r, r, r, 0.3);
         world.playSound(center, Sound.ENTITY_FISHING_BOBBER_SPLASH, 1.5f, 0.8f);
         world.playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 0.5f, 1.5f);
     }
@@ -280,18 +293,8 @@ public class WaterSphere extends AttackSpell {
 
     @Override
     public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
-        return Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
-            if (e.isCancelled()) return;
-            Location playerLoc = caster.getEyeLocation();
-            float yaw = playerLoc.getYaw();
-            float pitch = playerLoc.getPitch();
-            Vector forward = playerLoc.getDirection().normalize().multiply(1.5);
-            List<Location> points = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 2, 0);
-            for (Location loc : points) {
-                ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0,
-                        new Particle.DustOptions(Color.fromRGB(60, 180, 255), 0.4F));
-            }
-        }, 0L, (Long) Configs.CIRCLE_TICKS.get());
+        // Size 2 is what this spell has always drawn; CastCircle owns the layout and the colour.
+        return CastCircle.start(this, caster, e, CIRCLE_SIZE, 0);
     }
 
     @Override

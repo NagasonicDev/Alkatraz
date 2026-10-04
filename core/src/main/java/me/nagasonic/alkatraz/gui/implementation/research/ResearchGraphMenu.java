@@ -24,6 +24,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ResearchGraphMenu extends Menu {
 
@@ -35,6 +36,56 @@ public class ResearchGraphMenu extends Menu {
     }
 
     private static LangManager lang() { return Alkatraz.getLangManager(); }
+
+    private static final PieceType[] PIECES = PieceType.values();
+    private static final String[] STATE_KEYS = {"hidden", "locked", "completed", "available", "in_progress"};
+    private static final String[][] CONNECTOR_KEYS = new String[PIECES.length][STATE_KEYS.length];
+
+    static {
+        for (int i = 0; i < PIECES.length; i++) {
+            String pieceKey = PIECES[i].name().toLowerCase();
+            for (int j = 0; j < STATE_KEYS.length; j++) {
+                CONNECTOR_KEYS[i][j] = pieceKey + "_" + STATE_KEYS[j];
+            }
+        }
+    }
+
+    private record CachedItem(ItemStack item, int source) {}
+
+    private static final Map<String, CachedItem> NODE_CACHE = new ConcurrentHashMap<>();
+    private static final Map<String, ItemStack> CONNECTOR_CACHE = new ConcurrentHashMap<>();
+    private static final int NODE_CACHE_LIMIT = 4096;
+    private static int connectorToken = Integer.MIN_VALUE;
+    private static volatile List<ResearchCategory> sortedCategoryCache;
+    private static volatile int sortedCategoryToken = Integer.MIN_VALUE;
+
+    /**
+     * Drops every graph-derived item cache. Called on plugin disable so a
+     * classloader-preserving reload never serves items built from a previous
+     * research graph or texture pack.
+     */
+    public static void clearCaches() {
+        NODE_CACHE.clear();
+        CONNECTOR_CACHE.clear();
+        sortedCategoryCache = null;
+        sortedCategoryToken = Integer.MIN_VALUE;
+        connectorToken = Integer.MIN_VALUE;
+    }
+
+    /**
+     * Fingerprint of every custom-model-data value the connector items embed.
+     * {@link TexturePackManager#reload()} swaps those values without touching the
+     * research graph, so a mismatch here invalidates just the connector cache.
+     */
+    private static int connectorFingerprint() {
+        int token = 0;
+        for (String[] row : CONNECTOR_KEYS) {
+            for (String key : row) {
+                token = token * 31 + TexturePackManager.getConnectorCMD(key);
+            }
+        }
+        return token;
+    }
 
     private static final int SLOT_PAN_NW = 0;
     private static final int SLOT_PAN_N = 4;
@@ -76,6 +127,11 @@ public class ResearchGraphMenu extends Menu {
 
     @Override
     protected void build() {
+        int token = connectorFingerprint();
+        if (token != connectorToken) {
+            connectorToken = token;
+            CONNECTOR_CACHE.clear();
+        }
         Arrays.fill(occupied, false);
         fillAll();
         drawEdges();
@@ -237,14 +293,13 @@ public class ResearchGraphMenu extends Menu {
         List<int[]> waypoints = child.getEdgePaths() != null
             ? child.getEdgePaths().get(parent.getId()) : null;
         if (waypoints != null && !waypoints.isEmpty()) {
-            drawEdgeWithWaypoints(parent, child, waypoints);
+            drawEdgeWithWaypoints(parent, child, parentState, waypoints);
         } else {
-            drawCardinalEdge(parent, child);
+            drawCardinalEdge(parent, child, parentState);
         }
     }
 
-    private void drawEdgeWithWaypoints(ResearchNode parent, ResearchNode child, List<int[]> waypoints) {
-        ResearchState parentState = ResearchService.getState(viewer, parent);
+    private void drawEdgeWithWaypoints(ResearchNode parent, ResearchNode child, ResearchState parentState, List<int[]> waypoints) {
         ResearchState childState = ResearchService.getState(viewer, child);
         String stateKey = getStateKey(parentState, childState);
 
@@ -272,8 +327,7 @@ public class ResearchGraphMenu extends Menu {
         }
     }
 
-    private void drawCardinalEdge(ResearchNode parent, ResearchNode child) {
-        ResearchState parentState = ResearchService.getState(viewer, parent);
+    private void drawCardinalEdge(ResearchNode parent, ResearchNode child, ResearchState parentState) {
         ResearchState childState = ResearchService.getState(viewer, child);
         String stateKey = getStateKey(parentState, childState);
 
@@ -325,6 +379,11 @@ public class ResearchGraphMenu extends Menu {
     }
 
     private ItemStack createNodeItem(ResearchNode node, ResearchState state) {
+        String cacheKey = node.getId() + "|" + state;
+        int source = System.identityHashCode(node);
+        CachedItem cached = NODE_CACHE.get(cacheKey);
+        if (cached != null && cached.source() == source) return cached.item();
+
         Material material = switch (state) {
             case HIDDEN -> Material.RED_DYE;
             case LOCKED -> Material.RED_CONCRETE;
@@ -353,6 +412,8 @@ public class ResearchGraphMenu extends Menu {
             setMenuData(item, "action", "research");
             setMenuData(item, "research_id", node.getId());
         }
+        if (NODE_CACHE.size() >= NODE_CACHE_LIMIT) NODE_CACHE.clear();
+        NODE_CACHE.put(cacheKey, new CachedItem(item, source));
         return item;
     }
 
@@ -401,9 +462,20 @@ public class ResearchGraphMenu extends Menu {
     }
 
     private static List<ResearchCategory> sortedCategories() {
-        return ResearchService.getCategories().stream()
+        List<ResearchCategory> current = ResearchService.getCategories();
+        int token = current.size();
+        for (ResearchCategory cat : current) {
+            token = token * 31 + cat.getId().hashCode();
+            token = token * 31 + cat.getDisplayName().hashCode();
+        }
+        List<ResearchCategory> cached = sortedCategoryCache;
+        if (cached != null && sortedCategoryToken == token) return cached;
+        List<ResearchCategory> sorted = current.stream()
                 .sorted(Comparator.comparing(ResearchCategory::getDisplayName))
                 .toList();
+        sortedCategoryCache = sorted;
+        sortedCategoryToken = token;
+        return sorted;
     }
 
     private int findActiveCategoryIndex(List<ResearchCategory> cats) {
@@ -457,13 +529,18 @@ public class ResearchGraphMenu extends Menu {
     }
 
     private ItemStack createConnectorItem(PieceType piece, String stateKey) {
+        String cacheKey = piece + "|" + stateKey;
+        ItemStack cached = CONNECTOR_CACHE.get(cacheKey);
+        if (cached != null) return cached;
         Material mat = switch (stateKey) {
             case "completed" -> Material.PURPLE_STAINED_GLASS_PANE;
             case "available" -> Material.PINK_STAINED_GLASS_PANE;
             default -> Material.RED_DYE;
         };
         int cmd = TexturePackManager.getConnectorCMD(piece.name().toLowerCase() + "_" + stateKey);
-        return ItemBuilder.of(mat).name(" ").glint("in_progress".equals(stateKey)).customModelData(cmd).build();
+        ItemStack item = ItemBuilder.of(mat).name(" ").glint("in_progress".equals(stateKey)).customModelData(cmd).build();
+        CONNECTOR_CACHE.put(cacheKey, item);
+        return item;
     }
 
     private boolean isBlankSlot(int slot) {

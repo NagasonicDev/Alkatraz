@@ -128,9 +128,11 @@ public class RecipeCategoryMenu extends Menu {
         for (me.nagasonic.alkatraz.items.magic.recipe.AlkatrazRecipe recipe : RecipeRegistry.getAll()) {
             String id = recipe.getKey().getKey().toLowerCase();
             String display = recipe.getDisplayName() != null ? recipe.getDisplayName().toLowerCase() : "";
-            String resultName = recipe.getResult().hasItemMeta() && recipe.getResult().getItemMeta().hasDisplayName()
-                    ? recipe.getResult().getItemMeta().getDisplayName().toLowerCase()
-                    : recipe.getResult().getType().name().toLowerCase();
+            ItemStack result = recipe.getResult();
+            ItemMeta resultMeta = result.hasItemMeta() ? result.getItemMeta() : null;
+            String resultName = resultMeta != null && resultMeta.hasDisplayName()
+                    ? resultMeta.getDisplayName().toLowerCase()
+                    : result.getType().name().toLowerCase();
             if (RecipesPermissions.canSee(p, recipe)
                     && (id.contains(q) || display.contains(q) || resultName.contains(q))) {
                 results.add(recipe);

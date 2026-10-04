@@ -16,6 +16,7 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,8 +66,9 @@ public class ConfirmEngravingMenu extends Menu {
 
     private ItemStack createTargetDisplay(EngravingSession session) {
         ItemStack display = session.targetStack().clone();
-        List<String> lore = display.hasItemMeta() && display.getItemMeta().hasLore()
-                ? display.getItemMeta().getLore()
+        ItemMeta displayMeta = display.hasItemMeta() ? display.getItemMeta() : null;
+        List<String> lore = displayMeta != null && displayMeta.hasLore()
+                ? displayMeta.getLore()
                 : new ArrayList<>();
         lore.add("");
         lore.add(ColorFormat.format("&7Will receive this engraving."));
@@ -204,8 +206,9 @@ public class ConfirmEngravingMenu extends Menu {
 
     private static String runeName(EngravingSession session) {
         ItemStack rune = session.engravingItemStack();
-        if (rune != null && rune.hasItemMeta() && rune.getItemMeta().hasDisplayName()) {
-            return rune.getItemMeta().getDisplayName();
+        ItemMeta runeMeta = rune != null && rune.hasItemMeta() ? rune.getItemMeta() : null;
+        if (runeMeta != null && runeMeta.hasDisplayName()) {
+            return runeMeta.getDisplayName();
         }
         return MagicItemRegistries.ENGRAVING_DEFINITIONS.get(session.selectedEngravingKey())
                 .map(def -> StringUtils.prettifyKey(def.getKey().getKey()))

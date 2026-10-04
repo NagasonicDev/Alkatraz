@@ -15,22 +15,27 @@ code: 'RLRLS'
 
 # THE MAGIC CIRCLE REQUIRED TO CAST
 level: 3
-required_focus: 70
+required_focus: 65
 
 # COOLDOWN BEFORE CASTING AGAIN (SECONDS)
-cooldown: 15
+cooldown: 6
 
 # BASE CAST TIME (SECONDS)
 cast_time: 1.5
 
 # MANA COST
-mana_cost: 50
+mana_cost: 48
 
 # MAXIMUM MASTERY ACHIEVABLE. NOT RECOMMENDED TO CHANGE
 maximum_mastery: 200
 
 # BASE POWER (DAMAGE IF IT HITS)
-power: 4.0
+# getPower is applied ONCE, on impact. The cast-time application that used to sit
+# alongside it squared the option multipliers and the affinity term, so 2.24
+# affinity reached (1 + 2.24)^2 = 10.5x rather than 2.24x.
+power: 5.5
+
+role: 'BURST'
 
 # TENDRIL CONFIGURATION
 tendril_duration: 30

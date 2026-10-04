@@ -1,39 +1,53 @@
 options:
+  # ---------------------------------------------------------------------------
+  # radius -?" Adjust meteor impact radius
+  # ---------------------------------------------------------------------------
   radius:
-    description: "Adjust meteor impact radius"
+    description: "Adjust meteor crater radius"
     icon: FIRE_CHARGE
     default_index: 1
     values:
       tight:
         display_name: "Tight"
-        description: "Smaller radius, concentrated damage"
+        description: "Small craters, concentrated damage"
         icon: TARGET
         value_type: double
+        value: 2.0
+        impacts:
+          - type: stat_modifier
+            stat: radius
+            value: 2.0
+            modifier: SET
+      normal:
+        display_name: "Normal"
+        description: "Standard crater radius"
+        icon: FIRE_CHARGE
+        value_type: double
+        value: 3.0
+        impacts:
+          - type: stat_modifier
+            stat: radius
+            value: 3.0
+            modifier: SET
+      wide:
+        display_name: "Wide"
+        description: "Large craters, spread out damage"
+        icon: NETHER_STAR
+        value_type: double
         value: 4.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 7
+            description: "Requires Circle Level 7"
+          - type: number_stat
+            stat: mastery_meteor_shower
+            minimum: 50
+            description: "Requires 50 Meteor Shower mastery"
         impacts:
           - type: stat_modifier
             stat: radius
             value: 4.0
             modifier: SET
-      normal:
-        display_name: "Normal"
-        description: "Standard impact radius"
-        icon: FIRE_CHARGE
-        value_type: double
-        value: 6.0
-        impacts:
-          - type: stat_modifier
-            stat: radius
-            value: 6.0
-            modifier: SET
-      wide:
-        display_name: "Wide"
-        description: "Larger radius, spread out damage"
-        icon: NETHER_STAR
-        value_type: double
-        value: 8.0
-        impacts:
-          - type: stat_modifier
-            stat: radius
-            value: 8.0
-            modifier: SET
+          - type: mana_cost
+            change: 41

@@ -272,15 +272,21 @@ public class Spellbook {
     /**
      * Plays the discovery animation
      */
+    private static final Particle.DustOptions DISCOVERY_DUST = new Particle.DustOptions(Color.fromRGB(255, 215, 0), 1.0f);
+
     private void playDiscoveryAnimation(Player player, Runnable onComplete) {
         Location loc = player.getLocation();
-        
+        Location footRing = loc.clone().add(0, 0.1, 0);
+
         new BukkitRunnable() {
             int ticks = 0;
-            final int maxTicks = 60; // 3 seconds
-            
+            int realTicks = 0;
+            final int maxTicks = 30; // 3 seconds at a 2 tick period
+            final int period = 2;
+
             @Override
             public void run() {
+                realTicks += period;
                 if (!player.isOnline() || ticks >= maxTicks) {
                     // Animation complete
                     if (player.isOnline() && ticks >= maxTicks) {
@@ -304,7 +310,7 @@ public class Spellbook {
                 double height = (ticks / (double) maxTicks) * 3;
                 
                 for (int i = 0; i < 3; i++) {
-                    double angle = (ticks * 0.3) + (i * Math.PI * 2 / 3);
+                    double angle = (ticks * 0.6) + (i * Math.PI * 2 / 3);
                     double x = Math.cos(angle) * radius;
                     double z = Math.sin(angle) * radius;
                     
@@ -314,21 +320,13 @@ public class Spellbook {
                 }
                 
                 // Circle at player's feet
-                if (ticks % 5 == 0) {
-                    int particles = 16;
-                    for (int i = 0; i < particles; i++) {
-                        double angle = (Math.PI * 2 * i) / particles;
-                        double x = Math.cos(angle) * 1.5;
-                        double z = Math.sin(angle) * 1.5;
-                        
-                        Location particleLoc = loc.clone().add(x, 0.1, z);
-                        ParticleCaster.spawn(player, particleLoc.getWorld(), Utils.DUST, particleLoc, 1, 0, 0, 0, 0,
-                                new Particle.DustOptions(Color.fromRGB(255, 215, 0), 1.0f));
-                    }
+                if (realTicks % 5 == 0) {
+                    ParticleCaster.spawn(player, footRing.getWorld(), Utils.DUST, footRing, 16, 1.5, 0, 1.5, 0,
+                            DISCOVERY_DUST);
                 }
                 
                 // Sound effects
-                if (ticks % 10 == 0) {
+                if (realTicks % 10 == 0) {
                     loc.getWorld().playSound(loc, Sound.BLOCK_ENCHANTMENT_TABLE_USE, 0.5f, 1.0f + (ticks / (float) maxTicks));
                 }
                 
@@ -338,7 +336,7 @@ public class Spellbook {
                 
                 ticks++;
             }
-        }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
+        }.runTaskTimer(Alkatraz.getInstance(), 0L, 2L);
     }
     
     /**

@@ -7,11 +7,14 @@ enabled: true
 element: 'DARK'
 code: 'SRSRS'
 level: 4
-required_focus: 120
-cooldown: 30
+required_focus: 90
+cooldown: 7
 cast_time: 2.5
-mana_cost: 90
+mana_cost: 75
 maximum_mastery: 150
+# No power: key - a summon is not a cast-time damage instance. zombie_power is the
+# base the servants hit with and is routed through the 2-arg getPower directly.
+role: 'UTILITY'
 zombie_count: 3
 zombie_duration: 30
 zombie_power: 2.0

@@ -1,6 +1,7 @@
 package me.nagasonic.alkatraz.items.magic.effect.implementation;
 
 import me.nagasonic.alkatraz.api.magic.effect.Effect;
+import me.nagasonic.alkatraz.api.magic.instance.MagicItemInstance;
 import me.nagasonic.alkatraz.api.magic.trigger.TriggerContext;
 import me.nagasonic.alkatraz.items.magic.barrier.BarrierConfig;
 import me.nagasonic.alkatraz.items.magic.barrier.BarrierManager;
@@ -26,10 +27,11 @@ public final class SummonedBarrierEffect implements Effect {
         if (!(context.actor() instanceof Player player)) {
             return;
         }
-        if (context.sourceItem() == null) {
+        MagicItemInstance sourceItem = context.sourceItem();
+        if (sourceItem == null) {
             return;
         }
-        String itemKey = CooldownCondition.stableItemKey(context.sourceItem());
-        BarrierManager.start(player, context.sourceItem(), context.equipmentSlot(), config, itemKey);
+        String itemKey = CooldownCondition.stableItemKey(sourceItem);
+        BarrierManager.start(player, sourceItem, context.equipmentSlot(), config, itemKey);
     }
 }

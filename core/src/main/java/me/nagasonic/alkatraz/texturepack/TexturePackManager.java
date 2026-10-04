@@ -1,6 +1,5 @@
 package me.nagasonic.alkatraz.texturepack;
 
-import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.util.MaterialCompat;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -20,8 +19,7 @@ public class TexturePackManager {
     
     // Load the texture pack configuration
     public static void load() {
-        // Make sure the config file exists
-        Alkatraz.getInstance().saveConfig(CONFIG_NAME);
+        // Alkatraz.onLoad already ran saveConfig("texturepack.yml"), so the file exists.
         config = ConfigManager.getConfig(CONFIG_NAME).get();
         reloadCaches();
     }

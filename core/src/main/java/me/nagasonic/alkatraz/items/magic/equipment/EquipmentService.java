@@ -34,6 +34,33 @@ public final class EquipmentService {
      */
     private static final Map<UUID, EquipmentProfile> PROFILE_CACHE = new ConcurrentHashMap<>();
 
+    /**
+     * Cheap global guard for the periodic reconcile sweep. Fingerprinting a player costs up
+     * to ten {@code getItemMeta()} clones, which is pure waste on a server where nobody wears
+     * a magic item. Latched to {@code true} the moment a profile containing at least one
+     * {@link MagicItemInstance} is built, and recomputed on invalidation so it can fall back
+     * to {@code false} once the last magic item is gone.
+     */
+    private static volatile boolean anyMagicEquipped;
+
+    public static boolean isAnyMagicEquipped() {
+        return anyMagicEquipped;
+    }
+
+    static void markMagicEquipped() {
+        anyMagicEquipped = true;
+    }
+
+    private static void recomputeAnyMagicEquipped() {
+        for (EquipmentProfile profile : PROFILE_CACHE.values()) {
+            if (!profile.instances().isEmpty()) {
+                anyMagicEquipped = true;
+                return;
+            }
+        }
+        anyMagicEquipped = false;
+    }
+
     public void registerVirtualSlot(EquipmentSlot slot, VirtualSlotResolver resolver) {
         virtualResolvers.put(slot, resolver);
     }
@@ -41,24 +68,34 @@ public final class EquipmentService {
     /** Drops the cached profile for a player so the next {@link #profile(Player)} rebuilds it. */
     public static void invalidate(UUID uuid) {
         if (uuid != null) {
-            PROFILE_CACHE.remove(uuid);
+            if (PROFILE_CACHE.remove(uuid) != null) {
+                recomputeAnyMagicEquipped();
+            }
         }
     }
 
     /** Drops every cached profile. */
     public static void invalidateAll() {
         PROFILE_CACHE.clear();
+        recomputeAnyMagicEquipped();
     }
 
     public EquipmentProfile profile(Player player) {
         UUID uuid = player.getUniqueId();
         EquipmentProfile cached = PROFILE_CACHE.get(uuid);
         if (cached != null) {
+            if (!cached.instances().isEmpty()) {
+                anyMagicEquipped = true;
+            }
             return cached;
         }
         EquipmentProfile built = buildProfile(player);
         EquipmentProfile existing = PROFILE_CACHE.putIfAbsent(uuid, built);
-        return existing != null ? existing : built;
+        EquipmentProfile effective = existing != null ? existing : built;
+        if (!effective.instances().isEmpty()) {
+            anyMagicEquipped = true;
+        }
+        return effective;
     }
 
     private EquipmentProfile buildProfile(Player player) {

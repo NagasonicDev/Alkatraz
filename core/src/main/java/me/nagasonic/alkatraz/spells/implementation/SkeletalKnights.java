@@ -2,6 +2,7 @@ package me.nagasonic.alkatraz.spells.implementation;
 
 import de.tr7zw.changeme.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.api.Element;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
@@ -14,8 +15,11 @@ import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.Num
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
+import me.nagasonic.alkatraz.spells.vfx.ChannelRegistry;
+import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
+import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
+import me.nagasonic.alkatraz.spells.vfx.WindUp;
 import me.nagasonic.alkatraz.util.ParticleCaster;
-import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
@@ -24,40 +28,64 @@ import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.Vector;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 6th circle summoning spell. Channels a Warp-style wind-up (floor circle and
- * hex glyphs) for {@code wind_up_duration} seconds; moving or taking damage
- * interrupts the summon. On completion, 3 iron-armored skeleton knights
- * mounted on skeleton horses are spawned around the caster. Each knight fights
- * whatever the caster attacks, cannot harm its summoner, and despawns after
- * {@code knight_duration} seconds.
+ * 6th circle summoning spell. Channels a 6-second {@link WindUp} - a floor circle and
+ * hex glyphs in this spell's DARK palette - and moving or taking damage interrupts
+ * the summon through the shared {@link ChannelRegistry}. On completion, 3
+ * iron-armored skeleton knights mounted on skeleton horses are spawned around the
+ * caster. Each knight fights whatever the caster attacks, cannot harm its summoner,
+ * and despawns after {@code knight_duration} seconds.
  */
 public class SkeletalKnights extends AttackSpell implements Listener {
 
-    private static final Color LIGHT_BLUE = Color.fromRGB(150, 210, 255);
-    private static final Color AQUA = Color.fromRGB(0, 210, 255);
-    private static final Color DEEP_BLUE = Color.fromRGB(45, 110, 230);
+    /**
+     * The DARK palette. This spell used to carry eleven byte-identical aqua/blue colour
+     * constants shared with {@code Warp}, which contradicted {@code element: DARK} and made
+     * the two spells pixel-for-pixel the same ritual. Three shades now do the whole job:
+     * {@code core} for the leading ring and the outer ellipse, {@code accent} for the inner
+     * ring, {@code deep} for the glyph markers and spokes.
+     */
+    private static final ElementPalette.Palette PALETTE = ElementPalette.of(Element.DARK);
 
-    private static final Map<UUID, ChannelData> channels = new ConcurrentHashMap<>();
+    /** Floor ring radius of the wind-up ritual, in blocks, before the shrink factor. */
+    private static final double FLOOR_RADIUS = 2.2;
+    /** Points per floor ring; matches the original hand-rolled floor circle. */
+    private static final int FLOOR_RING_POINTS = 24;
+    /** Glyph markers around the floor ring; six makes the hex the original drew. */
+    private static final int FLOOR_GLYPHS = 6;
+
+    /** Outer ring radius of the cast circle, in blocks. */
+    private static final double CIRCLE_RADIUS = 0.8;
+    /** Points on the cast circle's outer ring; matches the original 28-point ellipse. */
+    private static final int CIRCLE_RING_POINTS = 28;
+    /** Glyph markers on the cast circle; six makes the hex the original drew. */
+    private static final int CIRCLE_GLYPHS = 6;
+
+    /** Repaint period used when {@code circle_ticks} is missing or not a number. */
+    private static final long DEFAULT_CIRCLE_TICKS = 10L;
+
     private final Map<UUID, List<UUID>> summonedKnights = new HashMap<>();
-
-    private record ChannelData(Player caster, BukkitRunnable runnable) {}
 
     private SkeletalKnightsConfig config;
 
     private static LangManager lang() {
         return Alkatraz.getLangManager();
+    }
+
+    /**
+     * The shared cast-circle repaint period, read from {@code circle_ticks}. Clamped to at
+     * least one tick because Bukkit rejects a zero or negative period.
+     */
+    private static long circleTicks() {
+        Object ticks = Configs.CIRCLE_TICKS.get();
+        long period = (ticks instanceof Number) ? ((Number) ticks).longValue() : DEFAULT_CIRCLE_TICKS;
+        return Math.max(1L, period);
     }
 
     public SkeletalKnights(String type) {
@@ -84,32 +112,44 @@ public class SkeletalKnights extends AttackSpell implements Listener {
             return;
         }
         UUID uuid = caster.getUniqueId();
-        if (channels.containsKey(uuid)) return;
+        if (ChannelRegistry.isChanneling(uuid)) return;
 
+        // The 6-second channel is a declared paid-over: SpellBudgets.isPaidOverWindUp(6, 120)
+        // is true, so this spell is allowed to run far past the circle-6 wind-up contract. It
+        // is deliberately NOT shortened to WindUp.standardTicks; waystone_recall only makes
+        // sense as a skip for something.
         int windUpTicks = config.windUpTicks(profile.getSpellMastery(this), getMaxMastery());
+        WindUp windUp = WindUp.begin(this, caster, windUpTicks);
 
-        BukkitRunnable runnable = new BukkitRunnable() {
+        // ChannelRegistry owns interruption (move / damage / quit / shutdown); this class owns
+        // the repeating task. The task id is captured in a holder so the canceller handed to the
+        // registry stays effectively final.
+        final int[] taskId = new int[1];
+        ChannelRegistry.register(uuid, windUp, () -> {
+            if (taskId[0] != 0) Bukkit.getScheduler().cancelTask(taskId[0]);
+        });
+
+        taskId[0] = new BukkitRunnable() {
             int ticks = 0;
 
             @Override
             public void run() {
                 if (ticks >= windUpTicks) {
                     cancel();
+                    ChannelRegistry.unregister(uuid);
                     completeSummon(caster);
                     return;
                 }
                 if (caster.isDead() || !caster.isOnline()) {
                     cancel();
-                    abortChannel(uuid, false);
+                    ChannelRegistry.unregister(uuid);
                     return;
                 }
+                windUp.tick();
                 animate(caster, ticks, windUpTicks);
                 ticks++;
             }
-        };
-
-        channels.put(uuid, new ChannelData(caster, runnable));
-        runnable.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
+        }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L).getTaskId();
     }
 
     @Override
@@ -118,8 +158,6 @@ public class SkeletalKnights extends AttackSpell implements Listener {
     }
 
     private void completeSummon(Player caster) {
-        UUID uuid = caster.getUniqueId();
-        channels.remove(uuid);
         if (caster.isDead() || !caster.isOnline()) return;
 
         int count = config.knightCount();
@@ -211,23 +249,25 @@ public class SkeletalKnights extends AttackSpell implements Listener {
     }
 
     private Location findSpawnLocation(Location center) {
+        World world = center.getWorld();
         double range = config.summonRange();
         for (int i = 0; i < 10; i++) {
             double x = center.getX() + (Math.random() - 0.5) * range * 2;
             double z = center.getZ() + (Math.random() - 0.5) * range * 2;
-            Location loc = new Location(center.getWorld(), x, center.getY(), z);
-            loc.setY(loc.getWorld().getHighestBlockYAt(loc) + 1);
-            if (loc.getBlock().getType() == Material.AIR && loc.clone().add(0, -1, 0).getBlock().getType().isSolid()) {
-                return loc;
+            int bx = (int) Math.floor(x);
+            int bz = (int) Math.floor(z);
+            int y = world.getHighestBlockYAt(bx, bz) + 1;
+            if (world.getBlockAt(bx, y, bz).getType() == Material.AIR && world.getBlockAt(bx, y - 1, bz).getType().isSolid()) {
+                return new Location(world, x, y, z);
             }
         }
         return null;
     }
 
     private void spawnSummonBurst(LivingEntity caster, Location loc) {
-        ParticleCaster.spawn(caster, loc.getWorld(), Particle.PORTAL, loc, 40, 0.5, 0.5, 0.5, 0.05);
+        ParticleCaster.spawn(caster, loc.getWorld(), Utils.PORTAL, loc, 40, 0.5, 0.5, 0.5, 0.05);
         ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 20, 0.3, 0.3, 0.3, 0,
-                new Particle.DustOptions(AQUA, 0.8F));
+                PALETTE.coreDust());
         ParticleCaster.spawn(caster, loc.getWorld(), Utils.LARGE_SMOKE, loc, 10, 0.3, 0.3, 0.3, 0.05);
     }
 
@@ -242,18 +282,21 @@ public class SkeletalKnights extends AttackSpell implements Listener {
         e.remove();
     }
 
-    // ================= Channel animation (ported from Warp) =================
+    // ================= Channel animation =================
 
     private void animate(Player caster, int ticks, int windUpTicks) {
         int actSwitch = Math.max(1, windUpTicks / 2);
         int remaining = windUpTicks - ticks;
         double shrink = remaining <= 10 ? Math.max(0.15, remaining / 10.0) : 1.0;
         double fullProgress = (double) ticks / windUpTicks;
+        long circleTicks = circleTicks();
 
         Location feet = caster.getLocation();
-        double floorR = Math.min(2.2, 0.8 + 1.4 * (ticks / (double) actSwitch)) * shrink;
-        spawnFloorCircle(caster, feet, floorR, ticks);
-        spawnHexGlyphs(caster, feet, floorR, ticks);
+        double floorR = Math.min(FLOOR_RADIUS, 0.8 + 1.4 * (ticks / (double) actSwitch)) * shrink;
+        // The floor circle and the hex glyphs are one builder now: counter-rotating rings with
+        // glyph markers, coloured from the DARK palette rather than from hardcoded aqua.
+        SpellVfx.channelGlyphs(this, caster, feet, floorR, FLOOR_RING_POINTS, FLOOR_GLYPHS,
+                Math.toRadians(ticks * 6));
 
         if (ticks >= actSwitch) {
             Location eye = caster.getEyeLocation();
@@ -262,67 +305,65 @@ public class SkeletalKnights extends AttackSpell implements Listener {
             double p2 = (double) (ticks - actSwitch) / (windUpTicks - actSwitch);
             double hw = (1.2 + 1.2 * p2) * shrink;
             double halfH = hw * 1.1;
-            List<Location> outer = ParticleUtils.ellipse(center, yaw, hw * 2, halfH * 2, 28);
-            List<Location> inner = ParticleUtils.ellipse(center, yaw, hw * 1.2, halfH * 1.2, 20);
+            World world = center.getWorld();
+            double yawRad = Math.toRadians(yaw);
+            double leftX = Math.cos(yawRad);
+            double leftZ = Math.sin(yawRad);
+            Location scratch = center.clone();
+            final int outerPoints = 28;
+            final int innerPoints = 20;
 
-            for (int i = 0; i < outer.size(); i++) {
-                ParticleCaster.spawn(caster, center.getWorld(), Utils.DUST,
-                        outer.get((i + ticks) % outer.size()), 0,
-                        new Particle.DustOptions(AQUA, 0.6F));
+            for (int i = 0; i < outerPoints; i++) {
+                ellipsePoint(center, leftX, leftZ, hw, halfH, outerPoints, (i + ticks) % outerPoints, scratch);
+                ParticleCaster.spawn(caster, world, Utils.DUST, scratch, 0, PALETTE.coreDust());
             }
-            for (int i = 0; i < inner.size(); i++) {
-                ParticleCaster.spawn(caster, center.getWorld(), Utils.DUST,
-                        inner.get(Math.floorMod(i - ticks * 2, inner.size())), 0,
-                        new Particle.DustOptions(LIGHT_BLUE, 0.6F));
+            int innerShift = Math.floorMod(-ticks * 2, innerPoints);
+            for (int i = 0; i < innerPoints; i++) {
+                int index = i + innerShift;
+                if (index >= innerPoints) index -= innerPoints;
+                ellipsePoint(center, leftX, leftZ, hw * 0.6, halfH * 0.6, innerPoints, index, scratch);
+                ParticleCaster.spawn(caster, world, Utils.DUST, scratch, 0, PALETTE.accentDust());
             }
             for (int s = 0; s < 6; s++) {
-                Location tip = outer.get((s * outer.size()) / 6);
+                ellipsePoint(center, leftX, leftZ, hw, halfH, outerPoints, (s * outerPoints) / 6, scratch);
                 double frac = 1.0 - ((ticks + s) % 10) / 10.0;
-                Vector dir = tip.toVector().subtract(center.toVector()).multiply(frac);
-                ParticleCaster.spawn(caster, center.getWorld(), Utils.DUST,
-                        center.clone().add(dir), 0,
-                        new Particle.DustOptions(DEEP_BLUE, 0.6F));
+                double tipX = (scratch.getX() - center.getX()) * frac;
+                double tipY = (scratch.getY() - center.getY()) * frac;
+                double tipZ = (scratch.getZ() - center.getZ()) * frac;
+                scratch.setX(center.getX() + tipX);
+                scratch.setY(center.getY() + tipY);
+                scratch.setZ(center.getZ() + tipZ);
+                ParticleCaster.spawn(caster, world, Utils.DUST, scratch, 0, PALETTE.deepDust());
             }
         }
 
-        int every = Math.max(1, ((Long) Configs.CIRCLE_TICKS.get()).intValue());
-        if (ticks % every == 0) {
+        if (ticks % circleTicks == 0) {
             float pitch = 0.6f + (float) fullProgress * 0.6f;
             caster.getWorld().playSound(caster.getEyeLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 0.4f, pitch);
         }
     }
 
-    private void spawnFloorCircle(Player caster, Location feet, double radius, int ticks) {
-        float spin = ticks * 6;
-        List<Location> outer = ParticleUtils.circle(feet, radius, 15, spin, 0);
-        List<Location> inner = ParticleUtils.circle(feet, radius * 0.7, 15, -spin, 0);
-        for (Location loc : outer) {
-            ParticleCaster.spawn(caster, feet.getWorld(), Utils.DUST, loc, 0,
-                    new Particle.DustOptions(LIGHT_BLUE, 0.5F));
-        }
-        for (Location loc : inner) {
-            ParticleCaster.spawn(caster, feet.getWorld(), Utils.DUST, loc, 0,
-                    new Particle.DustOptions(AQUA, 0.5F));
-        }
-    }
-
-    private void spawnHexGlyphs(Player caster, Location feet, double radius, int ticks) {
-        double glyphR = radius * 0.85;
-        double baseAngle = Math.toRadians(ticks * 3);
-        for (int k = 0; k < 6; k++) {
-            double a = baseAngle + k * Math.PI / 3.0;
-            Location loc = feet.clone().add(Math.cos(a) * glyphR, 0, Math.sin(a) * glyphR);
-            ParticleCaster.spawn(caster, feet.getWorld(), Utils.DUST, loc, 0,
-                    new Particle.DustOptions(DEEP_BLUE, 0.6F));
-        }
+    private static void ellipsePoint(Location center, double leftX, double leftZ,
+                                     double halfWidth, double halfHeight, int points, int index,
+                                     Location scratch) {
+        double angle = 2 * Math.PI * index / points;
+        double spanX = Math.cos(angle) * halfWidth;
+        double spanY = Math.sin(angle) * halfHeight;
+        scratch.setX(center.getX() + leftX * spanX);
+        scratch.setY(center.getY() + spanY);
+        scratch.setZ(center.getZ() + leftZ * spanX);
     }
 
     private void spawnArrivalExpand(Player caster, Location destination, float yaw) {
         World world = destination.getWorld();
         if (world == null || !world.isChunkLoaded(destination.getBlockX() >> 4, destination.getBlockZ() >> 4)) return;
         Location center = destination.clone().add(0, 1.1, 0);
+        double yawRad = Math.toRadians(yaw);
+        double leftX = Math.cos(yawRad);
+        double leftZ = Math.sin(yawRad);
         new BukkitRunnable() {
             int expand = 0;
+            final Location scratch = center.clone();
 
             @Override
             public void run() {
@@ -331,62 +372,21 @@ public class SkeletalKnights extends AttackSpell implements Listener {
                     return;
                 }
                 double hw = 0.6 + expand * 0.18;
-                List<Location> ring = ParticleUtils.ellipse(center, yaw, hw * 2, hw * 2.2, 36);
-                for (Location loc : ring) {
-                    ParticleCaster.spawn(caster, world, Utils.DUST, loc, 0,
-                            new Particle.DustOptions(AQUA, 0.8F));
+                for (int i = 0; i < 36; i++) {
+                    ellipsePoint(center, leftX, leftZ, hw, hw * 1.1, 36, i, scratch);
+                    ParticleCaster.spawn(caster, world, Utils.DUST, scratch, 0, PALETTE.coreDust());
                 }
                 expand++;
             }
         }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
     }
 
-    private void playFailSound(Player player) {
-        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_SKELETON_HORSE_DEATH, 0.5f, 0.5f);
-    }
-
-    private void abortChannel(UUID uuid, boolean announce) {
-        ChannelData data = channels.remove(uuid);
-        if (data == null) return;
-        data.runnable().cancel();
-        if (announce) {
-            Player player = Bukkit.getPlayer(uuid);
-            if (player != null && player.isOnline() && !player.isDead()) {
-                Utils.sendActionBar(player, lang().get("spells.skeletal_knights.interrupted"));
-                playFailSound(player);
-            }
-        }
-    }
-
-    @EventHandler
-    public void onMove(PlayerMoveEvent e) {
-        UUID uuid = e.getPlayer().getUniqueId();
-        if (!channels.containsKey(uuid)) return;
-        Location from = e.getFrom();
-        Location to = e.getTo();
-        if (to == null) return;
-        if (!from.getWorld().equals(to.getWorld()) || from.distance(to) > config.moveCancelThreshold()) {
-            abortChannel(uuid, true);
-        }
-    }
-
-    @EventHandler
-    public void onDamage(EntityDamageEvent e) {
-        if (e.getEntity() instanceof Player victim && channels.containsKey(victim.getUniqueId())) {
-            abortChannel(victim.getUniqueId(), true);
-        }
-    }
-
-    @EventHandler
-    public void onQuit(PlayerQuitEvent e) {
-        abortChannel(e.getPlayer().getUniqueId(), false);
-    }
-
     @EventHandler
     private void onKnightDamage(EntityDamageByEntityEvent e) {
         if (!(e.getDamager() instanceof Skeleton skeleton)) return;
-        if (!NBT.getPersistentData(skeleton, nbt -> nbt.getBoolean("summoned_knight"))) return;
-        String summonerId = NBT.getPersistentData(skeleton, nbt -> nbt.getString("summoner_uuid"));
+        SummonCombatGuard.SummonTag tag = SummonCombatGuard.readSummonTag(skeleton, "summoned_knight");
+        if (tag == null || !tag.flagged()) return;
+        String summonerId = tag.summonerUuid();
         if (summonerId == null) return;
         try {
             if (e.getEntity() instanceof Player p && p.getUniqueId().equals(UUID.fromString(summonerId))) {
@@ -406,8 +406,8 @@ public class SkeletalKnights extends AttackSpell implements Listener {
             target = lt;
         } else if (e.getEntity() instanceof Player p && e.getDamager() instanceof LivingEntity lt) {
             if (lt instanceof Skeleton skeleton) {
-                String summonerId = NBT.getPersistentData(skeleton, nbt -> nbt.getString("summoner_uuid"));
-                if (summonerId != null && summonerId.equals(p.getUniqueId().toString())) return;
+                SummonCombatGuard.SummonTag tag = SummonCombatGuard.readSummonTag(skeleton, "summoned_knight");
+                if (tag != null && tag.summonerUuid() != null && tag.summonerUuid().equals(p.getUniqueId().toString())) return;
             }
             player = p;
             target = lt;
@@ -426,18 +426,33 @@ public class SkeletalKnights extends AttackSpell implements Listener {
         }
     }
 
+    /**
+     * The cast circle. This used to be a hand-rolled 28-point <i>vertical</i> ellipse in front
+     * of the caster's eyes, byte-identical to {@code Warp}'s and aqua on a DARK spell. It is now
+     * the shared {@link SpellVfx#channelGlyphs} floor ritual at the caster's feet, so the two
+     * spells share one code path and one element-driven palette.
+     *
+     * <p>The vertical orientation is the one part of the old picture that could not be kept -
+     * see the C-DARK migration report. The caster's location is read fresh every repaint, never
+     * cached, and a cancelled prepare stops the task instead of only skipping a frame.
+     */
     @Override
     public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
-        return Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
-            if (e.isCancelled()) return;
-            Location eye = caster.getEyeLocation();
-            Location center = eye.clone().add(eye.getDirection().multiply(1.8));
-            List<Location> points = ParticleUtils.ellipse(center, eye.getYaw(), 1.6, 2.0, 28);
-            for (int i = 0; i < points.size(); i++) {
-                ParticleCaster.spawn(caster, points.get(i).getWorld(), Utils.DUST, points.get(i), 0,
-                        new Particle.DustOptions(i % 2 == 0 ? LIGHT_BLUE : AQUA, 0.4F));
+        return new BukkitRunnable() {
+            int ticks = 0;
+
+            @Override
+            public void run() {
+                if (e.isCancelled()) {
+                    cancel();
+                    return;
+                }
+                SpellVfx.channelGlyphs(SkeletalKnights.this, caster, caster.getLocation(),
+                        CIRCLE_RADIUS, CIRCLE_RING_POINTS, CIRCLE_GLYPHS,
+                        Math.toRadians(ticks * 6));
+                ticks++;
             }
-        }, 0L, (Long) Configs.CIRCLE_TICKS.get());
+        }.runTaskTimer(Alkatraz.getInstance(), 0L, circleTicks()).getTaskId();
     }
 
     @Override

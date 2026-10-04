@@ -19,6 +19,8 @@ public enum MagicEntityType {
 
     public static final String NBT_KEY = "magic_entity_type";
 
+    private static final MagicEntityType[] VALUES = values();
+
     private final String id;
 
     MagicEntityType(String id) {
@@ -37,7 +39,12 @@ public enum MagicEntityType {
         if (id == null || id.isBlank()) {
             return Optional.empty();
         }
-        for (MagicEntityType type : values()) {
+        for (MagicEntityType type : VALUES) {
+            if (type.id.equals(id)) {
+                return Optional.of(type);
+            }
+        }
+        for (MagicEntityType type : VALUES) {
             if (type.id.equalsIgnoreCase(id)) {
                 return Optional.of(type);
             }

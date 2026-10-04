@@ -87,7 +87,7 @@ public abstract class PagedMenu<T> extends Menu {
         ItemStack blank = Alkatraz.getGuiItemRegistry().getItem("blank");
         for (int i = 0; i < size; i++) {
             if (!reserved.contains(i)) {
-                inventory.setItem(i, blank.clone());
+                inventory.setItem(i, blank);
             }
         }
     }
@@ -139,7 +139,7 @@ public abstract class PagedMenu<T> extends Menu {
             setMenuData(nextPage, "action", "next_page");
             inventory.setItem(nextPageSlot, nextPage);
         } else {
-            inventory.setItem(nextPageSlot, blank.clone());
+            inventory.setItem(nextPageSlot, blank);
         }
         
         // Previous page button
@@ -153,7 +153,7 @@ public abstract class PagedMenu<T> extends Menu {
             setMenuData(prevPage, "action", "previous_page");
             inventory.setItem(previousPageSlot, prevPage);
         } else {
-            inventory.setItem(previousPageSlot, blank.clone());
+            inventory.setItem(previousPageSlot, blank);
         }
     }
 

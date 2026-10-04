@@ -22,6 +22,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -50,6 +51,7 @@ public final class FocusManager implements Listener {
     private final Map<UUID, Long> lastMoveTime = new HashMap<>();
     private final Map<UUID, Double> movementPenalty = new HashMap<>();
     private final FocusBossBar bossBar = new FocusBossBar();
+    private BukkitTask regenTask;
 
     /** Movement-penalty settings cached out of {@link FocusConfig} so the
      *  20x/sec move handler never touches the config tree. Refreshed by the
@@ -57,6 +59,14 @@ public final class FocusManager implements Listener {
     private volatile boolean focusEnabled = true;
     private volatile double movementPenaltyPerSpeed = 0.02;
     private volatile double movementMaxPenaltyRatio = 0.55;
+
+    /** Regeneration settings, read once per tick so the per-player loop does not
+     *  re-check the config staleness stamp for every value. */
+    private double regenBase = 2.0;
+    private double regenGrowthFactor = 1.5;
+    private double regenMax = 25.0;
+    private double lowHealthThreshold = 6.0;
+    private double lowHealthMultiplier = 0.5;
 
     /**
      * No listener anywhere registers for {@link PlayerFocusChangeEvent}, so the
@@ -71,7 +81,7 @@ public final class FocusManager implements Listener {
     public void start() {
         FocusConfig.reload();
         cacheConfig();
-        new BukkitRunnable() {
+        regenTask = new BukkitRunnable() {
             @Override
             public void run() {
                 tick();
@@ -83,9 +93,18 @@ public final class FocusManager implements Listener {
         focusEnabled = FocusConfig.isEnabled();
         movementPenaltyPerSpeed = FocusConfig.getMovementPenaltyPerSpeed();
         movementMaxPenaltyRatio = FocusConfig.getMovementMaxPenaltyRatio();
+        regenBase = FocusConfig.getRegenBase();
+        regenGrowthFactor = FocusConfig.getRegenGrowthFactor();
+        regenMax = FocusConfig.getRegenMax();
+        lowHealthThreshold = FocusConfig.getLowHealthThreshold();
+        lowHealthMultiplier = FocusConfig.getLowHealthMultiplier();
     }
 
     public void shutdown() {
+        if (regenTask != null) {
+            regenTask.cancel();
+            regenTask = null;
+        }
         bossBar.hideAll();
         lastMoveTime.clear();
         movementPenalty.clear();
@@ -115,10 +134,10 @@ public final class FocusManager implements Listener {
             if (!casting && profile.getFocus() < effectiveMax) {
                 double t = lastMove == null ? 0 : Math.min((now - lastMove) / 1000.0, 60.0);
                 double rate = Math.min(
-                        FocusConfig.getRegenBase() * Math.pow(FocusConfig.getRegenGrowthFactor(), t),
-                        FocusConfig.getRegenMax());
-                if (player.getHealth() < FocusConfig.getLowHealthThreshold()) {
-                    rate *= FocusConfig.getLowHealthMultiplier();
+                        regenBase * Math.pow(regenGrowthFactor, t),
+                        regenMax);
+                if (player.getHealth() < lowHealthThreshold) {
+                    rate *= lowHealthMultiplier;
                 }
                 setFocus(player, profile, Math.min(profile.getFocus() + rate, effectiveMax));
             } else if (bossBar.isVisible(player)) {

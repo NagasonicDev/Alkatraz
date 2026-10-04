@@ -9,7 +9,6 @@ import me.nagasonic.alkatraz.util.StringUtils;
 import org.bukkit.NamespacedKey;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -108,9 +107,7 @@ public final class LoreFormatter {
         }
         lines.add("");
         lines.add(String.format(HEADER_FORMAT, "Set Bonus: " + StringUtils.prettifyKey(setName)));
-        List<Integer> thresholds = new ArrayList<>(data.bonuses.keySet());
-        thresholds.sort(Integer::compareTo);
-        for (int threshold : thresholds) {
+        for (int threshold : data.sortedThresholds()) {
             lines.add("&f(" + threshold + ") Pieces:");
             for (SetBonusConfig.BonusEntry bonus : data.bonuses.get(threshold)) {
                 String displayName = MagicItemRegistries.ATTRIBUTE_TYPES.get(bonus.attribute)
@@ -157,13 +154,20 @@ public final class LoreFormatter {
     }
 
     private static List<String> visibleLines(List<String> raw) {
-        return raw.stream().filter(line -> line != null).collect(Collectors.toList());
+        List<String> lines = new ArrayList<>(raw.size());
+        for (String line : raw) {
+            if (line != null) {
+                lines.add(line);
+            }
+        }
+        return lines;
     }
 
-    private static List<String> conditionLines(List<Map<String, Object>> conditions) {
+    private static List<String> conditionLines(List<?> conditions) {
         List<String> lines = new ArrayList<>();
-        for (Map<String, Object> condition : conditions) {
-            String line = conditionLine(condition);
+        for (Object condition : conditions) {
+            if (!(condition instanceof Map<?, ?> map)) continue;
+            String line = conditionLine(castConfigMap(map));
             if (line != null) {
                 lines.add("&7  &f• &r" + line);
             }
@@ -171,10 +175,11 @@ public final class LoreFormatter {
         return lines;
     }
 
-    private static List<String> effectLines(List<Map<String, Object>> effects) {
+    private static List<String> effectLines(List<?> effects) {
         List<String> lines = new ArrayList<>();
-        for (Map<String, Object> effect : effects) {
-            String line = effectLine(effect);
+        for (Object effect : effects) {
+            if (!(effect instanceof Map<?, ?> map)) continue;
+            String line = effectLine(castConfigMap(map));
             if (line != null) {
                 lines.add("&7  &f• &r" + line);
             }
@@ -318,20 +323,16 @@ public final class LoreFormatter {
         return List.of();
     }
 
-    @SuppressWarnings("unchecked")
-    private static List<Map<String, Object>> configList(Map<String, Object> staticConfig, String key) {
+    private static List<?> configList(Map<String, Object> staticConfig, String key) {
         Object raw = staticConfig.get(key);
-        if (!(raw instanceof List<?> list)) {
-            return List.of();
+        if (raw instanceof List<?> list) {
+            return list;
         }
-        List<Map<String, Object>> result = new ArrayList<>();
-        for (Object item : list) {
-            if (item instanceof Map<?, ?> map) {
-                Map<String, Object> converted = new LinkedHashMap<>();
-                map.forEach((k, v) -> converted.put(String.valueOf(k), v));
-                result.add(converted);
-            }
-        }
-        return result;
+        return List.of();
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> castConfigMap(Map<?, ?> map) {
+        return (Map<String, Object>) map;
     }
 }

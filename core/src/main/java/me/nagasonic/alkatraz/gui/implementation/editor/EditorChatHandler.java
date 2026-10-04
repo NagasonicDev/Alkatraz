@@ -61,14 +61,20 @@ public class EditorChatHandler implements Listener {
         callbacks.remove(uuid);
     }
 
+    public static void clearAll() {
+        awaitingInput.clear();
+        callbacks.clear();
+    }
+
     @EventHandler
-    public void onChat(AsyncPlayerChatEvent event) {        Player player = event.getPlayer();
+    public void onChat(AsyncPlayerChatEvent event) {
+        Player player = event.getPlayer();
         if (!awaitingInput.contains(player.getUniqueId())) return;
         event.setCancelled(true);
         BiConsumer<Player, String> callback = callbacks.remove(player.getUniqueId());
-        if (callback != null) {
-            callback.accept(player, event.getMessage());
-        }
+        if (callback == null) return;
+        String message = event.getMessage();
+        Bukkit.getScheduler().runTask(Alkatraz.getInstance(), () -> callback.accept(player, message));
     }
 
     private static void applyEdit(Player player, EditorSession session, String action, String value) {

@@ -31,6 +31,21 @@ public class RecipeSubMenu extends Menu {
     private static final int SAVE_SLOT = 38;
     private static final int BACK_SLOT = 42;
 
+    private static ItemStack backgroundPanePrototype;
+
+    private static ItemStack backgroundPane() {
+        if (backgroundPanePrototype == null) {
+            ItemStack item = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
+            ItemMeta meta = item.getItemMeta();
+            if (meta != null) {
+                meta.setDisplayName(ColorFormat.format("&7"));
+                item.setItemMeta(meta);
+            }
+            backgroundPanePrototype = item;
+        }
+        return backgroundPanePrototype;
+    }
+
     private final ItemDetailMenu parent;
     private final EditorSession session;
     private Map<Character, String> ingredients;
@@ -90,7 +105,7 @@ public class RecipeSubMenu extends Menu {
     @Override
     protected void build() {
         for (int i = 0; i < size; i++) {
-            inventory.setItem(i, createBackgroundPane());
+            inventory.setItem(i, backgroundPane());
         }
 
         // Use the recipeShape field instead of loading from config
@@ -108,16 +123,6 @@ public class RecipeSubMenu extends Menu {
         inventory.setItem(DEF_SLOT, createDefinitionDisplay());
         inventory.setItem(SAVE_SLOT, createSaveButton());
         inventory.setItem(BACK_SLOT, createBackButton());
-    }
-
-    private ItemStack createBackgroundPane() {
-        ItemStack item = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
-        ItemMeta meta = item.getItemMeta();
-        if (meta != null) {
-            meta.setDisplayName(ColorFormat.format("&7"));
-            item.setItemMeta(meta);
-        }
-        return item;
     }
 
     private ItemStack createGridSlot(char c) {

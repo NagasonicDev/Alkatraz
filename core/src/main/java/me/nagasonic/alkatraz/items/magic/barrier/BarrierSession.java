@@ -104,8 +104,12 @@ public final class BarrierSession extends SpellProperties implements DamageableB
             }
         }
         recomputeAnchor();
-        pruneComponents();
         if (config.renderIntervalTicks() > 0 && ticksAlive % config.renderIntervalTicks() == 0) {
+            // Pruning costs one map lookup per tracked component, so it rides along with the
+            // render pass rather than running every tick. Between two prunes the set can only
+            // grow by the components renderBarrier() just added, and dispose() clears it
+            // outright, so it stays bounded by one render's worth of components.
+            pruneComponents();
             renderBarrier();
         }
         if (ticksAlive % REGEN_INTERVAL_TICKS == 0) {
@@ -295,7 +299,19 @@ public final class BarrierSession extends SpellProperties implements DamageableB
             dispose(false);
             return;
         }
-        Location base = raw.clone().add(0, config.verticalOffset(), 0);
+        // The anchor never escapes this instance (every consumer either clones it or
+        // reads it inline), so it is mutated in place instead of allocating a fresh
+        // Location every tick. Main-thread confined, like the rest of the tick loop.
+        Location base = this.anchor;
+        if (base == null) {
+            base = new Location(raw.getWorld(), 0, 0, 0);
+        }
+        base.setWorld(raw.getWorld());
+        base.setX(raw.getX());
+        base.setY(raw.getY() + config.verticalOffset());
+        base.setZ(raw.getZ());
+        base.setYaw(raw.getYaw());
+        base.setPitch(raw.getPitch());
         this.anchor = base;
         this.castLocation = base;
     }

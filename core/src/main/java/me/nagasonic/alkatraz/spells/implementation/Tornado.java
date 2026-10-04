@@ -1,20 +1,27 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.api.Element;
 import me.nagasonic.alkatraz.config.ConfigManager;
-import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.lang.LangManager;
-import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
+import me.nagasonic.alkatraz.spells.types.AttackSpell;
+import me.nagasonic.alkatraz.spells.types.AttackType;
+import me.nagasonic.alkatraz.spells.types.BarrierSpell;
+import me.nagasonic.alkatraz.spells.types.SpellAttackContext;
+import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
+import me.nagasonic.alkatraz.spells.vfx.CastCircle;
+import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
+import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.util.ColorFormat;
 import me.nagasonic.alkatraz.util.ParticleCaster;
-import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -24,9 +31,34 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
-public class Tornado extends Spell {
+public class Tornado extends AttackSpell {
+
+    /**
+     * The AIR palette, resolved once.
+     *
+     * <p>This replaces a {@code CORE_DUST} constant and two per-layer {@code DustOptions[]}
+     * gradient arrays (18 {@code new Particle.DustOptions} built at class-init from literal RGB).
+     * The tornado draws every one of its layers every tick, so those gradients were the colours
+     * being rebuilt most often in the plugin; {@link SpellVfx#column} now derives the same
+     * bottom-to-top ramp from the palette's three pre-built shades instead.
+     */
+    private static final ElementPalette.Palette PALETTE = ElementPalette.of(Element.AIR);
+
+    private static final BlockData CLAY_DATA = Material.CLAY.createBlockData();
+
+    /**
+     * The funnel's spiral column. {@link SpellVfx#column} draws {@link #CONE_LAYERS} slices from
+     * the foot to the cap, each rotated against the one below it, which is what makes the stack
+     * read as a winding column rather than as a pile of hoops. The whole formation is spun by
+     * {@link #CONE_SPIN_PER_TICK} radians each tick.
+     */
+    private static final int CONE_LAYERS = 12;
+    private static final int CONE_POINTS_PER_LAYER = 14;
+    private static final double CONE_SPIN_PER_TICK = 0.4;
 
     private static LangManager lang() {
         return Alkatraz.getLangManager();
@@ -34,13 +66,23 @@ public class Tornado extends Spell {
 
     private double radius;
     private double duration;
-    private double damagePerTick;
     private double pullStrength;
     private double speed;
     private int windUpDuration;
 
     public Tornado(String type) {
         super(type);
+    }
+
+    @Override
+    public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
+        ParticleCaster.spawn(caster, location.getWorld(), Utils.CLOUD, location, 20);
+    }
+
+    @Override
+    public void onCountered(Location location) {
+        ParticleCaster.spawn(null, location.getWorld(), Utils.CLOUD, location, 40, 0.5, 0.5, 0.5, 0.1);
+        location.getWorld().playSound(location, Sound.ENTITY_GENERIC_EXPLODE, 0.6f, 1.5f);
     }
 
     @Override
@@ -52,7 +94,6 @@ public class Tornado extends Spell {
         loadOptions();
         this.radius = spellConfig.getDouble("radius");
         this.duration = spellConfig.getDouble("duration");
-        this.damagePerTick = spellConfig.getDouble("damage_per_tick");
         this.pullStrength = spellConfig.getDouble("pull_strength");
         this.speed = spellConfig.getDouble("speed", 0.4);
         this.windUpDuration = spellConfig.getInt("wind_up_duration", 2) * 20;
@@ -63,8 +104,16 @@ public class Tornado extends Spell {
         if (caster.isDead()) return;
 
         double activeRadius = getModifiedStat(caster, "radius", radius);
-        double activeDamage = getModifiedStat(caster, "damage_per_tick", damagePerTick);
         double activePull = getModifiedStat(caster, "pull_strength", pullStrength);
+
+        // ONE shared AttackProperties for the whole tornado, so one counter kills
+        // it. RAW base power - getPower is applied once per hit, below.
+        AttackProperties props = new AttackProperties(
+                caster,
+                Utils.castLocation(caster),
+                getBasePower() * getWandPower(wand, caster),
+                AttackType.MAGIC
+        );
 
         Location targetLoc = Utils.resolveTarget(caster, 30);
         World world = caster.getWorld();
@@ -85,7 +134,7 @@ public class Tornado extends Spell {
             public void run() {
                 if (ticks >= windUpDuration) {
                     cancel();
-                    launchTornado(caster, wand, activeRadius, activeDamage, activePull, finalGround, world);
+                    launchTornado(caster, wand, props, activeRadius, activePull, finalGround, world);
                     return;
                 }
 
@@ -113,9 +162,9 @@ public class Tornado extends Spell {
                                     h,
                                     Math.sin(angle + j * 0.4) * r
                             );
-                            ParticleCaster.spawn(caster, spiralLoc.getWorld(), Particle.CLOUD, spiralLoc, 2, 0.1, 0.1, 0.1, 0);
+                            ParticleCaster.spawn(caster, spiralLoc.getWorld(), Utils.CLOUD, spiralLoc, 2, 0.1, 0.1, 0.1, 0);
                             if (Math.random() < 0.3) {
-                                ParticleCaster.spawn(caster, spiralLoc.getWorld(), Particle.SWEEP_ATTACK, spiralLoc, 1, 0.05, 0.05, 0.05, 0);
+                                ParticleCaster.spawn(caster, spiralLoc.getWorld(), Utils.SWEEP_ATTACK, spiralLoc, 1, 0.05, 0.05, 0.05, 0);
                             }
                         }
                     }
@@ -124,7 +173,7 @@ public class Tornado extends Spell {
                         double a = Math.random() * 2 * Math.PI;
                         double r = Math.random() * 2.0;
                         Location airLoc = casterLoc.clone().add(Math.cos(a) * r, Math.random() * 1.5, Math.sin(a) * r);
-                        ParticleCaster.spawn(caster, airLoc.getWorld(), Particle.CLOUD, airLoc, 1, 0.1, 0.1, 0.1, 0);
+                        ParticleCaster.spawn(caster, airLoc.getWorld(), Utils.CLOUD, airLoc, 1, 0.1, 0.1, 0.1, 0);
                     }
 
                     if (ticks % 15 == 0) {
@@ -145,34 +194,19 @@ public class Tornado extends Spell {
                                 1.0 + Math.random() * 1.5,
                                 Math.sin(angle) * r * 0.5
                         );
-                        ParticleCaster.spawn(caster, airLoc.getWorld(), Particle.SWEEP_ATTACK, airLoc, 1, 0.05, 0.05, 0.05, 0);
+                        ParticleCaster.spawn(caster, airLoc.getWorld(), Utils.SWEEP_ATTACK, airLoc, 1, 0.05, 0.05, 0.05, 0);
 
                         Vector toTornado = tornadoCenter.toVector().subtract(airLoc.toVector());
                         if (toTornado.length() > 0.1) {
                             Location streamLoc = airLoc.clone().add(toTornado.normalize().multiply(0.5));
-                            ParticleCaster.spawn(caster, streamLoc.getWorld(), Particle.CLOUD, streamLoc, 1, 0.05, 0.05, 0.05, 0);
+                            ParticleCaster.spawn(caster, streamLoc.getWorld(), Utils.CLOUD, streamLoc, 1, 0.05, 0.05, 0.05, 0);
                         }
                     }
 
-                    for (int layer = 0; layer < 6; layer++) {
-                        double t = layer / 5.0;
-                        double y = t * 6.0 * tornadoGrowth;
-                        double r = currentRadius * (0.4 + t * 0.6);
-                        int points = 8 + layer * 2;
-                        double baseAngle = ticks * 0.3 + t * 2.0;
-
-                        for (int i = 0; i < points; i++) {
-                            double angle = baseAngle + (2 * Math.PI * i / points);
-                            double px = Math.cos(angle) * r;
-                            double pz = Math.sin(angle) * r;
-                            Location particleLoc = tornadoCenter.clone().add(px, y, pz);
-                            ParticleCaster.spawn(caster, particleLoc.getWorld(), Particle.CLOUD, particleLoc, 1, 0.05, 0.05, 0.05, 0.01);
-                            if (i % 2 == 0 && Math.random() < 0.5) {
-                                ParticleCaster.spawn(caster, particleLoc.getWorld(), Utils.DUST, particleLoc, 0,
-                                        new Particle.DustOptions(Color.fromRGB(200, 220, 255), (float)(0.2 + t * 0.3)));
-                            }
-                        }
-                    }
+                    // The charging column, growing out of the ground point the tornado will
+                    // launch from. Its own shade ramp comes from the palette.
+                    SpellVfx.column(Tornado.this, caster, tornadoCenter, 6.0 * tornadoGrowth,
+                            currentRadius, 6, 12, ticks * CONE_SPIN_PER_TICK * 0.75);
 
                     if (ticks % 10 == 0) {
                         world.playSound(casterLoc, Sound.ENTITY_BLAZE_SHOOT, 0.5f, 0.9f + (float)(phaseProgress * 0.5f));
@@ -184,7 +218,8 @@ public class Tornado extends Spell {
         }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
     }
 
-    private void launchTornado(Player caster, ItemStack wand, double activeRadius, double activeDamage, double activePull, Location ground, World world) {
+    private void launchTornado(Player caster, ItemStack wand, AttackProperties props,
+                               double activeRadius, double activePull, Location ground, World world) {
         world.playSound(ground, Sound.ENTITY_BLAZE_SHOOT, 1.0f, 0.5f);
         world.playSound(ground, Sound.ENTITY_WITHER_SHOOT, 1.0f, 0.6f);
 
@@ -192,9 +227,17 @@ public class Tornado extends Spell {
         final double finalSpeed = speed;
         final double finalDuration = duration;
         final double finalActiveRadius = activeRadius;
-        final double finalActiveDamage = activeDamage;
         final double finalActivePull = activePull;
         final World finalWorld = world;
+
+        // SUSTAIN CADENCE LEDGER - per TARGET. AttackProperties' hit Set is never
+        // cleared for the life of the cast, so gating the repeats on props.hasHit
+        // would allow ONE application for the whole tornado instead of one per
+        // DAMAGE_INTERVAL_TICKS. A single shared `long lastDamageTick` would be
+        // worse still - it would let only one entity in the tornado be damaged at
+        // all. The clock is runnable-local; props.hit() is still called so a single
+        // counter still kills the whole field.
+        final Map<UUID, Long> nextStrikeTick = new HashMap<>();
 
         new BukkitRunnable() {
             int ticks = 0;
@@ -291,28 +334,23 @@ public class Tornado extends Spell {
                 double coneHeight = 12.0;
                 double bottomRadius = finalActiveRadius * 0.3;
                 double topRadius = finalActiveRadius * 1.2;
+                double midRadius = (bottomRadius + topRadius) * 0.5;
 
-                for (int layer = 0; layer < 12; layer++) {
-                    double t = layer / 11.0;
-                    double y = t * coneHeight;
-                    double r = bottomRadius + (topRadius - bottomRadius) * t;
-                    int points = (int) (8 + t * 10);
-                    double baseAngle = ticks * 0.4 + t * 2.0;
+                Location scratch = tornadoLoc.clone();
 
-                    for (int i = 0; i < points; i++) {
-                        double a = baseAngle + (2 * Math.PI * i / points);
-                        double variance = 0.85 + Math.random() * 0.3;
-                        double px = Math.cos(a) * r * variance;
-                        double pz = Math.sin(a) * r * variance;
-                        Location particleLoc = tornadoLoc.clone().add(px, y, pz);
+                // The funnel body, as two stacked spiral columns so it still widens with
+                // height: the lower half at the narrow base radius, the upper half at the
+                // wide mouth radius. Each is rotated against the tick counter so the
+                // column winds rather than sitting still.
+                SpellVfx.column(Tornado.this, caster, tornadoLoc, coneHeight * 0.5,
+                        bottomRadius, CONE_LAYERS / 2, CONE_POINTS_PER_LAYER, ticks * CONE_SPIN_PER_TICK);
+                SpellVfx.column(Tornado.this, caster, tornadoLoc.clone().add(0.0, coneHeight * 0.5, 0.0),
+                        coneHeight * 0.5, midRadius, CONE_LAYERS / 2, CONE_POINTS_PER_LAYER,
+                        ticks * CONE_SPIN_PER_TICK + 1.0);
 
-                        ParticleCaster.spawn(caster, particleLoc.getWorld(), Particle.CLOUD, particleLoc, 1, 0.05, 0.05, 0.05, 0.01);
-                        if (i % 2 == 0) {
-                            ParticleCaster.spawn(caster, particleLoc.getWorld(), Utils.DUST, particleLoc, 0,
-                                    new Particle.DustOptions(Color.fromRGB(180 + (int)(t * 75), 200, 230), (float)(0.3 + t * 0.5)));
-                        }
-                    }
-                }
+                // The hazy air the funnel is made of.
+                ParticleCaster.spawn(caster, tornadoLoc.getWorld(), Utils.CLOUD, tornadoLoc, 6,
+                        0.4, 0.8, 0.4, 0.05);
 
                 for (int i = 0; i < 4; i++) {
                     double a = ticks * 0.5 + i * Math.PI / 2;
@@ -320,23 +358,25 @@ public class Tornado extends Spell {
                     double x = Math.cos(a) * r;
                     double z = Math.sin(a) * r;
                     for (double y = 0; y < coneHeight; y += 1.5) {
-                        Location debrisLoc = tornadoLoc.clone().add(x, y, z);
-                        if (Math.random() < 0.3) {
-                            ParticleCaster.spawn(caster, debrisLoc.getWorld(), Particle.FALLING_DUST, debrisLoc, 1, 0.1, 0.1, 0.1, 0,
-                                    Material.CLAY.createBlockData());
-                        }
+                        if (Math.random() >= 0.3) continue;
+                        scratch.setX(tornadoLoc.getX() + x);
+                        scratch.setY(tornadoLoc.getY() + y);
+                        scratch.setZ(tornadoLoc.getZ() + z);
+                        ParticleCaster.spawn(caster, scratch.getWorld(), Utils.FALLING_DUST, scratch, 1, 0.1, 0.1, 0.1, 0,
+                                CLAY_DATA);
                     }
                 }
 
                 ParticleCaster.spawn(caster, tornadoLoc.getWorld(), Utils.DUST, tornadoLoc, 0,
-                        new Particle.DustOptions(Color.fromRGB(200, 220, 255), 1.5F));
+                        PALETTE.coreDust());
 
+                Vector centerVec = tornadoLoc.toVector();
                 for (Entity entity : tornadoLoc.getWorld().getNearbyEntities(
                         tornadoLoc, finalActiveRadius * 1.2, coneHeight, finalActiveRadius * 1.2)) {
                     if (entity.equals(caster)) continue;
                     if (!(entity instanceof LivingEntity le)) continue;
 
-                    Vector toCenter = tornadoLoc.toVector().subtract(le.getLocation().toVector());
+                    Vector toCenter = centerVec.subtract(le.getLocation().toVector());
                     toCenter.setY(0);
                     double dist = toCenter.length();
                     if (dist < 0.3) continue;
@@ -344,24 +384,34 @@ public class Tornado extends Spell {
                     double strength = finalActivePull * (1.0 - Math.min(dist / (finalActiveRadius * 1.2), 0.9));
                     toCenter = Utils.safeNormalize(toCenter).multiply(strength);
                     double pullUp = strength * 0.8 + 0.3;
-                    le.setVelocity(le.getVelocity().add(toCenter).setY(Math.max(le.getVelocity().getY() + pullUp * 0.15, 0.2)));
+                    Vector velocity = le.getVelocity();
+                    le.setVelocity(velocity.add(toCenter).setY(Math.max(velocity.getY() + pullUp * 0.15, 0.2)));
 
                     if (dist < finalActiveRadius * 0.5) {
-                        SpellDamageUtil.damageWithSpell(
-                                le, finalActiveDamage, caster, wand, Tornado.this
-                        );
-                        ParticleCaster.spawn(caster, le.getWorld(), Particle.CRIT, le.getLocation().add(0, 1, 0), 5, 0.3, 0.5, 0.3, 0.2);
+                        // SUSTAIN CADENCE. The old code damaged every tick for
+                        // duration * 20 = 100 ticks: 2.0 x 100 = 200 total against a
+                        // circle-5 SUSTAIN budget of 36. Now 5 hits x 7.2 = 36.
+                        Long nextStrike = nextStrikeTick.get(le.getUniqueId());
+                        if (nextStrike == null || nextStrike <= ticks) {
+                            nextStrikeTick.put(le.getUniqueId(), ticks + SpellAttackContext.DAMAGE_INTERVAL_TICKS);
+                            props.hit(le);
+                            SpellDamageUtil.damageWithSpell(le,
+                                    getPower(caster, le, props.getRemainingPower()),
+                                    caster, wand, Tornado.this);
+                            ParticleCaster.spawn(caster, le.getWorld(), Utils.CRIT, le.getLocation().add(0, 1, 0), 5, 0.3, 0.5, 0.3, 0.2);
+                        }
                     }
 
-                    ParticleCaster.spawn(caster, le.getWorld(), Particle.CLOUD, le.getLocation().add(0, 0.5, 0), 2, 0.2, 0.2, 0.2, 0);
+                    ParticleCaster.spawn(caster, le.getWorld(), Utils.CLOUD, le.getLocation().add(0, 0.5, 0), 2, 0.2, 0.2, 0.2, 0);
                 }
 
                 for (double x = -0.5; x <= 0.5; x += 1.0) {
                     for (double z = -0.5; z <= 0.5; z += 1.0) {
-                        Location baseLoc = tornadoLoc.clone().add(x, 0, z);
-                        if (Math.random() < 0.4) {
-                            ParticleCaster.spawn(caster, baseLoc.getWorld(), Particle.SWEEP_ATTACK, baseLoc, 1, 0.2, 0.05, 0.2, 0);
-                        }
+                        if (Math.random() >= 0.4) continue;
+                        scratch.setX(tornadoLoc.getX() + x);
+                        scratch.setY(tornadoLoc.getY());
+                        scratch.setZ(tornadoLoc.getZ() + z);
+                        ParticleCaster.spawn(caster, scratch.getWorld(), Utils.SWEEP_ATTACK, scratch, 1, 0.2, 0.05, 0.2, 0);
                     }
                 }
 
@@ -375,7 +425,13 @@ public class Tornado extends Spell {
         if (caster.isDead() || caster.getTarget() == null) return;
 
         Location targetLoc = caster.getTarget().getLocation();
-        double wandp = getWandPowerOrDefault(wand);
+        // RAW base power - getPower is applied once per hit, in launchMobTornado.
+        AttackProperties props = new AttackProperties(
+                caster,
+                Utils.castLocation(caster),
+                getBasePower() * getWandPowerOrDefault(wand),
+                AttackType.MAGIC
+        );
 
         new BukkitRunnable() {
             int ticks = 0;
@@ -384,7 +440,7 @@ public class Tornado extends Spell {
             public void run() {
                 if (ticks >= windUpDuration) {
                     cancel();
-                    launchMobTornado(caster, wand, targetLoc, wandp);
+                    launchMobTornado(caster, wand, targetLoc, props);
                     return;
                 }
 
@@ -409,7 +465,7 @@ public class Tornado extends Spell {
                                 h,
                                 Math.sin(angle + j * 0.5) * r
                         );
-                        ParticleCaster.spawn(caster, spiralLoc.getWorld(), Particle.CLOUD, spiralLoc, 1, 0.1, 0.1, 0.1, 0);
+                        ParticleCaster.spawn(caster, spiralLoc.getWorld(), Utils.CLOUD, spiralLoc, 1, 0.1, 0.1, 0.1, 0);
                     }
                 }
 
@@ -422,11 +478,12 @@ public class Tornado extends Spell {
         }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
     }
 
-    private void launchMobTornado(Mob caster, ItemStack wand, Location targetLoc, double wandp) {
+    private void launchMobTornado(Mob caster, ItemStack wand, Location targetLoc, AttackProperties props) {
         targetLoc.getWorld().playSound(targetLoc, Sound.ENTITY_BLAZE_SHOOT, 1.0f, 0.5f);
         targetLoc.getWorld().playSound(targetLoc, Sound.ENTITY_WITHER_SHOOT, 1.0f, 0.6f);
 
-        double power = damagePerTick * wandp;
+        // SUSTAIN CADENCE LEDGER - per TARGET. See the player branch.
+        Map<UUID, Long> nextStrikeTick = new HashMap<>();
 
         new BukkitRunnable() {
             int ticks = 0;
@@ -456,7 +513,7 @@ public class Tornado extends Spell {
                         double px = Math.cos(angle) * r;
                         double pz = Math.sin(angle) * r;
                         Location loc = tornadoLoc.clone().add(px, y, pz);
-                        ParticleCaster.spawn(caster, loc.getWorld(), Particle.CLOUD, loc, 1, 0, 0, 0, 0);
+                        ParticleCaster.spawn(caster, loc.getWorld(), Utils.CLOUD, loc, 1, 0, 0, 0, 0);
                     }
                 }
 
@@ -474,9 +531,17 @@ public class Tornado extends Spell {
                     le.setVelocity(le.getVelocity().add(pull));
 
                     if (dist < 2.0) {
-                        SpellDamageUtil.damageWithSpell(
-                                le, power, caster, wand, Tornado.this
-                        );
+                        // SUSTAIN CADENCE - see the player branch. The old code dealt
+                        // a flat damage_per_tick every tick for the whole field.
+                        Long nextStrike = nextStrikeTick.get(le.getUniqueId());
+                        if (nextStrike == null || nextStrike <= ticks) {
+                            nextStrikeTick.put(le.getUniqueId(), ticks + SpellAttackContext.DAMAGE_INTERVAL_TICKS);
+                            props.hit(le);
+                            SpellDamageUtil.damageWithSpell(
+                                    le, getPower(caster, le, props.getRemainingPower()),
+                                    caster, wand, Tornado.this
+                            );
+                        }
                     }
                 }
 
@@ -487,18 +552,7 @@ public class Tornado extends Spell {
 
     @Override
     public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
-        return Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
-            if (e.isCancelled()) return;
-            Location playerLoc = caster.getEyeLocation();
-            float yaw = playerLoc.getYaw();
-            float pitch = playerLoc.getPitch();
-            Vector forward = playerLoc.getDirection().normalize().multiply(1.5);
-            List<Location> points = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 3, 0);
-            Particle.DustOptions options = new Particle.DustOptions(Color.fromRGB(200, 220, 255), 0.4F);
-            for (Location loc : points) {
-                ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, options);
-            }
-        }, 0L, (Long) Configs.CIRCLE_TICKS.get());
+        return CastCircle.start(this, caster, e, 3.0, 0);
     }
 
     @Override

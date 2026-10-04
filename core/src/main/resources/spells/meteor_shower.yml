@@ -6,18 +6,37 @@ description:
 enabled: true
 element: 'FIRE'
 code: 'SSRLL'
-level: 5
-required_focus: 150
-cooldown: 30
-cast_time: 1.5
-mana_cost: 100
+level: 6
+required_focus: 135
+cooldown: 11
+# CIRCLES 6-9 HAVE A FIXED CAST TIME (SpellBudgets.castTimeRange) BECAUSE THE CAST
+# DURATION IS THE WIND-UP: EVERY HIGH-CIRCLE CAST IS A COMMITTED, TELEGRAPHED ACTION.
+# CIRCLE 6 IS 1.0s, MATCHING warp AND skeletal_knights.
+cast_time: 1.0
+mana_cost: 165
 power: 8
 maximum_mastery: 100
+
+# WHAT THIS SPELL IS JUDGED ON. READ BY Spell.loadConfiguration AND SpellBudgetTest.
+role: 'TERRAIN'
 mastery_bar_color: 'RED'
 gui_item: 'FIREWORK_STAR'
 gui_custom_model_data: 4105
 cast_sound: 'ENTITY_FIREWORK_ROCKET_BLAST'
-wind_up_duration: 2
 
 # WHETHER THIS SPELL CAN DESTROY/modify BLOCKS. DEFAULT: TRUE
 block_damage: true
+
+# THE CRATER RADIUS PER METEOR, DRIVEN BY THE 'radius' OPTION (see
+# meteor_shower_options.yml). RE-SCALED FROM 4/6/8 TO 2/3/4. DEFAULT: 3
+crater_radius: 3.0
+
+# THE DAMAGE RADIUS PER METEOR. WAS HARDCODED AT 5.0 AND IGNORED THE OPTION. DEFAULT: 5.0
+damage_radius: 5.0
+
+# THE FIRE RADIUS PER METEOR. WAS HARDCODED AT 5 AND IGNORED THE OPTION. DEFAULT: 5
+fire_radius: 5
+
+# THE CIRCLE-6 TERRAIN BUDGET FOR ONE CAST. The crater loop decrements this per
+# block actually destroyed so 6 meteors at the default radius cannot exceed it.
+terrain_budget: 620

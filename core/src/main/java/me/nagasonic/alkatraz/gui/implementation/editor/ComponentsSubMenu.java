@@ -25,6 +25,21 @@ public class ComponentsSubMenu extends Menu {
             28, 29, 30, 31, 32, 33, 34};
     private static final int BACK_SLOT = 42;
 
+    private static ItemStack backgroundPanePrototype;
+
+    private static ItemStack backgroundPane() {
+        if (backgroundPanePrototype == null) {
+            ItemStack item = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
+            ItemMeta meta = item.getItemMeta();
+            if (meta != null) {
+                meta.setDisplayName(ColorFormat.format("&7"));
+                item.setItemMeta(meta);
+            }
+            backgroundPanePrototype = item;
+        }
+        return backgroundPanePrototype;
+    }
+
     private final ItemDetailMenu parent;
     private final EditorSession session;
 
@@ -37,7 +52,7 @@ public class ComponentsSubMenu extends Menu {
     @Override
     protected void build() {
         for (int i = 0; i < size; i++) {
-            inventory.setItem(i, createBackgroundPane());
+            inventory.setItem(i, backgroundPane());
         }
 
         List<String> currentComps = session.config().getStringList("components");
@@ -52,16 +67,6 @@ public class ComponentsSubMenu extends Menu {
         }
 
         inventory.setItem(BACK_SLOT, createBackButton());
-    }
-
-    private ItemStack createBackgroundPane() {
-        ItemStack item = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
-        ItemMeta meta = item.getItemMeta();
-        if (meta != null) {
-            meta.setDisplayName(ColorFormat.format("&7"));
-            item.setItemMeta(meta);
-        }
-        return item;
     }
 
     private ItemStack createCompItem(String key, boolean enabled) {

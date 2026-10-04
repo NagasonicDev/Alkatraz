@@ -7,6 +7,10 @@ import org.bukkit.World;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 /**
  * Sends particles per-player instead of broadcasting to the whole world. Players beyond
  * {@code particles.max_radius} receive nothing, players between {@code dense_radius} and
@@ -18,6 +22,11 @@ import org.bukkit.entity.Player;
 public final class ParticleCaster {
 
     private static final long CONFIG_REFRESH_MS = 1000L;
+    private static final long TICK_WINDOW_NANOS = TimeUnit.MILLISECONDS.toNanos(50L);
+
+    private static volatile PlayerSnapshot snapshot;
+
+    private record PlayerSnapshot(World world, long window, List<Player> players) {}
 
     private static volatile boolean configLoaded = false;
     private static volatile double denseRadius = 12.0;
@@ -45,6 +54,18 @@ public final class ParticleCaster {
             lastConfigRead = now;
             configLoaded = true;
         }
+    }
+
+    private static List<Player> playersIn(World world) {
+        if (world == null) return Collections.emptyList();
+        long window = System.nanoTime() / TICK_WINDOW_NANOS;
+        PlayerSnapshot cached = snapshot;
+        if (cached != null && cached.world == world && cached.window == window) {
+            return cached.players;
+        }
+        List<Player> players = world.getPlayers();
+        snapshot = new PlayerSnapshot(world, window, players);
+        return players;
     }
 
     public static void spawn(LivingEntity caster, World world, Particle particle, Location location, int count) {
@@ -89,6 +110,7 @@ public final class ParticleCaster {
             world.spawnParticle(particle, location, count, dx, dy, dz, speed, data);
             return;
         }
+        if (count <= 0) return;
         recipient.spawnParticle(particle, location, count, dx, dy, dz, speed, data);
     }
 
@@ -98,6 +120,7 @@ public final class ParticleCaster {
             world.spawnParticle(particle, location, count, dx, dy, dz, speed, data);
             return;
         }
+        if (count <= 0) return;
 
         refreshConfig();
         double dense = denseRadius;
@@ -111,7 +134,7 @@ public final class ParticleCaster {
         double ly = location.getY();
         double lz = location.getZ();
 
-        for (Player player : world.getPlayers()) {
+        for (Player player : playersIn(world)) {
             Location pl = player.getLocation();
             double pdx = pl.getX() - lx;
             double pdy = pl.getY() - ly;

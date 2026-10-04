@@ -90,10 +90,7 @@ public class SpellRegistry {
 
     public static Spell getSpell(String id){
         if (id == null || id.isEmpty()) return null;
-        return getAllSpells().values().stream()
-                .filter(s -> id.equals(s.getId()))
-                .findFirst()
-                .orElse(null);
+        return allSpellsByID.get(id);
     }
 
     public static Spell getSpellFromName(String name) {
@@ -140,6 +137,7 @@ public class SpellRegistry {
 
     public static void reload() {
         allSpells = Collections.unmodifiableMap(new HashMap<>());
+        allSpellsByID = Collections.unmodifiableMap(new HashMap<>());
         allSpellsByIdFull = Collections.unmodifiableMap(new HashMap<>());
         registerSpells();
     }

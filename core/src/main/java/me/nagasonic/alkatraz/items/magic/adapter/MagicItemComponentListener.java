@@ -140,18 +140,21 @@ public final class MagicItemComponentListener implements Listener {
         ItemStack offHand = player.getInventory().getItemInOffHand();
 
         // Find the magic item between the two hands
+        Optional<MagicItemInstance> optInstance = Optional.empty();
         ItemStack stack = null;
-        if (mainHand != null && !mainHand.getType().isAir() && MagicItemStack.readInstance(mainHand).isPresent()) {
-            stack = mainHand;
-        } else if (offHand != null && !offHand.getType().isAir() && MagicItemStack.readInstance(offHand).isPresent()) {
-            stack = offHand;
+        if (mainHand != null && !mainHand.getType().isAir()) {
+            optInstance = MagicItemStack.readInstance(mainHand);
+            if (optInstance.isPresent()) {
+                stack = mainHand;
+            }
+        }
+        if (optInstance.isEmpty() && offHand != null && !offHand.getType().isAir()) {
+            optInstance = MagicItemStack.readInstance(offHand);
+            if (optInstance.isPresent()) {
+                stack = offHand;
+            }
         }
 
-        if (stack == null) {
-            return;
-        }
-
-        Optional<MagicItemInstance> optInstance = MagicItemStack.readInstance(stack);
         if (optInstance.isEmpty()) {
             return;
         }

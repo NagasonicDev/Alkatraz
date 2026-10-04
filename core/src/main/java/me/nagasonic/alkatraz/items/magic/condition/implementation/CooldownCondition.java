@@ -87,7 +87,14 @@ public final class CooldownCondition implements Condition {
      * deterministic across reads of the same physical item.
      */
     public static String stableItemKey(MagicItemInstance instance) {
-        StringBuilder key = new StringBuilder(instance.definitionKey().toString());
+        // Appended field-by-field rather than starting from NamespacedKey#toString so the
+        // intermediate "namespace:key" string is never allocated. The separator and field
+        // order match NamespacedKey#toString exactly, so the produced key is byte-identical
+        // (see also MagicKeys#format).
+        NamespacedKey definition = instance.definitionKey();
+        StringBuilder key = new StringBuilder(32 + instance.modifiers().size() * 24
+                + instance.engravings().size() * 48);
+        key.append(definition.getNamespace()).append(':').append(definition.getKey());
         for (NamespacedKey modifier : instance.modifiers()) {
             key.append('|').append(modifier);
         }

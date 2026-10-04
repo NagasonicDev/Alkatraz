@@ -16,6 +16,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Map;
+
 /**
  * Destination picker opened when casting Warp. Shows every set warp point with
  * its distance from the caster; only points on the same world within range can
@@ -47,8 +49,11 @@ public class WarpDestinationMenu extends Menu {
                 .build());
 
         int slots = profile == null ? 0 : warp.maxSlots(profile);
+        Map<Integer, MagicProfile.WarpPoint> points = profile == null
+                ? Map.of()
+                : profile.getWarpPoints();
         for (int slot = 0; slot < slots; slot++) {
-            inventory.setItem(slotToGuiSlot(slot), buildPointItem(slot, profile));
+            inventory.setItem(slotToGuiSlot(slot), buildPointItem(slot, profile, points));
         }
 
         ItemStack back = ItemBuilder.of(Material.BARRIER)
@@ -70,8 +75,8 @@ public class WarpDestinationMenu extends Menu {
         return 10 + slot;
     }
 
-    private ItemStack buildPointItem(int slot, MagicProfile profile) {
-        MagicProfile.WarpPoint point = profile == null ? null : profile.getWarpPoints().get(slot);
+    private ItemStack buildPointItem(int slot, MagicProfile profile, Map<Integer, MagicProfile.WarpPoint> points) {
+        MagicProfile.WarpPoint point = points.get(slot);
         ItemBuilder builder;
         boolean selectable = false;
 

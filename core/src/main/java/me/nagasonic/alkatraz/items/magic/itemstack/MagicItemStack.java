@@ -38,57 +38,88 @@ import java.util.UUID;
  */
 public final class MagicItemStack {
 
+    private static final NamespacedKey WAND_COMPONENT = MagicKeys.alkatraz("wand");
+    private static final NamespacedKey GRIMOIRE_COMPONENT = MagicKeys.alkatraz("grimoire");
+    private static final NamespacedKey EQUIPMENT_COMPONENT = MagicKeys.alkatraz("equipment");
+    private static final NamespacedKey SCROLL_COMPONENT = MagicKeys.alkatraz("scroll");
+
     private static LangManager lang() { return Alkatraz.getLangManager(); }
 
     private MagicItemStack() {}
+
+    private record StackRead(Optional<NamespacedKey> definitionKey, String rawInstance) {}
+
+    private static StackRead readStack(ItemStack stack) {
+        if (stack == null || !stack.hasItemMeta()) {
+            return new StackRead(Optional.empty(), null);
+        }
+        PersistentDataContainer pdc = stack.getItemMeta().getPersistentDataContainer();
+        String raw = pdc.get(ItemDataKeys.itemDefinition(), PersistentDataType.STRING);
+        if (raw == null || raw.isBlank()) {
+            return new StackRead(Optional.empty(), null);
+        }
+        Optional<NamespacedKey> definitionKey = MagicKeys.parse(raw);
+        if (definitionKey.isEmpty()) {
+            return new StackRead(Optional.empty(), null);
+        }
+        return new StackRead(definitionKey, pdc.get(ItemDataKeys.itemInstance(), PersistentDataType.STRING));
+    }
+
+    private static boolean hasComponent(ItemStack stack, NamespacedKey componentKey) {
+        if (stack == null) return false;
+        Optional<NamespacedKey> definitionKey = readStack(stack).definitionKey();
+        if (definitionKey.isEmpty()) return false;
+        return MagicItemRegistries.ITEM_DEFINITIONS.get(definitionKey.get())
+                .map(def -> def.hasComponent(componentKey))
+                .orElse(false);
+    }
 
     public static boolean isMagicItem(ItemStack stack) {
         return readDefinitionKey(stack).isPresent();
     }
 
     public static boolean isWandDefinition(ItemStack stack) {
-        if (stack == null || !isMagicItem(stack)) return false;
-        return readDefinition(stack).map(def -> def.hasComponent(MagicKeys.alkatraz("wand"))).orElse(false);
+        return hasComponent(stack, WAND_COMPONENT);
     }
 
     public static boolean isGrimoireDefinition(ItemStack stack) {
-        if (stack == null || !isMagicItem(stack)) return false;
-        return readDefinition(stack).map(def -> def.hasComponent(MagicKeys.alkatraz("grimoire"))).orElse(false);
+        return hasComponent(stack, GRIMOIRE_COMPONENT);
     }
 
     public static boolean isNonStackable(ItemDefinition definition) {
-        return definition.hasComponent(MagicKeys.alkatraz("equipment"))
-                || definition.hasComponent(MagicKeys.alkatraz("wand"))
-                || definition.hasComponent(MagicKeys.alkatraz("grimoire"));
+        return definition.hasComponent(EQUIPMENT_COMPONENT)
+                || definition.hasComponent(WAND_COMPONENT)
+                || definition.hasComponent(GRIMOIRE_COMPONENT);
     }
 
     public static boolean isNonStackable(ItemStack stack) {
-        if (stack == null || !isMagicItem(stack)) return false;
-        return readDefinition(stack).map(MagicItemStack::isNonStackable).orElse(false);
+        if (stack == null) return false;
+        Optional<NamespacedKey> definitionKey = readStack(stack).definitionKey();
+        if (definitionKey.isEmpty()) return false;
+        return MagicItemRegistries.ITEM_DEFINITIONS.get(definitionKey.get())
+                .map(MagicItemStack::isNonStackable)
+                .orElse(false);
+    }
+
+    public static boolean isComponent(ItemStack stack, NamespacedKey componentKey) {
+        return hasComponent(stack, componentKey);
     }
 
     public static Optional<NamespacedKey> readDefinitionKey(ItemStack stack) {
-        if (stack == null || !stack.hasItemMeta()) {
-            return Optional.empty();
-        }
-        PersistentDataContainer pdc = stack.getItemMeta().getPersistentDataContainer();
-        String raw = pdc.get(ItemDataKeys.itemDefinition(), PersistentDataType.STRING);
-        if (raw == null || raw.isBlank()) {
-            return Optional.empty();
-        }
-        return MagicKeys.parse(raw);
+        return readStack(stack).definitionKey();
     }
 
     public static Optional<MagicItemInstance> readInstance(ItemStack stack) {
-        Optional<NamespacedKey> definitionKey = readDefinitionKey(stack);
-        if (definitionKey.isEmpty() || stack == null || !stack.hasItemMeta()) {
+        if (stack == null) {
             return Optional.empty();
         }
-
-        PersistentDataContainer pdc = stack.getItemMeta().getPersistentDataContainer();
-        String rawInstance = pdc.get(ItemDataKeys.itemInstance(), PersistentDataType.STRING);
+        StackRead read = readStack(stack);
+        if (read.definitionKey().isEmpty()) {
+            return Optional.empty();
+        }
+        String rawInstance = read.rawInstance();
         if (rawInstance == null || rawInstance.isBlank()) {
-            return Optional.of(MagicItemInstance.createDefault(definitionKey.get()));
+            return Optional.of(MagicItemInstance.createDefault(read.definitionKey().get()));
         }
         return Optional.of(ItemInstanceSerializer.deserialize(rawInstance));
     }
@@ -141,11 +172,15 @@ public final class MagicItemStack {
         if (meta == null) {
             return stack;
         }
-        write(meta, instance.definitionKey(), instance);
-        MagicItemRegistries.ITEM_DEFINITIONS.get(instance.definitionKey()).ifPresent(def -> {
-            List<String> lore = buildLore(def, instance);
-            meta.setLore(lore);
-        });
+        String previous = meta.getPersistentDataContainer()
+                .get(ItemDataKeys.itemInstance(), PersistentDataType.STRING);
+        String serialized = write(meta, instance.definitionKey(), instance);
+        if (!serialized.equals(previous)) {
+            MagicItemRegistries.ITEM_DEFINITIONS.get(instance.definitionKey()).ifPresent(def -> {
+                List<String> lore = buildLore(def, instance);
+                meta.setLore(lore);
+            });
+        }
         stack.setItemMeta(meta);
         return stack;
     }
@@ -157,10 +192,12 @@ public final class MagicItemStack {
         stack.setItemMeta(meta);
     }
 
-    private static void write(ItemMeta meta, NamespacedKey definitionKey, MagicItemInstance instance) {
+    private static String write(ItemMeta meta, NamespacedKey definitionKey, MagicItemInstance instance) {
         PersistentDataContainer pdc = meta.getPersistentDataContainer();
         pdc.set(ItemDataKeys.itemDefinition(), PersistentDataType.STRING, MagicKeys.format(definitionKey));
-        pdc.set(ItemDataKeys.itemInstance(), PersistentDataType.STRING, ItemInstanceSerializer.serialize(instance));
+        String serialized = ItemInstanceSerializer.serialize(instance);
+        pdc.set(ItemDataKeys.itemInstance(), PersistentDataType.STRING, serialized);
+        return serialized;
     }
 
     public static Optional<ItemDefinition> readDefinition(ItemStack stack) {
@@ -217,10 +254,10 @@ public final class MagicItemStack {
     }
 
     private static String resolveTypeLabel(ItemDefinition definition) {
-        if (definition.hasComponent(MagicKeys.alkatraz("wand"))) return "Wand";
-        if (definition.hasComponent(MagicKeys.alkatraz("scroll"))) return "Scroll";
-        if (definition.hasComponent(MagicKeys.alkatraz("grimoire"))) return "Grimoire";
-        if (definition.hasComponent(MagicKeys.alkatraz("equipment"))) return "Equipment";
+        if (definition.hasComponent(WAND_COMPONENT)) return "Wand";
+        if (definition.hasComponent(SCROLL_COMPONENT)) return "Scroll";
+        if (definition.hasComponent(GRIMOIRE_COMPONENT)) return "Grimoire";
+        if (definition.hasComponent(EQUIPMENT_COMPONENT)) return "Equipment";
         return null;
     }
 
@@ -280,7 +317,7 @@ public final class MagicItemStack {
             }
         }
 
-        if (definition.hasComponent(MagicKeys.alkatraz("equipment"))) {
+        if (definition.hasComponent(EQUIPMENT_COMPONENT)) {
             String setName = SetBonusService.getInstance().extractSetName(definition.getKey().getKey());
             SetBonusConfig.SetBonusData setData = SetBonusService.getInstance().setBonusData(setName);
             for (String line : LoreFormatter.setBonusBlock(setName, setData)) {

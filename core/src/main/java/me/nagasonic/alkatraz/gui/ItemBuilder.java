@@ -38,8 +38,7 @@ public class ItemBuilder {
 
     public static ItemBuilder of(ItemStack existing) {
         ItemBuilder b = new ItemBuilder(existing.getType());
-        b.item.setItemMeta(existing.getItemMeta());
-        b.meta = b.item.getItemMeta();
+        b.meta = existing.getItemMeta();
         return b;
     }
 

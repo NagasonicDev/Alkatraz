@@ -48,4 +48,5 @@ public class EditorSession {
 
     public static EditorSession get(UUID uuid) { return sessions.get(uuid); }
     public static void remove(UUID uuid) { sessions.remove(uuid); }
+    public static void clearAll() { sessions.clear(); }
 }

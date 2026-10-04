@@ -12,6 +12,10 @@ import me.nagasonic.alkatraz.util.ColorFormat;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -155,6 +159,23 @@ public class SpellHotbarManager {
         justExited.remove(player.getUniqueId());
     }
 
+    /**
+     * Unconditionally clears the in-memory debounce markers for a player who left
+     * the server. The quit path only clears them for players who were actively in
+     * hotbar mode, so a player who used hotbar mode and quit while inactive would
+     * keep both entries forever.
+     *
+     * <p>The saved inventory maps are deliberately left untouched: the next join
+     * still needs them for the recovery path in {@link #restoreIfNeeded(Player)}.
+     *
+     * @param player the player disconnecting
+     */
+    public static void onQuit(Player player) {
+        UUID uuid = player.getUniqueId();
+        justEntered.remove(uuid);
+        justExited.remove(uuid);
+    }
+
     private static void exit(Player player, boolean clearPersisted) {
         if (!hotbarActive.containsKey(player.getUniqueId())) return;
         UUID uuid = player.getUniqueId();
@@ -226,9 +247,9 @@ public class SpellHotbarManager {
             ItemStack offhand = compound.hasTag("offhand") ? compound.getItemStack("offhand") : null;
             Integer heldSlot = compound.hasTag("heldSlot") ? compound.getInteger("heldSlot") : null;
             applySnapshot(player, storage, offhand, heldSlot);
-        } catch (IOException e) {
-            Alkatraz.getInstance().getLogger().severe("Failed to read hotbar inventory snapshot for " + uuid);
-            e.printStackTrace();
+        } catch (Exception e) {
+            Alkatraz.getInstance().getLogger().severe("Failed to read hotbar inventory snapshot for " + uuid
+                    + " (" + e.getClass().getSimpleName() + ": " + e.getMessage() + ")");
         } finally {
             deletePersistedSnapshot(uuid);
         }
@@ -256,15 +277,23 @@ public class SpellHotbarManager {
         }
         compound.setInteger("heldSlot", heldSlot);
         File file = snapshotFile(uuid);
-        try {
-            if (file.getParentFile() != null) {
-                file.getParentFile().mkdirs();
+        Bukkit.getScheduler().runTaskAsynchronously(Alkatraz.getInstance(), () -> {
+            if (!hotbarActive.containsKey(uuid)) return;
+            if (savedInventories.get(uuid) != storage) return;
+            try {
+                if (file.getParentFile() != null) {
+                    file.getParentFile().mkdirs();
+                }
+                NBT.writeFile(file, compound);
+            } catch (Exception e) {
+                Alkatraz.getInstance().getLogger().severe("Failed to persist hotbar inventory snapshot for " + uuid
+                        + " (" + e.getClass().getSimpleName() + ": " + e.getMessage() + ")");
             }
-            NBT.writeFile(file, compound);
-        } catch (IOException e) {
-            Alkatraz.getInstance().getLogger().severe("Failed to persist hotbar inventory snapshot for " + uuid);
-            e.printStackTrace();
-        }
+            ItemStack[] current = savedInventories.get(uuid);
+            if (!hotbarActive.containsKey(uuid) || (current != null && current != storage)) {
+                deletePersistedSnapshot(uuid);
+            }
+        });
     }
 
     private static void deletePersistedSnapshot(UUID uuid) {
@@ -436,5 +465,21 @@ public class SpellHotbarManager {
         meta.setLore(lore);
         item.setItemMeta(meta);
         return item;
+    }
+
+    // -------------------------------------------------------------------------
+    // Listeners
+    // -------------------------------------------------------------------------
+
+    /**
+     * Clears the debounce markers on quit, independently of the active state.
+     * Registered from the plugin's onEnable.
+     */
+    public static class QuitListener implements Listener {
+
+        @EventHandler(priority = EventPriority.MONITOR)
+        public void onQuit(PlayerQuitEvent event) {
+            SpellHotbarManager.onQuit(event.getPlayer());
+        }
     }
 }

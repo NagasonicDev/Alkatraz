@@ -104,8 +104,13 @@ options:
             value: 12.0
             modifier: SET
 
-  damage_per_tick:
-    description: "Damage dealt each tick near the center."
+  # WAS `damage_per_tick`, which modified a `damage_per_tick` stat that only the
+  # removed `damage_per_tick:` yml key used. `power` now carries the damage, so
+  # this option multiplies `damage` - the same stat AttackSpell.getPower reads -
+  # and the default index is 1 ('medium', x1.00) so an unconfigured cast costs
+  # exactly the circle-4 SUSTAIN budget.
+  damage:
+    description: "Damage dealt on each strike near the center."
     icon: TRIDENT
     default_index: 1
 
@@ -113,31 +118,31 @@ options:
 
       low:
         display_name: "Low"
-        description: "0.5 damage per tick."
+        description: "Weaker strikes (-40% damage per hit)."
         icon: TRIDENT
         value_type: double
-        value: 0.5
+        value: 0.6
         impacts:
           - type: stat_modifier
-            stat: damage_per_tick
-            value: 0.5
-            modifier: SET
+            stat: damage
+            value: 0.6
+            modifier: MULTIPLY
 
       medium:
         display_name: "Medium"
-        description: "1.0 damage per tick."
+        description: "Standard strike damage."
         icon: TRIDENT
         value_type: double
         value: 1.0
         impacts:
           - type: stat_modifier
-            stat: damage_per_tick
+            stat: damage
             value: 1.0
-            modifier: SET
+            modifier: MULTIPLY
 
       high:
         display_name: "High"
-        description: "1.5 damage per tick."
+        description: "Heavier strikes (+50% damage per hit)."
         icon: TRIDENT
         value_type: double
         value: 1.5
@@ -152,9 +157,9 @@ options:
             description: "Requires 60 Whirlpool mastery"
         impacts:
           - type: stat_modifier
-            stat: damage_per_tick
+            stat: damage
             value: 1.5
-            modifier: SET
+            modifier: MULTIPLY
 
   pull_strength:
     description: "How strongly enemies are pulled in."

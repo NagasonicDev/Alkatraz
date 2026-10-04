@@ -4,6 +4,7 @@ import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.api.configuration.requirement.Requirement;
 import me.nagasonic.alkatraz.items.magic.MagicItemService;
 import me.nagasonic.alkatraz.items.magic.recipe.adapter.CraftingEventRouter;
+import me.nagasonic.alkatraz.items.magic.recipe.unlock.UnlockManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -58,6 +59,7 @@ public final class RecipeRegistry {
         BY_INGREDIENT.clear();
         UNINDEXED.clear();
         BY_FILE.clear();
+        UnlockManager.invalidateLockableKeys();
     }
 
     public static AlkatrazRecipe get(NamespacedKey key) {

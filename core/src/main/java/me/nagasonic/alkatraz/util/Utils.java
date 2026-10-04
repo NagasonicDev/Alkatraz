@@ -25,7 +25,9 @@ import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,6 +35,28 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.Vector;
 
+/**
+ * General plugin utilities, and the owner of the cross-version particle alias table.
+ *
+ * <p><b>Version-rename invariant.</b> Minecraft 1.20.5 renamed a large batch of
+ * {@code Particle} enum constants (for example {@code REDSTONE} became {@code DUST},
+ * {@code BLOCK_CRACK} became {@code BLOCK}, {@code SPELL_WITCH} became {@code WITCH}).
+ * Alkatraz supports 1.19 through 1.26, so a bare {@code Particle.X} reference in shared
+ * code is not guaranteed to resolve on the older end of that range and will throw at
+ * class-initialisation time. Every spell and every other module must therefore reference
+ * particles through the {@code public static final} aliases declared below, never through
+ * raw {@code Particle} constants.
+ *
+ * <p>Each alias is built with {@link #oldOrNew(String, String)}, which yields the first
+ * name below 1.20.5 and the second name at or above 1.20.5. Both arguments are real enum
+ * constant names, so the pair is resolved through {@code Particle.valueOf(String)} on a
+ * single runtime rather than being compiled against two APIs. Several aliases pass the same
+ * name for both arguments, meaning that constant survived the rename untouched.
+ *
+ * <p>Adding a particle to this table means verifying <em>both</em> names: the first against
+ * the {@code spigot-api} 1.19 jar that {@code core} compiles and tests against, the second
+ * against a 1.20.5+ jar. {@code ParticleAliasTest} pins both sets.
+ */
 public class Utils {
     public static final Particle DUST = Particle.valueOf(oldOrNew("REDSTONE", "DUST"));
     public static final Particle EXPLOSION = Particle.valueOf(oldOrNew("EXPLOSION_LARGE", "EXPLOSION"));
@@ -47,7 +71,40 @@ public class Utils {
     public static final Particle RAIN = Particle.valueOf(oldOrNew("WATER_DROP", "RAIN"));
     public static final Particle TOTEM = Particle.valueOf(oldOrNew("TOTEM", "TOTEM_OF_UNDYING"));
     public static final Particle ENCHANT = Particle.valueOf(oldOrNew("ENCHANTMENT_TABLE", "ENCHANT"));
+
+    // Particle names stable across the 1.20.5 rename: the same constant exists on both sides,
+    // so oldOrNew() is called with the identical name twice. This is deliberate rather than a
+    // direct Particle.X reference so the whole alias table stays uniform and greppable, and so
+    // a future rename only has to touch one argument.
+    public static final Particle FLAME = Particle.valueOf(oldOrNew("FLAME", "FLAME"));
+    public static final Particle LAVA = Particle.valueOf(oldOrNew("LAVA", "LAVA"));
+    public static final Particle PORTAL = Particle.valueOf(oldOrNew("PORTAL", "PORTAL"));
+    public static final Particle SOUL = Particle.valueOf(oldOrNew("SOUL", "SOUL"));
+    public static final Particle SQUID_INK = Particle.valueOf(oldOrNew("SQUID_INK", "SQUID_INK"));
+    public static final Particle CLOUD = Particle.valueOf(oldOrNew("CLOUD", "CLOUD"));
+    public static final Particle SWEEP_ATTACK = Particle.valueOf(oldOrNew("SWEEP_ATTACK", "SWEEP_ATTACK"));
+    public static final Particle FALLING_DUST = Particle.valueOf(oldOrNew("FALLING_DUST", "FALLING_DUST"));
+    public static final Particle BUBBLE_POP = Particle.valueOf(oldOrNew("BUBBLE_POP", "BUBBLE_POP"));
+    public static final Particle BUBBLE_COLUMN_UP = Particle.valueOf(oldOrNew("BUBBLE_COLUMN_UP", "BUBBLE_COLUMN_UP"));
+    public static final Particle GLOW = Particle.valueOf(oldOrNew("GLOW", "GLOW"));
+    public static final Particle END_ROD = Particle.valueOf(oldOrNew("END_ROD", "END_ROD"));
+    public static final Particle HEART = Particle.valueOf(oldOrNew("HEART", "HEART"));
+    public static final Particle DRAGON_BREATH = Particle.valueOf(oldOrNew("DRAGON_BREATH", "DRAGON_BREATH"));
+    public static final Particle ASH = Particle.valueOf(oldOrNew("ASH", "ASH"));
+    public static final Particle CRIT = Particle.valueOf(oldOrNew("CRIT", "CRIT"));
+
     private static final Random random = new Random();
+    private static final String[] AFFINITY_KEYS = buildElementKeys("_affinity");
+    private static final String[] RESISTANCE_KEYS = buildElementKeys("_resistance");
+
+    private static String[] buildElementKeys(String suffix) {
+        String[] keys = new String[Element.values().length];
+        for (Element element : Element.values()) {
+            String name = (element == Element.NONE) ? "magic" : element.name().toLowerCase();
+            keys[element.ordinal()] = name + suffix;
+        }
+        return keys;
+    }
 
     public static DecimalFormat getDecimalFormat(int places) {
         String s = "";
@@ -156,7 +213,7 @@ public class Utils {
         boolean negative = chance < 0;
         int atLeast = (negative) ? (int) Math.ceil(chance) : (int) Math.floor(chance);
         double remainingChance = chance - atLeast;
-        if (getRandom().nextDouble() <= Math.abs(remainingChance)) atLeast += negative ? -1 : 1;
+        if (ThreadLocalRandom.current().nextDouble() <= Math.abs(remainingChance)) atLeast += negative ? -1 : 1;
         return atLeast;
     }
 
@@ -361,9 +418,10 @@ public class Utils {
      */
     public static Entity getTargetEntity(Player player, int range) {
         if (player == null) return null;
+        Location eye = player.getEyeLocation();
         RayTraceResult result = player.getWorld().rayTraceEntities(
-                player.getEyeLocation(),
-                player.getEyeLocation().getDirection(),
+                eye,
+                eye.getDirection(),
                 range,
                 e -> e != player
         );
@@ -413,25 +471,21 @@ public class Utils {
     }
 
     public static double getEntityAffinity(Element element, LivingEntity entity){
-        String name;
-        if (element == Element.NONE){
-            name = "magic";
-        }else { name = element.name().toLowerCase(); }
-        String key = name + "_affinity";
-        return NBT.getPersistentData(entity, nbt -> nbt.getDouble(key));
+        return NBT.getPersistentData(entity, nbt -> nbt.getDouble(AFFINITY_KEYS[element.ordinal()]));
     }
 
     public static double getEntityResistance(Element element, LivingEntity entity){
-        String name;
-        if (element == Element.NONE){
-            name = "magic";
-        }else { name = element.name().toLowerCase(); }
-        String key = name + "_resistance";
-        return NBT.getPersistentData(entity, nbt -> nbt.getDouble(key));
+        return NBT.getPersistentData(entity, nbt -> nbt.getDouble(RESISTANCE_KEYS[element.ordinal()]));
     }
 
     public static List<Block> blocksInRadius(Location center, int radius) {
-        List<Block> blocks = new ArrayList<>();
+        int radiusSquared = radius * radius;
+        List<Block> blocks = new ArrayList<>(sphereVolume(radius, radiusSquared));
+        forEachBlockInRadius(center, radius, blocks::add);
+        return blocks;
+    }
+
+    public static void forEachBlockInRadius(Location center, int radius, Consumer<Block> consumer) {
         World world = center.getWorld();
 
         int cx = center.getBlockX();
@@ -446,12 +500,22 @@ public class Utils {
 
                     if (x * x + y * y + z * z > radiusSquared) continue;
 
-                    Block block = world.getBlockAt(cx + x, cy + y, cz + z);
-                    blocks.add(block);
+                    consumer.accept(world.getBlockAt(cx + x, cy + y, cz + z));
                 }
             }
         }
-        return blocks;
+    }
+
+    private static int sphereVolume(int radius, int radiusSquared) {
+        long volume = 0L;
+        for (int x = -radius; x <= radius; x++) {
+            for (int y = -radius; y <= radius; y++) {
+                for (int z = -radius; z <= radius; z++) {
+                    if (x * x + y * y + z * z <= radiusSquared) volume++;
+                }
+            }
+        }
+        return (int) Math.min(volume, 1_000_000_000L);
     }
 
 
@@ -462,26 +526,6 @@ public class Utils {
             }
         }
         return false;
-    }
-
-    public static void raiseColumn(Block block, int depth, int raiseAmount) {
-        World world = block.getWorld();
-        int x = block.getX();
-        int y = block.getY();
-        int z = block.getZ();
-
-        for (int step = 0; step < raiseAmount; step++) {
-            // Move blocks top â†’ bottom
-            for (int i = 0; i <= depth; i++) {
-                Block from = world.getBlockAt(x, y - i + step, z);
-                Block to   = world.getBlockAt(x, y - i + step + 1, z);
-
-                to.setType(from.getType(), false);
-            }
-
-            // Clear the bottom-most block
-            world.getBlockAt(x, y - depth + step, z).setType(Material.AIR, false);
-        }
     }
 
     public static Location castLocation(LivingEntity caster){

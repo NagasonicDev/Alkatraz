@@ -2,7 +2,7 @@ package me.nagasonic.alkatraz.spells.implementation;
 
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
-import me.nagasonic.alkatraz.config.Configs;
+import me.nagasonic.alkatraz.api.Element;
 import me.nagasonic.alkatraz.api.dom.Ground;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.lang.LangManager;
@@ -13,9 +13,13 @@ import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
+import me.nagasonic.alkatraz.spells.util.SpellBudgets;
+import me.nagasonic.alkatraz.spells.util.TerrainEditor;
+import me.nagasonic.alkatraz.spells.vfx.CastCircle;
+import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
+import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.util.ParticleCaster;
-import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -29,7 +33,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class Fissure extends AttackSpell {
@@ -37,9 +40,24 @@ public class Fissure extends AttackSpell {
         return Alkatraz.getLangManager();
     }
 
+    /**
+     * The EARTH palette, resolved once. Every dust below is a pre-built instance off
+     * it, so a per-tick emission allocates no {@link Color} and no
+     * {@link Particle.DustOptions}.
+     */
+    private static final ElementPalette.Palette PALETTE = ElementPalette.of(Element.EARTH);
+
+    /** The trench's leading lip - the brightest shade, because the front is the information. */
+    private static final Particle.DustOptions EDGE_DUST = PALETTE.coreDust();
+    /** Interior dust and the wind-up's forward-running crack; the mid shade. */
+    private static final Particle.DustOptions CIRCLE_DUST = PALETTE.accentDust();
+    /** Ground shadow and the phase-one tremor cracks; the darkest shade. */
+    private static final Particle.DustOptions DEEP_DUST = PALETTE.deepDust();
+
     private int windUpDuration;
     private boolean blockDamage;
     private long recoverTime;
+    private int terrainBudget;
 
     public Fissure(String type) {
         super(type);
@@ -55,10 +73,10 @@ public class Fissure extends AttackSpell {
         this.windUpDuration = spellConfig.getInt("wind_up_duration", 6) * 20;
         this.blockDamage = spellConfig.getBoolean("block_damage", true);
         this.recoverTime = spellConfig.getLong("recover_time", 0);
+        this.terrainBudget = spellConfig.getInt("terrain_budget", SpellBudgets.terrainBudget(5));
     }
 
     private void launchFissureAttack(Player caster, ItemStack wand, AttackProperties props, double range, Vector direction, Vector perpendicular, Location startLoc, double maxWidth) {
-        double totalPower = getPower(caster, getBasePower()) * getWandPower(wand, caster);
         caster.getWorld().playSound(caster.getLocation(), Sound.BLOCK_GRINDSTONE_USE, 1.2f, 0.4f);
         caster.getWorld().playSound(caster.getLocation(), Sound.BLOCK_STONE_BREAK, 1.0f, 0.6f);
         Map<Location, Material> brokenBlocks = new HashMap<>();
@@ -71,7 +89,7 @@ public class Fissure extends AttackSpell {
             public void run() {
                 if (props.isCancelled() || props.isCountered() || distance > range) {
                     cancel();
-                    scheduleRecover(brokenBlocks);
+                    scheduleRecover(caster, brokenBlocks);
                     return;
                 }
 
@@ -81,9 +99,10 @@ public class Fissure extends AttackSpell {
                 double progress = distance / range;
                 double fissureWidth = 0.3 + progress * maxWidth;
 
+                Location head = startLoc.clone().add(direction.clone().multiply(distance));
+
                 for (double w = -fissureWidth; w <= fissureWidth; w += 0.5) {
-                    Location groundCheck = startLoc.clone().add(direction.clone().multiply(distance))
-                            .add(perpendicular.clone().multiply(w));
+                    Location groundCheck = head.clone().add(perpendicular.clone().multiply(w));
                     groundCheck.setY(startLoc.getY());
                     Block foundation = groundCheck.getWorld().getBlockAt(groundCheck);
                     int blocksDown = 0;
@@ -95,6 +114,10 @@ public class Fissure extends AttackSpell {
                     for (int depth = 0; depth < 2; depth++) {
                         Block target = foundation.getRelative(0, -depth, 0);
                         if (blockDamage && Ground.isGround(target.getType())) {
+                            // The circle-5 TERRAIN budget is 380 blocks and there was no cap
+                            // at all before - the spell destroyed 346. Stop once the cast's
+                            // allowance is spent.
+                            if (brokenBlocks.size() >= terrainBudget) continue;
                             if (Protection.blockEdit(caster, target.getLocation())) {
                                 brokenBlocks.putIfAbsent(target.getLocation(), target.getType());
                                 target.breakNaturally();
@@ -106,44 +129,44 @@ public class Fissure extends AttackSpell {
                 }
 
                 for (double w = -fissureWidth; w <= fissureWidth; w += 0.5) {
-                    Location fissureLoc = startLoc.clone().add(direction.clone().multiply(distance))
-                            .add(0, -0.5, 0)
-                            .add(perpendicular.clone().multiply(w));
+                    Location fissureLoc = head.clone().add(0, -0.5, 0).add(perpendicular.clone().multiply(w));
 
                     ParticleCaster.spawn(caster, fissureLoc.getWorld(), Utils.BLOCK, fissureLoc, 3, 0.2, 0.2, 0.2, 0.3,
                             Material.STONE.createBlockData());
 
                     if (Math.random() < 0.3) {
-                        ParticleCaster.spawn(caster, fissureLoc.getWorld(), Particle.FALLING_DUST, fissureLoc, 1, 0.1, 0.1, 0.1, 0,
+                        ParticleCaster.spawn(caster, fissureLoc.getWorld(), Utils.FALLING_DUST, fissureLoc, 1, 0.1, 0.1, 0.1, 0,
                                 Material.DIRT.createBlockData());
                     }
 
                     if (Math.abs(w) > fissureWidth - 0.8) {
                         ParticleCaster.spawn(caster, fissureLoc.getWorld(), Utils.DUST, fissureLoc.clone().add(0, 0.2, 0), 0,
-                                new Particle.DustOptions(Color.fromRGB(139, 90, 43), 0.8F));
+                                EDGE_DUST);
                     }
                 }
 
                 for (double w = -fissureWidth; w <= fissureWidth; w += 0.3) {
-                    Location deepLoc = startLoc.clone().add(direction.clone().multiply(distance))
-                            .add(0, -1, 0)
-                            .add(perpendicular.clone().multiply(w));
-                    ParticleCaster.spawn(caster, deepLoc.getWorld(), Utils.DUST, deepLoc, 0,
-                            new Particle.DustOptions(Color.BLACK, 0.5F));
+                    Location deepLoc = head.clone().add(0, -1, 0).add(perpendicular.clone().multiply(w));
+                    ParticleCaster.spawn(caster, deepLoc.getWorld(), Utils.DUST, deepLoc, 0, DEEP_DUST);
                 }
+
+                // A mid-tone spine down the middle of the cut. Without it the trench
+                // reads as two bright lips and a black void between them; with it the
+                // three shades run bright edge -> mid interior -> dark depth.
+                Location spineLoc = head.clone().add(0, -0.9, 0);
+                ParticleCaster.spawn(caster, spineLoc.getWorld(), Utils.DUST, spineLoc, 2, 0.15, 0.15, 0.15, 0,
+                        CIRCLE_DUST);
 
                 for (int edge = -1; edge <= 1; edge += 2) {
                     double edgeWidth = fissureWidth * edge;
-                    Location edgeLoc = startLoc.clone().add(direction.clone().multiply(distance))
-                            .add(0, 0.5, 0)
-                            .add(perpendicular.clone().multiply(edgeWidth));
+                    Location edgeLoc = head.clone().add(0, 0.5, 0).add(perpendicular.clone().multiply(edgeWidth));
                     ParticleCaster.spawn(caster, edgeLoc.getWorld(), Utils.BLOCK, edgeLoc, 6, 0.4, 0.3, 0.4, 0.2,
                             Material.STONE.createBlockData());
 
                     for (double s = -0.5; s <= 0.5; s += 0.5) {
                         Location sideRaise = edgeLoc.clone().add(0, 0.5 + Math.abs(s), 0)
                                 .add(perpendicular.clone().multiply(s * 0.3));
-                        ParticleCaster.spawn(caster, sideRaise.getWorld(), Particle.FALLING_DUST, sideRaise, 1, 0.1, 0.1, 0.1, 0,
+                        ParticleCaster.spawn(caster, sideRaise.getWorld(), Utils.FALLING_DUST, sideRaise, 1, 0.1, 0.1, 0.1, 0,
                                 Material.STONE.createBlockData());
                     }
                 }
@@ -151,10 +174,9 @@ public class Fissure extends AttackSpell {
                 for (double trailDist = prevDistance; trailDist < distance; trailDist += 0.5) {
                     double trailProgress = trailDist / range;
                     double trailWidth = 0.3 + trailProgress * maxWidth;
+                    Location trailHead = startLoc.clone().add(direction.clone().multiply(trailDist)).add(0, -0.3, 0);
                     for (double w = -trailWidth; w <= trailWidth; w += 0.3) {
-                        Location trailLoc = startLoc.clone().add(direction.clone().multiply(trailDist))
-                                .add(0, -0.3, 0)
-                                .add(perpendicular.clone().multiply(w));
+                        Location trailLoc = trailHead.clone().add(perpendicular.clone().multiply(w));
                         if (Math.random() < 0.1) {
                             ParticleCaster.spawn(caster, trailLoc.getWorld(), Utils.BLOCK, trailLoc, 1, 0.1, 0.05, 0.1, 0.2,
                                     Material.STONE.createBlockData());
@@ -168,9 +190,7 @@ public class Fissure extends AttackSpell {
                 }
 
                 double hitWidth = fissureWidth + 1.0;
-                for (Entity entity : startLoc.getWorld().getNearbyEntities(
-                        startLoc.clone().add(direction.clone().multiply(distance)),
-                        hitWidth, 3, hitWidth)) {
+                for (Entity entity : startLoc.getWorld().getNearbyEntities(head, hitWidth, 3, hitWidth)) {
                     if (entity.equals(caster)) continue;
                     if (!(entity instanceof LivingEntity le)) continue;
                     if (props.hasHit(le)) continue;
@@ -180,7 +200,7 @@ public class Fissure extends AttackSpell {
 
                     SpellDamageUtil.damageWithSpell(
                             le,
-                            getPower(caster, le, totalPower),
+                            getPower(caster, le, props.getRemainingPower()),
                             caster,
                             wand,
                             Fissure.this
@@ -190,20 +210,20 @@ public class Fissure extends AttackSpell {
         }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
     }
 
-    private void scheduleRecover(Map<Location, Material> brokenBlocks) {
+    private void scheduleRecover(LivingEntity caster, Map<Location, Material> brokenBlocks) {
         if (recoverTime <= 0 || brokenBlocks.isEmpty()) return;
         new BukkitRunnable() {
             @Override
             public void run() {
-                for (Map.Entry<Location, Material> entry : brokenBlocks.entrySet()) {
-                    entry.getKey().getBlock().setType(entry.getValue(), false);
-                }
+                // WAS an unconditional setType(original, false) loop with no
+                // Protection re-check - it could rewrite a region the caster lost
+                // build permission in after casting.
+                TerrainEditor.restoreAll(caster, new TerrainEditor.RestoreTicket(brokenBlocks));
             }
         }.runTaskLater(Alkatraz.getInstance(), recoverTime * 20);
     }
 
     private void launchMobFissureAttack(Mob caster, ItemStack wand, AttackProperties props) {
-        double power = getPower(caster, getBasePower()) * getWandPowerOrDefault(wand);
         Vector direction = caster.getLocation().getDirection().setY(0).normalize();
         Vector perpendicular = new Vector(-direction.getZ(), 0, direction.getX()).normalize();
         Location startLoc = caster.getLocation().clone();
@@ -242,7 +262,7 @@ public class Fissure extends AttackSpell {
 
                     SpellDamageUtil.damageWithSpell(
                             le,
-                            getPower(caster, le, power),
+                            getPower(caster, le, props.getRemainingPower()),
                             caster,
                             wand,
                             Fissure.this
@@ -256,11 +276,17 @@ public class Fissure extends AttackSpell {
     public void castAction(Player caster, ItemStack wand) {
         if (caster.isDead()) return;
 
-        double totalPower = getPower(caster, getBasePower()) * getWandPower(wand, caster);
+        // `power` is retired from earthsplitter.yml per spec section 7 - it is a
+        // TERRAIN spell judged on blocks, and a `power` key that never reaches
+        // damage is dead config. Incidental damage is seeded from the circle-5
+        // BURST budget instead, so the per-target total is bounded by 22.1.
+        // getPower is applied once per impact, in launchFissureAttack; the old code
+        // applied it at cast AND again on each entity, squaring both the option
+        // MULTIPLYs and the affinity term.
         AttackProperties props = new AttackProperties(
                 caster,
                 Utils.castLocation(caster),
-                totalPower,
+                SpellBudgets.burstBudget(5) * getWandPower(wand, caster),
                 AttackType.MAGIC
         );
 
@@ -303,7 +329,7 @@ public class Fissure extends AttackSpell {
                                     Math.sin(angle) * d
                             );
                             ParticleCaster.spawn(caster, crackLoc.getWorld(), Utils.DUST, crackLoc, 0,
-                                    new Particle.DustOptions(Color.fromRGB(50, 30, 10), 0.8F));
+                                    DEEP_DUST);
                         }
                     }
 
@@ -311,7 +337,7 @@ public class Fissure extends AttackSpell {
                         double a = Math.random() * 2 * Math.PI;
                         double r = Math.random() * 2.0;
                         Location tremorLoc = casterLoc.clone().add(Math.cos(a) * r, 0.1, Math.sin(a) * r);
-                        ParticleCaster.spawn(caster, tremorLoc.getWorld(), Particle.FALLING_DUST, tremorLoc, 2, 0.2, 0.1, 0.2, 0,
+                        ParticleCaster.spawn(caster, tremorLoc.getWorld(), Utils.FALLING_DUST, tremorLoc, 2, 0.2, 0.1, 0.2, 0,
                                 Material.DIRT.createBlockData());
                     }
 
@@ -339,18 +365,10 @@ public class Fissure extends AttackSpell {
                                 Math.sin(angle) * r
                         );
                         ParticleCaster.spawn(caster, crackLoc.getWorld(), Utils.DUST, crackLoc, 0,
-                                new Particle.DustOptions(Color.fromRGB(30, 15, 0), 1.0F));
+                                DEEP_DUST);
                     }
 
-                    for (double d = 0; d < crackExtend; d += 0.6) {
-                        for (int side = -1; side <= 1; side += 2) {
-                            Location crackLoc = casterLoc.clone().add(
-                                    direction.clone().multiply(d)
-                            ).add(perpendicular.clone().multiply(side * 0.3 * (d / crackExtend)));
-                            ParticleCaster.spawn(caster, crackLoc.getWorld(), Utils.DUST, crackLoc, 0,
-                                    new Particle.DustOptions(Color.fromRGB(80, 50, 20), 0.6F));
-                        }
-                    }
+                    drawWindUpCrack(caster, casterLoc, direction, crackExtend);
 
                     if (ticks % 15 == 0) {
                         casterLoc.getWorld().playSound(casterLoc, Sound.ENTITY_IRON_GOLEM_ATTACK, 0.3f, 0.3f);
@@ -367,11 +385,11 @@ public class Fissure extends AttackSpell {
         if (caster.isDead() || caster.getTarget() == null) return;
 
         double wandp = getWandPowerOrDefault(wand);
-        double power = getPower(caster, getBasePower()) * wandp;
+        // Same retirement as the player path - see castAction.
         AttackProperties props = new AttackProperties(
                 caster,
                 Utils.castLocation(caster),
-                power,
+                SpellBudgets.burstBudget(5) * wandp,
                 AttackType.MAGIC
         );
 
@@ -412,7 +430,7 @@ public class Fissure extends AttackSpell {
                                     Math.sin(angle) * d
                             );
                             ParticleCaster.spawn(caster, crackLoc.getWorld(), Utils.DUST, crackLoc, 0,
-                                    new Particle.DustOptions(Color.fromRGB(50, 30, 10), 0.8F));
+                                    DEEP_DUST);
                         }
                     }
 
@@ -420,7 +438,7 @@ public class Fissure extends AttackSpell {
                         double a = Math.random() * 2 * Math.PI;
                         double r = Math.random() * 2.0;
                         Location tremorLoc = casterLoc.clone().add(Math.cos(a) * r, 0.1, Math.sin(a) * r);
-                        ParticleCaster.spawn(caster, tremorLoc.getWorld(), Particle.FALLING_DUST, tremorLoc, 2, 0.2, 0.1, 0.2, 0,
+                        ParticleCaster.spawn(caster, tremorLoc.getWorld(), Utils.FALLING_DUST, tremorLoc, 2, 0.2, 0.1, 0.2, 0,
                                 Material.DIRT.createBlockData());
                     }
 
@@ -431,15 +449,7 @@ public class Fissure extends AttackSpell {
                     double phaseProgress = (progress - 0.67) / 0.33;
                     double crackExtend = phaseProgress * 8.0;
 
-                    for (double d = 0; d < crackExtend; d += 0.6) {
-                        for (int side = -1; side <= 1; side += 2) {
-                            Location crackLoc = casterLoc.clone().add(
-                                    direction.clone().multiply(d)
-                            ).add(perpendicular.clone().multiply(side * 0.3 * (d / crackExtend)));
-                            ParticleCaster.spawn(caster, crackLoc.getWorld(), Utils.DUST, crackLoc, 0,
-                                    new Particle.DustOptions(Color.fromRGB(80, 50, 20), 0.6F));
-                        }
-                    }
+                    drawWindUpCrack(caster, casterLoc, direction, crackExtend);
 
                     if (ticks % 15 == 0) {
                         casterLoc.getWorld().playSound(casterLoc, Sound.ENTITY_IRON_GOLEM_ATTACK, 0.3f, 0.3f);
@@ -451,11 +461,32 @@ public class Fissure extends AttackSpell {
         }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
     }
 
+    /**
+     * The wind-up's second phase: a crack running forward out of the caster along
+     * their facing, growing a little further every tick.
+     *
+     * <p>Shared geometry, shared colours - {@link SpellVfx#ground} supplies both, so
+     * the two lanes and the shade split are no longer this class's problem. The
+     * leading edge is {@code core} and the run behind it steps toward {@code deep},
+     * which is why a long crack reads as opening rather than as a static stripe.
+     *
+     * @param caster    the charging entity, for density falloff
+     * @param origin    the caster's feet, where the crack starts
+     * @param direction the flat direction the crack runs; assumed normalised
+     * @param length    how far the crack currently reaches, in blocks
+     */
+    private void drawWindUpCrack(LivingEntity caster, Location origin, Vector direction, double length) {
+        if (length <= 0) return;
+        int samples = Math.max(2, (int) Math.ceil(length / 0.6));
+        double yawDegrees = Math.toDegrees(Math.atan2(direction.getZ(), direction.getX()));
+        SpellVfx.ground(this, caster, origin, length, 0.6, samples, 2, yawDegrees, 1.0);
+    }
+
     @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
         ParticleCaster.spawn(caster, location.getWorld(), Utils.BLOCK, location, 30, 0.5, 0.5, 0.5, 0.5,
                 Material.STONE.createBlockData());
-        ParticleCaster.spawn(caster, location.getWorld(), Particle.FALLING_DUST, location, 15, 0.5, 0.5, 0.5, 0,
+        ParticleCaster.spawn(caster, location.getWorld(), Utils.FALLING_DUST, location, 15, 0.5, 0.5, 0.5, 0,
                 Material.STONE.createBlockData());
     }
 
@@ -468,18 +499,7 @@ public class Fissure extends AttackSpell {
 
     @Override
     public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
-        return Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
-            if (e.isCancelled()) return;
-            Location playerLoc = caster.getEyeLocation();
-            float yaw = playerLoc.getYaw();
-            float pitch = playerLoc.getPitch();
-            Vector forward = playerLoc.getDirection().normalize().multiply(1.5);
-            List<Location> points = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 3, 0);
-            Particle.DustOptions options = new Particle.DustOptions(Color.fromRGB(139, 90, 43), 0.4F);
-            for (Location loc : points) {
-                ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, options);
-            }
-        }, 0L, (Long) Configs.CIRCLE_TICKS.get());
+        return CastCircle.start(this, caster, e, 3.0, 0);
     }
 
     @Override

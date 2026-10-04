@@ -1,15 +1,13 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.api.Element;
 import me.nagasonic.alkatraz.config.ConfigManager;
-import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
 import me.nagasonic.alkatraz.spells.components.SpellParticleComponent;
-import me.nagasonic.alkatraz.spells.configuration.OptionValue;
-import me.nagasonic.alkatraz.spells.configuration.SpellOption;
 import me.nagasonic.alkatraz.spells.configuration.impact.implementation.ManaCostImpact;
 import me.nagasonic.alkatraz.spells.configuration.impact.implementation.StatModifierImpact;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
@@ -18,11 +16,14 @@ import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
+import me.nagasonic.alkatraz.spells.vfx.CastCircle;
+import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
+import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.util.ParticleCaster;
-import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -44,6 +45,32 @@ import java.util.*;
  * - Multiple blades are spread in an even horizontal fan around the player's aim direction.
  */
 public class AirBlades extends AttackSpell implements Listener {
+
+    private static final ElementPalette.Palette AIR = ElementPalette.of(Element.AIR);
+
+    /** The blade's cross-section dust. Pale AIR core, so the leading edge is the brightest thing. */
+    private static final Particle.DustOptions BLADE_DUST = AIR.coreDust();
+    /** The thin trailing wisp behind a blade, from the palette rather than a literal RGB. */
+    private static final Particle.DustOptions TRAIL_DUST = AIR.accentDust();
+
+    /**
+     * FAN GEOMETRY - the air_blades signature shape.
+     *
+     * <p>The volley is drawn as a {@link SpellVfx#cone} sector opening away from the caster:
+     * a bright {@code core} rim on the leading edge the blades actually leave along, and a
+     * {@code deep} interior fill so the rim stays legible as a boundary. The sector grows
+     * outward over {@link #FAN_TICKS} ticks and then disappears, which is the whole draw.
+     */
+    private static final double FAN_TICK_PERIOD = 0.2;
+    private static final int FAN_TICKS = 8;
+    private static final double FAN_RADIUS = 3.2;
+    private static final double FAN_START_SCALE = 0.35;
+    private static final int FAN_ARC_STEPS = 12;
+    private static final int FAN_RADIAL_STEPS = 4;
+    /** Arc width in degrees when only one blade fires; it still reads as a narrow cone. */
+    private static final double FAN_SOLO_ARC = 14.0;
+    /** Arc width in degrees added on top of the configured spread, so the fan slightly overshoots. */
+    private static final double FAN_ARC_PADDING = 8.0;
 
     // Config values
     private double bladeSpeed;
@@ -86,13 +113,14 @@ public class AirBlades extends AttackSpell implements Listener {
         int bladeCount = (int) getModifiedStat(caster, "blade_count",
                  (int) getOption("blade_count").getSelectedValue(caster).getValue());
 
-        double power = getPower(caster, getBasePower())
-                * getWandPower(wand, caster);
         double size = getModifiedStat(caster, "blade_size", 0.6);
+        // RAW base power. getPower is applied once per blade impact, below - the
+        // old code scaled here AND again at impact, which squared the option
+        // multipliers and the affinity term.
         AttackProperties props = new AttackProperties(
                 caster,
                 caster.getEyeLocation(),
-                power,
+                getBasePower() * getWandPower(wand, caster),
                 AttackType.MAGIC
         );
         fireBlades(caster, wand, bladeCount, size, props);
@@ -102,12 +130,11 @@ public class AirBlades extends AttackSpell implements Listener {
     public void mobCastAction(Mob caster, ItemStack wand) {
         int bladeCount = 2;
         double wandp = getWandPowerOrDefault(wand);
-        double power = getPower(caster, getBasePower())
-                * wandp;
+        // RAW base power - see the player branch.
         AttackProperties props = new AttackProperties(
                 caster,
                 caster.getEyeLocation(),
-                power,
+                getBasePower() * wandp,
                 AttackType.MAGIC
         );
         fireBlades(caster, wand, bladeCount, 0.6, props);
@@ -148,6 +175,44 @@ public class AirBlades extends AttackSpell implements Listener {
 
             launchBlade(caster, wand, props, bladeDir, size);
         }
+
+        spawnBladeFan(caster, aimDir, offsets.size());
+    }
+
+    /**
+     * Draws the AIR signature shape: a cone sector opening along {@code aimDir}, showing the
+     * angular sector the volley is about to sweep.
+     *
+     * <p>This is what separates air_blades from the rest of the element by shape rather than
+     * by colour: AIR's palette is deliberately the palest in the game, so a pale puff alone
+     * would be indistinguishable from swift's trail or air_burst's blast. A widening sector
+     * with a bright rim is a fan, and only one AIR spell draws a fan.
+     *
+     * @param caster  the entity casting, for per-player particle density
+     * @param aimDir  the direction the volley is centred on; never null
+     * @param blades  how many blades are in the volley; one still gets a narrow cone
+     */
+    private void spawnBladeFan(LivingEntity caster, Vector aimDir, int blades) {
+        double arc = (blades <= 1) ? FAN_SOLO_ARC : bladeSpread + FAN_ARC_PADDING;
+        double centre = Math.toDegrees(Math.atan2(aimDir.getZ(), aimDir.getX()));
+        Location apex = caster.getEyeLocation().clone().add(0.0, -0.3, 0.0);
+
+        new BukkitRunnable() {
+            int elapsed = 0;
+
+            @Override
+            public void run() {
+                if (elapsed >= FAN_TICKS || caster.isDead()) {
+                    cancel();
+                    return;
+                }
+                double progress = (elapsed + 1) / (double) FAN_TICKS;
+                double radius = FAN_RADIUS * (FAN_START_SCALE + (1.0 - FAN_START_SCALE) * progress);
+                SpellVfx.cone(AirBlades.this, caster, apex, radius,
+                        arc, centre - (arc / 2.0), FAN_ARC_STEPS, FAN_RADIAL_STEPS);
+                elapsed++;
+            }
+        }.runTaskTimer(Alkatraz.getInstance(), 0L, (long) (FAN_TICK_PERIOD * 20.0));
     }
 
     /**
@@ -159,7 +224,6 @@ public class AirBlades extends AttackSpell implements Listener {
             final Location position = caster.getEyeLocation().clone();
             final Vector step       = direction.clone().multiply(bladeSpeed);
             double distanceTravelled = 0;
-            final Set<UUID> hit      = new HashSet<>();
 
             @Override
             public void run() {
@@ -181,7 +245,8 @@ public class AirBlades extends AttackSpell implements Listener {
                 }
 
                 // Stop if the blade enters liquid or a solid block
-                if (position.getBlock().isLiquid() || (!position.getBlock().isPassable() && position.getBlock().getType().isOccluding())) {
+                Block b = position.getBlock();
+                if (b.isLiquid() || (!b.isPassable() && b.getType().isOccluding())) {
                     spawnDisperse(position);
                     cancel();
                     return;
@@ -207,14 +272,18 @@ public class AirBlades extends AttackSpell implements Listener {
                 for (Entity entity : position.getWorld().getNearbyEntities(position, 0.6, 0.6, 0.6)) {
                     if (!(entity instanceof LivingEntity target)) continue;
                     if (entity.equals(caster)) continue;
-                    if (hit.contains(entity.getUniqueId())) continue;
+                    // One AttackProperties for the WHOLE volley, so a counter kills
+                    // every blade - and so a target caught by two blades of the same
+                    // fan is only damaged once. Without this guard the shared props
+                    // made the fan hit a single target up to five times per cast.
+                    if (props.hasHit(target)) continue;
+                    props.hit(target);
 
-                    hit.add(entity.getUniqueId());
                     double damage = getPower(caster, target, props.getRemainingPower());
                     SpellDamageUtil.damageWithSpell(target, damage, caster, wand, AirBlades.this);
 
                     // Hit sound & particles
-                    ParticleCaster.spawn(caster, position.getWorld(), Particle.SWEEP_ATTACK, position, 3, 0.2, 0.2, 0.2, 0);
+                    ParticleCaster.spawn(caster, position.getWorld(), Utils.SWEEP_ATTACK, position, 3, 0.2, 0.2, 0.2, 0);
                     position.getWorld().playSound(position, Sound.ENTITY_PLAYER_ATTACK_SWEEP, 0.8f, 1.4f);
 
                     // One blade, one entity — stop after first hit
@@ -237,35 +306,28 @@ public class AirBlades extends AttackSpell implements Listener {
         // Perpendicular vector in the horizontal plane
         Vector perp = new Vector(-direction.getZ(), 0, direction.getX()).normalize();
 
-        int steps = 5;
-        double halfLen = size; // half-length of the blade cross in blocks
+        double span = size * 2;
+        ParticleCaster.spawn(null, center.getWorld(),
+                Utils.DUST, center, 16,
+                perp.getX() * span, 0, perp.getZ() * span,
+                0, BLADE_DUST
+        );
 
-        for (int i = -steps; i <= steps; i++) {
-            double t = ((double) i / steps) * halfLen;
-            Location loc = center.clone().add(perp.clone().multiply(t));
-            ParticleCaster.spawn(null, loc.getWorld(),
-                    Utils.DUST, loc, 1, 0, 0, 0, 0,
-                    new Particle.DustOptions(Color.fromRGB(220, 235, 255), 0.7f)
-            );
-        }
-
-        // Thin vertical sliver for the blade "edge"
-        for (int i = -2; i <= 2; i++) {
-            double t = ((double) i / 2) * 0.3;
-            Location loc = center.clone().add(0, t, 0);
-            ParticleCaster.spawn(null, loc.getWorld(),
-                    Utils.DUST, loc, 1, 0, 0, 0, 0,
-                    new Particle.DustOptions(Color.WHITE, 0.5f)
-            );
-        }
+        // A thin trailing wisp in the accent shade so the blade has a wake rather than
+        // being a flat perpendicular line. Small dust, so it stays a hint, not a second blade.
+        ParticleCaster.spawn(null, center.getWorld(),
+                Utils.DUST, center, 6,
+                -direction.getX() * size, 0, -direction.getZ() * size,
+                0, TRAIL_DUST
+        );
     }
 
     /**
      * Dispersal burst when a blade stops.
      */
     private void spawnDisperse(Location loc) {
-        ParticleCaster.spawn(null, loc.getWorld(), Particle.CLOUD, loc, 8, 0.3, 0.3, 0.3, 0.05);
-        ParticleCaster.spawn(null, loc.getWorld(), Particle.SWEEP_ATTACK, loc, 2, 0.2, 0.2, 0.2, 0);
+        ParticleCaster.spawn(null, loc.getWorld(), Utils.CLOUD, loc, 8, 0.3, 0.3, 0.3, 0.05);
+        ParticleCaster.spawn(null, loc.getWorld(), Utils.SWEEP_ATTACK, loc, 2, 0.2, 0.2, 0.2, 0);
     }
 
     // ============================================
@@ -274,14 +336,14 @@ public class AirBlades extends AttackSpell implements Listener {
 
     @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
-        ParticleCaster.spawn(caster, location.getWorld(), Particle.CLOUD, location, 20, 0.5, 0.5, 0.5, 0.1);
-        ParticleCaster.spawn(caster, location.getWorld(), Particle.SWEEP_ATTACK, location, 4);
+        ParticleCaster.spawn(caster, location.getWorld(), Utils.CLOUD, location, 20, 0.5, 0.5, 0.5, 0.1);
+        ParticleCaster.spawn(caster, location.getWorld(), Utils.SWEEP_ATTACK, location, 4);
         location.getWorld().playSound(location, Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1f, 1.6f);
     }
 
     @Override
     public void onCountered(Location location) {
-        ParticleCaster.spawn(null, location.getWorld(), Particle.CLOUD, location, 40, 1, 1, 1, 0.15);
+        ParticleCaster.spawn(null, location.getWorld(), Utils.CLOUD, location, 40, 1, 1, 1, 0.15);
         ParticleCaster.spawn(null, location.getWorld(), Utils.EXPLOSION, location, 1);
         location.getWorld().playSound(location, Sound.ENTITY_GENERIC_EXPLODE, 0.5f, 1.8f);
     }
@@ -292,20 +354,7 @@ public class AirBlades extends AttackSpell implements Listener {
 
     @Override
     public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
-        return Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
-            if (e.isCancelled()) return;
-            Location playerLoc = caster.getEyeLocation();
-            float yaw   = playerLoc.getYaw();
-            float pitch = playerLoc.getPitch();
-            Vector forward = playerLoc.getDirection().normalize().multiply(1.5);
-
-            List<Location> circlePoints = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 2, 0);
-
-            Particle.DustOptions options = new Particle.DustOptions(Color.fromRGB(210, 230, 255), 0.4F);
-            for (Location loc : circlePoints) {
-                ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, options);
-            }
-        }, 0L, (Long) Configs.CIRCLE_TICKS.get());
+        return CastCircle.start(this, caster, e);
     }
 
     // ============================================

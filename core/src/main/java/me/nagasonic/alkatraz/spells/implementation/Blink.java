@@ -2,15 +2,17 @@ package me.nagasonic.alkatraz.spells.implementation;
 
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
-import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.lang.LangManager;
+import me.nagasonic.alkatraz.api.Element;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
+import me.nagasonic.alkatraz.spells.vfx.CastCircle;
+import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
+import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.util.ParticleCaster;
-import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -21,9 +23,21 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
-import java.util.List;
-
 public class Blink extends Spell {
+
+    /**
+     * Blink is element NONE, so the pop and the cast circle draw in neutral grey
+     * rather than in the violet this spell used to hardcode.
+     */
+    private static final ElementPalette.Palette PALETTE = ElementPalette.of(Element.NONE);
+
+    /** The pop at each end of a blink; pre-built so a blink allocates no colour objects. */
+    private static final Particle.DustOptions POP_DUST = PALETTE.coreDust();
+
+    /** Steps in the origin-to-destination beam, and its half-width at each end. */
+    private static final int BEAM_STEPS = 12;
+    private static final double BEAM_START_WIDTH = 0.2;
+    private static final double BEAM_END_WIDTH = 0.6;
 
     private double blinkDistance;
 
@@ -68,6 +82,7 @@ public class Blink extends Spell {
             return;
         }
 
+        spawnBlinkBeam(caster, start, target);
         spawnTeleportParticles(caster, start);
         caster.teleport(target);
         spawnTeleportParticles(caster, target);
@@ -93,6 +108,7 @@ public class Blink extends Spell {
             return;
         }
 
+        spawnBlinkBeam(caster, start, target);
         spawnTeleportParticles(caster, start);
         caster.teleport(target);
         spawnTeleportParticles(caster, target);
@@ -128,25 +144,24 @@ public class Blink extends Spell {
     }
 
     private void spawnTeleportParticles(LivingEntity caster, Location loc) {
-        ParticleCaster.spawn(caster, loc.getWorld(), Particle.PORTAL, loc, 40, 0.5, 0.5, 0.5, 0.5);
+        ParticleCaster.spawn(caster, loc.getWorld(), Utils.PORTAL, loc, 40, 0.5, 0.5, 0.5, 0.5);
         ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 15, 0.3, 0.3, 0.3, 0,
-                new Particle.DustOptions(Color.fromRGB(120, 50, 200), 0.6F));
+                POP_DUST);
+    }
+
+    /**
+     * The thread a blink leaves behind: a tapered line from where the caster was to
+     * where they ended up, thin at the origin and wide at the arrival so the eye is
+     * pulled to the destination. Shared geometry and palette with every other beam
+     * in the plugin.
+     */
+    private void spawnBlinkBeam(LivingEntity caster, Location origin, Location target) {
+        SpellVfx.beam(this, caster, origin, target, BEAM_STEPS, BEAM_START_WIDTH, BEAM_END_WIDTH);
     }
 
     @Override
     public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
-        return Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
-            if (e.isCancelled()) return;
-            Location playerLoc = caster.getEyeLocation();
-            float yaw = playerLoc.getYaw();
-            float pitch = playerLoc.getPitch();
-            Vector forward = playerLoc.getDirection().normalize().multiply(1.5);
-            List<Location> points = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 3, 0);
-            Particle.DustOptions options = new Particle.DustOptions(Color.fromRGB(120, 50, 200), 0.4F);
-            for (Location loc : points) {
-                ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, options);
-            }
-        }, 0L, (Long) Configs.CIRCLE_TICKS.get());
+        return CastCircle.start(this, caster, e, 3.0, 0);
     }
 
     @Override

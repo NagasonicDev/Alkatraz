@@ -23,6 +23,10 @@ public class RangedKillTracker<W> {
     private final long ttlMillis;
     private final Map<UUID, TimedEntry<W>> entries = new ConcurrentHashMap<>();
 
+    /** Timestamp of the last full sweep; {@code true} forces the first call through. */
+    private long lastCleanup;
+    private boolean swept;
+
     public RangedKillTracker(long ttlMillis) {
         this.ttlMillis = ttlMillis;
     }
@@ -48,6 +52,14 @@ public class RangedKillTracker<W> {
     }
 
     public void cleanup(long nowMillis) {
+        // Time-gated: an O(n) sweep on every projectile hit is wasteful when entries
+        // expire slowly. The resolve() TTL check still drops stale entries on lookup, so
+        // an entry can outlive the sweep window by at most one interval.
+        if (swept && nowMillis - lastCleanup < ttlMillis) {
+            return;
+        }
+        swept = true;
+        lastCleanup = nowMillis;
         entries.entrySet().removeIf(e -> nowMillis - e.getValue().recordedAt() > ttlMillis);
     }
 }

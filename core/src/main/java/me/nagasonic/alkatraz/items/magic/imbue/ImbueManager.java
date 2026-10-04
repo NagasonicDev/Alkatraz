@@ -116,7 +116,10 @@ public final class ImbueManager {
 
     public static String getCleanName(ItemStack stack) {
         if (stack == null || stack.getType().isAir()) return "";
-        ItemMeta meta = stack.getItemMeta();
+        return cleanName(stack, stack.getItemMeta());
+    }
+
+    private static String cleanName(ItemStack stack, ItemMeta meta) {
         String clean = meta != null && meta.hasDisplayName() ? unwrapName(meta.getDisplayName()) : "";
         if (clean.isEmpty()) clean = prettifyMaterial(stack.getType());
         return clean;
@@ -127,7 +130,7 @@ public final class ImbueManager {
         ItemStack copy = stack.clone();
         ItemMeta meta = copy.getItemMeta();
         if (meta == null) return copy;
-        meta.setDisplayName(wrapName(getCleanName(copy)));
+        meta.setDisplayName(wrapName(cleanName(copy, meta)));
         copy.setItemMeta(meta);
         return copy;
     }
@@ -137,7 +140,7 @@ public final class ImbueManager {
         ItemStack copy = stack.clone();
         ItemMeta meta = copy.getItemMeta();
         if (meta == null || !meta.hasDisplayName()) return copy;
-        meta.setDisplayName(getCleanName(copy));
+        meta.setDisplayName(cleanName(copy, meta));
         copy.setItemMeta(meta);
         return copy;
     }

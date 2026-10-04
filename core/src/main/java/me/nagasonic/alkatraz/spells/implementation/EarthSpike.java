@@ -2,7 +2,6 @@ package me.nagasonic.alkatraz.spells.implementation;
 
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
-import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.api.dom.Ground;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.lang.LangManager;
@@ -18,8 +17,9 @@ import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
+import me.nagasonic.alkatraz.spells.vfx.CastCircle;
+import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.util.ParticleCaster;
-import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
 import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.util.Utils;
@@ -41,6 +41,19 @@ import java.util.List;
 import java.util.Map;
 
 public class EarthSpike extends AttackSpell implements Listener {
+
+    /**
+     * The spike cluster's signature {@code ground} shape: TIGHT and small, revealed outward from
+     * the centre. That is deliberately the opposite of {@code tremor}'s configuration - tremor is
+     * long, wide and multi-lane, this is a 1.5-block pad at 5x5 - so the two ground-shaped earth
+     * spells cannot read as the same picture at a glance.
+     */
+    private static final double SPIKE_REACH = 1.5;
+    private static final int SPIKE_SAMPLES = 5;
+    private static final int SPIKE_LANES = 5;
+
+    /** Minimum number of ticks the cluster is revealed over, so a 1-high spike still animates. */
+    private static final int SPIKE_MIN_REVEAL_TICKS = 1;
 
     private static LangManager lang() {
         return Alkatraz.getLangManager();
@@ -115,11 +128,12 @@ public class EarthSpike extends AttackSpell implements Listener {
             maxHeight = Math.max(maxHeight, h);
         }
 
+        drawSpikeCluster(props, player, target.getLocation().add(0.5, 0.05, 0.5), maxHeight);
+
         for (Map.Entry<BlockFace, Integer> entry : columns.entrySet()) {
             Block block = target.getRelative(entry.getKey());
             if (props.isCountered() || props.isCancelled()) return;
             int height = Math.max(1, (int) Math.round(entry.getValue() * heightMultiplier));
-            Location loc = block.getLocation();
             World world = block.getWorld();
             int x = block.getX();
             int y = block.getY();
@@ -154,24 +168,31 @@ public class EarthSpike extends AttackSpell implements Listener {
                         }
                     }
 
+                    Block topBlock = world.getBlockAt(x, y + step, z);
                     SpellBlockComponent comp = new SpellBlockComponent(
                             EarthSpike.this,
                             props,
                             player,
                             wand,
                             SpellComponentType.OFFENSE,
-                            world.getBlockAt(x, y + step, z),
+                            topBlock,
                             1,
                             2
                     );
                     SpellComponentHandler.register(comp);
-                    Block topBlock = world.getBlockAt(x, y + step, z);
-                    for (Entity entity : topBlock.getWorld().getNearbyEntities(loc, 1.5, 1.5, 1.5)) {
+                    for (Entity entity : world.getNearbyEntities(topBlock.getLocation(), 1.5, 1.5, 1.5)) {
                         if (props.isCountered() || props.isCancelled()) {
                             return;
                         }
                         if (entity instanceof LivingEntity le && !le.equals(player)) {
-                            SpellDamageUtil.damageWithSpell(le, getPower(player, le, props.getRemainingPower()), player, wand, EarthSpike.this);
+                            // Deduped per target per cast. Without this a standing
+                            // target took one hit per rising step: 35 to 105 depending
+                            // on the spike_height option.
+                            if (props.hasHit(le)) continue;
+                            props.hit(le);
+                            SpellDamageUtil.damageWithSpell(le,
+                                    getPower(player, le, props.getRemainingPower()),
+                                    player, wand, EarthSpike.this);
                             le.setVelocity(new Vector(0, 1, 0));
                         }
                     }
@@ -197,7 +218,14 @@ public class EarthSpike extends AttackSpell implements Listener {
                 @Override
                 public void run() {
                     for (Map.Entry<Location, Material> e : originals.entrySet()) {
-                        e.getKey().getBlock().setType(e.getValue(), false);
+                        // WAS: e.getKey().getBlock().setType(e.getValue(), false);
+                        // restoreAll re-checks Protection PER BLOCK.
+                        Location loc = e.getKey();
+                        if (loc == null || loc.getWorld() == null) continue;
+                        Block block = loc.getBlock();
+                        if (block.getType() == e.getValue()) continue;
+                        if (!Protection.blockEdit(player, loc)) continue;
+                        block.setType(e.getValue(), false);
                     }
                 }
             }.runTaskLater(Alkatraz.getInstance(), maxHeight + selfDestructTicks);
@@ -206,7 +234,13 @@ public class EarthSpike extends AttackSpell implements Listener {
                 @Override
                 public void run() {
                     for (Map.Entry<Location, Material> e : originals.entrySet()) {
-                        e.getKey().getBlock().setType(e.getValue(), false);
+                        // restoreAll re-checks Protection PER BLOCK.
+                        Location loc = e.getKey();
+                        if (loc == null || loc.getWorld() == null) continue;
+                        Block block = loc.getBlock();
+                        if (block.getType() == e.getValue()) continue;
+                        if (!Protection.blockEdit(player, loc)) continue;
+                        block.setType(e.getValue(), false);
                     }
                 }
             }.runTaskLater(Alkatraz.getInstance(), recoverTime * 20);
@@ -222,9 +256,11 @@ public class EarthSpike extends AttackSpell implements Listener {
         }
         if (target == null || !target.getType().isSolid()) return;
         double wandp = getWandPowerOrDefault(wand);
-        double power = getPower(caster, getBasePower())
-                * wandp;
-        AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster), power, AttackType.PHYSICAL);
+        // RAW base power into AttackProperties - getPower is applied once per damage
+        // instance, in the rising-step loop. Pre-scaling here too would square the
+        // option modifiers and the affinity term.
+        AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster),
+                getBasePower() * wandp, AttackType.PHYSICAL);
         Map<BlockFace, Integer> columns = new HashMap<>();
         columns.put(BlockFace.SELF, 7);
         columns.put(BlockFace.NORTH, 5);
@@ -240,11 +276,12 @@ public class EarthSpike extends AttackSpell implements Listener {
         Map<Location, Material> originals = new HashMap<>();
         int maxHeight = 7;
 
+        drawSpikeCluster(props, caster, target.getLocation().add(0.5, 0.05, 0.5), maxHeight);
+
         for (Map.Entry<BlockFace, Integer> entry : columns.entrySet()) {
             Block block = target.getRelative(entry.getKey());
             if (props.isCountered() || props.isCancelled()) return;
             int height = entry.getValue();
-            Location loc = block.getLocation();
             World world = block.getWorld();
             int x = block.getX();
             int y = block.getY();
@@ -279,24 +316,31 @@ public class EarthSpike extends AttackSpell implements Listener {
                         }
                     }
 
+                    Block topBlock = world.getBlockAt(x, y + step, z);
                     SpellBlockComponent comp = new SpellBlockComponent(
                             EarthSpike.this,
                             props,
                             caster,
                             wand,
                             SpellComponentType.OFFENSE,
-                            world.getBlockAt(x, y + step, z),
+                            topBlock,
                             1,
                             2
                     );
                     SpellComponentHandler.register(comp);
-                    Block topBlock = world.getBlockAt(x, y + step, z);
-                    for (Entity entity : topBlock.getWorld().getNearbyEntities(loc, 1.5, 1.5, 1.5)) {
+                    for (Entity entity : world.getNearbyEntities(topBlock.getLocation(), 1.5, 1.5, 1.5)) {
                         if (props.isCountered() || props.isCancelled()) {
                             return;
                         }
                         if (entity instanceof LivingEntity le && !le.equals(caster)) {
-                            SpellDamageUtil.damageWithSpell(le, getPower(caster, le, props.getRemainingPower()), caster, wand, EarthSpike.this);
+                            // Deduped per target per cast. Without this a standing
+                            // target took one hit per rising step: 35 to 105 depending
+                            // on the spike_height option.
+                            if (props.hasHit(le)) continue;
+                            props.hit(le);
+                            SpellDamageUtil.damageWithSpell(le,
+                                    getPower(caster, le, props.getRemainingPower()),
+                                    caster, wand, EarthSpike.this);
                             le.setVelocity(new Vector(0, 1, 0));
                         }
                     }
@@ -322,7 +366,14 @@ public class EarthSpike extends AttackSpell implements Listener {
                 @Override
                 public void run() {
                     for (Map.Entry<Location, Material> e : originals.entrySet()) {
-                        e.getKey().getBlock().setType(e.getValue(), false);
+                        // WAS: e.getKey().getBlock().setType(e.getValue(), false);
+                        // restoreAll re-checks Protection PER BLOCK.
+                        Location loc = e.getKey();
+                        if (loc == null || loc.getWorld() == null) continue;
+                        Block block = loc.getBlock();
+                        if (block.getType() == e.getValue()) continue;
+                        if (!Protection.blockEdit(caster, loc)) continue;
+                        block.setType(e.getValue(), false);
                     }
                 }
             }.runTaskLater(Alkatraz.getInstance(), maxHeight + selfDestructTicks);
@@ -331,32 +382,53 @@ public class EarthSpike extends AttackSpell implements Listener {
                 @Override
                 public void run() {
                     for (Map.Entry<Location, Material> e : originals.entrySet()) {
-                        e.getKey().getBlock().setType(e.getValue(), false);
+                        // restoreAll re-checks Protection PER BLOCK.
+                        Location loc = e.getKey();
+                        if (loc == null || loc.getWorld() == null) continue;
+                        Block block = loc.getBlock();
+                        if (block.getType() == e.getValue()) continue;
+                        if (!Protection.blockEdit(caster, loc)) continue;
+                        block.setType(e.getValue(), false);
                     }
                 }
             }.runTaskLater(Alkatraz.getInstance(), recoverTime * 20);
         }
     }
 
+    /**
+     * Reveals the spike cluster's {@code ground} tell outward from its centre over the same number
+     * of ticks the tallest spike takes to rise, so the dust and the spikes appear together.
+     *
+     * <p>Visual only, and stopped early on a counted or cancelled cast so a countered spike leaves
+     * no task behind.
+     *
+     * @param props   the cast's properties, polled for counter/cancel
+     * @param caster  the entity casting, used for per-player density falloff
+     * @param ground  the cluster's centre point on the ground
+     * @param maxHeight the tallest spike in this cast, in blocks
+     */
+    private void drawSpikeCluster(AttackProperties props, LivingEntity caster, Location ground, int maxHeight) {
+        final int revealTicks = Math.max(SPIKE_MIN_REVEAL_TICKS, maxHeight);
+        new BukkitRunnable() {
+            int step = 0;
+
+            @Override
+            public void run() {
+                if (props.isCountered() || props.isCancelled() || step > revealTicks) {
+                    cancel();
+                    return;
+                }
+                SpellVfx.ground(EarthSpike.this, caster, ground,
+                        SPIKE_REACH, SPIKE_REACH, SPIKE_SAMPLES, SPIKE_LANES,
+                        caster.getLocation().getYaw(), (double) step / revealTicks);
+                step++;
+            }
+        }.runTaskTimer(Alkatraz.getInstance(), 0, 1);
+    }
+
     @Override
     public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
-        int d = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
-            if (e.isCancelled()) return;
-            Location playerLoc = caster.getEyeLocation(); // Player eye location
-            float yaw = playerLoc.getYaw();
-            float pitch = playerLoc.getPitch();
-
-            // Calculate offset vector pointing forward relative to player orientation
-            Vector forward = playerLoc.getDirection().normalize().multiply(1.5); // 1.5 blocks in front
-
-            // Call magicCircle with proper center, yaw, pitch and offset
-            List<Location> magicCirclePoints = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 3, 0);
-            Particle.DustOptions options = new Particle.DustOptions(Color.fromRGB(78, 47, 0), 0.4F);
-            for (Location loc : magicCirclePoints) {
-                ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 10, options);
-            }
-        }, 0L, (Long) Configs.CIRCLE_TICKS.get());
-        return d;
+        return CastCircle.start(this, caster, e);
     }
 
     @Override

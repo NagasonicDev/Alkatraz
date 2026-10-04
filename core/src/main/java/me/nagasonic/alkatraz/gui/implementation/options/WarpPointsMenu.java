@@ -19,6 +19,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Map;
+
 /**
  * Custom spell option menu for managing warp points. Empty slots save the
  * player's current location; filled slots show a preview and can be cleared
@@ -52,8 +54,11 @@ public class WarpPointsMenu extends Menu {
                 .build());
 
         int absolute = warp.maxSlotsAbsolute();
+        Map<Integer, MagicProfile.WarpPoint> points = profile == null
+                ? Map.of()
+                : profile.getWarpPoints();
         for (int slot = 0; slot < absolute; slot++) {
-            inventory.setItem(slotToGuiSlot(slot), buildSlotItem(slot, profile));
+            inventory.setItem(slotToGuiSlot(slot), buildSlotItem(slot, profile, points));
         }
 
         ItemStack back = ItemBuilder.of(Material.BARRIER)
@@ -67,7 +72,7 @@ public class WarpPointsMenu extends Menu {
         return 10 + slot;
     }
 
-    private ItemStack buildSlotItem(int slot, MagicProfile profile) {
+    private ItemStack buildSlotItem(int slot, MagicProfile profile, Map<Integer, MagicProfile.WarpPoint> points) {
         int max = profile == null ? 0 : warp.maxSlots(profile);
 
         if (slot >= max) {
@@ -79,7 +84,7 @@ public class WarpPointsMenu extends Menu {
             return locked;
         }
 
-        MagicProfile.WarpPoint point = profile == null ? null : profile.getWarpPoints().get(slot);
+        MagicProfile.WarpPoint point = points.get(slot);
         if (point == null) {
             ItemStack empty = ItemBuilder.of(Material.LIGHT_GRAY_DYE)
                     .name("&7Slot " + (slot + 1))

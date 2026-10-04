@@ -17,6 +17,21 @@ public class EngravingTableMenuSelector extends Menu {
 
     private static final int ENGRVING_TABLE_SLOT = 22;
 
+    private static ItemStack backgroundPanePrototype;
+
+    private static ItemStack backgroundPane() {
+        if (backgroundPanePrototype == null) {
+            ItemStack item = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
+            ItemMeta meta = item.getItemMeta();
+            if (meta != null) {
+                meta.setDisplayName(ColorFormat.format("&7"));
+                item.setItemMeta(meta);
+            }
+            backgroundPanePrototype = item;
+        }
+        return backgroundPanePrototype;
+    }
+
     private static me.nagasonic.alkatraz.lang.LangManager lang() {
         return Alkatraz.getLangManager();
     }
@@ -33,7 +48,7 @@ public class EngravingTableMenuSelector extends Menu {
     @Override
     protected void build() {
         for (int i = 0; i < 27; i++) {
-            inventory.setItem(i, createBackgroundPane());
+            inventory.setItem(i, backgroundPane());
         }
 
         inventory.setItem(ENGRVING_TABLE_SLOT, createInfoItem());
@@ -67,16 +82,6 @@ public class EngravingTableMenuSelector extends Menu {
         }
 
         new EngravingTableMenu(viewer, magicItem, inst.get(), def.get()).open();
-    }
-
-    private ItemStack createBackgroundPane() {
-        ItemStack item = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
-        ItemMeta meta = item.getItemMeta();
-        if (meta != null) {
-            meta.setDisplayName(ColorFormat.format("&7"));
-            item.setItemMeta(meta);
-        }
-        return item;
     }
 
     private ItemStack createInfoItem() {

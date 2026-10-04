@@ -7,11 +7,12 @@ enabled: true
 element: 'WATER'
 code: 'LLRSS'
 level: 5
-required_focus: 140
-cooldown: 25
+required_focus: 115
+cooldown: 9
 cast_time: 1.5
-mana_cost: 90
-power: 7
+mana_cost: 120
+power: 10.8
+role: 'BURST'
 maximum_mastery: 100
 mastery_bar_color: 'BLUE'
 gui_item: 'WATER_BUCKET'

@@ -6,6 +6,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashSet;
@@ -36,12 +37,12 @@ public class SpellbookListener implements Listener {
         // Empty string (not null) is returned for a missing tag on modern MC versions.
         if (spellbookType == null || spellbookType.isEmpty()) return;
 
-        // Cancel the event to prevent other interactions
-        event.setCancelled(true);
-
         // Block if already using a spellbook
         UUID uuid = player.getUniqueId();
         if (!IN_USE.add(uuid)) return;
+
+        // Cancel the event to prevent other interactions
+        event.setCancelled(true);
 
         Runnable release = () -> IN_USE.remove(uuid);
 
@@ -59,5 +60,10 @@ public class SpellbookListener implements Listener {
         } else {
             release.run();
         }
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        IN_USE.remove(event.getPlayer().getUniqueId());
     }
 }

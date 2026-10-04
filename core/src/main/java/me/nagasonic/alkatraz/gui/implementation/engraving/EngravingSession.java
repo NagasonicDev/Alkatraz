@@ -38,6 +38,10 @@ public class EngravingSession {
         sessions.remove(playerId);
     }
 
+    public static void clearAll() {
+        sessions.clear();
+    }
+
     public ItemStack targetStack() {
         return targetStack;
     }

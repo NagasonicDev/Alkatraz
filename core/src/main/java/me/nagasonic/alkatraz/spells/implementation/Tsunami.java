@@ -1,8 +1,8 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.api.Element;
 import me.nagasonic.alkatraz.config.ConfigManager;
-import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
@@ -12,9 +12,11 @@ import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
+import me.nagasonic.alkatraz.spells.vfx.CastCircle;
+import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
+import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.util.ParticleCaster;
-import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -38,6 +40,26 @@ public class Tsunami extends AttackSpell {
     }
 
     private static final BlockData WATER_DATA = Material.WATER.createBlockData();
+
+    /**
+     * The single WATER palette. This spell used to carry {@code (0,120,255)} for the crest and
+     * {@code (0,100,255)} for its own cast circle - a sixth and seventh blue. Nothing here may
+     * name an RGB value.
+     */
+    private static final ElementPalette.Palette PALETTE = ElementPalette.of(Element.WATER);
+
+    /**
+     * Signature shape: a {@link SpellVfx#cone} whose apex sits one block behind the wave front and
+     * whose sector opens along the travel direction, so the shape itself points where the wave is
+     * going. A static shape would not - the forward motion is the whole point of a tsunami, and it
+     * is carried by the apex advancing along {@code direction} every tick.
+     */
+    private static final double CREST_ARC_DEGREES = 70.0;
+    private static final int CREST_ARC_STEPS = 6;
+    private static final int CREST_RADIAL_STEPS = 7;
+    /** How far behind the wave front the cone's apex sits, in blocks. */
+    private static final double CREST_APEX_BEHIND = 2.0;
+
     private int windUpDuration;
     public Tsunami(String type) {
         super(type);
@@ -57,11 +79,11 @@ public class Tsunami extends AttackSpell {
     public void castAction(Player caster, ItemStack wand) {
         if (caster.isDead()) return;
 
-        double totalPower = getPower(caster, getBasePower()) * getWandPower(wand, caster);
+        // RAW base power. getPower is applied once per impact, in launchTsunamiAttack.
         AttackProperties props = new AttackProperties(
                 caster,
                 Utils.castLocation(caster),
-                totalPower,
+                getBasePower() * getWandPower(wand, caster),
                 AttackType.MAGIC
         );
 
@@ -106,7 +128,7 @@ public class Tsunami extends AttackSpell {
                                     Math.sin(angle + j * 0.4) * r
                             );
                             ParticleCaster.spawn(caster, spiralLoc.getWorld(), Utils.SPLASH, spiralLoc, 2, 0.1, 0.1, 0.1, 0);
-                            ParticleCaster.spawn(caster, spiralLoc.getWorld(), Particle.BUBBLE_COLUMN_UP, spiralLoc, 1, 0.05, 0.05, 0.05, 0);
+                            ParticleCaster.spawn(caster, spiralLoc.getWorld(), Utils.BUBBLE_COLUMN_UP, spiralLoc, 1, 0.05, 0.05, 0.05, 0);
                         }
                     }
 
@@ -114,7 +136,7 @@ public class Tsunami extends AttackSpell {
                         double a = Math.random() * 2 * Math.PI;
                         double r = Math.random() * 1.5;
                         Location bubbleLoc = casterLoc.clone().add(Math.cos(a) * r, Math.random() * 2, Math.sin(a) * r);
-                        ParticleCaster.spawn(caster, bubbleLoc.getWorld(), Particle.BUBBLE_COLUMN_UP, bubbleLoc, 1, 0.1, 0.1, 0.1, 0);
+                        ParticleCaster.spawn(caster, bubbleLoc.getWorld(), Utils.BUBBLE_COLUMN_UP, bubbleLoc, 1, 0.1, 0.1, 0.1, 0);
                     }
 
                     if (ticks % 20 == 0) {
@@ -132,7 +154,7 @@ public class Tsunami extends AttackSpell {
                                 Math.sin(a) * r
                         );
                         ParticleCaster.spawn(caster, spiralLoc.getWorld(), Utils.SPLASH, spiralLoc, 3, 0.1, 0.1, 0.1, 0);
-                        ParticleCaster.spawn(caster, spiralLoc.getWorld(), Particle.BUBBLE_POP, spiralLoc, 1, 0.05, 0.05, 0.05, 0);
+                        ParticleCaster.spawn(caster, spiralLoc.getWorld(), Utils.BUBBLE_POP, spiralLoc, 1, 0.05, 0.05, 0.05, 0);
                     }
 
                     for (int i = 0; i < 6; i++) {
@@ -140,7 +162,7 @@ public class Tsunami extends AttackSpell {
                         double r = 2.0 * (1.0 - phaseProgress);
                         Location forwardLoc = casterLoc.clone().add(direction.clone().multiply(1.5)).add(Math.cos(a) * r, 1.0 + Math.random(), Math.sin(a) * r);
                         ParticleCaster.spawn(caster, forwardLoc.getWorld(), Utils.SPLASH, forwardLoc, 2, 0.1, 0.1, 0.1, 0);
-                        ParticleCaster.spawn(caster, forwardLoc.getWorld(), Particle.BUBBLE_COLUMN_UP, forwardLoc, 1, 0.05, 0.05, 0.05, 0);
+                        ParticleCaster.spawn(caster, forwardLoc.getWorld(), Utils.BUBBLE_COLUMN_UP, forwardLoc, 1, 0.05, 0.05, 0.05, 0);
                     }
 
                     if (ticks % 12 == 0) {
@@ -176,6 +198,7 @@ public class Tsunami extends AttackSpell {
                 distance += 1.0;
                 Location waveCenter = startLoc.clone().add(direction.clone().multiply(distance))
                         .add(0, 0.5, 0);
+                List<Player> fakeBlockRecipients = cullRecipients(waveCenter, waveWidth);
 
                 // No collision cancellation — wave flows up and over terrain
 
@@ -203,36 +226,24 @@ public class Tsunami extends AttackSpell {
                             Location blockLoc = forwardLoc.clone().add(0, h, 0);
                             Block b = blockLoc.getBlock();
                             if (b.getType() == Material.AIR || b.getType() == Material.CAVE_AIR || b.getType() == Material.VOID_AIR) {
-                                sendFakeBlock(blockLoc, WATER_DATA);
+                                sendFakeBlock(blockLoc, WATER_DATA, fakeBlockRecipients);
                                 placedBlocks.add(new FakeBlock(blockLoc.clone(), b.getBlockData()));
                             }
                         }
                     }
 
-                    for (Block b : Utils.blocksInRadius(colLoc, 2)) {
-                        if (b.getType() == Material.FIRE) {
-                            if (Protection.blockEdit(caster, b.getLocation())) {
-                                b.setType(Material.AIR);
-                            }
-                        } else if (b.getType() == Material.LAVA) {
-                            Levelled data = (Levelled) b.getBlockData();
-                            if (Protection.blockEdit(caster, b.getLocation())) {
-                                b.setType(data.getLevel() == 0 ? Material.OBSIDIAN : Material.COBBLESTONE);
-                            }
-                        }
-                    }
-
+                    extinguishBelow(colLoc, caster);
                     activeColumns.add(new WaveColumn(placedBlocks));
 
                     for (int h = 0; h < height; h++) {
                         Location sprayLoc = colLoc.clone().add(0, h, 0);
                         sprayLoc.setY(colBaseY + h);
                         ParticleCaster.spawn(caster, sprayLoc.getWorld(), Utils.SPLASH, sprayLoc, 3, 0.5, 0.2, 0.5, 0);
-                        ParticleCaster.spawn(caster, sprayLoc.getWorld(), Particle.BUBBLE_COLUMN_UP, sprayLoc, 2, 0.3, 0.2, 0.3, 0);
+                        ParticleCaster.spawn(caster, sprayLoc.getWorld(), Utils.BUBBLE_COLUMN_UP, sprayLoc, 2, 0.3, 0.2, 0.3, 0);
                     }
 
                     if (Math.abs(w) <= 1) {
-                        ParticleCaster.spawn(caster, colLoc.getWorld(), Utils.DUST, colLoc, 0, new Particle.DustOptions(Color.fromRGB(0, 120, 255), 1.2F));
+                        ParticleCaster.spawn(caster, colLoc.getWorld(), Utils.DUST, colLoc, 0, PALETTE.coreDust());
                     }
                 }
 
@@ -250,7 +261,7 @@ public class Tsunami extends AttackSpell {
                                 .add(0, 0.5, 0);
                         for (int w = -waveWidth; w <= waveWidth; w++) {
                             Location foamLoc = trailLoc.clone().add(perpendicular.clone().multiply(w));
-                            ParticleCaster.spawn(caster, foamLoc.getWorld(), Particle.BUBBLE_POP, foamLoc, 1, 0.3, 0.1, 0.3, 0);
+                            ParticleCaster.spawn(caster, foamLoc.getWorld(), Utils.BUBBLE_POP, foamLoc, 1, 0.3, 0.1, 0.3, 0);
                         }
                     }
                 }
@@ -272,7 +283,7 @@ public class Tsunami extends AttackSpell {
 
                     SpellDamageUtil.damageWithSpell(
                             le,
-                            getPower(caster, le, props.getInitialPower()),
+                            getPower(caster, le, props.getRemainingPower()),
                             caster,
                             wand,
                             Tsunami.this
@@ -299,12 +310,13 @@ public class Tsunami extends AttackSpell {
     }
 
     private static final double FAKE_BLOCK_CULL_R2 = 64.0 * 64.0;
+    private static final double FAKE_BLOCK_CULL = 64.0;
 
     private static void sendFakeBlock(Location loc, BlockData data) {
-        double x = loc.getX();
-        double y = loc.getY();
-        double z = loc.getZ();
         for (Player p : loc.getWorld().getPlayers()) {
+            double x = loc.getX();
+            double y = loc.getY();
+            double z = loc.getZ();
             Location pl = p.getLocation();
             double dx = pl.getX() - x;
             double dy = pl.getY() - y;
@@ -314,8 +326,59 @@ public class Tsunami extends AttackSpell {
         }
     }
 
+    private static void sendFakeBlock(Location loc, BlockData data, List<Player> recipients) {
+        if (recipients.isEmpty()) return;
+        for (Player p : recipients) {
+            p.sendBlockChange(loc, data);
+        }
+    }
+
+    private static List<Player> cullRecipients(Location waveCenter, int waveWidth) {
+        List<Player> worldPlayers = waveCenter.getWorld().getPlayers();
+        if (worldPlayers.isEmpty()) return Collections.emptyList();
+        double reach = FAKE_BLOCK_CULL + waveWidth + 3;
+        double reachSq = reach * reach;
+        double cx = waveCenter.getX();
+        double cy = waveCenter.getY() + 2.5;
+        double cz = waveCenter.getZ();
+        List<Player> recipients = new ArrayList<>(worldPlayers.size());
+        for (Player p : worldPlayers) {
+            Location pLoc = p.getLocation();
+            double dx = pLoc.getX() - cx;
+            double dy = pLoc.getY() - cy;
+            double dz = pLoc.getZ() - cz;
+            if (dx * dx + dy * dy + dz * dz > reachSq) continue;
+            recipients.add(p);
+        }
+        return recipients;
+    }
+
+    private static void extinguishBelow(Location colLoc, LivingEntity caster) {
+        World world = colLoc.getWorld();
+        int bx = colLoc.getBlockX();
+        int by = colLoc.getBlockY();
+        int bz = colLoc.getBlockZ();
+        for (int dx = -2; dx <= 2; dx++) {
+            for (int dy = -2; dy <= 2; dy++) {
+                for (int dz = -2; dz <= 2; dz++) {
+                    if (dx * dx + dy * dy + dz * dz > 4) continue;
+                    Block b = world.getBlockAt(bx + dx, by + dy, bz + dz);
+                    if (b.getType() == Material.FIRE) {
+                        if (Protection.blockEdit(caster, b.getLocation())) {
+                            b.setType(Material.AIR);
+                        }
+                    } else if (b.getType() == Material.LAVA) {
+                        Levelled data = (Levelled) b.getBlockData();
+                        if (Protection.blockEdit(caster, b.getLocation())) {
+                            b.setType(data.getLevel() == 0 ? Material.OBSIDIAN : Material.COBBLESTONE);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private void launchMobTsunamiAttack(Mob caster, ItemStack wand, AttackProperties props) {
-        double power = getPower(caster, getBasePower()) * getWandPowerOrDefault(wand);
         Vector direction = caster.getLocation().getDirection().setY(0).normalize();
         Vector perpendicular = new Vector(-direction.getZ(), 0, direction.getX()).normalize();
         List<WaveColumn> activeColumns = new ArrayList<>();
@@ -338,6 +401,7 @@ public class Tsunami extends AttackSpell {
                 distance += 1.0;
                 Location waveCenter = startLoc.clone().add(direction.clone().multiply(distance))
                         .add(0, 0.5, 0);
+                List<Player> fakeBlockRecipients = cullRecipients(waveCenter, 3);
 
                 // No collision cancellation — wave flows up and over terrain
 
@@ -359,24 +423,13 @@ public class Tsunami extends AttackSpell {
                         blockLoc.setY(colBaseY + h);
                         Block b = blockLoc.getBlock();
                         if (b.getType() == Material.AIR || b.getType() == Material.CAVE_AIR || b.getType() == Material.VOID_AIR) {
-                            sendFakeBlock(blockLoc, WATER_DATA);
+                            sendFakeBlock(blockLoc, WATER_DATA, fakeBlockRecipients);
                             placedBlocks.add(new FakeBlock(blockLoc.clone(), b.getBlockData()));
                         }
                     }
                     activeColumns.add(new WaveColumn(placedBlocks));
 
-                    for (Block b : Utils.blocksInRadius(colLoc, 2)) {
-                        if (b.getType() == Material.FIRE) {
-                            if (Protection.blockEdit(caster, b.getLocation())) {
-                                b.setType(Material.AIR);
-                            }
-                        } else if (b.getType() == Material.LAVA) {
-                            Levelled data = (Levelled) b.getBlockData();
-                            if (Protection.blockEdit(caster, b.getLocation())) {
-                                b.setType(data.getLevel() == 0 ? Material.OBSIDIAN : Material.COBBLESTONE);
-                            }
-                        }
-                    }
+                    extinguishBelow(colLoc, caster);
 
                     ParticleCaster.spawn(caster, waveCenter.getWorld(), Utils.SPLASH, waveCenter, 5, 3, 1, 0.5, 0);
                 }
@@ -398,7 +451,7 @@ public class Tsunami extends AttackSpell {
 
                     SpellDamageUtil.damageWithSpell(
                             le,
-                            getPower(caster, le, power),
+                            getPower(caster, le, props.getRemainingPower()),
                             caster,
                             wand,
                             Tsunami.this
@@ -413,11 +466,11 @@ public class Tsunami extends AttackSpell {
         if (caster.isDead() || caster.getTarget() == null) return;
 
         double wandp = getWandPowerOrDefault(wand);
-        double power = getPower(caster, getBasePower()) * wandp;
+        // RAW base power. getPower is applied once per impact, in launchMobTsunamiAttack.
         AttackProperties props = new AttackProperties(
                 caster,
                 Utils.castLocation(caster),
-                power,
+                getBasePower() * wandp,
                 AttackType.MAGIC
         );
 
@@ -492,29 +545,18 @@ public class Tsunami extends AttackSpell {
     @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
         ParticleCaster.spawn(caster, location.getWorld(), Utils.SPLASH, location, 40, 0.5, 0.5, 0.5, 0.2);
-        ParticleCaster.spawn(caster, location.getWorld(), Particle.BUBBLE_POP, location, 20, 0.5, 0.5, 0.5, 0);
+        ParticleCaster.spawn(caster, location.getWorld(), Utils.BUBBLE_POP, location, 20, 0.5, 0.5, 0.5, 0);
     }
 
     @Override
     public void onCountered(Location location) {
         ParticleCaster.spawn(null, location.getWorld(), Utils.SPLASH, location, 60, 1, 1, 1, 0.5);
-        ParticleCaster.spawn(null, location.getWorld(), Particle.BUBBLE_COLUMN_UP, location, 30, 1, 1, 1, 0);
+        ParticleCaster.spawn(null, location.getWorld(), Utils.BUBBLE_COLUMN_UP, location, 30, 1, 1, 1, 0);
     }
 
     @Override
     public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
-        return Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
-            if (e.isCancelled()) return;
-            Location playerLoc = caster.getEyeLocation();
-            float yaw = playerLoc.getYaw();
-            float pitch = playerLoc.getPitch();
-            Vector forward = playerLoc.getDirection().normalize().multiply(1.5);
-            List<Location> points = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 3, 0);
-            Particle.DustOptions options = new Particle.DustOptions(Color.fromRGB(0, 100, 255), 0.4F);
-            for (Location loc : points) {
-                ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, options);
-            }
-        }, 0L, (Long) Configs.CIRCLE_TICKS.get());
+        return CastCircle.start(this, caster, e, 3, 0);
     }
 
     @Override

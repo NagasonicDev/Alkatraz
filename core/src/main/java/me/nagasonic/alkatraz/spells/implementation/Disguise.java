@@ -2,8 +2,8 @@ package me.nagasonic.alkatraz.spells.implementation;
 
 import de.tr7zw.changeme.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.api.Element;
 import me.nagasonic.alkatraz.config.ConfigManager;
-import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
@@ -13,6 +13,8 @@ import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.spells.types.properties.SpellProperties;
+import me.nagasonic.alkatraz.spells.vfx.CastCircle;
+import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
 import me.nagasonic.alkatraz.util.*;
 import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -27,7 +29,6 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.util.Vector;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -35,6 +36,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import static me.nagasonic.alkatraz.util.ColorFormat.format;
 
 public class Disguise extends Spell implements Listener {
+
+    /**
+     * Disguise is element NONE, so its cast circle draws in neutral grey rather than
+     * in a colour that would imply it belongs to some other element's family.
+     */
+    private static final ElementPalette.Palette PALETTE = ElementPalette.of(Element.NONE);
 
     private static LangManager lang() {
         return Alkatraz.getLangManager();
@@ -83,20 +90,7 @@ public class Disguise extends Spell implements Listener {
 
     @Override
     public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
-        return Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
-            if (e.isCancelled()) return;
-            Location playerLoc = caster.getEyeLocation();
-            float yaw   = playerLoc.getYaw();
-            float pitch = playerLoc.getPitch();
-
-            Vector forward = playerLoc.getDirection().normalize().multiply(1.5);
-            List<Location> magicCirclePoints = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 2, 0);
-
-            Particle.DustOptions options = new Particle.DustOptions(Color.WHITE, 0.4F);
-            for (Location loc : magicCirclePoints) {
-                ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, options);
-            }
-        }, 0L, (Long) Configs.CIRCLE_TICKS.get());
+        return CastCircle.start(this, caster, e, 2.0, 0);
     }
 
     @Override
@@ -299,7 +293,12 @@ public class Disguise extends Spell implements Listener {
     private void onJoin(PlayerJoinEvent e) {
         Player joined = e.getPlayer();
 
-        for (Player other : Bukkit.getOnlinePlayers()) {
+        List<Player> online = new ArrayList<>(Bukkit.getOnlinePlayers());
+        if (online.size() <= 1) return;
+
+        List<Player> joinedOnly = List.of(joined);
+
+        for (Player other : online) {
             if (other == joined) continue;
 
             MagicProfile odata = ProfileManager.getProfile(other.getUniqueId(), MagicProfile.class);
@@ -309,7 +308,7 @@ public class Disguise extends Spell implements Listener {
                 if (Bukkit.getPlayer(disguisedAs) != null) {
                     Alkatraz.getNms().changeSkinElse(
                             other,
-                            List.of(joined),
+                            joinedOnly,
                             Skin.fromURL("https://sessionserver.mojang.com/session/minecraft/profile/"
                                     + disguisedAs + "?unsigned=false"));
                 }

@@ -15,11 +15,19 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.Base64;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 
 public class ItemUtils {
+    private static final int CACHE_LIMIT = 256;
+    private static final int CONNECT_TIMEOUT_MS = 3000;
+    private static final int READ_TIMEOUT_MS = 5000;
+    private static final Map<String, String> ID_CACHE = new ConcurrentHashMap<>();
+
     @Deprecated
     public static ItemStack headFromName(String name) {
         ItemStack item = getPlayerSkullItem();
@@ -31,19 +39,28 @@ public class ItemUtils {
     public static ItemStack headWithName(ItemStack item, String name) {
         notNull(item, "item");
         notNull(name, "name");
-        URL url = null;
         try {
-            url = new URL("https://api.mojang.com/users/profiles/minecraft/" + name);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
-            JsonObject object = new Gson().fromJson(reader, JsonObject.class);
-            String id = object.get("id").getAsString();
+            String id = profileId(name);
             Skin skin = Skin.fromURL("https://sessionserver.mojang.com/session/minecraft/profile/" + id + "?unsigned=false");
             return headFromBase64(skin.getTexture());
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static String profileId(String name) throws IOException {
+        String cached = ID_CACHE.get(name);
+        if (cached != null) return cached;
+        URL url = new URL("https://api.mojang.com/users/profiles/minecraft/" + name);
+        URLConnection connection = url.openConnection();
+        connection.setConnectTimeout(CONNECT_TIMEOUT_MS);
+        connection.setReadTimeout(READ_TIMEOUT_MS);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        JsonObject object = new Gson().fromJson(reader, JsonObject.class);
+        String id = object.get("id").getAsString();
+        if (ID_CACHE.size() > CACHE_LIMIT) ID_CACHE.clear();
+        ID_CACHE.put(name, id);
+        return id;
     }
 
     public static ItemStack headFromUuid(String id) {

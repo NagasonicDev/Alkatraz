@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -256,11 +257,11 @@ public class SpellOption {
     }
 
     public List<ValueRequirement> getRequirements() {
-        return new ArrayList<>(requirements);
+        return Collections.unmodifiableList(requirements);
     }
 
     public List<ValueImpact> getImpacts() {
-        return new ArrayList<>(impacts);
+        return Collections.unmodifiableList(impacts);
     }
 
     /**
@@ -315,7 +316,7 @@ public class SpellOption {
     }
 
     public List<OptionValue<?>> getOptionValues() {
-        return new ArrayList<>(optionValues);
+        return Collections.unmodifiableList(optionValues);
     }
 
     /**
@@ -380,10 +381,12 @@ public class SpellOption {
     public String getSelectedValueId(Player player) {
         String key = profileKey();
         MagicProfile profile = ProfileManager.getProfile(player, MagicProfile.class);
-        if (profile.getSpellOption(key) == null) {
-            profile.setSpellOption(key, optionValues.get(getDefIndex()).getId());
+        String selected = profile.getSpellOption(key);
+        if (selected == null) {
+            selected = optionValues.get(getDefIndex()).getId();
+            profile.setSpellOption(key, selected);
         }
-        return profile.getSpellOption(key);
+        return selected;
     }
 
     /**

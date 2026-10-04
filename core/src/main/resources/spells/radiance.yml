@@ -7,10 +7,10 @@ enabled: true
 element: 'LIGHT'
 code: 'LRLRS'
 level: 5
-required_focus: 140
-cooldown: 30
+required_focus: 115
+cooldown: 9
 cast_time: 1.5
-mana_cost: 95
+mana_cost: 120
 maximum_mastery: 100
 mastery_bar_color: 'YELLOW'
 gui_item: 'GLOWSTONE_DUST'
@@ -20,3 +20,10 @@ heal_amount: 8.0
 radius: 8.0
 duration: 5.0
 wind_up_duration: 3
+
+# radiance has NO power: key - the design lists '-' for it. The field's output is
+# heal_amount / duration, seeded into the shared AttackProperties and routed
+# through AttackSpell.getPower via the properties-carrying
+# SpellAttackContext overload, so the option modifiers, the affinity/resistance
+# spread and light's anti-dark amplification each apply exactly once per hit.
+role: 'SUSTAIN'

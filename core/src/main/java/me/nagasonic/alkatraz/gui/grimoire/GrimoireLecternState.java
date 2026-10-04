@@ -44,6 +44,10 @@ public class GrimoireLecternState {
         activeLecterns.remove(player.getUniqueId());
     }
 
+    public static void clearAll() {
+        activeLecterns.clear();
+    }
+
     public static boolean isActive(Player player) {
         return activeLecterns.containsKey(player.getUniqueId());
     }

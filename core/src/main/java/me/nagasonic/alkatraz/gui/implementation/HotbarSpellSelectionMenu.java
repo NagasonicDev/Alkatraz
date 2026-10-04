@@ -19,6 +19,7 @@ import org.bukkit.inventory.ItemStack;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -95,7 +96,7 @@ public class HotbarSpellSelectionMenu extends PagedMenu<Spell> {
         ItemStack blank = Alkatraz.getGuiItemRegistry().getItem("blank");
         for (int i = 0; i < 54; i++) {
             if (isReserved(i)) continue;
-            inventory.setItem(i, blank.clone());
+            inventory.setItem(i, blank);
         }
         addSlotHeaders();
     }
@@ -119,12 +120,13 @@ public class HotbarSpellSelectionMenu extends PagedMenu<Spell> {
     // -------------------------------------------------------------------------
 
     private void addSlotHeaders() {
-        MagicProfile profile = ProfileManager.getProfile(viewer, MagicProfile.class);
+        Map<Integer, String> assigned = ProfileManager.getProfile(viewer, MagicProfile.class)
+                .getHotbarSpellIds();
 
         for (int i = 0; i < SpellHotbarManager.SPELL_SLOT_COUNT; i++) {
-            String spellId = profile.getHotbarSpellIds().get(i);
-            Spell assigned = (spellId != null) ? SpellRegistry.getSpell(spellId) : null;
-            inventory.setItem(HEADER_SLOTS[i], buildHeaderItem(i, assigned));
+            String spellId = assigned.get(i);
+            Spell spell = (spellId != null) ? SpellRegistry.getSpell(spellId) : null;
+            inventory.setItem(HEADER_SLOTS[i], buildHeaderItem(i, spell));
         }
     }
 
@@ -260,8 +262,9 @@ public class HotbarSpellSelectionMenu extends PagedMenu<Spell> {
 
     /** Moves focus to the next slot that has no spell assigned. */
     private void advanceFocus(MagicProfile profile) {
+        Map<Integer, String> assigned = profile.getHotbarSpellIds();
         for (int i = 0; i < SpellHotbarManager.SPELL_SLOT_COUNT; i++) {
-            String id = profile.getHotbarSpellIds().get(i);
+            String id = assigned.get(i);
             if (id == null || id.isEmpty()) {
                 focusedSlotIndex = i;
                 return;

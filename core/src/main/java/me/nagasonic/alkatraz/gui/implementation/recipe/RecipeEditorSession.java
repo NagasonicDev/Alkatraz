@@ -75,6 +75,10 @@ public class RecipeEditorSession {
         sessions.remove(uuid);
     }
 
+    public static void clearAll() {
+        sessions.clear();
+    }
+
     private void materialize(AlkatrazRecipe recipe) {
         if (!config.contains("definition")) {
             config.set("definition", MagicKeys.format(key));

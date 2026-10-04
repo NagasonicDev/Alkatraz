@@ -14,16 +14,16 @@ code: 'RSRRS'
 
 # THE MAGIC CIRCLE REQUIRED TO CAST
 level: 3
-required_focus: 95
+required_focus: 65
 
 # COOLDOWN BEFORE CASTING AGAIN
-cooldown: 45
+cooldown: 6
 
 # BASE CAST TIME (SECONDS)
 cast_time: 2.0
 
 # MANA COST
-mana_cost: 90
+mana_cost: 48
 
 # MAXIMUM MASTERY ACHIEVABLE. NOT RECOMMENDED TO CHANGE
 maximum_mastery: 200
@@ -33,6 +33,10 @@ base_heal: 4
 
 # THE MAXIMUM THAT CAN BE HEALED THROUGH THE SPELL
 max_heal: 9
+
+# UTILITY - healing is not a damage role, so it carries no budget and no
+# power: key. The base comes from base_heal above.
+role: 'UTILITY'
 
 #THE COLOR OF THE SPELL MASTERY BOSSBAR. OPTIONS ARE: RED, BLUE, YELLOW, PINK, PURPLE, WHITE AND GREEN
 mastery_bar_color: 'YELLOW'

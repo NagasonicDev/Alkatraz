@@ -12,9 +12,12 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Per-entity TaskBrain state: the memory store, the current activity, the
@@ -33,8 +36,11 @@ public final class TaskBrainEngine implements TaskBrainContext {
     private final MobMemoryStore store;
     private long nowTick;
     private String currentActivity;
+    private boolean batching;
     @Nullable
     private String pinnedActivity;
+    private final List<LivingEntity> nearbyScratch = new ArrayList<>(16);
+    private final List<UUID> nearbyScratchIds = new ArrayList<>(16);
 
     private TaskBrainEngine(Mob entity, TaskBrain brain, Map<String, GoalBrain> activityBrains,
                             MobMemoryStore store, @Nullable String pinnedActivity, long initialTick) {
@@ -70,6 +76,20 @@ public final class TaskBrainEngine implements TaskBrainContext {
         return store;
     }
 
+    /**
+     * Reusable scan buffer for {@link SensorRunner}, so the once-a-second
+     * neighbour sweep allocates nothing. The caller must clear it and must not
+     * hand it to the blackboard.
+     */
+    List<LivingEntity> nearbyScratch() {
+        return nearbyScratch;
+    }
+
+    /** Companion id buffer for {@link #nearbyScratch()}; same reuse contract. */
+    List<UUID> nearbyScratchIds() {
+        return nearbyScratchIds;
+    }
+
     public String currentActivity() {
         return currentActivity;
     }
@@ -89,18 +109,36 @@ public final class TaskBrainEngine implements TaskBrainContext {
     /** Advances the engine by one heartbeat: sensors, then re-evaluation. */
     public void tick(long nowTick) {
         this.nowTick = Math.max(this.nowTick, nowTick);
-        SensorRunner.run(brain.coreSensors(), this);
-        for (ActivitySpec activity : brain.activities()) {
-            if (activity.id().equals(currentActivity)) {
-                SensorRunner.run(activity.sensors(), this);
-                break;
+        batching = true;
+        try {
+            SensorRunner.run(brain.coreSensors(), this);
+            reevaluate();
+            for (ActivitySpec activity : brain.activities()) {
+                if (activity.id().equals(currentActivity)) {
+                    SensorRunner.run(activity.sensors(), this);
+                    break;
+                }
             }
+        } finally {
+            batching = false;
         }
-        reconsider();
+        reevaluate();
     }
 
-    /** Recomputes the active activity, applying the transition if it changed. */
+    /**
+     * Recomputes the active activity. Memory writes made by a sensor no longer
+     * re-evaluate on the spot: every write inside {@link #tick(long)} is folded
+     * into the single re-evaluation the heartbeat already performed, so the
+     * activity schedule runs once per phase instead of once per write. Writes
+     * from outside a heartbeat (the damage listener, commands) still re-evaluate
+     * immediately, exactly as before.
+     */
     public void reconsider() {
+        if (batching) return;
+        reevaluate();
+    }
+
+    private void reevaluate() {
         String wanted = ActivityScheduler.select(brain, pinnedActivity,
                 key -> store.present(key, nowTick),
                 ActivityScheduler.bucketOf(entity.getWorld() == null ? 0 : entity.getWorld().getTime()));

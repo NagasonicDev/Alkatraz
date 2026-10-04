@@ -25,13 +25,15 @@ cooldown: 6
 cast_time: 0.8
 
 # MANA COST
-mana_cost: 40
+mana_cost: 48
 
 # MAXIMUM MASTERY ACHIEVABLE. NOT RECOMMENDED TO CHANGE
 maximum_mastery: 250
 
 # BASE POWER (DAMAGE)
-power: 2
+power: 5.5
+
+role: 'BURST'
 
 
 # THE COLOR OF THE SPELL MASTERY BOSSBAR. OPTIONS ARE: RED, BLUE, YELLOW, PINK, PURPLE, WHITE AND GREEN

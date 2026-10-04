@@ -27,6 +27,8 @@ public class BarrierProperties extends SpellProperties {
     private BarrierType type;
     private BossBar healthBar;
     private double radius;
+    private String lastTitle;
+    private boolean cleanupScheduled;
 
     public BarrierProperties(LivingEntity caster, Location castLocation, double hitpoints, BarrierType type, double radius) {
         super(caster, castLocation);
@@ -34,9 +36,10 @@ public class BarrierProperties extends SpellProperties {
         this.initialHitpoints = hitpoints;
         this.type = type;
         this.radius = radius;
-        this.healthBar = Bukkit.createBossBar(lang().get("spells.barrier.health_bar",
-                        "health", String.valueOf(hitpoints),
-                        "initHealth", String.valueOf(initialHitpoints)),
+        this.lastTitle = lang().get("spells.barrier.health_bar",
+                "health", String.valueOf(hitpoints),
+                "initHealth", String.valueOf(initialHitpoints));
+        this.healthBar = Bukkit.createBossBar(lastTitle,
                 BarColor.PINK,
                 BarStyle.SOLID
         );
@@ -49,19 +52,26 @@ public class BarrierProperties extends SpellProperties {
 
     public void damage(double amount) {
         hitpoints -= amount;
-        healthBar.setTitle(lang().get("spells.barrier.health_bar",
-                        "health", String.valueOf(hitpoints),
-                        "initHealth", String.valueOf(initialHitpoints)));
+        String title = lang().get("spells.barrier.health_bar",
+                "health", String.valueOf(hitpoints),
+                "initHealth", String.valueOf(initialHitpoints));
+        if (!title.equals(lastTitle)) {
+            lastTitle = title;
+            healthBar.setTitle(title);
+        }
         healthBar.setProgress(hitpoints <= 0 ? 0 : hitpoints / initialHitpoints);
         if (hitpoints <= 0) {
             hitpoints = 0;
             broken = true;
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    healthBar.removeAll();
-                }
-            }.runTaskLater(Alkatraz.getInstance(), 20L); //Wait one second before clearing health bar
+            if (!cleanupScheduled) {
+                cleanupScheduled = true;
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        healthBar.removeAll();
+                    }
+                }.runTaskLater(Alkatraz.getInstance(), 20L); //Wait one second before clearing health bar
+            }
         }
     }
 

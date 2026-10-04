@@ -9,8 +9,11 @@ import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -20,10 +23,10 @@ import java.util.function.Function;
 
 /**
  * The TaskBrain blackboard: keyed memory values with lazy expiry plus a record
- * of registered (declared-but-never-written) keys. Values persist lossily —
- * only BOOLEAN/NUMBER/STRING/LOCATION/entity (as UUID) survive NBT; unsupported
- * value types are dropped at write time and unresolvable refs are dropped on
- * read.
+ * of registered (declared-but-never-written) keys. Values persist losslessly —
+ * only BOOLEAN/NUMBER/STRING/LOCATION/entity (as UUID)/entity-list (as a
+ * comma-separated id list) survive NBT; unsupported value types are dropped at
+ * write time and unresolvable refs are dropped on read.
  */
 public final class MobMemoryStore {
 
@@ -127,7 +130,48 @@ public final class MobMemoryStore {
         } else if (value instanceof LivingEntity entity) {
             slot.setString("type", "ENTITY");
             v.setUUID("uuid", entity.getUniqueId());
+        } else if (value instanceof List<?> list) {
+            String joined = joinEntityIds(list);
+            if (joined == null) return;
+            slot.setString("type", "ENTITY_LIST");
+            v.setString("v", joined);
         }
+    }
+
+    /**
+     * Flattens an entity list to a comma-separated id string, or returns null
+     * when the list holds anything that is not a living entity (an unsupported
+     * element must not silently truncate the persisted value).
+     */
+    private static String joinEntityIds(List<?> list) {
+        if (list.isEmpty()) return null;
+        StringBuilder sb = new StringBuilder(list.size() * 36);
+        for (Object element : list) {
+            if (!(element instanceof LivingEntity living)) return null;
+            if (sb.length() > 0) sb.append(',');
+            sb.append(living.getUniqueId());
+        }
+        return sb.toString();
+    }
+
+    private static List<LivingEntity> splitEntityIds(String joined,
+                                                     Function<UUID, LivingEntity> entityResolver) {
+        List<LivingEntity> result = new ArrayList<>();
+        int start = 0;
+        int length = joined.length();
+        while (start <= length) {
+            int comma = joined.indexOf(',', start);
+            String token = comma < 0 ? joined.substring(start) : joined.substring(start, comma);
+            if (!token.isEmpty()) {
+                try {
+                    LivingEntity resolved = entityResolver.apply(UUID.fromString(token));
+                    if (resolved != null) result.add(resolved);
+                } catch (IllegalArgumentException ignored) {}
+            }
+            if (comma < 0) break;
+            start = comma + 1;
+        }
+        return result;
     }
 
     public static MobMemoryStore readFrom(NBTCompound nbt,
@@ -175,6 +219,11 @@ public final class MobMemoryStore {
                         v.getFloat("yaw"), v.getFloat("pitch"));
             }
             case "ENTITY" -> entityResolver.apply(v.getUUID("uuid"));
+            case "ENTITY_LIST" -> {
+                List<LivingEntity> entities = splitEntityIds(v.getString("v"), entityResolver);
+                if (entities.isEmpty()) yield null;
+                yield Collections.unmodifiableList(entities);
+            }
             default -> null;
         };
     }

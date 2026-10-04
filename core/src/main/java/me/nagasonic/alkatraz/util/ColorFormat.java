@@ -14,14 +14,16 @@ public class ColorFormat {
         String result = s;
 
         // 1️⃣ Handle hex color codes (#RRGGBB → §x§R§R§G§G§B§B)
-        Matcher matcher = HEX_PATTERN.matcher(result);
-        while (matcher.find()) {
-            String hexCode = matcher.group(1);
-            StringBuilder replacement = new StringBuilder("§x");
-            for (char c : hexCode.toCharArray()) {
-                replacement.append('§').append(c);
+        if (s.indexOf('#') >= 0) {
+            Matcher matcher = HEX_PATTERN.matcher(result);
+            while (matcher.find()) {
+                String hexCode = matcher.group(1);
+                StringBuilder replacement = new StringBuilder("§x");
+                for (char c : hexCode.toCharArray()) {
+                    replacement.append('§').append(c);
+                }
+                result = result.replace("#" + hexCode, replacement.toString());
             }
-            result = result.replace("#" + hexCode, replacement.toString());
         }
 
         // 2️⃣ Handle legacy color codes (&a → §a)

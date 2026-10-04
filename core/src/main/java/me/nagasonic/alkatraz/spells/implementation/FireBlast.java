@@ -3,7 +3,6 @@ package me.nagasonic.alkatraz.spells.implementation;
 import de.tr7zw.changeme.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
-import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.components.SpellComponent;
@@ -16,8 +15,9 @@ import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
+import me.nagasonic.alkatraz.spells.vfx.CastCircle;
+import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.util.ParticleCaster;
-import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
@@ -32,12 +32,29 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public class FireBlast extends AttackSpell implements Listener {
+
+    /**
+     * The travelling tell: a WIDE, fat {@code core} shell with a stubby tail, which is the
+     * opposite read to fireball's narrow cluster with a long tail. Same
+     * {@link SpellVfx#projectile} builder, deliberately different parameters, so the two
+     * fire projectiles are distinguishable at a glance.
+     */
+    private static final double BLAST_CLUSTER_RADIUS = 0.7;
+    private static final int BLAST_CLUSTER_POINTS = 16;
+    private static final int BLAST_TAIL_POINTS = 6;
+    private static final double BLAST_TAIL_LENGTH = 0.5;
+    /** Drawn every other tick; the shell is wide enough that it reads solid either way. */
+    private static final long TRACK_PERIOD_TICKS = 2L;
+
     private static LangManager lang() {
         return Alkatraz.getLangManager();
     }
@@ -50,12 +67,12 @@ public class FireBlast extends AttackSpell implements Listener {
 
     @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
-        ParticleCaster.spawn(caster, location.getWorld(), Particle.FLAME, location, 15);
+        ParticleCaster.spawn(caster, location.getWorld(), Utils.FLAME, location, 15);
     }
 
     @Override
     public void onCountered(Location location) {
-        ParticleCaster.spawn(null, location.getWorld(), Particle.FLAME, location, 30);
+        ParticleCaster.spawn(null, location.getWorld(), Utils.FLAME, location, 30);
     }
 
     @Override
@@ -89,16 +106,18 @@ public class FireBlast extends AttackSpell implements Listener {
             NBT.modifyPersistentData(fire, nbt -> {
                 nbt.setString("componentID", comp.getComponentID().toString());
             });
+            trackProjectile(p, fire);
         }
     }
 
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
         if (!caster.isDead() && caster.getTarget() != null){
-            double wandp = getWandPowerOrDefault(wand);
-            double power = getPower(caster, getBasePower())
-                    * wandp;
-            AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster), power, AttackType.MAGIC);
+            // RAW base power. getPower is applied once, in onDamage, below. It used
+            // to be applied here as well, which squared the option modifiers and the
+            // affinity term for every mob-cast fire blast.
+            AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster),
+                    getBasePower() * getWandPowerOrDefault(wand), AttackType.MAGIC);
             LargeFireball fire = caster.launchProjectile(LargeFireball.class, caster.getTarget().getLocation().toVector().subtract(caster.getLocation().toVector()).multiply(0.1));
             SpellEntityComponent comp = new SpellEntityComponent(
                     this,
@@ -113,30 +132,37 @@ public class FireBlast extends AttackSpell implements Listener {
             NBT.modifyPersistentData(fire, nbt -> {
                 nbt.setString("componentID", comp.getComponentID().toString());
             });
+            trackProjectile(caster, fire);
         }
+    }
+
+    /**
+     * Draws the blast's wide {@link SpellVfx#projectile} shell for as long as the entity
+     * lives. Purely visual, and it stops the moment the projectile is gone so an
+     * unresolved cast cannot leak a repeating task.
+     *
+     * @param caster the casting entity, used for per-player density falloff
+     * @param fire   the projectile to follow
+     */
+    private void trackProjectile(LivingEntity caster, LargeFireball fire) {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (fire.isDead() || !fire.isValid()) {
+                    cancel();
+                    return;
+                }
+                SpellVfx.projectile(FireBlast.this, caster, fire.getLocation(),
+                        fire.getVelocity(),
+                        BLAST_CLUSTER_RADIUS, BLAST_CLUSTER_POINTS,
+                        BLAST_TAIL_POINTS, BLAST_TAIL_LENGTH);
+            }
+        }.runTaskTimer(Alkatraz.getInstance(), 0L, TRACK_PERIOD_TICKS);
     }
 
     @Override
     public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
-        int d = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
-            if (e.isCancelled()) return;
-            Location playerLoc = caster.getEyeLocation(); // Player eye location
-            float yaw = playerLoc.getYaw();
-            float pitch = playerLoc.getPitch();
-
-            // Calculate offset vector pointing forward relative to player orientation
-            Vector forward = playerLoc.getDirection().normalize().multiply(1.5); // 1.5 blocks in front
-
-            // Call magicCircle with proper center, yaw, pitch and offset
-            List<Location> magicCirclePoints = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 3, 0);
-
-            // Spawn particles at all calculated points
-            Particle.DustOptions options = new Particle.DustOptions(Color.RED, 0.4F);
-            for (Location loc : magicCirclePoints) {
-                ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, options);
-            }
-        }, 0L, (Long) Configs.CIRCLE_TICKS.get());
-        return d;
+        return CastCircle.start(this, caster, e, 3, 0);
     }
 
     @Override
@@ -153,30 +179,36 @@ public class FireBlast extends AttackSpell implements Listener {
     @EventHandler
     private void onDamage(EntityDamageByEntityEvent e){
         if (!(e.getDamager() instanceof org.bukkit.entity.Fireball fireball)) return;
-        if (!NBT.getPersistentData(fireball, nbt -> nbt.hasTag("componentID"))) return;
-        String idString = NBT.getPersistentData(fireball, nbt -> nbt.getString("componentID"));
+        String idString = NBT.<String>getPersistentData(fireball, nbt -> nbt.hasTag("componentID") ? nbt.getString("componentID") : null);
         if (idString == null) return;
         if (!(e.getEntity() instanceof LivingEntity le)) return;
         SpellComponent comp = SpellComponentHandler.getActiveComponent(UUID.fromString(idString));
         if (!(comp instanceof SpellEntityComponent ecomp)) return;
         if (!(ecomp.getProperties() instanceof AttackProperties props)) return;
+        // One AttackProperties per cast: guard so a target hit by both the impact
+        // and the explosion's spread takes the scaled damage exactly once.
+        if (props.hasHit(le)) return;
+        props.hit(le);
         e.setDamage(getPower(comp.getCaster(), le, props.getRemainingPower()));
     }
 
     @EventHandler
     private void onHit(ProjectileHitEvent e){
         if (!(e.getEntity() instanceof org.bukkit.entity.Fireball fireball)) return;
-        if (!NBT.getPersistentData(fireball, nbt -> nbt.hasTag("componentID"))) return;
-        String idString = NBT.getPersistentData(fireball, nbt -> nbt.getString("componentID"));
+        String idString = NBT.<String>getPersistentData(fireball, nbt -> nbt.hasTag("componentID") ? nbt.getString("componentID") : null);
         if (idString == null) return;
         SpellComponent comp = SpellComponentHandler.getActiveComponent(UUID.fromString(idString));
+        if (comp == null) return;
         if (comp.getSpell() != this) return;
         Location loc = e.getHitBlock() != null ? e.getHitBlock().getLocation() : e.getHitEntity().getLocation();
         double radius = comp.getCaster() instanceof Player player ? (Double) getOption("fire_spread").getSelectedValue(player).getValue() : 3.0;
         if (blockDamage) {
             List<Block> blocks = Utils.blocksInRadius(loc, (int) Math.round(radius));
+            Set<Long> ignitedColumns = new HashSet<>();
             for (Block block : blocks){
                 if (block.getType() == Material.AIR){
+                    long column = (((long) block.getX()) << 32) ^ (block.getZ() & 0xFFFFFFFFL);
+                    if (!ignitedColumns.add(column)) continue;
                     if (Protection.ignite(comp.getCaster(), block.getLocation())) {
                         block.setType(Material.FIRE);
                     }

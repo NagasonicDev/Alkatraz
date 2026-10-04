@@ -7,11 +7,16 @@ enabled: true
 element: 'DARK'
 code: 'SLLSR'
 level: 5
-required_focus: 150
-cooldown: 35
+required_focus: 115
+cooldown: 9
 cast_time: 1.5
-mana_cost: 115
+mana_cost: 120
 maximum_mastery: 100
+# shadow_realm has NO power: key - spec section 7 lists '-' for it. The base
+# comes from damage_per_tick below and is seeded into the shared
+# AttackProperties, then routed through getPower so DARK affinity/resistance
+# and the option modifiers finally apply.
+role: 'SUSTAIN'
 mastery_bar_color: 'PURPLE'
 gui_item: 'ENDER_PEARL'
 gui_custom_model_data: 4109

@@ -1,4 +1,4 @@
-﻿id: 'earth_throw'
+id: 'earth_throw'
 display_name: '#A0522DEarth Throw'
 description:
   - '&7Throws a chunk of earth forward.'
@@ -20,7 +20,7 @@ required_focus: 20
 cooldown: 4
 
 # BASE CAST TIME (SECONDS)
-cast_time: 0.75
+cast_time: 0.5
 
 # MANA COST
 mana_cost: 15
@@ -28,7 +28,12 @@ mana_cost: 15
 # MAXIMUM MASTERY ACHIEVABLE. NOT RECOMMENDED TO CHANGE
 maximum_mastery: 100
 
-power: 4
+# BASE DAMAGE PER IMPACT. This spell now routes through AttackSpell.getPower, so
+# `power`, the wand and EARTH affinity/resistance all reach the damage it deals.
+# It was a flat 4.0 with no scaling at all.
+power: 3.0
+
+role: 'BURST'
 
 #THE COLOR OF THE SPELL MASTERY BOSSBAR. OPTIONS ARE: RED, BLUE, YELLOW, PINK, PURPLE, WHITE AND GREEN
 mastery_bar_color: 'GREEN'

@@ -3,6 +3,7 @@ package me.nagasonic.alkatraz.items.magic.adapter;
 import me.nagasonic.alkatraz.api.magic.instance.MagicItemInstance;
 import me.nagasonic.alkatraz.items.magic.trigger.RangedKillTracker;
 import me.nagasonic.alkatraz.items.magic.trigger.TriggerDispatch;
+import me.nagasonic.alkatraz.items.magic.trigger.TriggerPipeline;
 import org.bukkit.Material;
 import org.bukkit.entity.Egg;
 import org.bukkit.entity.EnderPearl;
@@ -36,11 +37,17 @@ public final class CombatTriggerListener implements Listener {
 
     private final RangedKillTracker<MagicItemInstance> rangedKills = new RangedKillTracker<>(10_000L);
 
+    /** Guards the melee-hit parameter map; {@code isBound} fails open, so this is a no-op when unbound. */
+    private static boolean meleeHitBound() {
+        return TriggerPipeline.isBound(TriggerPipeline.boundKey("on_melee_hit"));
+    }
+
     /**
      * Fires {@code alkatraz:on_melee_hit} when a player lands a direct melee hit.
      */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onMeleeHit(EntityDamageByEntityEvent event) {
+        if (!meleeHitBound()) return;
         if (!(event.getDamager() instanceof Player player)) return;
         if (!(event.getEntity() instanceof LivingEntity victim)) return;
         if (event.getDamager() instanceof Projectile) return;

@@ -315,10 +315,13 @@ public class RandomSpellbook {
     private static void playTransformationAnimation(Player player, Spell spell, Runnable onComplete) {
         new BukkitRunnable() {
             int ticks = 0;
-            final int maxTicks = 40; // 2 seconds
+            int realTicks = 0;
+            final int maxTicks = 20; // 2 seconds at a 2 tick period
+            final int period = 2;
             
             @Override
             public void run() {
+                realTicks += period;
                 if (!player.isOnline() || ticks >= maxTicks) {
                     if (player.isOnline() && ticks >= maxTicks) {
                         onComplete.run();
@@ -332,7 +335,7 @@ public class RandomSpellbook {
                 // Swirling particles
                 double radius = 0.5 + (ticks / (double) maxTicks) * 0.5;
                 for (int i = 0; i < 4; i++) {
-                    double angle = (ticks * 0.5) + (i * Math.PI / 2);
+                    double angle = (ticks * 1.0) + (i * Math.PI / 2);
                     double x = Math.cos(angle) * radius;
                     double z = Math.sin(angle) * radius;
                     
@@ -341,7 +344,7 @@ public class RandomSpellbook {
                 }
                 
                 // Sound effects
-                if (ticks % 8 == 0) {
+                if (realTicks % 8 == 0) {
                     loc.getWorld().playSound(loc, Sound.BLOCK_ENCHANTMENT_TABLE_USE, 0.7f, 1.0f + (ticks / (float) maxTicks) * 0.5f);
                 }
                 
@@ -353,7 +356,7 @@ public class RandomSpellbook {
                 
                 ticks++;
             }
-        }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
+        }.runTaskTimer(Alkatraz.getInstance(), 0L, 2L);
     }
     
     /**

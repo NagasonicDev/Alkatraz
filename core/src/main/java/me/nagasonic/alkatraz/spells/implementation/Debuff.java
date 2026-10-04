@@ -1,16 +1,17 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.api.Element;
 import me.nagasonic.alkatraz.config.ConfigManager;
-import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.modifier.AppliedModifier;
 import me.nagasonic.alkatraz.spells.modifier.PooledModifierSpellSupport;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
-import me.nagasonic.alkatraz.util.ParticleCaster;
-import me.nagasonic.alkatraz.util.ParticleUtils;
+import me.nagasonic.alkatraz.spells.vfx.CastCircle;
+import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
+import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -20,7 +21,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.util.Vector;
 
 import java.util.List;
 import java.util.Map;
@@ -37,7 +37,22 @@ public class Debuff extends Spell {
     }
 
     private static final String DEBUFF_GROUP_ID = "configure_debuffs";
-    private static final Color PARTICLE_COLOR = Color.fromRGB(128, 0, 128);
+
+    /**
+     * The DARK palette. Debuff's hardcoded {@code Color.fromRGB(128, 0, 128)} purple happened to
+     * look dark-ish but was a second, independent colour definition; it is now the palette's
+     * {@code accent} shade, so the cast circle, the impact burst and the modifier particles are
+     * all guaranteed to be the same DARK purple.
+     */
+    private static final ElementPalette.Palette PALETTE = ElementPalette.of(Element.DARK);
+
+    /** Colour handed to the shared modifier machinery, so its particles match the palette. */
+    private static final Color PARTICLE_COLOR = PALETTE.accent();
+
+    /** Outer radius of the aura drawn on the debuffed target when the cast lands, in blocks. */
+    private static final double TARGET_AURA_RADIUS = 0.9;
+    /** Points per ring of that aura. */
+    private static final int TARGET_AURA_POINTS = 16;
 
     private int baseDuration;
     private int targetRange;
@@ -82,6 +97,10 @@ public class Debuff extends Spell {
         PooledModifierSpellSupport.applyConfiguredModifiers(
                 caster, target, this, DEBUFF_GROUP_ID, duration, activeModifiers,
                 PARTICLE_COLOR, casterMsg, targetMsg, lang().get("spells.debuff.faded"));
+
+        // The mark on the victim. SpellVfx.selfAura reads the subject's location at draw time, so
+        // this is anchored to wherever the target is right now rather than to a cached point.
+        SpellVfx.selfAura(this, caster, target, TARGET_AURA_RADIUS, TARGET_AURA_POINTS, 0.0);
     }
 
     @Override
@@ -97,19 +116,7 @@ public class Debuff extends Spell {
 
     @Override
     public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
-        return Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
-            if (e.isCancelled()) return;
-            Location loc = caster.getEyeLocation();
-            float yaw = loc.getYaw();
-            float pitch = loc.getPitch();
-            Vector forward = loc.getDirection().normalize().multiply(1.5);
-            List<Location> points = ParticleUtils.magicCircle(loc, yaw, pitch, forward, 3, 0);
-
-            for (Location point : points) {
-                ParticleCaster.spawn(caster, point.getWorld(), Utils.DUST, point, 0,
-                        new Particle.DustOptions(PARTICLE_COLOR, 0.5F));
-            }
-        }, 0L, (Long) Configs.CIRCLE_TICKS.get());
+        return CastCircle.start(this, caster, e, 3.0, 0);
     }
 
     @Override

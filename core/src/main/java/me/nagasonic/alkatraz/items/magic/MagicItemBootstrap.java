@@ -46,6 +46,7 @@ import me.nagasonic.alkatraz.api.magic.equipment.EquipmentSlot;
 import me.nagasonic.alkatraz.items.magic.equipment.StorageSlotResolver;
 import me.nagasonic.alkatraz.api.magic.modifier.EngravingDefinition;
 import me.nagasonic.alkatraz.items.magic.persistence.ItemDataKeys;
+import me.nagasonic.alkatraz.items.magic.service.SetBonusService;
 import me.nagasonic.alkatraz.items.magic.recipe.MagicItemRecipeManager;
 import me.nagasonic.alkatraz.items.magic.recipe.adapter.CraftingEventRouter;
 import me.nagasonic.alkatraz.api.magic.registry.MagicItemRegistries;
@@ -68,6 +69,7 @@ public final class MagicItemBootstrap {
         ItemDataKeys.initialize();
         registerBuiltInTypes();
         loadDefinitions();
+        SetBonusService.getInstance().loadSetBonuses();
         CraftingEventRouter.registerDefaultAdapters();
 
         EquipmentService equipmentService = new EquipmentService();
@@ -100,6 +102,8 @@ public final class MagicItemBootstrap {
 
     public static void reload() {
         MagicItemRecipeManager.unregisterAll();
+        EquipmentService.invalidateAll();
+        SetBonusService.getInstance().loadSetBonuses();
         MagicItemRegistries.ITEM_DEFINITIONS.clear();
         MagicItemRegistries.ENGRAVING_DEFINITIONS.clear();
         loadDefinitions();

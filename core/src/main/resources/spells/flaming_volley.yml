@@ -8,11 +8,17 @@ element: 'FIRE'
 code: 'RLRRR'
 level: 4
 required_focus: 90
-cooldown: 10
+cooldown: 7
 cast_time: 1.5
-mana_cost: 60
+mana_cost: 75
 maximum_mastery: 200
-power: 3.0
+
+# DAMAGE PER ARROW. The volley fires 3 arrows at the default option, so a full
+# volley lands 12.0 - inside the circle-4 BURST budget.
+power: 4.0
+
+# WHAT THIS SPELL IS JUDGED ON. READ BY Spell.loadConfiguration AND SpellBudgetTest.
+role: 'BURST'
 arrow_speed: 0.8
 arrow_range: 50.0
 arrow_spread: 45.0

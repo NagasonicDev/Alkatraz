@@ -14,19 +14,23 @@ code: 'RRRSL'
 
 # THE MAGIC CIRCLE REQUIRED TO CAST
 level: 3
-required_focus: 105
+required_focus: 65
 
 # COOLDOWN BEFORE CASTING AGAIN
-cooldown: 30
+cooldown: 6
 
 # BASE CAST TIME (SECONDS)
 cast_time: 1.75
 
 # MANA COST
-mana_cost: 100
+mana_cost: 48
 
 # MAXIMUM MASTERY ACHIEVABLE. NOT RECOMMENDED TO CHANGE
 maximum_mastery: 150
+
+# BARRIER ABSORBS INCOMING ATTACKS RATHER THAN DEALING ANY, SO IT IS DENIAL.
+# IT HAS NO power: KEY ON PURPOSE - it takes damage, it never deals it.
+role: 'DENIAL'
 
 #THE COLOR OF THE SPELL MASTERY BOSSBAR. OPTIONS ARE: RED, BLUE, YELLOW, PINK, PURPLE, WHITE AND GREEN
 mastery_bar_color: 'WHITE'

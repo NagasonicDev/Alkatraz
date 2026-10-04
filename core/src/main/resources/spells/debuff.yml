@@ -6,12 +6,13 @@ description:
 element: DARK
 code: LSLSS
 cast_time: 1.5
-mana_cost: 45
+mana_cost: 24
 level: 2
-required_focus: 45
+required_focus: 40
 enabled: true
 maximum_mastery: 100
-cooldown: 25
+cooldown: 5
+role: 'UTILITY'
 mastery_bar_color: PURPLE
 gui_item: FERMENTED_SPIDER_EYE
 gui_custom_model_data: 4112

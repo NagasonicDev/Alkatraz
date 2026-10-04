@@ -2,55 +2,114 @@ package me.nagasonic.alkatraz.spells.implementation;
 
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
-import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.lang.LangManager;
-import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
+import me.nagasonic.alkatraz.spells.types.AttackSpell;
+import me.nagasonic.alkatraz.spells.types.AttackType;
+import me.nagasonic.alkatraz.spells.types.BarrierSpell;
+import me.nagasonic.alkatraz.spells.types.SpellAttackContext;
+import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
-import me.nagasonic.alkatraz.util.ParticleUtils;
+import me.nagasonic.alkatraz.spells.util.UndeadTypes;
+import me.nagasonic.alkatraz.spells.vfx.CastCircle;
+import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.Utils;
-import org.bukkit.*;
+import org.bukkit.Location;
+import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.*;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Mob;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.Vector;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
-public class Radiance extends Spell {
+/**
+ * Radiance - a sustained dome that heals everyone in it and burns the undead.
+ *
+ * <h2>Visuals</h2>
+ * Two phases, two builders. The bespoke two-stage wind-up keeps its own shape (it is
+ * circle 5 and predates the shared {@link me.nagasonic.alkatraz.spells.vfx.WindUp} policy,
+ * which only binds at circle 6+) but now draws {@link SpellVfx#orbit} bodies that spiral
+ * inward onto the caster, preserving the tell it always had. The persistent dome is a
+ * single {@link SpellVfx#field} redrawn each tick: a {@code core} shell for the boundary
+ * a player has to be able to see, and a {@code deep} interior so being inside reads as
+ * enclosed rather than as a second surface.
+ *
+ * <h2>Colour</h2>
+ * Every particle is routed through {@link ParticleCaster} and every constant through a
+ * {@link Utils} alias. Shades come from the spell's own element palette, so the three
+ * former hardcoded yellows and the azure-in-a-LIGHT-spell class of bug cannot recur.
+ */
+public class Radiance extends AttackSpell {
+
     private static LangManager lang() {
         return Alkatraz.getLangManager();
     }
+
+    // ---- Wind-up: orbit bodies spiralling in ------------------------------------
+
+    /** Orbit radius, in blocks, at the first frame of the wind-up. */
+    private static final double WIND_UP_START_RADIUS = 6.0D;
+
+    /** Orbit radius, in blocks, at the halfway frame - the point the charge turns inward. */
+    private static final double WIND_UP_MID_RADIUS = 2.0D;
+
+    /** Orbit radius, in blocks, at the final frame. */
+    private static final double WIND_UP_END_RADIUS = 0.7D;
+
+    /** Orbiting bodies per frame during the first half of the wind-up. */
+    private static final int WIND_UP_BODIES = 8;
+
+    /** Orbiting bodies per frame during the second half, where the density climbs. */
+    private static final int WIND_UP_BODIES_LATE = 4;
+
+    /** Extra bodies the second half gains per frame as the charge commits. */
+    private static final int WIND_UP_LATE_BODY_GAIN = 14;
+
+    /** Radians the orbit turns per tick. */
+    private static final double WIND_UP_SPIN = 0.08D;
+
+    /** Height of the orbit's centre above the caster's feet. */
+    private static final double WIND_UP_ORBIT_HEIGHT = 1.0D;
+
+    /** Ticks between wind-up sound cues, first half and second half. */
+    private static final int WIND_UP_SOUND_INTERVAL_EARLY = 20;
+    private static final int WIND_UP_SOUND_INTERVAL_LATE = 15;
+
+    // ---- The dome --------------------------------------------------------------
+
+    /** Dome height as a multiple of the active radius. */
+    private static final double DOME_HEIGHT_SCALE = 0.55D;
+
+    /** Dome shell particle count per tick. */
+    private static final int DOME_SHELL_POINTS = 44;
+
+    /** Dome interior particle count per tick. */
+    private static final int DOME_FILL_POINTS = 14;
+
+    /** Radians the dome turns per tick. */
+    private static final double DOME_SPIN = 0.05D;
+
+    /** Height above the entity at which a heal is shown to the caster. */
+    private static final double HEAL_MARKER_HEIGHT = 0.5D;
+
+    /** Height above an undead victim at which its burn is shown. */
+    private static final double BURN_MARKER_HEIGHT = 1.0D;
 
     private double healAmount;
     private double radius;
     private double duration;
     private int windUpDuration;
-
-    private static final Set<EntityType> UNDEAD_TYPES = new HashSet<>();
-
-    static {
-        UNDEAD_TYPES.add(EntityType.ZOMBIE);
-        UNDEAD_TYPES.add(EntityType.ZOMBIE_VILLAGER);
-        UNDEAD_TYPES.add(EntityType.HUSK);
-        UNDEAD_TYPES.add(EntityType.DROWNED);
-        UNDEAD_TYPES.add(EntityType.SKELETON);
-        UNDEAD_TYPES.add(EntityType.WITHER_SKELETON);
-        UNDEAD_TYPES.add(EntityType.STRAY);
-        UNDEAD_TYPES.add(EntityType.WITHER);
-        UNDEAD_TYPES.add(EntityType.PHANTOM);
-        UNDEAD_TYPES.add(EntityType.ZOGLIN);
-        UNDEAD_TYPES.add(EntityType.ZOMBIFIED_PIGLIN);
-        UNDEAD_TYPES.add(EntityType.SKELETON_HORSE);
-        UNDEAD_TYPES.add(EntityType.ZOMBIE_HORSE);
-    }
 
     public Radiance(String type) {
         super(type);
@@ -89,72 +148,30 @@ public class Radiance extends Spell {
                     return;
                 }
 
-                Location casterLoc = caster.getLocation();
                 double progress = (double) ticks / windUpDuration;
-                boolean phase1 = progress < 0.5;
+                double orbitRadius = orbitRadiusAt(progress);
+                Location centre = caster.getLocation().add(0.0D, WIND_UP_ORBIT_HEIGHT, 0.0D);
+                World world = centre.getWorld();
+                if (world != null) {
+                    int bodies = progress < 0.5
+                            ? WIND_UP_BODIES
+                            : WIND_UP_BODIES_LATE + (int) ((progress - 0.5) * 2.0 * WIND_UP_LATE_BODY_GAIN);
+                    // Bodies spread from a third of the orbit radius out to the full radius,
+                    // so the formation has depth rather than reading as one flat ring.
+                    SpellVfx.orbit(Radiance.this, caster, centre,
+                            orbitRadius * 0.34D, orbitRadius, bodies, ticks * WIND_UP_SPIN);
+                }
 
-                if (phase1) {
-                    double phaseProgress = progress / 0.5;
-                    double maxDistance = 6.0;
-                    double currentDistance = maxDistance * (1.0 - phaseProgress);
-
-                    for (int i = 0; i < 8; i++) {
-                        double angle = (2 * Math.PI * i / 8) + (ticks * 0.05);
-                        double x = Math.cos(angle) * currentDistance;
-                        double z = Math.sin(angle) * currentDistance;
-                        Location rayLoc = casterLoc.clone().add(x, 0.5 + Math.sin(ticks * 0.15 + i) * 1.0, z);
-                        ParticleCaster.spawn(caster, rayLoc.getWorld(), Particle.GLOW, rayLoc, 2, 0.1, 0.1, 0.1, 0);
-
-                        Vector inward = casterLoc.toVector().subtract(rayLoc.toVector()).normalize().multiply(0.3);
-                        Location trailLoc = rayLoc.clone().add(inward);
-                        ParticleCaster.spawn(caster, trailLoc.getWorld(), Particle.GLOW, trailLoc, 1, 0.05, 0.05, 0.05, 0);
-                    }
-
-                    for (int i = 0; i < 5; i++) {
-                        double a = Math.random() * 2 * Math.PI;
-                        double r = Math.random() * 1.5;
-                        Location hazeLoc = casterLoc.clone().add(Math.cos(a) * r, 0.1, Math.sin(a) * r);
-                        ParticleCaster.spawn(caster, hazeLoc.getWorld(), Utils.DUST, hazeLoc, 1, 0.3, 0.1, 0.3, 0,
-                                new Particle.DustOptions(Color.fromRGB(255, 255, 200), 0.4F));
-                    }
-
-                    if (ticks % 20 == 0) {
-                        casterLoc.getWorld().playSound(casterLoc, Sound.BLOCK_BEACON_POWER_SELECT, 0.5f,
-                                0.8f + (float)(phaseProgress * 0.7f));
+                if (progress < 0.5) {
+                    if (ticks % WIND_UP_SOUND_INTERVAL_EARLY == 0) {
+                        caster.getWorld().playSound(caster.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT,
+                                0.5f, 0.8f + (float) (progress * 1.4f));
                     }
                 } else {
-                    double phaseProgress = (progress - 0.5) / 0.5;
-                    double density = 1.0 + phaseProgress * 3.0;
-
-                    for (int i = 0; i < (int)(4 * density); i++) {
-                        double angle = (2 * Math.PI * i / (int)(4 * density)) + (ticks * 0.08);
-                        double distance = 2.0 * (1.0 - phaseProgress * 0.7);
-                        double x = Math.cos(angle) * distance;
-                        double z = Math.sin(angle) * distance;
-                        Location convergeLoc = casterLoc.clone().add(x, 0.5 + Math.sin(ticks * 0.2 + i) * 1.0, z);
-                        ParticleCaster.spawn(caster, convergeLoc.getWorld(), Particle.GLOW, convergeLoc, 3, 0.05, 0.05, 0.05, 0);
-                    }
-
-                    for (int i = 0; i < (int)(3 * phaseProgress); i++) {
-                        double a = Math.random() * 2 * Math.PI;
-                        double r = Math.random() * 1.0;
-                        Location sparkleLoc = casterLoc.clone().add(Math.cos(a) * r, Math.random() * 2, Math.sin(a) * r);
-                        ParticleCaster.spawn(caster, sparkleLoc.getWorld(), Particle.END_ROD, sparkleLoc, 1, 0.05, 0.05, 0.05, 0.02);
-                    }
-
-                    if (phaseProgress > 0.8) {
-                        double burstIntensity = (phaseProgress - 0.8) / 0.2;
-                        for (int i = 0; i < (int)(6 * burstIntensity); i++) {
-                            double a = Math.random() * 2 * Math.PI;
-                            double r = Math.random() * 0.5;
-                            Location burstLoc = casterLoc.clone().add(Math.cos(a) * r, 1.0 + Math.random(), Math.sin(a) * r);
-                            ParticleCaster.spawn(caster, burstLoc.getWorld(), Particle.GLOW, burstLoc, 2, 0.1, 0.1, 0.1, 0.1);
-                        }
-                    }
-
-                    if (ticks % 15 == 0) {
-                        casterLoc.getWorld().playSound(casterLoc, Sound.BLOCK_BEACON_POWER_SELECT, 0.7f,
-                                1.2f + (float)(phaseProgress * 0.5f));
+                    double late = (progress - 0.5) * 2.0;
+                    if (ticks % WIND_UP_SOUND_INTERVAL_LATE == 0) {
+                        caster.getWorld().playSound(caster.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT,
+                                0.7f, 1.2f + (float) (late * 0.5f));
                     }
                 }
 
@@ -163,8 +180,27 @@ public class Radiance extends Spell {
         }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
     }
 
+    /**
+     * The wind-up orbit's radius at a given progress: a long fall from
+     * {@link #WIND_UP_START_RADIUS} to {@link #WIND_UP_MID_RADIUS} across the first half,
+     * then a slower convergence onto {@link #WIND_UP_END_RADIUS}. The two different slopes
+     * are the wind-up's phase break, and are why it is not a plain linear shrink.
+     *
+     * @param progress wind-up progress in {@code [0, 1]}
+     * @return the orbit radius in blocks, never negative
+     */
+    private static double orbitRadiusAt(double progress) {
+        double t = Math.min(1.0D, Math.max(0.0D, progress));
+        if (t < 0.5D) {
+            double eased = (t / 0.5D) * (t / 0.5D);
+            return WIND_UP_START_RADIUS + (WIND_UP_MID_RADIUS - WIND_UP_START_RADIUS) * eased;
+        }
+        double eased = (t - 0.5D) / 0.5D;
+        return WIND_UP_MID_RADIUS + (WIND_UP_END_RADIUS - WIND_UP_MID_RADIUS) * eased;
+    }
+
     private boolean isUndead(LivingEntity entity) {
-        return UNDEAD_TYPES.contains(entity.getType());
+        return UndeadTypes.contains(entity.getType());
     }
 
     private void launchRadiance(Player caster, ItemStack wand) {
@@ -175,6 +211,19 @@ public class Radiance extends Spell {
         double healPerTick = getModifiedStat(caster, "heal", healAmount * wandPower) / duration;
         int totalTicks = (int) (duration * 20);
 
+        // radiance has NO power: key - the design lists '-' for it, and it is a
+        // SUSTAIN field whose output is heal_amount/duration. Seed the shared
+        // properties from that base and wrap them, so getPower (option modifiers,
+        // affinity/resistance, and the section 5.3 anti-dark amplification) still
+        // applies exactly once per hit. Passing getBasePower() here would be 0.0.
+        AttackProperties props = new AttackProperties(
+                caster,
+                caster.getLocation(),
+                healPerTick * wandPower,
+                AttackType.MAGIC
+        );
+        SpellAttackContext context = SpellAttackContext.of(this, props, caster, wand);
+
         World world = caster.getWorld();
         Location center = caster.getLocation().clone();
 
@@ -182,62 +231,47 @@ public class Radiance extends Spell {
         world.playSound(center, Sound.BLOCK_ENCHANTMENT_TABLE_USE, 1.0f, 1.5f);
 
         new BukkitRunnable() {
-            int tick = 0;
-            double ringAngle = 0;
+            int ticksElapsed = 0;
+            long lastDamageTick = -SpellAttackContext.DAMAGE_INTERVAL_TICKS;
+            // Per-TARGET strike ledger. `lastDamageTick` above stays because it
+            // also drives the caster's and friendly players' HEAL, which is a
+            // per-field pulse by design; it must NOT drive the damage.
+            final Map<UUID, Long> nextStrikeTick = new HashMap<>();
 
             @Override
             public void run() {
-                if (tick >= totalTicks) {
+                if (context.isSpent() || caster.isDead() || !caster.isOnline()) {
+                    cancel();
+                    return;
+                }
+
+                if (ticksElapsed >= totalTicks) {
                     center.getWorld().playSound(center, Sound.BLOCK_BEACON_DEACTIVATE, 1.0f, 1.5f);
                     cancel();
                     return;
                 }
 
-                ringAngle += 0.15;
+                // The dome: one shell plus one interior, re-spun every tick. Drawn before
+                // the entity sweep so the burn and heal markers land on top of it.
+                SpellVfx.field(Radiance.this, caster, center, activeRadius,
+                        activeRadius * DOME_HEIGHT_SCALE, DOME_SHELL_POINTS, DOME_FILL_POINTS,
+                        ticksElapsed * DOME_SPIN);
 
-                for (int ring = 0; ring < 3; ring++) {
-                    double r = activeRadius * (ring + 1) / 3.0;
-                    double angleOffset = ringAngle + ring * 2.0;
-                    int points = 12 + ring * 4;
-
-                    for (int i = 0; i < points; i++) {
-                        double a = angleOffset + (2 * Math.PI * i / points);
-                        double x = Math.cos(a) * r;
-                        double z = Math.sin(a) * r;
-                        Location ringLoc = center.clone().add(x, 0.5 + Math.sin(tick * 0.1 + ring) * 0.3, z);
-
-                        ParticleCaster.spawn(caster, ringLoc.getWorld(), Particle.GLOW, ringLoc, 1, 0, 0, 0, 0);
-                        ParticleCaster.spawn(caster, ringLoc.getWorld(), Utils.DUST, ringLoc, 0,
-                                new Particle.DustOptions(Color.fromRGB(255, 255, 200), 0.5F + ring * 0.2F));
-                    }
-                }
-
-                for (int i = 0; i < 3; i++) {
-                    double a = tick * 0.3 + i * 2.0;
-                    double r = activeRadius * (0.3 + (Math.sin(tick * 0.05) * 0.5 + 0.5) * 0.7);
-                    double x = Math.cos(a) * r;
-                    double z = Math.sin(a) * r;
-                    Location orbLoc = center.clone().add(x, 1.0 + Math.sin(tick * 0.2 + i) * 1.5, z);
-                    ParticleCaster.spawn(caster, orbLoc.getWorld(), Particle.END_ROD, orbLoc, 2, 0.1, 0.1, 0.1, 0.02);
-                }
-
-                for (int i = 0; i < 5; i++) {
-                    double a = Math.random() * 2 * Math.PI;
-                    double r = Math.random() * activeRadius;
-                    double x = Math.cos(a) * r;
-                    double z = Math.sin(a) * r;
-                    Location radiantLoc = center.clone().add(x, Math.random() * 3 + 0.5, z);
-                    ParticleCaster.spawn(caster, radiantLoc.getWorld(), Particle.GLOW, radiantLoc, 1, 0.05, 0.05, 0.05, 0);
+                boolean damageTick = ticksElapsed - lastDamageTick >= SpellAttackContext.DAMAGE_INTERVAL_TICKS;
+                if (damageTick) {
+                    lastDamageTick = ticksElapsed;
+                    context.tick();
                 }
 
                 for (Entity entity : world.getNearbyEntities(center, activeRadius, activeRadius, activeRadius)) {
                     if (entity.equals(caster)) {
-                        if (tick % 10 == 0) {
+                        if (damageTick) {
                             double maxHealth = caster.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
                             caster.setHealth(Math.min(maxHealth, caster.getHealth() + healPerTick));
 
-                            Location eyes = caster.getEyeLocation();
-                            ParticleCaster.spawn(caster, eyes.getWorld(), Particle.HEART, eyes.clone().add(0, 0.5, 0), 2, 0.3, 0.3, 0.3, 0);
+                            ParticleCaster.spawn(caster, caster.getWorld(), Utils.HEART,
+                                    caster.getEyeLocation().add(0.0D, HEAL_MARKER_HEIGHT, 0.0D),
+                                    2, 0.3, 0.3, 0.3, 0);
                         }
                         continue;
                     }
@@ -245,40 +279,58 @@ public class Radiance extends Spell {
                     if (!(entity instanceof LivingEntity le)) continue;
 
                     if (isUndead(le)) {
-                        if (tick % 10 == 0) {
-                            SpellDamageUtil.damageWithSpell(
-                                    le, calcPower(healPerTick, le, caster),
-                                    caster, wand, Radiance.this
-                            );
-                            ParticleCaster.spawn(caster, le.getWorld(), Particle.FLAME, le.getLocation().add(0, 1, 0), 8, 0.3, 0.5, 0.3, 0.05);
+                        if (damageTick) {
+                            // SUSTAIN CADENCE LEDGER - per TARGET. `damageTick`
+                            // alone is a per-FIELD gate, and props.hasHit is a
+                            // per-CAST one, so neither can express "once a second
+                            // per victim". See "SUSTAIN cadence: hasHit must not gate
+                            // the repeats" at the top of wave 3.
+                            Long nextStrike = nextStrikeTick.get(le.getUniqueId());
+                            if (nextStrike == null || nextStrike <= ticksElapsed) {
+                                nextStrikeTick.put(le.getUniqueId(), ticksElapsed + SpellAttackContext.DAMAGE_INTERVAL_TICKS);
+                                props.hit(le);
+                                // WAS calcPower(healPerTick, le, caster) - dead code with
+                                // zero legitimate callers that skips getModifiedStat and,
+                                // being on Spell rather than AttackSpell, never carried the
+                                // anti-dark amplification either.
+                                SpellDamageUtil.damageWithSpell(le, context.power(le), caster, wand, Radiance.this);
+                                ParticleCaster.spawn(caster, le.getWorld(), Utils.FLAME,
+                                        le.getLocation().add(0.0D, BURN_MARKER_HEIGHT, 0.0D),
+                                        8, 0.3, 0.5, 0.3, 0.05);
+                            }
                         }
                     } else if (entity instanceof Player targetPlayer) {
-                        if (tick % 10 == 0) {
+                        if (damageTick) {
                             double maxHealth = targetPlayer.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
                             targetPlayer.setHealth(Math.min(maxHealth, targetPlayer.getHealth() + healPerTick));
-                            ParticleCaster.spawn(caster, targetPlayer.getWorld(), Particle.HEART, targetPlayer.getLocation().add(0, 1, 0), 3, 0.3, 0.3, 0.3, 0);
+                            ParticleCaster.spawn(caster, targetPlayer.getWorld(), Utils.HEART,
+                                    targetPlayer.getLocation().add(0.0D, BURN_MARKER_HEIGHT, 0.0D),
+                                    3, 0.3, 0.3, 0.3, 0);
                         }
                     }
                 }
 
-                Particle.DustOptions sparkOptions = new Particle.DustOptions(Color.YELLOW, 0.3F);
-                for (int i = 0; i < 2; i++) {
-                    float yaw = (float) (Math.random() * 360);
-                    float pitch = (float) (Math.random() * 360);
-                    Vector forward = new Vector(0, 0, 1);
-                    List<Location> circlePoints = ParticleUtils.magicCircle(
-                            center.clone().add(0, 0.5 + Math.random() * 2, 0),
-                            yaw, pitch, forward, 1.0 + Math.random() * 0.5, 0);
-                    int wanted = (int) (circlePoints.size() * 0.3);
-                    for (int k = 0; k < wanted; k++) {
-                        Location loc = circlePoints.get((int) (Math.random() * circlePoints.size()));
-                        ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, sparkOptions);
-                    }
-                }
-
-                tick++;
+                ticksElapsed++;
             }
         }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
+    }
+
+    @Override
+    public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
+        ParticleCaster.spawn(caster, location.getWorld(), Utils.GLOW, location, 20);
+    }
+
+    @Override
+    public void onCountered(Location location) {
+        ParticleCaster.spawn(null, location.getWorld(), Utils.GLOW, location, 40, 0.3, 0.3, 0.3, 0.1);
+    }
+
+    @Override
+    public boolean canMobCast(Mob mob) {
+        // The mob field heals the caster and sears whatever undead is nearby, so it
+        // needs no target. AttackSpell's default requires one, which would be a
+        // regression from Spell's unconditional true.
+        return true;
     }
 
     @Override
@@ -303,20 +355,18 @@ public class Radiance extends Spell {
                     return;
                 }
 
-                Location casterLoc = caster.getLocation();
                 double progress = (double) ticks / windUpDuration;
-
-                for (int i = 0; i < 4; i++) {
-                    double angle = (2 * Math.PI * i / 4) + (ticks * 0.05);
-                    double distance = 3.0 * (1.0 - progress);
-                    double x = Math.cos(angle) * distance;
-                    double z = Math.sin(angle) * distance;
-                    Location rayLoc = casterLoc.clone().add(x, 0.5, z);
-                    ParticleCaster.spawn(caster, rayLoc.getWorld(), Particle.GLOW, rayLoc, 2, 0.1, 0.1, 0.1, 0);
+                double orbitRadius = WIND_UP_START_RADIUS + (WIND_UP_END_RADIUS - WIND_UP_START_RADIUS) * progress;
+                Location centre = caster.getLocation().add(0.0D, WIND_UP_ORBIT_HEIGHT, 0.0D);
+                if (centre.getWorld() != null) {
+                    // A mob's wind-up is the same tell at a fraction of the density: a mob
+                    // must be readable as charging without competing with a player's cast.
+                    SpellVfx.orbit(Radiance.this, caster, centre, orbitRadius * 0.34D, orbitRadius,
+                            WIND_UP_BODIES / 2, ticks * WIND_UP_SPIN);
                 }
 
-                if (ticks % 20 == 0) {
-                    casterLoc.getWorld().playSound(casterLoc, Sound.BLOCK_BEACON_POWER_SELECT, 0.4f, 0.8f);
+                if (ticks % WIND_UP_SOUND_INTERVAL_EARLY == 0) {
+                    caster.getWorld().playSound(caster.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 0.4f, 0.8f);
                 }
 
                 ticks++;
@@ -337,11 +387,15 @@ public class Radiance extends Spell {
                     return;
                 }
 
-                if (healTicks % 10 == 0) {
+                // The mob field deals no damage at all, so there is no per-target
+                // ledger to keep here - but its heal pulse moves onto the same
+                // 20-tick contract interval as the player branch, which also
+                // halved its healing (10 pulses x 1.6 became 5 x 1.6).
+                if (healTicks % SpellAttackContext.DAMAGE_INTERVAL_TICKS == 0) {
                     double healPerTick = totalHeal / duration;
                     double maxHealth = caster.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
                     caster.setHealth(Math.min(maxHealth, caster.getHealth() + healPerTick));
-                    ParticleCaster.spawn(caster, caster.getWorld(), Particle.GLOW, caster.getLocation(), 10, 2, 1, 2, 0);
+                    ParticleCaster.spawn(caster, caster.getWorld(), Utils.GLOW, caster.getLocation(), 10, 2, 1, 2, 0);
                 }
 
                 healTicks++;
@@ -351,18 +405,7 @@ public class Radiance extends Spell {
 
     @Override
     public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
-        return Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
-            if (e.isCancelled()) return;
-            Location playerLoc = caster.getEyeLocation();
-            float yaw = playerLoc.getYaw();
-            float pitch = playerLoc.getPitch();
-            Vector forward = playerLoc.getDirection().normalize().multiply(1.5);
-            List<Location> points = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 3, 0);
-            Particle.DustOptions options = new Particle.DustOptions(Color.fromRGB(255, 255, 150), 0.4F);
-            for (Location loc : points) {
-                ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, options);
-            }
-        }, 0L, (Long) Configs.CIRCLE_TICKS.get());
+        return CastCircle.start(this, caster, e);
     }
 
     @Override

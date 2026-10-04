@@ -8,9 +8,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 
-import java.util.Set;
-import java.util.UUID;
-
 /**
  * Prevents summoned companions from being damaged by their own owner and from
  * harming each other. Summons are identified by the persistent NBT flags
@@ -19,16 +16,26 @@ import java.util.UUID;
  */
 public final class SummonCombatGuard implements Listener {
 
-    private static final Set<String> SUMMON_FLAGS = Set.of("summoned_zombie", "summoned_knight", "summoned_mount");
+    private static final String[] SUMMON_FLAGS = {"summoned_zombie", "summoned_knight", "summoned_mount"};
 
     /** True when the entity is any kind of summoned companion. */
     public static boolean isSummon(Entity entity) {
         if (entity == null) return false;
-        return SUMMON_FLAGS.stream().anyMatch(flag -> NBT.getPersistentData(entity, nbt -> nbt.getBoolean(flag)));
+        for (String flag : SUMMON_FLAGS) {
+            if (NBT.getPersistentData(entity, nbt -> nbt.getBoolean(flag))) return true;
+        }
+        return false;
     }
 
     private static String summonerUuid(Entity entity) {
         return NBT.getPersistentData(entity, nbt -> nbt.getString("summoner_uuid"));
+    }
+
+    /** Flag and owner read in a single persistent-compound lookup. */
+    record SummonTag(String summonerUuid, boolean flagged) {}
+
+    static SummonTag readSummonTag(Entity entity, String flag) {
+        return NBT.getPersistentData(entity, nbt -> new SummonTag(nbt.getString("summoner_uuid"), nbt.getBoolean(flag)));
     }
 
     @EventHandler
@@ -44,11 +51,10 @@ public final class SummonCombatGuard implements Listener {
         if (damager instanceof Projectile projectile && projectile.getShooter() instanceof Entity shooter) {
             damager = shooter;
         }
-        if (isSummon(damager)) return true;
         if (damager instanceof Player player) {
             String ownerUuid = summonerUuid(victim);
             return ownerUuid != null && ownerUuid.equals(player.getUniqueId().toString());
         }
-        return false;
+        return isSummon(damager);
     }
 }

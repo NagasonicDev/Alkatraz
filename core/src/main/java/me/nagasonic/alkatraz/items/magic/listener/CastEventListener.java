@@ -37,11 +37,18 @@ import java.util.concurrent.ConcurrentHashMap;
 import static me.nagasonic.alkatraz.util.Utils.notAir;
 
 public class CastEventListener implements Listener {
-    private static final Map<String, Integer> level = new HashMap<>();
-    private static final Map<String, Float> exp = new HashMap<>();
     private static final Map<UUID, Integer> changedExp = new ConcurrentHashMap<>();
 
     private static final Set<UUID> spellDamageTargets = Collections.newSetFromMap(new ConcurrentHashMap<>());
+
+    /**
+     * Timestamp of the last {@link #sweepSpellDamageTargets()} pass. The sweep resolves
+     * every marked entity through {@code Bukkit.getEntity}, so an AoE spell marking twenty
+     * entities in one tick would otherwise do twenty full sweeps. Gating it to once per
+     * 50 ms tick bucket keeps the stale-mark cleanup while collapsing that to a single pass.
+     */
+    private static final long SWEEP_WINDOW_NANOS = 50_000_000L;
+    private static long lastSweepNanos;
 
     public static void markSpellDamage(LivingEntity target) {
         sweepSpellDamageTargets();
@@ -66,7 +73,7 @@ public class CastEventListener implements Listener {
         ItemStack wand = e.getPlayer().getInventory().getItem(e.getPreviousSlot());
         if (wand != null){
             if (wand.getType() != Material.AIR && wand.getAmount() != 0) {
-                if (WandUtils.isWand(wand)) {
+                if (isWandCached(e, wand)) {
                     WandComponentHandler.resetCastCode(e.getPlayer().getUniqueId());
                 }
             }
@@ -81,14 +88,14 @@ public class CastEventListener implements Listener {
         ItemStack curr = p.getInventory().getItem(e.getNewSlot());
         if (prev != null) {
             if (prev.getType() != Material.AIR && prev.getAmount() != 0){
-                if (isManaDisplayItem(prev)) {
+                if (isManaDisplayItemCached(e, prev)) {
                     switchFrom(p);
                 }
             }
         }
         if (curr != null){
             if (curr.getType() != Material.AIR && curr.getAmount() != 0){
-                if (isManaDisplayItem(curr)) {
+                if (isManaDisplayItemCached(e, curr)) {
                     switchTo(p, curr);
                 }
             }
@@ -246,8 +253,6 @@ public class CastEventListener implements Listener {
         if (data.isCasting()){ data.setCasting(false); }
         data.setCastingSpell(null);
         changedExp.remove(p.getUniqueId());
-        level.remove(p.getUniqueId().toString());
-        exp.remove(p.getUniqueId().toString());
     }
 
     @EventHandler
@@ -319,6 +324,9 @@ public class CastEventListener implements Listener {
     private void onHotbarPluginDisable(PluginDisableEvent e) {
         if (e.getPlugin() == Alkatraz.getInstance()) {
             SpellHotbarManager.exitAll();
+            changedExp.clear();
+            spellDamageTargets.clear();
+            lastSweepNanos = 0L;
         }
     }
 
@@ -438,9 +446,56 @@ public class CastEventListener implements Listener {
         return WandUtils.isWand(item) || WandUtils.isGrimoire(item);
     }
 
+    /**
+     * Per-dispatch memo for the {@link WandUtils} wand/grimoire probes.
+     *
+     * <p>{@code onHandSwitch} and {@code onWandMana} are separate handlers on the same
+     * {@code PlayerItemHeldEvent} and both test the previous slot, while {@code onWandMana}
+     * additionally tests the new slot; each probe costs a legacy NBT read plus three
+     * {@code MagicItemStack} stack reads. The memo is keyed on the event instance and reset
+     * whenever a different event arrives, so an entry can never outlive a single event
+     * dispatch and a stack is probed at most once per predicate per event. The two
+     * predicates are memoised separately so {@code onHandSwitch} keeps its
+     * wand-only semantics. Main-thread confined, since every reader is a synchronous
+     * Bukkit event handler.
+     */
+    private static PlayerItemHeldEvent handSwitchMemoEvent;
+    private static final Map<ItemStack, boolean[]> HAND_SWITCH_MEMO = new HashMap<>();
+
+    private static boolean[] memoSlot(PlayerItemHeldEvent event, ItemStack item) {
+        if (handSwitchMemoEvent != event) {
+            handSwitchMemoEvent = event;
+            HAND_SWITCH_MEMO.clear();
+        }
+        return HAND_SWITCH_MEMO.computeIfAbsent(item, ignored -> new boolean[2]);
+    }
+
+    private static boolean isWandCached(PlayerItemHeldEvent event, ItemStack item) {
+        if (item == null) {
+            return false;
+        }
+        boolean[] slot = memoSlot(event, item);
+        if (!slot[0]) {
+            slot[0] = WandUtils.isWand(item);
+        }
+        return slot[0];
+    }
+
+    private static boolean isManaDisplayItemCached(PlayerItemHeldEvent event, ItemStack item) {
+        if (item == null) {
+            return false;
+        }
+        if (isWandCached(event, item)) {
+            return true;
+        }
+        boolean[] slot = memoSlot(event, item);
+        if (!slot[1]) {
+            slot[1] = WandUtils.isGrimoire(item);
+        }
+        return slot[1];
+    }
+
     public static void resetExperience(Player p){
-        level.remove(p.getUniqueId().toString());
-        exp.remove(p.getUniqueId().toString());
         changedExp.remove(p.getUniqueId());
     }
 
@@ -453,6 +508,11 @@ public class CastEventListener implements Listener {
         if (spellDamageTargets.isEmpty()) {
             return;
         }
+        long now = System.nanoTime();
+        if (now - lastSweepNanos < SWEEP_WINDOW_NANOS) {
+            return;
+        }
+        lastSweepNanos = now;
         Iterator<UUID> iterator = spellDamageTargets.iterator();
         while (iterator.hasNext()) {
             if (Bukkit.getEntity(iterator.next()) == null) {

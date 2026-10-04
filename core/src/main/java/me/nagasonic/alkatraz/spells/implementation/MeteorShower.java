@@ -1,10 +1,13 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.api.Element;
 import me.nagasonic.alkatraz.config.ConfigManager;
-import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.lang.LangManager;
+import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
+import me.nagasonic.alkatraz.spells.components.SpellComponentType;
+import me.nagasonic.alkatraz.spells.components.SpellParticleComponent;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.spells.types.AttackSpell;
@@ -12,9 +15,12 @@ import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
-import me.nagasonic.alkatraz.hooks.Protection;
+import me.nagasonic.alkatraz.spells.util.TerrainEditor;
+import me.nagasonic.alkatraz.spells.vfx.CastCircle;
+import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
+import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
+import me.nagasonic.alkatraz.spells.vfx.WindUp;
 import me.nagasonic.alkatraz.util.ParticleCaster;
-import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -25,26 +31,72 @@ import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MeteorShower extends AttackSpell implements Listener {
     private static final Map<UUID, MeteorData> activeMeteorData = new ConcurrentHashMap<>();
+
+    /**
+     * Every colour this spell draws comes from the shared FIRE palette. The two dusts below
+     * were byte-identical {@code (255, 100, 0)} literals, so the landing marker and the impact
+     * burst were the same colour and the marker was invisible against its own detonation.
+     */
+    private static final ElementPalette.Palette PALETTE = ElementPalette.of(Element.FIRE);
+
+    /**
+     * The ground marker: {@code accent}. It has to read as a <i>telegraph</i> - a warning drawn
+     * before the hit - so it sits a shade below the detonation it is warning about.
+     */
+    private static final Particle.DustOptions MARKER_DUST = PALETTE.accentDust();
+
+    /**
+     * The impact burst: {@code core}, the brightest shade, because the detonation is the
+     * leading edge a player reacts to and nothing may out-shout it.
+     */
+    private static final Particle.DustOptions BURST_DUST = PALETTE.coreDust();
+
+    /** Bodies per rising flame ring during the wind-up; both rings use the same count. */
+    private static final int WIND_UP_RING_BODIES = 6;
+    /** Innermost radius of the rising flame rings, in blocks. */
+    private static final double WIND_UP_RING_INNER_RADIUS = 1.5;
+    /** How far past the inner radius the outermost ring sits, in blocks. */
+    private static final double WIND_UP_RING_SPREAD = 2.0;
+    /** Stations along the ground scorch mark drawn at the resolved target. */
+    private static final int MARKER_SAMPLES = 12;
+    /** Parallel furrows across the scorch mark, so it reads as scorched ground not a solid slab. */
+    private static final int MARKER_LANES = 3;
+    /** Particles in the release frame's warning ring at the target. */
+    private static final int LANDING_RING_POINTS = 24;
+    /** Flame motes rising off the hub each wind-up tick. */
+    private static final int WIND_UP_COLUMN_MOTES = 20;
+    /** Ground smoke at the caster's feet each wind-up tick. */
+    private static final int WIND_UP_FOOT_SMOKE = 8;
+    /** Ticks between the rising-pitch blaze shots, and between the dragon growls. */
+    private static final int WIND_UP_SHOOT_PERIOD = 20;
+    private static final int WIND_UP_GROWL_PERIOD = 15;
+    /** The dragon growl only joins the charge once it has visibly committed. */
+    private static final float WIND_UP_GROWL_THRESHOLD = 0.5f;
+
     private static LangManager lang() {
         return Alkatraz.getLangManager();
     }
 
-    private record MeteorData(Player caster, double totalPower, ItemStack wand) {}
+    private record MeteorData(Player caster, AttackProperties props, int[] blocksLeft, ItemStack wand) {}
 
-    private int windUpDuration;
     private boolean blockDamage;
+    private double craterRadius;
+    private double damageRadius;
+    private int fireRadius;
+    private int terrainBudget;
 
     public MeteorShower(String type) {
         super(type);
@@ -57,8 +109,13 @@ public class MeteorShower extends AttackSpell implements Listener {
         YamlConfiguration spellConfig = ConfigManager.getConfig("spells/meteor_shower.yml").get();
         loadCommonConfig(spellConfig);
         loadOptions();
-        this.windUpDuration = spellConfig.getInt("wind_up_duration", 6) * 20;
+        // wind_up_duration is gone: the shared WindUp owns the duration now, and at circle 6
+        // that is SpellBudgets.windUpTicks(6) - which is the spell's cast time, not extra to it.
         this.blockDamage = spellConfig.getBoolean("block_damage", true);
+        this.craterRadius = spellConfig.getDouble("crater_radius", 3.0);
+        this.damageRadius = spellConfig.getDouble("damage_radius", 5.0);
+        this.fireRadius = spellConfig.getInt("fire_radius", 5);
+        this.terrainBudget = spellConfig.getInt("terrain_budget", 620);
         Alkatraz.getInstance().getServer().getPluginManager().registerEvents(this, Alkatraz.getInstance());
     }
 
@@ -68,118 +125,206 @@ public class MeteorShower extends AttackSpell implements Listener {
         MeteorData data = activeMeteorData.remove(fb.getUniqueId());
         if (data == null) return;
         e.setCancelled(true);
-        triggerMeteorExplosion(e.getLocation(), data.caster(), data.totalPower(), data.wand());
+        triggerMeteorExplosion(e.getLocation(), data.caster(), data.props(), data.blocksLeft(), data.wand());
+    }
+
+    @EventHandler
+    private void onEntityDeath(EntityDeathEvent e) {
+        activeMeteorData.remove(e.getEntity().getUniqueId());
+    }
+
+    @EventHandler
+    private void onPluginDisable(PluginDisableEvent e) {
+        if (e.getPlugin() != Alkatraz.getInstance()) return;
+        activeMeteorData.clear();
     }
 
     @Override
     public void castAction(Player caster, ItemStack wand) {
         if (caster.isDead()) return;
 
-        double totalPower = getPower(caster, getBasePower()) * getWandPower(wand, caster);
+        // RAW base power - getPower is applied once per impact, in
+        // triggerMeteorExplosion. It used to be applied here AND in
+        // launchMeteorAttack AND again per impact.
         AttackProperties props = new AttackProperties(
                 caster,
                 Utils.castLocation(caster),
-                totalPower,
+                getBasePower() * getWandPower(wand, caster),
                 AttackType.MAGIC
         );
 
-        World world = caster.getWorld();
         Location targetLoc = Utils.resolveTarget(caster, 30);
-        double radius = getModifiedStat(caster, "radius", 8);
+        // The crater radius is now driven by the option instead of being hardcoded
+        // at 5 while the option controlled only meteor scatter.
+        double radius = getModifiedStat(caster, "radius", craterRadius);
+
+        // Register the cast so the spell is counterable and its projectiles can be
+        // deflected. register was never called before, so meteor_shower was
+        // uncounterable and immune to deflection.
+        SpellComponentHandler.register(new SpellParticleComponent(
+                this, props, caster, wand,
+                SpellComponentType.OFFENSE, Utils.castLocation(caster), 0.5, 2));
+
+        // The wind-up IS the cast time at circle 6 (see the cast_time comment in the yml), so
+        // the shared WindUp owns the duration, the escalation and the landing telegraph. The
+        // resolved target is handed straight to it, which is the one thing the bespoke charge
+        // could not do: it used to hide the impact point until the final third of the charge.
+        runWindUp(caster, targetLoc, radius,
+                () -> launchMeteorAttack(caster, wand, props, targetLoc, radius, new int[]{terrainBudget}));
+    }
+
+    /**
+     * Drives the circle-6 charge and runs {@code payload} exactly once, only after the shared
+     * {@link WindUp} reports complete.
+     *
+     * <p>The wind-up only ever draws and counts - it never fires anything itself - so the
+     * payload stays here. Three exits stop it without firing: the caster dying or logging off,
+     * an interruption cancelling the wind-up, and normal completion. A cancelled wind-up must
+     * never release the meteors, because mana is spent at the start of the cast and the player
+     * was told the cast was interrupted.
+     *
+     * @param caster        the charging entity
+     * @param marker        where the meteors will land, drawn as the dodge cue; may be null
+     * @param scatterRadius the effective meteor scatter radius, used to size the scorch mark
+     * @param payload       what to run once the charge completes
+     */
+    private void runWindUp(LivingEntity caster, Location marker, double scatterRadius, Runnable payload) {
+        final WindUp windUp = WindUp.begin(this, caster, WindUp.standardTicks(this, caster), marker);
+        final int[] tick = {0};
 
         new BukkitRunnable() {
-            int ticks = 0;
-
             @Override
             public void run() {
-                if (ticks >= windUpDuration) {
+                if (!isCharging(caster)) {
                     cancel();
-                    launchMeteorAttack(caster, wand, props, targetLoc, radius);
                     return;
                 }
-
-                if (caster.isDead() || (caster instanceof Player && !((Player) caster).isOnline())) {
+                if (windUp.isCancelled()) {
                     cancel();
                     return;
                 }
 
-                Location casterLoc = caster.getLocation();
-                double progress = (double) ticks / windUpDuration;
-                boolean phase1 = progress < 0.67;
+                windUp.tick();
+                float progress = windUp.progress();
+                drawCharge(caster, progress, tick[0]);
+                drawScorchMark(caster, marker, scatterRadius, progress);
+                playChargeSounds(caster, tick[0], progress);
+                tick[0]++;
 
-                if (phase1) {
-                    double phaseProgress = progress / 0.67;
-                    for (int ring = 0; ring < 3; ring++) {
-                        double ringRadius = 1.5 + ring * 1.0 + phaseProgress * 2.0;
-                        double ringHeight = phaseProgress * 3.0 + ring * 0.5;
-                        int points = 12 + ring * 4;
-                        for (int i = 0; i < points; i++) {
-                            double angle = (2 * Math.PI * i / points) + (ticks * 0.05 * (ring + 1));
-                            Location flameLoc = casterLoc.clone().add(
-                                    Math.cos(angle) * ringRadius,
-                                    ringHeight,
-                                    Math.sin(angle) * ringRadius
-                            );
-                            ParticleCaster.spawn(caster, flameLoc.getWorld(), Particle.FLAME, flameLoc, 2, 0.1, 0.1, 0.1, 0.02);
-                        }
-                    }
-
-                    for (int i = 0; i < 8; i++) {
-                        double a = Math.random() * 2 * Math.PI;
-                        double r = Math.random() * 2.5;
-                        Location groundLoc = casterLoc.clone().add(Math.cos(a) * r, 0.1, Math.sin(a) * r);
-                        ParticleCaster.spawn(caster, groundLoc.getWorld(), Utils.SMOKE, groundLoc, 1, 0.2, 0.1, 0.2, 0.01);
-                    }
-
-                    if (ticks % 20 == 0) {
-                        world.playSound(casterLoc, Sound.ENTITY_BLAZE_SHOOT, 0.4f, 0.5f + (float)(progress * 1.5f));
-                    }
-                } else {
-                    double phaseProgress = (progress - 0.67) / 0.33;
-                    double compressRadius = 3.0 * (1.0 - phaseProgress);
-                    double columnHeight = 3.0 + phaseProgress * 8.0;
-
-                    for (int i = 0; i < 20; i++) {
-                        double angle = Math.random() * 2 * Math.PI;
-                        double r = Math.random() * compressRadius;
-                        Location colLoc = casterLoc.clone().add(
-                                Math.cos(angle) * r,
-                                columnHeight + Math.random() * 2,
-                                Math.sin(angle) * r
-                        );
-                        ParticleCaster.spawn(caster, colLoc.getWorld(), Particle.FLAME, colLoc, 2, 0.05, 0.05, 0.05, 0.03);
-                    }
-
-                    if (targetLoc != null) {
-                        double markerRadius = 1.0 + phaseProgress * 3.0;
-                        int markerPoints = 16;
-                        for (int i = 0; i < markerPoints; i++) {
-                            double angle = (2 * Math.PI * i / markerPoints) + (ticks * 0.1);
-                            Location markerLoc = targetLoc.clone().add(
-                                    Math.cos(angle) * markerRadius,
-                                    0.1,
-                                    Math.sin(angle) * markerRadius
-                            );
-                            ParticleCaster.spawn(caster, markerLoc.getWorld(), Utils.DUST, markerLoc, 0,
-                                    new Particle.DustOptions(Color.fromRGB(255, 100, 0), 1.0F));
-                        }
-                    }
-
-                    if (ticks % 15 == 0) {
-                        world.playSound(casterLoc, Sound.ENTITY_ENDER_DRAGON_GROWL, 0.3f, 0.4f);
-                    }
+                if (windUp.isComplete()) {
+                    cancel();
+                    payload.run();
                 }
-
-                ticks++;
             }
         }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
     }
 
-    private void launchMeteorAttack(Player caster, ItemStack wand, AttackProperties props, Location targetLoc, double radius) {
+    private static boolean isCharging(LivingEntity caster) {
+        if (caster.isDead()) return false;
+        return !(caster instanceof Player player) || player.isOnline();
+    }
+
+    /**
+     * The tell that survives the migration: two counter-rotating flame rings rising off the
+     * caster, a collapsing column of motes above them and smoke at the feet.
+     *
+     * <p>{@link SpellVfx#orbit} is what makes the pair counter-rotate without a second hand-rolled
+     * trigonometry loop. The hub rises with progress so the charge reads as gathering upward
+     * rather than spinning in place.
+     */
+    private void drawCharge(LivingEntity caster, float progress, int tick) {
+        Location feet = caster.getLocation();
+        World world = feet.getWorld();
+        if (world == null) return;
+
+        double lift = progress * 3.0;
+        Location hub = feet.clone().add(0.0, lift, 0.0);
+        double outer = WIND_UP_RING_INNER_RADIUS + WIND_UP_RING_SPREAD;
+
+        // Outer ring spins with the charge, inner ring against it, so the pair never reads as
+        // a static circle.
+        SpellVfx.orbit(this, caster, hub, WIND_UP_RING_INNER_RADIUS, outer,
+                WIND_UP_RING_BODIES, tick * 0.06);
+        SpellVfx.orbit(this, caster, hub.clone().add(0.0, 0.5, 0.0),
+                WIND_UP_RING_INNER_RADIUS * 0.55, WIND_UP_RING_INNER_RADIUS,
+                WIND_UP_RING_BODIES, -tick * 0.09);
+
+        // The column narrows as it charges, mirroring the old two-phase "compress then release".
+        double columnHeight = 2.0 + progress * 6.0;
+        double columnReach = Math.max(0.2, 1.0 - progress * 0.6);
+        for (int i = 0; i < WIND_UP_COLUMN_MOTES; i++) {
+            double angle = Math.random() * 2 * Math.PI;
+            double reach = Math.random() * columnReach;
+            Location mote = feet.clone().add(
+                    Math.cos(angle) * reach,
+                    lift + Math.random() * columnHeight,
+                    Math.sin(angle) * reach);
+            ParticleCaster.spawn(caster, world, Utils.FLAME, mote, 2, 0.05, 0.05, 0.05, 0.03);
+        }
+
+        for (int i = 0; i < WIND_UP_FOOT_SMOKE; i++) {
+            double angle = Math.random() * 2 * Math.PI;
+            double reach = Math.random() * 2.5;
+            Location smoke = feet.clone().add(Math.cos(angle) * reach, 0.1, Math.sin(angle) * reach);
+            ParticleCaster.spawn(caster, world, Utils.SMOKE, smoke, 1, 0.2, 0.1, 0.2, 0.01);
+        }
+    }
+
+    /**
+     * The scorched GROUND the craters will carve, layered under the concentric landing rings
+     * {@link WindUp} draws at the same point.
+     *
+     * <p>Two shapes at one place on purpose: the rings say <i>here</i>, this says <i>this much
+     * of it</i>. The long axis is the damage footprint and the short axis is the crater, so the
+     * mark is sized from the spell's own config rather than from a magic number.
+     *
+     * <p>{@code advance} is the <b>fraction</b> of the shape revealed, not a direction - it
+     * fills in as the charge commits.
+     */
+    private void drawScorchMark(LivingEntity caster, Location target, double scatterRadius, float progress) {
+        if (target == null) return;
+        World world = target.getWorld();
+        if (world == null) return;
+
+        double length = damageRadius * 2.0;
+        double width = Math.max(craterRadius, scatterRadius) * 2.0;
+        // Point the long axis at the caster so the mark reads as coming from them.
+        Location feet = caster.getLocation();
+        double yaw = Math.toDegrees(Math.atan2(
+                target.getZ() - feet.getZ(), target.getX() - feet.getX()));
+
+        SpellVfx.ground(this, caster, target, length, width,
+                MARKER_SAMPLES, MARKER_LANES, yaw, progress);
+    }
+
+    /**
+     * The audio half of the two-phase tell, which {@link WindUp} deliberately does not own: a
+     * blaze shot per second that rises in pitch, plus a dragon growl that only joins in once
+     * the charge is visibly committed.
+     */
+    private void playChargeSounds(LivingEntity caster, int tick, float progress) {
         World world = caster.getWorld();
-        double totalPower = getPower(caster, getBasePower()) * getWandPower(wand, caster);
-        int totalMeteors = 6;
-        int durationTicks = 80;
+        if (world == null) return;
+
+        Location at = caster.getLocation();
+        if (tick % WIND_UP_SHOOT_PERIOD == 0) {
+            world.playSound(at, Sound.ENTITY_BLAZE_SHOOT, 0.4f, 0.5f + progress * 1.5f);
+        }
+        if (progress >= WIND_UP_GROWL_THRESHOLD && tick % WIND_UP_GROWL_PERIOD == 0) {
+            world.playSound(at, Sound.ENTITY_ENDER_DRAGON_GROWL, 0.3f, 0.4f);
+        }
+    }
+
+    private void launchMeteorAttack(Player caster, ItemStack wand, AttackProperties props,
+                                    Location targetLoc, double radius, int[] blocksLeft) {
+        World world = caster.getWorld();
+        final int totalMeteors = 6;
+        final int durationTicks = 80;
+        // The old cadence fired 2 per tick for ticksElapsed < 10, so all six meteors
+        // launched within 3 ticks and the <50 / <70 branches plus durationTicks were
+        // unreachable. One meteor every durationTicks/totalMeteors ticks spreads all
+        // six across the whole 80-tick window, making the window real.
+        final int ticksPerMeteor = Math.max(1, durationTicks / totalMeteors);
 
         world.playSound(targetLoc, Sound.ENTITY_FIREWORK_ROCKET_BLAST, 1.0f, 0.6f);
         world.playSound(targetLoc, Sound.ENTITY_WITHER_SPAWN, 1.0f, 0.3f);
@@ -188,12 +333,17 @@ public class MeteorShower extends AttackSpell implements Listener {
             double a = Math.random() * 2 * Math.PI;
             double r = Math.random() * radius * 1.5;
             Location glowLoc = targetLoc.clone().add(Math.cos(a) * r, Math.random() * 12 + 4, Math.sin(a) * r);
-            ParticleCaster.spawn(caster, glowLoc.getWorld(), Particle.FLAME, glowLoc, 1, 0, 0, 0, 0);
+            ParticleCaster.spawn(caster, glowLoc.getWorld(), Utils.FLAME, glowLoc, 1, 0, 0, 0, 0);
         }
 
-        ParticleCaster.spawn(caster, targetLoc.getWorld(), Utils.DUST, targetLoc, 0, new Particle.DustOptions(Color.fromRGB(255, 100, 0), 2.0F));
+        // The release tell, and the seam between the wind-up and the first impact: the charge
+        // has stopped drawing, so this is the last frame that still says "incoming". A MARKER_DUST
+        // warning ring around a BURST_DUST ignition point - two shades, two jobs. It used to be
+        // one bare BURST_DUST puff, which read as a stray particle rather than as a target.
+        drawLandingRing(caster, targetLoc, radius);
+        ParticleCaster.spawn(caster, targetLoc.getWorld(), Utils.DUST, targetLoc, 0, BURST_DUST);
 
-        MeteorData meteorData = new MeteorData(caster, totalPower, wand);
+        MeteorData meteorData = new MeteorData(caster, props, blocksLeft, wand);
 
         new BukkitRunnable() {
             int ticksElapsed = 0;
@@ -210,14 +360,7 @@ public class MeteorShower extends AttackSpell implements Listener {
                     return;
                 }
 
-                int meteorsThisTick = 0;
-                if (ticksElapsed < 10) {
-                    meteorsThisTick = 2;
-                } else if (ticksElapsed < 50) {
-                    meteorsThisTick = 1;
-                } else if (ticksElapsed < 70) {
-                    meteorsThisTick = 1;
-                }
+                int meteorsThisTick = (ticksElapsed % ticksPerMeteor == 0) ? 1 : 0;
 
                 for (int m = 0; m < meteorsThisTick && meteorsLaunched < totalMeteors; m++) {
                     double angle = Math.random() * 2 * Math.PI;
@@ -256,65 +399,45 @@ public class MeteorShower extends AttackSpell implements Listener {
         }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
     }
 
-    private void triggerMeteorExplosion(Location explodeLoc, Player caster, double totalPower, ItemStack wand) {
+    private void triggerMeteorExplosion(Location explodeLoc, Player caster,
+                                        AttackProperties props, int[] blocksLeft, ItemStack wand) {
         World world = explodeLoc.getWorld();
 
         ParticleCaster.spawn(caster, world, Utils.EXPLOSION_EMITTER, explodeLoc, 0, 0, 0, 0, 0);
-        ParticleCaster.spawn(caster, world, Particle.LAVA, explodeLoc, 30, 2, 1, 2, 0);
-        ParticleCaster.spawn(caster, world, Particle.FLAME, explodeLoc, 60, 3, 1.5, 3, 0.05);
+        ParticleCaster.spawn(caster, world, Utils.LAVA, explodeLoc, 30, 2, 1, 2, 0);
+        ParticleCaster.spawn(caster, world, Utils.FLAME, explodeLoc, 60, 3, 1.5, 3, 0.05);
         ParticleCaster.spawn(caster, world, Utils.LARGE_SMOKE, explodeLoc, 20, 2, 1, 2, 0);
-        ParticleCaster.spawn(caster, world, Utils.DUST, explodeLoc, 0, new Particle.DustOptions(Color.fromRGB(255, 100, 0), 2.0F));
+        ParticleCaster.spawn(caster, world, Utils.DUST, explodeLoc, 0, BURST_DUST);
         world.playSound(explodeLoc, Sound.ENTITY_GENERIC_EXPLODE, 2.0f, 0.6f);
         world.playSound(explodeLoc, Sound.ENTITY_BLAZE_SHOOT, 1.0f, 0.3f);
 
-        for (LivingEntity le : Utils.getNearbyLivingEntities(explodeLoc, 5.0)) {
+        // ONE getPower per impact, deduped per target for the whole cast so a
+        // target standing in the field takes one meteor's worth, not six.
+        for (LivingEntity le : Utils.getNearbyLivingEntities(explodeLoc, damageRadius)) {
             if (le.equals(caster)) continue;
-            SpellDamageUtil.damageWithSpell(
-                    le,
-                    getPower(caster, le, totalPower),
-                    caster,
-                    wand,
-                    this
-            );
+            if (props.hasHit(le)) continue;
+            props.hit(le);
+            SpellDamageUtil.damageWithSpell(le, getPower(caster, le, props.getRemainingPower()),
+                    caster, wand, this);
         }
 
-        if (blockDamage) {
-            int destroyRadius = 5;
-            for (int dx = -destroyRadius; dx <= destroyRadius; dx++) {
-                for (int dy = -destroyRadius; dy <= destroyRadius; dy++) {
-                    for (int dz = -destroyRadius; dz <= destroyRadius; dz++) {
-                        if (dx * dx + dy * dy + dz * dz > destroyRadius * destroyRadius) continue;
-                        Location blockLoc = explodeLoc.clone().add(dx, dy, dz);
-                        Block b = blockLoc.getBlock();
-                        if (b.getType().isSolid() && !b.getType().toString().contains("BEDROCK")) {
-                            ParticleCaster.spawn(caster, b.getWorld(), Utils.BLOCK, blockLoc.clone().add(0.5, 0.5, 0.5),
-                                    8, 0.3, 0.3, 0.3, 0.3, b.getBlockData());
-                            if (Protection.blockEdit(caster, b.getLocation())) {
-                                if (Math.random() < 0.3) {
-                                    b.breakNaturally();
-                                } else {
-                                    b.setType(Material.AIR);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+        if (!blockDamage) return;
 
-            for (int dx = -destroyRadius; dx <= destroyRadius; dx++) {
-                for (int dy = -destroyRadius; dy <= destroyRadius; dy++) {
-                    for (int dz = -destroyRadius; dz <= destroyRadius; dz++) {
-                        if (dx * dx + dy * dy + dz * dz > destroyRadius * destroyRadius) continue;
-                        Location blockLoc = explodeLoc.clone().add(dx, dy, dz);
-                        Block b = blockLoc.getBlock();
-                        if (b.isPassable() && b.getRelative(0, -1, 0).getType().isSolid()) {
-                            if (Protection.ignite(caster, b.getLocation())) {
-                                b.setType(Material.FIRE);
-                            }
-                        }
-                    }
-                }
-            }
+        // Real drops, per-block Protection, and a shared cast budget. The old triple
+        // loop did setType(Material.AIR) 70% of the time, deleting blocks with zero
+        // drops, matched "BEDROCK" by substring, and hardcoded radius 5 regardless of
+        // the radius option.
+        int allowance = Math.max(0, blocksLeft[0]);
+        if (allowance > 0) {
+            int destroyed = TerrainEditor.destroySphere(caster, explodeLoc, craterRadius, true, allowance);
+            blocksLeft[0] = allowance - destroyed;
+        }
+
+        // igniteCandidates already gates through Protection.ignite, so the returned
+        // list is safe to write directly.
+        for (Location igniteLoc : TerrainEditor.igniteCandidates(
+                caster, explodeLoc, fireRadius, fireRadius * fireRadius * 4)) {
+            igniteLoc.getBlock().setType(Material.FIRE, false);
         }
     }
 
@@ -322,102 +445,29 @@ public class MeteorShower extends AttackSpell implements Listener {
     public void mobCastAction(Mob caster, ItemStack wand) {
         if (caster.isDead() || caster.getTarget() == null) return;
 
-        double wandp = getWandPowerOrDefault(wand);
-        double power = getPower(caster, getBasePower()) * wandp;
+        // RAW base power. getPower is applied once per impact, below.
         AttackProperties props = new AttackProperties(
                 caster,
                 Utils.castLocation(caster),
-                power,
+                getBasePower() * getWandPowerOrDefault(wand),
                 AttackType.MAGIC
         );
+        int[] blocksLeft = {terrainBudget};
 
         Location targetLoc = caster.getTarget().getLocation();
-        World world = caster.getWorld();
 
-        new BukkitRunnable() {
-            int ticks = 0;
-
-            @Override
-            public void run() {
-                if (ticks >= windUpDuration) {
-                    cancel();
-                    launchMobMeteorAttack(caster, wand, props, targetLoc);
-                    return;
-                }
-
-                if (caster.isDead()) {
-                    cancel();
-                    return;
-                }
-
-                Location casterLoc = caster.getLocation();
-                double progress = (double) ticks / windUpDuration;
-                boolean phase1 = progress < 0.67;
-
-                if (phase1) {
-                    double phaseProgress = progress / 0.67;
-                    for (int ring = 0; ring < 3; ring++) {
-                        double ringRadius = 1.5 + ring * 1.0 + phaseProgress * 2.0;
-                        double ringHeight = phaseProgress * 3.0 + ring * 0.5;
-                        int points = 12 + ring * 4;
-                        for (int i = 0; i < points; i++) {
-                            double angle = (2 * Math.PI * i / points) + (ticks * 0.05 * (ring + 1));
-                            Location flameLoc = casterLoc.clone().add(
-                                    Math.cos(angle) * ringRadius,
-                                    ringHeight,
-                                    Math.sin(angle) * ringRadius
-                            );
-                            ParticleCaster.spawn(caster, flameLoc.getWorld(), Particle.FLAME, flameLoc, 2, 0.1, 0.1, 0.1, 0.02);
-                        }
-                    }
-
-                    if (ticks % 20 == 0) {
-                        world.playSound(casterLoc, Sound.ENTITY_BLAZE_SHOOT, 0.4f, 0.5f + (float)(progress * 1.5f));
-                    }
-                } else {
-                    double phaseProgress = (progress - 0.67) / 0.33;
-                    double compressRadius = 3.0 * (1.0 - phaseProgress);
-                    double columnHeight = 3.0 + phaseProgress * 8.0;
-
-                    for (int i = 0; i < 20; i++) {
-                        double angle = Math.random() * 2 * Math.PI;
-                        double r = Math.random() * compressRadius;
-                        Location colLoc = casterLoc.clone().add(
-                                Math.cos(angle) * r,
-                                columnHeight + Math.random() * 2,
-                                Math.sin(angle) * r
-                        );
-                        ParticleCaster.spawn(caster, colLoc.getWorld(), Particle.FLAME, colLoc, 2, 0.05, 0.05, 0.05, 0.03);
-                    }
-
-                    if (targetLoc != null) {
-                        double markerRadius = 1.0 + phaseProgress * 3.0;
-                        int markerPoints = 16;
-                        for (int i = 0; i < markerPoints; i++) {
-                            double angle = (2 * Math.PI * i / markerPoints) + (ticks * 0.1);
-                            Location markerLoc = targetLoc.clone().add(
-                                    Math.cos(angle) * markerRadius,
-                                    0.1,
-                                    Math.sin(angle) * markerRadius
-                            );
-                            ParticleCaster.spawn(caster, markerLoc.getWorld(), Utils.DUST, markerLoc, 0,
-                                    new Particle.DustOptions(Color.fromRGB(255, 100, 0), 1.0F));
-                        }
-                    }
-
-                    if (ticks % 15 == 0) {
-                        world.playSound(casterLoc, Sound.ENTITY_ENDER_DRAGON_GROWL, 0.3f, 0.4f);
-                    }
-                }
-
-                ticks++;
-            }
-        }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
+        // Same shared wind-up as the player path, so a mob's Meteor Shower is telegraphed
+        // exactly as a player's is. standardTicks grants no mastery discount to a non-player,
+        // so a mob always pays the full circle-6 wind-up.
+        runWindUp(caster, targetLoc, craterRadius,
+                () -> launchMobMeteorAttack(caster, wand, props, targetLoc, blocksLeft));
     }
 
-    private void launchMobMeteorAttack(Mob caster, ItemStack wand, AttackProperties props, Location targetLoc) {
-        double power = getPower(caster, getBasePower()) * getWandPowerOrDefault(wand);
-        int totalMeteors = 6;
+    private void launchMobMeteorAttack(Mob caster, ItemStack wand, AttackProperties props,
+                                       Location targetLoc, int[] blocksLeft) {
+        final int totalMeteors = 6;
+        final int durationTicks = 80;
+        final int ticksPerMeteor = Math.max(1, durationTicks / totalMeteors);
 
         new BukkitRunnable() {
             int meteorsLaunched = 0;
@@ -425,32 +475,47 @@ public class MeteorShower extends AttackSpell implements Listener {
 
             @Override
             public void run() {
-                if (props.isCancelled() || props.isCountered() || meteorsLaunched >= totalMeteors || ticksElapsed >= 60) {
+                if (props.isCancelled() || props.isCountered()
+                        || meteorsLaunched >= totalMeteors || ticksElapsed >= durationTicks) {
                     cancel();
                     return;
                 }
-
-                if (ticksElapsed % 10 == 0) {
-                    double angle = Math.random() * 2 * Math.PI;
-                    double r = Math.random() * 5;
-                    double x = Math.cos(angle) * r;
-                    double z = Math.sin(angle) * r;
-                    Location impactLoc = targetLoc.clone().add(x, 0, z);
-                    ParticleCaster.spawn(caster, impactLoc.getWorld(), Particle.FLAME, impactLoc, 10, 0.5, 0.5, 0.5, 0.05);
-                    ParticleCaster.spawn(caster, impactLoc.getWorld(), Particle.LAVA, impactLoc, 5, 0.5, 0.5, 0.5, 0);
-
-                    for (LivingEntity le : Utils.getNearbyLivingEntities(impactLoc, 2.5)) {
-                        if (le.equals(caster)) continue;
-                        SpellDamageUtil.damageWithSpell(
-                                le,
-                                getPower(caster, le, power),
-                                caster,
-                                wand,
-                                MeteorShower.this
-                        );
-                    }
-                    meteorsLaunched++;
+                if (ticksElapsed % ticksPerMeteor != 0) {
+                    ticksElapsed++;
+                    return;
                 }
+
+                double angle = Math.random() * 2 * Math.PI;
+                double r = Math.random() * craterRadius;
+                Location impactLoc = targetLoc.clone().add(Math.cos(angle) * r, 0, Math.sin(angle) * r);
+                ParticleCaster.spawn(caster, impactLoc.getWorld(), Utils.FLAME, impactLoc, 10, 0.5, 0.5, 0.5, 0.05);
+                ParticleCaster.spawn(caster, impactLoc.getWorld(), Utils.LAVA, impactLoc, 5, 0.5, 0.5, 0.5, 0);
+                ParticleCaster.spawn(caster, impactLoc.getWorld(), Utils.DUST, impactLoc, 0, BURST_DUST);
+
+                // One getPower per impact, deduped for the whole cast.
+                for (LivingEntity le : Utils.getNearbyLivingEntities(impactLoc, damageRadius)) {
+                    if (le.equals(caster)) continue;
+                    if (props.hasHit(le)) continue;
+                    props.hit(le);
+                    SpellDamageUtil.damageWithSpell(le, getPower(caster, le, props.getRemainingPower()),
+                            caster, wand, MeteorShower.this);
+                }
+
+                // The mob path broke no terrain at all, so a mob's Meteor Shower was
+                // strictly weaker than a player's. It now carves craters and lights
+                // fires, from the same shared block budget.
+                if (blockDamage) {
+                    int allowance = Math.max(0, blocksLeft[0]);
+                    if (allowance > 0) {
+                        blocksLeft[0] = allowance
+                                - TerrainEditor.destroySphere(caster, impactLoc, craterRadius, true, allowance);
+                    }
+                    for (Location igniteLoc : TerrainEditor.igniteCandidates(
+                            caster, impactLoc, fireRadius, fireRadius * fireRadius * 4)) {
+                        igniteLoc.getBlock().setType(Material.FIRE, false);
+                    }
+                }
+                meteorsLaunched++;
                 ticksElapsed++;
             }
         }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
@@ -458,7 +523,7 @@ public class MeteorShower extends AttackSpell implements Listener {
 
     @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
-        ParticleCaster.spawn(caster, location.getWorld(), Particle.LAVA, location, 20, 0.5, 0.5, 0.5, 0);
+        ParticleCaster.spawn(caster, location.getWorld(), Utils.LAVA, location, 20, 0.5, 0.5, 0.5, 0);
     }
 
     @Override
@@ -466,20 +531,36 @@ public class MeteorShower extends AttackSpell implements Listener {
         ParticleCaster.spawn(null, location.getWorld(), Utils.LARGE_SMOKE, location, 30, 1, 1, 1, 0);
     }
 
+    /**
+     * The release frame's warning ring at the resolved target, in {@link #MARKER_DUST}.
+     *
+     * <p>Deliberately hand-placed rather than delegated to {@link SpellVfx#ring}: that builder
+     * owns its own shade split, and this one specifically has to sit a shade <i>below</i> the
+     * {@link #BURST_DUST} ignition point it surrounds.
+     *
+     * @param caster the charging entity, for per-player density falloff
+     * @param target where the meteors will land
+     * @param radius the meteor scatter radius the ring is sized from
+     */
+    private void drawLandingRing(LivingEntity caster, Location target, double radius) {
+        World world = target.getWorld();
+        if (world == null) return;
+
+        double ringRadius = Math.max(1.0, radius);
+        int points = LANDING_RING_POINTS;
+        Location ringPoint = target.clone();
+        for (int i = 0; i < points; i++) {
+            double angle = 2 * Math.PI * i / points;
+            ringPoint.setX(target.getX() + Math.cos(angle) * ringRadius);
+            ringPoint.setY(target.getY() + 0.1);
+            ringPoint.setZ(target.getZ() + Math.sin(angle) * ringRadius);
+            ParticleCaster.spawn(caster, world, Utils.DUST, ringPoint, 0, MARKER_DUST);
+        }
+    }
+
     @Override
     public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
-        return Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
-            if (e.isCancelled()) return;
-            Location playerLoc = caster.getEyeLocation();
-            float yaw = playerLoc.getYaw();
-            float pitch = playerLoc.getPitch();
-            Vector forward = playerLoc.getDirection().normalize().multiply(1.5);
-            List<Location> points = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 3, 0);
-            Particle.DustOptions options = new Particle.DustOptions(Color.fromRGB(255, 69, 0), 0.4F);
-            for (Location loc : points) {
-                ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, options);
-            }
-        }, 0L, (Long) Configs.CIRCLE_TICKS.get());
+        return CastCircle.start(this, caster, e, 3.0, 0);
     }
 
     @Override
@@ -488,7 +569,8 @@ public class MeteorShower extends AttackSpell implements Listener {
                 .setDisplayName(lang().get("spells.meteorshower.book_name"))
                 .addCustomLoreLine(lang().get("spells.meteorshower.lore1"))
                 .addCustomLoreLine("")
-                .addRequirement(new NumberStatRequirement<>("circleLevel", 5))
+                // Follows the yml's promoted level: 6, matching Warp and Skeletal Knights.
+                .addRequirement(new NumberStatRequirement<>("circleLevel", 6))
                 .build();
     }
 }

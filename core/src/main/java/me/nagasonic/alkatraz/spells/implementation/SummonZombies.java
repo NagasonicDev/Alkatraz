@@ -3,16 +3,18 @@ package me.nagasonic.alkatraz.spells.implementation;
 import de.tr7zw.changeme.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
-import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
+import me.nagasonic.alkatraz.spells.vfx.CastCircle;
+import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
+import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
+import me.nagasonic.alkatraz.api.Element;
 import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.util.ParticleCaster;
-import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import me.nagasonic.alkatraz.api.mobs.MagicAiService;
 import org.bukkit.*;
@@ -24,11 +26,25 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.Vector;
 
 import java.util.*;
 
 public class SummonZombies extends AttackSpell implements Listener {
+
+    /**
+     * The DARK palette. This spell's cast circle used to be a hand-built
+     * {@code magicCircle} tinted {@code Color.fromRGB(50, 100, 50)} - green on a DARK spell,
+     * the second-worst colour contradiction in the roster. It is now driven entirely by the
+     * element palette, so nothing here names a colour at all.
+     */
+    private static final ElementPalette.Palette PALETTE = ElementPalette.of(Element.DARK);
+
+    /** Radius of the ground ring drawn where each zombie breaks the surface, in blocks. */
+    private static final double SUMMON_RING_RADIUS = 0.7;
+    /** Points on that ground ring. */
+    private static final int SUMMON_RING_POINTS = 16;
+    /** Downward offset of the shadow ring under it, in blocks; zero would skip the shadow. */
+    private static final double SUMMON_RING_SHADOW = 0.15;
 
     private static LangManager lang() {
         return Alkatraz.getLangManager();
@@ -160,13 +176,15 @@ public class SummonZombies extends AttackSpell implements Listener {
     }
 
     private Location findSpawnLocation(Location center) {
+        World world = center.getWorld();
         for (int i = 0; i < 10; i++) {
             double x = center.getX() + (Math.random() - 0.5) * summonRange * 2;
             double z = center.getZ() + (Math.random() - 0.5) * summonRange * 2;
-            Location loc = new Location(center.getWorld(), x, center.getY(), z);
-            loc.setY(loc.getWorld().getHighestBlockYAt(loc) + 1);
-            if (loc.getBlock().getType() == Material.AIR && loc.clone().add(0, -1, 0).getBlock().getType().isSolid()) {
-                return loc;
+            int bx = (int) Math.floor(x);
+            int bz = (int) Math.floor(z);
+            int y = world.getHighestBlockYAt(bx, bz) + 1;
+            if (world.getBlockAt(bx, y, bz).getType() == Material.AIR && world.getBlockAt(bx, y - 1, bz).getType().isSolid()) {
+                return new Location(world, x, y, z);
             }
         }
         return null;
@@ -174,6 +192,14 @@ public class SummonZombies extends AttackSpell implements Listener {
 
     private void spawnSummonParticles(LivingEntity caster, Location loc) {
         ParticleCaster.spawn(caster, loc.getWorld(), Utils.WITCH, loc, 20, 0.5, 0.5, 0.5, 0);
+        // The ground ring is what makes a summoned zombie read as rising out of the earth rather
+        // than simply appearing. Its colours come from the element palette via SpellVfx.ring, and
+        // the cluster inside it is the palette's own core shade - the same two-part burst
+        // SkeletalKnights draws, so the two summon spells read as one family.
+        ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 20, 0.3, 0.3, 0.3, 0,
+                PALETTE.coreDust());
+        SpellVfx.ring(this, caster, loc, SUMMON_RING_RADIUS, SUMMON_RING_POINTS, 0.0,
+                SUMMON_RING_SHADOW);
         ParticleCaster.spawn(caster, loc.getWorld(), Utils.LARGE_SMOKE, loc, 10, 0.3, 0.3, 0.3, 0.05);
     }
 
@@ -189,12 +215,11 @@ public class SummonZombies extends AttackSpell implements Listener {
     @EventHandler
     private void onZombieDamage(EntityDamageByEntityEvent e) {
         if (!(e.getDamager() instanceof Zombie zombie)) return;
-        String summonerId = NBT.getPersistentData(zombie, nbt -> nbt.getString("summoner_uuid"));
-        if (summonerId == null) return;
-        if (!NBT.getPersistentData(zombie, nbt -> nbt.getBoolean("summoned_zombie"))) return;
+        SummonCombatGuard.SummonTag tag = SummonCombatGuard.readSummonTag(zombie, "summoned_zombie");
+        if (tag == null || !tag.flagged() || tag.summonerUuid() == null) return;
 
         if (e.getEntity() instanceof Player p) {
-            UUID summonerUUID = UUID.fromString(summonerId);
+            UUID summonerUUID = UUID.fromString(tag.summonerUuid());
             if (p.getUniqueId().equals(summonerUUID)) {
                 e.setCancelled(true);
             }
@@ -211,8 +236,8 @@ public class SummonZombies extends AttackSpell implements Listener {
             target = lt;
         } else if (e.getEntity() instanceof Player p && e.getDamager() instanceof LivingEntity lt) {
             if (lt instanceof Zombie zombie) {
-                String summonerId = NBT.getPersistentData(zombie, nbt -> nbt.getString("summoner_uuid"));
-                if (summonerId != null && summonerId.equals(p.getUniqueId().toString())) return;
+                SummonCombatGuard.SummonTag tag = SummonCombatGuard.readSummonTag(zombie, "summoned_zombie");
+                if (tag != null && tag.summonerUuid() != null && tag.summonerUuid().equals(p.getUniqueId().toString())) return;
             }
             player = p;
             target = lt;
@@ -234,18 +259,7 @@ public class SummonZombies extends AttackSpell implements Listener {
 
     @Override
     public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
-        return Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
-            if (e.isCancelled()) return;
-            Location playerLoc = caster.getEyeLocation();
-            float yaw = playerLoc.getYaw();
-            float pitch = playerLoc.getPitch();
-            Vector forward = playerLoc.getDirection().normalize().multiply(1.5);
-            List<Location> points = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 3, 0);
-            Particle.DustOptions options = new Particle.DustOptions(Color.fromRGB(50, 100, 50), 0.4F);
-            for (Location loc : points) {
-                ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, options);
-            }
-        }, 0L, (Long) Configs.CIRCLE_TICKS.get());
+        return CastCircle.start(this, caster, e, 3.0, 0);
     }
 
     @Override

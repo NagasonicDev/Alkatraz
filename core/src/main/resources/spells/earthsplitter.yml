@@ -7,11 +7,21 @@ enabled: true
 element: 'EARTH'
 code: 'SRRLL'
 level: 5
-required_focus: 145
-cooldown: 28
+required_focus: 115
+cooldown: 9
 cast_time: 1.5
-mana_cost: 105
-power: 9
+mana_cost: 120
+
+# NO `power` KEY. It is retired per spec section 7: this is a TERRAIN spell
+# judged on blocks destroyed, and a `power` key that never reaches damage is dead
+# config. The spell's incidental damage is seeded from the circle-5 BURST budget
+# instead (SpellBudgets.burstBudget(5)).
+
+# BLOCKS A SINGLE CAST MAY DESTROY. The circle-5 TERRAIN budget is 380; the
+# spell destroyed 346 with no cap at all. The crack loop stops at this number.
+terrain_budget: 380
+
+role: 'TERRAIN'
 maximum_mastery: 100
 mastery_bar_color: 'GREEN'
 gui_item: 'DIAMOND_PICKAXE'

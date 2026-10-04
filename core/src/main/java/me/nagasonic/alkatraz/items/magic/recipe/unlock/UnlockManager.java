@@ -9,8 +9,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 
-import java.util.HashSet;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -80,23 +80,61 @@ public final class UnlockManager {
         if (cached != null) cached.remove(key);
     }
 
+    /**
+     * Keys of every recipe that can actually be locked, i.e. those with a non-empty
+     * requirement list. Recomputing this per evaluation meant calling
+     * {@code MagicItemRecipeManager.getRequirements} for every registered recipe on every
+     * crafting-matrix change and on every {@code UnlockSweep} player.
+     *
+     * <p>There is no recipe-reload hook reachable from here, so the set is rebuilt lazily
+     * whenever {@link RecipeRegistry#getAllKeys()} reports a different size than the one the
+     * cache was built from. That covers add/remove-on-reload, which is the only way the
+     * registry changes; a reload that swaps one recipe for another without changing the
+     * count would leave a stale set until the next count change or restart.
+     * {@link RecipeRegistry#unregisterAll()} calls {@link #invalidateLockableKeys()}, so
+     * every reachable reload path drops the set regardless of the count.
+     */
+    private static volatile Map<String, NamespacedKey> LOCKABLE = Map.of();
+    private static volatile int lockableKeySourceSize = -1;
+
+    private static Map<String, NamespacedKey> lockableKeys() {
+        Collection<NamespacedKey> all = RecipeRegistry.getAllKeys();
+        if (all.size() == lockableKeySourceSize) {
+            return LOCKABLE;
+        }
+        Map<String, NamespacedKey> lockable = new HashMap<>(Math.max(4, all.size()));
+        for (NamespacedKey key : all) {
+            if (!MagicItemRecipeManager.getRequirements(key).isEmpty()) {
+                lockable.put(key.toString(), key);
+            }
+        }
+        LOCKABLE = Map.copyOf(lockable);
+        lockableKeySourceSize = all.size();
+        return LOCKABLE;
+    }
+
+    /** Discards the cached lockable-key map so the next evaluation rebuilds it. */
+    public static void invalidateLockableKeys() {
+        lockableKeySourceSize = -1;
+        LOCKABLE = Map.of();
+    }
+
     /** Unlocks every recipe whose requirements are all met and that is not yet unlocked. Returns newly-unlocked count. */
     public static int evaluate(Player player) {
         if (player == null) return 0;
-        Set<String> alreadyUnlocked = new HashSet<>(CACHE.computeIfAbsent(player.getUniqueId(), id -> store.loadUnlocked(id)));
+        Map<String, NamespacedKey> lockable = lockableKeys();
+        if (lockable.isEmpty()) return 0;
+        Set<String> alreadyUnlocked = CACHE.computeIfAbsent(player.getUniqueId(), id -> store.loadUnlocked(id));
         int count = 0;
-        for (NamespacedKey key : RecipeRegistry.getAllKeys()) {
-            List<Requirement> requirements = MagicItemRecipeManager.getRequirements(key);
-            if (requirements.isEmpty()) continue; // no requirements = not a lockable recipe
-            String recipeKey = key.toString();
+        for (Map.Entry<String, NamespacedKey> entry : lockable.entrySet()) {
+            String recipeKey = entry.getKey();
             if (alreadyUnlocked.contains(recipeKey)) continue;
             boolean met = true;
-            for (Requirement req : requirements) {
+            for (Requirement req : MagicItemRecipeManager.getRequirements(entry.getValue())) {
                 if (!req.isMet(player)) { met = false; break; }
             }
             if (met) {
                 unlock(player, recipeKey);
-                alreadyUnlocked.add(recipeKey);
                 count++;
             }
         }

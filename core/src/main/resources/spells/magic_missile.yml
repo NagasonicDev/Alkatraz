@@ -17,7 +17,7 @@ level: 0
 required_focus: 0
 
 # COOLDOWN BEFORE CASTING AGAIN
-cooldown: 0.5
+cooldown: 2
 
 # BASE CAST TIME (SECONDS)
 cast_time: 0.25
@@ -28,7 +28,11 @@ mana_cost: 5
 # MAXIMUM MASTERY ACHIEVABLE. NOT RECOMMENDED TO CHANGE
 maximum_mastery: 250
 
-power: 1
+# THE ONE BURST ON ELEMENT NONE. SpellBudgets.isGrandfatheredBurst allowlists
+# exactly magic_missile at circle 0; every other NONE spell is UTILITY or DENIAL.
+role: 'BURST'
+
+power: 1.5
 
 #THE COLOR OF THE SPELL MASTERY BOSSBAR. OPTIONS ARE: RED, BLUE, YELLOW, PINK, PURPLE, WHITE AND GREEN
 mastery_bar_color: 'BLUE'

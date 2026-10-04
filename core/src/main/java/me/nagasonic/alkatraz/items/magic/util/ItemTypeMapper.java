@@ -16,12 +16,14 @@ import java.util.Set;
 public final class ItemTypeMapper {
 
     private static Map<Material, Set<String>> materialToTypes = Map.of();
+    private static Map<String, Set<Material>> typeToMaterials = Map.of();
 
     private ItemTypeMapper() {}
 
     public static void load() {
         YamlConfiguration config = ConfigManager.getConfig("magic/item_types.yml").get();
         Map<Material, Set<String>> map = new HashMap<>();
+        Map<String, Set<Material>> reverse = new HashMap<>();
 
         for (String type : config.getConfigurationSection("types").getKeys(false)) {
             List<String> materials = config.getStringList("types." + type);
@@ -29,18 +31,24 @@ public final class ItemTypeMapper {
                 Material mat = MaterialCompat.resolve(matStr);
                 if (mat != null) {
                     map.computeIfAbsent(mat, k -> new HashSet<>()).add(type);
+                    reverse.computeIfAbsent(type, k -> new HashSet<>()).add(mat);
                 } else {
                     Alkatraz.logWarning("Unknown material in item_types.yml: " + matStr);
                 }
             }
         }
 
-        // Freeze the map
+        // Freeze the maps
         Map<Material, Set<String>> frozen = new HashMap<>();
         for (var entry : map.entrySet()) {
             frozen.put(entry.getKey(), Collections.unmodifiableSet(entry.getValue()));
         }
+        Map<String, Set<Material>> frozenReverse = new HashMap<>();
+        for (var entry : reverse.entrySet()) {
+            frozenReverse.put(entry.getKey(), Collections.unmodifiableSet(entry.getValue()));
+        }
         materialToTypes = Collections.unmodifiableMap(frozen);
+        typeToMaterials = Collections.unmodifiableMap(frozenReverse);
         Alkatraz.logInfo("Loaded " + materialToTypes.size() + " material type mappings.");
     }
 
@@ -54,12 +62,6 @@ public final class ItemTypeMapper {
     }
 
     public static Set<Material> getMaterials(String type) {
-        Set<Material> result = new HashSet<>();
-        for (Map.Entry<Material, Set<String>> entry : materialToTypes.entrySet()) {
-            if (entry.getValue().contains(type)) {
-                result.add(entry.getKey());
-            }
-        }
-        return Collections.unmodifiableSet(result);
+        return typeToMaterials.getOrDefault(type, Set.of());
     }
 }

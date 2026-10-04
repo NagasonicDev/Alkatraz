@@ -41,6 +41,15 @@ public class ProfilePersistence {
     }
 
     /**
+     * Drops the memoised folder entry for a player. Called on quit so the map
+     * does not grow by one entry for every player who has ever joined.
+     * @param uuid Player UUID
+     */
+    public static void forgetPlayer(UUID uuid) {
+        playerFolders.remove(uuid);
+    }
+
+    /**
      * Gets the file for a specific profile type
      * @param uuid Player UUID
      * @param profileClass Profile class

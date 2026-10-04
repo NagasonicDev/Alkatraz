@@ -7,14 +7,18 @@ enabled: true
 element: 'AIR'
 code: 'RRSSR'
 level: 4
-required_focus: 120
-cooldown: 25
+required_focus: 90
+cooldown: 7
 cast_time: 2.0
-mana_cost: 80
+mana_cost: 75
 maximum_mastery: 150
 radius: 3.0
 duration: 30
 max_hitpoints: 30
+
+# WHAT THE SPELL IS JUDGED ON. It deflects projectiles rather than dealing
+# damage, so it is DENIAL and carries no power key - see spec section 5.2.
+role: 'DENIAL'
 mastery_bar_color: 'WHITE'
 gui_item: 'SHIELD'
 gui_custom_model_data: 4132

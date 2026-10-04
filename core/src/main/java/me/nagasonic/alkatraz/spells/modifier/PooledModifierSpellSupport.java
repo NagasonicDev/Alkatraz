@@ -7,8 +7,10 @@ import me.nagasonic.alkatraz.util.ColorFormat;
 import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.Color;
+import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
@@ -127,7 +129,9 @@ public final class PooledModifierSpellSupport {
     }
 
     public static void spawnCastParticles(LivingEntity entity, Color color) {
-        var loc = entity.getLocation().add(0, 1, 0);
+        final Location loc = entity.getLocation().add(0, 1, 0);
+        final World world = loc.getWorld();
+        final Particle.DustOptions dust = new Particle.DustOptions(color, 0.6F);
 
         new BukkitRunnable() {
             double angle = 0;
@@ -135,7 +139,7 @@ public final class PooledModifierSpellSupport {
 
             @Override
             public void run() {
-                if (ticks++ >= 20 || !entity.isValid()) {
+                if (ticks++ >= 10 || !entity.isValid()) {
                     cancel();
                     return;
                 }
@@ -143,15 +147,14 @@ public final class PooledModifierSpellSupport {
                     double a = angle + (Math.PI * 2 / 3) * i;
                     double x = Math.cos(a) * 0.8;
                     double z = Math.sin(a) * 0.8;
-                    double y = ticks * 0.1;
+                    double y = ticks * 0.2;
                     var pLoc = loc.clone().add(x, y, z);
-                    ParticleCaster.spawn(entity, pLoc.getWorld(), Utils.DUST, pLoc, 0,
-                            new Particle.DustOptions(color, 0.6F));
-                    ParticleCaster.spawn(entity, pLoc.getWorld(), Particle.END_ROD, pLoc, 1, 0, 0, 0, 0.02);
+                    ParticleCaster.spawn(entity, world, Utils.DUST, pLoc, 0, dust);
+                    ParticleCaster.spawn(entity, world, Particle.END_ROD, pLoc, 1, 0, 0, 0, 0.02);
                 }
-                angle += 0.4;
+                angle += 0.8;
             }
-        }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
+        }.runTaskTimer(Alkatraz.getInstance(), 0L, 2L);
     }
 
     private static class ModifierExpiry extends BukkitRunnable {

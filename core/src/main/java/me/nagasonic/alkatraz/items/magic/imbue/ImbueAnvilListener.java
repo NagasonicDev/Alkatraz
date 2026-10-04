@@ -54,10 +54,12 @@ public final class ImbueAnvilListener implements Listener {
         switch (event.getClick()) {
             case LEFT, RIGHT -> {
                 ItemStack cursor = event.getCursor();
-                if (!ImbueManager.isImbued(base) && !ImbueManager.isImbued(cursor)) return;
+                boolean baseImbued = ImbueManager.isImbued(base);
+                boolean cursorImbued = ImbueManager.isImbued(cursor);
+                if (!baseImbued && !cursorImbued) return;
                 if (event.getClick() == ClickType.RIGHT) {
-                    if (ImbueManager.isImbued(base) && cursor != null && !cursor.getType().isAir()
-                            && !ImbueManager.isImbued(cursor)) return;
+                    if (baseImbued && cursor != null && !cursor.getType().isAir()
+                            && !cursorImbued) return;
                     if ((base == null || base.getType().isAir()) && cursor != null && cursor.getAmount() > 1) {
                         event.setCancelled(true);
                         ItemStack single = ImbueManager.toClean(cursor);
@@ -69,8 +71,8 @@ public final class ImbueAnvilListener implements Listener {
                     }
                 }
                 event.setCancelled(true);
-                inventory.setItem(0, ImbueManager.isImbued(cursor) ? ImbueManager.toClean(cursor) : cursor);
-                event.getView().setCursor(ImbueManager.isImbued(base) ? ImbueManager.toWrapped(base) : base);
+                inventory.setItem(0, cursorImbued ? ImbueManager.toClean(cursor) : cursor);
+                event.getView().setCursor(baseImbued ? ImbueManager.toWrapped(base) : base);
             }
             case SHIFT_LEFT, SHIFT_RIGHT -> {
                 if (!ImbueManager.isImbued(base)) return;
@@ -83,10 +85,12 @@ public final class ImbueAnvilListener implements Listener {
                 int hotbarSlot = event.getHotbarButton();
                 Inventory bottom = event.getView().getBottomInventory();
                 ItemStack hotbarItem = bottom.getItem(hotbarSlot);
-                if (!ImbueManager.isImbued(base) && !ImbueManager.isImbued(hotbarItem)) return;
+                boolean baseImbued = ImbueManager.isImbued(base);
+                boolean hotbarImbued = ImbueManager.isImbued(hotbarItem);
+                if (!baseImbued && !hotbarImbued) return;
                 event.setCancelled(true);
-                inventory.setItem(0, ImbueManager.isImbued(hotbarItem) ? ImbueManager.toClean(hotbarItem) : hotbarItem);
-                bottom.setItem(hotbarSlot, ImbueManager.isImbued(base) ? ImbueManager.toWrapped(base) : base);
+                inventory.setItem(0, hotbarImbued ? ImbueManager.toClean(hotbarItem) : hotbarItem);
+                bottom.setItem(hotbarSlot, baseImbued ? ImbueManager.toWrapped(base) : base);
             }
             default -> { }
         }

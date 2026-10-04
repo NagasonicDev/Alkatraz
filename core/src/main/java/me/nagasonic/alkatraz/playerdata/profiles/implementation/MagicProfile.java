@@ -1,6 +1,5 @@
 package me.nagasonic.alkatraz.playerdata.profiles.implementation;
 
-import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.playerdata.SpellHotbarManager;
 import me.nagasonic.alkatraz.api.Element;
 import me.nagasonic.alkatraz.api.playerdata.Profile;
@@ -20,7 +19,6 @@ public class MagicProfile extends Profile {
 
     private transient List<SpellModifier> spellModifiers;
     private transient Map<SpellModifier, String> spellModifierTypes;
-    private transient int manaRegenTaskId = -1;
     private transient Spell castingSpell;
     private transient ItemStack castingWand;
     private transient int currentCircleTaskId = -1;
@@ -73,6 +71,25 @@ public class MagicProfile extends Profile {
         doubleStat("earthResistance", 0);
         doubleStat("lightResistance", 0);
         doubleStat("darkResistance", 0);
+
+        // Last-applied equipment contribution per affinity/resistance stat.
+        // EquipmentStatService subtracts these before re-applying, so research
+        // rewards written straight onto the stat are preserved instead of being
+        // overwritten on every 20-tick reconcile.
+        doubleStat("equipSyncMagicAffinity", 0);
+        doubleStat("equipSyncMagicResistance", 0);
+        doubleStat("equipSyncFireAffinity", 0);
+        doubleStat("equipSyncWaterAffinity", 0);
+        doubleStat("equipSyncEarthAffinity", 0);
+        doubleStat("equipSyncAirAffinity", 0);
+        doubleStat("equipSyncLightAffinity", 0);
+        doubleStat("equipSyncDarkAffinity", 0);
+        doubleStat("equipSyncFireResistance", 0);
+        doubleStat("equipSyncWaterResistance", 0);
+        doubleStat("equipSyncEarthResistance", 0);
+        doubleStat("equipSyncAirResistance", 0);
+        doubleStat("equipSyncLightResistance", 0);
+        doubleStat("equipSyncDarkResistance", 0);
 
         // Cast time multiplier (default 1.0 = no change)
         doubleStat("castTimeMultiplier", 1.0);
@@ -384,6 +401,39 @@ public class MagicProfile extends Profile {
 
     public double getDarkResistance() { return getDouble("darkResistance"); }
     public void setDarkResistance(double value) { setDouble("darkResistance", value); }
+
+    // ============================================
+    // Equipment Sync Affinity/Resistance Getters/Setters
+    // ============================================
+
+    public double getEquipSyncMagicAffinity() { return getDouble("equipSyncMagicAffinity"); }
+    public void setEquipSyncMagicAffinity(double v) { setDouble("equipSyncMagicAffinity", v); }
+    public double getEquipSyncMagicResistance() { return getDouble("equipSyncMagicResistance"); }
+    public void setEquipSyncMagicResistance(double v) { setDouble("equipSyncMagicResistance", v); }
+    public double getEquipSyncFireAffinity() { return getDouble("equipSyncFireAffinity"); }
+    public void setEquipSyncFireAffinity(double v) { setDouble("equipSyncFireAffinity", v); }
+    public double getEquipSyncWaterAffinity() { return getDouble("equipSyncWaterAffinity"); }
+    public void setEquipSyncWaterAffinity(double v) { setDouble("equipSyncWaterAffinity", v); }
+    public double getEquipSyncEarthAffinity() { return getDouble("equipSyncEarthAffinity"); }
+    public void setEquipSyncEarthAffinity(double v) { setDouble("equipSyncEarthAffinity", v); }
+    public double getEquipSyncAirAffinity() { return getDouble("equipSyncAirAffinity"); }
+    public void setEquipSyncAirAffinity(double v) { setDouble("equipSyncAirAffinity", v); }
+    public double getEquipSyncLightAffinity() { return getDouble("equipSyncLightAffinity"); }
+    public void setEquipSyncLightAffinity(double v) { setDouble("equipSyncLightAffinity", v); }
+    public double getEquipSyncDarkAffinity() { return getDouble("equipSyncDarkAffinity"); }
+    public void setEquipSyncDarkAffinity(double v) { setDouble("equipSyncDarkAffinity", v); }
+    public double getEquipSyncFireResistance() { return getDouble("equipSyncFireResistance"); }
+    public void setEquipSyncFireResistance(double v) { setDouble("equipSyncFireResistance", v); }
+    public double getEquipSyncWaterResistance() { return getDouble("equipSyncWaterResistance"); }
+    public void setEquipSyncWaterResistance(double v) { setDouble("equipSyncWaterResistance", v); }
+    public double getEquipSyncEarthResistance() { return getDouble("equipSyncEarthResistance"); }
+    public void setEquipSyncEarthResistance(double v) { setDouble("equipSyncEarthResistance", v); }
+    public double getEquipSyncAirResistance() { return getDouble("equipSyncAirResistance"); }
+    public void setEquipSyncAirResistance(double v) { setDouble("equipSyncAirResistance", v); }
+    public double getEquipSyncLightResistance() { return getDouble("equipSyncLightResistance"); }
+    public void setEquipSyncLightResistance(double v) { setDouble("equipSyncLightResistance", v); }
+    public double getEquipSyncDarkResistance() { return getDouble("equipSyncDarkResistance"); }
+    public void setEquipSyncDarkResistance(double v) { setDouble("equipSyncDarkResistance", v); }
 
     public double getCastTimeMultiplier() { return getDouble("castTimeMultiplier"); }
     public void setCastTimeMultiplier(double value) { setDouble("castTimeMultiplier", value); }
@@ -704,11 +754,13 @@ public class MagicProfile extends Profile {
      * Gets the selected value ID for a spell option
      */
     public String getSpellOption(String optionId) {
-        return getStringSet("spellOptions").stream()
-                .filter(s -> s.startsWith(optionId + ":"))
-                .map(s -> s.substring(optionId.length() + 1))
-                .findFirst()
-                .orElse(null);
+        String prefix = optionId + ":";
+        for (String entry : getStringSet("spellOptions")) {
+            if (entry.startsWith(prefix)) {
+                return entry.substring(prefix.length());
+            }
+        }
+        return null;
     }
 
     /**
@@ -737,9 +789,10 @@ public class MagicProfile extends Profile {
      * Gets a spell modifier by spell and id
      */
     public List<SpellModifier> getSpellModifiers(Spell spell, String id) {
+        String combinedId = spell.getId() + "_" + id;
         List<SpellModifier> mods = new ArrayList<>();
         for (SpellModifier mod : spellModifiers) {
-            if (Objects.equals(mod.getCombinedId(), spell.getId() + "_" + id)) {
+            if (Objects.equals(mod.getCombinedId(), combinedId)) {
                 mods.add(mod);
             }
         }
@@ -765,7 +818,13 @@ public class MagicProfile extends Profile {
      * Checks if a spell modifier exists
      */
     public boolean hasSpellModifier(Spell spell, String id) {
-        return !getSpellModifiers(spell, id).isEmpty();
+        String combinedId = spell.getId() + "_" + id;
+        for (SpellModifier mod : spellModifiers) {
+            if (Objects.equals(mod.getCombinedId(), combinedId)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -864,24 +923,35 @@ public class MagicProfile extends Profile {
         }
     }
 
+    /**
+     * Retained for callers that re-apply mana stats. Regeneration is driven by a
+     * single shared task in
+     * {@link me.nagasonic.alkatraz.playerdata.profiles.ProfileManager}, so there
+     * is no per-profile task left to start.
+     */
     public void addManaPerSecond(){
-        if (manaRegenTaskId != -1) return;
-        manaRegenTaskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
-            Player player = Bukkit.getPlayer(getOwner());
-            if (player == null || !player.isOnline()) {
-                cancelManaRegenTask();
-                return;
-            }
-            if (getMana() >= getMaxMana()) return;
-            StatUtils.addMana(player, getManaRegeneration());
-        }, 20L, 20L);
     }
 
-    public void cancelManaRegenTask(){
-        if (manaRegenTaskId != -1) {
-            Bukkit.getScheduler().cancelTask(manaRegenTaskId);
-            manaRegenTaskId = -1;
+    /**
+     * Applies one second of mana regeneration for this profile. Invoked once per
+     * second by the shared regeneration task in
+     * {@link me.nagasonic.alkatraz.playerdata.profiles.ProfileManager} for every
+     * online player.
+     */
+    public void regenMana(){
+        Player player = Bukkit.getPlayer(getOwner());
+        if (player == null || !player.isOnline()) {
+            return;
         }
+        if (getMana() >= getMaxMana()) return;
+        StatUtils.addMana(player, getManaRegeneration());
+    }
+
+    /**
+     * Retained for callers that used to stop a per-profile regeneration task.
+     * Regeneration is shared, so there is nothing left to cancel.
+     */
+    public void cancelManaRegenTask(){
     }
 
     // ============================================

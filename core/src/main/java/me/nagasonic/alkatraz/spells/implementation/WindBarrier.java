@@ -1,8 +1,8 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.api.Element;
 import me.nagasonic.alkatraz.config.ConfigManager;
-import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
@@ -14,15 +14,15 @@ import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.BarrierType;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.BarrierProperties;
+import me.nagasonic.alkatraz.spells.vfx.CastCircle;
+import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
+import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.util.ParticleCaster;
-import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
-import de.tr7zw.changeme.nbtapi.NBT;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
@@ -30,9 +30,18 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
-import java.util.List;
-
 public class WindBarrier extends BarrierSpell implements Listener {
+
+    /** The AIR palette, resolved once so a 5-tickly barrier shell allocates no colour objects. */
+    private static final ElementPalette.Palette PALETTE = ElementPalette.of(Element.AIR);
+
+    /**
+     * Shell geometry. The barrier drew a 100 point sphere on every frame; that count is now named
+     * here so the two call sites cannot drift apart, and {@link SpellVfx#nova} draws it as a
+     * {@code core} shell over a {@code deep} inner ring so the dome reads as a surface with
+     * thickness rather than as one flat ring of motes.
+     */
+    private static final int SHELL_POINTS = 100;
 
     private static LangManager lang() {
         return Alkatraz.getLangManager();
@@ -92,7 +101,7 @@ public class WindBarrier extends BarrierSpell implements Listener {
                     for (Entity entity : center.getWorld().getNearbyEntities(center, activeRadius, activeRadius, activeRadius)) {
                         if (!(entity instanceof LivingEntity living)) continue;
                         if (entity == p) continue;
-                        if (NBT.getPersistentData(entity, nbt -> nbt.getBoolean("summoned_zombie"))) continue;
+                        if (SummonCombatGuard.isSummon(entity)) continue;
 
                         Vector push = entity.getLocation().toVector().subtract(center.toVector());
                         push.setY(0);
@@ -102,26 +111,19 @@ public class WindBarrier extends BarrierSpell implements Listener {
                     }
                 }
 
-                List<Location> particleLocations = ParticleUtils.sphere(center, activeRadius, 100);
+                SpellVfx.nova(WindBarrier.this, p, center, activeRadius, SHELL_POINTS);
 
-                for (Location loc : particleLocations) {
-                    SpellParticleComponent particle = new SpellParticleComponent(
-                            WindBarrier.this,
-                            properties,
-                            p,
-                            wand,
-                            SpellComponentType.DEFENSE,
-                            loc,
-                            0.8,
-                            4
-                    );
-                    SpellComponentHandler.register(particle);
-
-                    ParticleCaster.spawn(p, loc.getWorld(), Particle.CLOUD, loc, 1, 0, 0, 0, 0);
-                    if (Math.random() < 0.1) {
-                        ParticleCaster.spawn(p, loc.getWorld(), Particle.SWEEP_ATTACK, loc, 1);
-                    }
-                }
+                SpellParticleComponent particle = new SpellParticleComponent(
+                        WindBarrier.this,
+                        properties,
+                        p,
+                        wand,
+                        SpellComponentType.DEFENSE,
+                        center,
+                        activeRadius,
+                        4
+                );
+                SpellComponentHandler.register(particle);
 
                 ticksPassed++;
             }
@@ -145,23 +147,19 @@ public class WindBarrier extends BarrierSpell implements Listener {
                     return;
                 }
 
-                List<Location> particleLocations = ParticleUtils.sphere(center, radius, 100);
+                SpellVfx.nova(WindBarrier.this, caster, center, radius, SHELL_POINTS);
 
-                for (Location loc : particleLocations) {
-                    SpellParticleComponent particle = new SpellParticleComponent(
-                            WindBarrier.this,
-                            properties,
-                            caster,
-                            wand,
-                            SpellComponentType.DEFENSE,
-                            loc,
-                            0.8,
-                            4
-                    );
-                    SpellComponentHandler.register(particle);
-
-                    ParticleCaster.spawn(caster, loc.getWorld(), Particle.CLOUD, loc, 1, 0, 0, 0, 0);
-                }
+                SpellParticleComponent particle = new SpellParticleComponent(
+                        WindBarrier.this,
+                        properties,
+                        caster,
+                        wand,
+                        SpellComponentType.DEFENSE,
+                        center,
+                        radius,
+                        4
+                );
+                SpellComponentHandler.register(particle);
 
                 ticksPassed++;
             }
@@ -170,18 +168,7 @@ public class WindBarrier extends BarrierSpell implements Listener {
 
     @Override
     public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
-        return Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
-            if (e.isCancelled()) return;
-            Location playerLoc = caster.getEyeLocation();
-            float yaw = playerLoc.getYaw();
-            float pitch = playerLoc.getPitch();
-            Vector forward = playerLoc.getDirection().normalize().multiply(1.5);
-            List<Location> points = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 3, 0);
-            Particle.DustOptions options = new Particle.DustOptions(Color.fromRGB(200, 220, 255), 0.4F);
-            for (Location loc : points) {
-                ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, options);
-            }
-        }, 0L, (Long) Configs.CIRCLE_TICKS.get());
+        return CastCircle.start(this, caster, e, 3.0, 0);
     }
 
     @Override
@@ -200,7 +187,8 @@ public class WindBarrier extends BarrierSpell implements Listener {
 
     @Override
     public void onBarrierBreak(Location center) {
-        ParticleCaster.spawn(null, center.getWorld(), Particle.CLOUD, center, 50, radius, 1, radius, 0.2);
+        ParticleCaster.spawn(null, center.getWorld(), Utils.CLOUD, center, 50, radius, 1, radius, 0.2);
+        ParticleCaster.spawn(null, center.getWorld(), Utils.DUST, center, 0, PALETTE.coreDust());
         ParticleCaster.spawn(null, center.getWorld(), Utils.EXPLOSION, center, 1);
         center.getWorld().playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 0.8f, 1.2f);
     }

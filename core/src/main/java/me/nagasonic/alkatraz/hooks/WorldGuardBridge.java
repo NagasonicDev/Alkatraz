@@ -19,14 +19,13 @@ public final class WorldGuardBridge {
     private static WorldGuardBridge instance;
 
     private final boolean present;
-    private Object worldGuard;
-    private Object platform;
-    private Method platformGetRegionContainer;
-    private Method containerCreateQuery;
-    private Method queryGetApplicableRegions;
-    private Method resultGetRegions;
-    private Method regionGetId;
-    private Method bukkitAdapterAdapt;
+    private volatile Object platform;
+    private volatile Method platformGetRegionContainer;
+    private volatile Method containerCreateQuery;
+    private volatile Method queryGetApplicableRegions;
+    private volatile Method resultGetRegions;
+    private volatile Method regionGetId;
+    private volatile Method bukkitAdapterAdapt;
 
     private WorldGuardBridge() {
         Plugin plugin = Bukkit.getPluginManager().getPlugin(WORLDGUARD);
@@ -52,12 +51,13 @@ public final class WorldGuardBridge {
         try {
             Class<?> worldGuardClass = Class.forName("com.sk89q.worldguard.WorldGuard");
             Method getInstance = worldGuardClass.getMethod("getInstance");
-            worldGuard = getInstance.invoke(null);
+            Object worldGuard = getInstance.invoke(null);
 
             Method getPlatform = worldGuardClass.getMethod("getPlatform");
-            platform = getPlatform.invoke(worldGuard);
+            Object resolvedPlatform = getPlatform.invoke(worldGuard);
+            this.platform = resolvedPlatform;
 
-            platformGetRegionContainer = platform.getClass().getMethod("getRegionContainer");
+            platformGetRegionContainer = resolvedPlatform.getClass().getMethod("getRegionContainer");
             containerCreateQuery = platformGetRegionContainer.getReturnType().getMethod("createQuery");
             queryGetApplicableRegions = containerCreateQuery.getReturnType().getMethod("getApplicableRegions", Class.forName("com.sk89q.worldedit.util.Location"));
             resultGetRegions = queryGetApplicableRegions.getReturnType().getMethod("getRegions");
@@ -71,26 +71,32 @@ public final class WorldGuardBridge {
         }
     }
 
-    /**
-     * Returns the ids of all WorldGuard regions containing the given location,
-     * or an empty set if WorldGuard is not present.
-     */
     public Set<String> regionsAt(Location location) {
         if (!present) {
             return Collections.emptySet();
         }
+        Method getRegionContainer = platformGetRegionContainer;
+        Method createQuery = containerCreateQuery;
+        Method getApplicableRegions = queryGetApplicableRegions;
+        Method getRegions = resultGetRegions;
+        Method getId = regionGetId;
+        Method adapt = bukkitAdapterAdapt;
+        if (platform == null || getRegionContainer == null || createQuery == null || getApplicableRegions == null
+                || getRegions == null || getId == null || adapt == null) {
+            return Collections.emptySet();
+        }
         try {
-            Object container = platformGetRegionContainer.invoke(platform);
-            Object query = containerCreateQuery.invoke(container);
-            Object weLocation = bukkitAdapterAdapt.invoke(null, location);
-            Object result = queryGetApplicableRegions.invoke(query, weLocation);
-            Set<?> regions = (Set<?>) resultGetRegions.invoke(result);
+            Object container = getRegionContainer.invoke(platform);
+            Object query = createQuery.invoke(container);
+            Object weLocation = adapt.invoke(null, location);
+            Object result = getApplicableRegions.invoke(query, weLocation);
+            Set<?> regions = (Set<?>) getRegions.invoke(result);
             if (regions.isEmpty()) {
                 return Collections.emptySet();
             }
             Set<String> ids = new HashSet<>(Math.max(2, regions.size() << 1));
             for (Object region : regions) {
-                ids.add((String) regionGetId.invoke(region));
+                ids.add((String) getId.invoke(region));
             }
             return ids;
         } catch (ReflectiveOperationException e) {

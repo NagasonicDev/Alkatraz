@@ -25,6 +25,21 @@ public class TriggerSelectionMenu extends PagedMenu<TriggerType> {
 
     private static final int[] CONTENT_SLOTS = {19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34};
 
+    private static ItemStack borderPanePrototype;
+
+    private static ItemStack borderPane() {
+        if (borderPanePrototype == null) {
+            ItemStack item = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
+            ItemMeta meta = item.getItemMeta();
+            if (meta != null) {
+                meta.setDisplayName(ColorFormat.format("&7"));
+                item.setItemMeta(meta);
+            }
+            borderPanePrototype = item;
+        }
+        return borderPanePrototype;
+    }
+
     private static me.nagasonic.alkatraz.lang.LangManager lang() {
         return Alkatraz.getLangManager();
     }
@@ -76,25 +91,15 @@ public class TriggerSelectionMenu extends PagedMenu<TriggerType> {
     @Override
     protected void addDecorations() {
         for (int i = 0; i < 9; i++) {
-            inventory.setItem(i, createBorderPane());
-            inventory.setItem(i + 45, createBorderPane());
+            inventory.setItem(i, borderPane());
+            inventory.setItem(i + 45, borderPane());
         }
         for (int i = 9; i < 18; i++) {
-            inventory.setItem(i, createBorderPane());
+            inventory.setItem(i, borderPane());
         }
         for (int i = 36; i < 45; i++) {
-            inventory.setItem(i, createBorderPane());
+            inventory.setItem(i, borderPane());
         }
-    }
-
-    private ItemStack createBorderPane() {
-        ItemStack item = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
-        ItemMeta meta = item.getItemMeta();
-        if (meta != null) {
-            meta.setDisplayName(ColorFormat.format("&7"));
-            item.setItemMeta(meta);
-        }
-        return item;
     }
 
     @Override

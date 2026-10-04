@@ -24,7 +24,7 @@ public final class CompareAttributeCondition implements Condition {
 
     @Override
     public boolean test(TriggerContext context) {
-        if (context.actor() == null) {
+        if (context.actor() == null || attribute == null) {
             return false;
         }
         AttributeService attributes = MagicItemServices.attributes();

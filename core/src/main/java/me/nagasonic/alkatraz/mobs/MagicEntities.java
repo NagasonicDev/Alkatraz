@@ -11,10 +11,13 @@ import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.WeakHashMap;
 
 /**
  * Version-agnostic entry point for custom magic mobs.
@@ -30,6 +33,15 @@ import java.util.Optional;
  * </pre>
  */
 public final class MagicEntities {
+
+    /**
+     * Resolved spell lists, keyed weakly on the entity so entries vanish with it.
+     * {@code mob_spells} is written once at construction and never mutated, so the
+     * resolution is stable for the entity's whole life; without this the NBT read
+     * plus id split plus stream pipeline ran on every goal evaluation.
+     */
+    private static final Map<LivingEntity, List<Spell>> SPELL_CACHE =
+            Collections.synchronizedMap(new WeakHashMap<>());
 
     private MagicEntities() {}
 
@@ -83,14 +95,25 @@ public final class MagicEntities {
     }
 
     public static List<Spell> getSpells(LivingEntity entity) {
+        List<Spell> cached = SPELL_CACHE.get(entity);
+        if (cached != null) return cached;
+        List<Spell> resolved = resolveSpells(entity);
+        SPELL_CACHE.put(entity, resolved);
+        return resolved;
+    }
+
+    private static List<Spell> resolveSpells(LivingEntity entity) {
         List<String> ids = getSpellIds(entity);
         if (ids.isEmpty()) {
             return Collections.emptyList();
         }
-        return ids.stream()
-                .map(SpellRegistry::getSpell)
-                .filter(Objects::nonNull)
-                .toList();
+        List<Spell> spells = new ArrayList<>(ids.size());
+        for (String id : ids) {
+            Spell spell = SpellRegistry.getSpell(id);
+            if (spell != null) spells.add(spell);
+        }
+        if (spells.isEmpty()) return Collections.emptyList();
+        return Collections.unmodifiableList(spells);
     }
 
     // -------------------------------------------------------------------------

@@ -7,11 +7,14 @@ enabled: true
 element: 'DARK'
 code: 'SRRLS'
 level: 6
-required_focus: 100
-cooldown: 45
+required_focus: 135
+cooldown: 11
 cast_time: 1.0
-mana_cost: 120
+mana_cost: 165
 maximum_mastery: 100
+# No power: key - the servants hit with knight_power, routed through the 2-arg
+# getPower once each.
+role: 'UTILITY'
 knight_count: 3
 knight_duration: 30
 knight_power: 6.0
@@ -20,7 +23,9 @@ wind_up_duration: 6
 move_cancel_threshold: 0.25
 mastery_bar_color: 'PURPLE'
 gui_item: 'SKELETON_HORSE'
-gui_custom_model_data: 4130
+# WAS 4130, the same value as water_sphere - a live collision. Spec section 10.2
+# assigns 4167.
+gui_custom_model_data: 4167
 prepare_sound: 'ENTITY_SKELETON_AMBIENT'
 prepare_sound_volume: 0.4
 prepare_sound_pitch: 1.0

@@ -24,14 +24,31 @@ public final class RecipeGate {
     private RecipeGate() {}
 
     public static boolean canCraft(Player player, AlkatrazRecipe recipe) {
-        return getUnmet(player, recipe).isEmpty();
+        List<Requirement> requirements = recipe.getRequirements();
+        List<String> permissions = recipe.getPermissions();
+        if (requirements.isEmpty() && permissions.isEmpty()) {
+            return true;
+        }
+        if (player == null) {
+            return false;
+        }
+        if (!requirements.isEmpty() && !UnlockManager.isUnlocked(player, recipe.getKey().toString())) {
+            return false;
+        }
+        for (Requirement req : requirements) {
+            if (!req.isMet(player)) return false;
+        }
+        for (String permission : permissions) {
+            if (!player.hasPermission(permission)) return false;
+        }
+        return true;
     }
 
     public static List<Requirement> getUnmet(Player player, AlkatrazRecipe recipe) {
-        List<Requirement> unmet = new ArrayList<>();
         if (recipe.getRequirements().isEmpty() && recipe.getPermissions().isEmpty()) {
-            return unmet;
+            return List.of();
         }
+        List<Requirement> unmet = new ArrayList<>();
         if (player == null) {
             unmet.addAll(recipe.getRequirements());
             for (String permission : recipe.getPermissions()) {

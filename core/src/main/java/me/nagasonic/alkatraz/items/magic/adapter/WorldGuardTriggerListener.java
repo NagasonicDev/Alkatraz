@@ -2,6 +2,7 @@ package me.nagasonic.alkatraz.items.magic.adapter;
 
 import me.nagasonic.alkatraz.hooks.WorldGuardBridge;
 import me.nagasonic.alkatraz.items.magic.trigger.TriggerDispatch;
+import me.nagasonic.alkatraz.items.magic.trigger.TriggerPipeline;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -23,12 +24,26 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class WorldGuardTriggerListener implements Listener {
 
+    private static final org.bukkit.NamespacedKey REGION_ENTER = TriggerPipeline.boundKey("on_region_enter");
+    private static final org.bukkit.NamespacedKey REGION_LEAVE = TriggerPipeline.boundKey("on_region_leave");
+
     private final WorldGuardBridge bridge = WorldGuardBridge.getInstance();
     private final Map<UUID, Set<String>> lastRegions = new ConcurrentHashMap<>();
+
+    /**
+     * {@link WorldGuardBridge#regionsAt(Location)} costs several reflective {@code Method.invoke}
+     * calls plus collection allocations, and would otherwise run for every block change even
+     * when no definition declares a region trigger. {@code isBound} fails open, so this keeps
+     * the pre-existing behaviour whenever the bound-trigger index is unavailable.
+     */
+    private static boolean regionTriggersBound() {
+        return TriggerPipeline.isBound(REGION_ENTER) || TriggerPipeline.isBound(REGION_LEAVE);
+    }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onMove(PlayerMoveEvent event) {
         if (!bridge.isPresent()) return;
+        if (!regionTriggersBound()) return;
         Player player = event.getPlayer();
         Location to = event.getTo();
         if (to == null) return;

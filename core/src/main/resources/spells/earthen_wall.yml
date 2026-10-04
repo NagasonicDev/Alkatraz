@@ -1,4 +1,4 @@
-﻿id: 'earthen_wall'
+id: 'earthen_wall'
 display_name: '&6Earthen Wall'
 description:
   - '&7Raises a wall of earth to block'
@@ -7,15 +7,26 @@ enabled: true
 element: 'EARTH'
 code: 'LLRSR'
 level: 4
-required_focus: 95
-cooldown: 15
-cast_time: 2.0
-mana_cost: 70
+required_focus: 90
+cooldown: 7
+cast_time: 1.25
+mana_cost: 75
 maximum_mastery: 200
-power: 3.0
+
+# DAMAGE PER HIT. The wall deals this every time a rising segment reaches a
+# target, and the per-cast total is capped at denial_damage_cap below.
+power: 0.5
+
+# THE MOST TOTAL DAMAGE ONE WALL MAY DEAL TO A SINGLE TARGET. 0.5/hit x 18 hits
+# = 9.0, the total named in the design. It sits under the circle-4 BURST
+# ceiling of 13.9, which is what a DENIAL spell's incidental damage is capped at.
+denial_damage_cap: 9.0
+
 duration: 10.0
 height: 6
 length: 20
+
+role: 'DENIAL'
 mastery_bar_color: 'GREEN'
 gui_item: 'STONE'
 gui_custom_model_data: 4121

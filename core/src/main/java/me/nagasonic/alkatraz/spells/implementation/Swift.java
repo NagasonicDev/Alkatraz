@@ -1,32 +1,44 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.api.Element;
 import me.nagasonic.alkatraz.config.ConfigManager;
-import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
+import me.nagasonic.alkatraz.spells.vfx.CastCircle;
+import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
+import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.util.ParticleCaster;
-import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
-import org.bukkit.Bukkit;
-import org.bukkit.Color;
 import org.bukkit.Location;
-import org.bukkit.Particle;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-
 public class Swift extends Spell {
+
+    /** The AIR palette, resolved once so a per-tick dash trail allocates no colour objects. */
+    private static final ElementPalette.Palette PALETTE = ElementPalette.of(Element.AIR);
+
+    /**
+     * Dash trail geometry. The dash runs for {@link #DASH_TRAIL_FRAMES} frames every
+     * {@link #DASH_TRAIL_PERIOD} ticks, and each frame draws one {@link SpellVfx#beam} from
+     * where the caster was last frame to where they are now: a bright {@code core} spine along
+     * the actual path travelled, tapering to nothing at the leading end.
+     */
+    private static final int DASH_TRAIL_FRAMES = 8;
+    private static final long DASH_TRAIL_PERIOD = 5L;
+    private static final int DASH_TRAIL_STEPS = 6;
+    private static final double DASH_TRAIL_START_WIDTH = 0.6;
+    private static final double DASH_TRAIL_END_WIDTH = 0.1;
 
     private static LangManager lang() {
         return Alkatraz.getLangManager();
@@ -36,7 +48,6 @@ public class Swift extends Spell {
         super(type);
     }
     private double strength;
-    private int taskID;
     private static final double MAX_DASH_SPEED = 4.0;
 
     @Override
@@ -59,15 +70,21 @@ public class Swift extends Spell {
             Vector velocity = p.getEyeLocation().getDirection().normalize().multiply(speed);
             if (velocity.getY() > 0.5) velocity.setY(0.5);
             p.setVelocity(velocity);
-            AtomicInteger i = new AtomicInteger(0);
-            taskID = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
-                if (i.get() < 8){
-                    ParticleCaster.spawn(p, p.getWorld(), Particle.CLOUD, p.getLocation(), 10, 0.5, 0.5, 0.5, 0.25);
-                    i.set(i.get() + 1);
-                }else{
-                    stop();
+            new BukkitRunnable() {
+                int iterations = 0;
+                Location previous = p.getLocation().clone();
+
+                @Override
+                public void run() {
+                    if (iterations >= DASH_TRAIL_FRAMES) {
+                        cancel();
+                        return;
+                    }
+                    drawDashTrail(p, previous);
+                    previous = p.getLocation().clone();
+                    iterations++;
                 }
-            }, 0L, 5L);
+            }.runTaskTimer(Alkatraz.getInstance(), 0L, DASH_TRAIL_PERIOD);
         }
     }
 
@@ -80,39 +97,47 @@ public class Swift extends Spell {
             Vector velocity = caster.getEyeLocation().getDirection().normalize().multiply(speed);
             if (velocity.getY() > 0.5) velocity.setY(0.5);
             caster.setVelocity(velocity);
-            AtomicInteger i = new AtomicInteger(0);
-            taskID = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
-                if (i.get() < 8){
-                    ParticleCaster.spawn(caster, caster.getWorld(), Particle.CLOUD, caster.getLocation(), 10, 0.5, 0.5, 0.5, 0.25);
-                    i.set(i.get() + 1);
-                }else{
-                    stop();
+            new BukkitRunnable() {
+                int iterations = 0;
+                Location previous = caster.getLocation().clone();
+
+                @Override
+                public void run() {
+                    if (iterations >= DASH_TRAIL_FRAMES) {
+                        cancel();
+                        return;
+                    }
+                    drawDashTrail(caster, previous);
+                    previous = caster.getLocation().clone();
+                    iterations++;
                 }
-            }, 0L, 5L);
+            }.runTaskTimer(Alkatraz.getInstance(), 0L, DASH_TRAIL_PERIOD);
         }
+    }
+
+    /**
+     * Draws one frame of the dash trail: a {@link SpellVfx#beam} from the caster's position on the
+     * previous frame to their position now, plus the pale {@code core} burst that marks where the
+     * dash is right now.
+     *
+     * <p>The beam is what makes a dash read as a dash. The old implementation spawned a static puff
+     * at the caster's feet ten times a frame, which looked identical whether the caster had moved
+     * a block or had not moved at all, because it never referenced where they had been.
+     *
+     * @param caster   the dashing entity
+     * @param previous where the caster stood on the previous frame; read, never mutated
+     */
+    private void drawDashTrail(LivingEntity caster, Location previous) {
+        Location current = caster.getLocation();
+        SpellVfx.beam(this, caster, previous, current, DASH_TRAIL_STEPS,
+                DASH_TRAIL_START_WIDTH, DASH_TRAIL_END_WIDTH);
+        ParticleCaster.spawn(caster, current.getWorld(), Utils.CLOUD, current, 6, 0.3, 0.3, 0.3, 0.1);
+        ParticleCaster.spawn(caster, current.getWorld(), Utils.DUST, current, 0, PALETTE.coreDust());
     }
 
     @Override
     public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
-        int d = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
-            if (e.isCancelled()) return;
-            Location playerLoc = caster.getEyeLocation(); // Player eye location
-            float yaw = playerLoc.getYaw();
-            float pitch = 0;
-
-            // Calculate offset vector pointing forward relative to player orientation
-            Vector forward = playerLoc.getDirection().normalize().multiply(1.5); // 1.5 blocks in front
-
-            // Call magicCircle with proper center, yaw, pitch and offset
-            List<Location> magicCirclePoints = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 2, 0);
-
-            // Spawn particles at all calculated points
-            Particle.DustOptions options = new Particle.DustOptions(Color.WHITE, 0.4F);
-            for (Location loc : magicCirclePoints) {
-                ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, options);
-            }
-        }, 0L, (Long) Configs.CIRCLE_TICKS.get());
-        return d;
+        return CastCircle.start(this, caster, e, 2.0, 0);
     }
 
     @Override
@@ -123,10 +148,6 @@ public class Swift extends Spell {
                 .addCustomLoreLine("")
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 2))
                 .build();
-    }
-
-    private void stop(){
-        Bukkit.getServer().getScheduler().cancelTask(this.taskID);
     }
 
     @Override

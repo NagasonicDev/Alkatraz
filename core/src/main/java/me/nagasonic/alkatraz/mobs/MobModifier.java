@@ -5,8 +5,10 @@ import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.Config;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.api.Element;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -45,6 +47,9 @@ import java.util.Map;
  * progressively harder in crowded areas.
  */
 public class MobModifier implements Listener {
+
+    /** Half-extent of the spawn box used for the nearby-player count. */
+    private static final double SPAWN_SCAN_RADIUS = 50;
 
     /** Cache parsed configs so we only hit disk once per entity type per session. */
     private final Map<EntityType, MobProfile> profileCache = new HashMap<>();
@@ -124,14 +129,7 @@ public class MobModifier implements Listener {
      */
     private void applyProfile(LivingEntity entity, MobProfile profile) {
         // Count nearby players outside the NBT lambda — cleaner and safer.
-        List<LivingEntity> nearby = me.nagasonic.alkatraz.util.Utils.getNearbyLivingEntities(entity.getLocation(), 50);
-        int playerCount = 0;
-        for (Entity e : nearby) {
-            if (e instanceof Player) {
-                playerCount++;
-            }
-        }
-        final double scaleFactor = Math.max(1, playerCount);
+        final double scaleFactor = Math.max(1, countNearbyPlayers(entity));
 
         NBT.modifyPersistentData(entity, nbt -> {
             for (Element element : Element.values()) {
@@ -143,6 +141,33 @@ public class MobModifier implements Listener {
             }
             nbt.setString("mob_spells", String.join(",", profile.spellIds));
         });
+    }
+
+    /**
+     * Counts players inside the spawn box. This reproduces the old
+     * {@code Utils.getNearbyLivingEntities(location, 50)} filter exactly — same
+     * world, and the same axis-aligned 100x100x100 box (a box, not a sphere,
+     * which is what {@code CraftWorld.getNearbyEntities(Location, x, y, z)} runs)
+     * — but walks the online player list instead of every chunk section in the
+     * box and materialising every entity inside it.
+     *
+     * <p>{@code Entity.getX()} only exists from the 1.20 API onwards, so one
+     * {@code Location} per candidate is the floor on this 1.19 baseline.
+     */
+    private static int countNearbyPlayers(LivingEntity entity) {
+        World world = entity.getWorld();
+        if (world == null) return 0;
+        Location origin = entity.getLocation();
+        int count = 0;
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (!player.getWorld().equals(world)) continue;
+            Location at = player.getLocation();
+            if (Math.abs(at.getX() - origin.getX()) > SPAWN_SCAN_RADIUS) continue;
+            if (Math.abs(at.getY() - origin.getY()) > SPAWN_SCAN_RADIUS) continue;
+            if (Math.abs(at.getZ() - origin.getZ()) > SPAWN_SCAN_RADIUS) continue;
+            count++;
+        }
+        return count;
     }
 
     // -------------------------------------------------------------------------

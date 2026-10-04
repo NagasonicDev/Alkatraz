@@ -9,6 +9,7 @@ import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.api.magic.trigger.TriggerContext;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
@@ -24,18 +25,39 @@ public final class StatPointsAttributeSource implements AttributeSource {
 
     private static final StatPointsAttributeSource INSTANCE = new StatPointsAttributeSource();
 
+    private static final Element[] ELEMENTS = Element.values();
+    private static final NamespacedKey[] AFFINITY_KEYS = new NamespacedKey[ELEMENTS.length];
+    private static final NamespacedKey[] RESISTANCE_KEYS = new NamespacedKey[ELEMENTS.length];
+
+    static {
+        for (int i = 0; i < ELEMENTS.length; i++) {
+            String name = ELEMENTS[i].name().toLowerCase(Locale.ROOT);
+            AFFINITY_KEYS[i] = MagicKeys.alkatraz(name + "_affinity");
+            RESISTANCE_KEYS[i] = MagicKeys.alkatraz(name + "_resistance");
+        }
+    }
+
     private StatPointsAttributeSource() {}
 
     public static StatPointsAttributeSource getInstance() {
         return INSTANCE;
     }
 
-    public static double affinityFromPoints(int points, double perPoint) {
-        return points * perPoint;
+    /**
+     * Diminishing returns: {@code perPoint * points ^ exponent}. With the shipped
+     * defaults (10, 0.65) this yields 28 affinity at 5 points and 215 at 112,
+     * spanning a x1.28 to x3.15 multiplier across circles 1-9.
+     *
+     * <p>The {@code points <= 0} guard also keeps a negative exponent from turning
+     * {@code Math.pow(0, negative)} into {@code Infinity}, so an uninvested
+     * element is always exactly zero.
+     */
+    public static double affinityFromPoints(int points, double perPoint, double exponent) {
+        return points <= 0 ? 0.0 : perPoint * Math.pow(points, exponent);
     }
 
-    public static double resistanceFromPoints(int points, double perPoint) {
-        return points * perPoint;
+    public static double resistanceFromPoints(int points, double perPoint, double exponent) {
+        return points <= 0 ? 0.0 : perPoint * Math.pow(points, exponent);
     }
 
     @Override
@@ -54,21 +76,23 @@ public final class StatPointsAttributeSource implements AttributeSource {
         }
         double affinityPerPoint = ((Number) Configs.AFFINITY_PER_POINT.get()).doubleValue();
         double resistancePerPoint = ((Number) Configs.RESISTANCE_PER_POINT.get()).doubleValue();
+        double affinityExponent = ((Number) Configs.AFFINITY_EXPONENT.get()).doubleValue();
+        double resistanceExponent = ((Number) Configs.RESISTANCE_EXPONENT.get()).doubleValue();
 
         List<AttributeContribution> contributions = new ArrayList<>();
-        for (Element element : Element.values()) {
+        for (int i = 0; i < ELEMENTS.length; i++) {
+            Element element = ELEMENTS[i];
             if (element == Element.NONE) continue;
             int points = profile.getPoints(element);
-            String name = element.name().toLowerCase(Locale.ROOT);
             contributions.add(new AttributeContribution(
-                    MagicKeys.alkatraz(name + "_affinity"),
-                    affinityFromPoints(points, affinityPerPoint),
+                    AFFINITY_KEYS[i],
+                    affinityFromPoints(points, affinityPerPoint, affinityExponent),
                     AttributeContribution.AttributeOperation.ADD,
                     AttributeSourceType.BASE,
                     0));
             contributions.add(new AttributeContribution(
-                    MagicKeys.alkatraz(name + "_resistance"),
-                    resistanceFromPoints(points, resistancePerPoint),
+                    RESISTANCE_KEYS[i],
+                    resistanceFromPoints(points, resistancePerPoint, resistanceExponent),
                     AttributeContribution.AttributeOperation.ADD,
                     AttributeSourceType.BASE,
                     0));

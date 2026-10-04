@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Runs sensors against a {@link TaskBrainContext}, writing observations into the
@@ -35,17 +36,45 @@ public final class SensorRunner {
 
     private static void writeNearest(TaskBrainContext ctx, int radius, boolean playersOnly) {
         LivingEntity entity = ctx.getEntity();
-        List<LivingEntity> nearby = new ArrayList<>();
+        List<LivingEntity> nearby;
+        List<UUID> nearbyIds;
+        if (ctx instanceof TaskBrainEngine engine) {
+            nearby = engine.nearbyScratch();
+            nearbyIds = engine.nearbyScratchIds();
+        } else {
+            nearby = new ArrayList<>(16);
+            nearbyIds = new ArrayList<>(16);
+        }
+        nearby.clear();
+        nearbyIds.clear();
         for (Entity candidate : entity.getNearbyEntities(radius, radius, radius)) {
             if (candidate.equals(entity)) continue;
             if (!(candidate instanceof LivingEntity living)) continue;
             if (playersOnly && !(living instanceof Player)) continue;
             nearby.add(living);
+            nearbyIds.add(living.getUniqueId());
         }
         if (nearby.isEmpty()) {
             ctx.eraseMemory(MemoryKey.NEAREST_HOSTILES);
-        } else {
-            ctx.setMemory(MemoryKey.NEAREST_HOSTILES, nearby);
+            return;
         }
+        if (unchanged(ctx, nearby, nearbyIds)) return;
+        ctx.setMemory(MemoryKey.NEAREST_HOSTILES, List.copyOf(nearby));
+    }
+
+    /**
+     * Whether the freshly scanned neighbourhood is the same one already on the
+     * blackboard. Compared by id, not by identity: CraftBukkit hands out a new
+     * wrapper per entity per tick, so reference equality would never match. The
+     * stored list is refreshed every heartbeat anyway, so skipping a redundant
+     * write only saves the copy and the blackboard churn.
+     */
+    private static boolean unchanged(TaskBrainContext ctx, List<LivingEntity> scanned, List<UUID> scannedIds) {
+        List<LivingEntity> stored = ctx.getMemory(MemoryKey.NEAREST_HOSTILES).orElse(null);
+        if (stored == null || stored.size() != scanned.size()) return false;
+        for (int i = 0; i < scanned.size(); i++) {
+            if (!stored.get(i).getUniqueId().equals(scannedIds.get(i))) return false;
+        }
+        return true;
     }
 }

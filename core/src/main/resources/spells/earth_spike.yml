@@ -1,4 +1,4 @@
-﻿id: 'earth_spike'
+id: 'earth_spike'
 display_name: '#A0522DEarth Spike'
 description:
   - '&7Creates a spike of condensed rock,'
@@ -14,21 +14,26 @@ code: 'RLRSR'
 
 # THE MAGIC CIRCLE REQUIRED TO CAST
 level: 2
-required_focus: 45
+required_focus: 40
 
 # COOLDOWN BEFORE CASTING AGAIN
-cooldown: 10
+cooldown: 5
 
 # BASE CAST TIME (SECONDS)
-cast_time: 1.25
+cast_time: 0.75
 
 # MANA COST
-mana_cost: 45
+mana_cost: 24
 
 # MAXIMUM MASTERY ACHIEVABLE. NOT RECOMMENDED TO CHANGE
 maximum_mastery: 200
 
-power: 5
+# BASE DAMAGE PER TARGET PER CAST. The rising steps are deduped through
+# AttackProperties.hasHit, so a target caught by overlapping columns takes this
+# once - previously they took one hit per rising step, 35 to 105 in total.
+power: 5.5
+
+role: 'BURST'
 
 #THE COLOR OF THE SPELL MASTERY BOSSBAR. OPTIONS ARE: RED, BLUE, YELLOW, PINK, PURPLE, WHITE AND GREEN
 mastery_bar_color: 'GREEN'

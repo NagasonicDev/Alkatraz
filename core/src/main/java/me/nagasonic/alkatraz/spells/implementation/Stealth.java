@@ -3,7 +3,6 @@ package me.nagasonic.alkatraz.spells.implementation;
 import de.tr7zw.changeme.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
-import me.nagasonic.alkatraz.config.Configs;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
@@ -12,8 +11,10 @@ import me.nagasonic.alkatraz.api.Element;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
+import me.nagasonic.alkatraz.spells.vfx.CastCircle;
+import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
+import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.util.ParticleCaster;
-import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.StatUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.*;
@@ -29,11 +30,11 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.util.Vector;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class Stealth extends Spell implements Listener {
 
@@ -41,11 +42,24 @@ public class Stealth extends Spell implements Listener {
         return Alkatraz.getLangManager();
     }
 
+    /**
+     * The single NONE palette. The old trail was hardcoded {@code Color.fromRGB(36, 36, 36)},
+     * a near-black that read as a rendering artefact rather than as this spell. The ash trail
+     * now takes the palette's darkest shade, which is grey rather than black.
+     */
+    private static final ElementPalette.Palette PALETTE = ElementPalette.of(Element.NONE);
+
+    /** Radius of the aura rings shed at the caster's feet, in blocks. */
+    private static final double AURA_RADIUS = 0.9;
+    /** Particles per aura ring. */
+    private static final int AURA_POINTS = 12;
+
     public Stealth(String type){
         super(type);
     }
     private Map<Integer, Double> costs = new HashMap<>();
-    private int taskID;
+    private final Map<UUID, Integer> stealthTasks = new HashMap<>();
+    private final Map<UUID, Long> lastTrailTick = new HashMap<>();
 
     @Override
     public void loadConfiguration() {
@@ -75,45 +89,44 @@ public class Stealth extends Spell implements Listener {
                 }
             }else{
                 data.setStealth(true);
+                boolean armorInvis = (boolean) getOption("armor_invis").getSelectedValue(p).getValue();
                 for (Player player : Bukkit.getOnlinePlayers()){
                     if (player != p){
                         MagicProfile td = ProfileManager.getProfile(player.getUniqueId(), MagicProfile.class);
                         if (td.getCircleLevel() < data.getCircleLevel()){
                             Alkatraz.getNms().setInvisible(p, true);
-                            if ((boolean) getOption("armor_invis").getSelectedValue(p).getValue()){
+                            if (armorInvis){
                                 Alkatraz.getNms().fakeArmor(p, player, null, null, null, null);
                             }else Alkatraz.getNms().fakeArmor(p, player, p.getInventory().getHelmet(), p.getInventory().getChestplate(), p.getInventory().getLeggings(), p.getInventory().getBoots());
                         }else{
                             Alkatraz.getNms().setInvisible(p, true);
-                            if ((boolean) getOption("armor_invis").getSelectedValue(p).getValue()){
+                            if (armorInvis){
                                 Alkatraz.getNms().fakeArmor(p, player, null, null, null, null);
                             }else Alkatraz.getNms().fakeArmor(p, player, p.getInventory().getHelmet(), p.getInventory().getChestplate(), p.getInventory().getLeggings(), p.getInventory().getBoots());
                             Alkatraz.getNms().setTransparent(p, player, true);
                         }
                     }else {
                         Alkatraz.getNms().setInvisible(p, true);
-                        if ((boolean) getOption("armor_invis").getSelectedValue(p).getValue()){
+                        if (armorInvis){
                             Alkatraz.getNms().fakeArmor(p, player, null, null, null, null);
                         }else Alkatraz.getNms().fakeArmor(p, player, p.getInventory().getHelmet(), p.getInventory().getChestplate(), p.getInventory().getLeggings(), p.getInventory().getBoots());
                         Alkatraz.getNms().setTransparent(p, player, true);
                     }
                 }
-                taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
+                Integer previousTask = stealthTasks.remove(p.getUniqueId());
+                if (previousTask != null) {
+                    Bukkit.getServer().getScheduler().cancelTask(previousTask);
+                }
+                stealthTasks.put(p.getUniqueId(), Bukkit.getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
                     if (!data.isStealth()){
-                        stop();
+                        stop(p);
+                        return;
                     }
                     if (!p.isDead()){
                         double cost = costs.get(data.getCircleLevel());
                         if (data.getMana() >= cost){
                             StatUtils.subMana(p, cost);
-                            for (Player player : Bukkit.getOnlinePlayers()){
-                                if (player != p){
-                                    MagicProfile td = ProfileManager.getProfile(player.getUniqueId(), MagicProfile.class);
-                                    if (td.getCircleLevel() <= data.getCircleLevel()){
-                                        ParticleCaster.spawnForPlayer(player, p.getWorld(), Particle.ASH, p.getLocation(), td.getCircleLevel() - data.getCircleLevel() + 11);
-                                    }
-                                }
-                            }
+                            spawnTrail(p, data);
                         }else{
                             data.setStealth(false);
                             for (Player player : Bukkit.getOnlinePlayers()){
@@ -121,7 +134,7 @@ public class Stealth extends Spell implements Listener {
                                 Alkatraz.getNms().fakeArmor(p, player, p.getInventory().getHelmet(), p.getInventory().getChestplate(), p.getInventory().getLeggings(), p.getInventory().getBoots());
                                 Alkatraz.getNms().setTransparent(p, player, false);
                             }
-                            stop();
+                            stop(p);
                         }
                     }else {
                         data.setStealth(false);
@@ -130,9 +143,9 @@ public class Stealth extends Spell implements Listener {
                             Alkatraz.getNms().fakeArmor(p, player, p.getInventory().getHelmet(), p.getInventory().getChestplate(), p.getInventory().getLeggings(), p.getInventory().getBoots());
                             Alkatraz.getNms().setTransparent(p, player, false);
                         }
-                        stop();
+                        stop(p);
                     }
-                }, 0L, 20L);
+                }, 0L, 20L));
             }
         }
     }
@@ -171,25 +184,7 @@ public class Stealth extends Spell implements Listener {
 
     @Override
     public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
-        int d = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
-            if (e.isCancelled()) return;
-            Location playerLoc = caster.getEyeLocation(); // Player eye location
-            float yaw = playerLoc.getYaw();
-            float pitch = playerLoc.getPitch();
-
-            // Calculate offset vector pointing forward relative to player orientation
-            Vector forward = playerLoc.getDirection().normalize().multiply(1.5); // 1.5 blocks in front
-
-            // Call magicCircle with proper center, yaw, pitch and offset
-            List<Location> magicCirclePoints = ParticleUtils.magicCircle(playerLoc, yaw, pitch, forward, 2, 0);
-
-            // Spawn particles at all calculated points
-            Particle.DustOptions options = new Particle.DustOptions(Color.GRAY, 0.4F);
-            for (Location loc : magicCirclePoints) {
-                ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 0, options);
-            }
-        }, 0L, (Long) Configs.CIRCLE_TICKS.get());
-        return d;
+        return CastCircle.start(this, caster, e);
     }
 
     @Override
@@ -203,8 +198,23 @@ public class Stealth extends Spell implements Listener {
                 .build();
     }
 
-    private void stop(){
-        Bukkit.getServer().getScheduler().cancelTask(taskID);
+    private void stop(Player caster){
+        Integer task = stealthTasks.remove(caster.getUniqueId());
+        if (task != null) {
+            Bukkit.getServer().getScheduler().cancelTask(task);
+        }
+        lastTrailTick.remove(caster.getUniqueId());
+    }
+
+    private void spawnTrail(Player p, MagicProfile data) {
+        World world = p.getWorld();
+        for (Player player : world.getPlayers()) {
+            if (player == p) continue;
+            MagicProfile td = ProfileManager.getProfile(player.getUniqueId(), MagicProfile.class);
+            if (td.getCircleLevel() <= data.getCircleLevel()) {
+                ParticleCaster.spawnForPlayer(player, world, Utils.ASH, p.getLocation(), td.getCircleLevel() - data.getCircleLevel() + 11);
+            }
+        }
     }
 
     @EventHandler
@@ -212,8 +222,9 @@ public class Stealth extends Spell implements Listener {
         Player p = (Player) e.getWhoClicked();
         MagicProfile data = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
         if (data.isStealth()){
+            boolean armorInvis = (boolean) getOption("armor_invis").getSelectedValue(p).getValue();
             for (Player player : Bukkit.getOnlinePlayers()){
-                if ((boolean) getOption("armor_invis").getSelectedValue(p).getValue()){
+                if (armorInvis){
                     Alkatraz.getNms().fakeArmor(p, player, null, null, null, null);
                 }else Alkatraz.getNms().fakeArmor(p, player, p.getInventory().getHelmet(), p.getInventory().getChestplate(), p.getInventory().getLeggings(), p.getInventory().getBoots());
             }
@@ -222,28 +233,29 @@ public class Stealth extends Spell implements Listener {
 
     @EventHandler
     private void onJoin(PlayerJoinEvent e){
+        Player p = e.getPlayer();
         for (Player caster : Bukkit.getOnlinePlayers()) {
             if (caster != null){
-                Player p = e.getPlayer();
                 MagicProfile td = ProfileManager.getProfile(caster.getUniqueId(), MagicProfile.class);
                 if (td.isStealth()){
+                    boolean armorInvis = (boolean) getOption("armor_invis").getSelectedValue(caster).getValue();
                     MagicProfile data = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
                     if (p != caster){
                         if (td.getCircleLevel() < data.getCircleLevel()){
                             Alkatraz.getNms().setInvisible(caster, true);
-                            if ((boolean) getOption("armor_invis").getSelectedValue(caster).getValue()){
+                            if (armorInvis){
                                 Alkatraz.getNms().fakeArmor(caster, p, null, null, null, null);
                             }else Alkatraz.getNms().fakeArmor(caster, p, p.getInventory().getHelmet(), p.getInventory().getChestplate(), p.getInventory().getLeggings(), p.getInventory().getBoots());
                         }else{
                             Alkatraz.getNms().setInvisible(caster, true);
-                            if ((boolean) getOption("armor_invis").getSelectedValue(caster).getValue()){
+                            if (armorInvis){
                                 Alkatraz.getNms().fakeArmor(caster, p, null, null, null, null);
                             }else Alkatraz.getNms().fakeArmor(caster, p, p.getInventory().getHelmet(), p.getInventory().getChestplate(), p.getInventory().getLeggings(), p.getInventory().getBoots());
                             Alkatraz.getNms().setTransparent(caster, p, true);
                         }
                     }else {
                         Alkatraz.getNms().setInvisible(caster, true);
-                        if ((boolean) getOption("armor_invis").getSelectedValue(caster).getValue()){
+                        if (armorInvis){
                             Alkatraz.getNms().fakeArmor(caster, caster, null, null, null, null);
                         }else Alkatraz.getNms().fakeArmor(caster, caster, p.getInventory().getHelmet(), p.getInventory().getChestplate(), p.getInventory().getLeggings(), p.getInventory().getBoots());
                         Alkatraz.getNms().setTransparent(caster, caster, true);
@@ -256,6 +268,7 @@ public class Stealth extends Spell implements Listener {
     @EventHandler
     private void onQuit(PlayerQuitEvent e){
         Player player = e.getPlayer();
+        stop(player);
         MagicProfile data = ProfileManager.getProfile(player.getUniqueId(), MagicProfile.class);
         if (data.isStealth()){
             data.setStealth(false);
@@ -265,15 +278,40 @@ public class Stealth extends Spell implements Listener {
         }
     }
 
+    private static final double TRAIL_RANGE_SQ = 64.0;
+    private static final Particle.DustOptions TRAIL_DUST = PALETTE.deepDust();
+
     @EventHandler
     private void onWalk(PlayerMoveEvent e){
-        MagicProfile data = ProfileManager.getProfile(e.getPlayer().getUniqueId(), MagicProfile.class);
-        if (data.isStealth()){
-            for (Player other : Bukkit.getOnlinePlayers()){
-                MagicProfile odata = ProfileManager.getProfile(other.getUniqueId(), MagicProfile.class);
-                if (odata.getCircleLevel() >= data.getCircleLevel()){
-                    ParticleCaster.spawnForPlayer(other, e.getPlayer().getWorld(), Utils.DUST, e.getPlayer().getLocation().add(0, 0.3, 0), 5, new Particle.DustOptions(Color.fromRGB(36, 36, 36), 0.5F));
-                }
+        Player mover = e.getPlayer();
+        MagicProfile data = ProfileManager.getProfile(mover.getUniqueId(), MagicProfile.class);
+        if (!data.isStealth()) return;
+
+        Location to = e.getTo();
+        Location from = e.getFrom();
+        boolean crossed = to.getBlockX() != from.getBlockX()
+                || to.getBlockY() != from.getBlockY()
+                || to.getBlockZ() != from.getBlockZ();
+        long lived = mover.getTicksLived();
+        long last = lastTrailTick.getOrDefault(mover.getUniqueId(), Long.MIN_VALUE);
+        if (!crossed && (last == Long.MIN_VALUE || lived - last < 3)) return;
+        lastTrailTick.put(mover.getUniqueId(), lived);
+
+        Location base = mover.getLocation().add(0, 0.3, 0);
+        World world = base.getWorld();
+        double bx = base.getX();
+        double by = base.getY();
+        double bz = base.getZ();
+        for (Player other : world.getPlayers()) {
+            if (other == mover) continue;
+            Location oLoc = other.getLocation();
+            double dx = oLoc.getX() - bx;
+            double dy = oLoc.getY() - by;
+            double dz = oLoc.getZ() - bz;
+            if (dx * dx + dy * dy + dz * dz > TRAIL_RANGE_SQ) continue;
+            MagicProfile odata = ProfileManager.getProfile(other.getUniqueId(), MagicProfile.class);
+            if (odata.getCircleLevel() >= data.getCircleLevel()) {
+                ParticleCaster.spawnForPlayer(other, world, Utils.DUST, base, 5, TRAIL_DUST);
             }
         }
     }

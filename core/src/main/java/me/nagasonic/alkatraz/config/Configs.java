@@ -10,6 +10,8 @@ public enum Configs {
     CIRCLE_TICKS,
     AFFINITY_PER_POINT,
     RESISTANCE_PER_POINT,
+    AFFINITY_EXPONENT,
+    RESISTANCE_EXPONENT,
     FIRST_JOIN_TUTORIAL,
     LANGUAGE;
 
@@ -36,6 +38,8 @@ public enum Configs {
         CIRCLE_TICKS.value = config.getLong("circle_ticks");
         AFFINITY_PER_POINT.value = config.getInt("affinity_per_point");
         RESISTANCE_PER_POINT.value = config.getInt("resistance_per_point");
+        AFFINITY_EXPONENT.value = config.getDouble("affinity_exponent", 0.65);
+        RESISTANCE_EXPONENT.value = config.getDouble("resistance_exponent", 0.65);
         FIRST_JOIN_TUTORIAL.value = config.getBoolean("first_join_tutorial");
         LANGUAGE.value = config.getString("language", "english");
         loaded = true;

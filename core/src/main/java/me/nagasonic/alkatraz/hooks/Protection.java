@@ -35,31 +35,37 @@ public final class Protection {
 
     /** May the doer place/break blocks at the location? */
     public static boolean blockEdit(LivingEntity doer, Location loc) {
-        return decide(hasBypass(doer), hook().canBuild(doer, loc));
+        if (hasBypass(doer)) return true;
+        return hook().canBuild(doer, loc);
     }
 
     /** May the doer damage the victim at the location? */
     public static boolean damage(LivingEntity victim, LivingEntity doer, Location loc) {
-        return decide(hasBypass(doer), hook().canDamage(victim, doer, loc));
+        if (hasBypass(doer)) return true;
+        return hook().canDamage(victim, doer, loc);
     }
 
     /** May the doer create an explosion at the location? */
     public static boolean explosion(LivingEntity doer, Location loc) {
-        return decide(hasBypass(doer), hook().canExplode(doer, loc));
+        if (hasBypass(doer)) return true;
+        return hook().canExplode(doer, loc);
     }
 
     /** May the player teleport to the location? */
     public static boolean teleport(Player player, Location loc) {
-        return decide(hasBypass(player), hook().canTeleport(player, loc));
+        if (hasBypass(player)) return true;
+        return hook().canTeleport(player, loc);
     }
 
     /** May the doer spawn a mob at the location? */
     public static boolean spawnMob(LivingEntity doer, Location loc) {
-        return decide(hasBypass(doer), hook().canSpawnMob(doer, loc));
+        if (hasBypass(doer)) return true;
+        return hook().canSpawnMob(doer, loc);
     }
 
     /** May the doer place/ignite fire at the location? */
     public static boolean ignite(LivingEntity doer, Location loc) {
-        return decide(hasBypass(doer), hook().canIgnite(doer, loc));
+        if (hasBypass(doer)) return true;
+        return hook().canIgnite(doer, loc);
     }
 }

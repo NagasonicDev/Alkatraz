@@ -14,6 +14,7 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -72,8 +73,9 @@ public class EquipmentMenu extends Menu {
     }
 
     private ItemStack createFilledSlot(ItemStack equipped, EquipmentSlot equipSlot) {
-        List<String> existingLore = equipped.hasItemMeta() && equipped.getItemMeta().hasLore()
-                ? equipped.getItemMeta().getLore()
+        ItemMeta equippedMeta = equipped.hasItemMeta() ? equipped.getItemMeta() : null;
+        List<String> existingLore = equippedMeta != null && equippedMeta.hasLore()
+                ? equippedMeta.getLore()
                 : new ArrayList<>();
         existingLore.add("");
         existingLore.add(ColorFormat.format(Alkatraz.getLangManager().get("equipment.click_unequip")));
@@ -229,6 +231,10 @@ public class EquipmentMenu extends Menu {
 
     public static void clearPending(Player player) {
         pendingEquip.remove(player.getUniqueId());
+    }
+
+    public static void clearAllPending() {
+        pendingEquip.clear();
     }
 
     @Override

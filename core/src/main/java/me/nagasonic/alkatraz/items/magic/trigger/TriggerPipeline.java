@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Event Ã¢â€ â€™ context Ã¢â€ â€™ relevant items Ã¢â€ â€™ modifiers Ã¢â€ â€™ conditions Ã¢â€ â€™ effects.
@@ -43,6 +44,13 @@ public final class TriggerPipeline {
      */
     private static volatile Set<NamespacedKey> BOUND_TRIGGERS = Set.of();
 
+    /**
+     * Cached {@link NamespacedKey} instances for the constant trigger paths used by
+     * listeners as hot-path guards. {@link NamespacedKey} is immutable with
+     * value-based {@code equals}/{@code hashCode}, so sharing instances is safe.
+     */
+    private static final ConcurrentHashMap<String, NamespacedKey> BOUND_KEY_CACHE = new ConcurrentHashMap<>();
+
     private final EquipmentService equipmentService;
 
     public TriggerPipeline(EquipmentService equipmentService) {
@@ -52,6 +60,37 @@ public final class TriggerPipeline {
     /** Replaces the bound-trigger index. Passing {@code null} or an empty set disables the shortcut. */
     public static void setBoundTriggers(Set<NamespacedKey> types) {
         BOUND_TRIGGERS = (types == null || types.isEmpty()) ? Set.of() : Set.copyOf(types);
+    }
+
+    /** Memoised {@link MagicKeys#alkatraz(String)} lookup used by {@link #isBound(NamespacedKey)} callers. */
+    public static NamespacedKey boundKey(String path) {
+        NamespacedKey cached = BOUND_KEY_CACHE.get(path);
+        if (cached != null) {
+            return cached;
+        }
+        NamespacedKey key = MagicKeys.alkatraz(path);
+        if (BOUND_KEY_CACHE.size() > 1024) {
+            BOUND_KEY_CACHE.clear();
+        }
+        BOUND_KEY_CACHE.put(path, key);
+        return key;
+    }
+
+    /**
+     * Whether any loaded item or engraving definition declares the given trigger type, so a
+     * dispatch for it could resolve at least one binding.
+     *
+     * <p>Fails open: when the index is empty or unavailable (its {@code Set.of()} sentinel)
+     * this returns {@code true}, preserving the pre-existing behaviour of resolving bindings
+     * for every dispatch. Callers therefore use this only to skip work that
+     * {@link #dispatch(InternalTriggerEvent)} would have discarded anyway.
+     */
+    public static boolean isBound(NamespacedKey triggerKey) {
+        Set<NamespacedKey> bound = BOUND_TRIGGERS;
+        if (bound.isEmpty()) {
+            return true;
+        }
+        return triggerKey != null && bound.contains(triggerKey);
     }
 
     /**

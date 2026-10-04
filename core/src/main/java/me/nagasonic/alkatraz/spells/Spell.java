@@ -14,11 +14,13 @@ import me.nagasonic.alkatraz.api.magic.registry.MagicItemRegistries;
 import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.FocusConfig;
+import me.nagasonic.alkatraz.config.VerbosityLevel;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.configuration.SpellOption;
 import me.nagasonic.alkatraz.spells.configuration.SpellOptionLoader;
 import me.nagasonic.alkatraz.spells.configuration.impact.implementation.StatModifierImpact;
+import me.nagasonic.alkatraz.spells.types.SpellRole;
 import me.nagasonic.alkatraz.api.dom.Permission;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.util.ColorFormat;
@@ -33,6 +35,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("unused")
@@ -44,6 +47,7 @@ public abstract class Spell {
     protected Element element;
     protected String code;
     protected BarColor masteryBarColor;
+    protected SpellRole role = SpellRole.BURST;
     protected ItemStack guiItem;
     protected int guiCustomModelData;
     protected long cooldown;
@@ -57,6 +61,9 @@ public abstract class Spell {
 
     // Spell options (defined once per spell, selections stored per-player)
     protected Map<String, SpellOption> options = new HashMap<>();
+
+    // Lazily built per-instance cache of the SLOT options of each option group.
+    private final Map<String, List<SpellOption>> groupOptionCache = new ConcurrentHashMap<>();
 
     // Tracks players whose cast was cancelled by the spell itself (e.g. invalid position)
     // so the framework can refund mana and skip cooldown/mastery.
@@ -87,6 +94,7 @@ public abstract class Spell {
         if (options.isEmpty()) {
             setupOptions();
         }
+        groupOptionCache.clear();
     }
 
     /**
@@ -113,7 +121,9 @@ public abstract class Spell {
      */
     public void cast(Player p, ItemStack wand) {
         long startTime = System.nanoTime();
-        Alkatraz.logHigh("Spell cast started: " + getId() + " by " + p.getName());
+        if (Alkatraz.isLoggable(VerbosityLevel.HIGH)) {
+            Alkatraz.logHigh("Spell cast started: " + getId() + " by " + p.getName());
+        }
         MagicProfile profile = ProfileManager.getProfile(p, MagicProfile.class);
 
         // Check circle level requirement
@@ -211,7 +221,9 @@ public abstract class Spell {
                         if (!playerCastEvent.isCancelled()) {
                             playSound(p, castSound, castSoundVolume, castSoundPitch);
                             long castEnd = System.nanoTime();
-                            Alkatraz.logVeryHigh("Spell cast completed: " + getId() + " by " + p.getName() + " in " + ((castEnd - startTime) / 1_000_000) + "ms");
+                            if (Alkatraz.isLoggable(VerbosityLevel.VERY_HIGH)) {
+                                Alkatraz.logVeryHigh("Spell cast completed: " + getId() + " by " + p.getName() + " in " + ((castEnd - startTime) / 1_000_000) + "ms");
+                            }
                             castAction(p, wand);
                             // Only grant cooldown/mastery if the spell didn't self-cancel
                             if (castCancelledPlayers.remove(uuid)) {
@@ -271,6 +283,15 @@ public abstract class Spell {
         this.maxMastery    = spellConfig.getInt("maximum_mastery");
         this.cooldown      = spellConfig.getLong("cooldown");
         this.masteryBarColor = BarColor.valueOf(spellConfig.getString("mastery_bar_color"));
+        SpellRole parsedRole = SpellRole.parse(spellConfig.getString("role"));
+        if (parsedRole == null) {
+            if (spellConfig.isSet("role")) {
+                Alkatraz.logWarning("Spell '" + this.id + "' has an unrecognised role: '"
+                        + spellConfig.getString("role") + "'. Falling back to BURST.");
+            }
+            parsedRole = SpellRole.BURST;
+        }
+        this.role = parsedRole;
         this.guiItem       = Utils.materialFromString(spellConfig.getString("gui_item"));
         this.guiCustomModelData = spellConfig.getInt("gui_custom_model_data", 0);
 
@@ -355,6 +376,7 @@ public abstract class Spell {
 
     public void addOption(SpellOption option) {
         options.put(option.getId(), option);
+        groupOptionCache.clear();
     }
 
     public SpellOption getOption(String optionId) {
@@ -362,7 +384,22 @@ public abstract class Spell {
     }
 
     public Map<String, SpellOption> getAllOptions() {
-        return new HashMap<>(options);
+        return Collections.unmodifiableMap(options);
+    }
+
+    /**
+     * Returns the SLOT options of a group ordered by slot index. The list is
+     * cached per spell instance because the option graph never changes at
+     * runtime; a {@code /alkatraz reload} builds brand new {@code Spell}
+     * instances, so the cache is discarded with them.
+     */
+    public List<SpellOption> getGroupOptions(String groupId) {
+        return groupOptionCache.computeIfAbsent(groupId, key ->
+                options.values().stream()
+                        .filter(o -> key.equals(o.getGroup()))
+                        .filter(o -> o.getRole() == SpellOption.OptionRole.SLOT)
+                        .sorted(Comparator.comparingInt(SpellOption::getSlotIndex))
+                        .toList());
     }
 
     // ============================================
@@ -377,45 +414,53 @@ public abstract class Spell {
     protected double getModifiedStat(Player caster, String statName, double baseValue) {
         MagicProfile profile = ProfileManager.getProfile(caster, MagicProfile.class);
 
-        if (profile.hasSpellModifier(this, statName)) {
-            List<MagicProfile.SpellModifier> modifiers =
-                    profile.getSpellModifiers(this, statName);
-            List<MagicProfile.SpellModifier> adds  = new ArrayList<>();
-            List<MagicProfile.SpellModifier> mults = new ArrayList<>();
-            List<MagicProfile.SpellModifier> sets  = new ArrayList<>();
-
+        List<MagicProfile.SpellModifier> modifiers = profile.getSpellModifiers(this, statName);
+        if (!modifiers.isEmpty()) {
+            double setSum = 0;
+            int setCount = 0;
             for (MagicProfile.SpellModifier modifier : modifiers) {
-                String typeStr = profile.getSpellModifierType(modifier);
-                if (typeStr != null) {
-                    StatModifierImpact.ModifierType type =
-                            StatModifierImpact.ModifierType.valueOf(typeStr);
-                    if (type == StatModifierImpact.ModifierType.ADD)      adds.add(modifier);
-                    if (type == StatModifierImpact.ModifierType.MULTIPLY) mults.add(modifier);
-                    if (type == StatModifierImpact.ModifierType.SET)      sets.add(modifier);
+                StatModifierImpact.ModifierType type = modifierType(profile, modifier);
+                if (type == StatModifierImpact.ModifierType.SET) {
+                    setSum += modifier.value();
+                    setCount++;
                 }
             }
-            double val;
-            if (!sets.isEmpty()) {
-                val = 0;
-                for (MagicProfile.SpellModifier setmod : sets) val += setmod.value();
-                val /= sets.size();
-            } else {
-                val = baseValue;
+
+            double val = setCount > 0 ? setSum / setCount : baseValue;
+
+            for (MagicProfile.SpellModifier modifier : modifiers) {
+                StatModifierImpact.ModifierType type = modifierType(profile, modifier);
+                if (type == StatModifierImpact.ModifierType.MULTIPLY) val *= modifier.value();
             }
-            for (MagicProfile.SpellModifier mult   : mults) val *= mult.value();
-            for (MagicProfile.SpellModifier addmod : adds)  val += addmod.value();
+            for (MagicProfile.SpellModifier modifier : modifiers) {
+                StatModifierImpact.ModifierType type = modifierType(profile, modifier);
+                if (type == StatModifierImpact.ModifierType.ADD) val += modifier.value();
+            }
             return Double.isFinite(val) ? val : baseValue;
         }
 
         return baseValue;
     }
 
+    private static final Map<String, StatModifierImpact.ModifierType> MODIFIER_TYPES =
+            new ConcurrentHashMap<>();
+
+    private static StatModifierImpact.ModifierType modifierType(
+            MagicProfile profile, MagicProfile.SpellModifier modifier) {
+        String typeStr = profile.getSpellModifierType(modifier);
+        if (typeStr == null) return null;
+        StatModifierImpact.ModifierType cached = MODIFIER_TYPES.get(typeStr);
+        if (cached != null) return cached;
+        StatModifierImpact.ModifierType parsed = StatModifierImpact.ModifierType.valueOf(typeStr);
+        MODIFIER_TYPES.put(typeStr, parsed);
+        return parsed;
+    }
+
     protected int getModifiedManaCost(Player caster) {
         MagicProfile profile = ProfileManager.getProfile(caster, MagicProfile.class);
 
-        if (profile.hasSpellModifier(this, "mana_cost")) {
-            List<MagicProfile.SpellModifier> mods =
-                    profile.getSpellModifiers(this, "mana_cost");
+        List<MagicProfile.SpellModifier> mods = profile.getSpellModifiers(this, "mana_cost");
+        if (!mods.isEmpty()) {
             double value = 0;
             for (MagicProfile.SpellModifier mod : mods) value += mod.value();
             return (int) Math.max(0, cost + value);
@@ -494,6 +539,7 @@ public abstract class Spell {
     public int getRequiredCircleLevel() { return requiredCircle; }
     public double getRequiredFocus() { return requiredFocus; }
     public BarColor getMasteryBarColor() { return masteryBarColor; }
+    public SpellRole getRole() { return role; }
     public ItemStack getGuiItem()    { return guiItem; }
     public int getGuiCustomModelData() { return guiCustomModelData; }
     public boolean isEnabled()       { return enabled; }
@@ -502,10 +548,17 @@ public abstract class Spell {
      * Reads magic power from a wand, supporting both new PDC magic items and legacy NBT wands.
      * For new PDC items, reads from the item definition's spell_power attribute.
      * For legacy wands, reads from NBT magic_power key.
-     * Returns 0.0 if wand is null or has no power data.
+     * Returns 1.0 (a neutral multiplier) if wand is null or has no power data.
      * <p>
-     * The returned value is a percentage-based multiplier:
-     * a stored spell_power of 10 yields a 10% bonus (1.10x total multiplier).
+     * The raw {@code alkatraz:spell_power} value is interpreted as a PERCENT and the
+     * returned value is {@code 1 + raw/100}: a stored spell_power of 10 yields a 10%
+     * bonus (1.10x total multiplier).
+     * <p>
+     * Callers that have a player should use {@link #getWandPower(ItemStack, Player)},
+     * which sources the same attribute from the equipment profile. That profile snapshot
+     * already includes the MAIN_HAND slot, so routing through it counts the wand exactly
+     * once; this overload stays the only option for mob casting and for callers with no
+     * profile.
      */
     public static double getWandPower(ItemStack wand) {
         if (wand == null) return 1.0;
@@ -533,12 +586,31 @@ public abstract class Spell {
         return power == 0.0 && wand != null ? 1.0 : power;
     }
 
+    /**
+     * Reads spell power from a wand, accounting for player-attributed bonuses.
+     * Returns 1.0 for null wand (neutral multiplier).
+     * <p>
+     * The profile's {@code spell_power} stat is a PERCENT, so this returns
+     * {@code 1 + spellPower/100}. It deliberately does NOT multiply by
+     * {@link #getWandPower(ItemStack)} on top: {@code EquipmentService.buildProfile}
+     * scans MAIN_HAND, so the wand's own attribute is already inside the profile total
+     * and re-reading the item counted it a second time. It also treated the two sources
+     * as different units, which turned a fully kitted profile into a
+     * {@code (1 + 20/100) * (1 + 43) = 52.8x} multiplier instead of
+     * {@code 1 + 43/100 = 1.43x}.
+     * <p>
+     * Falls back to the one-arg item-definition overload when there is no player or no
+     * loaded profile (mob casting, offline lookups).
+     *
+     * @param wand   the wand item stack, may be null
+     * @param player the casting player, may be null
+     * @return the spell power multiplier; 1.0 when the profile carries no spell power
+     */
     public static double getWandPower(ItemStack wand, Player player) {
-        double base = getWandPower(wand);
-        if (player == null) return base;
+        if (player == null) return getWandPower(wand);
         MagicProfile profile = ProfileManager.getProfile(player, MagicProfile.class);
-        if (profile == null) return base;
-        return base * (1 + profile.getSpellPower());
+        if (profile == null) return getWandPower(wand);
+        return 1.0 + profile.getSpellPower() / 100.0;
     }
 
     public static double getWandPowerOrDefault(ItemStack wand, Player player) {

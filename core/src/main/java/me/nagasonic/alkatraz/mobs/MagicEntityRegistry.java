@@ -3,6 +3,7 @@ package me.nagasonic.alkatraz.mobs;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.Config;
 import me.nagasonic.alkatraz.config.ConfigManager;
+import me.nagasonic.alkatraz.config.VerbosityLevel;
 import me.nagasonic.alkatraz.api.mobs.MagicEntityType;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -73,42 +74,45 @@ public final class MagicEntityRegistry {
             EntityType baseType,
             CreatureSpawnEvent.SpawnReason spawnReason
     ) {
-        Alkatraz.logHigh("Rolling for replacement: " + baseType + " reason=" + spawnReason);
+        boolean high = Alkatraz.isLoggable(VerbosityLevel.HIGH);
+        boolean veryHigh = Alkatraz.isLoggable(VerbosityLevel.VERY_HIGH);
+        if (high) Alkatraz.logHigh("Rolling for replacement: " + baseType + " reason=" + spawnReason);
         List<SpawnReplacement> candidates = replacementsByBaseType.get(baseType);
         if (candidates == null || candidates.isEmpty()) {
-            Alkatraz.logVeryHigh("No candidates for " + baseType);
+            if (veryHigh) Alkatraz.logVeryHigh("No candidates for " + baseType);
             return Optional.empty();
         }
 
-        List<SpawnReplacement> eligible = new ArrayList<>();
         double totalChance = 0.0;
+        int eligibleCount = 0;
         for (SpawnReplacement candidate : candidates) {
             if (!candidate.spawnReasons().contains(spawnReason)) {
-                Alkatraz.logVeryHigh("  skip " + candidate.type().getId() + " (wrong reason)");
+                if (veryHigh) Alkatraz.logVeryHigh("  skip " + candidate.type().getId() + " (wrong reason)");
                 continue;
             }
-            eligible.add(candidate);
+            eligibleCount++;
             totalChance += candidate.chance();
-            Alkatraz.logVeryHigh("  eligible " + candidate.type().getId() + " chance=" + candidate.chance());
+            if (veryHigh) Alkatraz.logVeryHigh("  eligible " + candidate.type().getId() + " chance=" + candidate.chance());
         }
 
-        if (eligible.isEmpty() || totalChance <= 0.0) {
-            Alkatraz.logHigh("No eligible replacements for " + baseType + " (totalChance=" + totalChance + ")");
+        if (eligibleCount == 0 || totalChance <= 0.0) {
+            if (high) Alkatraz.logHigh("No eligible replacements for " + baseType + " (totalChance=" + totalChance + ")");
             return Optional.empty();
         }
 
         double roll = ThreadLocalRandom.current().nextDouble();
-        Alkatraz.logHigh("Roll for " + baseType + ": totalChance=" + totalChance + " roll=" + roll);
+        if (high) Alkatraz.logHigh("Roll for " + baseType + ": totalChance=" + totalChance + " roll=" + roll);
         if (roll >= totalChance) {
-            Alkatraz.logHigh("  roll failed");
+            if (high) Alkatraz.logHigh("  roll failed");
             return Optional.empty();
         }
 
         double cumulative = 0.0;
-        for (SpawnReplacement candidate : eligible) {
+        for (SpawnReplacement candidate : candidates) {
+            if (!candidate.spawnReasons().contains(spawnReason)) continue;
             cumulative += candidate.chance();
             if (roll < cumulative) {
-                Alkatraz.logHigh("  selected: " + candidate.type().getId());
+                if (high) Alkatraz.logHigh("  selected: " + candidate.type().getId());
                 return Optional.of(candidate.type());
             }
         }

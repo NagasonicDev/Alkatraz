@@ -8,7 +8,6 @@ import me.nagasonic.alkatraz.spells.configuration.impact.implementation.CastModi
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -22,13 +21,7 @@ public final class CastModifierCollector {
      * Gathers cast modifiers from all slot options in a group.
      */
     public static List<AppliedModifier> fromGroup(Spell spell, Player player, String groupId) {
-        List<SpellOption> slots = spell.getAllOptions().values().stream()
-                .filter(o -> groupId.equals(o.getGroup()))
-                .filter(o -> o.getRole() == SpellOption.OptionRole.SLOT)
-                .sorted(Comparator.comparingInt(SpellOption::getSlotIndex))
-                .toList();
-
-        return fromSlotOptions(player, slots);
+        return fromSlotOptions(player, spell.getGroupOptions(groupId));
     }
 
     /**

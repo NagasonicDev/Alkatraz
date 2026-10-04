@@ -7,17 +7,21 @@ description:
 element: LIGHT
 code: SRLSS
 cast_time: 1.5
-mana_cost: 40
+mana_cost: 24
 level: 2
 required_focus: 40
 enabled: true
 maximum_mastery: 100
-cooldown: 30
+cooldown: 5
 mastery_bar_color: BLUE
 gui_item: BEACON
 gui_custom_model_data: 4110
 base_duration: 30
 target_range: 20
+
+# UTILITY - buff carries no budget and no power: key. It hands its configured
+# effects to a player, it does not deal damage.
+role: 'UTILITY'
 
 cast_sound: 'BLOCK_BEACON_ACTIVATE'
 cast_sound_pitch: 1.5

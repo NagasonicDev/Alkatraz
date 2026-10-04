@@ -3,6 +3,7 @@ package me.nagasonic.alkatraz.loot;
 import me.nagasonic.alkatraz.Alkatraz;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -14,6 +15,7 @@ import org.bukkit.loot.LootTable;
 import org.bukkit.plugin.Plugin;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
@@ -37,6 +39,8 @@ import java.util.function.Predicate;
 public class LootInjector implements Listener {
     
     private static final List<LootInjector> REGISTERED_INJECTORS = new ArrayList<>();
+    private static final int KEY_CACHE_LIMIT = 512;
+    private static final Map<NamespacedKey, String> KEY_STRINGS = new ConcurrentHashMap<>();
     
     private final Predicate<LootTable> filter;
     private final List<WeightedItem> items;
@@ -59,6 +63,15 @@ public class LootInjector implements Listener {
 
     public static void register(Plugin plugin){
         plugin.getServer().getPluginManager().registerEvents(new LootListener(), plugin);
+    }
+
+    private static String keyString(NamespacedKey key) {
+        String cached = KEY_STRINGS.get(key);
+        if (cached != null) return cached;
+        String value = key.toString();
+        if (KEY_STRINGS.size() > KEY_CACHE_LIMIT) KEY_STRINGS.clear();
+        KEY_STRINGS.put(key, value);
+        return value;
     }
 
     public static class LootListener implements Listener {
@@ -130,7 +143,7 @@ public class LootInjector implements Listener {
          */
         public Builder forLootTable(String... tableKeys) {
             this.filter = ctx -> {
-                String tableKey = ctx.getKey().toString();
+                String tableKey = keyString(ctx.getKey());
                 for (String key : tableKeys) {
                     if (tableKey.contains(key)) {
                         return true;

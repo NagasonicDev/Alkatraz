@@ -98,7 +98,7 @@ public abstract class Menu {
     protected void fillAll() {
         ItemStack blank = Alkatraz.getGuiItemRegistry().getItem("blank");
         for (int i = 0; i < size; i++) {
-            inventory.setItem(i, blank.clone());
+            inventory.setItem(i, blank);
         }
     }
 
@@ -108,7 +108,7 @@ public abstract class Menu {
         ItemStack blank = Alkatraz.getGuiItemRegistry().getItem("blank");
         for (int i = 0; i < size; i++) {
             if (!excluded.contains(i)) {
-                inventory.setItem(i, blank.clone());
+                inventory.setItem(i, blank);
             }
         }
     }
@@ -129,6 +129,13 @@ public abstract class Menu {
      */
     public static void removeActiveMenu(Player player) {
         activeMenus.remove(player.getUniqueId());
+    }
+
+    /**
+     * Drops every tracked menu instance (plugin disable)
+     */
+    public static void clearActiveMenus() {
+        activeMenus.clear();
     }
 
     public Set<Integer> dropZoneSlots() {
