@@ -958,6 +958,14 @@ spells.arcaneresonance.spent = &7Your resonance has spent itself.
 spells.arcaneresonance.expired = &7Your resonance faded unused.
 spells.arcaneresonance.already_active = &cYou are already resonating!
 
+# --- Dispel (circle 3, LIGHT, UTILITY) ---
+spells.dispel.book_name = &eScroll of the Unwritten Word
+spells.dispel.lore1 = &8Every working leaves a mark.
+spells.dispel.lore2 = &8yours, or theirs - if your circle is deep enough.
+spells.dispel.cleared = &eDispelled &f%cleared% &eeffect(s).
+spells.dispel.resisted = &8%resisted% &7effect(s) held firm.
+spells.dispel.nothing = &8Nothing here answers to your circle.
+
 # --- Affinity curve migration notice (one-time, on login) ---
 migration.affinity_curve.header = &6Affinity recalculated
 migration.affinity_curve.intro = &7%player%, stat points now have diminishing returns.

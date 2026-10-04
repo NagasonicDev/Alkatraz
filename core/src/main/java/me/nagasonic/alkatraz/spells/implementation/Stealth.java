@@ -10,6 +10,10 @@ import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.api.Element;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
+import me.nagasonic.alkatraz.spells.effect.ActiveEffect;
+import me.nagasonic.alkatraz.spells.effect.EffectApplicator;
+import me.nagasonic.alkatraz.spells.effect.EffectKind;
+import me.nagasonic.alkatraz.spells.effect.EffectRegistry;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.spells.vfx.CastCircle;
 import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
@@ -87,6 +91,7 @@ public class Stealth extends Spell implements Listener {
                     Alkatraz.getNms().fakeArmor(p, player, p.getInventory().getHelmet(), p.getInventory().getChestplate(), p.getInventory().getLeggings(), p.getInventory().getBoots());
                     Alkatraz.getNms().setTransparent(p, player, false);
                 }
+                unstampConcealment(p);
             }else{
                 data.setStealth(true);
                 boolean armorInvis = (boolean) getOption("armor_invis").getSelectedValue(p).getValue();
@@ -135,6 +140,7 @@ public class Stealth extends Spell implements Listener {
                                 Alkatraz.getNms().setTransparent(p, player, false);
                             }
                             stop(p);
+                            unstampConcealment(p);
                         }
                     }else {
                         data.setStealth(false);
@@ -144,8 +150,10 @@ public class Stealth extends Spell implements Listener {
                             Alkatraz.getNms().setTransparent(p, player, false);
                         }
                         stop(p);
+                        unstampConcealment(p);
                     }
                 }, 0L, 20L));
+                EffectApplicator.applyConcealment(p, this, EffectApplicator.stealthHandle());
             }
         }
     }
@@ -206,6 +214,83 @@ public class Stealth extends Spell implements Listener {
         lastTrailTick.remove(caster.getUniqueId());
     }
 
+    /**
+     * Test seam for {@link #dispel(Player)}.
+     *
+     * <p>{@link #stop(Player)} cancels the upkeep task only when one is actually
+     * registered for the player, and {@code stealthTasks} is private with no
+     * accessor, so a test cannot otherwise prove that dispel reaches the cancel.
+     * Package-private, and named for what it is, so it cannot be mistaken for
+     * production state manipulation.
+     *
+     * @param player the player to seed
+     * @param taskId the task id {@code dispel} must go on to cancel
+     */
+    void seedStealthTaskForTest(UUID player, int taskId) {
+        stealthTasks.put(player, taskId);
+    }
+
+    /**
+     * Reverses an active Stealth on a victim who did not cast it. Called by
+     * {@code Dispel} when the victim is not the caster.
+     *
+     * <p>Three separate things have to happen and none of them implies the
+     * others:
+     *
+     * <ol>
+     *   <li>{@code setStealth(false)} — stops the repeating task's own
+     *       self-heal branch ({@code Stealth.java:121-124}), which does
+     *       {@code stop(p); return;} and performs no NMS work at all.</li>
+     *   <li>{@link #stop(Player)} — cancels the upkeep task and clears the trail
+     *       tick, so the player stops paying the per-second mana cost.</li>
+     *   <li>The three NMS calls — because the reset block at
+     *       {@code Stealth.java:131-138} lives in the <em>mana-exhaustion</em>
+     *       branch, not in the self-heal branch. Clearing the flag alone leaves
+     *       the victim permanently invisible.</li>
+     * </ol>
+     *
+     * <p><b>Every online viewer, not just the victim.</b> {@code onQuit} and
+     * {@code onJoin} both pass {@code player, player}, so they only ever fix the
+     * victim's own view; reusing either would leave everyone else looking at an
+     * invisible ghost.
+     *
+     * @param victim the player whose stealth is being broken
+     */
+    public void dispel(Player victim) {
+        MagicProfile data = ProfileManager.getProfile(victim.getUniqueId(), MagicProfile.class);
+        if (data == null || !data.isStealth()) return;
+        data.setStealth(false);
+        stop(victim);
+        unstampConcealment(victim);
+        for (Player viewer : Bukkit.getOnlinePlayers()) {
+            Alkatraz.getNms().setInvisible(victim, false);
+            Alkatraz.getNms().fakeArmor(victim, viewer,
+                    victim.getInventory().getHelmet(), victim.getInventory().getChestplate(),
+                    victim.getInventory().getLeggings(), victim.getInventory().getBoots());
+            Alkatraz.getNms().setTransparent(victim, viewer, false);
+        }
+    }
+
+    /**
+     * Drops this spell's concealment stamp from a player whose stealth has just
+     * ended by any route.
+     *
+     * <p>Concealment entries carry {@code Long.MAX_VALUE} and are never pruned,
+     * because an illusion has no duration and must survive a restart. That means
+     * every path that ends a stealth has to remove the stamp explicitly, or the
+     * entry stays visible to the dispel forever and a dispel later reports a
+     * cleared illusion that was never there.
+     *
+     * @param p the player whose concealment stamp should be dropped
+     */
+    private void unstampConcealment(Player p) {
+        for (ActiveEffect effect : EffectRegistry.effectsOn(p.getUniqueId())) {
+            if (effect.kind() == EffectKind.CONCEALMENT && EffectApplicator.isStealthHandle(effect.handle())) {
+                EffectRegistry.remove(effect);
+            }
+        }
+    }
+
     private void spawnTrail(Player p, MagicProfile data) {
         World world = p.getWorld();
         for (Player player : world.getPlayers()) {
@@ -238,6 +323,7 @@ public class Stealth extends Spell implements Listener {
             if (caster != null){
                 MagicProfile td = ProfileManager.getProfile(caster.getUniqueId(), MagicProfile.class);
                 if (td.isStealth()){
+                    EffectApplicator.applyConcealment(caster, this, EffectApplicator.stealthHandle());
                     boolean armorInvis = (boolean) getOption("armor_invis").getSelectedValue(caster).getValue();
                     MagicProfile data = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
                     if (p != caster){
@@ -275,6 +361,7 @@ public class Stealth extends Spell implements Listener {
             Alkatraz.getNms().setInvisible(player, false);
             Alkatraz.getNms().fakeArmor(player, player, player.getInventory().getHelmet(), player.getInventory().getChestplate(), player.getInventory().getLeggings(), player.getInventory().getBoots());
             Alkatraz.getNms().setTransparent(player, player, false);
+            unstampConcealment(player);
         }
     }
 

@@ -1,0 +1,49 @@
+# =============================================================================
+# dispel_options.yml
+# =============================================================================
+#
+# One option, `tier`, whose `adept` value grants the single extra dispel band at
+# half mastery. It is an ordinary stat_modifier impact, so Spell.getModifiedStat
+# already reads it - no new mechanism.
+#
+#   dispelBands = casterCircle + (tier == adept ? 1 : 0)
+#
+# The contest is `dispelBands >= effectBands`, so a novice dispel already strips
+# everything cast at or below its own circle - the mastery band is what lifts it
+# one circle higher. DispelBands.dispelBands clamps the bonus to {0, 1} anyway,
+# so a custom tier added here cannot make a dispel outrank its own circle's cap.
+# =============================================================================
+
+options:
+
+  tier:
+    description: "How deep your circle reaches"
+    display_name: "Dispel Depth"
+    icon: BEACON
+    default_index: 0
+
+    values:
+
+      novice:
+        display_name: "Novice"
+        description: "Strips effects cast at or below your own circle"
+        icon: LIGHT_GRAY_STAINED_GLASS_PANE
+        value_type: string
+        value: novice
+
+      adept:
+        display_name: "Adept"
+        description: "Reaches one circle deeper than your own"
+        icon: NETHER_STAR
+        value_type: string
+        value: adept
+        requirements:
+          - type: number_stat
+            stat: mastery_dispel
+            minimum: 50
+            description: "Requires 50 Dispel mastery"
+        impacts:
+          - type: stat_modifier
+            stat: dispel_bands
+            value: 1.0
+            modifier: ADD

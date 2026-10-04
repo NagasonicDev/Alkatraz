@@ -106,10 +106,11 @@ class SpellLangTest {
     }
 
     @Test
-    void theRosterIsSixtySeven() {
-        assertEquals(67, roster.size(),
-                "wave 7 registers 67 spells; dispel is held back for wave 9 (T31). A different count "
-                        + "means a spell yml was added or removed without updating SpellRegistry.SPELL_IDS");
+    void theRosterIsSixtyEight() {
+        assertEquals(68, roster.size(),
+                "wave 9 (T31) lands the last of spec section 9's 30 additions, dispel, taking the roster "
+                        + "from 67 to 68. A different count means a spell yml was added or removed "
+                        + "without updating SpellRegistry.SPELL_IDS");
     }
 
     @Test

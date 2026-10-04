@@ -11,6 +11,7 @@ import me.nagasonic.alkatraz.spells.components.*;
 import me.nagasonic.alkatraz.spells.vfx.CastCircle;
 import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
+import me.nagasonic.alkatraz.spells.effect.EffectApplicator;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.AttackType;
@@ -292,31 +293,31 @@ public class DarkTendrils extends AttackSpell implements Listener {
         int durationTicks = duration * 20;
 
         // Slowness II
-        target.addPotionEffect(new PotionEffect(
-                PotionEffectType.SLOW, 
-                durationTicks, 
+        EffectApplicator.applyPotion(caster, target, new PotionEffect(
+                PotionEffectType.SLOW,
+                durationTicks,
                 1, // Level II
-                false, 
+                false,
                 true
-        ));
+        ), this);
 
         // Blindness I
-        target.addPotionEffect(new PotionEffect(
-                PotionEffectType.BLINDNESS, 
-                durationTicks, 
+        EffectApplicator.applyPotion(caster, target, new PotionEffect(
+                PotionEffectType.BLINDNESS,
+                durationTicks,
                 0, // Level I
-                false, 
+                false,
                 true
-        ));
+        ), this);
 
         // Wither I
-        target.addPotionEffect(new PotionEffect(
-                PotionEffectType.WITHER, 
-                durationTicks, 
+        EffectApplicator.applyPotion(caster, target, new PotionEffect(
+                PotionEffectType.WITHER,
+                durationTicks,
                 0, // Level I
-                false, 
+                false,
                 true
-        ));
+        ), this);
     }
 
     /**

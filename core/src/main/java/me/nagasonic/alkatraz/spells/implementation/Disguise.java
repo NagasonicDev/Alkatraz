@@ -9,6 +9,10 @@ import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
+import me.nagasonic.alkatraz.spells.effect.ActiveEffect;
+import me.nagasonic.alkatraz.spells.effect.EffectApplicator;
+import me.nagasonic.alkatraz.spells.effect.EffectKind;
+import me.nagasonic.alkatraz.spells.effect.EffectRegistry;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
@@ -256,18 +260,22 @@ public class Disguise extends Spell implements Listener {
                 return;
             }
 
-            data.setDisguise(target.getUniqueId().toString());
-            clicker.setDisplayName(target.getName());
-
-            Skin skin = Skin.fromURL(
-                    "https://sessionserver.mojang.com/session/minecraft/profile/"
-                            + target.getUniqueId() + "?unsigned=false");
-
+            // Skin first, profile second, exactly as dispel() does it. Skin.fromURL
+            // performs a blocking HTTP call and throws RuntimeException on failure
+            // (Skin.java:76-80); it used to sit OUTSIDE the try, so it threw after
+            // setDisguise and setDisplayName had already committed, and
+            // onInventoryClose then refunded the mana as if nothing had happened.
+            Skin skin;
             try {
-                Alkatraz.getNms().changeSkin(clicker,
-                        List.copyOf(Bukkit.getOnlinePlayers()), skin);
+                skin = Skin.fromURL(
+                        "https://sessionserver.mojang.com/session/minecraft/profile/"
+                                + target.getUniqueId() + "?unsigned=false");
+                Alkatraz.getNms().changeSkin(clicker, List.copyOf(Bukkit.getOnlinePlayers()), skin);
+                data.setDisguise(target.getUniqueId().toString());
+                clicker.setDisplayName(target.getName());
+                EffectApplicator.applyConcealment(clicker, this, EffectApplicator.disguiseHandle());
                 props.selected = true;
-            } catch (UnsupportedOperationException ex) {
+            } catch (RuntimeException ex) {
                 props.selected = false;
             }
 
@@ -303,20 +311,38 @@ public class Disguise extends Spell implements Listener {
 
             MagicProfile odata = ProfileManager.getProfile(other.getUniqueId(), MagicProfile.class);
 
-            if (odata.getDisguise() != null) {
-                UUID disguisedAs = UUID.fromString(odata.getDisguise());
+            // Bug 1: this used to be `odata.getDisguise() != null`, but
+            // Profile.stringStat registers a "" default, and Profile.setString
+            // does NOT null-guard, so an in-memory setDisguise(null) yields null
+            // until the next save/load. Feeding "" into UUID.fromString threw an
+            // uncaught IllegalArgumentException out of PlayerJoinEvent. Blank is
+            // the real "not disguised" value, so test for blank and let the
+            // try/catch own anything malformed.
+            //
+            // Bug 2: the old `else` branch stamped the joiner's UUID into every
+            // non-disguised player's profile. A dispel reading getDisguise()
+            // would consume that garbage. The branch was already documented as
+            // suspicious in-source and is wrong either way, so it is deleted
+            // rather than fixed.
+            String stored = odata.getDisguise();
+            if (stored == null || stored.isBlank()) continue;
+
+            try {
+                UUID disguisedAs = UUID.fromString(stored);
                 if (Bukkit.getPlayer(disguisedAs) != null) {
                     Alkatraz.getNms().changeSkinElse(
                             other,
                             joinedOnly,
                             Skin.fromURL("https://sessionserver.mojang.com/session/minecraft/profile/"
                                     + disguisedAs + "?unsigned=false"));
+                    // Disguise survives a restart (it lives on the profile), so it
+                    // re-stamps on join or a dispel cannot see it.
+                    EffectApplicator.applyConcealment(other, this, EffectApplicator.disguiseHandle());
                 }
-            } else {
-                // Bug-for-bug preservation of the original logic; consider whether
-                // you actually want this branch — it sets another player's disguise
-                // to the joining player's UUID unconditionally.
-                odata.setDisguise(joined.getUniqueId().toString());
+            } catch (RuntimeException ignored) {
+                // A malformed stored id or a Mojang outage must not escape
+                // PlayerJoinEvent. The disguise simply stays unapplied this join;
+                // the next one retries.
             }
         }
     }
@@ -361,6 +387,97 @@ public class Disguise extends Spell implements Listener {
 
         public Map<Integer, List<Player>> getGuiPages() {
             return guiPages;
+        }
+    }
+
+    /**
+     * Drops an in-flight Disguise cast without refunding anything.
+     *
+     * <p>The mana refund lives in {@code onInventoryClose}, which reads the
+     * pending cast out of {@code activeCasts} and refunds when nothing was
+     * selected. Removing the entry first is therefore the whole fix: the close
+     * then finds nothing, returns early, and refunds nothing. The GUI stays open
+     * but goes inert, because {@code onInventoryClick} matches on the same entry.
+     *
+     * @param caster the caster whose pending cast should be dropped
+     */
+    public void cancelCast(UUID caster) {
+        activeCasts.remove(caster);
+    }
+
+    /**
+     * Reverses an active Disguise on a victim who did not cast it. Called by
+     * {@code Dispel} when the victim is not the caster.
+     *
+     * <p><b>Skin first, profile second.</b> That ordering is the entire point of
+     * this method. Clearing the profile and <em>then</em> failing the reset would
+     * leave a player whose profile says clean but whose texture never reverts —
+     * and because {@code onJoin} skips players with no disguise, that desync
+     * persists across every relog until the profile is hand-edited. Doing it in
+     * this order turns a Mojang outage into a clean <em>resisted</em>, which is a
+     * result the contest in spec 4.5.3 already has a vocabulary for.
+     *
+     * <p>No new NMS code is needed in any version module: {@code changeSkin}
+     * already exists on the interface, and {@code Bukkit.getOfflinePlayer}'s
+     * {@code PlayerProfile} is <em>not</em> usable here because it carries
+     * textures with no Mojang signature, which is what the sessionserver round
+     * trip exists to supply.
+     *
+     * <p>The concealment stamp is dropped only once the profile is clear, so a
+     * failed fetch leaves the illusion registered and still contestable.
+     *
+     * @param victim the player whose disguise is being broken
+     * @return true if the illusion was cleared, false if it resisted
+     */
+    public boolean dispel(Player victim) {
+        MagicProfile data = ProfileManager.getProfile(victim.getUniqueId(), MagicProfile.class);
+        if (data == null) return false;
+
+        String stored = data.getDisguise();
+        if (stored == null || stored.isBlank()) return false;
+
+        try {
+            UUID.fromString(stored);
+        } catch (IllegalArgumentException ex) {
+            return false;
+        }
+
+        Skin ownSkin;
+        try {
+            ownSkin = Skin.fromURL("https://sessionserver.mojang.com/session/minecraft/profile/"
+                    + victim.getUniqueId() + "?unsigned=false");
+        } catch (RuntimeException ex) {
+            return false;
+        }
+
+        try {
+            Alkatraz.getNms().changeSkin(victim, List.copyOf(Bukkit.getOnlinePlayers()), ownSkin);
+        } catch (RuntimeException ex) {
+            return false;
+        }
+
+        data.setDisguise(null);
+        victim.setDisplayName(victim.getName());
+        unstampConcealment(victim);
+        return true;
+    }
+
+    /**
+     * Drops this spell's concealment stamp from a player whose disguise has just
+     * been broken.
+     *
+     * <p>Mirrors {@code Stealth.unstampConcealment} and for the same reason: a
+     * concealment entry carries {@code Long.MAX_VALUE} and never self-prunes, so
+     * a reversal that leaves it behind would let a later dispel report clearing
+     * an illusion that no longer exists.
+     *
+     * @param p the player whose concealment stamp should be dropped
+     */
+    private void unstampConcealment(Player p) {
+        for (ActiveEffect effect : EffectRegistry.effectsOn(p.getUniqueId())) {
+            if (effect.kind() == EffectKind.CONCEALMENT && EffectApplicator.isDisguiseHandle(effect.handle())) {
+                EffectRegistry.remove(effect);
+            }
         }
     }
 }

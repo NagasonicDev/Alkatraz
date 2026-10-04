@@ -27,6 +27,28 @@ public class PotionAppliedModifier extends AppliedModifier {
         this.durationTicks = durationTicks;
     }
 
+    /**
+     * @return the potion type this modifier applies
+     */
+    public PotionEffectType getEffectType() {
+        return effectType;
+    }
+
+    /**
+     * @return the potion level this modifier applies, where 0 is level I
+     */
+    public int getAmplifier() {
+        return amplifier;
+    }
+
+    /**
+     * @return how long the effect runs in ticks, or 0 if the owning spell has not
+     *         set it yet — in which case it applies nothing at all
+     */
+    public int getDurationTicks() {
+        return durationTicks;
+    }
+
     @Override
     public void apply(LivingEntity entity, Spell source) {
         if (durationTicks <= 0) return;

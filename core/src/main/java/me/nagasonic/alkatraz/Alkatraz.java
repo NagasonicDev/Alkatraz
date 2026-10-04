@@ -473,6 +473,7 @@ public final class Alkatraz extends JavaPlugin {
                 "spells/dark_tendrils.yml",
                 "spells/detect.yml",
                 "spells/disguise.yml",
+                "spells/dispel.yml",
                 "spells/earthen_wall.yml",
                 "spells/earth_spike.yml",
                 "spells/earth_throw.yml",

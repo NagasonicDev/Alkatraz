@@ -12,6 +12,7 @@ import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
 import me.nagasonic.alkatraz.spells.components.SpellParticleComponent;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
+import me.nagasonic.alkatraz.spells.effect.EffectApplicator;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.AttackType;
@@ -222,9 +223,9 @@ public class WaterSphere extends AttackSpell {
                     push.setY(Math.max(0.2, push.getY()));
                     le.setVelocity(push.multiply(0.8));
 
-                    le.addPotionEffect(new org.bukkit.potion.PotionEffect(
+                    EffectApplicator.applyPotion(caster, le, new org.bukkit.potion.PotionEffect(
                             org.bukkit.potion.PotionEffectType.SLOW, 30, 0, false, true
-                    ));
+                    ), WaterSphere.this);
                 }
 
                 // Hydrate nearby farmland

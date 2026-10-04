@@ -3,6 +3,9 @@ package me.nagasonic.alkatraz.spells.modifier;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.Spell;
+import me.nagasonic.alkatraz.spells.effect.ActiveEffect;
+import me.nagasonic.alkatraz.spells.effect.EffectApplicator;
+import me.nagasonic.alkatraz.spells.effect.EffectRegistry;
 import me.nagasonic.alkatraz.util.ColorFormat;
 import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.Utils;
@@ -97,7 +100,7 @@ public final class PooledModifierSpellSupport {
             if (modifier instanceof PotionAppliedModifier potion) {
                 potion.setDurationTicks(durationTicks);
             }
-            modifier.apply(target, spell);
+            EffectApplicator.applyModifier(caster, target, modifier, spell, durationTicks);
         }
 
         activeByTarget.put(target.getUniqueId(), new ArrayList<>(modifiers));
@@ -183,6 +186,9 @@ public final class PooledModifierSpellSupport {
             List<AppliedModifier> active = activeByTarget.remove(target.getUniqueId());
             if (active != null) {
                 for (AppliedModifier modifier : active) {
+                    for (ActiveEffect effect : EffectRegistry.effectsOn(target.getUniqueId())) {
+                        if (effect.handle() == modifier) EffectRegistry.remove(effect);
+                    }
                     modifier.remove(target, spell);
                 }
             }

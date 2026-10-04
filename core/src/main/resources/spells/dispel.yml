@@ -1,0 +1,74 @@
+id: 'dispel'
+display_name: '&eDispel'
+description:
+  - '&7Strips the buffs, debuffs and illusions'
+  - '&7carrying a single target. Out-ranks each'
+  - '&7one by circle.'
+# WHETHER THE PLUGIN SHOULD LOAD THE SPELL. DEFAULT: TRUE
+enabled: true
+
+# LIGHT: its pillar is "The Sanctuary" and a dispel is that pillar turned into a
+# weapon - it hands a debuffed, buffed or hidden opponent back to whoever is
+# standing next to them. NONE fits the mechanics but contradicts its own pillar -
+# "it changes the caster, not the target" - and a dispel is entirely about changing
+# the target. DARK forbids any defensive option.
+element: 'LIGHT'
+
+# UTILITY. Read by SpellBudgetTest and SpellAttackContext; one of BURST,
+# SUSTAIN, TERRAIN, DENIAL, UTILITY. A spell with no role: key fails the build.
+#
+# THERE IS DELIBERATELY NO `power:` KEY. A dispel deals no damage at all - the
+# bursts are particles only, pure feedback. UTILITY has no budget axis, so a
+# power: key here would be a value nothing checks, which is exactly the dead
+# config SpellBudgetTest.utilitySpellsCarryNoDamageKey exists to reject.
+role: 'UTILITY'
+
+# THE CASTING CODE. 'R' FOR RIGHT CLICK, 'L' FOR LEFT CLICK, 'S' FOR HAND SWAP
+#
+# SLLLS has exactly one Hamming-1 neighbour against the whole roster: tremor
+# SLLRS, also circle 3, differing only at position 4 - so a misfire costs four
+# correct inputs first.
+code: 'SLLLS'
+
+# THE MAGIC CIRCLE REQUIRED TO CAST
+level: 3
+
+# CIRCLE 3 FOCUS. The 0.85 x 130 ceiling is 110.5, so this is comfortable.
+required_focus: 65
+
+# COOLDOWN BEFORE CASTING AGAIN
+cooldown: 6
+
+# BASE CAST TIME (SECONDS)
+cast_time: 1.0
+
+# MANA COST
+mana_cost: 48
+
+# MAXIMUM MASTERY ACHIEVABLE. NOT RECOMMENDED TO CHANGE
+#
+# 100 makes the adept tier's threshold of 50 exactly half.
+maximum_mastery: 100
+
+# HOW FAR THE CROSSHAIR REACHES FOR A TARGET. Fed to Utils.getTargetEntity,
+# which takes an int - Dispel casts it.
+#
+# A crosshair target wins even if it carries nothing dispellable: a wasted cast
+# is a real cost, and it stops a player spraying dispel at empty space to
+# trigger a free self-cleanse. Only when the crosshair finds nothing does the
+# target become the caster.
+target_range: 24.0
+
+# HOW MANY VANILLA POTION EFFECTS THE CONTEST MAY OFFER PER CAST, HIGHEST
+# AMPLIFIER FIRST. Capped so one dispel cannot sweep a player's whole bar.
+vanilla_potion_limit: 4
+
+# WHETHER STEALTH AND DISGUISE ILLUSIONS ARE IN THE CANDIDATE SET.
+illusion_reset: true
+
+#THE COLOR OF THE SPELL MASTERY BOSSBAR. OPTIONS ARE: RED, BLUE, YELLOW, PINK, PURPLE, WHITE AND GREEN
+mastery_bar_color: 'YELLOW'
+
+#THE ITEM THAT APPEARS IN THE /SPELLS GUI
+gui_item: 'SPECTRAL_ARROW'
+gui_custom_model_data: 4168

@@ -61,6 +61,7 @@ public class SpellRegistry {
         registerIfEnabled("earthen_wall", () -> new EarthenWall("EARTHEN_WALL"));
         registerIfEnabled("detect", () -> new Detect("DETECT"));
         registerIfEnabled("disguise", () -> new Disguise("DISGUISE"));
+        registerIfEnabled("dispel", () -> new Dispel("DISPEL"));
         registerIfEnabled("earth_spike", () -> new EarthSpike("EARTH_SPIKE"));
         registerIfEnabled("earth_throw", () -> new EarthThrow("EARTH_THROW"));
         registerIfEnabled("fireball", () -> new Fireball("FIREBALL"));

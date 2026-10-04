@@ -6,6 +6,7 @@ import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
+import me.nagasonic.alkatraz.spells.effect.EffectApplicator;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.spells.vfx.CastCircle;
 import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
@@ -100,9 +101,9 @@ public class LightBuff extends Spell {
         for (Player target : nearbyPlayers) {
             if (target.isDead() || !target.isValid()) continue;
 
-            target.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, durationTicks, 0, false, true));
-            target.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, durationTicks, 0, false, true));
-            target.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, durationTicks, 0, false, true));
+            EffectApplicator.applyPotion(caster, target, new PotionEffect(PotionEffectType.INCREASE_DAMAGE, durationTicks, 0, false, true), this);
+            EffectApplicator.applyPotion(caster, target, new PotionEffect(PotionEffectType.SPEED, durationTicks, 0, false, true), this);
+            EffectApplicator.applyPotion(caster, target, new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, durationTicks, 0, false, true), this);
 
             target.sendMessage(ChatColor.translateAlternateColorCodes('&', lang().get("spells.lightbuff.blessed_by_target", "caster", caster.getName())));
 

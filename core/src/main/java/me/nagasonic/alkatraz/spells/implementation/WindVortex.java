@@ -13,6 +13,7 @@ import me.nagasonic.alkatraz.spells.configuration.SpellOption;
 import me.nagasonic.alkatraz.spells.configuration.impact.implementation.ManaCostImpact;
 import me.nagasonic.alkatraz.spells.configuration.impact.implementation.StatModifierImpact;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
+import me.nagasonic.alkatraz.spells.effect.EffectApplicator;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.AttackType;
@@ -408,9 +409,9 @@ public class WindVortex extends AttackSpell implements Listener {
 
                 // Apply slight levitation to lift them off ground
                 if (distance < radius * 0.5 && ticksElapsed % 40 == 0) {
-                    living.addPotionEffect(new PotionEffect(
+                    EffectApplicator.applyPotion(caster, living, new PotionEffect(
                             PotionEffectType.LEVITATION, 20, 0, false, false
-                    ));
+                    ), WindVortex.this);
                 }
 
                 // Spawn particles around caught entities

@@ -6,6 +6,7 @@ import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
+import me.nagasonic.alkatraz.spells.effect.EffectApplicator;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.AttackType;
@@ -243,12 +244,12 @@ public class ShadowRealm extends AttackSpell {
 
                     if (afflicted.add(le.getUniqueId())) {
                         if (le instanceof Player targetPlayer) {
-                            targetPlayer.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, effectTicks, 1, false, true));
-                            targetPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, effectTicks, 2, false, true));
-                            targetPlayer.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, effectTicks, 1, false, true));
+                            EffectApplicator.applyPotion(caster, targetPlayer, new PotionEffect(PotionEffectType.BLINDNESS, effectTicks, 1, false, true), ShadowRealm.this);
+                            EffectApplicator.applyPotion(caster, targetPlayer, new PotionEffect(PotionEffectType.SLOW, effectTicks, 2, false, true), ShadowRealm.this);
+                            EffectApplicator.applyPotion(caster, targetPlayer, new PotionEffect(PotionEffectType.WEAKNESS, effectTicks, 1, false, true), ShadowRealm.this);
                         } else {
-                            le.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, effectTicks, 2, false, true));
-                            le.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, effectTicks, 1, false, true));
+                            EffectApplicator.applyPotion(caster, le, new PotionEffect(PotionEffectType.SLOW, effectTicks, 2, false, true), ShadowRealm.this);
+                            EffectApplicator.applyPotion(caster, le, new PotionEffect(PotionEffectType.WEAKNESS, effectTicks, 1, false, true), ShadowRealm.this);
                         }
                     }
 
