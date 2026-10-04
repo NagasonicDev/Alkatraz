@@ -505,8 +505,8 @@ public class Fissure extends AttackSpell {
     @Override
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
-                .setDisplayName(lang().get("spells.fissure.book_name"))
-                .addCustomLoreLine(lang().get("spells.fissure.lore1"))
+                .setDisplayName(lang().get("spells.earthsplitter.book_name"))
+                .addCustomLoreLine(lang().get("spells.earthsplitter.lore1"))
                 .addCustomLoreLine("")
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 5))
                 .build();

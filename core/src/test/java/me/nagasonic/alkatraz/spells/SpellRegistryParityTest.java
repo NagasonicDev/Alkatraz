@@ -106,7 +106,43 @@ class SpellRegistryParityTest {
                 "the bundled resource count and the registry count must match once registration is complete");
         assertEquals(bundled.size(), saved.size(),
                 "the bundled resource count and the saveConfig literal count must match");
-        assertEquals(30, bundled.size() - 38,
-                "the roster grew by exactly the 30 new spells in spec section 9");
+        // Spec section 9 adds 30 spells, but the plan lands 29 of them in waves 5-7 and
+        // holds dispel back for wave 9 (T31). Keying the expectation off whether the
+        // last one is bundled makes this self-activating: 29 now, 30 from wave 9, with
+        // no second edit. Both size asserts above stay live either way.
+        int expectedNewSpells = BundledSpellRoster.has("dispel") ? 30 : 29;
+        assertEquals(expectedNewSpells, bundled.size() - 38,
+                "the roster grew from the 38 pre-expansion spells by exactly " + expectedNewSpells
+                        + " (spec section 9 adds 30; dispel is the last of them, in wave 9)");
+    }
+
+    /**
+     * The one failure mode in this file that no other test can see.
+     *
+     * <p>Wave 7 rewrote {@code registerSpells()} as a loop over {@code SPELL_IDS},
+     * which is derived from {@code SPELL_FACTORY.keySet()}. Java runs field
+     * initialisers and static blocks in SOURCE ORDER, so if the {@code static { ... }}
+     * block that populates the factory map ever moves below the {@code SPELL_IDS}
+     * declaration, {@code SPELL_IDS} freezes an empty list at class-load time.
+     * {@code registerSpells()} then loops zero times and the plugin logs
+     * "Registered 0 spells." with all 67 spells silently dead - no exception, no
+     * warning, no menu entry, no error in the console beyond the count.
+     *
+     * <p>Every other test in this class reads the source as TEXT and never executes
+     * it, so they all stay green through that regression. This one pins the order.
+     */
+    @Test
+    void theFactoryStaticBlockIsDeclaredBeforeSpellIds() throws IOException {
+        String source = BundledSpellRoster.readSource("src/main/java/me/nagasonic/alkatraz/spells/SpellRegistry.java");
+        int staticBlock = source.indexOf("static {");
+        int spellIds = source.indexOf("SPELL_IDS =");
+        assertTrue(staticBlock >= 0,
+                "SpellRegistry.java has no 'static {' block, so SPELL_FACTORY is never populated");
+        assertTrue(spellIds >= 0,
+                "SpellRegistry.java no longer declares SPELL_IDS; registerSpells() cannot loop over it");
+        assertTrue(staticBlock < spellIds,
+                "the static block that populates SPELL_FACTORY is declared BELOW SPELL_IDS, so "
+                        + "SPELL_IDS freezes an empty list and registerSpells() registers nothing. "
+                        + "Move the static block above the SPELL_IDS declaration.");
     }
 }

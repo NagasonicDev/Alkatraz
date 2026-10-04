@@ -224,6 +224,59 @@ custom_model_data:
     spell_fire_wall: 4135
     spell_lesser_heal: 4136
 
+    # --- Circle 5-9 additions (4137-4168) ---
+    # DEAD CONFIG, KEPT DELIBERATELY. TexturePackManager.loadItemCMDs()
+    # reads exactly six hardcoded custom_model_data.gui.* keys
+    # (next_page, prev_page, back_button, blank_pane, border_pane,
+    # header_pane) and NEVER loops this section - unlike
+    # custom_model_data.items and connector_textures, which it does loop.
+    # Nothing in the plugin reads any spell_* key.
+    #
+    # The load-bearing value is gui_custom_model_data in each spell's OWN yml,
+    # read at Spell.java:285 and applied at SpellsMenu.java:119. Do not delete
+    # this block thinking it drives the menu - it does not - and do not delete
+    # it because it is unused: the resource-pack author works from this file and
+    # needs the ids to draw the models.
+    spell_flame_lance: 4137
+    spell_inferno_pilgrimage: 4138
+    spell_sunfire_barrage: 4139
+    spell_inferno_rite: 4140
+    spell_undertow: 4141
+    spell_everdrain: 4142
+    spell_thousand_waves: 4143
+    spell_tide_of_the_deep: 4144
+    spell_tectonic_strike: 4145
+    spell_fault_line: 4146
+    spell_continental_shift: 4147
+    spell_worldbreaker: 4148
+    spell_updraft: 4149
+    spell_thunderclap: 4150
+    spell_cyclone_nest: 4151
+    spell_stormcaller: 4152
+    spell_skywrath: 4153
+    spell_light_bolt: 4154
+    spell_radiant_brand: 4155
+    spell_choir_of_light: 4156
+    spell_apotheosis: 4157
+    spell_crown_of_dawn: 4158
+    spell_umbral_volley: 4159
+    spell_void_anchor: 4160
+    spell_oblivion: 4161
+    spell_arcane_ward: 4162
+    spell_waystone_recall: 4163
+    spell_echo_cast: 4164
+    spell_arcane_resonance: 4165
+    # dispel (the 30th expansion spell, wave 9) sits above the band because 4166
+    # and 4167 belong to the two repairs below. Reserved now so the resource-pack
+    # author can draw it before the spell lands.
+    spell_dispel: 4168
+
+    # These two were absent from this file entirely even though the spells exist and
+    # have shipped since 2026-09. Their live values were ALSO colliding and were
+    # repaired in wave 3 - see CustomModelDataTest.theTwoKnownCollisionsAreRepaired.
+    spell_warp: 4166
+    spell_skeletal_knights: 4167
+
 # GUI item materials configuration
 gui_items:
   # Default materials for GUI elements

@@ -53,13 +53,20 @@ class ProgressionConfigTest {
     private static final Map<Integer, Integer> SCOPED_COUNTS = Map.of(1, 1, 2, 2, 3, 3, 4, 4);
 
     /**
-     * The unscoped circles 6-9 counts, keyed by roster size. 38 is what ships today;
-     * 68 is spec section 11's rescale (21/28/35/53). Any other roster size has no
-     * entry, which makes the test fail loudly rather than quietly pass on a
-     * half-applied migration.
+     * The unscoped circles 6-9 counts, keyed by roster size. 38 is what shipped
+     * before the circle 6-9 expansion; 67 and 68 are spec section 11's rescale
+     * (21/28/35/53). Any other roster size has no entry, which makes the test fail
+     * loudly rather than quietly pass on a half-applied migration.
+     *
+     * <p>67 and 68 carry the SAME numbers on purpose. These counts are absolute
+     * numbers of mastered spells, not percentages, so the ladder does not move when
+     * {@code dispel} lands in wave 9 and takes the roster from 67 to 68. Their share
+     * of the roster does (78% becomes 77%), which is the correct direction for a
+     * capstone gate and needs no yml edit.
      */
     private static final Map<Integer, Map<Integer, Integer>> UNSCOPED_BY_ROSTER = Map.of(
             38, Map.of(6, 12, 7, 16, 8, 20, 9, 30),
+            67, Map.of(6, 21, 7, 28, 8, 35, 9, 53),
             68, Map.of(6, 21, 7, 28, 8, 35, 9, 53)
     );
 
@@ -123,7 +130,7 @@ class ProgressionConfigTest {
     }
 
     @Test
-    void theRosterIsThirtyEightOrSixtyEight() {
+    void theRosterIsASizeThisMapHasAnEntryFor() {
         int size = rosterSize();
         assertTrue(UNSCOPED_BY_ROSTER.containsKey(size),
                 "the roster is " + size + " spells, which has no entry in UNSCOPED_BY_ROSTER. "

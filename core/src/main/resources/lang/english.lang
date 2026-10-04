@@ -603,10 +603,13 @@ spells.warp.point_set = &aWarp point set!
 spells.warp.point_cleared = &7Warp point cleared.
 
 # --- Skeletal Knights ---
-spells.skeletal_knights.book_name = &2Codex of the Black Steeds
-spells.skeletal_knights.lore1 = &8&oRide forth, servants of bone.
-spells.skeletal_knights.lore2 = &7Summon three iron-clad knights upon skeletal steeds.
-spells.skeletal_knights.interrupted = &cSummoning interrupted!
+spells.skeletalknights.book_name = &2Codex of the Black Steeds
+spells.skeletalknights.lore1 = &8&oRide forth, servants of bone.
+spells.skeletalknights.lore2 = &7Summon three iron-clad knights upon skeletal steeds.
+# Dead config: the class channels through the shared WindUp/ChannelRegistry, which
+# sends spells.cast.interrupted. Kept (and renamed with the block) so an existing
+# translation is not silently dropped.
+spells.skeletalknights.interrupted = &cSummoning interrupted!
 
 # --- Buff ---
 spells.buff.book_name = &bTome of Fortification
@@ -667,10 +670,12 @@ spells.earthenwall.book_name = &6Gaia's Bulwark
 spells.earthenwall.lore1 = &8&oThe earth rises to meet your call.
 spells.earthenwall.lore2 = &8earth barriers.
 
-# --- Fissure ---
-spells.fissure.book_name = &aTerra Fissure Tome
-spells.fissure.lore1 = &8The ground itself obeys the earth mage.
-spells.fissure.lore2 = &8the ground.
+# --- EarthSplitter (class Fissure) ---
+spells.earthsplitter.book_name = &aTerra Fissure Tome
+spells.earthsplitter.lore1 = &8The ground itself obeys the earth mage.
+# Dead config: Fissure.getSpellBook() reads book_name and lore1 only. Kept (and
+# renamed with the block) so an existing translation is not silently dropped.
+spells.earthsplitter.lore2 = &8the ground.
 
 # --- FireBlast ---
 spells.fireblast.book_name = &eScroll of Apollo &oII
@@ -708,7 +713,10 @@ spells.lightbuff.blessed_by_target = &eYou have been blessed by &f%caster%&e's l
 spells.lightbuff.blessed_count = &eBlessed &f%count% &eplayers with light for &f%duration%&e seconds!
 
 # --- MagicMissile ---
-# (no spellbook — getSpellBook returns null)
+# No book_name / lore keys: getSpellBook() returns null (MagicMissile.java:242-244)
+# and the starter spell is issued directly rather than as a scroll. This is the
+# ONLY spell permitted to have no lang prefix, and SpellLangTest asserts the
+# exemption list never grows.
 
 # --- MeteorShower ---
 spells.meteorshower.book_name = &6Codex of Falling Stars
@@ -770,6 +778,185 @@ spells.windbarrier.lore1 = &8&oThe wind shall shield thee.
 # --- WindVortex ---
 spells.windvortex.book_name = &fTome of Wind &oVol. 2
 spells.windvortex.lore1 = &8Demonstrates the influence of wind on surroundings.
+
+# ==============================
+# Circle 5-9 expansion (wave 5 spells)
+#
+# Every prefix below is the spell's id with its underscores removed. The prefix is
+# a HARDCODED LITERAL in each spell's getSpellBook(); nothing derives it, and
+# LangManager.get returns the raw key on a miss, so a typo renders as the literal
+# text "spells.foo.book_name" on the item. SpellLangTest pins the convention.
+# ==============================
+
+# --- FlameLance (circle 5, FIRE) ---
+spells.flamelance.book_name = &eCodex of the Piercing Flame
+spells.flamelance.lore1 = &8Draw the breath in, hold it, and loose a lance
+spells.flamelance.lore2 = &8narrow enough to pass through an entire crowd.
+
+# --- InfernoPilgrimage (circle 7, FIRE) ---
+spells.infernopilgrimage.book_name = &6Rite of the Walking Pyre
+spells.infernopilgrimage.lore1 = &8The flame does not stand and wait to be struck.
+spells.infernopilgrimage.lore2 = &8It walks where you look, and takes three breaths to pass.
+
+# --- SunfireBarrage (circle 8, FIRE) ---
+spells.sunfirebarrage.book_name = &eAstral Codex of Falling Light
+spells.sunfirebarrage.lore1 = &8Mark what must burn, then hold still and let the
+spells.sunfirebarrage.lore2 = &8sun come down on it in pieces.
+
+# --- InfernoRite (circle 9, FIRE) ---
+spells.infernorite.book_name = &6Grimoire of the Ninth Pyre
+spells.infernorite.lore1 = &8Wherever your fire has already taken hold, the rite
+spells.infernorite.lore2 = &8carries it onward - and the rest of it all goes at once.
+spells.infernorite.opened = &6The rite opens. Three charges, and no more.
+spells.infernorite.expired = &7The rite closes.
+
+# --- Undertow (circle 6, WATER) ---
+spells.undertow.book_name = &9Tome of the Riptide
+spells.undertow.lore1 = &8The sea does not chase. It waits,
+spells.undertow.lore2 = &8and then it takes what you owe.
+
+# --- Everdrain (circle 7, WATER) ---
+spells.everdrain.book_name = &9Codex of the Leeching Deep
+spells.everdrain.lore1 = &8Life is currency, and the water
+spells.everdrain.lore2 = &8always comes to collect.
+
+# --- ThousandWaves (circle 8, WATER) ---
+spells.thousandwaves.book_name = &9Atlas of a Thousand Waves
+spells.thousandwaves.lore1 = &8Call the whole sea, and it comes
+spells.thousandwaves.lore2 = &8one wave at a time, and all at once.
+
+# --- TideOfTheDeep (circle 9, WATER) ---
+spells.tideofthedeep.book_name = &9Testament of the Rising Tide
+spells.tideofthedeep.lore1 = &8Stand in the flood and it will
+spells.tideofthedeep.lore2 = &8carry you. Everything else drowns.
+
+# --- TectonicStrike (circle 6, EARTH) ---
+spells.tectonicstrike.book_name = &6Tome of the Shattered Strata
+spells.tectonicstrike.lore1 = &8&oBring the mountain down on one point.
+spells.tectonicstrike.lore2 = &8a focused slam that breaks the ground open.
+
+# --- FaultLine (circle 7, EARTH) ---
+spells.faultline.book_name = &4Grimoire of the Split Land
+spells.faultline.lore1 = &8&oThe crust remembers every wound.
+spells.faultline.lore2 = &8a crack that keeps opening for ten seconds.
+
+# --- ContinentalShift (circle 8, EARTH) ---
+spells.continentalshift.book_name = &2Atlas of the Rising Land
+spells.continentalshift.lore1 = &8&oLift a continent, and stand upon it.
+spells.continentalshift.lore2 = &8a plateau raised from the crust, and no scar left behind.
+
+# --- Worldbreaker (circle 9, EARTH) ---
+spells.worldbreaker.book_name = &5Last Codex of the Broken World
+spells.worldbreaker.lore1 = &8&oThe world was whole, once.
+spells.worldbreaker.lore2 = &8two faults, one slab, and everything caught between.
+
+# --- Updraft (circle 3, AIR) ---
+spells.updraft.book_name = &fTome of Wind &oVol. 3
+spells.updraft.lore1 = &8Air itself, taught to lift what it holds.
+spells.updraft.lore2 = &8knock upward.
+
+# --- Thunderclap (circle 6, AIR) ---
+spells.thunderclap.book_name = &fCodex of the Split Sky
+spells.thunderclap.lore1 = &8One word of thunder, and the air answers.
+spells.thunderclap.lore2 = &8a single concussive blast.
+
+# --- CycloneNest (circle 7, AIR) ---
+spells.cyclonenest.book_name = &fCompendium of the Maelstrom
+spells.cyclonenest.lore1 = &8Three small gyres, set down and left to feed.
+spells.cyclonenest.lore2 = &8nesting tornadoes.
+
+# --- Stormcaller (circle 8, AIR) ---
+spells.stormcaller.book_name = &fThe Wandering Tempest
+spells.stormcaller.lore1 = &8Call the storm, and hold it to you.
+spells.stormcaller.lore2 = &8a storm that follows.
+
+# --- Skywrath (circle 9, AIR) ---
+spells.skywrath.book_name = &fThe Wrath of Open Sky
+spells.skywrath.lore1 = &8The last lesson: take the sky itself.
+spells.skywrath.lore2 = &8flight, and a storm to justify it.
+spells.skywrath.ending = &7The sky closes. You are grounded again.
+
+# --- LightBolt (circle 1, LIGHT) ---
+spells.lightbolt.book_name = &eScroll of the First Ray
+spells.lightbolt.lore1 = &8The opening line of the lit canticle,
+spells.lightbolt.lore2 = &8a single ray loosed at the risen dead.
+
+# --- RadiantBrand (circle 6, LIGHT) ---
+spells.radiantbrand.book_name = &6Book of the Sealed Brand
+spells.radiantbrand.lore1 = &8Mark a foe, and the light keeps
+spells.radiantbrand.lore2 = &8its own accounts.
+spells.radiantbrand.no_target = &cNo living target in sight.
+spells.radiantbrand.faded = &7The brand fades unlit.
+
+# --- ChoirOfLight (circle 7, LIGHT) ---
+spells.choiroflight.book_name = &bPsalter of the Shifting Choir
+spells.choiroflight.lore1 = &8Every voice in the choir finds its
+spells.choiroflight.lore2 = &8own throat, and all of them sing at once.
+spells.choiroflight.no_target = &cNothing to sing to.
+
+# --- Apotheosis (circle 8, LIGHT) ---
+spells.apotheosis.book_name = &dLitany of the Ascendant
+spells.apotheosis.lore1 = &8Stand still while the light climbs,
+spells.apotheosis.lore2 = &8and it will climb through you.
+spells.apotheosis.active = &dThe ascendant holds for &f%duration%&d seconds.
+spells.apotheosis.expired = &7The light settles out of you.
+spells.apotheosis.interrupted = &cThe ascent is broken!
+spells.apotheosis.already_active = &cYou are already ascended.
+spells.apotheosis.boss_bar = &dApotheosis %duration%s
+
+# --- CrownOfDawn (circle 9, LIGHT) ---
+spells.crownofdawn.book_name = &fCrown of the Breaking Dawn
+spells.crownofdawn.lore1 = &8A wall of morning stands where
+spells.crownofdawn.lore2 = &8you tell it to, and nothing crosses.
+spells.crownofdawn.broken = &cThe crown of dawn is broken!
+
+# --- UmbralVolley (circle 7, DARK) ---
+spells.umbralvolley.book_name = &5Umbral Volley &oChapter III
+spells.umbralvolley.lore1 = &8&oThree darts of night, and the wound they
+spells.umbralvolley.lore2 = &8leave behind them does not close.
+
+# --- VoidAnchor (circle 8, DARK) ---
+spells.voidanchor.book_name = &5Grimoire of the Bound &oFolio IV
+spells.voidanchor.lore1 = &8&oTear a horror from the ground and set it
+spells.voidanchor.lore2 = &8to hold what you would not hold yourself.
+spells.voidanchor.no_summon_spot = &cThe ground will not give one up here.
+
+# --- Oblivion (circle 9, DARK) ---
+spells.oblivion.book_name = &5Necronomicon Finis
+spells.oblivion.lore1 = &8&oWhat is already dying is easiest to erase;
+spells.oblivion.lore2 = &8a soul at its last leaves the least behind.
+spells.oblivion.no_target = &cNothing stands close enough to be forgotten.
+
+# --- ArcaneWard (circle 5, NONE) ---
+spells.arcaneward.book_name = &5Aegis Codex &oPart II
+spells.arcaneward.lore1 = &8&oSet the aegis where it is needed, not where you stand.
+spells.arcaneward.lore2 = &8stationary ally-buffersing.
+
+# --- WaystoneRecall (circle 7, NONE) ---
+spells.waystonerecall.book_name = &dCodex of the Bound Waystone
+spells.waystonerecall.lore1 = &8&oThe waystone does not ask for a moment.
+spells.waystonerecall.lore2 = &8instantaneous long-range recall.
+spells.waystonerecall.no_points = &cYou have no reachable waystones! Set some in Warp's options first.
+spells.waystonerecall.nothing_in_sight = &cNo waystone within reach of your aim.
+spells.waystonerecall.blocked = &cYou cannot recall there!
+
+# --- EchoCast (circle 8, NONE) ---
+spells.echocast.book_name = &dGrimoire of the Repeated Hour
+spells.echocast.lore1 = &8&oWhat you cast, cast once more.
+spells.echocast.lore2 = &8re-casts the last three spells in order.
+spells.echocast.no_history = &cYou have not cast anything to echo yet.
+spells.echocast.not_enough_mana = &cNot enough mana to echo your last three spells.
+spells.echocast.replaying = &dEchoing &f%count% &dspell(s)...
+
+# --- ArcaneResonance (circle 9, NONE) ---
+spells.arcaneresonance.book_name = &5Tome of the Standing Wave
+spells.arcaneresonance.lore1 = &8&oHold the note. The spell answers twice.
+spells.arcaneresonance.lore2 = &8the next three casts sound at a fifth more.
+spells.arcaneresonance.armed = &dResonance armed - &f%count% &dcasts amplified.
+spells.arcaneresonance.charges = &dResonance - &f%count% &dcast(s) remain.
+spells.arcaneresonance.spent = &7Your resonance has spent itself.
+spells.arcaneresonance.expired = &7Your resonance faded unused.
+spells.arcaneresonance.already_active = &cYou are already resonating!
 
 # --- Equipment ---
 equipment.slot_occupied = &cThat slot is already occupied!

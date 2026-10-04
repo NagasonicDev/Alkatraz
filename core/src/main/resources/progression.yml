@@ -76,7 +76,7 @@ circle:
         - type: mastered_spell_count
           circle: 2
           count: 2
-          description: "Requires 1 max-mastered 2nd circle spell"
+          description: "Requires 2 max-mastered 2nd circle spells"
     4:
       stat_points: 10
       max_mana: 1250
@@ -122,8 +122,8 @@ circle:
         - type: arcane_knowledge
           amount: 36916
         - type: mastered_spell_count
-          count: 12
-          description: "Requires 12 max-mastered spells"
+          count: 21
+          description: "Requires 21 max-mastered spells"
         - type: research
           research: spellcraft_field_notes
           description: "Requires Spellcraft Field Notes research"
@@ -138,8 +138,8 @@ circle:
         - type: arcane_knowledge
           amount: 86360
         - type: mastered_spell_count
-          count: 16
-          description: "Requires 16 max-mastered spells"
+          count: 28
+          description: "Requires 28 max-mastered spells"
         - type: research
           research: mana_conservation
           description: "Requires Mana Conservation research"
@@ -154,8 +154,8 @@ circle:
         - type: arcane_knowledge
           amount: 202531
         - type: mastered_spell_count
-          count: 20
-          description: "Requires 20 max-mastered spells"
+          count: 35
+          description: "Requires 35 max-mastered spells"
         - type: research
           research: disciplined_channel
           description: "Requires Disciplined Channel research"
@@ -170,8 +170,8 @@ circle:
         - type: arcane_knowledge
           amount: 474531
         - type: mastered_spell_count
-          count: 30
-          description: "Requires all 30 spells max-mastered"
+          count: 53
+          description: "Requires 53 max-mastered spells"
         - type: research
           research: fire_inferno_rite
           description: "Requires Inferno Rite research"

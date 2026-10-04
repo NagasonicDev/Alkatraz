@@ -437,45 +437,99 @@ public final class Alkatraz extends JavaPlugin {
     }
 
     private void saveSpellConfigs(){
-        saveConfig("spells/air_blades.yml");
-        saveConfig("spells/air_burst.yml");
-        saveConfig("spells/barrier.yml");
-        saveConfig("spells/blink.yml");
-        saveConfig("spells/buff.yml");
-        saveConfig("spells/debuff.yml");
-        saveConfig("spells/debuff_options.yml");
-        saveConfig("spells/dark_tendrils.yml");
-        saveConfig("spells/detect.yml");
-        saveConfig("spells/disguise.yml");
-        saveConfig("spells/earthen_wall.yml");
-        saveConfig("spells/earth_spike.yml");
-        saveConfig("spells/earth_throw.yml");
-        saveConfig("spells/earthsplitter.yml");
-        saveConfig("spells/fireball.yml");
-        saveConfig("spells/fire_blast.yml");
-        saveConfig("spells/fire_wall.yml");
-        saveConfig("spells/flaming_volley.yml");
-        saveConfig("spells/geyser.yml");
-        saveConfig("spells/heal.yml");
-        saveConfig("spells/lesser_heal.yml");
-        saveConfig("spells/light_buff.yml");
-        saveConfig("spells/magic_missile.yml");
-        saveConfig("spells/meteor_shower.yml");
-        saveConfig("spells/radiance.yml");
-        saveConfig("spells/shadow_realm.yml");
-        saveConfig("spells/skeletal_knights.yml");
-        saveConfig("spells/stealth.yml");
-        saveConfig("spells/summon_zombies.yml");
-        saveConfig("spells/swift.yml");
-        saveConfig("spells/tornado.yml");
-        saveConfig("spells/tsunami.yml");
-        saveConfig("spells/tremor.yml");
-        saveConfig("spells/warp.yml");
-        saveConfig("spells/water_pulse.yml");
-        saveConfig("spells/water_sphere.yml");
-        saveConfig("spells/whirlpool.yml");
-        saveConfig("spells/wind_barrier.yml");
-        saveConfig("spells/wind_vortex.yml");
+        for (String path : spellConfigPaths()) {
+            saveConfig(path);
+        }
+    }
+
+    /**
+     * Every spell config copied out of the jar on first run, in the same order as
+     * SpellRegistry.SPELL_IDS.
+     *
+     * <p>{@code debuff_options.yml} is the only {@code *_options.yml} in this list.
+     * The other 36 (and the 29 wave-5 ones) are saved by each spell's own
+     * loadConfiguration(), which is why they are absent here - see
+     * spec section 10.3. Do NOT add them: a second saveConfig for a file the spell
+     * already saves is harmless but pointless, and it widens the list that
+     * SpellRegistryParityTest.savedSpellConfigIds() scans.
+     *
+     * <p>The literals stay as literals deliberately. Wave 4's
+     * SpellRegistryParityTest reads this file as text with the pattern
+     * "spells/([a-z0-9_]+)\\.yml" because after this refactor there are no saveConfig
+     * calls left to match. Replacing the literals with "spells/" + id + ".yml"
+     * would empty that roster and fail the wave-7 gate.
+     */
+    public static Set<String> spellConfigPaths() {
+        return new LinkedHashSet<>(List.of(
+                "spells/air_blades.yml",
+                "spells/air_burst.yml",
+                "spells/barrier.yml",
+                "spells/blink.yml",
+                "spells/buff.yml",
+                "spells/debuff.yml",
+                "spells/debuff_options.yml",
+                "spells/dark_tendrils.yml",
+                "spells/detect.yml",
+                "spells/disguise.yml",
+                "spells/earthen_wall.yml",
+                "spells/earth_spike.yml",
+                "spells/earth_throw.yml",
+                "spells/earthsplitter.yml",
+                "spells/fireball.yml",
+                "spells/fire_blast.yml",
+                "spells/fire_wall.yml",
+                "spells/flaming_volley.yml",
+                "spells/geyser.yml",
+                "spells/heal.yml",
+                "spells/lesser_heal.yml",
+                "spells/light_buff.yml",
+                "spells/magic_missile.yml",
+                "spells/meteor_shower.yml",
+                "spells/radiance.yml",
+                "spells/shadow_realm.yml",
+                "spells/skeletal_knights.yml",
+                "spells/stealth.yml",
+                "spells/summon_zombies.yml",
+                "spells/swift.yml",
+                "spells/tornado.yml",
+                "spells/tsunami.yml",
+                "spells/tremor.yml",
+                "spells/warp.yml",
+                "spells/water_pulse.yml",
+                "spells/water_sphere.yml",
+                "spells/whirlpool.yml",
+                "spells/wind_barrier.yml",
+                "spells/wind_vortex.yml",
+                "spells/flame_lance.yml",
+                "spells/inferno_pilgrimage.yml",
+                "spells/sunfire_barrage.yml",
+                "spells/inferno_rite.yml",
+                "spells/undertow.yml",
+                "spells/everdrain.yml",
+                "spells/thousand_waves.yml",
+                "spells/tide_of_the_deep.yml",
+                "spells/tectonic_strike.yml",
+                "spells/fault_line.yml",
+                "spells/continental_shift.yml",
+                "spells/worldbreaker.yml",
+                "spells/updraft.yml",
+                "spells/thunderclap.yml",
+                "spells/cyclone_nest.yml",
+                "spells/stormcaller.yml",
+                "spells/skywrath.yml",
+                "spells/light_bolt.yml",
+                "spells/radiant_brand.yml",
+                "spells/choir_of_light.yml",
+                "spells/apotheosis.yml",
+                "spells/crown_of_dawn.yml",
+                "spells/umbral_volley.yml",
+                "spells/void_anchor.yml",
+                "spells/oblivion.yml",
+                "spells/arcane_ward.yml",
+                "spells/waystone_recall.yml",
+                "spells/echo_cast.yml",
+                "spells/arcane_resonance.yml"
+        ));
     }
 
     private void saveMobConfigs() {

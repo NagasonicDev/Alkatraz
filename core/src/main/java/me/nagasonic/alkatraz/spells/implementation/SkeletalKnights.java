@@ -464,9 +464,9 @@ public class SkeletalKnights extends AttackSpell implements Listener {
     @Override
     public ItemStack getSpellBook() {
         return new Spellbook(getId())
-                .setDisplayName(lang().get("spells.skeletal_knights.book_name"))
-                .addCustomLoreLine(lang().get("spells.skeletal_knights.lore1"))
-                .addCustomLoreLine(lang().get("spells.skeletal_knights.lore2"))
+                .setDisplayName(lang().get("spells.skeletalknights.book_name"))
+                .addCustomLoreLine(lang().get("spells.skeletalknights.lore1"))
+                .addCustomLoreLine(lang().get("spells.skeletalknights.lore2"))
                 .addRequirement(new NumberStatRequirement<>("circleLevel", 6))
                 .build();
     }
