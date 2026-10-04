@@ -1,0 +1,121 @@
+# =============================================================================
+# flame_lance_options.yml
+# Spell option configuration for the Flame Lance spell.
+#
+# NEITHER OPTION BELOW CHANGES DAMAGE. 'reach' changes how many bodies the beam can
+# find; 'focus' changes how tightly it is aimed. Per-target damage is fixed at the
+# yml's power: 10.8 no matter what is selected, so neither option can take the spell
+# past burstBudget(5) = 22.1 and neither carries a mana_cost impact.
+# =============================================================================
+
+options:
+
+  # ---------------------------------------------------------------------------
+  # reach - how far the lance carries
+  # ---------------------------------------------------------------------------
+  reach:
+    description: "How far the lance carries"
+    icon: BLAZE_ROD
+    default_index: 1
+
+    values:
+
+      short:
+        display_name: "Close"
+        description: "A short lance. Easy to aim indoors."
+        icon: STICK
+        value_type: double
+        value: 12.0
+        impacts:
+          - type: stat_modifier
+            stat: beam_length
+            value: 12.0
+            modifier: SET
+
+      standard:
+        display_name: "Standard"
+        description: "Standard lance reach."
+        icon: BLAZE_ROD
+        value_type: double
+        value: 24.0
+        impacts:
+          - type: stat_modifier
+            stat: beam_length
+            value: 24.0
+            modifier: SET
+
+      long:
+        display_name: "Pillar to Pillar"
+        description: "Carries across a whole hall."
+        icon: END_ROD
+        value_type: double
+        value: 36.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 7
+            description: "Requires Circle Level 7"
+          - type: number_stat
+            stat: mastery_flame_lance
+            minimum: 50
+            description: "Requires 50 Flame Lance mastery"
+        impacts:
+          - type: stat_modifier
+            stat: beam_length
+            value: 36.0
+            modifier: SET
+
+  # ---------------------------------------------------------------------------
+  # focus - how tightly the lance is aimed
+  # ---------------------------------------------------------------------------
+  focus:
+    description: "How tightly the lance is aimed"
+    icon: GLASS_BOTTLE
+    default_index: 1
+
+    values:
+
+      wide:
+        display_name: "Wild"
+        description: "A loose, scatter-wide lance."
+        icon: WHEAT
+        value_type: double
+        value: 2.5
+        impacts:
+          - type: stat_modifier
+            stat: hit_radius
+            value: 2.5
+            modifier: SET
+
+      normal:
+        display_name: "Focused"
+        description: "Standard lance width."
+        icon: GLASS_BOTTLE
+        value_type: double
+        value: 1.75
+        impacts:
+          - type: stat_modifier
+            stat: hit_radius
+            value: 1.75
+            modifier: SET
+
+      narrow:
+        display_name: "Hairline"
+        description: "A needle. Almost nothing is wide enough to stop it."
+        icon: IRON_NUGGET
+        value_type: double
+        value: 1.1
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 6
+            description: "Requires Circle Level 6"
+          - type: number_stat
+            stat: mastery_flame_lance
+            minimum: 60
+            description: "Requires 60 Flame Lance mastery"
+        impacts:
+          - type: stat_modifier
+            stat: hit_radius
+            value: 1.1
+            modifier: SET

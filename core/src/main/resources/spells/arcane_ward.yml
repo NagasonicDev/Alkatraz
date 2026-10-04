@@ -1,0 +1,80 @@
+id: 'arcane_ward'
+display_name: '&5Arcane Ward'
+description:
+  - '&7Weaves a screen of mana around one'
+  - '&7soul - yours or an ally''s - and'
+  - '&7leaves it standing when you walk away.'
+# WHAT THIS SPELL IS JUDGED ON. READ BY Spell.loadConfiguration AND SpellBudgetTest.
+# DENIAL IS ONE OF THE TWO ROLES NONE IS ALLOWED (spec 5.2): {UTILITY, DENIAL}.
+role: 'DENIAL'
+enabled: true
+
+# NONE MEANS ITS DAMAGE DOES NOT SCALE WITH ELEMENTAL DAMAGE, ONLY MAGIC DAMAGE
+element: 'NONE'
+
+# THE CASTING CODE. 'R' FOR RIGHT CLICK, 'L' FOR LEFT CLICK, 'S' FOR HAND SWAP
+code: 'LLRRL'
+
+level: 5
+
+# SPEC SECTION 6 LADDER, CIRCLE 5. Verbatim.
+# required_focus 115 is under SpellBudgetTest's 85%-of-max_focus ceiling of
+# 0.85 * 150 = 127.5 for circle 5, so this row passes that test.
+#
+# cast_time 1.5s = 30 ticks sits inside SpellBudgets.castTimeRange(5), which is the
+# 5-40 tick window at circle 5. flame_lance at circle 5 takes the same 1.5s.
+required_focus: 115
+cooldown: 9
+cast_time: 1.5
+mana_cost: 120
+
+maximum_mastery: 100
+
+# THERE IS DELIBERATELY NO power: KEY.
+# arcane_ward deals no damage to anything. It absorbs damage through
+# BarrierProperties.damage(double), which SpellComponentHandler.collide calls with
+# the *attacker's* AttackProperties.getRemainingPower(). SpellBudgetTest's
+# denialSpellsCapIncidentalDamageAtTheCircleBurstBudget asserts that a DENIAL spell
+# with no denial_damage_cap carries no power key, and a power key here would be dead
+# config by rule 3 besides.
+#
+# THERE IS ALSO NO hit_count: KEY. It never damages one target even once, let alone
+# more than once, so the declared per-cast total is exactly 0.0 against a
+# burstBudget(5) of 22.1.
+
+# THE AMOUNT OF DAMAGE THE WARD CAN ABSORB. BarrierSpell.loadCommonConfig reads this
+# key with getDouble("max_hitpoints") and has no default, so it MUST be present.
+# Twice barrier's circle-3 20 because this is a circle-5 spell.
+max_hitpoints: 40.0
+
+# THE RADIUS OF THE WARD SHELL, IN BLOCKS. Smaller than barrier's 3 - this one is
+# meant to be planted on a person, not to fill a room. These three scalars are the
+# loadConfiguration fallbacks and the mob path's values; the player-facing numbers come
+# from arcane_ward_options.yml.
+radius: 2.5
+
+# HOW LONG THE WARD LASTS, IN SECONDS (45.0 -> 225 ticks at the 4-tick period).
+duration: 45.0
+
+# HOW FAR THE CASTER CAN LOOK TO PLACE THE WARD ON SOMEONE ELSE. If no other living
+# entity is inside this range along the crosshair, the ward lands on the caster.
+target_range: 24
+
+# THERE IS DELIBERATELY NO follow_player: KEY, AND NO SUCH OPTION IN THE OPTIONS FILE.
+# That omission IS the spell. barrier_options.yml ships follow_player, and it is the
+# single option that would let a player turn arcane_ward back into barrier; a ward that
+# chases its caster cannot be planted and left behind.
+
+#THE COLOR OF THE SPELL MASTERY BOSSBAR.
+mastery_bar_color: 'BLUE'
+
+#THE ITEM THAT APPEARS IN THE /SPELLS GUI
+gui_item: 'BEACON'
+gui_custom_model_data: 4162
+
+prepare_sound: 'BLOCK_BEACON_ACTIVATE'
+prepare_sound_volume: 0.4
+prepare_sound_pitch: 1.6
+cast_sound: 'BLOCK_BEACON_POWER_SELECT'
+cast_sound_volume: 0.8
+cast_sound_pitch: 1.2

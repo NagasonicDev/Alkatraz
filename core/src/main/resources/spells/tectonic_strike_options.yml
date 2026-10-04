@@ -1,0 +1,155 @@
+# =============================================================================
+# tectonic_strike_options.yml
+# Spell option configuration for the Tectonic Strike spell.
+#
+# NEITHER OPTION CAN TAKE THE SPELL PAST burstBudget(6) = 34.1. The slam lands
+# exactly ONE hit per target, so the damage multipliers below are capped at 1.3
+# and 1.25: 14.8 x 1.3 x 1.25 = 24.05 in the worst reachable pairing.
+# 'crater_radius' additionally carries a mana_cost impact on its paid value,
+# because the wider crater is bought with terrain as well as with rock.
+# =============================================================================
+
+options:
+
+  # ---------------------------------------------------------------------------
+  # crater_radius - how much rock the slam takes with it
+  # ---------------------------------------------------------------------------
+  crater_radius:
+    description: "How deep a crater the slam digs"
+    icon: DIAMOND_PICKAXE
+    default_index: 1
+
+    values:
+
+      narrow:
+        display_name: "Focused"
+        description: "A tight crater. 19 blocks."
+        icon: STONE
+        value_type: double
+        value: 1.5
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 6
+            description: "Requires Circle Level 6"
+          - type: number_stat
+            stat: mastery_tectonic_strike
+            minimum: 25
+            description: "Requires 25 Tectonic Strike mastery"
+        impacts:
+          - type: stat_modifier
+            stat: crater_radius
+            value: 1.5
+            modifier: SET
+          # A SMALLER CRATER STILL PUSHES AS FAR, SO THE RAW HIT HARDER.
+          - type: stat_modifier
+            stat: damage
+            value: 1.3
+            modifier: MULTIPLY
+
+      standard:
+        display_name: "Standard"
+        description: "A full crater. 81 blocks."
+        icon: IRON_PICKAXE
+        value_type: double
+        value: 2.5
+        impacts:
+          - type: stat_modifier
+            stat: crater_radius
+            value: 2.5
+            modifier: SET
+
+      wide:
+        display_name: "Tremor"
+        description: "A 179-block crater, truncated at the spell's cap."
+        icon: DIAMOND_BLOCK
+        value_type: double
+        value: 3.5
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 6
+            description: "Requires Circle Level 6"
+          - type: number_stat
+            stat: mastery_tectonic_strike
+            minimum: 75
+            description: "Requires 75 Tectonic Strike mastery"
+        impacts:
+          - type: stat_modifier
+            stat: crater_radius
+            value: 3.5
+            modifier: SET
+          # SPEC 4.3: 179 CANDIDATES IS OVER THE 120 crater_block_cap, SO THIS MAX
+          # OPTION BUYS A BIGGER JOB AND PAYS EXTRA MANA FOR IT. THE CAP STILL BINDS.
+          - type: mana_cost
+            change: 40
+
+  # ---------------------------------------------------------------------------
+  # blast_radius - how far the shockwave throws things
+  # ---------------------------------------------------------------------------
+  blast_radius:
+    description: "How far the shockwave throws"
+    icon: TNT
+    default_index: 1
+
+    values:
+
+      tight:
+        display_name: "Tight"
+        description: "Short shockwave, heavier hit per target."
+        icon: SNOWBALL
+        value_type: double
+        value: 3.5
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 6
+            description: "Requires Circle Level 6"
+        impacts:
+          - type: stat_modifier
+            stat: blast_radius
+            value: 3.5
+            modifier: SET
+          - type: stat_modifier
+            stat: damage
+            value: 1.25
+            modifier: MULTIPLY
+
+      standard:
+        display_name: "Standard"
+        description: "Normal shockwave reach"
+        icon: IRON_INGOT
+        value_type: double
+        value: 5.5
+        impacts:
+          - type: stat_modifier
+            stat: blast_radius
+            value: 5.5
+            modifier: SET
+
+      wide:
+        display_name: "Arena"
+        description: "Shockwave across most of an arena."
+        icon: TNT_MINECART
+        value_type: double
+        value: 8.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 6
+            description: "Requires Circle Level 6"
+          - type: number_stat
+            stat: mastery_tectonic_strike
+            minimum: 50
+            description: "Requires 50 Tectonic Strike mastery"
+        impacts:
+          - type: stat_modifier
+            stat: blast_radius
+            value: 8.0
+            modifier: SET
+          # STILL EXACTLY ONE HIT PER TARGET, SO THE BURST TOTAL IS 14.8 x 1.25
+          # = 18.5 AT MOST AND NEVER APPROACHES burstBudget(6) = 34.1.
+          - type: stat_modifier
+            stat: damage
+            value: 1.25
+            modifier: MULTIPLY

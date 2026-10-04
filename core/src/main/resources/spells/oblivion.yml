@@ -1,0 +1,80 @@
+id: 'oblivion'
+display_name: '&5Oblivion'
+description:
+  - '&7Erase one soul. The closer it'
+  - '&7already is to the dark, the'
+  - '&7less of it there is to remove.'
+# WHETHER THE PLUGIN SHOULD LOAD THE SPELL. DEFAULT: TRUE
+enabled: true
+
+# ELEMENT TYPE
+element: 'DARK'
+
+# THE CASTING CODE. 'R' FOR RIGHT CLICK, 'L' FOR LEFT CLICK, 'S' FOR HAND SWAP
+code: 'RSLRL'
+
+# BURST / SUSTAIN / TERRAIN / DENIAL / UTILITY - MUST BE ALLOWED FOR THE ELEMENT.
+# DARK ALLOWS {UTILITY, SUSTAIN, BURST}. DENIAL IS FORBIDDEN OUTRIGHT.
+role: 'BURST'
+
+# THE MAGIC CIRCLE REQUIRED TO CAST
+level: 9
+required_focus: 161
+
+# COOLDOWN BEFORE CASTING AGAIN (SECONDS)
+cooldown: 20
+
+# BASE CAST TIME (SECONDS). SpellBudgets.castTimeRange(9) COLLAPSES TO THE SINGLE POINT
+# 40 TICKS, SO 2.0 IS THE ONLY LEGAL CIRCLE-9 CAST TIME - NOT THE 3.0 OF THE OLD SECTION
+# 6 SINGLE-VALUE LADDER, WHICH CAST TIME AS A RANGE RETIRED.
+cast_time: 2.0
+
+# MANA COST
+mana_cost: 600
+
+# MAXIMUM MASTERY ACHIEVABLE. NOT RECOMMENDED TO CHANGE
+maximum_mastery: 100
+
+# BASE POWER. SECTION 6 LADDER, CIRCLE 9, VERBATIM.
+power: 28.6
+
+# HOW MUCH OF ITS REMAINING HEALTH A FULL-MISSING-HIT SCALES BY. A TARGET ON FULL
+# HEALTH TAKES BASE POWER; A TARGET ON 1 HEALTH TAKES THE CAP BELOW.
+missing_health_multiplier: 3.15
+
+# HARD CEILING. 28.6 x 3.15 = 90.09, truncated to the circle-9 BURST budget.
+burst_damage_cap: 90.0
+
+# NO hit_count KEY. THIS SPELL'S DAMAGE IS SCALED, NOT COUNTED: ONE CAST MAKES EXACTLY
+# ONE DAMAGE APPLICATION. SpellBudgetTest.declaredTotal READS missing_health_multiplier
+# AND burst_damage_cap FOR THIS ID AND NEVER LOOKS AT hit_count.
+
+# TARGETING
+target_range: 24.0
+
+# THE CURSE. WEAKNESS AND BLINDNESS ONLY - NEITHER DEALS DAMAGE, AND THERE IS NO WITHER.
+# NOTHING IN THE CLASS REMOVES THESE EFFECTS, SO THEY OUTLIVE THE CAST.
+debuff_duration: 12
+debuff_weakness_amplifier: 2
+debuff_blindness_amplifier: 1
+
+# THE ERASURE WAVE - 30 TICKS, EXPANDING 0.1 -> 3.0 BLOCKS. PURELY COSMETIC: IT CARRIES
+# NO ATTACK PROPERTIES, NO SPELL COMPONENT AND NO DAMAGE.
+erasure_wave_ticks: 30
+erasure_wave_radius: 3.0
+erasure_knockback: 0.6
+erasure_lift: 0.35
+
+#THE COLOR OF THE SPELL MASTERY BOSSBAR. OPTIONS ARE: RED, BLUE, YELLOW, PINK, PURPLE, WHITE AND GREEN
+mastery_bar_color: 'RED'
+
+#THE ITEM THAT APPEARS IN THE /SPELLS GUI
+gui_item: 'SCULK_CATALYST'
+gui_custom_model_data: 4161
+
+prepare_sound: 'ENTITY_WITHER_AMBIENT'
+prepare_sound_volume: 0.4
+prepare_sound_pitch: 0.6
+cast_sound: 'ENTITY_ENDERMAN_TELEPORT'
+cast_sound_volume: 1.0
+cast_sound_pitch: 0.4

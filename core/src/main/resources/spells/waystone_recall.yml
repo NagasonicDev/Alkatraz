@@ -1,0 +1,86 @@
+id: 'waystone_recall'
+display_name: '&dWaystone Recall'
+description:
+  - '&7Names a waystone, and stands you'
+  - '&7on it before the sound has'
+  - '&7finished - no channel, no window.'
+# WHAT THIS SPELL IS JUDGED ON. READ BY Spell.loadConfiguration AND SpellBudgetTest.
+# UTILITY IS ONE OF THE TWO ROLES NONE IS ALLOWED (spec 5.2): {UTILITY, DENIAL}.
+role: 'UTILITY'
+enabled: true
+
+# NONE MEANS ITS DAMAGE DOES NOT SCALE WITH ELEMENTAL DAMAGE, ONLY MAGIC DAMAGE
+element: 'NONE'
+
+# THE CASTING CODE. 'R' FOR RIGHT CLICK, 'L' FOR LEFT CLICK, 'S' FOR HAND SWAP
+code: 'SSSLS'
+
+level: 7
+
+# SPEC SECTION 6 LADDER, CIRCLE 7. Verbatim.
+# Focus: SpellBudgetTest's 85%-of-max_focus ceiling for circle 7 is
+# 0.85 * 170 = 144.5, and the ladder was lowered to 144 so the rule holds.
+#
+# cast_time 1.25s = 25 ticks. SpellBudgets.castTimeRange collapses circle 7 to the single
+# point 25 ticks, so 1.25 is the ONLY legal value here; the spec's original single-value
+# ladder (2.0) was withdrawn when the range replaced it. inferno_pilgrimage at circle 7
+# takes the same 1.25s.
+required_focus: 144
+cooldown: 13
+cast_time: 1.25
+mana_cost: 240
+
+maximum_mastery: 100
+
+# THERE IS DELIBERATELY NO power: KEY AND NO hit_count: KEY.
+# SpellBudgetTest.utilitySpellsCarryNoDamageKey asserts a UTILITY spell carries no
+# power key, and a power key here would be dead config besides. The declared per-cast
+# damage total is exactly 0.0 against a burstBudget(7) of 48.0.
+
+# ---------------------------------------------------------------------------
+# WAYSTONE RECALL-SPECIFIC KEYS. All are read by WaystoneRecallConfig.fromConfig
+# with the default shown here, so a missing key is a no-op rather than a zero.
+# ---------------------------------------------------------------------------
+
+# HOW MUCH FARTHER THAN warp's OWN BUDGETED DISTANCE A RECALL REACHES.
+# The recall distance is WarpConfig.maxDistance(circle, warp mastery, 100) multiplied
+# by this. At circle 7 with no warp mastery that is 600.0 * 2.0 = 1200 blocks, against
+# warp's 600. At 100 warp mastery it is 900.0 * 2.0 = 1800.
+distance_multiplier: 2.0
+
+# HOW FAR OFF THE CROSSHAIR A WAYSTONE MAY SIT AND STILL BE THE RECALL TARGET,
+# IN DEGREES OF ARC. Small on purpose: the destination is chosen by aim, so a wide
+# cone would make the pick ambiguous. Ties resolve to the lowest slot index.
+aim_cone_degrees: 6.0
+
+# THE FEWEST ELIGIBLE WAYSTONE SLOTS A CASTER MAY HAVE FOR THE CAST TO BE WORTH
+# FIRING. Below this the cast self-cancels and refunds its mana. Defaults to 1.
+min_recall_slots: 1
+
+# A HARD CEILING ON ELIGIBLE SLOTS, ON TOP OF warp's OWN MASTERY-GATED SLOT BUDGET.
+# The effective budget is min(WarpConfig.maxSlots(warp mastery), this). A caster can
+# therefore never recall to a waystone their warp mastery has not unlocked.
+max_recall_slots: 5
+
+# HOW LONG THE COSMETIC ARRIVAL RING EXPANDS AT THE DESTINATION, IN TICKS (10 -> a
+# 10-tick runnable). It never gates the teleport; the teleport is same-tick.
+arrival_expand_ticks: 10
+
+# THERE IS DELIBERATELY NO wind_up_duration: KEY.
+# Its absence is the spell. warp ships wind_up_duration: 6 and is interruptible by
+# movement or damage; waystone_recall resolves in the cast tick and has no channel to
+# interrupt, so it has no channel machinery - no channels map, no ChannelRegistry
+# registration, no Listener, no onMove/onDamage/onQuit handlers. WindUp's own policy
+# table agrees: EXEMPT_FROM_WIND_UP lists waystone_recall at circle 7.
+
+#THE COLOR OF THE SPELL MASTERY BOSSBAR.
+mastery_bar_color: 'GREEN'
+
+#THE ITEM THAT APPEARS IN THE /SPELLS GUI
+gui_item: 'RECOVERY_COMPASS'
+gui_custom_model_data: 4163
+
+prepare_sound: 'ENTITY_ENDERMAN_TELEPORT'
+prepare_sound_volume: 0.3
+prepare_sound_pitch: 1.2
+cast_sound: 'ENTITY_ENDERMAN_TELEPORT'

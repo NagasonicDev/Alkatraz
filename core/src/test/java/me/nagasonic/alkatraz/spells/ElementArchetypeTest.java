@@ -97,7 +97,8 @@ class ElementArchetypeTest {
             SpellRole role = SpellRole.parse(y.getString("role"));
             assertNotNull(role, id + " must declare a role");
             assertTrue(ALLOWLIST.get(element).contains(role)
-                            || SpellBudgets.isGrandfatheredBurst(id, element, role),
+                            || SpellBudgets.isGrandfatheredBurst(id, element, role)
+                            || SpellBudgets.isDualBudgetSpell(id, element, role),
                     id + " declares " + role + ", which " + element + " may not use");
         }
     }

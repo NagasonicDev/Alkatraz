@@ -1,0 +1,88 @@
+# =============================================================================
+# fault_line_options.yml
+# Spell option configuration for the Fault Line spell.
+#
+# BUDGET GUARD. This spell is DOUBLE-CHARGED: the SUSTAIN budget of 76 is spent
+# in health damage and the TERRAIN budget of 950 is spent in blocks. Only ONE
+# option changes how many 20-tick damage windows the fault walks, and the
+# implementation clamps the per-window base to sustainBudget(7) / windows, so
+# the health total closes at exactly 76 for EVERY option pairing:
+#   defaults  7.60 x 10          = 76.0
+#   'seam'    7.60 x 2.0 x 5     = 76.0
+#   'rift'    (76 / 15) x 15     = 76.0
+# Without that clamp 'rift' would deal 7.6 x 15 = 114 and overshoot.
+# =============================================================================
+
+options:
+
+  # ---------------------------------------------------------------------------
+  # crack_length - how far the fault runs before it stops
+  # ---------------------------------------------------------------------------
+  crack_length:
+    description: "How far the fault splits the ground"
+    icon: DIAMOND_PICKAXE
+    default_index: 1
+
+    values:
+
+      seam:
+        display_name: "Seam"
+        description: "A short fault. 20 blocks, 5 damage ticks."
+        icon: STONE
+        value_type: int
+        value: 20
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 7
+            description: "Requires Circle Level 7"
+        impacts:
+          - type: stat_modifier
+            stat: crack_length
+            value: 20
+            modifier: SET
+          # FEWER WINDOWS MEANS THE WHOLE BUDGET LANDS HARDER PER APPLICATION.
+          # 7.6 x 2.0 x 5 = 76.0, STILL EXACTLY THE CIRCLE-7 SUSTAIN BUDGET.
+          - type: stat_modifier
+            stat: damage
+            value: 2.0
+            modifier: MULTIPLY
+
+      standard:
+        display_name: "Standard"
+        description: "A 40 block fault, 10 damage ticks."
+        icon: IRON_PICKAXE
+        value_type: int
+        value: 40
+        impacts:
+          - type: stat_modifier
+            stat: crack_length
+            value: 40
+            modifier: SET
+
+      rift:
+        display_name: "Rift"
+        description: "A 60 block fault. 15 ticks, 555 blocks of terrain."
+        icon: NETHERITE_BLOCK
+        value_type: int
+        value: 60
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 7
+            description: "Requires Circle Level 7"
+          - type: number_stat
+            stat: mastery_fault_line
+            minimum: 75
+            description: "Requires 75 Fault Line mastery"
+        impacts:
+          - type: stat_modifier
+            stat: crack_length
+            value: 60
+            modifier: SET
+          # SPEC 4.3: 'rift' SPENDS 1.5x THE DEFAULT TERRAIN (555 AGAINST 370) AND
+          # 1.5x THE DAMAGE WINDOWS, SO IT PAYS EXTRA MANA. THE PER-WINDOW CLAMP
+          # IS WHAT KEEPS THE HEALTH TOTAL AT 76 - THIS OPTION BUYS A BIGGER JOB,
+          # NOT A BIGGER ALLOWANCE.
+          - type: mana_cost
+            change: 60

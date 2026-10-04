@@ -1,0 +1,64 @@
+id: 'thunderclap'
+display_name: '&fThunderclap'
+description:
+  - '&7A single concussive blast that shoves'
+  - '&7everything nearby outward and back.'
+enabled: true
+
+# WHAT THIS SPELL IS JUDGED ON. READ BY Spell.loadConfiguration AND SpellBudgetTest.
+role: 'BURST'
+
+# AIR IS FORBIDDEN FROM TERRAIN (spec 5.2). thunderclap never calls TerrainEditor
+# and never places a block - the blast moves entities, the world is untouched.
+element: 'AIR'
+
+# THE CASTING CODE. 'R' FOR RIGHT CLICK, 'L' FOR LEFT CLICK, 'S' FOR HAND SWAP
+code: 'LRSLS'
+
+level: 6
+
+# SPEC SECTION 6 LADDER, CIRCLE 6. Verbatim, with ONE documented exception:
+# required_focus 135 sits under SpellBudgetTest's 85% ceiling of 0.85 * 160 = 136,
+# and cast_time is NOT the ladder's 1.75s but the only value SpellBudgets.castTimeRange
+# permits at circle 6, which collapses to the single point 20 ticks = 1.0s. Every other
+# circle-6 spell already ships 1.0 for this reason.
+required_focus: 135
+cooldown: 11
+cast_time: 1.0
+mana_cost: 165
+
+maximum_mastery: 100
+
+# THE CIRCLE-6 LADDER POWER, 14.8 - the loudest single hit at circle 6. There is
+# deliberately NO hit_count key: the blast damages a target exactly once, on tick
+# 60 and no other tick, so the declared per-cast total is 14.8 against a
+# burstBudget(6) of 34.1. The unused budget is spent on reach and shove, never on
+# a second application.
+power: 14.8
+
+# CHARGE TIME BEFORE THE BLAST, IN SECONDS (3.0 -> 60 ticks).
+charge_ticks: 3.0
+# TOTAL LIFETIME OF THE RUNNABLE, IN SECONDS (12.0 -> 240 ticks). Only tick 60
+# of this window deals damage; the rest is charge and afterglow.
+clap_ticks: 12.0
+# BLAST RADIUS ON THE HORIZONTAL AXES, IN BLOCKS.
+clap_radius: 5.0
+# BLAST RADIUS ON THE VERTICAL AXIS, IN BLOCKS.
+clap_height: 3.5
+# HORIZONTAL DISPLACEMENT WRITTEN TO EVERY STRUCK TARGET, OUTWARD FROM THE
+# BLAST CENTRE. Radial, never along the caster's crosshair - that is updraft's and
+# air_burst's job.
+clap_push: 1.8
+# THE SMALL VERTICAL COMPONENT ADDED ON TOP OF THE RADIAL PUSH, IN BLOCKS/TICK.
+clap_lift: 0.45
+
+#THE COLOR OF THE SPELL MASTERY BOSSBAR.
+mastery_bar_color: 'RED'
+
+#THE ITEM THAT APPEARS IN THE /SPELLS GUI
+gui_item: 'LIGHTNING_ROD'
+gui_custom_model_data: 4150
+
+cast_sound: 'ENTITY_LIGHTNING_BOLT_THUNDER'
+cast_sound_volume: 1.5
+cast_sound_pitch: 0.6

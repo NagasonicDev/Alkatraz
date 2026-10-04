@@ -1,0 +1,153 @@
+# =============================================================================
+# continental_shift_options.yml
+# Spell option configuration for the Continental Shift spell.
+#
+# NEITHER OPTION CHANGES DAMAGE - this spell deals none at all. Both change the
+# BLOCK footprint, and the shared int[] allowance truncates the write at
+# terrain_budget = 1400 whatever the option asks for:
+#   'ridge'     45 columns x 4 layers  =  180
+#   defaults    73 columns x 6 layers  =  438
+#   'high'      73 columns x 9 layers  =  657
+#   'colossus' 163 columns x 9 layers  = 1467 -> truncated at 1400
+# =============================================================================
+
+options:
+
+  # ---------------------------------------------------------------------------
+  # plateau_radius_x - the plateau's footprint
+  # ---------------------------------------------------------------------------
+  plateau_radius_x:
+    description: "How wide the raised plateau is"
+    icon: STONE_BRICKS
+    default_index: 1
+
+    values:
+
+      rise:
+        display_name: "Ridge"
+        description: "A narrow ridge. 5 x 3, 45 columns."
+        icon: STONE
+        value_type: double
+        value: 5.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 8
+            description: "Requires Circle Level 8"
+        impacts:
+          - type: stat_modifier
+            stat: plateau_radius_x
+            value: 5.0
+            modifier: SET
+          - type: stat_modifier
+            stat: plateau_radius_z
+            value: 3.0
+            modifier: SET
+
+      standard:
+        display_name: "Mesa"
+        description: "A 6 x 4 plateau. 73 columns, 438 blocks."
+        icon: SMOOTH_STONE
+        value_type: double
+        value: 6.0
+        impacts:
+          - type: stat_modifier
+            stat: plateau_radius_x
+            value: 6.0
+            modifier: SET
+          - type: stat_modifier
+            stat: plateau_radius_z
+            value: 4.0
+            modifier: SET
+
+      colossus:
+        display_name: "Continent"
+        description: "A 9 x 6 plateau. 163 columns, 1467 blocks, cut at the cap."
+        icon: POLISHED_ANDESITE
+        value_type: double
+        value: 9.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 8
+            description: "Requires Circle Level 8"
+          - type: number_stat
+            stat: mastery_continental_shift
+            minimum: 75
+            description: "Requires 75 Continental Shift mastery"
+        impacts:
+          - type: stat_modifier
+            stat: plateau_radius_x
+            value: 9.0
+            modifier: SET
+          - type: stat_modifier
+            stat: plateau_radius_z
+            value: 6.0
+            modifier: SET
+          # SPEC 4.3: 163 COLUMNS x 9 LAYERS IS 1467 BLOCKS, OVER THE 1400
+          # CEILING, SO THIS MAX OPTION PAYS EXTRA MANA. THE SHARED int[]
+          # ALLOWANCE STILL TRUNCATES THE WRITE AT 1400.
+          - type: mana_cost
+            change: 120
+
+  # ---------------------------------------------------------------------------
+  # plateau_height - how far the slab stands proud of the ground
+  # ---------------------------------------------------------------------------
+  plateau_height:
+    description: "How high the plateau stands"
+    icon: SMOOTH_STONE_SLAB
+    default_index: 1
+
+    values:
+
+      low:
+        display_name: "Terrace"
+        description: "A low terrace. 4 blocks up."
+        icon: STONE_SLAB
+        value_type: int
+        value: 4
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 8
+            description: "Requires Circle Level 8"
+        impacts:
+          - type: stat_modifier
+            stat: plateau_height
+            value: 4
+            modifier: SET
+
+      standard:
+        display_name: "Mesa"
+        description: "Six blocks up."
+        icon: SMOOTH_STONE_SLAB
+        value_type: int
+        value: 6
+        impacts:
+          - type: stat_modifier
+            stat: plateau_height
+            value: 6
+            modifier: SET
+
+      high:
+        display_name: "Butte"
+        description: "Nine blocks up. 73 columns x 9 = 657 blocks."
+        icon: POLISHED_BLACKSTONE
+        value_type: int
+        value: 9
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 8
+            description: "Requires Circle Level 8"
+          - type: number_stat
+            stat: mastery_continental_shift
+            minimum: 50
+            description: "Requires 50 Continental Shift mastery"
+        impacts:
+          - type: stat_modifier
+            stat: plateau_height
+            value: 9
+            modifier: SET
+          # 657 IS STILL INSIDE 1400, SO THIS ONE IS A FREE DEAL RATHER THAN A
+          # PAID-OVER. NO mana_cost IMPACT IS REQUIRED.

@@ -1,0 +1,68 @@
+# =============================================================================
+# cyclone_nest_options.yml
+# Spell option configuration for the Cyclone Nest spell.
+#
+# Structure overview:
+#   options:
+#     <option-id>:
+#       description:   <string>
+#       icon:          <Material name>
+#       default_index: <int>   # 0-based index into 'values' list order
+#       values:
+#         <value-id>:
+#           display_name: <string>
+#           description:  <string>
+#           icon:         <Material name>
+#           value_type:   int | double | float | boolean | string | auto
+#           value:        <typed value>
+#           requirements: [...]   # optional
+#           impacts:      [...]   # optional
+#
+# NO OPTION HERE CARRIES A `damage` STAT MODIFIER, AND THAT IS THE POINT.
+# All three nests share one cadence clock and one per-target map, so the number of
+# nests changes how much BOARD the spell controls and never how much DAMAGE it
+# deals. power x hit_count = 72.0 is the ceiling at every option level, which is
+# why no mana_cost impact is needed: no option can take the spell past its budget.
+# =============================================================================
+
+options:
+
+  # ---------------------------------------------------------------------------
+  # nests - how many tornadoes the cast places
+  # ---------------------------------------------------------------------------
+  nests:
+    description: "How many tornadoes the cast places"
+    icon: FEATHER
+    default_index: 2
+
+    values:
+
+      one_nest:
+        display_name: "One Nest"
+        description: "A single tornado. Cheapest to cast."
+        icon: PAPER
+        value_type: int
+        value: 1
+
+      two_nests:
+        display_name: "Two Nests"
+        description: "Two tornadoes, wider coverage."
+        icon: PAPER
+        value_type: int
+        value: 2
+
+      three_nests:
+        display_name: "Three Nests"
+        description: "Three tornadoes in a triangle. The default."
+        icon: FEATHER
+        value_type: int
+        value: 3
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 7
+            description: "Requires Circle Level 7"
+          - type: number_stat
+            stat: mastery_cyclone_nest
+            minimum: 50
+            description: "Requires 50 Cyclone Nest mastery"

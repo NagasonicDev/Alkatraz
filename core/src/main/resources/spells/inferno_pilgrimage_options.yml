@@ -1,0 +1,122 @@
+# =============================================================================
+# inferno_pilgrimage_options.yml
+# Spell option configuration for the Inferno Pilgrimage spell.
+#
+# NEITHER OPTION BELOW CHANGES DAMAGE. Per-target damage is fixed at power 16 x
+# hit_count 3 = 48.0, which IS burstBudget(7). 'march' changes how far the wall
+# travels; 'breadth' changes how wide a corridor it sweeps. Because damage is
+# invariant, neither option can exceed the budget and neither carries a
+# mana_cost impact.
+# =============================================================================
+
+options:
+
+  # ---------------------------------------------------------------------------
+  # march - how far the wall travels
+  # ---------------------------------------------------------------------------
+  march:
+    description: "How far the wall travels"
+    icon: BLAZE_POWDER
+    default_index: 1
+
+    values:
+
+      short_march:
+        display_name: "Short March"
+        description: "A wall that clears a corridor."
+        icon: SOUL_SAND
+        value_type: double
+        value: 0.5
+        impacts:
+          - type: stat_modifier
+            stat: wall_speed
+            value: 0.5
+            modifier: SET
+
+      standard_march:
+        display_name: "Standard March"
+        description: "Standard wall travel."
+        icon: BLAZE_POWDER
+        value_type: double
+        value: 0.75
+        impacts:
+          - type: stat_modifier
+            stat: wall_speed
+            value: 0.75
+            modifier: SET
+
+      long_march:
+        display_name: "Pilgrimage"
+        description: "A wall that crosses the field."
+        icon: END_ROD
+        value_type: double
+        value: 1.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 8
+            description: "Requires Circle Level 8"
+          - type: number_stat
+            stat: mastery_inferno_pilgrimage
+            minimum: 50
+            description: "Requires 50 Inferno Pilgrimage mastery"
+        impacts:
+          - type: stat_modifier
+            stat: wall_speed
+            value: 1.0
+            modifier: SET
+
+  # ---------------------------------------------------------------------------
+  # breadth - how wide a corridor each pulse sweeps
+  # ---------------------------------------------------------------------------
+  breadth:
+    description: "How wide a corridor each pulse sweeps"
+    icon: CAMPFIRE
+    default_index: 1
+
+    values:
+
+      narrow_breadth:
+        display_name: "Narrow"
+        description: "A tight corridor. Easy to walk around."
+        icon: IRON_NUGGET
+        value_type: double
+        value: 2.0
+        impacts:
+          - type: stat_modifier
+            stat: pulse_width
+            value: 2.0
+            modifier: SET
+
+      standard_breadth:
+        display_name: "Standard"
+        description: "Standard corridor width."
+        icon: CAMPFIRE
+        value_type: double
+        value: 3.5
+        impacts:
+          - type: stat_modifier
+            stat: pulse_width
+            value: 3.5
+            modifier: SET
+
+      wide_breadth:
+        display_name: "Sweeping"
+        description: "A corridor that catches a whole rank."
+        icon: HAY_BLOCK
+        value_type: double
+        value: 5.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 8
+            description: "Requires Circle Level 8"
+          - type: number_stat
+            stat: mastery_inferno_pilgrimage
+            minimum: 70
+            description: "Requires 70 Inferno Pilgrimage mastery"
+        impacts:
+          - type: stat_modifier
+            stat: pulse_width
+            value: 5.0
+            modifier: SET

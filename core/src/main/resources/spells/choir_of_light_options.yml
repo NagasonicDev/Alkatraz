@@ -1,0 +1,93 @@
+# =============================================================================
+# choir_of_light_options.yml
+# Spell option configuration for the Choir of Light spell.
+#
+# Structure overview:
+#   options:
+#     <option-id>:
+#       description:   <string>
+#       icon:          <Material name>
+#       default_index: <int>   # 0-based index into 'values' list order
+#       values:
+#         <value-id>:
+#           display_name: <string>
+#           description:  <string>
+#           icon:         <Material name>
+#           value_type:   int | double | float | boolean | string | auto
+#           value:        <typed value>
+#           requirements: [...]   # optional
+#           impacts:      [...]   # optional
+#
+# Impact entry fields:
+#   type: stat_modifier | mana_cost | tag
+# =============================================================================
+
+options:
+
+  # ---------------------------------------------------------------------------
+  # shards - how many seeking shards one cast looses
+  #
+  # A SEEKING SHARD LANDS ONE HIT ON ITS OWN LOCKED TARGET, SO MORE SHARDS MEANS
+  # MORE DAMAGE PER CAST. THE DEFAULT - 2 SHARDS x 18.9 = 37.8 - SITS INSIDE THE
+  # CIRCLE-7 BURST BUDGET OF 48.0. EVERY VALUE ABOVE THAT PAYS FOR ITSELF WITH
+  # EXTRA MANA, WHICH IS THE ONLY WAY A MAX OPTION MAY EXCEED ITS BUDGET.
+  # ---------------------------------------------------------------------------
+  shards:
+    description: "How many light shards the choir looses"
+    icon: PRISMARINE_SHARD
+    default_index: 0
+
+    values:
+
+      pair:
+        display_name: "Pair"
+        description: "Two shards. 37.8 across the volley."
+        icon: PRISMARINE_SHARD
+        value_type: int
+        value: 2
+
+      trio:
+        display_name: "Trio"
+        description: "Three shards. 56.7 across the volley."
+        icon: SEA_LANTERN
+        value_type: int
+        value: 3
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 7
+            description: "Requires Circle Level 7"
+          - type: number_stat
+            stat: mastery_choir_of_light
+            minimum: 40
+            description: "Requires 40 Choir of Light mastery"
+        impacts:
+          - type: stat_modifier
+            stat: shard_count
+            value: 3
+            modifier: SET
+          - type: mana_cost
+            change: 40
+
+      chorus:
+        display_name: "Full Chorus"
+        description: "Six shards. 113.4 across the volley."
+        icon: BEACON
+        value_type: int
+        value: 6
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 7
+            description: "Requires Circle Level 7"
+          - type: number_stat
+            stat: mastery_choir_of_light
+            minimum: 80
+            description: "Requires 80 Choir of Light mastery"
+        impacts:
+          - type: stat_modifier
+            stat: shard_count
+            value: 6
+            modifier: SET
+          - type: mana_cost
+            change: 180

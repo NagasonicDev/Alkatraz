@@ -1,0 +1,70 @@
+id: 'flame_lance'
+display_name: '&6Flame Lance'
+description:
+  - '&7A lance of fire narrow enough to pass through a'
+  - '&7crowd, burning everything it touches exactly once.'
+enabled: true
+
+# NONE MEANS ITS DAMAGE DOES NOT SCALE WITH ELEMENTAL DAMAGE, ONLY MAGIC DAMAGE
+element: 'FIRE'
+
+# THE CASTING CODE. 'R' FOR RIGHT CLICK, 'L' FOR LEFT CLICK, 'S' FOR HAND SWAP
+code: 'RLSLR'
+
+# WHAT THIS SPELL IS JUDGED ON. READ BY SpellBudgetTest AND SpellBudgetTest's ELEMENT TABLE.
+role: 'BURST'
+
+# THE MAGIC CIRCLE REQUIRED TO CAST
+level: 5
+required_focus: 115
+
+# COOLDOWN BEFORE CASTING AGAIN
+cooldown: 9
+
+# BASE CAST TIME (SECONDS)
+cast_time: 1.5
+
+# MANA COST
+mana_cost: 120
+
+# MAXIMUM MASTERY ACHIEVABLE. NOT RECOMMENDED TO CHANGE
+maximum_mastery: 100
+
+# BASE DAMAGE. SECTION 6 LADDER, CIRCLE 5. APPLIED EXACTLY ONCE PER TARGET -
+# THERE IS NO hit_count KEY BECAUSE THE BEAM HITS EACH TARGET ONCE AND ONLY ONCE,
+# no matter how many ticks it spends inside the beam. See the wave-3 deviations table.
+power: 10.8
+
+# HOW FAR THE BEAM CARRIES, IN BLOCKS. THE ONLY KEY THAT CHANGES HOW MANY TARGETS
+# CAN BE REACHED - NEVER HOW MUCH ANY ONE OF THEM TAKES.
+beam_length: 24.0
+
+# HOW FAST THE FRONT ADVANCES, IN BLOCKS PER TICK. 24.0 / 1.5 = 16 TICKS = 0.8
+# SECONDS, so every damage event lands inside one second of the cast. THIS IS TRAVEL
+# SPEED, NOT A DAMAGE CADENCE.
+beam_speed: 1.5
+
+# HALF-WIDTH OF THE VISIBLE DUST COLUMN.
+beam_radius: 1.25
+
+# PERPENDICULAR HIT TEST DISTANCE FROM THE BEAM AXIS, MEASURED AT AN ENTITY'S
+# MID-BODY (EYES MINUS 0.9). DELIBERATELY WIDER THAN beam_radius SO THE DAMAGE
+# VOLUME IS NOT NARROWER THAN THE DUST. 1.25 + 0.4 (ENTITY HALF-WIDTH) < 1.75.
+hit_radius: 1.75
+
+# HOW MANY TICKS A TARGET IGNITION BURNS FOR. ONE DISCRETE IGNITION PER TARGET, NOT
+# A REFRESHED DOT - fire never sustains (spec section 5.1).
+ignite_ticks: 40
+
+# HOW HARD A TARGET IS SHOVED ALONG THE BEAM, AND HOW HIGH.
+knockback: 0.45
+knockback_y: 0.28
+
+#THE COLOR OF THE SPELL MASTERY BOSSBAR. OPTIONS ARE: RED, BLUE, YELLOW, PINK, PURPLE, WHITE AND GREEN
+mastery_bar_color: 'RED'
+
+#THE ITEM THAT APPEARS IN THE /SPELLS GUI
+gui_item: 'BLAZE_ROD'
+gui_custom_model_data: 4137
+
+cast_sound: 'ITEM_FIRECHARGE_USE'

@@ -1,0 +1,97 @@
+id: 'echo_cast'
+display_name: '&6Echo Cast'
+description:
+  - '&7Takes the last three things you cast'
+  - '&7and makes you cast them again,'
+  - '&7in order, for sixty percent.'
+# WHAT THIS SPELL IS JUDGED ON. READ BY Spell.loadConfiguration AND SpellBudgetTest.
+# UTILITY IS ONE OF THE TWO ROLES NONE IS ALLOWED (spec 5.2): {UTILITY, DENIAL}.
+role: 'UTILITY'
+enabled: true
+
+# NONE MEANS ITS DAMAGE DOES NOT SCALE WITH ELEMENTAL DAMAGE, ONLY MAGIC DAMAGE
+element: 'NONE'
+
+# THE CASTING CODE. 'R' FOR RIGHT CLICK, 'L' FOR LEFT CLICK, 'S' FOR HAND SWAP
+code: 'LLSLS'
+
+level: 8
+
+# SPEC SECTION 6 LADDER, CIRCLE 8. Verbatim.
+# required_focus 153 is EXACTLY 0.85 * max_focus(8) = 0.85 * 180, so it lands on
+# SpellBudgetTest's 85% ceiling with zero headroom. Equality passes the assertion
+# (required_focus <= ceiling); the balance consequence is that a circle-8 caster
+# cannot take a full-health hit and remain able to cast this.
+#
+# cast_time 1.5s = 30 ticks. SpellBudgets.castTimeRange collapses circle 8 to the single
+# point 30 ticks, so 1.5 is the only legal value; the spec's original single-value ladder
+# (2.25) was withdrawn when the range replaced it. sunfire_barrage at circle 8 takes 1.5s.
+required_focus: 153
+cooldown: 16
+cast_time: 1.5
+mana_cost: 450
+
+maximum_mastery: 100
+
+# THERE IS DELIBERATELY NO power: KEY AND NO hit_count: KEY.
+# SpellBudgetTest.utilitySpellsCarryNoDamageKey asserts a UTILITY spell carries no
+# power key. echo_cast deals no damage of its own - it re-fires OTHER spells, whose own
+# power keys reach their own damage. The declared per-cast total is exactly 0.0
+# against a burstBudget(8) of 64.1.
+
+# ---------------------------------------------------------------------------
+# ECHO CAST-SPECIFIC KEYS. All are read by EchoCastConfig.fromConfig with the default
+# shown here, so a missing key is a no-op rather than a zero.
+# ---------------------------------------------------------------------------
+
+# HOW MANY OF THE CASTER'S RECENT CASTS ARE RETAINED AND REPLAYED. The buffer is a
+# bounded ArrayDeque in EchoCast itself; this is its bound.
+history_size: 3
+
+# THE PERCENT OF EACH REPLAYED SPELL'S OWN mana_cost THAT THE ECHO CHARGES FOR
+# REPLAYING IT. THIS IS A MANA MODEL, NOT A POWER MODEL. Nothing anywhere in
+# EchoCast reads this value into a damage path - there is no getPower call in the
+# class to read it into. The charge is ceil(cost * 60 / 100), summed over the whole
+# sequence and taken as one StatUtils.subMana before the first replay fires, so the
+# sequence is all-or-nothing and self-cancels (refunding the 450) if the caster
+# cannot pay all of it.
+replay_cost_percent: 60
+
+# HOW MANY TICKS BETWEEN EACH REPLAY IN THE SEQUENCE (8 -> replays at t=0, 8 and 16).
+# Purely cosmetic pacing; the replays are already-paid-for casts and cannot be
+# interrupted.
+replay_gap_ticks: 8
+
+# SPELLS THAT ARE NEVER RECORDED INTO THE HISTORY AND NEVER REPLAYED.
+#   echo_cast         - a self-reference
+#   arcane_resonance  - its castAction installs pooled StatModifierImpacts and its
+#                       own listener would amplify the replay
+#   warp              - Warp.castAction calls cancelCast(caster) UNCONDITIONALLY
+#                       (Warp.java:113) and opens a menu; a replay would poison the
+#                       caster's next genuine warp with a silent refund and skip its
+#                       cooldown and mastery
+#   blink             - Blink.castAction self-cancels on both failure paths, the
+#                       same one-shot refund leak
+#
+# The general rule this encodes: a spell whose castAction self-cancels or opens a GUI
+# cannot be safely re-entered. skip_ids is a config list precisely so the set can grow
+# without a code change.
+skip_ids:
+  - 'echo_cast'
+  - 'arcane_resonance'
+  - 'warp'
+  - 'blink'
+
+#THE COLOR OF THE SPELL MASTERY BOSSBAR.
+mastery_bar_color: 'YELLOW'
+
+#THE ITEM THAT APPEARS IN THE /SPELLS GUI
+gui_item: 'AMETHYST_CLUSTER'
+gui_custom_model_data: 4164
+
+prepare_sound: 'BLOCK_ENCHANTMENT_TABLE_USE'
+prepare_sound_volume: 0.5
+prepare_sound_pitch: 0.9
+cast_sound: 'ENTITY_EVOKER_PREPARE_ATTACK'
+cast_sound_volume: 0.9
+cast_sound_pitch: 1.5

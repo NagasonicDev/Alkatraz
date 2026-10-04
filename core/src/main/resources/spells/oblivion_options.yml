@@ -1,0 +1,145 @@
+# =============================================================================
+# oblivion_options.yml
+# Spell option configuration for the Oblivion spell.
+#
+# NEITHER OPTION BELOW TOUCHES DAMAGE, SO NEITHER CARRIES A mana_cost IMPACT. The
+# damage ceiling is fixed by power 28.6 x missing_health_multiplier 3.15, capped
+# at burst_damage_cap 90.0, on EVERY value of EVERY option - there is no damage
+# knob in this file for a player to overreach with, and 90.0 IS burstBudget(9).
+# debuff_duration selects between two non-damaging potion effects; target_range only
+# changes how far the crosshair reaches.
+#
+# Structure overview:
+#   options:
+#     <option-id>:
+#       description:   <string>
+#       icon:          <Material name>
+#       default_index: <int>   # 0-based index into 'values' list order
+#       values:
+#         <value-id>:
+#           display_name: <string>
+#           description:  <string>
+#           icon:         <Material name>
+#           value_type:   int | double | float | boolean | string | auto
+#           value:        <typed value>
+#           requirements: [...]   # optional - list of requirement entries
+#           impacts:      [...]   # optional - list of impact entries
+#
+# Requirement entry fields:
+#   type: number_stat | boolean_stat | permission | option_value | composite
+#
+# Impact entry fields:
+#   type: stat_modifier | mana_cost | tag
+# =============================================================================
+
+options:
+
+  # ---------------------------------------------------------------------------
+  # debuff_duration - How long the curse outlives the cast
+  # ---------------------------------------------------------------------------
+  debuff_duration:
+    description: "How long the erased soul's weakness lingers"
+    icon: SCULK_CATALYST
+    default_index: 1
+
+    values:
+
+      brief:
+        display_name: "Brief Unmaking"
+        description: "6 seconds of weakness and blindness"
+        icon: GRAY_DYE
+        value_type: int
+        value: 6
+        impacts:
+          - type: stat_modifier
+            stat: debuff_duration
+            value: 6.0
+            modifier: SET
+
+      erasure:
+        display_name: "Erasure"
+        description: "12 seconds of weakness and blindness"
+        icon: SCULK_CATALYST
+        value_type: int
+        value: 12
+        impacts:
+          - type: stat_modifier
+            stat: debuff_duration
+            value: 12.0
+            modifier: SET
+
+      unmade:
+        display_name: "Unmade"
+        description: "20 seconds of weakness and blindness"
+        icon: BLACK_DYE
+        value_type: int
+        value: 20
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 9
+            description: "Requires Circle Level 9"
+          - type: number_stat
+            stat: mastery_oblivion
+            minimum: 75
+            description: "Requires 75 Oblivion mastery"
+        impacts:
+          - type: stat_modifier
+            stat: debuff_duration
+            value: 20.0
+            modifier: SET
+
+  # ---------------------------------------------------------------------------
+  # target_range - How far the erasure can reach
+  # ---------------------------------------------------------------------------
+  target_range:
+    description: "How far Oblivion can reach"
+    icon: ENDER_EYE
+    default_index: 1
+
+    values:
+
+      close:
+        display_name: "Close"
+        description: "Reach 16 blocks"
+        icon: IRON_SWORD
+        value_type: int
+        value: 16
+        impacts:
+          - type: stat_modifier
+            stat: target_range
+            value: 16.0
+            modifier: SET
+
+      reach:
+        display_name: "Far"
+        description: "Reach 24 blocks"
+        icon: ENDER_EYE
+        value_type: int
+        value: 24
+        impacts:
+          - type: stat_modifier
+            stat: target_range
+            value: 24.0
+            modifier: SET
+
+      unseeable:
+        display_name: "Unseeable"
+        description: "Reach 32 blocks"
+        icon: END_CRYSTAL
+        value_type: int
+        value: 32
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 9
+            description: "Requires Circle Level 9"
+          - type: number_stat
+            stat: mastery_oblivion
+            minimum: 50
+            description: "Requires 50 Oblivion mastery"
+        impacts:
+          - type: stat_modifier
+            stat: target_range
+            value: 32.0
+            modifier: SET

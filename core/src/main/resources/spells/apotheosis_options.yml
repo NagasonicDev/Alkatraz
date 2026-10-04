@@ -1,0 +1,187 @@
+# =============================================================================
+# apotheosis_options.yml
+# Spell option configuration for the Apotheosis spell.
+#
+# Uses the generic pooled-slot option pattern:
+#   - option_role: pool  - master list of selectable values + custom menu
+#   - option_role: slot  - per-slot selection (inherits values from the pool)
+#   - menu_slots: <int>  - slot headers shown in the pool menu
+#   - group: <id>        - collapses hidden options into one menu entry
+#
+# Cast-time effects use cast_modifier impacts. kind: attribute becomes an
+# AttributeAppliedModifier; kind: stat becomes a StatAppliedModifier.
+#
+# BOTH SHIPPED ENTRIES ARE THINGS THE CODEBASE PROVABLY CONSUMES:
+#   mana_cost - a cast_modifier/kind: stat named `mana_cost` lands in the profile and
+#               Spell.getModifiedManaCost sums every modifier of that name
+#               UNCONDITIONALLY, never consulting the modifier-type map
+#   movement speed - a cast_modifier/kind: attribute becomes a real Bukkit
+#               AttributeModifier, added on apply and removed on expiry
+#
+# There is deliberately NO `damage` entry and NO `projectile_speed` entry. A
+# cast_modifier/kind: stat becomes a StatAppliedModifier, whose apply() calls
+# profile.setSpellModifier(...) and never setSpellModifierType(...). Spell.getModifiedStat
+# guards every branch on the modifier type, so a null type falls through and the value is
+# silently dropped. A `damage` or `projectile_speed` entry in this pool would therefore look
+# like it worked while being inert. The vanilla half of the empowerment - Strength I,
+# Regeneration and Resistance - is applied directly in completeTransformation instead, where
+# it cannot be swallowed.
+#
+# SLOT DEFAULTS ARE NOT 'none'. SpellOptionLoader merges a pool's values into each slot in a
+# SECOND pass and only APPENDS the ones the slot does not already declare, so a slot's value
+# order is [none, ...pool]. default_index: 0 therefore resolves to `none`, which
+# CastModifierCollector skips, which makes applyConfiguredModifiers return false and cancels
+# the cast - a transformation that silently does nothing. Slot 1 points at index 1 and slot 2
+# at index 2 so the default ascendant is real.
+# =============================================================================
+
+options:
+
+  # ---------------------------------------------------------------------------
+  # duration - how long the ascendant holds once the channel lands
+  # ---------------------------------------------------------------------------
+  duration:
+    description: "How long the ascendant holds"
+    icon: CLOCK
+    default_index: 1
+
+    values:
+
+      brief:
+        display_name: "Brief"
+        description: "Ascends for 15 seconds, reduced cost"
+        icon: CLOCK
+        value_type: int
+        value: 15
+        impacts:
+          - type: stat_modifier
+            stat: duration
+            value: 15
+            modifier: SET
+          - type: mana_cost
+            change: -60
+
+      full:
+        display_name: "Full"
+        description: "Ascends for 30 seconds"
+        icon: CLOCK
+        value_type: int
+        value: 30
+        impacts:
+          - type: stat_modifier
+            stat: duration
+            value: 30
+            modifier: SET
+
+      eternal:
+        display_name: "Eternal"
+        description: "Ascends for 60 seconds"
+        icon: CLOCK
+        value_type: int
+        value: 60
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 8
+            description: "Requires Circle Level 8"
+          - type: number_stat
+            stat: mastery_apotheosis
+            minimum: 60
+            description: "Requires 60 Apotheosis mastery"
+        impacts:
+          - type: stat_modifier
+            stat: duration
+            value: 60
+            modifier: SET
+          - type: mana_cost
+            change: 60
+
+  # ---------------------------------------------------------------------------
+  # apotheosis_pool - the two things apotheosis can grant. ORDER MATTERS: the slots
+  # below inherit these in this order, after their own `none`, so index 1 is ascendant
+  # and index 2 is swift.
+  # ---------------------------------------------------------------------------
+  apotheosis_pool:
+    description: "What the ascendant grants"
+    display_name: "Configure Apotheosis"
+    icon: NETHER_STAR
+    hidden: true
+    group: configure_apotheosis
+    option_role: pool
+    menu_slots: 2
+    use_custom_menu: true
+    custom_menu: "me.nagasonic.alkatraz.gui.implementation.options.PooledSlotSelectionMenu"
+    default_index: 0
+
+    values:
+
+      ascendant:
+        display_name: "Ascendant"
+        description: "Your spells cost 60 less mana"
+        icon: LAPIS_LAZULI
+        value_type: string
+        value: ascendant
+        impacts:
+          - type: cast_modifier
+            kind: stat
+            stat: mana_cost
+            value: -60
+            description: "-60 mana per spell"
+
+      swift:
+        display_name: "Swift"
+        description: "The light carries you: 15% faster movement"
+        icon: FEATHER
+        value_type: string
+        value: swift
+        impacts:
+          - type: cast_modifier
+            kind: attribute
+            attribute: GENERIC_MOVEMENT_SPEED
+            amount: 0.15
+            operation: ADD_SCALAR
+            description: "+15% movement speed"
+
+  # ---------------------------------------------------------------------------
+  # apotheosis_slot_1 - default_index 1, so the default is `ascendant` and not `none`
+  # ---------------------------------------------------------------------------
+  apotheosis_slot_1:
+    description: "First ascendant slot"
+    display_name: "Slot 1"
+    icon: NETHER_STAR
+    hidden: true
+    group: configure_apotheosis
+    option_role: slot
+    slot_index: 1
+    inherit_values_from: apotheosis_pool
+    default_index: 1
+
+    values:
+      none:
+        display_name: "Empty"
+        description: "Nothing granted in this slot"
+        icon: LIGHT_GRAY_STAINED_GLASS_PANE
+        value_type: string
+        value: none
+
+  # ---------------------------------------------------------------------------
+  # apotheosis_slot_2 - default_index 2, so the default is `swift` and not `none`
+  # ---------------------------------------------------------------------------
+  apotheosis_slot_2:
+    description: "Second ascendant slot"
+    display_name: "Slot 2"
+    icon: NETHER_STAR
+    hidden: true
+    group: configure_apotheosis
+    option_role: slot
+    slot_index: 2
+    inherit_values_from: apotheosis_pool
+    default_index: 2
+
+    values:
+      none:
+        display_name: "Empty"
+        description: "Nothing granted in this slot"
+        icon: LIGHT_GRAY_STAINED_GLASS_PANE
+        value_type: string
+        value: none

@@ -168,7 +168,8 @@ class SpellBudgetTest {
             SpellRole role = SpellRole.parse(y.getString("role"));
             assertNotNull(role, id + " must declare a parseable role");
             boolean allowed = SpellBudgets.isAllowed(element, role)
-                    || SpellBudgets.isGrandfatheredBurst(id, element, role);
+                    || SpellBudgets.isGrandfatheredBurst(id, element, role)
+                    || SpellBudgets.isDualBudgetSpell(id, element, role);
             assertTrue(allowed, id + " declares " + role + " but " + element + " may not use it");
         }
     }
@@ -204,10 +205,18 @@ class SpellBudgetTest {
     void terrainSpellsCarryTheCircleTerrainBudget() throws IOException {
         for (String id : roster) {
             YamlConfiguration y = BundledSpellRoster.load(id);
-            if (SpellRole.TERRAIN != SpellRole.parse(y.getString("role"))) continue;
+            SpellRole role = SpellRole.parse(y.getString("role"));
+            // fault_line is exempt from EARTH's allowlist via
+            // SpellBudgets.isDualBudgetSpell precisely because it is a SUSTAIN field
+            // that also reshapes land, so it never reaches the TERRAIN arm above.
+            // Without this clause its terrain_budget would be an unasserted key.
+            if (SpellRole.TERRAIN != role
+                    && !SpellBudgets.isDualBudgetSpell(id, Element.valueOf(y.getString("element")), role)) {
+                continue;
+            }
             int circle = circleOf(y);
             assertTrue(y.isSet("terrain_budget"),
-                    id + " is TERRAIN and must declare terrain_budget, or it has no block cap at all");
+                    id + " reshapes land and must declare terrain_budget, or it has no block cap at all");
             assertEquals(SpellBudgets.terrainBudget(circle), y.getInt("terrain_budget"),
                     id + " spends from the circle-" + circle + " TERRAIN budget");
         }

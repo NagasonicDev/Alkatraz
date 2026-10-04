@@ -1,0 +1,82 @@
+id: 'cyclone_nest'
+display_name: '&fCyclone Nest'
+description:
+  - '&7Set three small tornadoes into the'
+  - '&7ground and leave them feeding.'
+enabled: true
+
+# WHAT THIS SPELL IS JUDGED ON. READ BY Spell.loadConfiguration AND SpellBudgetTest.
+role: 'SUSTAIN'
+
+# AIR IS FORBIDDEN FROM TERRAIN (spec 5.2). cyclone_nest never calls TerrainEditor
+# and never places a block. It only READS terrain, via Utils.findTopSolid, to
+# decide where a nest's funnel starts.
+element: 'AIR'
+
+# THE CASTING CODE. 'R' FOR RIGHT CLICK, 'L' FOR LEFT CLICK, 'S' FOR HAND SWAP
+code: 'LRSRL'
+
+level: 7
+
+# SPEC SECTION 6 LADDER, CIRCLE 7. mana/cd/focus verbatim - required_focus 144
+# sits under SpellBudgetTest's 85%-of-max_focus ceiling of 0.85 * 170 = 144.5.
+# cast_time is NOT the ladder's 2.0s but the only value SpellBudgets.castTimeRange
+# permits at circle 7, which collapses to the single point 25 ticks = 1.25s.
+required_focus: 144
+cooldown: 13
+cast_time: 1.25
+mana_cost: 240
+
+maximum_mastery: 100
+
+# POWER DEVIATION, DOCUMENTED. The circle-7 ladder power of 18.9 is a PER-HIT
+# value and cannot be used unmodified by a SUSTAIN field. 9.0 x hit_count 8 = 72.0
+# against a sustainBudget(7) of 76, leaving 4.0 of headroom. This is the same
+# deviation shape as inferno_pilgrimage's 16 x 3.
+power: 9.0
+
+# MANDATED BY THE SUSTAIN CADENCE RULE. cyclone_nest damages one target once
+# every SpellAttackContext.DAMAGE_INTERVAL_TICKS (20) ticks for nest_lifetime
+# seconds, so it applies damage exactly nest_lifetime times. This must equal
+# nest_lifetime, and CycloneNestConfig.hitsPerTarget() asserts the same number.
+#
+# IT IS NOT MULTIPLIED BY nest_count. All three nests share ONE cadence clock and
+# ONE per-target map, so a target standing in the overlap of two or three nests
+# still takes one application, not two or three. Three nests buy area control,
+# not damage. power x hit_count = 72.0 is therefore the true per-target ceiling.
+hit_count: 8
+
+# HOW MANY TORNADOES THE CAST PLACES. Default 3. Never carries a `damage` stat
+# modifier in any options file - see the note above.
+nest_count: 3
+# HOW LONG ONE TORNADO (AND THE WHOLE CAST) LASTS, IN SECONDS. 8.0 -> 160 ticks,
+# 8 damage openings at the 20-tick cadence.
+nest_lifetime: 8.0
+# FUNNEL RADIUS AT THE BASE AND AT THE TOP OF THE CONE.
+nest_radius: 2.5
+# FUNNEL HEIGHT IN BLOCKS.
+nest_height: 6.0
+# HORIZONTAL PULL TOWARD THE FUNNEL AXIS, IN BLOCKS/TICK, FALLING OFF LINEARLY
+# TO 10% AT THE EDGE.
+nest_pull: 0.55
+# WANDER SPEED IN BLOCKS/TICK. The heading advances 0.21 rad/tick, one full turn
+# every 30 ticks, and reverses on a wall or a drop of more than 2.5 blocks.
+nest_wander_speed: 0.18
+# THE THREE NESTS ARE PLACED DETERMINISTICALLY - never Math.random - at 0, 120 and
+# 240 degrees around the aim point, each at half this distance from the centre.
+nest_spawn_spread: 4.0
+
+#THE COLOR OF THE SPELL MASTERY BOSSBAR.
+mastery_bar_color: 'YELLOW'
+
+#THE ITEM THAT APPEARS IN THE /SPELLS GUI
+gui_item: 'FEATHER'
+gui_custom_model_data: 4151
+
+# 'ENTITY_BLAZE_WHISPER' is not a Bukkit Sound name. Spell.playSound resolves
+# cast_sound with Sound.valueOf inside a catch-all, so a bad name is SILENT, not
+# an error - this spell was playing no cast sound at all. ENTITY_BLAZE_AMBIENT is
+# the blaze's real idle whoosh and is the closest thing to a nest of tornadoes.
+cast_sound: 'ENTITY_BLAZE_AMBIENT'
+cast_sound_volume: 0.9
+cast_sound_pitch: 0.7

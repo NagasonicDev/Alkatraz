@@ -1,0 +1,162 @@
+options:
+  ward_size:
+    description: "Adjust the ward radius."
+    icon: BARRIER
+    default_index: 1
+    values:
+      compact:
+        display_name: "Compact"
+        description: "Tighter shell, hugs the holder."
+        icon: IRON_NUGGET
+        value_type: double
+        value: 2.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 4
+            description: "Requires Circle Level 4"
+        impacts:
+          - type: stat_modifier
+            stat: barrier_size
+            value: 2.0
+            modifier: SET
+      standard:
+        display_name: "Standard"
+        description: "Default ward radius."
+        icon: IRON_INGOT
+        value_type: double
+        value: 2.5
+        impacts:
+          - type: stat_modifier
+            stat: barrier_size
+            value: 2.5
+            modifier: SET
+      wide:
+        display_name: "Wide"
+        description: "Broad shell. Covers two people."
+        icon: IRON_BLOCK
+        value_type: double
+        value: 3.5
+        requirements:
+          - type: number_stat
+            stat: mastery_arcaneward
+            minimum: 50
+            description: "Requires 50 Arcane Ward mastery"
+        impacts:
+          - type: stat_modifier
+            stat: barrier_size
+            value: 3.5
+            modifier: SET
+          - type: mana_cost
+            change: 10
+
+  ward_duration:
+    description: "Adjust how long the ward lasts."
+    icon: CLOCK
+    default_index: 1
+    values:
+      brief:
+        display_name: "Brief"
+        description: "Fades sooner."
+        icon: CLOCK
+        value_type: double
+        value: 30.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 4
+            description: "Requires Circle Level 4"
+        impacts:
+          - type: stat_modifier
+            stat: barrier_duration
+            value: 30.0
+            modifier: SET
+          - type: mana_cost
+            change: -10
+      standard:
+        display_name: "Standard"
+        description: "Default ward duration."
+        icon: COMPASS
+        value_type: double
+        value: 45.0
+        impacts:
+          - type: stat_modifier
+            stat: barrier_duration
+            value: 45.0
+            modifier: SET
+      enduring:
+        display_name: "Enduring"
+        description: "Outlasts a long engagement."
+        icon: RECOVERY_COMPASS
+        value_type: double
+        value: 60.0
+        requirements:
+          - type: number_stat
+            stat: mastery_arcaneward
+            minimum: 75
+            description: "Requires 75 Arcane Ward mastery"
+        impacts:
+          - type: stat_modifier
+            stat: barrier_duration
+            value: 60.0
+            modifier: SET
+          - type: mana_cost
+            change: 15
+
+  ward_hitpoints:
+    description: "Adjust how much damage the ward absorbs."
+    icon: SHIELD
+    default_index: 1
+    values:
+      fragile:
+        display_name: "Fragile"
+        description: "Breaks on the first heavy hit."
+        icon: CRACKED_STONE_BRICKS
+        value_type: double
+        value: 28.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 4
+            description: "Requires Circle Level 4"
+        impacts:
+          - type: stat_modifier
+            stat: barrier_hitpoints
+            value: 28.0
+            modifier: SET
+          - type: mana_cost
+            change: -5
+      standard:
+        display_name: "Standard"
+        description: "Default ward strength."
+        icon: SHIELD
+        value_type: double
+        value: 40.0
+        impacts:
+          - type: stat_modifier
+            stat: barrier_hitpoints
+            value: 40.0
+            modifier: SET
+      reinforced:
+        display_name: "Reinforced"
+        description: "Soaks an entire volley."
+        icon: ANVIL
+        value_type: double
+        value: 55.0
+        requirements:
+          - type: number_stat
+            stat: mastery_arcaneward
+            minimum: 75
+            description: "Requires 75 Arcane Ward mastery"
+        impacts:
+          - type: stat_modifier
+            stat: barrier_hitpoints
+            value: 55.0
+            modifier: SET
+          - type: mana_cost
+            change: 12
+
+# THERE IS DELIBERATELY NO follow_player OPTION HERE.
+# barrier_options.yml ships one, and it is the single option that would let a player
+# turn arcane_ward back into barrier. Persistence after the caster moves is this
+# spell's entire identity, so it must not be a player-side choice.

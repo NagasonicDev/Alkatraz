@@ -1,0 +1,135 @@
+# =============================================================================
+# umbral_volley_options.yml
+# Spell option configuration for the Umbral Volley spell.
+#
+# NEITHER OPTION BELOW CAN PUSH THE SPELL PAST ITS BUDGET, SO NEITHER CARRIES A
+# mana_cost IMPACT. Per-target damage is fixed at power 16 x hit_count 3 = 48.0,
+# which IS burstBudget(7), and dart_count's MAXIMUM VALUE IS 3 - the shipped
+# default - so no value of it can exceed the budget. curse_duration touches no
+# damage at all: it selects between two non-damaging potion effects.
+#
+# Structure overview:
+#   options:
+#     <option-id>:
+#       description:   <string>
+#       icon:          <Material name>
+#       default_index: <int>   # 0-based index into 'values' list order
+#       values:
+#         <value-id>:
+#           display_name: <string>
+#           description:  <string>
+#           icon:         <Material name>
+#           value_type:   int | double | float | boolean | string | auto
+#           value:        <typed value>
+#           requirements: [...]   # optional - list of requirement entries
+#           impacts:      [...]   # optional - list of impact entries
+#
+# Requirement entry fields:
+#   type: number_stat | boolean_stat | permission | option_value | composite
+#
+# Impact entry fields:
+#   type: stat_modifier | mana_cost | tag
+# =============================================================================
+
+options:
+
+  # ---------------------------------------------------------------------------
+  # dart_count - How many darts leave the caster on one cast
+  # ---------------------------------------------------------------------------
+  dart_count:
+    description: "How many shadow darts the volley contains"
+    icon: SPECTRAL_ARROW
+    default_index: 2
+
+    values:
+
+      single_dart:
+        display_name: "Single Dart"
+        description: "One dart, all of the damage"
+        icon: ARROW
+        value_type: int
+        value: 1
+        impacts:
+          - type: stat_modifier
+            stat: dart_count
+            value: 1.0
+            modifier: SET
+
+      paired_darts:
+        display_name: "Paired Darts"
+        description: "Two darts, half the damage each"
+        icon: BARB_ARROW
+        value_type: int
+        value: 2
+        impacts:
+          - type: stat_modifier
+            stat: dart_count
+            value: 2.0
+            modifier: SET
+
+      full_volley:
+        display_name: "Full Volley"
+        description: "Three darts at 16 damage each - 48 total"
+        icon: SPECTRAL_ARROW
+        value_type: int
+        value: 3
+        impacts:
+          - type: stat_modifier
+            stat: dart_count
+            value: 3.0
+            modifier: SET
+
+  # ---------------------------------------------------------------------------
+  # curse_duration - How long the debuff rides on the target
+  # ---------------------------------------------------------------------------
+  curse_duration:
+    description: "How long the curse outlives the cast"
+    icon: SPIDER_EYE
+    default_index: 1
+
+    values:
+
+      fading:
+        display_name: "Fading Curse"
+        description: "4 seconds of weakness and blindness"
+        icon: SPIDER_EYE
+        value_type: int
+        value: 4
+        impacts:
+          - type: stat_modifier
+            stat: debuff_duration
+            value: 4.0
+            modifier: SET
+
+      umbral:
+        display_name: "Umbral Curse"
+        description: "8 seconds of weakness and blindness"
+        icon: NETHER_STAR
+        value_type: int
+        value: 8
+        impacts:
+          - type: stat_modifier
+            stat: debuff_duration
+            value: 8.0
+            modifier: SET
+
+      deep_curse:
+        display_name: "Deep Curse"
+        description: "12 seconds of weakness and blindness"
+        icon: DRAGON_BREATH
+        value_type: int
+        value: 12
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 7
+            description: "Requires Circle Level 7"
+          - type: number_stat
+            stat: mastery_umbral_volley
+            minimum: 60
+            description: "Requires 60 Umbral Volley mastery"
+        impacts:
+          - type: stat_modifier
+            stat: debuff_duration
+            value: 12.0
+            modifier: SET

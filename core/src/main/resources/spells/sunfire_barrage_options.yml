@@ -1,0 +1,122 @@
+# =============================================================================
+# sunfire_barrage_options.yml
+# Spell option configuration for the Sunfire Barrage spell.
+#
+# NEITHER OPTION BELOW CHANGES DAMAGE. The per-target cap is the yml's hit_count: 2,
+# so no configuration of this spell can deal more than 2 x 22.7 = 45.4 to one body,
+# which is inside burstBudget(8) = 64.1. 'targets' changes how many bodies are marked
+# - MORE MARKS ACTUALLY MEANS FEWER RE-STRIKES PER BODY - and 'cadence' changes only
+# the spacing between impacts. Neither therefore carries a mana_cost impact.
+# =============================================================================
+
+options:
+
+  # ---------------------------------------------------------------------------
+  # targets - how many bodies the channel marks
+  # ---------------------------------------------------------------------------
+  targets:
+    description: "How many bodies the channel marks"
+    icon: TARGET
+    default_index: 1
+
+    values:
+
+      focused:
+        display_name: "Focused"
+        description: "Three marks. Each one burns twice."
+        icon: IRON_NUGGET
+        value_type: int
+        value: 3
+        impacts:
+          - type: stat_modifier
+            stat: max_marks
+            value: 3
+            modifier: SET
+
+      standard:
+        display_name: "Standard"
+        description: "Five marks."
+        icon: TARGET
+        value_type: int
+        value: 5
+        impacts:
+          - type: stat_modifier
+            stat: max_marks
+            value: 5
+            modifier: SET
+
+      saturation:
+        display_name: "Saturation"
+        description: "Eight marks across the field."
+        icon: SPECTRAL_ARROW
+        value_type: int
+        value: 8
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 9
+            description: "Requires Circle Level 9"
+          - type: number_stat
+            stat: mastery_sunfire_barrage
+            minimum: 60
+            description: "Requires 60 Sunfire Barrage mastery"
+        impacts:
+          - type: stat_modifier
+            stat: max_marks
+            value: 8
+            modifier: SET
+
+  # ---------------------------------------------------------------------------
+  # cadence - how fast the pieces fall once the channel completes
+  # ---------------------------------------------------------------------------
+  cadence:
+    description: "How fast the pieces fall once the channel completes"
+    icon: CLOCK
+    default_index: 0
+
+    values:
+
+      volley:
+        display_name: "Volley"
+        description: "Five impacts in under a second."
+        icon: FEATHER
+        value_type: int
+        value: 2
+        impacts:
+          - type: stat_modifier
+            stat: strike_interval_ticks
+            value: 2
+            modifier: SET
+
+      hail:
+        display_name: "Hail"
+        description: "Half a second between impacts. Easiest to walk out of."
+        icon: SNOWBALL
+        value_type: int
+        value: 4
+        impacts:
+          - type: stat_modifier
+            stat: strike_interval_ticks
+            value: 4
+            modifier: SET
+
+      bombardment:
+        display_name: "Bombardment"
+        description: "A full second between impacts. Every stone lands."
+        icon: CANNON
+        value_type: int
+        value: 20
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 9
+            description: "Requires Circle Level 9"
+          - type: number_stat
+            stat: mastery_sunfire_barrage
+            minimum: 80
+            description: "Requires 80 Sunfire Barrage mastery"
+        impacts:
+          - type: stat_modifier
+            stat: strike_interval_ticks
+            value: 20
+            modifier: SET

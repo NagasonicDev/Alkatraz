@@ -1,0 +1,101 @@
+# =============================================================================
+# inferno_rite_options.yml
+# Spell option configuration for the Inferno Rite spell.
+#
+# NEITHER OPTION BELOW CHANGES DAMAGE. 'reach' changes which already-burning bodies
+# are close enough to count; 'spread' changes how many a single triggering hit may
+# detonate, but InfernoRiteConfig.detonationsPerTrigger() clamps that to hit_count,
+# and the per-cast charge counter is the real ceiling at 3. So no configuration of
+# this spell can exceed 3 x 28.6 = 85.8, which is inside burstBudget(9) = 90.0.
+# =============================================================================
+
+options:
+
+  # ---------------------------------------------------------------------------
+  # reach - how close a burning body must be to count
+  # ---------------------------------------------------------------------------
+  reach:
+    description: "How close a burning body must be to count"
+    icon: SOUL_CAMPFIRE
+    default_index: 1
+
+    values:
+
+      close:
+        display_name: "Close"
+        description: "Only what is already ablaze at arm's reach."
+        icon: IRON_NUGGET
+        value_type: double
+        value: 4.0
+        impacts:
+          - type: stat_modifier
+            stat: chain_radius
+            value: 4.0
+            modifier: SET
+
+      standard:
+        display_name: "Standard"
+        description: "Standard propagation range."
+        icon: SOUL_CAMPFIRE
+        value_type: double
+        value: 8.0
+        impacts:
+          - type: stat_modifier
+            stat: chain_radius
+            value: 8.0
+            modifier: SET
+
+      conflagrant:
+        display_name: "Conflagrant"
+        description: "A whole burning field goes at once."
+        icon: NETHER_STAR
+        value_type: double
+        value: 14.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 9
+            description: "Requires Circle Level 9"
+          - type: number_stat
+            stat: mastery_inferno_rite
+            minimum: 75
+            description: "Requires 75 Inferno Rite mastery"
+        impacts:
+          - type: stat_modifier
+            stat: chain_radius
+            value: 14.0
+            modifier: SET
+
+  # ---------------------------------------------------------------------------
+  # spread - how many bodies one triggering hit detonates
+  # ---------------------------------------------------------------------------
+  spread:
+    description: "How many bodies one triggering hit detonates"
+    icon: REDSTONE
+    default_index: 1
+
+    values:
+
+      focused:
+        display_name: "Focused"
+        description: "One body per hit. Three hits, three bodies."
+        icon: REDSTONE
+        value_type: int
+        value: 1
+        impacts:
+          - type: stat_modifier
+            stat: chain_targets_per_trigger
+            value: 1
+            modifier: SET
+
+      standard:
+        display_name: "Standard"
+        description: "Two bodies per hit."
+        icon: FIRE_CHARGE
+        value_type: int
+        value: 2
+        impacts:
+          - type: stat_modifier
+            stat: chain_targets_per_trigger
+            value: 2
+            modifier: SET

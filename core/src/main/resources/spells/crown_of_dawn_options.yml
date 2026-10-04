@@ -1,0 +1,138 @@
+# =============================================================================
+# crown_of_dawn_options.yml
+# Spell option configuration for the Crown of Dawn spell.
+#
+# Structure overview:
+#   options:
+#     <option-id>:
+#       description:   <string>
+#       icon:          <Material name>
+#       default_index: <int>   # 0-based index into 'values' list order
+#       values:
+#         <value-id>:
+#           display_name: <string>
+#           description:  <string>
+#           icon:         <Material name>
+#           value_type:   int | double | float | boolean | string | auto
+#           value:        <typed value>
+#           requirements: [...]   # optional
+#           impacts:      [...]   # optional
+# =============================================================================
+#
+# NEITHER OPTION CHANGES HOW MUCH DAMAGE A SINGLE TARGET TAKES. THE DAMAGE BAND IS
+# wall_half_thickness + 0.6, NOT THE WALL'S LENGTH OR HEIGHT, AND THE PER-CAST
+# TOTAL IS PINNED AT denial_damage_cap = 90.0 REGARDLESS. SO NEITHER OPTION
+# CARRIES A mana_cost IMPACT - THERE IS NO OVER-BUDGET MAX OPTION HERE.
+# =============================================================================
+
+options:
+
+  # ---------------------------------------------------------------------------
+  # wall_length - how far the wall spans along the caster's aim
+  # ---------------------------------------------------------------------------
+  wall_length:
+    description: "How far the wall of dawn reaches"
+    icon: WHITE_STAINED_GLASS
+    default_index: 1
+
+    values:
+
+      short_wall:
+        display_name: "Short Wall"
+        description: "Six blocks of dawn."
+        icon: WHITE_STAINED_GLASS_PANE
+        value_type: double
+        value: 6.0
+        impacts:
+          - type: stat_modifier
+            stat: wall_length
+            value: 6.0
+            modifier: SET
+
+      dawn_wall:
+        display_name: "Wall of Dawn"
+        description: "Nine blocks of dawn."
+        icon: WHITE_STAINED_GLASS
+        value_type: double
+        value: 9.0
+        impacts:
+          - type: stat_modifier
+            stat: wall_length
+            value: 9.0
+            modifier: SET
+
+      world_wall:
+        display_name: "Wall of the World"
+        description: "Fourteen blocks of dawn."
+        icon: LIGHTNING_ROD
+        value_type: double
+        value: 14.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 9
+            description: "Requires Circle Level 9"
+          - type: number_stat
+            stat: mastery_crown_of_dawn
+            minimum: 60
+            description: "Requires 60 Crown of Dawn mastery"
+        impacts:
+          - type: stat_modifier
+            stat: wall_length
+            value: 14.0
+            modifier: SET
+
+  # ---------------------------------------------------------------------------
+  # wall_height - how far the wall reaches upward
+  # ---------------------------------------------------------------------------
+  wall_height:
+    description: "How high the wall of dawn reaches"
+    icon: LADDER
+    default_index: 1
+
+    values:
+
+      low_wall:
+        display_name: "Low Wall"
+        description: "Breaks ankles. Two and a half blocks."
+        icon: OAK_SLAB
+        value_type: double
+        value: 2.5
+        impacts:
+          - type: stat_modifier
+            stat: wall_height
+            value: 2.5
+            modifier: SET
+
+      dawn_height:
+        display_name: "Full Dawn"
+        description: "Three and a half blocks."
+        icon: LADDER
+        value_type: double
+        value: 3.5
+        impacts:
+          - type: stat_modifier
+            stat: wall_height
+            value: 3.5
+            modifier: SET
+
+      vault_wall:
+        display_name: "Vault"
+        description: "Five blocks. Nothing vaults it."
+        icon: LIGHTNING_ROD
+        value_type: double
+        value: 5.0
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 9
+            description: "Requires Circle Level 9"
+          - type: number_stat
+            stat: mastery_crown_of_dawn
+            minimum: 80
+            description: "Requires 80 Crown of Dawn mastery"
+        impacts:
+          - type: stat_modifier
+            stat: wall_height
+            value: 5.0
+            modifier: SET

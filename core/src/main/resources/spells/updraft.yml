@@ -1,0 +1,56 @@
+id: 'updraft'
+display_name: '&fUpdraft'
+description:
+  - '&7A column of rising air that tears'
+  - '&7enemies off their feet.'
+enabled: true
+
+# WHAT THIS SPELL IS JUDGED ON. READ BY Spell.loadConfiguration AND SpellBudgetTest.
+role: 'BURST'
+
+# AIR IS FORBIDDEN FROM TERRAIN (spec 5.2). updraft never calls TerrainEditor and
+# never places a block - it moves things, which is air's signature.
+element: 'AIR'
+
+# THE CASTING CODE. 'R' FOR RIGHT CLICK, 'L' FOR LEFT CLICK, 'S' FOR HAND SWAP
+code: 'LLSSL'
+
+# FILLS AIR'S CIRCLE-3 GAP: wind_vortex is 2, wind_barrier is 4.
+level: 3
+
+# SPEC SECTION 6 LADDER, CIRCLE 3. Verbatim - do not round up, this is the
+# cheapest ladder row in wave 5.
+required_focus: 65
+cooldown: 6
+cast_time: 1.0
+mana_cost: 48
+
+maximum_mastery: 100
+
+# THE CIRCLE-3 LADDER POWER, 5.5. There is deliberately NO hit_count key: the
+# column damages each target exactly once, so the declared per-cast total is
+# 5.5 against a burstBudget(3) of 9.0. A hit_count here would under-report a
+# spell that never hits twice and give SpellBudgetTest a number to trust.
+power: 5.5
+
+# HOW LONG THE COLUMN TRAVELS, IN SECONDS (10.0 -> 200 ticks at a 1-tick period).
+lift_duration: 10.0
+# HOW FAR IT REACHES ALONG THE CASTER'S EYE DIRECTION, IN BLOCKS.
+lift_range: 6.0
+# HORIZONTAL HIT RADIUS OF EACH COLUMN NODE, IN BLOCKS.
+lift_radius: 2.0
+# THE EXACT VERTICAL VELOCITY WRITTEN TO EVERY TARGET IN THE COLUMN. Note this
+# is a fixed constant and NOT the damage number - updraft's damage is 5.5 and its
+# lift is 1.35 blocks/tick, and the two are deliberately unrelated.
+lift_velocity: 1.35
+
+#THE COLOR OF THE SPELL MASTERY BOSSBAR.
+mastery_bar_color: 'WHITE'
+
+#THE ITEM THAT APPEARS IN THE /SPELLS GUI
+gui_item: 'PHANTOM_MEMBRANE'
+gui_custom_model_data: 4149
+
+cast_sound: 'ENTITY_PHANTOM_AMBIENT'
+cast_sound_volume: 0.9
+cast_sound_pitch: 1.4

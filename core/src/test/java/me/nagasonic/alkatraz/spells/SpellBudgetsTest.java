@@ -26,15 +26,25 @@ class SpellBudgetsTest {
      * Every shipped spell yml under {@code /spells}, excluding the {@code _options}
      * companions. Listed explicitly so a new spell cannot silently escape the
      * cast-time guard by never being named here.
+     *
+     * <p>The 29 circle 1-9 spells added by the 2026-10-03 expansion are named too: they
+     * are in {@code /spells} and the guard is only meaningful while it covers them.
+     * {@code dispel} is absent on purpose - it is wave 9's T31 and its yml does not
+     * exist yet.
      */
     private static final String[] SHIPPED_SPELL_FILES = {
-            "air_blades", "air_burst", "barrier", "blink", "buff", "dark_tendrils", "debuff",
-            "detect", "disguise", "earthen_wall", "earthsplitter", "earth_spike", "earth_throw",
-            "fireball", "fire_blast", "fire_wall", "flaming_volley", "geyser", "heal",
-            "lesser_heal", "light_buff", "magic_missile", "meteor_shower", "radiance",
-            "shadow_realm", "skeletal_knights", "stealth", "summon_zombies", "swift", "tornado",
-            "tremor", "tsunami", "warp", "water_pulse", "water_sphere", "whirlpool",
-            "wind_barrier", "wind_vortex"
+            "air_blades", "air_burst", "apotheosis", "arcane_resonance", "arcane_ward", "barrier",
+            "blink", "buff", "choir_of_light", "continental_shift", "crown_of_dawn", "cyclone_nest", "dark_tendrils",
+            "debuff", "detect", "disguise", "echo_cast", "earthen_wall", "earthsplitter",
+            "earth_spike", "earth_throw", "everdrain", "fault_line", "fireball", "fire_blast",
+            "fire_wall", "flame_lance", "flaming_volley", "geyser", "heal", "inferno_pilgrimage",
+            "inferno_rite", "lesser_heal", "light_bolt", "light_buff", "magic_missile",
+            "meteor_shower", "oblivion", "radiance", "radiant_brand", "shadow_realm",
+            "skeletal_knights", "skywrath", "stealth", "stormcaller", "summon_zombies",
+            "sunfire_barrage", "swift", "tectonic_strike", "thousand_waves", "thunderclap",
+            "tide_of_the_deep", "tornado", "tremor", "tsunami", "umbral_volley", "undertow",
+            "updraft", "void_anchor", "warp", "water_pulse", "water_sphere", "waystone_recall",
+            "whirlpool", "wind_barrier", "wind_vortex", "worldbreaker"
     };
 
     @Test

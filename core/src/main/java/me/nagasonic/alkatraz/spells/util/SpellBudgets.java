@@ -237,4 +237,26 @@ public final class SpellBudgets {
     public static boolean isGrandfatheredBurst(String spellId, Element element, SpellRole role) {
         return "magic_missile".equals(spellId) && element == Element.NONE && role == SpellRole.BURST;
     }
+
+    /**
+     * The one spell charged against two budgets at once: fault_line at circle 7 declares
+     * SUSTAIN, which EARTH's allowlist does not carry, <em>because</em> it is both a
+     * damage-over-time field and a terrain reshape.
+     *
+     * <p>Spec section 5.2 is the load-bearing invariant here - the element allowlists
+     * are enforced in CI and exist so that no element quietly drifts into another
+     * element's role. Widening {@link #ALLOWED} to admit SUSTAIN for EARTH would make
+     * every future earth spell free to tick, which is precisely what
+     * {@code ElementArchetypeTest} exists to prevent. So the exemption is per-spill,
+     * exactly as {@link #isGrandfatheredBurst} is for magic_missile, and the table stays
+     * honest.
+     *
+     * <p>The cost of being SUSTAIN rather than TERRAIN is that
+     * {@code SpellBudgetTest.terrainSpellsCarryTheCircleTerrainBudget} skips this spell,
+     * so the exemption is paired with an explicit terrain-budget assertion there. Both
+     * budgets therefore stay enforced; only the role <em>label</em> is unusual.
+     */
+    public static boolean isDualBudgetSpell(String spellId, Element element, SpellRole role) {
+        return "fault_line".equals(spellId) && element == Element.EARTH && role == SpellRole.SUSTAIN;
+    }
 }
