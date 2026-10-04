@@ -1,12 +1,15 @@
 package me.nagasonic.alkatraz.config;
 
 import me.nagasonic.alkatraz.Alkatraz;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BooleanSupplier;
 import java.util.function.IntSupplier;
+import java.util.function.Supplier;
 
 /**
  * Centralized config reader for all spellbook-related settings.
@@ -74,6 +77,7 @@ public class SpellbookConfig {
     private static volatile boolean mobDropsEnabled = true;
     private static volatile boolean fishingEnabled = true;
     private static volatile boolean piglinBarteringEnabled = true;
+    private static volatile Map<String, Integer> elementCaps = Map.of();
 
     private static boolean stale() {
         return System.currentTimeMillis() - lastRefresh >= REFRESH_INTERVAL_MS;
@@ -90,7 +94,9 @@ public class SpellbookConfig {
     private static synchronized void doReload() {
         villagerTradingEnabled = getBoolean("villager_trading.enabled", true);
         villagerChanceTwoTrades = getInt("villager_trading.chance_two_trades", 20);
-        villagerChanceOneTrade = getInt("villager_trading.chance_one_trades", 40);
+        // WAS villager_trading.chance_one_trade plus a trailing 's', a key config.yml
+        // never defines, so this knob was dead and always returned the hardcoded 40.
+        villagerChanceOneTrade = getInt("villager_trading.chance_one_trade", 40);
         villagerMaxTrades = getInt("villager_trading.max_trades_per_villager", 2);
         villagerTradeMaxUses = getInt("villager_trading.trade_max_uses", 3);
         magicStoneBaseChance = getDouble("magic_stone.base_drop_chance", 0.75);
@@ -101,6 +107,7 @@ public class SpellbookConfig {
         mobDropsEnabled = lootBoolean("loot.mob_drops.enabled", true);
         fishingEnabled = lootBoolean("loot.fishing.enabled", true);
         piglinBarteringEnabled = lootBoolean("loot.piglin_bartering.enabled", true);
+        elementCaps = loadElementCaps();
         memo.clear();
         lastRefresh = System.currentTimeMillis();
     }
@@ -141,6 +148,14 @@ public class SpellbookConfig {
         return value;
     }
 
+    private static String memoString(String memoKey, Supplier<String> supplier) {
+        Object cached = memo.get(memoKey);
+        if (cached instanceof String value) return value;
+        String value = supplier.get();
+        memo.put(memoKey, value);
+        return value;
+    }
+
     // ==========================================
     // SPELLBOOK CIRCLE WEIGHTS
     // ==========================================
@@ -160,6 +175,57 @@ public class SpellbookConfig {
             default -> 0;
         };
         return memoInt("cw:" + circle, () -> getInt("spellbook.circle_weights.circle_" + circle, def));
+    }
+
+    // ==========================================
+    // ELEMENT SPELLBOOK CIRCLE CAPS
+    // ==========================================
+
+    /**
+     * Highest circle a random ELEMENT spellbook from {@code sourceKey} may contain.
+     *
+     * <p>An element book with no cap can roll any spell of that element at any circle,
+     * so a blaze's FIRE book could hand over {@code inferno_rite} - circle 9, 600 mana
+     * - off a mob whose own signature drop is {@code fire_blast} at circle 2.
+     *
+     * <p>The rule applied to every one of the 25 call sites is that the cap equals the
+     * top circle of that source's own non-element sibling band, so an element book never
+     * outranks the random book beside it. A cap of 9 means uncapped.
+     *
+     * <p>Every cap key in the shipped loot.yml also matches the {@code def} passed by
+     * its caller, so a server whose loot.yml predates this block still gets the
+     * intended caps - the block is the tuning surface, not the only source of truth.
+     *
+     * @return the configured cap, or {@code def} when the key is absent.
+     */
+    public static int getElementMaxCircle(String sourceKey, int def) {
+        refreshIfStale();
+        Integer cap = elementCaps.get(sourceKey);
+        return cap == null ? def : cap;
+    }
+
+    /**
+     * Flattens {@code loot.element_book_caps} into {@code dotted.key -> circle}.
+     *
+     * <p>YamlConfiguration turns a dotted YAML key into NESTED sections, so
+     * {@code mob.enderman.dark: 4} is read back as {@code mob -> enderman -> dark}.
+     * That means {@code getKeys(false)} on the caps section returns the five group
+     * names and reading a cap needs the full path, which is exactly the shape of
+     * {@code sourceKey}. Group entries resolve to a ConfigurationSection rather than a
+     * Number, so they are dropped here instead of being stored as the default cap.
+     */
+    private static Map<String, Integer> loadElementCaps() {
+        Map<String, Integer> caps = new HashMap<>();
+        ConfigurationSection section = lootCfg().getConfigurationSection("loot.element_book_caps");
+        if (section != null) {
+            for (String key : section.getKeys(true)) {
+                Object value = section.get(key);
+                if (value instanceof Number number) {
+                    caps.put(key, number.intValue());
+                }
+            }
+        }
+        return Map.copyOf(caps);
     }
 
     // ==========================================
@@ -342,6 +408,21 @@ public class SpellbookConfig {
         refreshIfStale();
         String memoKey = "mob:" + mob + ' ' + key + ' ' + def;
         return memoInt(memoKey, () -> lootInt("loot.mob_drops." + mob + "." + key, def));
+    }
+
+    /**
+     * A string-valued mob loot key, memoised like {@link #getMobInt}.
+     *
+     * <p>Exists so a specific spellbook's id is data rather than code. It used to be a
+     * {@code SpellRegistry.getSpell("fire_blast")} literal inside {@code registerAll()},
+     * which NPEs during {@code onEnable} if the id is ever renamed - so renaming a spell
+     * took the whole plugin down. Reading it from loot.yml turns a rename into a config
+     * edit that logs one warning and skips one loot entry.
+     */
+    public static String getMobString(String mob, String key, String def) {
+        refreshIfStale();
+        String memoKey = "mobstr:" + mob + ' ' + key + ' ' + def;
+        return memoString(memoKey, () -> lootCfg().getString("loot.mob_drops." + mob + "." + key, def));
     }
 
     // ==========================================

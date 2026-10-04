@@ -1,10 +1,123 @@
 # ==============================
 # Spellbook Loot Configuration
 # Controls all spellbook drops from chests, mobs, fishing, etc.
+#
+# HOW A CIRCLE'S SHARE OF A RANDOM SPELLBOOK IS COMPUTED
+# ----------------------------------------------------
+# spellbook.circle_weights (config.yml) is the weight of a CIRCLE, not of a spell.
+# SpellbookFactory divides each circle's weight by the number of spells sitting at that
+# circle, so a circle bucket always totals exactly its configured weight and a circle's
+# share of a book is:
+#
+#     share(circle) = w(circle) / sum(w(circles in this book))
+#
+# Adding spells to a circle therefore never makes that circle more common. It used to:
+# the weight was applied per SPELL, so a bucket totalled count(circle) x w(circle) and a
+# circle's share was a function of roster size. Circle 2 held eleven spells and circle 1
+# held five, so a (1,2) book came out 52.4% circle 2 and 47.6% circle 1 - the ladder ran
+# backwards, purely because circle 2 was bigger.
+#
+# HOW A MOB'S DROP CHANCE IS COMPUTED
+# -----------------------------------
+#     book weight / (book weight + filler_weight)
+#
+# Example: 100 / (100 + 1900) = 5% drop chance.
+#
+# loot_multiplier scales the spellbook, element and specific weights but NOT
+# filler_weight, nothing_weight or max_items. Raising it therefore raises the DROP
+# CHANCE and not only the mix, because the ballast stays put.
+#
+# CONFIG UPDATES
+# -------------
+# New keys below are added to existing installs automatically. CHANGED default values
+# are NOT - an install keeps whatever it already had. That is why evoker.filler_weight
+# and ravager.filler_weight are deliberately unchanged even though their pools grew.
 # ==============================
 loot:
   # Global multiplier for loot weights. 1.0 = default, 0.5 = half as common, 2.0 = twice as common.
+  # Scales the book, element and specific weights ONLY - not filler_weight, nothing_weight
+  # or max_items. Raising it raises the drop CHANCE, not just the mix.
   loot_multiplier: 1.0
+
+  # --- Element spellbook circle caps ---
+  # A random ELEMENT spellbook is otherwise uncapped: it can roll any spell of that
+  # element at any circle. Without these, a blaze could hand over inferno_rite (circle 9,
+  # 600 mana), a stronghold library a 0.585% chance of oblivion, and a desert pyramid
+  # both flame_lance (circle 5) and meteor_shower (circle 6).
+  #
+  # RULE: the cap equals the top circle of that source's own non-element sibling band, so
+  # an element book never outranks the random book sitting beside it in the same pool.
+  # Three sources have no sibling band - blaze, drowned and enderman - so their cap is
+  # that mob's own specific spellbook's circle. enderman has two element books, so it has
+  # two keys.
+  #
+  # Capping changes ONLY the mix inside the element book. The entry's weight in the drop
+  # pool is untouched, so no drop rate anywhere changes because of a cap.
+  #
+  # A cap of 9 means uncapped. Only the End city, the ender dragon and the wither may use 9.
+  # Each key below also matches the default baked into SpellbookLoot, so an install whose
+  # loot.yml predates this whole block still gets the intended caps.
+  #
+  # Every note here is on its own line above its key, never trailing it: ConfigUpdater
+  # only re-emits whole-line comments, so a trailing '# ...' is deleted from every
+  # existing install on its next load.
+  element_book_caps:
+    chest:
+      # sibling band (4,5,6)
+      nether: 6
+      # endgame - the only structure that reaches circle 9
+      end: 9
+    structure:
+      # sibling band (2,3,4)
+      desert_pyramid: 4
+      # sibling band (1,2,3)
+      ocean_ruins: 3
+      # sibling band (4,5,6)
+      stronghold: 6
+      # sibling band (2,3,4)
+      woodland_mansion: 4
+    mob:
+      # its own specific is fire_blast at circle 2, plus one above
+      blaze: 3
+      # its own specific is water_pulse at circle 2, plus one above
+      drowned: 3
+      # sibling band (2,3)
+      piglin: 3
+      # sibling band (2,3)
+      guardian: 3
+      # sibling band (2,3)
+      vindicator: 3
+      # sibling band (1,2,3) plus (2,3,4)
+      witch: 4
+      # sibling band (2,3,4)
+      wither_skeleton: 4
+      enderman:
+        # its own specific is blink at circle 4
+        dark: 4
+        air: 4
+      # sibling band (1,2). AIR has THREE spells at circle 2, so this one mattered most
+      # before the per-circle-total fix.
+      phantom: 2
+      # sibling band (3,4) plus (4,5,6)
+      ravager: 6
+      # sibling band (4,5,6)
+      evoker: 6
+      # sibling band (5,6,7)
+      elder_guardian: 7
+      # endgame
+      ender_dragon: 9
+      # endgame
+      wither: 9
+    fishing:
+      # sibling band (1..7)
+      water: 7
+      # sibling band (1..7)
+      air: 7
+      # sibling band (1..7)
+      light: 7
+    piglin_bartering:
+      # sibling band (3..7)
+      fire: 7
 
   # --- Chest Loot ---
   chest_loot:
@@ -20,6 +133,7 @@ loot:
       spellbook_1_2_weight: 80
       spellbook_1_3_weight: 60
       spellbook_2_4_weight: 20
+      # No filler: a dungeon is a guaranteed single book. That is the design.
       max_items: 1
     nether:
       enabled: true
@@ -61,8 +175,12 @@ loot:
       max_items: 1
 
   # --- Mob Drops ---
-  # Drop chance formula: spellbook_weight / (spellbook_weight + filler_weight)
+  # Drop chance formula: book weight / (book weight + filler_weight)
   # Example: 100 / (100 + 1900) = 5% drop chance
+  #
+  # specific_spell is the mob's signature fixed spellbook. It is DATA, not a code
+  # literal: an unregistered id logs one warning and skips that entry, instead of
+  # throwing out of onEnable and stopping the plugin from loading.
   mob_drops:
     enabled: true
     zombie:
@@ -108,6 +226,14 @@ loot:
       spellbook_2_4_weight: 70
       spellbook_4_6_weight: 50
       dark_element_weight: 30
+      # The evoker's whole identity is summoning and skeletal_knights is the circle-6
+      # summoning spell, so the evoker is the only mob that can drop it.
+      specific_spell: 'skeletal_knights'
+      specific_spellbook_weight: 25
+      # UNCHANGED from 150 even though the pool grew from 300 to 325. ConfigUpdater adds
+      # NEW keys to existing installs but never changed default values, so editing this
+      # would make new and existing installs disagree. P(book) therefore rises
+      # 50.000% -> 53.846%. Raise this to 175 if you want the old rate back.
       filler_weight: 150
     vindicator:
       enabled: true
@@ -118,21 +244,31 @@ loot:
       enabled: true
       earth_element_weight: 100
       spellbook_3_4_weight: 70
+      # NEW. Without a circle-5/6 band, EARTH had no circle-6 source from any mob.
+      spellbook_4_6_weight: 30
+      # A ravager is a focused slam with heavy knockback, which is what a ravager is.
+      specific_spell: 'tectonic_strike'
+      specific_spellbook_weight: 30
+      # UNCHANGED from 203 for the same reason as evoker. P(book) rises
+      # 45.576% -> 53.118%. Raise this to 275 if you want the old rate back.
       filler_weight: 203
     blaze:
       enabled: true
       fire_element_weight: 100
+      specific_spell: 'fire_blast'
       specific_spellbook_weight: 50
       filler_weight: 350
     drowned:
       enabled: true
       water_element_weight: 100
+      specific_spell: 'water_pulse'
       specific_spellbook_weight: 40
       filler_weight: 860
     enderman:
       enabled: true
       dark_element_weight: 70
       air_element_weight: 50
+      specific_spell: 'blink'
       specific_spellbook_weight: 20
       filler_weight: 1150
     wither_skeleton:
@@ -143,22 +279,56 @@ loot:
     elder_guardian:
       enabled: true
       water_element_weight: 100
-      spellbook_4_6_weight: 60
+      # Band moved from (4,5,6) to (5,6,7). The elder guardian is the most accessible boss
+      # in the game and sits exactly one circle below the End's bosses.
+      spellbook_5_7_weight: 60
+      # Undertow drags one target toward you and its damage scales with the drag
+      # distance. An elder guardian pulls you into the monument.
+      specific_spell: 'undertow'
+      specific_spellbook_weight: 40
+      # NEW ballast. This boss is farmable in an ocean biome. With no filler, max_items 2
+      # meant both of those rolls was a guaranteed book, and against w(7)=150 in the
+      # 1275-point (5,6,7) band that is 8.63% for at least one circle-7 book per kill,
+      # forever, which is exactly the infinite supply the rarity ladder is supposed to
+      # prevent. It is now 2.60%.
+      # P(book) falls 100% -> 37.037%.
+      filler_weight: 340
       max_items: 2
     ender_dragon:
       enabled: true
       air_element_weight: 100
       spellbook_4_6_weight: 80
+      # WAS DEAD: circles 7-9 held no spells, so this book shipped as spell_count=0,
+      # printed spellbook.empty on right-click and was never consumed. Works from wave 5.
       spellbook_7_9_weight: 20
+      # Skywrath is the only flight-granting spell in the roster and the only circle-9
+      # AIR spell, and the dragon is the mob that flies.
+      specific_spell: 'skywrath'
+      specific_spellbook_weight: 25
+      # NO filler, deliberately. The ender dragon is a once-per-world-event boss, so
+      # there is no farm to protect against and ballast would only reduce the guaranteed
+      # reward of the most valuable kill in the game. Every roll is a book.
       max_items: 2
     wither:
       enabled: true
       dark_element_weight: 100
       spellbook_4_6_weight: 80
+      # WAS DEAD, same as the dragon's. Works from wave 5.
       spellbook_7_9_weight: 20
+      # Oblivion scales with the target's MISSING health, which is the wither's whole kill
+      # mechanic, and dark's circle-9 capstone has no other mob source.
+      specific_spell: 'oblivion'
+      specific_spellbook_weight: 25
+      # NEW ballast, same reasoning as the elder guardian - a wither fight is repeatable
+      # on any end-stone platform. P(book) falls 100% -> 45.000%.
+      filler_weight: 275
       max_items: 2
 
   # --- Fishing ---
+  # Band moved from (1..6) to (1..7). Sum w(1..7) = 20025, so circle 7 is 150/20025 = 0.749%.
+  # The random book is chosen 40/140 = 28.571% per roll with max_items 2, giving
+  # 1 - (1 - 0.28571 * 0.00749)^2 = 0.428% for at least one circle-7 book per treasure.
+  # Circles 8 (450 mana) and 9 (600 mana) stay behind the End.
   fishing:
     enabled: true
     random_spellbook_weight: 40
@@ -168,6 +338,10 @@ loot:
     max_items: 2
 
   # --- Piglin Bartering ---
+  # Band moved from (3..6) to (3..7). Sum w(3..7) = 5025, so circle 7 is 150/5025 = 2.985%.
+  # Against the 900 nothing ballast that is 0.04 * 0.02985 = 0.1194% per barter, or
+  # 11.3% over 100 barters. The floor stays at 3 - a piglin has no reason to know a
+  # circle-1 spell.
   piglin_bartering:
     enabled: true
     fire_element_weight: 60

@@ -30,6 +30,9 @@ import java.util.*;
  */
 public class RandomSpellbook {
     
+    // LinkedHashMap, not HashMap: build() writes spell_<i>/weight_<i> in iteration
+    // order, so a deterministic order makes two builds of the same book byte-identical.
+    // Not final: both constructors below assign it.
     private Map<String, Double> weightedSpells; // spell_id -> weight
     private String displayName;
     private List<String> lore;
@@ -43,7 +46,7 @@ public class RandomSpellbook {
      * Creates a new random spellbook
      */
     public RandomSpellbook(String name) {
-        this.weightedSpells = new HashMap<>();
+        this.weightedSpells = new LinkedHashMap<>();
         this.material = Material.ENCHANTED_BOOK;
         this.displayName = name;
         this.lore = new ArrayList<>();
@@ -55,7 +58,7 @@ public class RandomSpellbook {
      */
     public RandomSpellbook(String name, Map<String, Double> spells) {
         this(name);
-        this.weightedSpells = spells;
+        this.weightedSpells = new LinkedHashMap<>(spells);
         generateDefaultLore();
     }
     
@@ -71,16 +74,18 @@ public class RandomSpellbook {
     }
     
     /**
-     * Adds a spell with a weight
-     * Higher weight = more likely to be selected
-     * 
-     * @param spellId The spell ID
-     * @param weight The weight (1-100 recommended)
+     * Adds a spell with a weight. Higher weight = more likely to be selected.
+     *
+     * <p>A weight of zero or less is IGNORED rather than rejected. The old
+     * implementation threw IllegalArgumentException, which meant a circle whose
+     * spellbook.circle_weights key was missing or zero - circle 0 always, since
+     * SpellbookConfig.getCircleWeight returns 0 outside 1-9 - took down plugin
+     * enable from inside registerAll(). A spell that cannot be rolled is simply not
+     * in the book; that is not a caller bug worth a stack trace at startup.
      */
     public RandomSpellbook addSpell(String spellId, double weight) {
-        if (weight <= 0) {
-            throw new IllegalArgumentException("Weight must be positive!");
-        }
+        if (spellId == null || spellId.isBlank()) return this;
+        if (weight <= 0) return this;
         weightedSpells.put(spellId, weight);
         return this;
     }
@@ -223,8 +228,10 @@ public class RandomSpellbook {
             return;
         }
         
-        // Load weighted spells from NBT
-        Map<String, Double> weightedSpells = new HashMap<>();
+        // Load weighted spells from NBT. LinkedHashMap, not HashMap: spell_<i> was
+        // written in a deterministic order by build(), so reading it back the same
+        // way keeps selectWeightedRandom's walk reproducible.
+        Map<String, Double> weightedSpells = new LinkedHashMap<>();
         Integer spellCount = NBT.get(item, nbt -> (Integer) nbt.getInteger("spell_count"));
         
         if (spellCount == null || spellCount == 0) {
@@ -283,29 +290,43 @@ public class RandomSpellbook {
     }
     
     /**
-     * Selects a random spell based on weights
+     * Selects a random spell based on weights.
+     *
+     * <p>The accumulator is a {@code double} and was an {@code int}. Every weight
+     * used to be a whole number - {@code SpellbookConfig.getCircleWeight} returns an
+     * {@code int} - so the truncation was exactly zero and the bug was latent. Now
+     * that {@code SpellbookFactory} divides a circle's weight by its bucket size,
+     * weights are fractional ({@code 375/7 = 53.571...}, {@code 30/7 = 4.285...}).
+     * <p>Because {@code int += double} is a compound assignment, each step was
+     * {@code trunc(I + p) = I + floor(p)}, so the walk could only ever reach
+     * {@code sum(floor(p))} - short of the true total by {@code sum(frac(p)) =
+     * sum(w(circle) mod count(circle))}. {@code randomValue} is drawn against the
+     * true total, so that shortfall fell through to the {@code keySet().iterator()
+     * .next()} fallback: 2.22% of uses for the {@code (6,7,8,9)} end-city book and
+     * 3.92% for the {@code (7,8,9)} dragon and wither books. The bias is not by
+     * circle - every entry but the first in iteration order is short by exactly
+     * {@code frac(p)}, and the whole shortfall lands on that one entry. See the
+     * per-band table at the top of this wave for every figure.
      */
     private static String selectWeightedRandom(Map<String, Double> weightedSpells) {
-        // Calculate total weight
         double totalWeight = 0;
         for (double weight : weightedSpells.values()) {
             totalWeight += weight;
         }
-        
-        // Select random value
+        if (totalWeight <= 0) return null;
+
         Random random = new Random();
-        double randomValue = random.nextDouble(totalWeight);
-        
-        // Find selected spell
-        int currentWeight = 0;
+        double randomValue = random.nextDouble() * totalWeight;
+
+        double currentWeight = 0;
         for (Map.Entry<String, Double> entry : weightedSpells.entrySet()) {
             currentWeight += entry.getValue();
             if (randomValue < currentWeight) {
                 return entry.getKey();
             }
         }
-        
-        // Fallback (shouldn't happen)
+
+        // Floating-point accumulation can leave randomValue a hair above the total.
         return weightedSpells.keySet().iterator().next();
     }
     

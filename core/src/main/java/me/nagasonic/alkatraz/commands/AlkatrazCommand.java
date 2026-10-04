@@ -16,6 +16,7 @@ import me.nagasonic.alkatraz.api.magic.instance.MagicItemInstance;
 import me.nagasonic.alkatraz.api.magic.modifier.EngravingDefinition;
 import me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack;
 import me.nagasonic.alkatraz.items.magic.MagicItemBootstrap;
+import me.nagasonic.alkatraz.loot.implementation.SpellbookLoot;
 import me.nagasonic.alkatraz.api.magic.registry.MagicItemRegistries;
 import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
 import de.tr7zw.changeme.nbtapi.NBT;
@@ -383,6 +384,13 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
         MagicEntities.registerProfiles();
         MagicBrainService.getInstance().reloadBrains();
         MagicItemBootstrap.reload();
+        // Spellbook weights are baked into ItemStack NBT at build time, and registerAll()
+        // only ran from onEnable, so loot.yml edits did nothing until a restart. Rebuilding
+        // here fixes every roll generated from now on. Books already in an inventory or
+        // already generated into a chunk keep the weights they were built with, so a
+        // spellbook.circle_weights change STILL needs a full restart - see
+        // SpellbookLoot.reloadLoot's javadoc.
+        SpellbookLoot.reloadLoot();
         refreshStaticCompletions();
         sender.sendMessage(lang().get("commands.reload_success"));
     }
