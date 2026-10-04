@@ -50,6 +50,7 @@ import me.nagasonic.alkatraz.hooks.WorldGuardHook;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileRegistry;
 import me.nagasonic.alkatraz.playerdata.SpellHotbarManager;
+import me.nagasonic.alkatraz.progression.AffinityCurveMigrationNotice;
 import me.nagasonic.alkatraz.progression.ProgressionService;
 import me.nagasonic.alkatraz.progression.research.ResearchObjectiveListener;
 import me.nagasonic.alkatraz.progression.research.ResearchService;
@@ -202,6 +203,7 @@ public final class Alkatraz extends JavaPlugin {
         registerListener(new SpellHotbarManager.QuitListener());
         registerListener(new ResearchObjectiveListener());
         registerListener(new FirstJoinTutorial());
+        registerListener(new AffinityCurveMigrationNotice());
         registerListener(new MagicItemTriggerAdapter());
         BarrierManager.initialize();
         registerListener(new BarrierEventListener());
