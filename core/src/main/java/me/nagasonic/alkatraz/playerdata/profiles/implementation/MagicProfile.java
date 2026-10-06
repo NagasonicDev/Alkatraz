@@ -4,6 +4,7 @@ import me.nagasonic.alkatraz.playerdata.SpellHotbarManager;
 import me.nagasonic.alkatraz.api.Element;
 import me.nagasonic.alkatraz.api.playerdata.Profile;
 import me.nagasonic.alkatraz.config.FocusConfig;
+import me.nagasonic.alkatraz.progression.AffinityCurveMigrationNotice;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.util.StatUtils;
 import org.bukkit.Bukkit;
@@ -100,6 +101,11 @@ public class MagicProfile extends Profile {
         boolStat("stealth", false);
         boolStat("canCast", true);
         boolStat("tutorialSeen", false);
+        // One-time notice flag for the affinity curve change. Must be declared here:
+        // Profile.getBool throws for an unregistered stat, and ProfilePersistence only
+        // registers what it reads back, so a profile with no saved copy of this key
+        // would throw on every join.
+        boolStat(AffinityCurveMigrationNotice.SEEN_FLAG, false);
 
         // Strings
         stringStat("disguise");

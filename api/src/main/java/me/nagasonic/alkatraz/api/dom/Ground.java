@@ -14,6 +14,8 @@ public enum Ground {
     // --- Soil & Dirt ---------------------------------------------------------
     /** Dirt block. */
     DIRT(Material.DIRT),
+    /** Dirt Path */
+    DIRT_PATH(Material.DIRT_PATH),
     /** Grass block. */
     GRASS(Material.GRASS_BLOCK),
     /** Coarse dirt block. */
@@ -277,7 +279,7 @@ public enum Ground {
      */
     public static boolean isLoose(Material material) {
         return switch (material) {
-            case DIRT, COARSE_DIRT, ROOTED_DIRT, PODZOL, MUD,
+            case DIRT, DIRT_PATH, COARSE_DIRT, ROOTED_DIRT, PODZOL, MUD,
                  SAND, RED_SAND, GRAVEL, CLAY,
                  SOUL_SAND, SOUL_SOIL -> true;
             default -> false;

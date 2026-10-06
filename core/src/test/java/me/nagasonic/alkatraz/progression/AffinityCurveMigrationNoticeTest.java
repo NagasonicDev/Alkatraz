@@ -1,13 +1,16 @@
 package me.nagasonic.alkatraz.progression;
 
 import me.nagasonic.alkatraz.api.Element;
+import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import org.junit.jupiter.api.Test;
 
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -112,5 +115,22 @@ class AffinityCurveMigrationNoticeTest {
         assertEquals("affinityCurveNoticeSeen", AffinityCurveMigrationNotice.SEEN_FLAG,
                 "the flag lives in the profile's bool map, alongside FirstJoinTutorial's tutorialSeen, "
                         + "and is persisted on logout - not in any transient field");
+    }
+
+    @Test
+    void theSeenFlagIsARegisteredBoolStatOnEveryNewProfile() {
+        // Profile.getBool throws IllegalArgumentException for a stat that was never
+        // registered, which crashed PlayerJoinEvent with "Stat affinityCurveNoticeSeen
+        // not found". A profile persisted before this flag existed has no saved copy to
+        // self-register on load (ProfilePersistence only registers what it reads), so the
+        // stat has to be declared in MagicProfile's initializer like tutorialSeen is.
+        MagicProfile profile = new MagicProfile(UUID.randomUUID());
+        assertTrue(profile.isBool(AffinityCurveMigrationNotice.SEEN_FLAG),
+                "the notice reads this flag on every join, so a fresh profile must already know it");
+        assertFalse(profile.getBool(AffinityCurveMigrationNotice.SEEN_FLAG),
+                "defaults to false so the check runs exactly once per player");
+        profile.setBool(AffinityCurveMigrationNotice.SEEN_FLAG, true);
+        assertTrue(profile.getBool(AffinityCurveMigrationNotice.SEEN_FLAG),
+                "the notice sets the flag before it has anything to say, so it must be writable");
     }
 }
