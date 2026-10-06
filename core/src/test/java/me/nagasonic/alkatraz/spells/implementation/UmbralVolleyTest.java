@@ -1,6 +1,7 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
 import me.nagasonic.alkatraz.api.Element;
+import me.nagasonic.alkatraz.spells.BundledLang;
 import me.nagasonic.alkatraz.spells.types.SpellRole;
 import me.nagasonic.alkatraz.spells.util.SpellBudgets;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -135,6 +136,8 @@ class UmbralVolleyTest {
                     ID + " is a BURST of discrete hits and must carry no '" + forbidden
                             + "' key - a per-tick damage key is the shape spec section 5.1 forbids");
         }
-        assertFalse(y.getStringList("description").isEmpty(), "description must be a non-empty list");
+        assertNotNull(BundledLang.resolve(BundledLang.parse(), "spells.umbralvolley.description"),
+                "spells.umbralvolley.description must exist in english.lang - the description moved out of "
+                        + ID + ".yml on 2026-10-06, and a missing key renders the raw lang key as lore");
     }
 }

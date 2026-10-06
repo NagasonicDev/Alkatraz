@@ -1,8 +1,4 @@
 ﻿id: 'fire_wall'
-display_name: '&6Fire Wall'
-description:
-  - '&7Creates a wall of fire to block enemies'
-  - '&7and deal heavy damage.'
 # WHETHER THE PLUGIN SHOULD LOAD THE SPELL. DEFAULT: TRUE
 enabled: true
 

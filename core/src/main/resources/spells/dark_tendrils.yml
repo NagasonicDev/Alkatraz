@@ -1,9 +1,4 @@
 ﻿id: 'dark_tendrils'
-display_name: '&5Dark Tendrils'
-description:
-  - '&7Summon tendrils of dark mana that'
-  - '&7hunt nearby targets and inflict'
-  - '&7debilitating effects.'
 # WHETHER THE PLUGIN SHOULD LOAD THE SPELL. DEFAULT: TRUE
 enabled: true
 

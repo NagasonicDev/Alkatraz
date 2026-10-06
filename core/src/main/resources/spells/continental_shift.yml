@@ -1,8 +1,4 @@
 id: 'continental_shift'
-display_name: '&2Continental Shift'
-description:
-  - '&7Channels the crust upward into a plateau you can'
-  - '&7stand on, and drop off the edge of.'
 enabled: true
 
 element: 'EARTH'

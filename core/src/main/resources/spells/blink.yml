@@ -1,8 +1,4 @@
 ﻿id: 'blink'
-display_name: '&5Blink'
-description:
-  - '&7Teleports you a short distance'
-  - '&7in the direction you are facing.'
 enabled: true
 element: 'NONE'
 code: 'SSRRS'

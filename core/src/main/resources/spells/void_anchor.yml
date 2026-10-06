@@ -1,9 +1,4 @@
 id: 'void_anchor'
-display_name: '&5Void Anchor'
-description:
-  - '&7Tear a bound horror from the ground'
-  - '&7and set it to hold what comes'
-  - '&7within its reach.'
 # WHETHER THE PLUGIN SHOULD LOAD THE SPELL. DEFAULT: TRUE
 enabled: true
 

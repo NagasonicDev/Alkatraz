@@ -1,9 +1,4 @@
 id: 'undertow'
-display_name: '&9Undertow'
-description:
-  - '&7Calls a riptide that hauls one'
-  - '&7enemy toward you. The further it'
-  - '&7drags them, the more they suffer.'
 enabled: true
 
 element: 'WATER'

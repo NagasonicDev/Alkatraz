@@ -1,8 +1,4 @@
 id: 'tectonic_strike'
-display_name: '&6Tectonic Strike'
-description:
-  - '&7Slams the full weight of a mountain into one'
-  - '&7point, cracking the ground and hurling everything back.'
 enabled: true
 
 # EARTH ACTS ON SPACE. THE DAMAGE HERE IS A CONSEQUENCE OF THE GROUND MOVING.

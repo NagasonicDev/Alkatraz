@@ -1,10 +1,4 @@
 id: 'tide_of_the_deep'
-display_name: '&9Tide of the Deep'
-description:
-  - '&7Raises a tide that mends you'
-  - '&7alone and drowns all within -'
-  - '&7and the deeper it runs, the'
-  - '&7harder it comes.'
 enabled: true
 
 element: 'WATER'

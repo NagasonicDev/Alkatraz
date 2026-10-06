@@ -12,22 +12,27 @@ public class LangManager {
     private final Map<String, String> rawMessages = new HashMap<>();
     private final String language;
 
-    public LangManager(String language) {
+    public LangManager(String language, File dataFolder) {
         this.language = language;
         // Always load bundled english as base first
         loadBundledLanguage("english");
-        // Then load the configured language (filesystem overrides bundled)
+        // Then the on-disk english override, so the extracted file is actually read.
+        // Without this layer english is the one language a server owner cannot edit:
+        // LangManager used to skip loadLanguage for english entirely.
+        loadLanguage("english", dataFolder);
+        // Then the configured language (filesystem overrides filesystem overrides bundled)
         if (!"english".equals(language)) {
-            loadLanguage(language);
+            loadLanguage(language, dataFolder);
         }
     }
 
-    private void loadLanguage(String langName) {
-        File langDir = new File("plugins/Alkatraz/lang");
-        File langFile = new File(langDir, langName + ".lang");
+    private void loadLanguage(String langName, File dataFolder) {
+        File langFile = new File(new File(dataFolder, "lang"), langName + ".lang");
         if (!langFile.exists()) {
             return;
         }
+        // Explicit UTF-8, matching loadBundledLanguage. FileReader would silently use the
+        // platform default charset, and a lang file is user-authored text.
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(new FileInputStream(langFile), StandardCharsets.UTF_8))) {
             loadFromReader(reader);

@@ -1,8 +1,4 @@
 ﻿id: 'summon_zombies'
-display_name: '&2Summon Zombies'
-description:
-  - '&7Summons zombies from the ground'
-  - '&7to attack your enemies.'
 enabled: true
 element: 'DARK'
 code: 'SRSRS'

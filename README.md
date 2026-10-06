@@ -96,7 +96,7 @@ Hold a wand to enter magic mode — your XP bar becomes a **mana bar**. Cast spe
 |-------|---------|-------------|
 | Meteor Shower | Fire | Rains meteors from the sky |
 | Tsunami | Water | Sends a massive wave forward |
-| Fissure | Earth | Splits the ground open |
+| Earth Splitter | Earth | Splits the ground open |
 | Tornado | Air | Creates a destructive tornado |
 | Radiance | Light | Unleashes a burst of holy energy |
 | Shadow Realm | Dark | Opens a portal of darkness |

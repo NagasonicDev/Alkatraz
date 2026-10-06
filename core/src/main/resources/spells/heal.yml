@@ -1,8 +1,4 @@
 ﻿id: 'heal'
-display_name: '&eHeal'
-description:
-  - '&7Heal yourself (&8Shift&7) or any'
-  - '&7target.'
 # WHETHER THE PLUGIN SHOULD LOAD THE SPELL. DEFAULT: TRUE
 enabled: true
 

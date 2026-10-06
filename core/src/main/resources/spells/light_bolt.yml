@@ -1,9 +1,4 @@
 id: 'light_bolt'
-display_name: '&eScroll of the First Ray'
-description:
-  - '&7A pale bolt of gathered light,'
-  - '&7hurled straight down your aim.'
-  - '&7It bites the risen dead twice as hard.'
 # WHETHER THE PLUGIN SHOULD LOAD THE SPELL. DEFAULT: TRUE
 enabled: true
 

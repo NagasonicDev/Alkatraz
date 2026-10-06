@@ -1,9 +1,4 @@
 id: 'echo_cast'
-display_name: '&6Echo Cast'
-description:
-  - '&7Takes the last three things you cast'
-  - '&7and makes you cast them again,'
-  - '&7in order, for sixty percent.'
 # WHAT THIS SPELL IS JUDGED ON. READ BY Spell.loadConfiguration AND SpellBudgetTest.
 # UTILITY IS ONE OF THE TWO ROLES NONE IS ALLOWED (spec 5.2): {UTILITY, DENIAL}.
 role: 'UTILITY'

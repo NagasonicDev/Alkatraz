@@ -1,9 +1,4 @@
 id: 'umbral_volley'
-display_name: '&5Umbral Volley'
-description:
-  - '&7Loose three darts of shadow that hunt'
-  - '&7the same prey, then split apart'
-  - '&8&oand leave a wound that will not close.'
 # WHETHER THE PLUGIN SHOULD LOAD THE SPELL. DEFAULT: TRUE
 enabled: true
 

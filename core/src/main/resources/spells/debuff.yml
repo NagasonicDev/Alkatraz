@@ -1,8 +1,4 @@
 ﻿id: debuff
-display_name: "&7Debuff"
-description:
-  - "&7Applies your configured debuffs"
-  - "&7to a target you are looking at."
 element: DARK
 code: LSLSS
 cast_time: 1.5

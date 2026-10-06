@@ -1,8 +1,4 @@
 id: 'thunderclap'
-display_name: '&fThunderclap'
-description:
-  - '&7A single concussive blast that shoves'
-  - '&7everything nearby outward and back.'
 enabled: true
 
 # WHAT THIS SPELL IS JUDGED ON. READ BY Spell.loadConfiguration AND SpellBudgetTest.

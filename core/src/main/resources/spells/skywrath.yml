@@ -1,8 +1,4 @@
 id: 'skywrath'
-display_name: '&fSkywrath'
-description:
-  - '&7Take the sky itself. A storm follows you'
-  - '&7for fifteen seconds, and you fly with it.'
 enabled: true
 
 # WHAT THIS SPELL IS JUDGED ON. READ BY Spell.loadConfiguration AND SpellBudgetTest.

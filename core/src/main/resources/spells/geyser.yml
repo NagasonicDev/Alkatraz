@@ -1,9 +1,4 @@
 ﻿id: 'geyser'
-display_name: '&bGeyser'
-description:
-  - '&7Summons a column of water that erupts'
-  - '&7in front of the player, launching'
-  - '&7enemies and dealing damage.'
 
 # WHETHER THE PLUGIN SHOULD LOAD THE SPELL. DEFAULT: TRUE
 enabled: true

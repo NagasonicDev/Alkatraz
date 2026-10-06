@@ -1,8 +1,4 @@
 id: 'inferno_rite'
-display_name: '&6Inferno Rite'
-description:
-  - '&7For eight seconds, your fire detonates whatever'
-  - '&7else is already burning. Three times, and no more.'
 enabled: true
 
 # NONE MEANS ITS DAMAGE DOES NOT SCALE WITH ELEMENTAL DAMAGE, ONLY MAGIC DAMAGE

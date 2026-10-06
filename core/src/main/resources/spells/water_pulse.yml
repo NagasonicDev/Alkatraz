@@ -1,9 +1,4 @@
 ﻿id: 'water_pulse'
-display_name: '&9Water Pulse'
-description:
-  - '&7A wave of water that knocks'
-  - '&7back enemies and extinquishes'
-  - '&7fire and lava'
 # WHETHER THE PLUGIN SHOULD LOAD THE SPELL. DEFAULT: TRUE
 enabled: true
 

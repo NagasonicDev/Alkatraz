@@ -1,8 +1,4 @@
 ﻿id: 'flaming_volley'
-display_name: '&6Flaming Volley'
-description:
-  - '&7Fires a volley of flaming arrows'
-  - '&7that ignite enemies on impact.'
 enabled: true
 element: 'FIRE'
 code: 'RLRRR'

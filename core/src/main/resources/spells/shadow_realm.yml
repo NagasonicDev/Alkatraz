@@ -1,8 +1,4 @@
 ﻿id: 'shadow_realm'
-display_name: '&5Shadow Realm'
-description:
-  - '&7Envelops an area in pure darkness,'
-  - '&7corrupting all who enter.'
 enabled: true
 element: 'DARK'
 code: 'SLLSR'

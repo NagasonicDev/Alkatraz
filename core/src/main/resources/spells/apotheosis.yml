@@ -1,10 +1,4 @@
 id: 'apotheosis'
-display_name: '&dLitany of the Ascendant'
-description:
-  - '&7Stand still while the light climbs,'
-  - '&7and it will climb through you.'
-  - '&7Your own spells cost less and hit'
-  - '&7harder while it holds.'
 # WHETHER THE PLUGIN SHOULD LOAD THE SPELL. DEFAULT: TRUE
 enabled: true
 

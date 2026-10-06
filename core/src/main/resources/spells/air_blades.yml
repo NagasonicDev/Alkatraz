@@ -1,9 +1,4 @@
 ﻿id: 'air_blades'
-display_name: '&fAir Blades'
-description:
-  - '&7Arm yourself with blades of wind,'
-  - '&7releasing a fan of cutting'
-  - '&7air towards your foes.'
 
 # WHETHER THE PLUGIN SHOULD LOAD THE SPELL. DEFAULT: TRUE
 enabled: true

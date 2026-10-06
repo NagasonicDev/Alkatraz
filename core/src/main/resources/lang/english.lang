@@ -568,28 +568,38 @@ pooled.no_effects = &cNo effects configured! Open the spell options menu.
 spells.fireball.book_name = &eScroll of the Apollo &oI
 spells.fireball.lore1 = &8The first scroll, containing the basis of
 spells.fireball.lore2 = &8fire magic.
+spells.fireball.name = &6Fireball
+spells.fireball.description = &7A small ball of fire that can be shot\n&7at an enemy.
 
 # --- AirBlades ---
 spells.airblades.book_name = &fThe Iron Fan Treatise
 spells.airblades.lore1 = &8The discipline of the war-fan: a blade of wind
 spells.airblades.lore2 = &8for each spoke of the iron ribs.
+spells.airblades.name = &fAir Blades
+spells.airblades.description = &7Arm yourself with blades of wind,\n&7releasing a fan of cutting\n&7air towards your foes.
 
 # --- AirBurst ---
 spells.airburst.book_name = &7Tome of Wind &oVol. 1
 spells.airburst.lore1 = &8A beginners guide to wind magic.
 spells.airburst.lore2 = &8compressed air.
+spells.airburst.name = &7Air Burst
+spells.airburst.description = &7A burst of air that damages and\n&7launches enemies backward.
 
 # --- Barrier ---
 spells.barrier.book_name = &aAegis Codex &oPart I
 spells.barrier.lore1 = &8&oDefense is the best Offense &r&7 - Barrier Master
 spells.barrier.lore2 = &8air-based defense.
 spells.barrier.health_bar = &dBarrier: %health%/%initHealth%
+spells.barrier.name = &aBarrier
+spells.barrier.description = &7Creates a shield of mana to block\n&7incoming attacks
 
 # --- Blink ---
 spells.blink.book_name = &5Voidwalk Codex
 spells.blink.lore1 = &8&oStep between the folds of reality.
 spells.blink.lore2 = &8short-range teleportation.
 spells.blink.no_valid_location = &cNo valid teleport location found!
+spells.blink.name = &5Blink
+spells.blink.description = &7Teleports you a short distance\n&7in the direction you are facing.
 
 # --- Warp ---
 spells.warp.book_name = &6Codex of the Folded Path
@@ -601,6 +611,8 @@ spells.warp.too_far = &cThat warp point is too far away!
 spells.warp.blocked = &cYou cannot warp there!
 spells.warp.point_set = &aWarp point set!
 spells.warp.point_cleared = &7Warp point cleared.
+spells.warp.name = &5Warp
+spells.warp.description = &7Fold space to teleport across\n&7great distances in an instant.
 
 # --- Skeletal Knights ---
 spells.skeletalknights.book_name = &2Codex of the Black Steeds
@@ -610,6 +622,8 @@ spells.skeletalknights.lore2 = &7Summon three iron-clad knights upon skeletal st
 # sends spells.cast.interrupted. Kept (and renamed with the block) so an existing
 # translation is not silently dropped.
 spells.skeletalknights.interrupted = &cSummoning interrupted!
+spells.skeletalknights.name = &2Skeletal Knights
+spells.skeletalknights.description = &7Summon 3 iron-clad skeleton knights\n&7mounted on skeletal steeds.
 
 # --- Buff ---
 spells.buff.book_name = &bTome of Fortification
@@ -621,11 +635,15 @@ spells.buff.applied_to_target = &bBuffs applied to &f%target% &bfor &f%duration%
 spells.buff.active_self = &bBuffs active for &f%duration%&b seconds!
 spells.buff.target_buffed = &bYou have been buffed for &f%duration%&b seconds!
 spells.buff.expired = &7Your buffs have expired.
+spells.buff.name = &eBuff
+spells.buff.description = &7Applies your configured buffs\n&7for a set duration.\n&8Sneak to buff another player.
 
 # --- DarkTendrils ---
 spells.darktendrils.book_name = &8Grimoire of Shadows &oChapter 1
 spells.darktendrils.lore1 = &8&oDarkness is the light of the dusk.
 spells.darktendrils.lore2 = &8the void.
+spells.darktendrils.name = &5Dark Tendrils
+spells.darktendrils.description = &7Summon tendrils of dark mana that\n&7hunt nearby targets and inflict\n&7debilitating effects.
 
 # --- Debuff ---
 spells.debuff.book_name = &5Tome of Enfeeblement
@@ -636,11 +654,15 @@ spells.debuff.no_target = &cNo valid target in sight.
 spells.debuff.applied = &5Debuffs applied to &f%target% &5for &f%duration%&5 seconds!
 spells.debuff.target_debuffed = &5You have been debuffed for &f%duration%&5 seconds!
 spells.debuff.faded = &7The debuff on you has faded.
+spells.debuff.name = &7Debuff
+spells.debuff.description = &7Applies your configured debuffs\n&7to a target you are looking at.
 
 # --- Detect ---
 spells.detect.book_name = &fCypher's First Manual
 spells.detect.lore1 = &8A book containing the info of a Moroccan Agent.
 spells.detect.lore2 = &8hidden entities.
+spells.detect.name = &fDetect
+spells.detect.description = &7Uses magic power to search the surroundings.\n&7Detection range varies with circle level.
 
 # --- Disguise ---
 spells.disguise.book_name = &dIllusionist's Guide &oI
@@ -653,22 +675,30 @@ spells.disguise.next_page = &fNext Page
 spells.disguise.previous_page = &fPrevious Page
 spells.disguise.page_number = &ePage %page%
 spells.disguise.click_disguise = &aClick to disguise as %target%
+spells.disguise.name = &fDisguise
+spells.disguise.description = &7Uses mana to change the appearance of the player\n&7to another player.
 
 # --- EarthSpike ---
 spells.earthspike.book_name = &aTome of the Blind Earthseer &oSection II
 spells.earthspike.lore1 = &8The 2nd lesson of the seeker of the
 spells.earthspike.lore2 = &8pinnacle of Earth magic
 spells.earthspike.must_be_cast_on_earth = &cMust be casted on earth.
+spells.earthspike.name = #A0522DEarth Spike
+spells.earthspike.description = &7Creates a spike of condensed rock,\n&7launching enemies up and dealing damage.
 
 # --- EarthThrow ---
 spells.earththrow.book_name = &aTome of the Blind Earthseer &oSection I
 spells.earththrow.lore1 = &8The first of a series containing the knowledge
 spells.earththrow.lore2 = &8of the greatest earthbender in the world.
+spells.earththrow.name = #A0522DEarth Throw
+spells.earththrow.description = &7Throws a chunk of earth forward.\n&7Launches enemies upwards when landing.
 
 # --- EarthenWall ---
 spells.earthenwall.book_name = &6Gaia's Bulwark
 spells.earthenwall.lore1 = &8&oThe earth rises to meet your call.
 spells.earthenwall.lore2 = &8earth barriers.
+spells.earthenwall.name = &6Earthen Wall
+spells.earthenwall.description = &7Raises a wall of earth to block\n&7and damage enemies.
 
 # --- EarthSplitter (class Fissure) ---
 spells.earthsplitter.book_name = &aTerra Fissure Tome
@@ -676,108 +706,154 @@ spells.earthsplitter.lore1 = &8The ground itself obeys the earth mage.
 # Dead config: Fissure.getSpellBook() reads book_name and lore1 only. Kept (and
 # renamed with the block) so an existing translation is not silently dropped.
 spells.earthsplitter.lore2 = &8the ground.
+spells.earthsplitter.name = &aEarth Splitter
+spells.earthsplitter.description = &7Cracks the earth open with a widening fissure that travels forward,\n&7launching enemies into the air.
 
 # --- FireBlast ---
 spells.fireblast.book_name = &eScroll of Apollo &oII
 spells.fireblast.lore1 = &8A scroll containing the knowledge to enhance
 spells.fireblast.lore2 = &8fireball.
+spells.fireblast.name = &6Fire Blast
+spells.fireblast.description = &7A large ball of fire that can be shot at\n&7an enemy and ignites their surroundings.
 
 # --- FireWall ---
 spells.firewall.book_name = &cRecord of Brunhild
 spells.firewall.lore1 = &8The record of the punishment of the Valkyrie Brunhild
 spells.firewall.lore2 = &8walls of fire.
+spells.firewall.name = &6Fire Wall
+spells.firewall.description = &7Creates a wall of fire to block enemies\n&7and deal heavy damage.
 
 # --- FlamingVolley ---
 spells.flamingvolley.book_name = &cInferno Volley Codex
 spells.flamingvolley.lore1 = &8&oA rain of fire upon thy enemies.
 spells.flamingvolley.lore2 = &8fiery projectiles.
+spells.flamingvolley.name = &6Flaming Volley
+spells.flamingvolley.description = &7Fires a volley of flaming arrows\n&7that ignite enemies on impact.
 
 # --- Geyser ---
 spells.geyser.book_name = &3Scroll of the Tidal Arts
 spells.geyser.lore1 = &8The third part of a trilogy, containing
 spells.geyser.lore2 = &8the ultimate expression of water magic.
 spells.geyser.lore3 = &8summoning water from the earth.
+spells.geyser.name = &bGeyser
+spells.geyser.description = &7Summons a column of water that erupts\n&7in front of the player, launching\n&7enemies and dealing damage.
 
 # --- Heal ---
 spells.heal.book_name = &eAsclepius' Pharmacopoeia &o2nd Edition
 spells.heal.lore1 = &8The knowledge of the god of medicine.
+spells.heal.name = &eHeal
+spells.heal.description = &7Heal yourself (&8Shift&7) or any\n&7target.
 
 # --- LesserHeal ---
 spells.lesserheal.book_name = &eAsclepius' Pharmacopoeia &o1st Edition
 spells.lesserheal.lore1 = &8The knowledge of the god of medicine.
+spells.lesserheal.name = &eLesser Heal
+spells.lesserheal.description = &7Heal yourself (&8Shift&7) or any\n&7target player.
 
 # --- LightBuff ---
 spells.lightbuff.book_name = &eCodex of Celestial Radiance
 spells.lightbuff.lore1 = &8&oLet there be light.
 spells.lightbuff.blessed_by_target = &eYou have been blessed by &f%caster%&e's light!
 spells.lightbuff.blessed_count = &eBlessed &f%count% &eplayers with light for &f%duration%&e seconds!
+spells.lightbuff.name = &eLight Buff
+spells.lightbuff.description = &7Blesses nearby allies with\n&7a short burst of power.
 
 # --- MagicMissile ---
 # No book_name / lore keys: getSpellBook() returns null (MagicMissile.java:242-244)
 # and the starter spell is issued directly rather than as a scroll. This is the
-# ONLY spell permitted to have no lang prefix, and SpellLangTest asserts the
-# exemption list never grows.
+# ONLY spell permitted to have no BOOK prefix, and SpellLangTest asserts the
+# exemption list never grows. It does have a name/description pair, like every spell.
+spells.magicmissile.name = &bMagic Missile
+spells.magicmissile.description = &7A short burst of mana that\n&7deals small damage to enemies.
 
 # --- MeteorShower ---
 spells.meteorshower.book_name = &6Codex of Falling Stars
 spells.meteorshower.lore1 = &8The heavens answer the caller's will.
+spells.meteorshower.name = &6Meteor Shower
+spells.meteorshower.description = &7Calls down a rain of fiery meteors\n&7from the sky, devastating a large area.
 
 # --- Radiance ---
 spells.radiance.book_name = &eGospel of the Dawn
 spells.radiance.lore1 = &8Light banishes the darkness.
+spells.radiance.name = &eRadiance
+spells.radiance.description = &7A burst of holy light that heals allies\n&7and sears undead creatures.
 
 # --- ShadowRealm ---
 spells.shadowrealm.book_name = &5Necronomicon of the Void
 spells.shadowrealm.lore1 = &8The abyss gazes back into you.
+spells.shadowrealm.name = &5Shadow Realm
+spells.shadowrealm.description = &7Envelops an area in pure darkness,\n&7corrupting all who enter.
 
 # --- Stealth ---
 spells.stealth.book_name = &8A Beginners Guide to Assassination
 spells.stealth.lore1 = &8A book written by a certain teacher
 spells.stealth.lore2 = &8to help is students kill him.
+spells.stealth.name = &7Stealth
+spells.stealth.description = &7Uses magic power to hide the player,\n&7costing mana every second.\n&7Mana cost varies with circle level.
 
 # --- SummonZombies ---
 spells.summonzombies.book_name = &2Necronomicon Ex Mortis
 spells.summonzombies.lore1 = &8&oThe dead shall serve the living.
+spells.summonzombies.name = &2Summon Zombies
+spells.summonzombies.description = &7Summons zombies from the ground\n&7to attack your enemies.
 
 # --- Swift ---
 spells.swift.book_name = &fHermes' Tachys Manual
 spells.swift.lore1 = &8The secret to Hermes' instant deliveries.
+spells.swift.name = &fSwift
+spells.swift.description = &7Generates a gust of air behind the caster,\n&7propelling them forward.
 
 # --- Tremor ---
 spells.tremor.book_name = &aTome of the Blind Earthseer &oSection III
 spells.tremor.lore1 = &8The 3rd lesson of the seeker of the
 spells.tremor.lore2 = &8pinnacle of Earth magic
+spells.tremor.name = #A0522DTremor
+spells.tremor.description = &7Sends out a shockwave through the ground\n&7launching enemies up and dealing damage.
 
 # --- Tornado ---
 spells.tornado.book_name = &bScroll of the Endless Gyre
 spells.tornado.lore1 = &8The winds spiral into an unstoppable force.
 spells.tornado.no_ground = &cNo valid ground found for the tornado!
+spells.tornado.name = &bTornado
+spells.tornado.description = &7Creates a violent vortex that pulls in\n&7and tears apart nearby enemies.
 
 # --- Tsunami ---
 spells.tsunami.book_name = &9Tidal Scroll of the Deep
 spells.tsunami.lore1 = &8The ocean bends to the caster's command.
+spells.tsunami.name = &9Tsunami
+spells.tsunami.description = &7Summons a massive wave that surges forward,\n&7placing water blocks and crushing everything in its path.
 
 # --- WaterPulse ---
 spells.waterpulse.book_name = &9Water Sutra &oVol. II
 spells.waterpulse.lore1 = &8The second part of a trilogy, containing
 spells.waterpulse.lore2 = &8the area potential of water magic.
+spells.waterpulse.name = &9Water Pulse
+spells.waterpulse.description = &7A wave of water that knocks\n&7back enemies and extinquishes\n&7fire and lava
 
 # --- WaterSphere ---
 spells.watersphere.book_name = &9Water Sutra &oVol. I
 spells.watersphere.lore1 = &8The first part of a trilogy, revealing
 spells.watersphere.lore2 = &8the basics of water magic.
+spells.watersphere.name = &9Water Sphere
+spells.watersphere.description = &7A small ball of water that\n&7can be propelled in a direction.
 
 # --- Whirlpool ---
 spells.whirlpool.book_name = &9Tome of the Maelstrom
 spells.whirlpool.lore1 = &8&oThe depths rise to claim all.
+spells.whirlpool.name = &9Whirlpool
+spells.whirlpool.description = &7Summons a whirlpool at the\n&7target location that pulls\n&7enemies in and damages them.
 
 # --- WindBarrier ---
 spells.windbarrier.book_name = &fAegis of the Zephyr
 spells.windbarrier.lore1 = &8&oThe wind shall shield thee.
+spells.windbarrier.name = &fWind Barrier
+spells.windbarrier.description = &7Creates a barrier of wind that\n&7deflects incoming projectiles.
 
 # --- WindVortex ---
 spells.windvortex.book_name = &fTome of Wind &oVol. 2
 spells.windvortex.lore1 = &8Demonstrates the influence of wind on surroundings.
+spells.windvortex.name = &fWind Vortex
+spells.windvortex.description = &7Create a powerful vortex of wind\n&7that pulls enemies toward you.\n&7Enemies caught in the vortex take\n&7damage and are left vulnerable.
 
 # ==============================
 # Circle 5-9 expansion (wave 5 spells)
@@ -792,16 +868,22 @@ spells.windvortex.lore1 = &8Demonstrates the influence of wind on surroundings.
 spells.flamelance.book_name = &eCodex of the Piercing Flame
 spells.flamelance.lore1 = &8Draw the breath in, hold it, and loose a lance
 spells.flamelance.lore2 = &8narrow enough to pass through an entire crowd.
+spells.flamelance.name = &6Flame Lance
+spells.flamelance.description = &7A lance of fire narrow enough to pass through a\n&7crowd, burning everything it touches exactly once.
 
 # --- InfernoPilgrimage (circle 7, FIRE) ---
 spells.infernopilgrimage.book_name = &6Rite of the Walking Pyre
 spells.infernopilgrimage.lore1 = &8The flame does not stand and wait to be struck.
 spells.infernopilgrimage.lore2 = &8It walks where you look, and takes three breaths to pass.
+spells.infernopilgrimage.name = &6Inferno Pilgrimage
+spells.infernopilgrimage.description = &7Loose a wall of flame and it walks the line you\n&7were looking down, taking three pulses as it goes.
 
 # --- SunfireBarrage (circle 8, FIRE) ---
 spells.sunfirebarrage.book_name = &eAstral Codex of Falling Light
 spells.sunfirebarrage.lore1 = &8Mark what must burn, then hold still and let the
 spells.sunfirebarrage.lore2 = &8sun come down on it in pieces.
+spells.sunfirebarrage.name = &6Sunfire Barrage
+spells.sunfirebarrage.description = &7Hold still and the sun finds five things to\n&7burn. Move, or get hit, and it finds nothing.
 
 # --- InfernoRite (circle 9, FIRE) ---
 spells.infernorite.book_name = &6Grimoire of the Ninth Pyre
@@ -809,77 +891,107 @@ spells.infernorite.lore1 = &8Wherever your fire has already taken hold, the rite
 spells.infernorite.lore2 = &8carries it onward - and the rest of it all goes at once.
 spells.infernorite.opened = &6The rite opens. Three charges, and no more.
 spells.infernorite.expired = &7The rite closes.
+spells.infernorite.name = &6Inferno Rite
+spells.infernorite.description = &7For eight seconds, your fire detonates whatever\n&7else is already burning. Three times, and no more.
 
 # --- Undertow (circle 6, WATER) ---
 spells.undertow.book_name = &9Tome of the Riptide
 spells.undertow.lore1 = &8The sea does not chase. It waits,
 spells.undertow.lore2 = &8and then it takes what you owe.
+spells.undertow.name = &9Undertow
+spells.undertow.description = &7Calls a riptide that hauls one\n&7enemy toward you. The further it\n&7drags them, the more they suffer.
 
 # --- Everdrain (circle 7, WATER) ---
 spells.everdrain.book_name = &9Codex of the Leeching Deep
 spells.everdrain.lore1 = &8Life is currency, and the water
 spells.everdrain.lore2 = &8always comes to collect.
+spells.everdrain.name = &9Everdrain
+spells.everdrain.description = &7Opens a pool that drinks from\n&7every living thing inside it -\n&7and hands their life to you.
 
 # --- ThousandWaves (circle 8, WATER) ---
 spells.thousandwaves.book_name = &9Atlas of a Thousand Waves
 spells.thousandwaves.lore1 = &8Call the whole sea, and it comes
 spells.thousandwaves.lore2 = &8one wave at a time, and all at once.
+spells.thousandwaves.name = &9Thousand Waves
+spells.thousandwaves.description = &7Hold to gather the sea, then\n&7release eight crests at once -\n&7each one heavier than the last.
 
 # --- TideOfTheDeep (circle 9, WATER) ---
 spells.tideofthedeep.book_name = &9Testament of the Rising Tide
 spells.tideofthedeep.lore1 = &8Stand in the flood and it will
 spells.tideofthedeep.lore2 = &8carry you. Everything else drowns.
+spells.tideofthedeep.name = &9Tide of the Deep
+spells.tideofthedeep.description = &7Raises a tide that mends you\n&7alone and drowns all within -\n&7and the deeper it runs, the\n&7harder it comes.
 
 # --- TectonicStrike (circle 6, EARTH) ---
 spells.tectonicstrike.book_name = &6Tome of the Shattered Strata
 spells.tectonicstrike.lore1 = &8&oBring the mountain down on one point.
 spells.tectonicstrike.lore2 = &8a focused slam that breaks the ground open.
+spells.tectonicstrike.name = &6Tectonic Strike
+spells.tectonicstrike.description = &7Slams the full weight of a mountain into one\n&7point, cracking the ground and hurling everything back.
 
 # --- FaultLine (circle 7, EARTH) ---
 spells.faultline.book_name = &4Grimoire of the Split Land
 spells.faultline.lore1 = &8&oThe crust remembers every wound.
 spells.faultline.lore2 = &8a crack that keeps opening for ten seconds.
+spells.faultline.name = &4Fault Line
+spells.faultline.description = &7Splits the ground open and keeps splitting it for ten\n&7seconds, hurling anything that falls into the crack.
 
 # --- ContinentalShift (circle 8, EARTH) ---
 spells.continentalshift.book_name = &2Atlas of the Rising Land
 spells.continentalshift.lore1 = &8&oLift a continent, and stand upon it.
 spells.continentalshift.lore2 = &8a plateau raised from the crust, and no scar left behind.
+spells.continentalshift.name = &2Continental Shift
+spells.continentalshift.description = &7Channels the crust upward into a plateau you can\n&7stand on, and drop off the edge of.
 
 # --- Worldbreaker (circle 9, EARTH) ---
 spells.worldbreaker.book_name = &5Last Codex of the Broken World
 spells.worldbreaker.lore1 = &8&oThe world was whole, once.
 spells.worldbreaker.lore2 = &8two faults, one slab, and everything caught between.
+spells.worldbreaker.name = &5Worldbreaker
+spells.worldbreaker.description = &7Tears the arena apart along two faults and levers\n&7the slab between them into the air.
 
 # --- Updraft (circle 3, AIR) ---
 spells.updraft.book_name = &fTome of Wind &oVol. 3
 spells.updraft.lore1 = &8Air itself, taught to lift what it holds.
 spells.updraft.lore2 = &8knock upward.
+spells.updraft.name = &fUpdraft
+spells.updraft.description = &7A column of rising air that tears\n&7enemies off their feet.
 
 # --- Thunderclap (circle 6, AIR) ---
 spells.thunderclap.book_name = &fCodex of the Split Sky
 spells.thunderclap.lore1 = &8One word of thunder, and the air answers.
 spells.thunderclap.lore2 = &8a single concussive blast.
+spells.thunderclap.name = &fThunderclap
+spells.thunderclap.description = &7A single concussive blast that shoves\n&7everything nearby outward and back.
 
 # --- CycloneNest (circle 7, AIR) ---
 spells.cyclonenest.book_name = &fCompendium of the Maelstrom
 spells.cyclonenest.lore1 = &8Three small gyres, set down and left to feed.
 spells.cyclonenest.lore2 = &8nesting tornadoes.
+spells.cyclonenest.name = &fCyclone Nest
+spells.cyclonenest.description = &7Set three small tornadoes into the\n&7ground and leave them feeding.
 
 # --- Stormcaller (circle 8, AIR) ---
 spells.stormcaller.book_name = &fThe Wandering Tempest
 spells.stormcaller.lore1 = &8Call the storm, and hold it to you.
 spells.stormcaller.lore2 = &8a storm that follows.
+spells.stormcaller.name = &fStormcaller
+spells.stormcaller.description = &7Hold still and raise a storm that\n&7follows you, striking what comes close.
 
 # --- Skywrath (circle 9, AIR) ---
 spells.skywrath.book_name = &fThe Wrath of Open Sky
 spells.skywrath.lore1 = &8The last lesson: take the sky itself.
 spells.skywrath.lore2 = &8flight, and a storm to justify it.
 spells.skywrath.ending = &7The sky closes. You are grounded again.
+spells.skywrath.name = &fSkywrath
+spells.skywrath.description = &7Take the sky itself. A storm follows you\n&7for fifteen seconds, and you fly with it.
 
 # --- LightBolt (circle 1, LIGHT) ---
 spells.lightbolt.book_name = &eScroll of the First Ray
 spells.lightbolt.lore1 = &8The opening line of the lit canticle,
 spells.lightbolt.lore2 = &8a single ray loosed at the risen dead.
+spells.lightbolt.name = &eLight Bolt
+spells.lightbolt.description = &7A pale bolt of gathered light,\n&7hurled straight down your aim.\n&7It bites the risen dead twice as hard.
 
 # --- RadiantBrand (circle 6, LIGHT) ---
 spells.radiantbrand.book_name = &6Book of the Sealed Brand
@@ -887,12 +999,16 @@ spells.radiantbrand.lore1 = &8Mark a foe, and the light keeps
 spells.radiantbrand.lore2 = &8its own accounts.
 spells.radiantbrand.no_target = &cNo living target in sight.
 spells.radiantbrand.faded = &7The brand fades unlit.
+spells.radiantbrand.name = &6Radiant Brand
+spells.radiantbrand.description = &7Seal a mark on one foe. It deals\n&7no damage when it is set...\n&7...and everything when it goes out.
 
 # --- ChoirOfLight (circle 7, LIGHT) ---
 spells.choiroflight.book_name = &bPsalter of the Shifting Choir
 spells.choiroflight.lore1 = &8Every voice in the choir finds its
 spells.choiroflight.lore2 = &8own throat, and all of them sing at once.
 spells.choiroflight.no_target = &cNothing to sing to.
+spells.choiroflight.name = &bChoir of Light
+spells.choiroflight.description = &7Shards of light orbit you, find\n&7their own throats, and sing as\n&7one. Answer the choir and it\n&7falls silent all at once.
 
 # --- Apotheosis (circle 8, LIGHT) ---
 spells.apotheosis.book_name = &dLitany of the Ascendant
@@ -903,34 +1019,46 @@ spells.apotheosis.expired = &7The light settles out of you.
 spells.apotheosis.interrupted = &cThe ascent is broken!
 spells.apotheosis.already_active = &cYou are already ascended.
 spells.apotheosis.boss_bar = &dApotheosis %duration%s
+spells.apotheosis.name = &dApotheosis
+spells.apotheosis.description = &7Stand still while the light climbs,\n&7and it will climb through you.\n&7Your own spells cost less and hit\n&7harder while it holds.
 
 # --- CrownOfDawn (circle 9, LIGHT) ---
 spells.crownofdawn.book_name = &fCrown of the Breaking Dawn
 spells.crownofdawn.lore1 = &8A wall of morning stands where
 spells.crownofdawn.lore2 = &8you tell it to, and nothing crosses.
 spells.crownofdawn.broken = &cThe crown of dawn is broken!
+spells.crownofdawn.name = &fCrown of Dawn
+spells.crownofdawn.description = &7A wall of morning stands where\n&7you tell it to. Nothing crosses,\n&7and the weakened do not leave it.
 
 # --- UmbralVolley (circle 7, DARK) ---
 spells.umbralvolley.book_name = &5Umbral Volley &oChapter III
 spells.umbralvolley.lore1 = &8&oThree darts of night, and the wound they
 spells.umbralvolley.lore2 = &8leave behind them does not close.
+spells.umbralvolley.name = &5Umbral Volley
+spells.umbralvolley.description = &7Loose three darts of shadow that hunt\n&7the same prey, then split apart\n&8&oand leave a wound that will not close.
 
 # --- VoidAnchor (circle 8, DARK) ---
 spells.voidanchor.book_name = &5Grimoire of the Bound &oFolio IV
 spells.voidanchor.lore1 = &8&oTear a horror from the ground and set it
 spells.voidanchor.lore2 = &8to hold what you would not hold yourself.
 spells.voidanchor.no_summon_spot = &cThe ground will not give one up here.
+spells.voidanchor.name = &5Void Anchor
+spells.voidanchor.description = &7Tear a bound horror from the ground\n&7and set it to hold what comes\n&7within its reach.
 
 # --- Oblivion (circle 9, DARK) ---
 spells.oblivion.book_name = &5Necronomicon Finis
 spells.oblivion.lore1 = &8&oWhat is already dying is easiest to erase;
 spells.oblivion.lore2 = &8a soul at its last leaves the least behind.
 spells.oblivion.no_target = &cNothing stands close enough to be forgotten.
+spells.oblivion.name = &5Oblivion
+spells.oblivion.description = &7Erase one soul. The closer it\n&7already is to the dark, the\n&7less of it there is to remove.
 
 # --- ArcaneWard (circle 5, NONE) ---
 spells.arcaneward.book_name = &5Aegis Codex &oPart II
 spells.arcaneward.lore1 = &8&oSet the aegis where it is needed, not where you stand.
 spells.arcaneward.lore2 = &8stationary ally-buffersing.
+spells.arcaneward.name = &5Arcane Ward
+spells.arcaneward.description = &7Weaves a screen of mana around one\n&7soul - yours or an ally's - and\n&7leaves it standing when you walk away.
 
 # --- WaystoneRecall (circle 7, NONE) ---
 spells.waystonerecall.book_name = &dCodex of the Bound Waystone
@@ -939,6 +1067,8 @@ spells.waystonerecall.lore2 = &8instantaneous long-range recall.
 spells.waystonerecall.no_points = &cYou have no reachable waystones! Set some in Warp's options first.
 spells.waystonerecall.nothing_in_sight = &cNo waystone within reach of your aim.
 spells.waystonerecall.blocked = &cYou cannot recall there!
+spells.waystonerecall.name = &dWaystone Recall
+spells.waystonerecall.description = &7Names a waystone, and stands you\n&7on it before the sound has\n&7finished - no channel, no window.
 
 # --- EchoCast (circle 8, NONE) ---
 spells.echocast.book_name = &dGrimoire of the Repeated Hour
@@ -947,6 +1077,8 @@ spells.echocast.lore2 = &8re-casts the last three spells in order.
 spells.echocast.no_history = &cYou have not cast anything to echo yet.
 spells.echocast.not_enough_mana = &cNot enough mana to echo your last three spells.
 spells.echocast.replaying = &dEchoing &f%count% &dspell(s)...
+spells.echocast.name = &6Echo Cast
+spells.echocast.description = &7Takes the last three things you cast\n&7and makes you cast them again,\n&7in order, for sixty percent.
 
 # --- ArcaneResonance (circle 9, NONE) ---
 spells.arcaneresonance.book_name = &5Tome of the Standing Wave
@@ -957,6 +1089,8 @@ spells.arcaneresonance.charges = &dResonance - &f%count% &dcast(s) remain.
 spells.arcaneresonance.spent = &7Your resonance has spent itself.
 spells.arcaneresonance.expired = &7Your resonance faded unused.
 spells.arcaneresonance.already_active = &cYou are already resonating!
+spells.arcaneresonance.name = &dArcane Resonance
+spells.arcaneresonance.description = &7Sets your next three casts ringing\n&7true - each one sounds twice,\n&7at a fifth more than it should.
 
 # --- Dispel (circle 3, LIGHT, UTILITY) ---
 spells.dispel.book_name = &eScroll of the Unwritten Word
@@ -965,6 +1099,8 @@ spells.dispel.lore2 = &8yours, or theirs - if your circle is deep enough.
 spells.dispel.cleared = &eDispelled &f%cleared% &eeffect(s).
 spells.dispel.resisted = &8%resisted% &7effect(s) held firm.
 spells.dispel.nothing = &8Nothing here answers to your circle.
+spells.dispel.name = &eDispel
+spells.dispel.description = &7Strips the buffs, debuffs and illusions\n&7carrying a single target. Out-ranks each\n&7one by circle.
 
 # --- Affinity curve migration notice (one-time, on login) ---
 migration.affinity_curve.header = &6Affinity recalculated
@@ -992,13 +1128,37 @@ progression.requirement_arcane_knowledge = Arcane Knowledge: %current%/%needed%
 progression.requirement_spell_mastery = Spell Mastery (%spell%%metColor%): %current%/%needed%
 
 # ==============================
-# YAML Overrides (optional)
-# Uncomment or add keys here to override YAML-defined display strings.
-# If a key is missing, the YAML value is used unchanged.
-# Format: override.<type>.<id>.<field>
+# SPELL NAMES AND DESCRIPTIONS
 # ==============================
-# override.spells.fireball.name = &6Fireball
-# override.spells.fireball.description = &7A small ball of fire that can be shot at enemies.
+# A spell's name and description live here, not in spells/<id>.yml. Each spell owns one
+# block keyed by its id with the underscores removed, so fire_blast and earth_spike are
+# spells.fireblast.* and spells.earthspike.*.
+#
+# This file shadows the copy bundled in the jar, so edit it freely and run
+# /alkatraz reload to apply it. Do not delete it: the bundled copy is written back on
+# the next server start and any edits go with it.
+#
+# Colour codes: &a and friends for the legacy codes, #RRGGBB for hex. A hex code carries
+# no ampersand in front of it - &#RRGGBB is not a valid form in a lang file and leaves a
+# stray & in the output. See spells.earthspike.name further up for a hex example.
+#
+# A value is a single line. This format has no line continuations, so a value wrapped
+# across two physical lines is silently cut at the break. Use the two characters
+# backslash and n to make a description span several lines, and repeat the colour code
+# on every segment:
+#   spells.fireball.description = &7A small ball of fire that can be shot\n&7at an enemy.
+#
+# Every spell's real .name and .description keys sit in that spell's own block further up
+# this file; the line above only shows the shape. spells.<prefix>.book_name is a
+# different string - the title of the book the spell is learned from - and neither it nor
+# the name comes from the spell's yml any more.
+
+# ==============================
+# RESEARCH OVERRIDES (optional)
+# ==============================
+# research.yml nodes and categories can be renamed from here. Uncomment or add keys.
+# Format: override.research.<type>.<id>.<field>
+# ==============================
 # override.research.nodes.<id>.name = &aCustom Name
 # override.research.nodes.<id>.description = &7Custom description line 1\nCustom description line 2
 # override.research.categories.<id>.name = &aCustom Category Name

@@ -1,8 +1,4 @@
 ﻿id: 'meteor_shower'
-display_name: '&6Meteor Shower'
-description:
-  - '&7Calls down a rain of fiery meteors'
-  - '&7from the sky, devastating a large area.'
 enabled: true
 element: 'FIRE'
 code: 'SSRLL'

@@ -377,6 +377,9 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage(lang().get("commands.no_permission"));
             return;
         }
+        // Language first: SpellRegistry.reload() re-runs Spell.loadCommonConfig, which is
+        // where spell names and descriptions are read. A lang edit must land before that.
+        Alkatraz.reloadLangManager();
         ConfigManager.getDefaultConfigs().keySet().forEach(ConfigManager::reloadConfig);
         ConfigManager.reloadConfig("progression.yml");
         SpellRegistry.reload();

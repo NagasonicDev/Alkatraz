@@ -1,8 +1,4 @@
 id: 'warp'
-display_name: '&5Warp'
-description:
-  - '&7Fold space to teleport across'
-  - '&7great distances in an instant.'
 enabled: true
 element: 'NONE'
 code: 'SRSSR'

@@ -1,8 +1,4 @@
 id: 'worldbreaker'
-display_name: '&5Worldbreaker'
-description:
-  - '&7Tears the arena apart along two faults and levers'
-  - '&7the slab between them into the air.'
 enabled: true
 
 element: 'EARTH'

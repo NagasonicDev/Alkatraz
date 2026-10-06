@@ -1,9 +1,4 @@
 id: 'dispel'
-display_name: '&eDispel'
-description:
-  - '&7Strips the buffs, debuffs and illusions'
-  - '&7carrying a single target. Out-ranks each'
-  - '&7one by circle.'
 # WHETHER THE PLUGIN SHOULD LOAD THE SPELL. DEFAULT: TRUE
 enabled: true
 

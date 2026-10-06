@@ -1,9 +1,4 @@
 id: 'everdrain'
-display_name: '&9Everdrain'
-description:
-  - '&7Opens a pool that drinks from'
-  - '&7every living thing inside it -'
-  - '&7and hands their life to you.'
 enabled: true
 
 element: 'WATER'

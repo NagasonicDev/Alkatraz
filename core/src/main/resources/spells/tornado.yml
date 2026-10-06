@@ -1,8 +1,4 @@
 ﻿id: 'tornado'
-display_name: '&bTornado'
-description:
-  - '&7Creates a violent vortex that pulls in'
-  - '&7and tears apart nearby enemies.'
 enabled: true
 element: 'AIR'
 code: 'RRSRR'

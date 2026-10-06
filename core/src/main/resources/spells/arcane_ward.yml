@@ -1,9 +1,4 @@
 id: 'arcane_ward'
-display_name: '&5Arcane Ward'
-description:
-  - '&7Weaves a screen of mana around one'
-  - '&7soul - yours or an ally''s - and'
-  - '&7leaves it standing when you walk away.'
 # WHAT THIS SPELL IS JUDGED ON. READ BY Spell.loadConfiguration AND SpellBudgetTest.
 # DENIAL IS ONE OF THE TWO ROLES NONE IS ALLOWED (spec 5.2): {UTILITY, DENIAL}.
 role: 'DENIAL'

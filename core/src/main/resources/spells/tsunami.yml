@@ -1,8 +1,4 @@
 ﻿id: 'tsunami'
-display_name: '&9Tsunami'
-description:
-  - '&7Summons a massive wave that surges forward,'
-  - '&7placing water blocks and crushing everything in its path.'
 enabled: true
 element: 'WATER'
 code: 'LLRSS'

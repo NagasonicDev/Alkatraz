@@ -1,9 +1,4 @@
 id: 'thousand_waves'
-display_name: '&9Thousand Waves'
-description:
-  - '&7Hold to gather the sea, then'
-  - '&7release eight crests at once -'
-  - '&7each one heavier than the last.'
 enabled: true
 
 element: 'WATER'

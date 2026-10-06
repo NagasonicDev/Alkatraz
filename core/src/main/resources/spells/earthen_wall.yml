@@ -1,8 +1,4 @@
 id: 'earthen_wall'
-display_name: '&6Earthen Wall'
-description:
-  - '&7Raises a wall of earth to block'
-  - '&7and damage enemies.'
 enabled: true
 element: 'EARTH'
 code: 'LLRSR'

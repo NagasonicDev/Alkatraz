@@ -1,9 +1,4 @@
 ﻿id: 'whirlpool'
-display_name: '&9Whirlpool'
-description:
-  - '&7Summons a whirlpool at the'
-  - '&7target location that pulls'
-  - '&7enemies in and damages them.'
 enabled: true
 element: 'WATER'
 code: 'RLLSR'

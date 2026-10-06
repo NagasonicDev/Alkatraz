@@ -1,8 +1,4 @@
 id: 'tremor'
-display_name: '#A0522DTremor'
-description:
-  - '&7Sends out a shockwave through the ground'
-  - '&7launching enemies up and dealing damage.'
 # WHETHER THE PLUGIN SHOULD LOAD THE SPELL. DEFAULT: TRUE
 enabled: true
 

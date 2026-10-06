@@ -1,9 +1,4 @@
 id: 'oblivion'
-display_name: '&5Oblivion'
-description:
-  - '&7Erase one soul. The closer it'
-  - '&7already is to the dark, the'
-  - '&7less of it there is to remove.'
 # WHETHER THE PLUGIN SHOULD LOAD THE SPELL. DEFAULT: TRUE
 enabled: true
 

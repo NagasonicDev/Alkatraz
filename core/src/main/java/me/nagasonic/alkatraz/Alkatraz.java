@@ -152,8 +152,9 @@ public final class Alkatraz extends JavaPlugin {
         
         // Initialize LangManager (must be before GUIItemRegistry, which uses lang strings)
         logVeryHigh("Initializing LangManager...");
+        save("lang/english.lang");
         langManager = new me.nagasonic.alkatraz.lang.LangManager(
-            pluginConfig.getString("language", "english"));
+            pluginConfig.getString("language", "english"), getDataFolder());
         
         // Initialize GUI item registry
         logVeryHigh("Initializing GUIItemRegistry...");
@@ -303,6 +304,16 @@ public final class Alkatraz extends JavaPlugin {
 
     public static me.nagasonic.alkatraz.lang.LangManager getLangManager() {
         return langManager;
+    }
+
+    /**
+     * Rebuilds the LangManager from config. /alkatraz reload calls this before
+     * SpellRegistry.reload(), which is what re-reads spell names and descriptions, so a
+     * lang edit takes effect on reload instead of needing a server restart.
+     */
+    public static void reloadLangManager() {
+        langManager = new me.nagasonic.alkatraz.lang.LangManager(
+                pluginConfig.getString("language", "english"), instance.getDataFolder());
     }
 
     public static RecipeManagerAPI getRecipeManager() {

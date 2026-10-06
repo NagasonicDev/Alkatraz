@@ -248,26 +248,23 @@ public abstract class Spell {
      */
     public void loadCommonConfig(YamlConfiguration spellConfig) {
         this.id            = spellConfig.getString("id");
-        this.displayName   = spellConfig.getString("display_name");
-        this.description   = spellConfig.getStringList("description");
         this.element       = Element.valueOf(spellConfig.getString("element"));
 
-        LangManager lang = Alkatraz.getLangManager();
-        String nameKey = "override.spells." + this.id + ".name";
-        String langName = lang.get(nameKey);
-        if (!langName.equals(nameKey)) {
-            this.displayName = langName;
-        } else {
-            this.displayName = ColorFormat.format(spellConfig.getString("display_name"));
-        }
+        // Name and description live in english.lang, not in this file: a spell's name and
+        // the name of the book it is learned from are different strings, and keeping them
+        // in two files is how light_bolt ended up showing "Scroll of the First Ray".
+        String prefix = this.id.replace("_", "");
+        String nameKey = "spells." + prefix + ".name";
+        String langName = lang().get(nameKey);
+        // LangManager returns the key itself on a miss, so this is a miss, not a name.
+        // Falling back to the id keeps getDisplayName() non-null for the sort comparator
+        // in SpellsMenu and the boss bar in StatUtils.
+        this.displayName = langName.equals(nameKey)
+                ? this.id.replace("_", " ")
+                : langName;
 
-        String descKey = "override.spells." + this.id + ".description";
-        String langDesc = lang.get(descKey);
-        if (!langDesc.equals(descKey)) {
-            this.description = Arrays.asList(ColorFormat.format(langDesc).split("\\\\n"));
-        } else {
-            this.description = spellConfig.getStringList("description");
-        }
+        this.description = splitLangDescription(lang().get("spells." + prefix + ".description"));
+
         this.code          = spellConfig.getString("code");
         this.castTime      = spellConfig.getDouble("cast_time");
         this.cost          = spellConfig.getInt("mana_cost");
@@ -296,6 +293,19 @@ public abstract class Spell {
         this.guiCustomModelData = spellConfig.getInt("gui_custom_model_data", 0);
 
         loadSoundConfig(spellConfig);
+    }
+
+    /**
+     * Splits a lang description value into lore lines. english.lang has no line
+     * continuations, so lines are separated by a literal backslash-n in the value; the
+     * regex below is \\n, a literal backslash followed by n. Returns an empty list rather
+     * than null so the lore loops in SpellsMenu and Spellbook cannot NPE on a missing key.
+     */
+    static List<String> splitLangDescription(String value) {
+        if (value == null || value.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return Arrays.asList(value.split("\\\\n"));
     }
 
     private void loadSoundConfig(YamlConfiguration spellConfig) {

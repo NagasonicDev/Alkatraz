@@ -1,9 +1,4 @@
 id: 'arcane_resonance'
-display_name: '&dArcane Resonance'
-description:
-  - '&7Sets your next three casts ringing'
-  - '&7true - each one sounds twice,'
-  - '&7at a fifth more than it should.'
 # WHAT THIS SPELL IS JUDGED ON. READ BY Spell.loadConfiguration AND SpellBudgetTest.
 # UTILITY IS ONE OF THE TWO ROLES NONE IS ALLOWED (spec 5.2): {UTILITY, DENIAL}.
 role: 'UTILITY'

@@ -1,8 +1,4 @@
 id: 'inferno_pilgrimage'
-display_name: '&6Inferno Pilgrimage'
-description:
-  - '&7Loose a wall of flame and it walks the line you'
-  - '&7were looking down, taking three pulses as it goes.'
 enabled: true
 
 # NONE MEANS ITS DAMAGE DOES NOT SCALE WITH ELEMENTAL DAMAGE, ONLY MAGIC DAMAGE

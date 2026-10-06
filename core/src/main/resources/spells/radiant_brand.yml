@@ -1,9 +1,4 @@
 id: 'radiant_brand'
-display_name: '&6Book of the Sealed Brand'
-description:
-  - '&7Seal a mark on one foe. It deals'
-  - '&7no damage when it is set...'
-  - '&7...and everything when it goes out.'
 # WHETHER THE PLUGIN SHOULD LOAD THE SPELL. DEFAULT: TRUE
 enabled: true
 

@@ -1,8 +1,4 @@
 id: 'earth_spike'
-display_name: '#A0522DEarth Spike'
-description:
-  - '&7Creates a spike of condensed rock,'
-  - '&7launching enemies up and dealing damage.'
 # WHETHER THE PLUGIN SHOULD LOAD THE SPELL. DEFAULT: TRUE
 enabled: true
 

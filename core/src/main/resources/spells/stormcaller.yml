@@ -1,8 +1,4 @@
 id: 'stormcaller'
-display_name: '&fStormcaller'
-description:
-  - '&7Hold still and raise a storm that'
-  - '&7follows you, striking what comes close.'
 enabled: true
 
 # WHAT THIS SPELL IS JUDGED ON. READ BY Spell.loadConfiguration AND SpellBudgetTest.

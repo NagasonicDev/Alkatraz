@@ -1,8 +1,4 @@
 ﻿id: 'swift'
-display_name: '&fSwift'
-description:
-  - '&7Generates a gust of air behind the caster,'
-  - '&7propelling them forward.'
 # WHETHER THE PLUGIN SHOULD LOAD THE SPELL. DEFAULT: TRUE
 enabled: true
 

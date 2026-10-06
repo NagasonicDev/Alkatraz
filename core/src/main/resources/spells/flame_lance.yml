@@ -1,8 +1,4 @@
 id: 'flame_lance'
-display_name: '&6Flame Lance'
-description:
-  - '&7A lance of fire narrow enough to pass through a'
-  - '&7crowd, burning everything it touches exactly once.'
 enabled: true
 
 # NONE MEANS ITS DAMAGE DOES NOT SCALE WITH ELEMENTAL DAMAGE, ONLY MAGIC DAMAGE

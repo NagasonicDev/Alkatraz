@@ -1,9 +1,4 @@
 id: 'waystone_recall'
-display_name: '&dWaystone Recall'
-description:
-  - '&7Names a waystone, and stands you'
-  - '&7on it before the sound has'
-  - '&7finished - no channel, no window.'
 # WHAT THIS SPELL IS JUDGED ON. READ BY Spell.loadConfiguration AND SpellBudgetTest.
 # UTILITY IS ONE OF THE TWO ROLES NONE IS ALLOWED (spec 5.2): {UTILITY, DENIAL}.
 role: 'UTILITY'

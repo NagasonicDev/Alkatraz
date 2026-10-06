@@ -1,9 +1,4 @@
 ﻿id: 'stealth'
-display_name: '&7Stealth'
-description:
-  - '&7Uses magic power to hide the player,'
-  - '&7costing mana every second.'
-  - '&7Mana cost varies with circle level.'
 # WHETHER THE PLUGIN SHOULD LOAD THE SPELL. DEFAULT: TRUE
 enabled: true
 

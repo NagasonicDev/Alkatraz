@@ -1,9 +1,4 @@
 id: 'crown_of_dawn'
-display_name: '&fCrown of the Breaking Dawn'
-description:
-  - '&7A wall of morning stands where'
-  - '&7you tell it to. Nothing crosses,'
-  - '&7and the weakened do not leave it.'
 # WHETHER THE PLUGIN SHOULD LOAD THE SPELL. DEFAULT: TRUE
 enabled: true
 

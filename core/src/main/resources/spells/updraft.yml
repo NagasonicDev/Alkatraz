@@ -1,8 +1,4 @@
 id: 'updraft'
-display_name: '&fUpdraft'
-description:
-  - '&7A column of rising air that tears'
-  - '&7enemies off their feet.'
 enabled: true
 
 # WHAT THIS SPELL IS JUDGED ON. READ BY Spell.loadConfiguration AND SpellBudgetTest.

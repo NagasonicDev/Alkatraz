@@ -1,6 +1,7 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
 import me.nagasonic.alkatraz.api.Element;
+import me.nagasonic.alkatraz.spells.BundledLang;
 import me.nagasonic.alkatraz.spells.types.SpellRole;
 import me.nagasonic.alkatraz.spells.util.SpellBudgets;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -128,6 +129,8 @@ class OblivionTest {
                 "halfway through a 30-tick wave the shell is halfway to its 3.0 radius");
         assertFalse(y.isSet("damage_per_tick"),
                 ID + " makes exactly one damage application, so a per-tick damage key would be a lie");
-        assertFalse(y.getStringList("description").isEmpty(), "description must be a non-empty list");
+        assertNotNull(BundledLang.resolve(BundledLang.parse(), "spells.oblivion.description"),
+                "spells.oblivion.description must exist in english.lang - the description moved out of "
+                        + ID + ".yml on 2026-10-06, and a missing key renders the raw lang key as lore");
     }
 }

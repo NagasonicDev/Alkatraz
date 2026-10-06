@@ -1,8 +1,4 @@
 id: 'sunfire_barrage'
-display_name: '&6Sunfire Barrage'
-description:
-  - '&7Hold still and the sun finds five things to'
-  - '&7burn. Move, or get hit, and it finds nothing.'
 enabled: true
 
 # NONE MEANS ITS DAMAGE DOES NOT SCALE WITH ELEMENTAL DAMAGE, ONLY MAGIC DAMAGE

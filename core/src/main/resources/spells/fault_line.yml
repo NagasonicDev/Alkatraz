@@ -1,8 +1,4 @@
 id: 'fault_line'
-display_name: '&4Fault Line'
-description:
-  - '&7Splits the ground open and keeps splitting it for ten'
-  - '&7seconds, hurling anything that falls into the crack.'
 enabled: true
 
 element: 'EARTH'

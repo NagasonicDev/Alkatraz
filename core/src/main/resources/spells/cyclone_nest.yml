@@ -1,8 +1,4 @@
 id: 'cyclone_nest'
-display_name: '&fCyclone Nest'
-description:
-  - '&7Set three small tornadoes into the'
-  - '&7ground and leave them feeding.'
 enabled: true
 
 # WHAT THIS SPELL IS JUDGED ON. READ BY Spell.loadConfiguration AND SpellBudgetTest.

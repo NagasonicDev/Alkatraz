@@ -1,8 +1,4 @@
 ﻿id: 'earthsplitter'
-display_name: '&aFissure'
-description:
-  - '&7Cracks the earth open with a widening fissure that travels forward,'
-  - '&7launching enemies into the air.'
 enabled: true
 element: 'EARTH'
 code: 'SRRLL'
