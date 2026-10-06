@@ -19,6 +19,7 @@ import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
 import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.util.Utils;
 import de.tr7zw.changeme.nbtapi.NBT;
+import org.bukkit.Color;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -31,6 +32,15 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 public class Barrier extends BarrierSpell implements Listener {
+
+    /**
+     * This spell's colour, handed to every shared VFX builder it calls.
+     *
+     * <p>Seeded with the `NONE` element's core shade so the spell looks unchanged, but
+     * it is now a value you own: edit this one line to re-tint the whole spell, and the
+     * two supporting shades follow automatically.
+     */
+    private static final Color CAST_COLOR = Color.fromRGB(180, 180, 180);
 
     /**
      * The single NONE palette. The old break-flash was hardcoded {@link Color#RED}, which on
@@ -96,7 +106,7 @@ public class Barrier extends BarrierSpell implements Listener {
                 }
 
                 if (properties.isBroken() || ticksPassed >= activeDuration * 5) {
-                    onBarrierBreak(center, activeRadius);
+                    onBarrierBreak(p, center, activeRadius);
                     properties.getHealthBar().removeAll();
                     cancel();
                     return;
@@ -130,7 +140,7 @@ public class Barrier extends BarrierSpell implements Listener {
                 );
                 SpellComponentHandler.register(shell);
 
-                SpellVfx.nova(Barrier.this, p, center, activeRadius, SHELL_POINT_COUNT);
+                SpellVfx.nova(CAST_COLOR, p, center, activeRadius, SHELL_POINT_COUNT);
 
                 ticksPassed++;
             }
@@ -151,7 +161,7 @@ public class Barrier extends BarrierSpell implements Listener {
             @Override
             public void run() {
                 if (properties.isBroken() || ticksPassed >= duration * 5) {
-                    onBarrierBreak(center);
+                    onBarrierBreak(caster, center);
                     properties.getHealthBar().removeAll();
                     cancel();
                     return;
@@ -169,7 +179,7 @@ public class Barrier extends BarrierSpell implements Listener {
                 );
                 SpellComponentHandler.register(shell);
 
-                SpellVfx.nova(Barrier.this, caster, center, radius, SHELL_POINT_COUNT);
+                SpellVfx.nova(CAST_COLOR, caster, center, radius, SHELL_POINT_COUNT);
 
                 ticksPassed++;
             }
@@ -200,10 +210,18 @@ public class Barrier extends BarrierSpell implements Listener {
 
     @Override
     public void onBarrierBreak(Location center) {
-        onBarrierBreak(center, radius);
+        onBarrierBreak(null, center, radius);
     }
 
-    private void onBarrierBreak(Location center, double breakRadius) {
-        SpellVfx.nova(null, null, center, breakRadius, BREAK_POINT_COUNT);
+    private void onBarrierBreak(LivingEntity caster, Location center) {
+        onBarrierBreak(caster, center, radius);
+    }
+
+    /**
+     * The caster is threaded through so the ward's owner always sees the burst at full density,
+     * while everyone else nearby still gets it through the normal distance falloff.
+     */
+    private void onBarrierBreak(LivingEntity caster, Location center, double breakRadius) {
+        SpellVfx.nova(CAST_COLOR, caster, center, breakRadius, BREAK_POINT_COUNT);
     }
 }

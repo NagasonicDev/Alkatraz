@@ -22,6 +22,7 @@ import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
+import org.bukkit.Color;
 import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.LivingEntity;
@@ -34,6 +35,15 @@ import org.bukkit.util.Vector;
 import java.util.List;
 
 public class AirBurst extends AttackSpell {
+
+    /**
+     * This spell's colour, handed to every shared VFX builder it calls.
+     *
+     * <p>Seeded with the `AIR` element's core shade so the spell looks unchanged, but
+     * it is now a value you own: edit this one line to re-tint the whole spell, and the
+     * two supporting shades follow automatically.
+     */
+    private static final Color CAST_COLOR = Color.fromRGB(234, 246, 255);
 
     /**
      * Knockback strength in blocks/tick, deliberately a FLAT constant rather than
@@ -95,17 +105,21 @@ public class AirBurst extends AttackSpell {
      * with a very different aspect ratio (thin, long, straight) so the two never read as
      * the same effect.
      *
+     * @param caster   the entity casting; passed through so the sweep keeps its full density
      * @param from     where the previous blast point was, or the cast origin on the first tick
      * @param to       the blast point being resolved this tick
      * @param blastSize the configured blast size, in blocks
      */
-    private void spawnSweepSegment(Location from, Location to, double blastSize) {
-        SpellVfx.beam(AirBurst.this, null, from, to, BEAM_STEPS,
+    private void spawnSweepSegment(LivingEntity caster, Location from, Location to, double blastSize) {
+        // The caster used to be null here, which cost this segment the caster-full-density
+        // exemption: the caster standing furthest from their own blast saw the thinnest version
+        // of it, which is backwards.
+        SpellVfx.beam(CAST_COLOR, caster, from, to, BEAM_STEPS,
                 blastSize * BEAM_START_WIDTH, blastSize * BEAM_END_WIDTH);
 
         // Leading edge: pale, translucent-looking air thrown off the front of the blast.
         // This is what makes the sweep read as moving rather than as a drawn line.
-        ParticleCaster.spawn(null, to.getWorld(), Utils.CLOUD, to, BLAST_EDGE_MOTES,
+        ParticleCaster.spawn(caster, to.getWorld(), Utils.CLOUD, to, BLAST_EDGE_MOTES,
                 blastSize * BLAST_EDGE_SPREAD, blastSize * BLAST_EDGE_SPREAD,
                 blastSize * BLAST_EDGE_SPREAD, 0.1);
     }
@@ -171,7 +185,7 @@ public class AirBurst extends AttackSpell {
                         2                        // lifespan (ticks)
                 );
 
-                spawnSweepSegment((previous == null) ? caster.getEyeLocation() : previous, point, blastSize);
+                spawnSweepSegment(caster, (previous == null) ? caster.getEyeLocation() : previous, point, blastSize);
                 previous = point;
 
                 for (LivingEntity le : me.nagasonic.alkatraz.util.Utils.getNearbyLivingEntities(point, blastSize)) {
@@ -254,7 +268,7 @@ public class AirBurst extends AttackSpell {
                         40                       // lifespan (ticks)
                 );
 
-                spawnSweepSegment((previous == null) ? caster.getEyeLocation() : previous, point, 1.0);
+                spawnSweepSegment(caster, (previous == null) ? caster.getEyeLocation() : previous, point, 1.0);
                 previous = point;
 
                 for (LivingEntity le : me.nagasonic.alkatraz.util.Utils.getNearbyLivingEntities(point, 1)) {

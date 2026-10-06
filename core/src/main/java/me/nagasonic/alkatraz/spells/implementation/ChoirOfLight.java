@@ -241,7 +241,7 @@ public class ChoirOfLight extends AttackSpell {
                                 Math.sin(a) * orbitRadius);
                         ParticleCaster.spawn(caster, eyeWorld, Utils.DUST, point, 1, ORBIT_DUST);
                     }
-                    ParticleCaster.spawn(caster, eyeWorld, Utils.ENTITY_EFFECT, casterEye, 1, 0.05, 0.05, 0.05, 0.0);
+                    ParticleCaster.spawn(caster, eyeWorld, Utils.ENTITY_EFFECT, casterEye, 1, 0.05, 0.05, 0.05, 0.0, CHOIR_COLOR);
                     ticks++;
                     return;
                 }
@@ -385,13 +385,13 @@ public class ChoirOfLight extends AttackSpell {
 
     @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
-        ParticleCaster.spawn(caster, location.getWorld(), Utils.ENTITY_EFFECT, location, 24);
+        ParticleCaster.spawn(caster, location.getWorld(), Utils.ENTITY_EFFECT, location, 24, CHOIR_COLOR);
         location.getWorld().playSound(location, Sound.BLOCK_GLASS_BREAK, 0.8f, 1.5f);
     }
 
     @Override
     public void onCountered(Location location) {
-        ParticleCaster.spawn(null, location.getWorld(), Utils.ENTITY_EFFECT, location, 48);
+        ParticleCaster.spawn(null, location.getWorld(), Utils.ENTITY_EFFECT, location, 48, CHOIR_COLOR);
         ParticleCaster.spawn(null, location.getWorld(), Utils.EXPLOSION, location, 2);
         location.getWorld().playSound(location, Sound.BLOCK_GLASS_BREAK, 1.0f, 0.9f);
     }

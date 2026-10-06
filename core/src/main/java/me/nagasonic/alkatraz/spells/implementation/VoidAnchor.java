@@ -123,6 +123,14 @@ import java.util.UUID;
 public class VoidAnchor extends AttackSpell implements Listener {
 
     /**
+     * This spell's colour, handed to the wind-up telegraph that precedes its payload.
+     *
+     * <p>Seeded with the `DARK` element's core shade so the spell looks unchanged, but
+     * it is now a value you own: edit this one line to re-tint the charge-up.
+     */
+    private static final Color CAST_COLOR = Color.fromRGB(106, 13, 173);
+
+    /**
      * This spell's on-screen identity is <b>near-black with a deep violet ring</b>,
      * deliberately the darkest of the three DARK spells and distinguishable at a
      * glance from {@code umbral_volley}'s bright {@code RGB(96,0,168)} and
@@ -251,7 +259,7 @@ public class VoidAnchor extends AttackSpell implements Listener {
         }
 
         int total = channelTicks;
-        WindUp windUp = WindUp.begin(this, caster, total, anchor);
+        WindUp windUp = WindUp.begin(this, CAST_COLOR, caster, total, anchor);
         int[] ticks = {0};
 
         BukkitRunnable runnable = new BukkitRunnable() {

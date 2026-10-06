@@ -18,7 +18,9 @@ public class ParticleUtils {
             loc.subtract(line);
             line.normalize();
         }
-        locs.remove(0);
+        // The loop body never runs for endpoints less than one block apart, so this used to throw
+        // IndexOutOfBoundsException on any spell whose range is under a block.
+        if (!locs.isEmpty()) locs.remove(0);
         return locs;
     }
 

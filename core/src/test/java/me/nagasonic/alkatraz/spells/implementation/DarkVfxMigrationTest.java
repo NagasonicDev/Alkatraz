@@ -19,6 +19,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -169,13 +171,26 @@ class DarkVfxMigrationTest {
     void noMigratedSpellBuildsItsOwnColour() {
         for (String relative : SOURCE_FILES) {
             String code = readCode(relative);
-            assertFalse(code.contains("Color.fromRGB"),
-                    relative + " still names an RGB literal; a DARK spell choosing its own colour "
-                            + "is exactly how skeletal_knights ended up aqua");
+            assertEquals(1, countRgbLiterals(code),
+                    relative + " must name exactly one colour, its CAST_COLOR, and take every other "
+                            + "colour from the DARK palette; a second literal is how "
+                            + "skeletal_knights ended up aqua");
             assertFalse(code.contains("new Particle.DustOptions"),
                     relative + " still constructs DustOptions; the palette pre-builds core, accent "
                             + "and deep, and a per-tick construction is pure garbage");
         }
+    }
+
+    /**
+     * Counts every {@code Color.fromRGB} call in a migrated source, {@code CAST_COLOR} or not.
+     */
+    private static int countRgbLiterals(String code) {
+        Matcher matcher = Pattern.compile("Color\\.fromRGB\\s*\\(").matcher(code);
+        int found = 0;
+        while (matcher.find()) {
+            found++;
+        }
+        return found;
     }
 
     @Test

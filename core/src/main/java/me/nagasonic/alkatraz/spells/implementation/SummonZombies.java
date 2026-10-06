@@ -17,6 +17,7 @@ import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.Utils;
 import me.nagasonic.alkatraz.api.mobs.MagicAiService;
+import org.bukkit.Color;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -30,6 +31,15 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.util.*;
 
 public class SummonZombies extends AttackSpell implements Listener {
+
+    /**
+     * This spell's colour, handed to every shared VFX builder it calls.
+     *
+     * <p>Seeded with the `DARK` element's core shade so the spell looks unchanged, but
+     * it is now a value you own: edit this one line to re-tint the whole spell, and the
+     * two supporting shades follow automatically.
+     */
+    private static final Color CAST_COLOR = Color.fromRGB(106, 13, 173);
 
     /**
      * The DARK palette. This spell's cast circle used to be a hand-built
@@ -198,7 +208,7 @@ public class SummonZombies extends AttackSpell implements Listener {
         // SkeletalKnights draws, so the two summon spells read as one family.
         ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 20, 0.3, 0.3, 0.3, 0,
                 PALETTE.coreDust());
-        SpellVfx.ring(this, caster, loc, SUMMON_RING_RADIUS, SUMMON_RING_POINTS, 0.0,
+        SpellVfx.ring(CAST_COLOR, caster, loc, SUMMON_RING_RADIUS, SUMMON_RING_POINTS, 0.0,
                 SUMMON_RING_SHADOW);
         ParticleCaster.spawn(caster, loc.getWorld(), Utils.LARGE_SMOKE, loc, 10, 0.3, 0.3, 0.3, 0.05);
     }

@@ -19,6 +19,7 @@ import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
 import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.Utils;
+import org.bukkit.Color;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -31,6 +32,15 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 public class WindBarrier extends BarrierSpell implements Listener {
+
+    /**
+     * This spell's colour, handed to every shared VFX builder it calls.
+     *
+     * <p>Seeded with the `AIR` element's core shade so the spell looks unchanged, but
+     * it is now a value you own: edit this one line to re-tint the whole spell, and the
+     * two supporting shades follow automatically.
+     */
+    private static final Color CAST_COLOR = Color.fromRGB(234, 246, 255);
 
     /** The AIR palette, resolved once so a 5-tickly barrier shell allocates no colour objects. */
     private static final ElementPalette.Palette PALETTE = ElementPalette.of(Element.AIR);
@@ -111,7 +121,7 @@ public class WindBarrier extends BarrierSpell implements Listener {
                     }
                 }
 
-                SpellVfx.nova(WindBarrier.this, p, center, activeRadius, SHELL_POINTS);
+                SpellVfx.nova(CAST_COLOR, p, center, activeRadius, SHELL_POINTS);
 
                 SpellParticleComponent particle = new SpellParticleComponent(
                         WindBarrier.this,
@@ -147,7 +157,7 @@ public class WindBarrier extends BarrierSpell implements Listener {
                     return;
                 }
 
-                SpellVfx.nova(WindBarrier.this, caster, center, radius, SHELL_POINTS);
+                SpellVfx.nova(CAST_COLOR, caster, center, radius, SHELL_POINTS);
 
                 SpellParticleComponent particle = new SpellParticleComponent(
                         WindBarrier.this,

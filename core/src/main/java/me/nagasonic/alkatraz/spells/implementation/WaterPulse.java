@@ -19,6 +19,7 @@ import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
 import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.util.Utils;
+import org.bukkit.Color;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Levelled;
@@ -33,6 +34,15 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 public class WaterPulse extends AttackSpell implements Listener {
+
+    /**
+     * This spell's colour, handed to every shared VFX builder it calls.
+     *
+     * <p>Seeded with the `WATER` element's core shade so the spell looks unchanged, but
+     * it is now a value you own: edit this one line to re-tint the whole spell, and the
+     * two supporting shades follow automatically.
+     */
+    private static final Color CAST_COLOR = Color.fromRGB(47, 127, 212);
 
     /**
      * This spell names no colour at all any more. {@link SpellVfx} reads the element straight off
@@ -202,7 +212,7 @@ public class WaterPulse extends AttackSpell implements Listener {
         // Signature shape: an EXPANDING ring. `ringRadius` is monotonically increasing across the
         // cast, which is the whole tell - whirlpool is the same builder with the opposite sign.
         // No shadow ring here: this is a blast front standing on open ground, not ground decal.
-        SpellVfx.ring(WaterPulse.this, caster, centre, r, RING_POINTS, rotation, 0.0);
+        SpellVfx.ring(CAST_COLOR, caster, centre, r, RING_POINTS, rotation, 0.0);
 
         SpellParticleComponent comp = new SpellParticleComponent(
                 WaterPulse.this,

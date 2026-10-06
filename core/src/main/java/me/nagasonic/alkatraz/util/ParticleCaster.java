@@ -1,6 +1,7 @@
 package me.nagasonic.alkatraz.util;
 
 import me.nagasonic.alkatraz.config.ParticleConfig;
+import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.World;
@@ -23,6 +24,9 @@ public final class ParticleCaster {
 
     private static final long CONFIG_REFRESH_MS = 1000L;
     private static final long TICK_WINDOW_NANOS = TimeUnit.MILLISECONDS.toNanos(50L);
+    private static final Color DEFAULT_COLOR = Color.fromRGB(255, 255, 255);
+    private static final Particle.DustOptions DEFAULT_DUST =
+            new Particle.DustOptions(Color.fromRGB(255, 255, 255), 1.0F);
 
     private static volatile PlayerSnapshot snapshot;
 
@@ -54,6 +58,26 @@ public final class ParticleCaster {
             lastConfigRead = now;
             configLoaded = true;
         }
+    }
+
+    /**
+     * Some particle types declare a required data class, and Paper rejects the call
+     * outright when it is null. {@code ENTITY_EFFECT} wants a {@link Color}, {@code DUST}
+     * wants a {@link Particle.DustOptions}. Callers that do not care about the tint leave
+     * {@code data} null, so fill in a neutral default based on the declared type.
+     */
+    private static <T> T withDefaultData(Particle particle, T data) {
+        if (data != null || particle == null) return data;
+        Class<?> required = particle.getDataType();
+        if (required == Void.class || required == null) return null;
+        if (required == Color.class) return cast(DEFAULT_COLOR);
+        if (required == Particle.DustOptions.class) return cast(DEFAULT_DUST);
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T cast(Object value) {
+        return (T) value;
     }
 
     private static List<Player> playersIn(World world) {
@@ -106,21 +130,25 @@ public final class ParticleCaster {
 
     private static <T> void dispatchTo(Player recipient, World world, Particle particle, Location location, int count,
                                        double dx, double dy, double dz, double speed, T data) {
+        T payload = withDefaultData(particle, data);
+        int particles = normalizeCount(count);
+        if (particles <= 0) return;
         if (!ParticleConfig.isEnabled()) {
-            world.spawnParticle(particle, location, count, dx, dy, dz, speed, data);
+            world.spawnParticle(particle, location, particles, dx, dy, dz, speed, payload);
             return;
         }
-        if (count <= 0) return;
-        recipient.spawnParticle(particle, location, count, dx, dy, dz, speed, data);
+        recipient.spawnParticle(particle, location, particles, dx, dy, dz, speed, payload);
     }
 
     private static <T> void dispatch(LivingEntity caster, World world, Particle particle, Location location, int count,
                                      double dx, double dy, double dz, double speed, T data) {
+        T payload = withDefaultData(particle, data);
+        int particles = normalizeCount(count);
+        if (particles <= 0) return;
         if (!ParticleConfig.isEnabled()) {
-            world.spawnParticle(particle, location, count, dx, dy, dz, speed, data);
+            world.spawnParticle(particle, location, particles, dx, dy, dz, speed, payload);
             return;
         }
-        if (count <= 0) return;
 
         refreshConfig();
         double dense = denseRadius;
@@ -146,8 +174,18 @@ public final class ParticleCaster {
             double scale = isCaster && casterFull ? 1.0 : scaleForDistanceSq(distSq, denseSq, maxSq, minScale);
             if (scale <= 0) continue;
 
-            player.spawnParticle(particle, location, scaledCount(count, scale), dx, dy, dz, speed, data);
+            player.spawnParticle(particle, location, scaledCount(particles, scale), dx, dy, dz, speed, payload);
         }
+    }
+
+    /**
+     * Vanilla reads a particle count of zero as "the offsets are absolute coordinates, draw exactly one
+     * particle at this point", not as "draw nothing". The geometry VFX layer spells one particle per
+     * computed point that way, so zero has to reach the client as a single particle rather than being
+     * dropped. With zero offsets a count of one renders exactly the same particle zero did.
+     */
+    static int normalizeCount(int count) {
+        return count < 0 ? 0 : Math.max(1, count);
     }
 
     static double scaleForDistanceSq(double distSq, double denseSq, double maxSq, double minScale) {

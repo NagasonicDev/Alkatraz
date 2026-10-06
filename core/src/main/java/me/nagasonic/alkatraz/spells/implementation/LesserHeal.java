@@ -13,6 +13,7 @@ import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
 import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.Utils;
+import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
@@ -44,6 +45,15 @@ import org.bukkit.scheduler.BukkitRunnable;
  * </ul>
  */
 public class LesserHeal extends Spell {
+
+    /**
+     * This spell's colour, handed to every shared VFX builder it calls.
+     *
+     * <p>Seeded with the `LIGHT` element's core shade so the spell looks unchanged, but
+     * it is now a value you own: edit this one line to re-tint the whole spell, and the
+     * two supporting shades follow automatically.
+     */
+    private static final Color CAST_COLOR = Color.fromRGB(255, 255, 135);
 
     /**
      * Column height in blocks - just over half of {@code heal}'s 3.2, which is what
@@ -175,7 +185,7 @@ public class LesserHeal extends Spell {
                 World world = base.getWorld();
                 if (world != null) {
                     int layers = (int) Math.round(COLUMN_LAYERS * (elapsed + 1) / (double) COLUMN_REVEAL_TICKS);
-                    SpellVfx.column(LesserHeal.this, subject, base, COLUMN_HEIGHT, COLUMN_RADIUS,
+                    SpellVfx.column(CAST_COLOR, subject, base, COLUMN_HEIGHT, COLUMN_RADIUS,
                             layers, COLUMN_POINTS, COLUMN_PHASE_STEP * (elapsed + 1));
 
                     // The anchor ring the stronger heal does not have, drawn in the

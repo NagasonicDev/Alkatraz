@@ -184,7 +184,7 @@ public class RadiantBrand extends AttackSpell {
                         ParticleCaster.spawn(caster, world, Utils.DUST, point, 1, BRAND_DUST);
                     }
                     ParticleCaster.spawn(caster, world, Utils.ENTITY_EFFECT,
-                            target.getLocation().add(0, 1.0, 0), 1, 0.1, 0.1, 0.1, 0.0);
+                            target.getLocation().add(0, 1.0, 0), 1, 0.1, 0.1, 0.1, 0.0, BRAND_COLOR);
                 }
 
                 if (elapsed % MARK_SOUND_INTERVAL == 0) {
@@ -217,7 +217,7 @@ public class RadiantBrand extends AttackSpell {
         if (world == null) return;
 
         ParticleCaster.spawn(caster, world, Utils.DUST, at, 40, 0.4, 0.4, 0.4, 0.0, BRAND_CORE);
-        ParticleCaster.spawn(caster, world, Utils.ENTITY_EFFECT, at, 30, 0.5, 0.5, 0.5, 0.0);
+        ParticleCaster.spawn(caster, world, Utils.ENTITY_EFFECT, at, 30, 0.5, 0.5, 0.5, 0.0, BRAND_COLOR);
         ParticleCaster.spawn(caster, world, Utils.EXPLOSION_EMITTER, at, 4, 0.3, 0.3, 0.3, 0.0);
         world.playSound(at, Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 1.6f);
 
@@ -244,7 +244,7 @@ public class RadiantBrand extends AttackSpell {
 
     @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
-        ParticleCaster.spawn(caster, location.getWorld(), Utils.ENTITY_EFFECT, location, 20);
+        ParticleCaster.spawn(caster, location.getWorld(), Utils.ENTITY_EFFECT, location, 20, BRAND_COLOR);
         location.getWorld().playSound(location, Sound.BLOCK_BEACON_AMBIENT, 0.6f, 1.4f);
     }
 

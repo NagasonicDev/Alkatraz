@@ -21,6 +21,7 @@ import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.Utils;
+import org.bukkit.Color;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -36,6 +37,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Fissure extends AttackSpell {
+
+    /**
+     * This spell's colour, handed to every shared VFX builder it calls.
+     *
+     * <p>Seeded with the `EARTH` element's core shade so the spell looks unchanged, but
+     * it is now a value you own: edit this one line to re-tint the whole spell, and the
+     * two supporting shades follow automatically.
+     */
+    private static final Color CAST_COLOR = Color.fromRGB(160, 82, 45);
     private static LangManager lang() {
         return Alkatraz.getLangManager();
     }
@@ -479,7 +489,7 @@ public class Fissure extends AttackSpell {
         if (length <= 0) return;
         int samples = Math.max(2, (int) Math.ceil(length / 0.6));
         double yawDegrees = Math.toDegrees(Math.atan2(direction.getZ(), direction.getX()));
-        SpellVfx.ground(this, caster, origin, length, 0.6, samples, 2, yawDegrees, 1.0);
+        SpellVfx.ground(CAST_COLOR, caster, origin, length, 0.6, samples, 2, yawDegrees, 1.0);
     }
 
     @Override

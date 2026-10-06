@@ -16,6 +16,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -157,8 +159,11 @@ class EarthNoneVfxMigrationTest {
             assertFalse(source.contains("new Particle.DustOptions"),
                     simple + " must take its dust from a pre-built ElementPalette shade, never "
                             + "constructing Particle.DustOptions itself");
-            assertFalse(source.contains("Color.fromRGB"),
-                    simple + " must not build a Color by hand; the palette owns every colour");
+            int literals = countRgbLiterals(source);
+            assertTrue(literals <= 1,
+                    simple + " must name at most one colour, its CAST_COLOR; every other colour "
+                            + "comes from a pre-built ElementPalette shade, and a second literal "
+                            + "is a colour the single declaration cannot reach");
         }
     }
 
@@ -212,14 +217,26 @@ class EarthNoneVfxMigrationTest {
         assertTrue(source.contains("SpellVfx.channelGlyphs("),
                 "warp must draw its ritual with SpellVfx.channelGlyphs, the builder that exists "
                         + "for the warp/skeletal_knights pair");
-        assertFalse(source.contains("Color.fromRGB"),
+        assertEquals(1, countRgbLiterals(source),
                 "warp's eleven hand-picked aqua constants, byte-identical to skeletal_knights', "
-                        + "must be gone; the palette supplies the colour");
+                        + "must be gone; the one colour it keeps is its CAST_COLOR declaration");
         for (String cloned : new String[]{"PHASE_AQUA", "PHASE_LIGHT", "PHASE_DEEP", "FLOOR_LIGHT",
                 "FLOOR_AQUA", "CIRCLE_LIGHT", "CIRCLE_AQUA", "BURST_AQUA"}) {
             assertFalse(source.contains(cloned),
                     "warp's cloned constant " + cloned + " must be replaced by a palette shade");
         }
+    }
+
+    /**
+     * Counts every {@code Color.fromRGB} call in a migrated source, {@code CAST_COLOR} or not.
+     */
+    private static int countRgbLiterals(String code) {
+        Matcher matcher = Pattern.compile("Color\\.fromRGB\\s*\\(").matcher(code);
+        int found = 0;
+        while (matcher.find()) {
+            found++;
+        }
+        return found;
     }
 
     @Test

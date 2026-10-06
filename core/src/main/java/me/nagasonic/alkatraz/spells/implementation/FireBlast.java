@@ -20,6 +20,7 @@ import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.util.Utils;
+import org.bukkit.Color;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -41,6 +42,15 @@ import java.util.Set;
 import java.util.UUID;
 
 public class FireBlast extends AttackSpell implements Listener {
+
+    /**
+     * This spell's colour, handed to every shared VFX builder it calls.
+     *
+     * <p>Seeded with the `FIRE` element's core shade so the spell looks unchanged, but
+     * it is now a value you own: edit this one line to re-tint the whole spell, and the
+     * two supporting shades follow automatically.
+     */
+    private static final Color CAST_COLOR = Color.fromRGB(255, 140, 0);
 
     /**
      * The travelling tell: a WIDE, fat {@code core} shell with a stubby tail, which is the
@@ -152,7 +162,7 @@ public class FireBlast extends AttackSpell implements Listener {
                     cancel();
                     return;
                 }
-                SpellVfx.projectile(FireBlast.this, caster, fire.getLocation(),
+                SpellVfx.projectile(CAST_COLOR, caster, fire.getLocation(),
                         fire.getVelocity(),
                         BLAST_CLUSTER_RADIUS, BLAST_CLUSTER_POINTS,
                         BLAST_TAIL_POINTS, BLAST_TAIL_LENGTH);

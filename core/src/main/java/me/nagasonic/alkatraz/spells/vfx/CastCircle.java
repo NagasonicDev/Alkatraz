@@ -6,6 +6,7 @@ import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.Utils;
+import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.World;
@@ -62,6 +63,13 @@ public final class CastCircle {
     private static final double MIN_SIZE = 0.05;
     /** Repaint period used when {@code circle_ticks} is missing or not a number. */
     private static final long DEFAULT_CIRCLE_TICKS = 10L;
+    /**
+     * Frames a cast circle must draw at minimum before the period is clamped shorter.
+     *
+     * <p>Two is not enough to read as an animation; six is roughly a sixth of a second of motion,
+     * which is the floor below which a wind-up reads as nothing happening.
+     */
+    private static final long MIN_CIRCLE_FRAMES = 6L;
 
     /** Ring plane offset from the caster's pitch, in degrees. */
     private static final float RING_PITCH_OFFSET = 90.0f;
@@ -97,7 +105,21 @@ public final class CastCircle {
     }
 
     /**
-     * Starts the cast circle for a spell at an explicit size and rotation step.
+     * Starts the default cast circle for a spell at the spell's own colour.
+     *
+     * @param spell  the spell being cast; supplies the cast time that sizes the frame budget
+     * @param color  the colour the spell declared; {@code null} falls back to element grey
+     * @param caster the entity casting; the circle follows its eyes
+     * @param event  the prepare event; a cancelled event stops the circle
+     * @return the Bukkit task id, exactly as {@code Spell.circleAction} must return it
+     */
+    public static int start(Spell spell, Color color, LivingEntity caster, SpellPrepareEvent event) {
+        return start(spell, color, caster, event, DEFAULT_SIZE, DEFAULT_ROTATION_STEP);
+    }
+
+    /**
+     * Starts the cast circle for a spell at an explicit size and rotation step, in the spell's
+     * element colour.
      *
      * @param spell        the spell being cast; supplies the element colour
      * @param caster       the entity casting; the circle follows its eyes
@@ -108,11 +130,36 @@ public final class CastCircle {
      */
     public static int start(Spell spell, LivingEntity caster, SpellPrepareEvent event,
                             double size, int rotationStep) {
-        ElementPalette.Palette palette = ElementPalette.of(spell.getElement());
+        return start(spell, ElementPalette.of(spell == null ? null : spell.getElement()), caster, event, size, rotationStep);
+    }
+
+    /**
+     * Starts the cast circle for a spell at an explicit size, rotation step and colour.
+     *
+     * <p>The colour is the casting spell's own constant rather than its element's palette, so the
+     * circle a spell draws during its wind-up is the same colour as the effect that follows it. A
+     * spell whose element is {@code NONE} would otherwise show a grey circle around a coloured
+     * payload.
+     *
+     * @param spell        the spell being cast; supplies the cast time that sizes the frame budget
+     * @param color        the colour the spell declared; {@code null} falls back to element grey
+     * @param caster       the entity casting; the circle follows its eyes
+     * @param event        the prepare event; a cancelled event stops the circle
+     * @param size         circle scale; values below {@link #MIN_SIZE} fall back to the default
+     * @param rotationStep degrees added to the caster's yaw to spin the layout
+     * @return the Bukkit task id, exactly as {@code Spell.circleAction} must return it
+     */
+    public static int start(Spell spell, Color color, LivingEntity caster, SpellPrepareEvent event,
+                            double size, int rotationStep) {
+        return start(spell, ElementPalette.of(color), caster, event, size, rotationStep);
+    }
+
+    private static int start(Spell spell, ElementPalette.Palette palette, LivingEntity caster,
+                             SpellPrepareEvent event, double size, int rotationStep) {
         Particle.DustOptions bodyDust = palette.coreDust();
         Particle.DustOptions accentDust = palette.deepDust();
         RingGeometry geometry = geometryFor(size);
-        long period = circleTicks();
+        long period = circleTicks(spell);
 
         return new BukkitRunnable() {
             @Override
@@ -341,11 +388,24 @@ public final class CastCircle {
         return from + (to - from) * t;
     }
 
-    private static long circleTicks() {
+    /**
+     * The repaint period for a spell's cast circle.
+     *
+     * <p>{@code circle_ticks} is a ceiling, not a fixed period. The circle task is cancelled the
+     * moment the cast completes, so a spell with a 0.5 s cast time and the default 10-tick period
+     * only ever drew twice - at tick 0 and at tick 10, about 50 ms of a two second animation. Any
+     * short-cast spell looked like it had no wind-up at all.
+     *
+     * <p>Clamping down to {@code castTicks / MIN_FRAMES} keeps the circle animating across the whole
+     * cast for fast spells while leaving a long, expensive circle alone at the configured period.
+     */
+    private static long circleTicks(Spell spell) {
         Object ticks = Configs.CIRCLE_TICKS.get();
         long period = (ticks instanceof Number) ? ((Number) ticks).longValue() : DEFAULT_CIRCLE_TICKS;
         // Bukkit rejects a period below one tick, and a zero period is never what an admin meant.
-        return Math.max(1L, period);
+        period = Math.max(1L, period);
+        long budget = (spell == null) ? period : (long) (spell.getCastTime() * 20.0) / MIN_CIRCLE_FRAMES;
+        return Math.min(period, Math.max(1L, budget));
     }
 
     /**

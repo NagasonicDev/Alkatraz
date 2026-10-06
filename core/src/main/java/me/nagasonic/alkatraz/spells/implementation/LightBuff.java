@@ -10,6 +10,7 @@ import me.nagasonic.alkatraz.spells.effect.EffectApplicator;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.spells.vfx.CastCircle;
 import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
+import org.bukkit.Color;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -36,6 +37,15 @@ import java.util.List;
  * the caster could not tell them.
  */
 public class LightBuff extends Spell {
+
+    /**
+     * This spell's colour, handed to every shared VFX builder it calls.
+     *
+     * <p>Seeded with the `LIGHT` element's core shade so the spell looks unchanged, but
+     * it is now a value you own: edit this one line to re-tint the whole spell, and the
+     * two supporting shades follow automatically.
+     */
+    private static final Color CAST_COLOR = Color.fromRGB(255, 255, 135);
 
     /** Ticks the expanding shell takes to open. */
     private static final int NOVA_TICKS = 8;
@@ -181,7 +191,7 @@ public class LightBuff extends Spell {
                 double progress = (elapsed + 1) / (double) NOVA_TICKS;
                 double scale = NOVA_START_SCALE + (NOVA_END_SCALE - NOVA_START_SCALE) * progress;
                 Location centre = target.getLocation().add(0.0D, NOVA_CENTRE_HEIGHT, 0.0D);
-                SpellVfx.nova(LightBuff.this, caster, centre, radius * scale,
+                SpellVfx.nova(CAST_COLOR, caster, centre, radius * scale,
                         NOVA_START_POINTS + NOVA_POINTS_PER_TICK * elapsed);
                 elapsed++;
             }

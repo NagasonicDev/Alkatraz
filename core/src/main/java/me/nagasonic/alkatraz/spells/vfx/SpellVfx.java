@@ -1,10 +1,10 @@
 package me.nagasonic.alkatraz.spells.vfx;
 
 import me.nagasonic.alkatraz.api.Element;
-import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.util.Utils;
+import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.World;
@@ -21,10 +21,11 @@ import java.util.List;
  *
  * <h2>Invariants - the three rules this class exists to enforce</h2>
  * <ol>
- *   <li><b>No hardcoded colours.</b> Every particle is coloured from
- *       {@link ElementPalette#of(Element)} for the casting spell. A literal RGB or a
- *       {@code Color.YELLOW} in this file is a defect, because it is exactly how
- *       {@code heal} and {@code lesser_heal} ended up sharing a colour.</li>
+ *   <li><b>No hardcoded colours.</b> Every draw method takes the colour as its first argument and
+ *       colours from {@link ElementPalette#of(Color)}. That colour is a constant declared in the
+ *       calling spell, so each spell tunes one value and the palette stays editable at the call
+ *       site. A literal RGB or a {@code Color.YELLOW} in this file is a defect, because it is
+ *       exactly how {@code heal} and {@code lesser_heal} ended up sharing a colour.</li>
  *   <li><b>No raw {@code Particle.*}.</b> Every particle constant is a {@link Utils} alias.
  *       Minecraft 1.20.5 renamed a large batch of them and this plugin supports 1.19
  *       through 1.26, so a bare {@code Particle.DUST} throws at class-initialisation time on
@@ -57,8 +58,8 @@ import java.util.List;
  * {@code MinecraftVersion}'s, which calls {@code Alkatraz.getInstance().getServer()} and NPEs
  * without a live server. A test that calls a geometry method must therefore never transitively
  * initialise {@code Utils}, and {@code SpellVfxTest} asserts exactly that. The geometry methods
- * also take no {@link Spell}: colour is irrelevant to shape, so the shape half is testable with
- * numbers alone.
+ *       also take no colour: colour is irrelevant to shape, so the shape half is testable with
+ *       numbers alone.
  *
  * <h2>Why the geometry is computed here rather than through {@link ParticleUtils}</h2>
  * {@code ParticleUtils} has two helpers that loop forever on a non-positive step and two more
@@ -94,7 +95,7 @@ import java.util.List;
  *   <li><b>{@code earthen_wall} (EARTH) / {@code fire_wall} (FIRE)</b> - identical steered
  *       {@code WallSegment} build loop, only the block swapped. Generalised as
  *       {@link #column} along a caller-supplied path: the wall builder asks for a column at
- *       each segment's base, and {@code spell} supplies the palette, so EARTH rises in brown
+ *       each segment's base, and each wall passes its own colour, so EARTH rises in brown
  *       and FIRE in orange without either spell naming a colour.</li>
  *   <li><b>{@code radiance} / {@code tornado} / {@code meteor_shower}</b> - the same two-phase
  *       0.5 / 0.67 rotating-ring wind-up skeleton, copy-pasted three times. Wave A's
@@ -154,13 +155,17 @@ public final class SpellVfx {
     }
 
     /**
-     * The palette for a spell, tolerating a null spell so a caller mid-migration cannot NPE.
+     * The palette for a caller-supplied colour, tolerating {@code null}.
      *
-     * @param spell the casting spell, or {@code null}
-     * @return the element palette; {@link Element#NONE}'s neutral grey for {@code null}
+     * <p>The colour is whatever the calling spell declared as its own constant. It is passed in
+     * rather than read from a {@code Spell} so that a spell's palette is visible and editable at
+     * the call site, and so a spell whose element is {@code NONE} can still be a specific colour.
+     *
+     * @param color the casting spell's colour, or {@code null}
+     * @return the palette built around that colour; {@link Element#NONE}'s neutral grey for {@code null}
      */
-    static ElementPalette.Palette paletteOf(Spell spell) {
-        return ElementPalette.of((spell == null) ? null : spell.getElement());
+    static ElementPalette.Palette paletteOf(Color color) {
+        return ElementPalette.of(color);
     }
 
     /**
@@ -225,7 +230,7 @@ public final class SpellVfx {
      * follows from the caster to the impact. The two flanking ribbon points are {@code accent}:
      * they exist only to give the line thickness, so they must not out-shout the spine.
      *
-     * @param spell      the casting spell; supplies the palette
+     * @param color      the colour the calling spell declared; supplies the palette
      * @param caster     the entity casting, used for density falloff; {@code null} broadcasts
      * @param origin     where the beam starts
      * @param target     where the beam ends
@@ -233,14 +238,14 @@ public final class SpellVfx {
      * @param startWidth ribbon width at the origin, in blocks
      * @param endWidth   ribbon width at the target, in blocks
      */
-    public static void beam(Spell spell, LivingEntity caster, Location origin, Location target,
+    public static void beam(Color color, LivingEntity caster, Location origin, Location target,
                             int steps, double startWidth, double endWidth) {
         World world = worldOf(origin);
         if (world == null) return;
         List<Location> points = beamGeometry(origin, target, steps, startWidth, endWidth);
         if (points.isEmpty()) return;
 
-        ElementPalette.Palette palette = paletteOf(spell);
+        ElementPalette.Palette palette = paletteOf(color);
         Location scratch = new Location(world, 0.0, 0.0, 0.0);
         boolean spine = true;
         for (Location point : points) {
@@ -321,7 +326,7 @@ public final class SpellVfx {
      * falls behind, so a projectile that has just been fired reads as moving away from where it
      * started rather than as a static blob.
      *
-     * @param spell         the casting spell; supplies the palette
+     * @param color         the colour the calling spell declared; supplies the palette
      * @param caster        the entity casting, used for density falloff
      * @param head          the cluster's centre; this is the travelling position
      * @param direction     unit travel direction; a zero vector falls back to straight up
@@ -330,12 +335,12 @@ public final class SpellVfx {
      * @param tailPoints    number of particles in the tail
      * @param tailLength    how far behind {@code head} the tail extends horizontally, in blocks
      */
-    public static void projectile(Spell spell, LivingEntity caster, Location head, Vector direction,
+    public static void projectile(Color color, LivingEntity caster, Location head, Vector direction,
                                   double clusterRadius, int clusterPoints, int tailPoints, double tailLength) {
         World world = worldOf(head);
         if (world == null) return;
         List<Location> cluster = projectileHead(head, clusterRadius, clusterPoints);
-        ElementPalette.Palette palette = paletteOf(spell);
+        ElementPalette.Palette palette = paletteOf(color);
         Location scratch = new Location(world, 0.0, 0.0, 0.0);
         for (Location point : cluster) {
             scratch.setX(point.getX());
@@ -429,19 +434,19 @@ public final class SpellVfx {
      * at) but it silently turns the whole shell into nothing in a unit test, so this uses
      * {@code fibonacciSphere}, which does not inspect the world.
      *
-     * @param spell   the casting spell; supplies the palette
+     * @param color   the colour the calling spell declared; supplies the palette
      * @param caster  the entity casting, used for density falloff
      * @param center  the shell's centre
      * @param radius  shell radius in blocks
      * @param points  number of shell particles; the inner ring is half of it
      */
-    public static void nova(Spell spell, LivingEntity caster, Location center, double radius, int points) {
+    public static void nova(Color color, LivingEntity caster, Location center, double radius, int points) {
         World world = worldOf(center);
         if (world == null) return;
         List<Location> shell = novaGeometry(center, radius, points);
         if (shell.isEmpty()) return;
 
-        ElementPalette.Palette palette = paletteOf(spell);
+        ElementPalette.Palette palette = paletteOf(color);
         ParticleCaster.spawn(caster, world, Utils.END_ROD, center, Math.max(1, clampPoints(points) / 8));
         Location scratch = new Location(world, 0.0, 0.0, 0.0);
         for (Location point : shell) {
@@ -501,7 +506,7 @@ public final class SpellVfx {
      * counter-rotated, which reads as a ground shadow and stops a flat ring looking like a
      * drawn-on circle. Pass {@code 0.0} to skip it.
      *
-     * @param spell         the casting spell; supplies the palette
+     * @param color         the colour the calling spell declared; supplies the palette
      * @param caster        the entity casting, used for density falloff
      * @param center        the ring's centre, normally a ground point
      * @param radius        ring radius in blocks
@@ -509,11 +514,11 @@ public final class SpellVfx {
      * @param rotation      phase offset in radians, for spinning the ring
      * @param shadowOffset  downward offset for the {@code deep} ground ring, in blocks; zero skips it
      */
-    public static void ring(Spell spell, LivingEntity caster, Location center, double radius, int points,
+    public static void ring(Color color, LivingEntity caster, Location center, double radius, int points,
                             double rotation, double shadowOffset) {
         World world = worldOf(center);
         if (world == null) return;
-        ElementPalette.Palette palette = paletteOf(spell);
+        ElementPalette.Palette palette = paletteOf(color);
         Location scratch = new Location(world, 0.0, 0.0, 0.0);
 
         for (Location point : ringGeometry(center, radius, points, rotation, 0.0)) {
@@ -590,7 +595,7 @@ public final class SpellVfx {
      * recognise to know they are being hit. The interior fill is {@code deep}: a bright interior
      * would wash the arc out, and a dark interior is what makes the arc legible as a boundary.
      *
-     * @param spell            the casting spell; supplies the palette
+     * @param color            the colour the calling spell declared; supplies the palette
      * @param caster           the entity casting, used for density falloff
      * @param center           the sector's apex, normally on the ground
      * @param radius           sector radius in blocks
@@ -599,11 +604,11 @@ public final class SpellVfx {
      * @param arcSteps         divisions along the arc
      * @param radialSteps      divisions from apex to rim
      */
-    public static void cone(Spell spell, LivingEntity caster, Location center, double radius,
+    public static void cone(Color color, LivingEntity caster, Location center, double radius,
                             double arcDegrees, double startAngleDegrees, int arcSteps, int radialSteps) {
         World world = worldOf(center);
         if (world == null) return;
-        ElementPalette.Palette palette = paletteOf(spell);
+        ElementPalette.Palette palette = paletteOf(color);
         Location scratch = new Location(world, 0.0, 0.0, 0.0);
 
         List<Location> sector = sectorGeometry(center, radius, arcDegrees, startAngleDegrees, arcSteps, radialSteps);
@@ -677,7 +682,7 @@ public final class SpellVfx {
      * rotates each layer against the one below it, which is what turns a stack of rings into
      * something that looks like it is being wound up.
      *
-     * @param spell            the casting spell; supplies the palette
+     * @param color            the colour the calling spell declared; supplies the palette
      * @param caster           the entity casting, used for density falloff
      * @param base             the column's foot; {@code columnGeometry} starts here
      * @param height           total column height in blocks
@@ -686,14 +691,14 @@ public final class SpellVfx {
      * @param pointsPerLayer   particles per slice; clamped to at least one
      * @param phaseStepRadians rotation applied between consecutive slices
      */
-    public static void column(Spell spell, LivingEntity caster, Location base, double height, double radius,
+    public static void column(Color color, LivingEntity caster, Location base, double height, double radius,
                               int layers, int pointsPerLayer, double phaseStepRadians) {
         World world = worldOf(base);
         if (world == null) return;
         List<Location> points = columnGeometry(base, height, radius, layers, pointsPerLayer, phaseStepRadians);
         if (points.isEmpty()) return;
 
-        ElementPalette.Palette palette = paletteOf(spell);
+        ElementPalette.Palette palette = paletteOf(color);
         int perLayer = clampPoints(pointsPerLayer);
         Location scratch = new Location(world, 0.0, 0.0, 0.0);
         for (int i = 0; i < points.size(); i++) {
@@ -784,7 +789,7 @@ public final class SpellVfx {
      * ring of orbiting motes has internal rhythm and reads as several objects rather than one
      * uniform ring. The centre itself gets a {@code deep} marker so there is something to orbit.
      *
-     * @param spell        the casting spell; supplies the palette
+     * @param color        the colour the calling spell declared; supplies the palette
      * @param caster       the entity casting, used for density falloff
      * @param center       the orbit's centre
      * @param minRadius    radius of the innermost body, in blocks
@@ -792,14 +797,14 @@ public final class SpellVfx {
      * @param bodies       number of orbiting bodies; zero yields no orbits
      * @param phaseRadians overall phase offset in radians, for spinning the whole formation
      */
-    public static void orbit(Spell spell, LivingEntity caster, Location center, double minRadius, double maxRadius,
+    public static void orbit(Color color, LivingEntity caster, Location center, double minRadius, double maxRadius,
                              int bodies, double phaseRadians) {
         World world = worldOf(center);
         if (world == null) return;
         List<Location> points = orbitGeometry(center, minRadius, maxRadius, bodies, phaseRadians);
         if (points.isEmpty()) return;
 
-        ElementPalette.Palette palette = paletteOf(spell);
+        ElementPalette.Palette palette = paletteOf(color);
         Location scratch = new Location(world, center.getX(), center.getY(), center.getZ());
         ParticleCaster.spawn(caster, world, Utils.DUST, scratch, 0, palette.deepDust());
         for (int i = 0; i < points.size(); i++) {
@@ -858,7 +863,7 @@ public final class SpellVfx {
      * being inside reads as enclosed - filled with dark element - rather than as a second
      * surface. This is a per-frame shape for a field with a lifetime, not a one-shot burst.
      *
-     * @param spell      the casting spell; supplies the palette
+     * @param color      the colour the calling spell declared; supplies the palette
      * @param caster     the entity casting, used for density falloff
      * @param center     the dome's base, on the ground
      * @param radius     dome radius in blocks
@@ -867,11 +872,11 @@ public final class SpellVfx {
      * @param fillPoints  particles in the interior volume; zero yields an empty interior
      * @param phaseRadians spin applied to both shell and fill
      */
-    public static void field(Spell spell, LivingEntity caster, Location center, double radius, double height,
+    public static void field(Color color, LivingEntity caster, Location center, double radius, double height,
                              int shellPoints, int fillPoints, double phaseRadians) {
         World world = worldOf(center);
         if (world == null) return;
-        ElementPalette.Palette palette = paletteOf(spell);
+        ElementPalette.Palette palette = paletteOf(color);
         Location scratch = new Location(world, 0.0, 0.0, 0.0);
 
         for (Location point : fieldGeometry(center, radius, height, shellPoints, 0, phaseRadians)) {
@@ -958,7 +963,7 @@ public final class SpellVfx {
      * information the player needs. Everything behind it steps toward {@code deep}, so the crack
      * looks like it is healing behind its own front.
      *
-     * @param spell       the casting spell; supplies the palette
+     * @param color       the colour the calling spell declared; supplies the palette
      * @param caster      the entity casting, used for density falloff
      * @param center      where the shape starts, on the ground
      * @param length      how far the shape runs, in blocks
@@ -968,14 +973,14 @@ public final class SpellVfx {
      * @param yawDegrees  direction the shape runs, in degrees
      * @param advance     how much of the shape is revealed, {@code [0, 1]}; see {@link #groundRevealed}
      */
-    public static void ground(Spell spell, LivingEntity caster, Location center, double length, double width,
+    public static void ground(Color color, LivingEntity caster, Location center, double length, double width,
                               int samples, int lanes, double yawDegrees, double advance) {
         World world = worldOf(center);
         if (world == null) return;
         List<Location> points = groundGeometry(center, length, width, samples, lanes, yawDegrees);
         if (points.isEmpty()) return;
 
-        ElementPalette.Palette palette = paletteOf(spell);
+        ElementPalette.Palette palette = paletteOf(color);
         int laneCount = clampPoints(lanes);
         int stationCount = clampOptional(samples);
         int revealed = groundRevealed(samples, advance) * laneCount;
@@ -1066,20 +1071,20 @@ public final class SpellVfx {
      * ring is {@code accent} and turns the other way, so the aura has motion even before the
      * caller adds its own spin.
      *
-     * @param spell         the casting spell; supplies the palette
+     * @param color         the colour the calling spell declared; supplies the palette
      * @param caster        the entity casting, used for density falloff
      * @param subject       the entity the aura follows
      * @param radius        outer ring radius in blocks
      * @param points        particles per ring; each ring uses this count
      * @param rotationRadians outer ring phase offset, in radians; the inner ring uses the negative
      */
-    public static void selfAura(Spell spell, LivingEntity caster, LivingEntity subject, double radius,
+    public static void selfAura(Color color, LivingEntity caster, LivingEntity subject, double radius,
                                 int points, double rotationRadians) {
         if (subject == null) return;
         World world = worldOf(subject.getLocation());
         if (world == null) return;
 
-        ElementPalette.Palette palette = paletteOf(spell);
+        ElementPalette.Palette palette = paletteOf(color);
         Location center = subject.getLocation();
         Location scratch = new Location(world, 0.0, 0.0, 0.0);
 
@@ -1130,16 +1135,16 @@ public final class SpellVfx {
      * {@code skeletal_knights} each carried their own copy of {@code spawnFloorCircle},
      * {@code spawnHexGlyphs} and {@code ellipsePoint}, and their eleven colour constants were
      * byte-identical - so a neutral teleportation and a DARK skeleton summoning were the same
-     * aqua picture. Everything coloured here comes from the spell's element, which is the entire
-     * point: {@code warp} now draws grey, {@code skeletal_knights} draws purple, off one code
-     * path.
+     * aqua picture. Everything coloured here comes from the colour the calling spell passed, which
+     * is the entire point: {@code warp} passes its own neutral grey, {@code skeletal_knights} passes
+     * purple, off one code path.
      *
      * <p><b>Shades.</b> The outer ring is {@code core} and the inner one {@code accent}, turning
      * opposite ways, so the ritual reads as spinning even on a static frame. The glyph markers
      * are {@code deep}: they are slow structural detail on the floor and must not compete with
      * the rings above them.
      *
-     * @param spell         the casting spell; supplies the palette
+     * @param color         the colour the calling spell declared; supplies the palette
      * @param caster        the entity casting, used for density falloff
      * @param feet          the channel's floor point
      * @param radius        outer ring radius in blocks
@@ -1147,11 +1152,11 @@ public final class SpellVfx {
      * @param glyphCount    glyph markers around the ring; zero draws none
      * @param rotationRadians phase offset in radians for the outer ring
      */
-    public static void channelGlyphs(Spell spell, LivingEntity caster, Location feet, double radius,
+    public static void channelGlyphs(Color color, LivingEntity caster, Location feet, double radius,
                                      int ringPoints, int glyphCount, double rotationRadians) {
         World world = worldOf(feet);
         if (world == null) return;
-        ElementPalette.Palette palette = paletteOf(spell);
+        ElementPalette.Palette palette = paletteOf(color);
         Location scratch = new Location(world, 0.0, 0.0, 0.0);
         int ringSize = Math.max(3, clampPoints(ringPoints));
 

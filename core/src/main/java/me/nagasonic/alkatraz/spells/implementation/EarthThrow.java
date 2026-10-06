@@ -26,6 +26,7 @@ import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
 import me.nagasonic.alkatraz.spells.util.TerrainEditor;
 import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.util.Utils;
+import org.bukkit.Color;
 import org.bukkit.*;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.block.Block;
@@ -49,6 +50,15 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class EarthThrow extends AttackSpell implements Listener {
+
+    /**
+     * This spell's colour, handed to every shared VFX builder it calls.
+     *
+     * <p>Seeded with the `EARTH` element's core shade so the spell looks unchanged, but
+     * it is now a value you own: edit this one line to re-tint the whole spell, and the
+     * two supporting shades follow automatically.
+     */
+    private static final Color CAST_COLOR = Color.fromRGB(160, 82, 45);
     private static final Map<UUID, Map<Location, Material>> recoverData = new ConcurrentHashMap<>();
     private static final long RECOVER_DATA_TTL_TICKS = 600L;
 
@@ -210,7 +220,7 @@ public class EarthThrow extends AttackSpell implements Listener {
                 if (velocity.lengthSquared() > 1.0E-6) {
                     travel = Utils.safeNormalize(velocity);
                 }
-                SpellVfx.projectile(EarthThrow.this, caster, lump.getLocation(), travel,
+                SpellVfx.projectile(CAST_COLOR, caster, lump.getLocation(), travel,
                         LUMP_CLUSTER_RADIUS, LUMP_CLUSTER_POINTS, LUMP_TAIL_POINTS, LUMP_TAIL_LENGTH);
             }
         }.runTaskTimer(Alkatraz.getInstance(), 0, 1);

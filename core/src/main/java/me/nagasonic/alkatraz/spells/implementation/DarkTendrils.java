@@ -19,6 +19,7 @@ import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.Utils;
+import org.bukkit.Color;
 import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.*;
@@ -44,6 +45,15 @@ import java.util.*;
  * - Can be hit/destroyed by other spells via SpellComponents
  */
 public class DarkTendrils extends AttackSpell implements Listener {
+
+    /**
+     * This spell's colour, handed to every shared VFX builder it calls.
+     *
+     * <p>Seeded with the `DARK` element's core shade so the spell looks unchanged, but
+     * it is now a value you own: edit this one line to re-tint the whole spell, and the
+     * two supporting shades follow automatically.
+     */
+    private static final Color CAST_COLOR = Color.fromRGB(106, 13, 173);
 
     /** Orbiting tendril bodies while the tendril is still wandering, in blocks. */
     private static final double WANDER_INNER_RADIUS = 0.35D;
@@ -513,7 +523,7 @@ public class DarkTendrils extends AttackSpell implements Listener {
 
             if (target == null) {
                 // Wandering: the tendrils orbit the tendril itself.
-                SpellVfx.orbit(DarkTendrils.this, caster, loc,
+                SpellVfx.orbit(CAST_COLOR, caster, loc,
                         WANDER_INNER_RADIUS, WANDER_OUTER_RADIUS, ORBIT_BODIES, phase);
                 return;
             }
@@ -526,8 +536,8 @@ public class DarkTendrils extends AttackSpell implements Listener {
             double inner = LOCK_INNER_RADIUS * (1.0D - 0.6D * closeness);
             double outer = LOCK_OUTER_RADIUS * (1.0D - 0.6D * closeness);
 
-            SpellVfx.orbit(DarkTendrils.this, caster, targetLoc, inner, outer, ORBIT_BODIES, -phase);
-            SpellVfx.beam(DarkTendrils.this, caster, loc, target.getEyeLocation(),
+            SpellVfx.orbit(CAST_COLOR, caster, targetLoc, inner, outer, ORBIT_BODIES, -phase);
+            SpellVfx.beam(CAST_COLOR, caster, loc, target.getEyeLocation(),
                     TETHER_STEPS, TETHER_START_WIDTH, TETHER_END_WIDTH);
         }
     }

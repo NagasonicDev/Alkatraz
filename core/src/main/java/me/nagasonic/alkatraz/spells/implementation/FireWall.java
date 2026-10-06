@@ -26,6 +26,7 @@ import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.Utils;
 import me.nagasonic.alkatraz.spells.vfx.CastCircle;
 import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
+import org.bukkit.Color;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -47,6 +48,15 @@ import java.util.Set;
 import java.util.UUID;
 
 public class FireWall extends AttackSpell implements Listener, DamageableBarrier {
+
+    /**
+     * This spell's colour, handed to every shared VFX builder it calls.
+     *
+     * <p>Seeded with the `FIRE` element's core shade so the spell looks unchanged, but
+     * it is now a value you own: edit this one line to re-tint the whole spell, and the
+     * two supporting shades follow automatically.
+     */
+    private static final Color CAST_COLOR = Color.fromRGB(255, 140, 0);
 
     /**
      * The wall's per-segment shape: a {@link SpellVfx#column} revealed slice by slice upward,
@@ -660,7 +670,7 @@ public class FireWall extends AttackSpell implements Listener, DamageableBarrier
     private void drawSegmentColumn(LivingEntity caster, World world, Location base, double currentHeight) {
         if (currentHeight <= 0.0) return;
         int layers = Math.max(1, (int) Math.ceil(currentHeight / COLUMN_LAYER_SPACING));
-        SpellVfx.column(this, caster, base, currentHeight, COLUMN_RADIUS,
+        SpellVfx.column(CAST_COLOR, caster, base, currentHeight, COLUMN_RADIUS,
                 layers, COLUMN_LAYER_POINTS, COLUMN_PHASE_STEP);
 
         Location tip = base.clone().add(0.0, currentHeight, 0.0);

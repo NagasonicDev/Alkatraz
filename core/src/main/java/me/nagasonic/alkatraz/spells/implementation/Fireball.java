@@ -25,6 +25,7 @@ import me.nagasonic.alkatraz.spells.vfx.CastCircle;
 import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.Utils;
+import org.bukkit.Color;
 import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.LivingEntity;
@@ -42,6 +43,15 @@ import org.jetbrains.annotations.UnknownNullability;
 import java.util.UUID;
 
 public class Fireball extends AttackSpell implements Listener {
+
+    /**
+     * This spell's colour, handed to every shared VFX builder it calls.
+     *
+     * <p>Seeded with the `FIRE` element's core shade so the spell looks unchanged, but
+     * it is now a value you own: edit this one line to re-tint the whole spell, and the
+     * two supporting shades follow automatically.
+     */
+    private static final Color CAST_COLOR = Color.fromRGB(255, 140, 0);
 
     /**
      * The travelling tell: a tight {@code core} cluster riding the fireball with a short
@@ -161,7 +171,7 @@ public class Fireball extends AttackSpell implements Listener {
                     cancel();
                     return;
                 }
-                SpellVfx.projectile(Fireball.this, caster, fireball.getLocation(),
+                SpellVfx.projectile(CAST_COLOR, caster, fireball.getLocation(),
                         fireball.getVelocity(),
                         TRACK_CLUSTER_RADIUS, TRACK_CLUSTER_POINTS,
                         TRACK_TAIL_POINTS, TRACK_TAIL_LENGTH);

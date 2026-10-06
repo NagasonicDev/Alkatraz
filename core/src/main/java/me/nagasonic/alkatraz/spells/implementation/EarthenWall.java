@@ -22,6 +22,7 @@ import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
 import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.util.Utils;
+import org.bukkit.Color;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -41,6 +42,15 @@ import java.util.Map;
 import java.util.UUID;
 
 public class EarthenWall extends AttackSpell implements Listener {
+
+    /**
+     * This spell's colour, handed to every shared VFX builder it calls.
+     *
+     * <p>Seeded with the `EARTH` element's core shade so the spell looks unchanged, but
+     * it is now a value you own: edit this one line to re-tint the whole spell, and the
+     * two supporting shades follow automatically.
+     */
+    private static final Color CAST_COLOR = Color.fromRGB(160, 82, 45);
 
     /**
      * The wall's signature {@code column}, drawn at the head of the rising path.
@@ -555,7 +565,7 @@ public class EarthenWall extends AttackSpell implements Listener {
         WallSegment head = wallPoints.get(wallPoints.size() - 1);
         if (head.step <= 0 || head.base.getWorld() == null) return;
         Location base = head.base.clone().add(0.0, WALL_COLUMN_LIFT, 0.0);
-        SpellVfx.column(EarthenWall.this, caster, base, Math.max(0.5, head.step), WALL_COLUMN_RADIUS,
+        SpellVfx.column(CAST_COLOR, caster, base, Math.max(0.5, head.step), WALL_COLUMN_RADIUS,
                 head.step, WALL_COLUMN_POINTS, WALL_COLUMN_PHASE_STEP);
     }
 

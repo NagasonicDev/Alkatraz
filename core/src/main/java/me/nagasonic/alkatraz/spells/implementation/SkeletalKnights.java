@@ -21,6 +21,7 @@ import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.spells.vfx.WindUp;
 import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.Utils;
+import org.bukkit.Color;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -43,6 +44,15 @@ import java.util.*;
  * and despawns after {@code knight_duration} seconds.
  */
 public class SkeletalKnights extends AttackSpell implements Listener {
+
+    /**
+     * This spell's colour, handed to every shared VFX builder it calls.
+     *
+     * <p>Seeded with the `DARK` element's core shade so the spell looks unchanged, but
+     * it is now a value you own: edit this one line to re-tint the whole spell, and the
+     * two supporting shades follow automatically.
+     */
+    private static final Color CAST_COLOR = Color.fromRGB(106, 13, 173);
 
     /**
      * The DARK palette. This spell used to carry eleven byte-identical aqua/blue colour
@@ -295,7 +305,7 @@ public class SkeletalKnights extends AttackSpell implements Listener {
         double floorR = Math.min(FLOOR_RADIUS, 0.8 + 1.4 * (ticks / (double) actSwitch)) * shrink;
         // The floor circle and the hex glyphs are one builder now: counter-rotating rings with
         // glyph markers, coloured from the DARK palette rather than from hardcoded aqua.
-        SpellVfx.channelGlyphs(this, caster, feet, floorR, FLOOR_RING_POINTS, FLOOR_GLYPHS,
+        SpellVfx.channelGlyphs(CAST_COLOR, caster, feet, floorR, FLOOR_RING_POINTS, FLOOR_GLYPHS,
                 Math.toRadians(ticks * 6));
 
         if (ticks >= actSwitch) {
@@ -447,7 +457,7 @@ public class SkeletalKnights extends AttackSpell implements Listener {
                     cancel();
                     return;
                 }
-                SpellVfx.channelGlyphs(SkeletalKnights.this, caster, caster.getLocation(),
+                SpellVfx.channelGlyphs(CAST_COLOR, caster, caster.getLocation(),
                         CIRCLE_RADIUS, CIRCLE_RING_POINTS, CIRCLE_GLYPHS,
                         Math.toRadians(ticks * 6));
                 ticks++;

@@ -18,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -178,8 +179,14 @@ class FireVfxMigrationTest {
         for (String name : new String[]{"MeteorShower", "FlamingVolley"}) {
             String code = code(name);
             assumeSourceFound(name);
-            assertFalse(HARDCODED_COLOUR.matcher(code).find(),
-                    name + " still names a colour literal. Every dust must come from PALETTE.");
+            Matcher matcher = HARDCODED_COLOUR.matcher(code);
+            int literals = 0;
+            while (matcher.find()) {
+                literals++;
+            }
+            assertEquals(1, literals,
+                    name + " must name exactly one colour, its CAST_COLOR. Every dust must come "
+                            + "from PALETTE, which is derived from that one declaration.");
         }
     }
 

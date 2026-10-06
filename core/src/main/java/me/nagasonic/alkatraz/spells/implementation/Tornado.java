@@ -19,6 +19,7 @@ import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.util.ColorFormat;
 import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.Utils;
+import org.bukkit.Color;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
@@ -36,6 +37,15 @@ import java.util.Map;
 import java.util.UUID;
 
 public class Tornado extends AttackSpell {
+
+    /**
+     * This spell's colour, handed to every shared VFX builder it calls.
+     *
+     * <p>Seeded with the `AIR` element's core shade so the spell looks unchanged, but
+     * it is now a value you own: edit this one line to re-tint the whole spell, and the
+     * two supporting shades follow automatically.
+     */
+    private static final Color CAST_COLOR = Color.fromRGB(234, 246, 255);
 
     /**
      * The AIR palette, resolved once.
@@ -205,7 +215,7 @@ public class Tornado extends AttackSpell {
 
                     // The charging column, growing out of the ground point the tornado will
                     // launch from. Its own shade ramp comes from the palette.
-                    SpellVfx.column(Tornado.this, caster, tornadoCenter, 6.0 * tornadoGrowth,
+                    SpellVfx.column(CAST_COLOR, caster, tornadoCenter, 6.0 * tornadoGrowth,
                             currentRadius, 6, 12, ticks * CONE_SPIN_PER_TICK * 0.75);
 
                     if (ticks % 10 == 0) {
@@ -342,9 +352,9 @@ public class Tornado extends AttackSpell {
                 // height: the lower half at the narrow base radius, the upper half at the
                 // wide mouth radius. Each is rotated against the tick counter so the
                 // column winds rather than sitting still.
-                SpellVfx.column(Tornado.this, caster, tornadoLoc, coneHeight * 0.5,
+                SpellVfx.column(CAST_COLOR, caster, tornadoLoc, coneHeight * 0.5,
                         bottomRadius, CONE_LAYERS / 2, CONE_POINTS_PER_LAYER, ticks * CONE_SPIN_PER_TICK);
-                SpellVfx.column(Tornado.this, caster, tornadoLoc.clone().add(0.0, coneHeight * 0.5, 0.0),
+                SpellVfx.column(CAST_COLOR, caster, tornadoLoc.clone().add(0.0, coneHeight * 0.5, 0.0),
                         coneHeight * 0.5, midRadius, CONE_LAYERS / 2, CONE_POINTS_PER_LAYER,
                         ticks * CONE_SPIN_PER_TICK + 1.0);
 

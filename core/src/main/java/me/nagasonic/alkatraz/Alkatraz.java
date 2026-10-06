@@ -307,6 +307,18 @@ public final class Alkatraz extends JavaPlugin {
     }
 
     /**
+     * Re-reads config.yml into the static {@link #pluginConfig} reference.
+     *
+     * <p>{@link Config#reload()} builds a fresh {@code YamlConfiguration}, so the instance captured
+     * during {@code onLoad} went stale the moment a reload happened. Everything reading
+     * {@link #getPluginConfig()} kept seeing boot-time values until a restart, which is why the
+     * {@code particles:} section looked inert: {@code ParticleConfig} was reading a stale tree.
+     */
+    public static void reloadPluginConfig() {
+        pluginConfig = ConfigManager.reloadConfig("config.yml").get();
+    }
+
+    /**
      * Rebuilds the LangManager from config. /alkatraz reload calls this before
      * SpellRegistry.reload(), which is what re-reads spell names and descriptions, so a
      * lang edit takes effect on reload instead of needing a server restart.

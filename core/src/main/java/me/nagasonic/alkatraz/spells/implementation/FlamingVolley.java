@@ -21,6 +21,7 @@ import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.Utils;
+import org.bukkit.Color;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -38,6 +39,15 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class FlamingVolley extends AttackSpell implements Listener {
+
+    /**
+     * This spell's colour, handed to every shared VFX builder it calls.
+     *
+     * <p>Seeded with the `FIRE` element's core shade so the spell looks unchanged, but
+     * it is now a value you own: edit this one line to re-tint the whole spell, and the
+     * two supporting shades follow automatically.
+     */
+    private static final Color CAST_COLOR = Color.fromRGB(255, 140, 0);
 
     /**
      * Every colour this spell draws comes from the shared FIRE palette.
@@ -186,7 +196,7 @@ public class FlamingVolley extends AttackSpell implements Listener {
         double startAngle = heading - arcDegrees / 2.0
                 + SPREAD_SPIN.getAndUpdate(previous -> (previous + SPREAD_SPIN_STEP) % 360);
 
-        SpellVfx.cone(this, caster, feet, arrowRange, arcDegrees, startAngle,
+        SpellVfx.cone(CAST_COLOR, caster, feet, arrowRange, arcDegrees, startAngle,
                 SPREAD_ARC_STEPS, SPREAD_RADIAL_STEPS);
     }
 

@@ -14,6 +14,7 @@ import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.spells.vfx.CastCircle;
 import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
 import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
+import org.bukkit.Color;
 import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.*;
@@ -30,6 +31,15 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Detect extends Spell {
+
+    /**
+     * This spell's colour, handed to every shared VFX builder it calls.
+     *
+     * <p>Seeded with the `NONE` element's core shade so the spell looks unchanged, but
+     * it is now a value you own: edit this one line to re-tint the whole spell, and the
+     * two supporting shades follow automatically.
+     */
+    private static final Color CAST_COLOR = Color.fromRGB(180, 180, 180);
     private static LangManager lang() {
         return Alkatraz.getLangManager();
     }
@@ -95,7 +105,7 @@ public class Detect extends Spell {
                         // The scan ring runs EVERY tick, not on circle_ticks, and expands to the
                         // max radius before the task stops. That faster cadence is the whole
                         // tell of this spell - it reads as a sweep, not a pulse.
-                        SpellVfx.ring(Detect.this, p, a, ringRadius, RING_POINTS,
+                        SpellVfx.ring(CAST_COLOR, p, a, ringRadius, RING_POINTS,
                                 ringRadius * 0.3D, RING_SHADOW_OFFSET);
                         l.addAndGet(SCAN_STEP);
                         if (l.get() == (double) r / 2){

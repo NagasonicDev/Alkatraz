@@ -17,6 +17,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -159,12 +161,17 @@ class AirVfxMigrationTest {
     }
 
     /**
-     * No migrated spell constructs a colour by hand.
+     * No migrated spell constructs a colour by hand beyond its single declared colour.
      *
      * <p>This is the assertion that actually pins the migration. Before it, {@code Tornado} held
      * a {@code CORE_DUST} plus two {@code DustOptions[]} gradient arrays - eighteen
      * {@code new Particle.DustOptions} built at class-init from literal RGB - and every spell
      * built one more inside its cast circle lambda, every tick, for every casting player.
+     *
+     * <p>Each spell now names exactly one colour, its {@code CAST_COLOR}, and hands that to every
+     * shared builder it calls. {@link #everyAirSpellDeclaresACachedAirPalette()} asserts the
+     * constant is there; this one bounds it - a second literal anywhere else means the spell is
+     * tinting itself in places the single declaration does not reach.
      */
     @Test
     void everyAirSpellBuildsNoColoursByHand() {
@@ -172,11 +179,22 @@ class AirVfxMigrationTest {
             String code = stripComments(readSource(source));
             assertFalse(code.contains("new Particle.DustOptions"),
                     source + " still constructs a Particle.DustOptions; colours come from PALETTE");
-            assertFalse(code.contains("Color.fromRGB"),
-                    source + " still hardcodes an RGB colour; colours come from PALETTE");
+            assertEquals(1, countRgbLiterals(code),
+                    source + " must name exactly one colour, its CAST_COLOR; every other colour "
+                            + "comes from PALETTE or from that one declaration");
             assertFalse(code.contains("Color.WHITE"),
                     source + " still uses a Bukkit colour constant; colours come from PALETTE");
         }
+    }
+
+    /** Counts every {@code Color.fromRGB} call in the file, {@code CAST_COLOR} declaration or not. */
+    private static int countRgbLiterals(String code) {
+        Matcher matcher = Pattern.compile("Color\\.fromRGB\\s*\\(").matcher(code);
+        int found = 0;
+        while (matcher.find()) {
+            found++;
+        }
+        return found;
     }
 
     /**

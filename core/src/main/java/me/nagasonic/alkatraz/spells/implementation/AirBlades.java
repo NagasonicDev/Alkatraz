@@ -22,6 +22,7 @@ import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
 import me.nagasonic.alkatraz.util.Utils;
+import org.bukkit.Color;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -45,6 +46,15 @@ import java.util.*;
  * - Multiple blades are spread in an even horizontal fan around the player's aim direction.
  */
 public class AirBlades extends AttackSpell implements Listener {
+
+    /**
+     * This spell's colour, handed to every shared VFX builder it calls.
+     *
+     * <p>Seeded with the `AIR` element's core shade so the spell looks unchanged, but
+     * it is now a value you own: edit this one line to re-tint the whole spell, and the
+     * two supporting shades follow automatically.
+     */
+    private static final Color CAST_COLOR = Color.fromRGB(234, 246, 255);
 
     private static final ElementPalette.Palette AIR = ElementPalette.of(Element.AIR);
 
@@ -208,7 +218,7 @@ public class AirBlades extends AttackSpell implements Listener {
                 }
                 double progress = (elapsed + 1) / (double) FAN_TICKS;
                 double radius = FAN_RADIUS * (FAN_START_SCALE + (1.0 - FAN_START_SCALE) * progress);
-                SpellVfx.cone(AirBlades.this, caster, apex, radius,
+                SpellVfx.cone(CAST_COLOR, caster, apex, radius,
                         arc, centre - (arc / 2.0), FAN_ARC_STEPS, FAN_RADIAL_STEPS);
                 elapsed++;
             }

@@ -7,6 +7,7 @@ import me.nagasonic.alkatraz.mobs.MagicEntities;
 import me.nagasonic.alkatraz.api.mobs.MagicEntityType;
 import me.nagasonic.alkatraz.api.mobs.MagicBrainService;
 import me.nagasonic.alkatraz.config.ConfigManager;
+import me.nagasonic.alkatraz.config.ParticleConfig;
 import me.nagasonic.alkatraz.api.dom.Permission;
 import me.nagasonic.alkatraz.gui.implementation.EquipmentMenu;
 import me.nagasonic.alkatraz.gui.implementation.StatsMenu;
@@ -382,6 +383,10 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
         Alkatraz.reloadLangManager();
         ConfigManager.getDefaultConfigs().keySet().forEach(ConfigManager::reloadConfig);
         ConfigManager.reloadConfig("progression.yml");
+        // config.yml feeds the static pluginConfig reference and, through it, the particle
+        // performance settings. Without this the particles: block stayed at boot-time values.
+        Alkatraz.reloadPluginConfig();
+        ParticleConfig.reload();
         SpellRegistry.reload();
         ProgressionService.reload();
         MagicEntities.registerProfiles();

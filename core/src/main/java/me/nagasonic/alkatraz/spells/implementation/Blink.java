@@ -14,6 +14,7 @@ import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
 import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.Utils;
+import org.bukkit.Color;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -24,6 +25,15 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
 public class Blink extends Spell {
+
+    /**
+     * This spell's colour, handed to every shared VFX builder it calls.
+     *
+     * <p>Seeded with the `NONE` element's core shade so the spell looks unchanged, but
+     * it is now a value you own: edit this one line to re-tint the whole spell, and the
+     * two supporting shades follow automatically.
+     */
+    private static final Color CAST_COLOR = Color.fromRGB(180, 180, 180);
 
     /**
      * Blink is element NONE, so the pop and the cast circle draw in neutral grey
@@ -156,7 +166,7 @@ public class Blink extends Spell {
      * in the plugin.
      */
     private void spawnBlinkBeam(LivingEntity caster, Location origin, Location target) {
-        SpellVfx.beam(this, caster, origin, target, BEAM_STEPS, BEAM_START_WIDTH, BEAM_END_WIDTH);
+        SpellVfx.beam(CAST_COLOR, caster, origin, target, BEAM_STEPS, BEAM_START_WIDTH, BEAM_END_WIDTH);
     }
 
     @Override

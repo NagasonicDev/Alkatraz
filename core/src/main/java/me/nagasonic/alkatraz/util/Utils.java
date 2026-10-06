@@ -58,6 +58,16 @@ import org.bukkit.util.Vector;
  * against a 1.20.5+ jar. {@code ParticleAliasTest} pins both sets.
  */
 public class Utils {
+
+    /**
+     * How far in front of the caster's eyes a cast originates, in blocks.
+     *
+     * <p>A cast origin that sits exactly at the eye spawns inside the caster's own head, so the
+     * first tick of a projectile is swallowed by the caster's hitbox and by any block the caster
+     * is standing against.
+     */
+    public static final double CAST_ORIGIN_OFFSET = 1.5;
+
     public static final Particle DUST = Particle.valueOf(oldOrNew("REDSTONE", "DUST"));
     public static final Particle EXPLOSION = Particle.valueOf(oldOrNew("EXPLOSION_LARGE", "EXPLOSION"));
     public static final Particle SMOKE = Particle.valueOf(oldOrNew("SMOKE_NORMAL", "SMOKE"));
@@ -529,7 +539,8 @@ public class Utils {
     }
 
     public static Location castLocation(LivingEntity caster){
-        return caster.getEyeLocation().getDirection().normalize().multiply(1.5).toLocation(caster.getWorld());
+        Location eye = caster.getEyeLocation();
+        return eye.add(safeNormalize(eye.getDirection()).multiply(CAST_ORIGIN_OFFSET));
     }
 
     public static String genCode(){

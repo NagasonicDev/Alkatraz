@@ -22,6 +22,7 @@ import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
 import me.nagasonic.alkatraz.spells.util.TerrainEditor;
 import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.util.Utils;
+import org.bukkit.Color;
 import org.bukkit.*;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -44,6 +45,15 @@ import java.util.Map;
 import java.util.UUID;
 
 public class Tremor extends AttackSpell implements Listener {
+
+    /**
+     * This spell's colour, handed to every shared VFX builder it calls.
+     *
+     * <p>Seeded with the `EARTH` element's core shade so the spell looks unchanged, but
+     * it is now a value you own: edit this one line to re-tint the whole spell, and the
+     * two supporting shades follow automatically.
+     */
+    private static final Color CAST_COLOR = Color.fromRGB(160, 82, 45);
 
     private static final Map<UUID, Map<Location, Material>> recoverData = new java.util.concurrent.ConcurrentHashMap<>();
 
@@ -332,7 +342,7 @@ public class Tremor extends AttackSpell implements Listener {
         double advance = Math.min(1.0, (double) step / Math.max(1, maxSteps));
         float yaw = (float) Math.toDegrees(Math.atan2(direction.getZ(), direction.getX()));
         Location ground = base.clone().add(0.0, TREMOR_DUST_LIFT, 0.0);
-        SpellVfx.ground(Tremor.this, caster, ground, length, width, stations, TREMOR_LANES, yaw, advance);
+        SpellVfx.ground(CAST_COLOR, caster, ground, length, width, stations, TREMOR_LANES, yaw, advance);
     }
 
     private static boolean nearAnyLane(LivingEntity entity, List<Location> lanes) {

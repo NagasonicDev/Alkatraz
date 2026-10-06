@@ -82,6 +82,15 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Stormcaller extends AttackSpell {
 
+    /**
+     * This spell's colour, handed to the wind-up telegraph that precedes its payload.
+     *
+     * <p>Seeded with the `AIR` element's core shade so the spell looks unchanged, but
+     * it is now a value you own: edit this one line to re-tint the charge-up.
+     * <p>Matches its BOLT_TINT, so the charge and the lightning read as one thing.
+     */
+    private static final Color CAST_COLOR = Color.fromRGB(225, 255, 245);
+
     /** Mint green - the only green in the air element, distinct from azure and violet. */
     private static final Color STORM_TINT = Color.fromRGB(160, 255, 210);
     private static final Color BOLT_TINT = Color.fromRGB(225, 255, 245);
@@ -165,7 +174,7 @@ public class Stormcaller extends AttackSpell {
 
         final AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster),
                 getBasePower() * getWandPower(wand, caster), AttackType.MAGIC);
-        final WindUp windUp = WindUp.begin(this, caster, channelTicks);
+        final WindUp windUp = WindUp.begin(this, CAST_COLOR, caster, channelTicks);
 
         BukkitRunnable runnable = new BukkitRunnable() {
             @Override

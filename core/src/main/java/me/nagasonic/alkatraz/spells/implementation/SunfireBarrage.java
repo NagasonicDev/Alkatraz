@@ -20,6 +20,7 @@ import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
 import me.nagasonic.alkatraz.spells.vfx.WindUp;
 import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.Utils;
+import org.bukkit.Color;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -62,6 +63,14 @@ import java.util.UUID;
  * deals zero.
  */
 public class SunfireBarrage extends AttackSpell {
+
+    /**
+     * This spell's colour, handed to the wind-up telegraph that precedes its payload.
+     *
+     * <p>Seeded with the `FIRE` element's core shade so the spell looks unchanged, but
+     * it is now a value you own: edit this one line to re-tint the charge-up.
+     */
+    private static final Color CAST_COLOR = Color.fromRGB(255, 140, 0);
 
     private static final ElementPalette.Palette PALETTE = ElementPalette.of(Element.FIRE);
 
@@ -113,7 +122,7 @@ public class SunfireBarrage extends AttackSpell {
                 getBasePower() * getWandPower(wand, caster), AttackType.MAGIC);
 
         List<UUID> marks = new ArrayList<>();
-        WindUp windUp = WindUp.begin(this, caster, windUpTicks);
+        WindUp windUp = WindUp.begin(this, CAST_COLOR, caster, windUpTicks);
         // A zero interval would be a modulo by zero on the first tick; clamp to one.
         final int markEvery = Math.max(1, cfg.markIntervalTicks());
 

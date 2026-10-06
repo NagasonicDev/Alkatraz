@@ -1,5 +1,6 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
+import java.util.Random;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
@@ -53,9 +54,20 @@ import org.bukkit.util.Vector;
  */
 public class LightBolt extends AttackSpell {
 
-    /** Pale warm white. Unique to this class across the five light spells. */
-    private static final Color BOLT_COLOR = Color.fromRGB(255, 250, 200);
-    private static final Particle.DustOptions BOLT_DUST = new Particle.DustOptions(BOLT_COLOR, 0.7F);
+    /**
+     * This spell's colour, handed to every particle it draws.
+     *
+     * <p>Pale warm white, unique to this class across the five light spells. It is a value you
+     * own: edit this one line to re-tint the bolt, its dust and its cast circle together.
+     */
+    private static final Color CAST_COLOR = Color.fromRGB(255, 250, 200);
+    private static final Particle.DustOptions BOLT_DUST = new Particle.DustOptions(CAST_COLOR, 0.7F);
+
+    /** Dust points drawn per travel tick. Three jittered samples read as a bolt, not a dotted line. */
+    private static final int BODY_DUST = 3;
+
+    /** Random offset, in blocks, applied to each body dust sample so the bolt has thickness. */
+    private static final double BODY_SPREAD = 0.06;
 
     /** Dust drawn by one {@link #burst}, at scale 1. */
     private static final int BURST_DUST = 12;
@@ -148,8 +160,14 @@ public class LightBolt extends AttackSpell {
     private void fireBolt(LivingEntity caster, ItemStack wand, SpellAttackContext context,
                           Location origin, Vector direction, double speed, double range,
                           double scanRadius) {
-        if (speed <= 0.0 || range <= 0.0) return;
         Location position = origin.clone();
+
+        // A degenerate speed or range still has to be visible. Previously this returned before
+        // any emission at all, so a wand that zeroed projectile_speed produced a silent cast.
+        if (speed <= 0.0 || range <= 0.0) {
+            burst(caster, position, 1.0F);
+            return;
+        }
 
         new BukkitRunnable() {
             double travelled = 0.0;
@@ -162,7 +180,7 @@ public class LightBolt extends AttackSpell {
                 context.tick();
 
                 if (context.isSpent()) {
-                    burst(position, 1.0F);
+                    burst(caster, position, 1.0F);
                     cancel();
                     return;
                 }
@@ -171,18 +189,18 @@ public class LightBolt extends AttackSpell {
                 travelled += speed;
 
                 if (travelled >= range) {
-                    burst(position, 1.0F);
+                    burst(caster, position, 1.0F);
                     cancel();
                     return;
                 }
                 Block block = position.getBlock();
                 if (block.isLiquid() || (!block.isPassable() && block.getType().isOccluding())) {
-                    burst(position, 1.0F);
+                    burst(caster, position, 1.0F);
                     cancel();
                     return;
                 }
                 if (ticks++ >= MAX_TRAVEL_TICKS) {
-                    burst(position, 1.0F);
+                    burst(caster, position, 1.0F);
                     cancel();
                     return;
                 }
@@ -193,8 +211,16 @@ public class LightBolt extends AttackSpell {
                     return;
                 }
 
-                ParticleCaster.spawn(caster, world, Utils.DUST, position, 1, BOLT_DUST);
-                ParticleCaster.spawn(caster, world, Utils.ENTITY_EFFECT, position, 1, 0.05, 0.05, 0.05, 0.0);
+                // Emitted before the collision scan so the bolt is on screen on the tick it lands.
+                Random random = Utils.getRandom();
+                for (int i = 0; i < BODY_DUST; i++) {
+                    ParticleCaster.spawn(caster, world, Utils.DUST, position.clone().add(new Vector(
+                            (random.nextDouble() - 0.5) * BODY_SPREAD,
+                            (random.nextDouble() - 0.5) * BODY_SPREAD,
+                            (random.nextDouble() - 0.5) * BODY_SPREAD)), 1, BOLT_DUST);
+                }
+                ParticleCaster.spawn(caster, world, Utils.ENTITY_EFFECT,
+                        position, 1, 0.05, 0.05, 0.05, 0.0, CAST_COLOR);
 
                 // The SHARED properties, so countering the bolt is a single call on one object.
                 SpellParticleComponent component = new SpellParticleComponent(
@@ -217,7 +243,7 @@ public class LightBolt extends AttackSpell {
                     if (!context.hit(target)) continue;
 
                     SpellDamageUtil.damageWithSpell(target, context.power(target), caster, wand, LightBolt.this);
-                    burst(position, 1.0F);
+                    burst(caster, position, 1.0F);
                     world.playSound(position, Sound.ENTITY_FIREWORK_ROCKET_BLAST, 0.8f, 1.4f);
                     cancel();
                     return;
@@ -227,34 +253,37 @@ public class LightBolt extends AttackSpell {
     }
 
     /**
-     * The bolt's own dissipation burst. Broadcast with a null caster so everyone nearby sees it,
-     * which is the point - the bolt is a thing in the world, not a private effect.
+     * The bolt's own dissipation burst.
      *
-     * @param loc   where the bolt ended
-     * @param scale multiplier on the dust count, so a hit and a wall-stop can read differently
+     * <p>The caster is passed through so the caster always sees it at full density - the burst
+     * is how the cast reads as "it hit something", so culling it by distance defeats the point.
+     *
+     * @param caster the casting entity, for per-player particle density falloff
+     * @param loc    where the bolt ended
+     * @param scale  multiplier on the dust count, so a hit and a wall-stop can read differently
      */
-    private void burst(Location loc, float scale) {
+    private void burst(LivingEntity caster, Location loc, float scale) {
         World world = loc.getWorld();
         if (world == null) return;
-        ParticleCaster.spawn(null, world, Utils.EXPLOSION, loc, 1);
-        ParticleCaster.spawn(null, world, Utils.DUST, loc,
+        ParticleCaster.spawn(caster, world, Utils.EXPLOSION, loc, 1);
+        ParticleCaster.spawn(caster, world, Utils.DUST, loc,
                 Math.max(1, Math.round(BURST_DUST * scale)), 0.2, 0.2, 0.2, 0.0, BOLT_DUST);
     }
 
     @Override
     public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
-        return CastCircle.start(this, caster, e, 2.0, 0);
+        return CastCircle.start(this, CAST_COLOR, caster, e, 2.0, 0);
     }
 
     @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
-        ParticleCaster.spawn(caster, location.getWorld(), Utils.ENTITY_EFFECT, location, 20);
+        ParticleCaster.spawn(caster, location.getWorld(), Utils.ENTITY_EFFECT, location, 20, CAST_COLOR);
         location.getWorld().playSound(location, Sound.ENTITY_FIREWORK_ROCKET_BLAST, 0.8f, 1.4f);
     }
 
     @Override
     public void onCountered(Location location) {
-        ParticleCaster.spawn(null, location.getWorld(), Utils.ENTITY_EFFECT, location, 40);
+        ParticleCaster.spawn(null, location.getWorld(), Utils.ENTITY_EFFECT, location, 40, CAST_COLOR);
         ParticleCaster.spawn(null, location.getWorld(), Utils.EXPLOSION, location, 1);
         location.getWorld().playSound(location, Sound.ENTITY_FIREWORK_ROCKET_BLAST, 1.0f, 0.8f);
     }

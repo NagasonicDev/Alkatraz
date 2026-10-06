@@ -17,6 +17,7 @@ import me.nagasonic.alkatraz.spells.vfx.CastCircle;
 import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.Utils;
+import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.World;
@@ -51,6 +52,15 @@ import java.util.UUID;
  * former hardcoded yellows and the azure-in-a-LIGHT-spell class of bug cannot recur.
  */
 public class Radiance extends AttackSpell {
+
+    /**
+     * This spell's colour, handed to every shared VFX builder it calls.
+     *
+     * <p>Seeded with the `LIGHT` element's core shade so the spell looks unchanged, but
+     * it is now a value you own: edit this one line to re-tint the whole spell, and the
+     * two supporting shades follow automatically.
+     */
+    private static final Color CAST_COLOR = Color.fromRGB(255, 255, 135);
 
     private static LangManager lang() {
         return Alkatraz.getLangManager();
@@ -158,7 +168,7 @@ public class Radiance extends AttackSpell {
                             : WIND_UP_BODIES_LATE + (int) ((progress - 0.5) * 2.0 * WIND_UP_LATE_BODY_GAIN);
                     // Bodies spread from a third of the orbit radius out to the full radius,
                     // so the formation has depth rather than reading as one flat ring.
-                    SpellVfx.orbit(Radiance.this, caster, centre,
+                    SpellVfx.orbit(CAST_COLOR, caster, centre,
                             orbitRadius * 0.34D, orbitRadius, bodies, ticks * WIND_UP_SPIN);
                 }
 
@@ -253,7 +263,7 @@ public class Radiance extends AttackSpell {
 
                 // The dome: one shell plus one interior, re-spun every tick. Drawn before
                 // the entity sweep so the burn and heal markers land on top of it.
-                SpellVfx.field(Radiance.this, caster, center, activeRadius,
+                SpellVfx.field(CAST_COLOR, caster, center, activeRadius,
                         activeRadius * DOME_HEIGHT_SCALE, DOME_SHELL_POINTS, DOME_FILL_POINTS,
                         ticksElapsed * DOME_SPIN);
 
@@ -361,7 +371,7 @@ public class Radiance extends AttackSpell {
                 if (centre.getWorld() != null) {
                     // A mob's wind-up is the same tell at a fraction of the density: a mob
                     // must be readable as charging without competing with a player's cast.
-                    SpellVfx.orbit(Radiance.this, caster, centre, orbitRadius * 0.34D, orbitRadius,
+                    SpellVfx.orbit(CAST_COLOR, caster, centre, orbitRadius * 0.34D, orbitRadius,
                             WIND_UP_BODIES / 2, ticks * WIND_UP_SPIN);
                 }
 

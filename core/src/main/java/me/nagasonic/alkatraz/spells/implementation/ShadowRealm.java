@@ -19,6 +19,7 @@ import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
 import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.Utils;
+import org.bukkit.Color;
 import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.*;
@@ -37,6 +38,15 @@ import java.util.Set;
 import java.util.UUID;
 
 public class ShadowRealm extends AttackSpell {
+
+    /**
+     * This spell's colour, handed to every shared VFX builder it calls.
+     *
+     * <p>Seeded with the `DARK` element's core shade so the spell looks unchanged, but
+     * it is now a value you own: edit this one line to re-tint the whole spell, and the
+     * two supporting shades follow automatically.
+     */
+    private static final Color CAST_COLOR = Color.fromRGB(106, 13, 173);
 
     /**
      * The single DARK palette. Every colour in this spell comes from here: nothing in
@@ -293,14 +303,14 @@ public class ShadowRealm extends AttackSpell {
     private void drawField(LivingEntity caster, Location targetLoc, double activeRadius,
                            double fieldHeight, int ticks) {
         double spin = ticks * 0.15D;
-        SpellVfx.field(this, caster, targetLoc, activeRadius, fieldHeight,
+        SpellVfx.field(CAST_COLOR, caster, targetLoc, activeRadius, fieldHeight,
                 SHELL_POINTS, FILL_POINTS, spin);
 
         double wallRadius = activeRadius * WALL_RADIUS_FRACTION;
         for (int side = 0; side < WALL_COLUMNS; side++) {
             double angle = spin + Math.PI * side;
             Location wallBase = targetLoc.clone().add(Math.cos(angle) * wallRadius, 0.0, Math.sin(angle) * wallRadius);
-            SpellVfx.column(this, caster, wallBase, fieldHeight, 0.35D,
+            SpellVfx.column(CAST_COLOR, caster, wallBase, fieldHeight, 0.35D,
                     WALL_LAYERS, WALL_POINTS_PER_LAYER,
                     (side == 0 ? WALL_PHASE_STEP : -WALL_PHASE_STEP) + spin);
         }
@@ -384,7 +394,7 @@ public class ShadowRealm extends AttackSpell {
                     return;
                 }
 
-                SpellVfx.field(ShadowRealm.this, caster, targetLoc, radius, radius * HEIGHT_PER_RADIUS,
+                SpellVfx.field(CAST_COLOR, caster, targetLoc, radius, radius * HEIGHT_PER_RADIUS,
                         SHELL_POINTS, FILL_POINTS, ticks * 0.2D);
                 ParticleCaster.spawn(caster, targetLoc.getWorld(), Utils.SMOKE, targetLoc,
                         (int) (SHELL_POINTS / 4), radius * 0.4, radius * 0.4, radius * 0.4, 0);

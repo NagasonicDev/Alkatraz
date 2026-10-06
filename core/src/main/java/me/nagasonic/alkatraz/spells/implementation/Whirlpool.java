@@ -21,6 +21,7 @@ import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProper
 import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
 import me.nagasonic.alkatraz.util.Utils;
+import org.bukkit.Color;
 import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
@@ -36,6 +37,15 @@ import java.util.Map;
 import java.util.UUID;
 
 public class Whirlpool extends AttackSpell {
+
+    /**
+     * This spell's colour, handed to every shared VFX builder it calls.
+     *
+     * <p>Seeded with the `WATER` element's core shade so the spell looks unchanged, but
+     * it is now a value you own: edit this one line to re-tint the whole spell, and the
+     * two supporting shades follow automatically.
+     */
+    private static final Color CAST_COLOR = Color.fromRGB(47, 127, 212);
 
     /**
      * The single WATER palette. This spell used to carry its own {@code (30,120,200)} in two
@@ -271,7 +281,7 @@ public class Whirlpool extends AttackSpell {
         double ringRadius = fieldRadius * (1.0 - (ticks % CONTRACT_PERIOD) / (double) CONTRACT_PERIOD);
 
         // Shadow offset 0.35 lays a dark counter-turning ring on the ground under the tread.
-        SpellVfx.ring(Whirlpool.this, caster, centre, ringRadius, RING_POINTS, angle, 0.35);
+        SpellVfx.ring(CAST_COLOR, caster, centre, ringRadius, RING_POINTS, angle, 0.35);
 
         World world = centre.getWorld();
         Location point = centre.clone();

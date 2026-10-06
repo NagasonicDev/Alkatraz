@@ -73,6 +73,15 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ContinentalShift extends AttackSpell implements Listener {
 
     /**
+     * This spell's colour, handed to the wind-up telegraph that precedes its payload.
+     *
+     * <p>Seeded with the `EARTH` element's core shade so the spell looks unchanged, but
+     * it is now a value you own: edit this one line to re-tint the charge-up.
+     * <p>Follows the earth shade its terrain writes already use.
+     */
+    private static final Color CAST_COLOR = Color.fromRGB(160, 82, 45);
+
+    /**
      * Desaturated moss green. Hoisted to a static so it is allocated once, and deliberately NOT
      * derived from {@code element}: TectonicStrike's ember orange, FaultLine's magma red and
      * Worldbreaker's violet-black are this element's other identities.
@@ -176,7 +185,7 @@ public class ContinentalShift extends AttackSpell implements Listener {
 
         int channelTicks = WindUp.effectiveTicks(
                 (int) Math.round(channelSeconds * 20.0), masteryOf(caster), getMaxMastery());
-        WindUp windUp = WindUp.begin(this, caster, channelTicks, centre);
+        WindUp windUp = WindUp.begin(this, CAST_COLOR, caster, channelTicks, centre);
 
         // ONE shared allowance for the whole cast. Checked before every one of the six layer
         // writes, so the SUM across all of them can never exceed terrain_budget.

@@ -20,6 +20,7 @@ import me.nagasonic.alkatraz.spells.vfx.CastCircle;
 import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
 import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.util.Utils;
+import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
@@ -64,6 +65,15 @@ import java.util.UUID;
  * the plugin, and a literal RGB would be the defect the wave-C VFX migration removed.
  */
 public class ArcaneWard extends BarrierSpell {
+
+    /**
+     * This spell's colour, handed to every shared VFX builder it calls.
+     *
+     * <p>Seeded with the `NONE` element's core shade so the spell looks unchanged, but
+     * it is now a value you own: edit this one line to re-tint the whole spell, and the
+     * two supporting shades follow automatically.
+     */
+    private static final Color CAST_COLOR = Color.fromRGB(180, 180, 180);
 
     /** Particles on the expanding shell. */
     private static final int SHELL_POINT_COUNT = 200;
@@ -148,7 +158,7 @@ public class ArcaneWard extends BarrierSpell {
             @Override
             public void run() {
                 if (properties.isBroken() || ticksPassed >= activeDuration * RUNS_PER_SECOND) {
-                    onBarrierBreak(center, activeRadius);
+                    onBarrierBreak(caster, center, activeRadius);
                     properties.getHealthBar().removeAll();
                     cancel();
                     return;
@@ -185,7 +195,7 @@ public class ArcaneWard extends BarrierSpell {
                 );
                 SpellComponentHandler.register(shell);
 
-                SpellVfx.nova(ArcaneWard.this, caster, center, activeRadius, SHELL_POINT_COUNT);
+                SpellVfx.nova(CAST_COLOR, caster, center, activeRadius, SHELL_POINT_COUNT);
 
                 ticksPassed++;
             }
@@ -244,7 +254,7 @@ public class ArcaneWard extends BarrierSpell {
             @Override
             public void run() {
                 if (properties.isBroken() || ticksPassed >= duration * RUNS_PER_SECOND) {
-                    onBarrierBreak(center, radius);
+                    onBarrierBreak(caster, center, radius);
                     properties.getHealthBar().removeAll();
                     cancel();
                     return;
@@ -262,7 +272,7 @@ public class ArcaneWard extends BarrierSpell {
                 );
                 SpellComponentHandler.register(shell);
 
-                SpellVfx.nova(ArcaneWard.this, caster, center, radius, SHELL_POINT_COUNT);
+                SpellVfx.nova(CAST_COLOR, caster, center, radius, SHELL_POINT_COUNT);
 
                 ticksPassed++;
             }
@@ -293,11 +303,18 @@ public class ArcaneWard extends BarrierSpell {
 
     @Override
     public void onBarrierBreak(Location center) {
-        onBarrierBreak(center, radius);
+        onBarrierBreak(null, center, radius);
     }
 
-    private void onBarrierBreak(Location center, double breakRadius) {
-        // A null caster broadcasts, so everyone standing near the ward sees it pop.
-        SpellVfx.nova(null, null, center, breakRadius, BREAK_POINT_COUNT);
+    private void onBarrierBreak(LivingEntity caster, Location center) {
+        onBarrierBreak(caster, center, radius);
+    }
+
+    /**
+     * The caster is threaded through so the ward's owner always sees the burst at full density;
+     * every other player nearby still gets it through the normal distance falloff.
+     */
+    private void onBarrierBreak(LivingEntity caster, Location center, double breakRadius) {
+        SpellVfx.nova(CAST_COLOR, caster, center, breakRadius, BREAK_POINT_COUNT);
     }
 }

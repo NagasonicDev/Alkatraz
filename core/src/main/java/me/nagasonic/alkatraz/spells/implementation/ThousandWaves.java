@@ -20,6 +20,7 @@ import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
 import me.nagasonic.alkatraz.spells.vfx.WindUp;
 import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.Utils;
+import org.bukkit.Color;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -93,6 +94,14 @@ import java.util.UUID;
  * respected at the design level rather than only at the code level.
  */
 public class ThousandWaves extends AttackSpell {
+
+    /**
+     * This spell's colour, handed to the wind-up telegraph that precedes its payload.
+     *
+     * <p>Seeded with the `WATER` element's core shade so the spell looks unchanged, but
+     * it is now a value you own: edit this one line to re-tint the charge-up.
+     */
+    private static final Color CAST_COLOR = Color.fromRGB(47, 127, 212);
 
     private static final ElementPalette.Palette PALETTE = ElementPalette.of(Element.WATER);
 
@@ -217,7 +226,7 @@ public class ThousandWaves extends AttackSpell {
         if (ChannelRegistry.isChanneling(uuid)) return;       // no double channels
 
         int windUpTicks = channelTicks(profile.getSpellMastery(this), getMaxMastery());
-        WindUp windUp = WindUp.begin(this, caster, windUpTicks);
+        WindUp windUp = WindUp.begin(this, CAST_COLOR, caster, windUpTicks);
 
         // ChannelRegistry owns interruption; this class owns its repeating task. The task id
         // is captured in a holder so the canceller stays effectively final.

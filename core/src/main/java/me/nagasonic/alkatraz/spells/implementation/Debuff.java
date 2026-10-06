@@ -13,6 +13,7 @@ import me.nagasonic.alkatraz.spells.vfx.CastCircle;
 import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
 import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.util.Utils;
+import org.bukkit.Color;
 import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.LivingEntity;
@@ -31,6 +32,15 @@ import java.util.concurrent.ConcurrentHashMap;
  * Debuff — Applies configured negative modifiers to a targeted living entity.
  */
 public class Debuff extends Spell {
+
+    /**
+     * This spell's colour, handed to every shared VFX builder it calls.
+     *
+     * <p>Seeded with the `DARK` element's core shade so the spell looks unchanged, but
+     * it is now a value you own: edit this one line to re-tint the whole spell, and the
+     * two supporting shades follow automatically.
+     */
+    private static final Color CAST_COLOR = Color.fromRGB(106, 13, 173);
 
     private static LangManager lang() {
         return Alkatraz.getLangManager();
@@ -100,7 +110,7 @@ public class Debuff extends Spell {
 
         // The mark on the victim. SpellVfx.selfAura reads the subject's location at draw time, so
         // this is anchored to wherever the target is right now rather than to a cached point.
-        SpellVfx.selfAura(this, caster, target, TARGET_AURA_RADIUS, TARGET_AURA_POINTS, 0.0);
+        SpellVfx.selfAura(CAST_COLOR, caster, target, TARGET_AURA_RADIUS, TARGET_AURA_POINTS, 0.0);
     }
 
     @Override

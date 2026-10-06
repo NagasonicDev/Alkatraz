@@ -13,6 +13,7 @@ import me.nagasonic.alkatraz.spells.vfx.CastCircle;
 import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
 import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.util.Utils;
+import org.bukkit.Color;
 import org.bukkit.Sound;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
@@ -42,6 +43,15 @@ import java.util.concurrent.ConcurrentHashMap;
  * circle and the pooled modifier particles are all the same LIGHT palette.
  */
 public class Buff extends Spell {
+
+    /**
+     * This spell's colour, handed to every shared VFX builder it calls.
+     *
+     * <p>Seeded with the `LIGHT` element's core shade so the spell looks unchanged, but
+     * it is now a value you own: edit this one line to re-tint the whole spell, and the
+     * two supporting shades follow automatically.
+     */
+    private static final Color CAST_COLOR = Color.fromRGB(255, 255, 135);
 
     private static LangManager lang() {
         return Alkatraz.getLangManager();
@@ -166,7 +176,7 @@ public class Buff extends Spell {
                     cancel();
                     return;
                 }
-                SpellVfx.selfAura(Buff.this, caster, subject, AURA_RADIUS, AURA_POINTS,
+                SpellVfx.selfAura(CAST_COLOR, caster, subject, AURA_RADIUS, AURA_POINTS,
                         AURA_SPIN * (elapsed + 1));
                 elapsed++;
             }

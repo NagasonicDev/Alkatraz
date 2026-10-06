@@ -8,6 +8,7 @@ import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.util.SpellBudgets;
 import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.Utils;
+import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -99,16 +100,29 @@ public final class WindUp {
     private final int totalTicks;
     private final Location marker;
     private final Location origin;
+    private final ElementPalette.Palette palette;
 
     private int elapsed = 0;
     private boolean cancelled = false;
 
     private WindUp(Spell spell, LivingEntity caster, int totalTicks, Location marker) {
+        this(spell, caster, totalTicks, marker, null);
+    }
+
+    /**
+     * @param color the spell's own colour, or {@code null} to take it from the spell's element.
+     *              Resolved once here rather than per tick, because the charge redraws every tick
+     *              for the whole wind-up and {@link ElementPalette#of(Color)} is cached anyway.
+     */
+    private WindUp(Spell spell, LivingEntity caster, int totalTicks, Location marker, Color color) {
         this.spell = spell;
         this.caster = caster;
         this.totalTicks = Math.max(0, totalTicks);
         this.marker = marker;
         this.origin = caster.getLocation();
+        this.palette = (color != null)
+                ? ElementPalette.of(color)
+                : ElementPalette.of(spell == null ? null : spell.getElement());
     }
 
     /**
@@ -135,6 +149,22 @@ public final class WindUp {
     }
 
     /**
+     * Begins a wind-up in the casting spell's own colour rather than its element's palette.
+     *
+     * <p>The charge is the telegraph for the payload, so it has to read as the same effect the
+     * caster is about to receive. A {@code NONE}-element spell that draws a coloured payload would
+     * otherwise telegraph in grey and land in colour.
+     *
+     * @param spell       the spell being wound up
+     * @param color       the colour the spell declared; {@code null} falls back to element grey
+     * @param caster      the charging entity
+     * @param windUpTicks duration in ticks, already mastery-adjusted by the caller
+     */
+    public static WindUp begin(Spell spell, Color color, LivingEntity caster, int windUpTicks) {
+        return new WindUp(spell, caster, windUpTicks, null, color);
+    }
+
+    /**
      * Begins a wind-up anchored to a landing point, drawing escalating ground
      * geometry there so the effect can be dodged.
      *
@@ -144,6 +174,18 @@ public final class WindUp {
     public static WindUp begin(Spell spell, LivingEntity caster, int windUpTicks, Location markerLocation) {
         return new WindUp(spell, caster, windUpTicks,
                 markerLocation == null ? null : markerLocation.clone());
+    }
+
+    /**
+     * Begins a marker-anchored wind-up in the casting spell's own colour.
+     *
+     * @param color         the colour the spell declared; {@code null} falls back to element grey
+     * @param markerLocation where the spell is about to land, or null for
+     *                       self/omni-target effects
+     */
+    public static WindUp begin(Spell spell, Color color, LivingEntity caster, int windUpTicks, Location markerLocation) {
+        return new WindUp(spell, caster, windUpTicks,
+                markerLocation == null ? null : markerLocation.clone(), color);
     }
 
     /**
@@ -314,9 +356,9 @@ public final class WindUp {
     // Visuals
     // ================================================================
 
-    /** The caster's element palette, resolved once per tick and never rebuilt. */
+    /** The caster's palette, resolved once when the wind-up began and never rebuilt. */
     private ElementPalette.Palette palette() {
-        return ElementPalette.of(spell == null ? null : spell.getElement());
+        return palette;
     }
 
     /**

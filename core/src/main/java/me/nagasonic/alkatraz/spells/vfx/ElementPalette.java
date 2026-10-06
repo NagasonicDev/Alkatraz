@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The single source of truth for turning an {@link Element} into particle colours.
@@ -37,22 +38,87 @@ public final class ElementPalette {
     /** Smallest dust size, for edges, ground rings and shadow. */
     private static final float DEEP_SIZE = 0.4f;
 
+    /** How far {@code accent} is blended from the base colour toward white. */
+    private static final double ACCENT_BLEND = 0.35;
+    /** How far {@code deep} is blended from the base colour toward black. */
+    private static final double DEEP_BLEND = 0.5;
+
     private static final Map<Element, Palette> PALETTES;
+
+    /**
+     * Per-spell palettes built by {@link #of(Color)}, keyed on the packed RGB int.
+     *
+     * <p>Written only during a spell's own emission, so it is bounded by the number of distinct
+     * colours declared in source, not by how often a particle is dispatched.
+     */
+    private static final Map<Integer, Palette> CUSTOM = new ConcurrentHashMap<>();
 
     static {
         Map<Element, Palette> built = new EnumMap<>(Element.class);
-        built.put(Element.FIRE, new Palette(Element.FIRE, 255, 140, 0, 255, 210, 74, 140, 47, 0));
-        built.put(Element.WATER, new Palette(Element.WATER, 47, 127, 212, 127, 212, 255, 16, 56, 107));
-        built.put(Element.EARTH, new Palette(Element.EARTH, 160, 82, 45, 217, 143, 95, 78, 40, 17));
-        built.put(Element.AIR, new Palette(Element.AIR, 234, 246, 255, 255, 255, 255, 159, 196, 216));
-        built.put(Element.LIGHT, new Palette(Element.LIGHT, 255, 255, 135, 255, 253, 224, 212, 184, 58));
-        built.put(Element.DARK, new Palette(Element.DARK, 106, 13, 173, 177, 76, 224, 43, 4, 56));
+        built.put(Element.FIRE, new Palette(Element.FIRE, rgb(255, 140, 0), rgb(255, 210, 74), rgb(140, 47, 0)));
+        built.put(Element.WATER, new Palette(Element.WATER, rgb(47, 127, 212), rgb(127, 212, 255), rgb(16, 56, 107)));
+        built.put(Element.EARTH, new Palette(Element.EARTH, rgb(160, 82, 45), rgb(217, 143, 95), rgb(78, 40, 17)));
+        built.put(Element.AIR, new Palette(Element.AIR, rgb(234, 246, 255), rgb(255, 255, 255), rgb(159, 196, 216)));
+        built.put(Element.LIGHT, new Palette(Element.LIGHT, rgb(255, 255, 135), rgb(255, 253, 224), rgb(212, 184, 58)));
+        built.put(Element.DARK, new Palette(Element.DARK, rgb(106, 13, 173), rgb(177, 76, 224), rgb(43, 4, 56)));
         // NONE stays neutral grey on purpose so it never reads as a real element.
-        built.put(Element.NONE, new Palette(Element.NONE, 180, 180, 180, 234, 234, 234, 85, 95, 102));
+        built.put(Element.NONE, new Palette(Element.NONE, rgb(180, 180, 180), rgb(234, 234, 234), rgb(85, 95, 102)));
         PALETTES = Collections.unmodifiableMap(built);
     }
 
     private ElementPalette() {
+    }
+
+    private static int rgb(int r, int g, int b) {
+        return Color.fromRGB(r, g, b).asRGB();
+    }
+
+    /**
+     * Returns a palette built around a single caller-supplied colour.
+     *
+     * <p>This is how a spell overrides the colour its element would otherwise give it. The spell
+     * declares one {@link Color} and the other two shades are derived from it, so a spell author
+     * tunes one value instead of three and cannot leave the triple internally inconsistent.
+     *
+     * <p>The derivation is a blend toward white for {@code accent} and toward black for {@code deep},
+     * at the same ratios the built-in element triples already use, which is why a spell that passes
+     * its element's {@code core} colour still looks like it did before.
+     *
+     * <p>Results are cached on {@link Color#asRGB()}: {@code Color} has no {@code equals}, so a
+     * {@code Color}-keyed map would never hit and every per-tick call would rebuild three
+     * {@link Particle.DustOptions}. Keying the packed int means a spell asking for its colour every
+     * tick allocates nothing, which is the same guarantee the static element map provides.
+     *
+     * @param color the spell's own colour; {@code null} resolves to {@link Element#NONE}'s palette
+     * @return a shared, immutable palette for that colour
+     */
+    public static Palette of(Color color) {
+        if (color == null) {
+            return PALETTES.get(Element.NONE);
+        }
+        int rgb = color.asRGB();
+        Palette cached = CUSTOM.get(rgb);
+        if (cached != null) {
+            return cached;
+        }
+        Palette built = new Palette(Element.NONE, rgb(color.getRed(), color.getGreen(), color.getBlue()),
+                blend(color, 255, ACCENT_BLEND), blend(color, 0, DEEP_BLEND));
+        Palette raced = CUSTOM.putIfAbsent(rgb, built);
+        return (raced == null) ? built : raced;
+    }
+
+    /**
+     * Blends {@code color} toward {@code target} by {@code ratio}, clamping each channel to 0-255.
+     */
+    private static int blend(Color color, int target, double ratio) {
+        int r = (int) Math.round(color.getRed() + (target - color.getRed()) * ratio);
+        int g = (int) Math.round(color.getGreen() + (target - color.getGreen()) * ratio);
+        int b = (int) Math.round(color.getBlue() + (target - color.getBlue()) * ratio);
+        return Color.fromRGB(clampChannel(r), clampChannel(g), clampChannel(b)).asRGB();
+    }
+
+    private static int clampChannel(int value) {
+        return Math.max(0, Math.min(255, value));
     }
 
     /**
@@ -91,8 +157,9 @@ public final class ElementPalette {
     /**
      * An immutable element colour scheme with pre-built dust.
      *
-     * <p>Instances are created once during {@code ElementPalette}'s static initialisation and are
-     * shared; never construct one from a spell.
+     * <p>Element palettes are created once during {@code ElementPalette}'s static initialisation.
+     * A spell that wants its own colour never constructs one directly either: it declares a
+     * {@link Color} constant and passes it to {@link #of(Color)}, which caches the result.
      */
     public static final class Palette {
 
@@ -105,13 +172,13 @@ public final class ElementPalette {
         private final Particle.DustOptions deepDust;
 
         private Palette(Element element,
-                         int coreR, int coreG, int coreB,
-                         int accentR, int accentG, int accentB,
-                         int deepR, int deepG, int deepB) {
+                        int coreRgb,
+                        int accentRgb,
+                        int deepRgb) {
             this.element = element;
-            this.core = Color.fromRGB(coreR, coreG, coreB);
-            this.accent = Color.fromRGB(accentR, accentG, accentB);
-            this.deep = Color.fromRGB(deepR, deepG, deepB);
+            this.core = Color.fromRGB(coreRgb);
+            this.accent = Color.fromRGB(accentRgb);
+            this.deep = Color.fromRGB(deepRgb);
             this.coreDust = new Particle.DustOptions(this.core, CORE_SIZE);
             this.accentDust = new Particle.DustOptions(this.accent, ACCENT_SIZE);
             this.deepDust = new Particle.DustOptions(this.deep, DEEP_SIZE);

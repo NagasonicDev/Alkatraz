@@ -23,6 +23,7 @@ import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
 import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.Utils;
+import org.bukkit.Color;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
@@ -37,6 +38,15 @@ import org.bukkit.util.Vector;
 import java.util.*;
 
 public class WaterSphere extends AttackSpell {
+
+    /**
+     * This spell's colour, handed to every shared VFX builder it calls.
+     *
+     * <p>Seeded with the `WATER` element's core shade so the spell looks unchanged, but
+     * it is now a value you own: edit this one line to re-tint the whole spell, and the
+     * two supporting shades follow automatically.
+     */
+    private static final Color CAST_COLOR = Color.fromRGB(47, 127, 212);
 
     /**
      * The single WATER palette. Every colour in this spell comes from here: the projectile head is
@@ -176,7 +186,7 @@ public class WaterSphere extends AttackSpell {
                 // Signature shape: a travelling cluster with a tail. The head is `core` (the
                 // leading edge - what the eye tracks from the caster to the impact) and the tail
                 // darkens toward `deep` behind it, so the orb reads as leaving, not as a blob.
-                SpellVfx.projectile(WaterSphere.this, caster, center, travelDir,
+                SpellVfx.projectile(CAST_COLOR, caster, center, travelDir,
                         radius, clusterPoints, TAIL_POINTS, radius * TAIL_LENGTH_PER_RADIUS);
 
                 // Water spray around the head, so the orb reads as liquid rather than as dust.

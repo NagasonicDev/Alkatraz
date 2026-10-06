@@ -18,6 +18,7 @@ import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
 import me.nagasonic.alkatraz.util.Utils;
+import org.bukkit.Color;
 import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.LivingEntity;
@@ -44,6 +45,15 @@ import java.util.List;
  *      damage and is launched skyward. Entities are only damaged once per cast.
  */
 public class Geyser extends AttackSpell {
+
+    /**
+     * This spell's colour, handed to every shared VFX builder it calls.
+     *
+     * <p>Seeded with the `WATER` element's core shade so the spell looks unchanged, but
+     * it is now a value you own: edit this one line to re-tint the whole spell, and the
+     * two supporting shades follow automatically.
+     */
+    private static final Color CAST_COLOR = Color.fromRGB(47, 127, 212);
 
     private static LangManager lang() {
         return Alkatraz.getLangManager();
@@ -275,7 +285,7 @@ public class Geyser extends AttackSpell {
 
             // Growing height, fixed slice count: the column is revealed from the foot up.
             double progress = Math.min(1.0, (double) tick[0] / ERUPTION_TICKS);
-            SpellVfx.column(Geyser.this, caster, epicentre, height * progress, radius * 0.4,
+            SpellVfx.column(CAST_COLOR, caster, epicentre, height * progress, radius * 0.4,
                     COLUMN_LAYERS, COLUMN_POINTS_PER_LAYER, COLUMN_PHASE_STEP);
 
             // Droplets riding the current, so the riser reads as liquid rather than as a tube.

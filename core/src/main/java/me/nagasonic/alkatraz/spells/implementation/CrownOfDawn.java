@@ -347,7 +347,7 @@ public class CrownOfDawn extends AttackSpell {
             Location point = segment.clone().add(0, i * RISE_STEP, 0);
             ParticleCaster.spawn(caster, world, Utils.DUST, point, 1, crest ? CROWN_DUST : CROWN_EDGE);
             if (crest) {
-                ParticleCaster.spawn(caster, world, Utils.ENTITY_EFFECT, point, 1, 0.0, 0.0, 0.0, 0.05);
+                ParticleCaster.spawn(caster, world, Utils.ENTITY_EFFECT, point, 1, 0.0, 0.0, 0.0, 0.05, CROWN_COLOR);
             }
         }
     }
@@ -356,7 +356,7 @@ public class CrownOfDawn extends AttackSpell {
         Location at = victim.getLocation().add(0, 1, 0);
         World world = at.getWorld();
         if (world == null) return;
-        ParticleCaster.spawn(caster, world, Utils.ENTITY_EFFECT, at, 60, 0.4, 0.6, 0.4, 0.0);
+        ParticleCaster.spawn(caster, world, Utils.ENTITY_EFFECT, at, 60, 0.4, 0.6, 0.4, 0.0, CROWN_COLOR);
         ParticleCaster.spawn(caster, world, Utils.DUST, at, 40, 0.3, 0.3, 0.3, 0.0, CROWN_DUST);
         world.playSound(at, Sound.ENTITY_WITHER_DEATH, 1.0f, 1.8f);
     }
@@ -392,13 +392,13 @@ public class CrownOfDawn extends AttackSpell {
 
     @Override
     public void onHitBarrier(BarrierSpell barrier, Location location, LivingEntity caster) {
-        ParticleCaster.spawn(caster, location.getWorld(), Utils.ENTITY_EFFECT, location, 30);
+        ParticleCaster.spawn(caster, location.getWorld(), Utils.ENTITY_EFFECT, location, 30, CROWN_COLOR);
         location.getWorld().playSound(location, Sound.BLOCK_BEACON_DEACTIVATE, 0.8f, 0.8f);
     }
 
     @Override
     public void onCountered(Location location) {
-        ParticleCaster.spawn(null, location.getWorld(), Utils.ENTITY_EFFECT, location, 60);
+        ParticleCaster.spawn(null, location.getWorld(), Utils.ENTITY_EFFECT, location, 60, CROWN_COLOR);
         ParticleCaster.spawn(null, location.getWorld(), Utils.DUST, location, 40, 0.3, 0.3, 0.3, 0.0, CROWN_DUST);
         location.getWorld().playSound(location, Sound.BLOCK_BEACON_DEACTIVATE, 1.2f, 0.6f);
     }

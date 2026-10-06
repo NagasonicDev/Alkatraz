@@ -26,6 +26,7 @@ import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
 import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.Utils;
+import org.bukkit.Color;
 import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
@@ -52,6 +53,15 @@ import java.util.*;
  * - Can be countered by other spells via SpellParticleComponent
  */
 public class WindVortex extends AttackSpell implements Listener {
+
+    /**
+     * This spell's colour, handed to every shared VFX builder it calls.
+     *
+     * <p>Seeded with the `AIR` element's core shade so the spell looks unchanged, but
+     * it is now a value you own: edit this one line to re-tint the whole spell, and the
+     * two supporting shades follow automatically.
+     */
+    private static final Color CAST_COLOR = Color.fromRGB(234, 246, 255);
 
     /** The AIR palette, resolved once so a per-tick vortex allocates no colour objects. */
     private static final ElementPalette.Palette PALETTE = ElementPalette.of(Element.AIR);
@@ -354,7 +364,7 @@ public class WindVortex extends AttackSpell implements Listener {
             for (int ring = 0; ring < RING_COUNT; ring++) {
                 double ringProgress = (double) ring / RING_COUNT;
                 Location band = centre.clone().add(0.0, RING_SPAN * radius * ringProgress, 0.0);
-                SpellVfx.orbit(WindVortex.this, caster, band, inner, inner + bandRadius,
+                SpellVfx.orbit(CAST_COLOR, caster, band, inner, inner + bandRadius,
                         RING_POINTS, rotation + ringProgress * Math.PI);
             }
         }

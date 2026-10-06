@@ -20,6 +20,7 @@ import me.nagasonic.alkatraz.spells.vfx.WindUp;
 import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.StatUtils;
 import me.nagasonic.alkatraz.util.Utils;
+import org.bukkit.Color;
 import org.bukkit.*;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.LivingEntity;
@@ -52,6 +53,15 @@ import java.util.UUID;
  * committed to, exactly as before.
  */
 public class Warp extends Spell {
+
+    /**
+     * This spell's colour, handed to every shared VFX builder it calls.
+     *
+     * <p>Seeded with the `NONE` element's core shade so the spell looks unchanged, but
+     * it is now a value you own: edit this one line to re-tint the whole spell, and the
+     * two supporting shades follow automatically.
+     */
+    private static final Color CAST_COLOR = Color.fromRGB(180, 180, 180);
 
     /**
      * Warp is element NONE, so the ritual draws in neutral grey. It used to carry
@@ -297,7 +307,7 @@ public class Warp extends Spell {
                     cancel();
                     return;
                 }
-                SpellVfx.channelGlyphs(spell, caster, caster.getLocation(),
+                SpellVfx.channelGlyphs(CAST_COLOR, caster, caster.getLocation(),
                         CIRCLE_RADIUS, CIRCLE_POINTS, GLYPH_COUNT, frame * 0.18);
                 frame++;
             }

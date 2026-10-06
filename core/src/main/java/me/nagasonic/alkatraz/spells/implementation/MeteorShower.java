@@ -22,6 +22,7 @@ import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.spells.vfx.WindUp;
 import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.Utils;
+import org.bukkit.Color;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -43,6 +44,15 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MeteorShower extends AttackSpell implements Listener {
+
+    /**
+     * This spell's colour, handed to every shared VFX builder it calls.
+     *
+     * <p>Seeded with the `FIRE` element's core shade so the spell looks unchanged, but
+     * it is now a value you own: edit this one line to re-tint the whole spell, and the
+     * two supporting shades follow automatically.
+     */
+    private static final Color CAST_COLOR = Color.fromRGB(255, 140, 0);
     private static final Map<UUID, MeteorData> activeMeteorData = new ConcurrentHashMap<>();
 
     /**
@@ -243,9 +253,9 @@ public class MeteorShower extends AttackSpell implements Listener {
 
         // Outer ring spins with the charge, inner ring against it, so the pair never reads as
         // a static circle.
-        SpellVfx.orbit(this, caster, hub, WIND_UP_RING_INNER_RADIUS, outer,
+        SpellVfx.orbit(CAST_COLOR, caster, hub, WIND_UP_RING_INNER_RADIUS, outer,
                 WIND_UP_RING_BODIES, tick * 0.06);
-        SpellVfx.orbit(this, caster, hub.clone().add(0.0, 0.5, 0.0),
+        SpellVfx.orbit(CAST_COLOR, caster, hub.clone().add(0.0, 0.5, 0.0),
                 WIND_UP_RING_INNER_RADIUS * 0.55, WIND_UP_RING_INNER_RADIUS,
                 WIND_UP_RING_BODIES, -tick * 0.09);
 
@@ -293,7 +303,7 @@ public class MeteorShower extends AttackSpell implements Listener {
         double yaw = Math.toDegrees(Math.atan2(
                 target.getZ() - feet.getZ(), target.getX() - feet.getX()));
 
-        SpellVfx.ground(this, caster, target, length, width,
+        SpellVfx.ground(CAST_COLOR, caster, target, length, width,
                 MARKER_SAMPLES, MARKER_LANES, yaw, progress);
     }
 
