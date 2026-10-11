@@ -1,0 +1,131 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/echo_shard"
+    },
+    "entries": [
+      {
+        "threshold": 1212,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/inferno_pendant"
+        }
+      },
+      {
+        "threshold": 1224,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/abyss_pendant"
+        }
+      },
+      {
+        "threshold": 1236,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/tempest_pendant"
+        }
+      },
+      {
+        "threshold": 1248,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/titan_pendant"
+        }
+      },
+      {
+        "threshold": 1260,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/divine_pendant"
+        }
+      },
+      {
+        "threshold": 1272,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/nether_pendant"
+        }
+      },
+      {
+        "threshold": 1284,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/ethereal_pendant"
+        }
+      },
+      {
+        "threshold": 1288,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/phoenix_pendant"
+        }
+      },
+      {
+        "threshold": 1292,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/leviathan_pendant"
+        }
+      },
+      {
+        "threshold": 1296,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/cyclone_pendant"
+        }
+      },
+      {
+        "threshold": 1300,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/colossus_pendant"
+        }
+      },
+      {
+        "threshold": 1304,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/seraphic_pendant"
+        }
+      },
+      {
+        "threshold": 1308,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/oblivion_pendant"
+        }
+      },
+      {
+        "threshold": 1312,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/primordial_pendant"
+        }
+      },
+      {
+        "threshold": 6109,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_echo_shard"
+        }
+      },
+      {
+        "threshold": 6145,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_echo_shard"
+        }
+      },
+      {
+        "threshold": 6146,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_echo_shard"
+        }
+      }
+    ]
+  }
+}

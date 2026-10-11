@@ -1,0 +1,33 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/ender_eye"
+    },
+    "entries": [
+      {
+        "threshold": 4118,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_dark_tendrils"
+        }
+      },
+      {
+        "threshold": 4119,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_detect"
+        }
+      },
+      {
+        "threshold": 4166,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_warp"
+        }
+      }
+    ]
+  }
+}

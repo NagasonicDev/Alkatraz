@@ -1,0 +1,33 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:block/gray_stained_glass_pane"
+    },
+    "entries": [
+      {
+        "threshold": 4004,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/gui_blank_pane"
+        }
+      },
+      {
+        "threshold": 4005,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/gui_border_pane"
+        }
+      },
+      {
+        "threshold": 4006,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/gui_header_pane"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,138 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/amethyst_shard"
+    },
+    "entries": [
+      {
+        "threshold": 1204,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/ember_pendant"
+        }
+      },
+      {
+        "threshold": 1208,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/blaze_pendant"
+        }
+      },
+      {
+        "threshold": 1216,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/frost_pendant"
+        }
+      },
+      {
+        "threshold": 1220,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/glacier_pendant"
+        }
+      },
+      {
+        "threshold": 1228,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/zephyr_pendant"
+        }
+      },
+      {
+        "threshold": 1232,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/storm_pendant"
+        }
+      },
+      {
+        "threshold": 1240,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/boulder_pendant"
+        }
+      },
+      {
+        "threshold": 1244,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/mountain_pendant"
+        }
+      },
+      {
+        "threshold": 1252,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/radiant_pendant"
+        }
+      },
+      {
+        "threshold": 1256,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/luminous_pendant"
+        }
+      },
+      {
+        "threshold": 1264,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/shadow_pendant"
+        }
+      },
+      {
+        "threshold": 1268,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/void_pendant"
+        }
+      },
+      {
+        "threshold": 1276,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/mystic_pendant"
+        }
+      },
+      {
+        "threshold": 1280,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/arcane_pendant"
+        }
+      },
+      {
+        "threshold": 4139,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_sunfire_barrage"
+        }
+      },
+      {
+        "threshold": 5001,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/magic_stone"
+        }
+      },
+      {
+        "threshold": 6101,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_amethyst_shard"
+        }
+      },
+      {
+        "threshold": 6134,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_amethyst_shard"
+        }
+      }
+    ]
+  }
+}

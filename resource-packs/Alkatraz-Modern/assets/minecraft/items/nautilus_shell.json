@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/nautilus_shell"
+    },
+    "entries": [
+      {
+        "threshold": 4144,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_tide_of_the_deep"
+        }
+      },
+      {
+        "threshold": 6164,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_nautilus_shell"
+        }
+      }
+    ]
+  }
+}

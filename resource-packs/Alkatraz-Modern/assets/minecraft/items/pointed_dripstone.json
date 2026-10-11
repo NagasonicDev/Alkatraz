@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:block/pointed_dripstone"
+    },
+    "entries": [
+      {
+        "threshold": 4122,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_earth_spike"
+        }
+      },
+      {
+        "threshold": 6168,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_pointed_dripstone"
+        }
+      }
+    ]
+  }
+}

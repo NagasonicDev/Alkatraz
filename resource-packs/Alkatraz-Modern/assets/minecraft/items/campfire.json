@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:block/campfire"
+    },
+    "entries": [
+      {
+        "threshold": 4138,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_inferno_pilgrimage"
+        }
+      },
+      {
+        "threshold": 6150,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_campfire"
+        }
+      }
+    ]
+  }
+}

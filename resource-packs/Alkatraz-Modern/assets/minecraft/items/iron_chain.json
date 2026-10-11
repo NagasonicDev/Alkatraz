@@ -1,0 +1,61 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/iron_chain"
+    },
+    "entries": [
+      {
+        "threshold": 1206,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/blaze_necklace"
+        }
+      },
+      {
+        "threshold": 1218,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/glacier_necklace"
+        }
+      },
+      {
+        "threshold": 1230,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/storm_necklace"
+        }
+      },
+      {
+        "threshold": 1242,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/mountain_necklace"
+        }
+      },
+      {
+        "threshold": 1254,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/luminous_necklace"
+        }
+      },
+      {
+        "threshold": 1266,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/void_necklace"
+        }
+      },
+      {
+        "threshold": 1278,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/arcane_necklace"
+        }
+      }
+    ]
+  }
+}

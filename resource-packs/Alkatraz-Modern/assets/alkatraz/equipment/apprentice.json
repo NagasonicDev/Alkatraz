@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "alkatraz:apprentice"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "alkatraz:apprentice"
+      }
+    ]
+  }
+}

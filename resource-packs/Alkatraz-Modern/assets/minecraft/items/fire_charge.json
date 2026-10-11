@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/fire_charge"
+    },
+    "entries": [
+      {
+        "threshold": 4102,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_fireball"
+        }
+      },
+      {
+        "threshold": 6121,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_fire_charge"
+        }
+      }
+    ]
+  }
+}

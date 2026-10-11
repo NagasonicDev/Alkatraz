@@ -1,0 +1,40 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/leather_leggings"
+    },
+    "entries": [
+      {
+        "threshold": 2799,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/apprentice_leggings"
+        }
+      },
+      {
+        "threshold": 2803,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/scholar_leggings"
+        }
+      },
+      {
+        "threshold": 2807,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/enchanter_leggings"
+        }
+      },
+      {
+        "threshold": 2811,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/archmage_leggings"
+        }
+      }
+    ]
+  }
+}

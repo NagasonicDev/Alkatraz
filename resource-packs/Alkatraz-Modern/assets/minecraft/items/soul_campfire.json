@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:block/soul_campfire"
+    },
+    "entries": [
+      {
+        "threshold": 4140,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_inferno_rite"
+        }
+      },
+      {
+        "threshold": 6123,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_soul_campfire"
+        }
+      }
+    ]
+  }
+}

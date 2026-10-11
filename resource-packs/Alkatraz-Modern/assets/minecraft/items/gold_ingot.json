@@ -1,0 +1,215 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/gold_ingot"
+    },
+    "entries": [
+      {
+        "threshold": 1210,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/inferno_necklace"
+        }
+      },
+      {
+        "threshold": 1211,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/inferno_bracelet"
+        }
+      },
+      {
+        "threshold": 1222,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/abyss_necklace"
+        }
+      },
+      {
+        "threshold": 1223,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/abyss_bracelet"
+        }
+      },
+      {
+        "threshold": 1234,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/tempest_necklace"
+        }
+      },
+      {
+        "threshold": 1235,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/tempest_bracelet"
+        }
+      },
+      {
+        "threshold": 1246,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/titan_necklace"
+        }
+      },
+      {
+        "threshold": 1247,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/titan_bracelet"
+        }
+      },
+      {
+        "threshold": 1258,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/divine_necklace"
+        }
+      },
+      {
+        "threshold": 1259,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/divine_bracelet"
+        }
+      },
+      {
+        "threshold": 1270,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/nether_necklace"
+        }
+      },
+      {
+        "threshold": 1271,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/nether_bracelet"
+        }
+      },
+      {
+        "threshold": 1282,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/ethereal_necklace"
+        }
+      },
+      {
+        "threshold": 1283,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/ethereal_bracelet"
+        }
+      },
+      {
+        "threshold": 1286,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/phoenix_necklace"
+        }
+      },
+      {
+        "threshold": 1287,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/phoenix_bracelet"
+        }
+      },
+      {
+        "threshold": 1290,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/leviathan_necklace"
+        }
+      },
+      {
+        "threshold": 1291,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/leviathan_bracelet"
+        }
+      },
+      {
+        "threshold": 1294,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/cyclone_necklace"
+        }
+      },
+      {
+        "threshold": 1295,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/cyclone_bracelet"
+        }
+      },
+      {
+        "threshold": 1298,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/colossus_necklace"
+        }
+      },
+      {
+        "threshold": 1299,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/colossus_bracelet"
+        }
+      },
+      {
+        "threshold": 1302,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/seraphic_necklace"
+        }
+      },
+      {
+        "threshold": 1303,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/seraphic_bracelet"
+        }
+      },
+      {
+        "threshold": 1306,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/oblivion_necklace"
+        }
+      },
+      {
+        "threshold": 1307,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/oblivion_bracelet"
+        }
+      },
+      {
+        "threshold": 1310,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/primordial_necklace"
+        }
+      },
+      {
+        "threshold": 1311,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/primordial_bracelet"
+        }
+      },
+      {
+        "threshold": 4103,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_heal"
+        }
+      }
+    ]
+  }
+}

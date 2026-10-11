@@ -1,0 +1,117 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/iron_nugget"
+    },
+    "entries": [
+      {
+        "threshold": 1203,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/ember_bracelet"
+        }
+      },
+      {
+        "threshold": 1207,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/blaze_bracelet"
+        }
+      },
+      {
+        "threshold": 1215,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/frost_bracelet"
+        }
+      },
+      {
+        "threshold": 1219,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/glacier_bracelet"
+        }
+      },
+      {
+        "threshold": 1227,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/zephyr_bracelet"
+        }
+      },
+      {
+        "threshold": 1231,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/storm_bracelet"
+        }
+      },
+      {
+        "threshold": 1239,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/boulder_bracelet"
+        }
+      },
+      {
+        "threshold": 1243,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/mountain_bracelet"
+        }
+      },
+      {
+        "threshold": 1251,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/radiant_bracelet"
+        }
+      },
+      {
+        "threshold": 1255,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/luminous_bracelet"
+        }
+      },
+      {
+        "threshold": 1263,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/shadow_bracelet"
+        }
+      },
+      {
+        "threshold": 1267,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/void_bracelet"
+        }
+      },
+      {
+        "threshold": 1275,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/mystic_bracelet"
+        }
+      },
+      {
+        "threshold": 1279,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/arcane_bracelet"
+        }
+      },
+      {
+        "threshold": 4101,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_magic_missile"
+        }
+      }
+    ]
+  }
+}

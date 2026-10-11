@@ -1,0 +1,19 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/elytra"
+    },
+    "entries": [
+      {
+        "threshold": 4153,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_skywrath"
+        }
+      }
+    ]
+  }
+}

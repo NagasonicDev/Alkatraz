@@ -1,0 +1,33 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/prismarine_shard"
+    },
+    "entries": [
+      {
+        "threshold": 4142,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_everdrain"
+        }
+      },
+      {
+        "threshold": 4156,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_choir_of_light"
+        }
+      },
+      {
+        "threshold": 6126,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_prismarine_shard"
+        }
+      }
+    ]
+  }
+}

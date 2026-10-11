@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "alkatraz:item/spell_tide_of_the_deep"
+  }
+}

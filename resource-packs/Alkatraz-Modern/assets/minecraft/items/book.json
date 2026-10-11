@@ -1,0 +1,82 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/book"
+    },
+    "entries": [
+      {
+        "threshold": 5002,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/leather_grimoire"
+        }
+      },
+      {
+        "threshold": 5003,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/runic_grimoire"
+        }
+      },
+      {
+        "threshold": 5004,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/blaze_grimoire"
+        }
+      },
+      {
+        "threshold": 5005,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/glacier_grimoire"
+        }
+      },
+      {
+        "threshold": 5006,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/mountain_grimoire"
+        }
+      },
+      {
+        "threshold": 5007,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/storm_grimoire"
+        }
+      },
+      {
+        "threshold": 5008,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/luminous_grimoire"
+        }
+      },
+      {
+        "threshold": 5009,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/void_grimoire"
+        }
+      },
+      {
+        "threshold": 6113,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_book"
+        }
+      },
+      {
+        "threshold": 6163,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_book"
+        }
+      }
+    ]
+  }
+}

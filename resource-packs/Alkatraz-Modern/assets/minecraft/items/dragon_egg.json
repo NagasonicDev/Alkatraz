@@ -1,0 +1,19 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:block/dragon_egg"
+    },
+    "entries": [
+      {
+        "threshold": 6119,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_dragon_egg"
+        }
+      }
+    ]
+  }
+}

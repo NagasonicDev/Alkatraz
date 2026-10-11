@@ -1,0 +1,54 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/shield"
+    },
+    "entries": [
+      {
+        "threshold": 4132,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_wind_barrier"
+        }
+      },
+      {
+        "threshold": 6107,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_shield"
+        }
+      },
+      {
+        "threshold": 6143,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_shield"
+        }
+      },
+      {
+        "threshold": 6154,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_shield"
+        }
+      },
+      {
+        "threshold": 6167,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_shield"
+        }
+      },
+      {
+        "threshold": 6177,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_shield"
+        }
+      }
+    ]
+  }
+}

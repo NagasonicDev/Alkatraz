@@ -1,0 +1,40 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/glowstone_dust"
+    },
+    "entries": [
+      {
+        "threshold": 4108,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_radiance"
+        }
+      },
+      {
+        "threshold": 4111,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_light_buff"
+        }
+      },
+      {
+        "threshold": 4154,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_light_bolt"
+        }
+      },
+      {
+        "threshold": 6141,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_glowstone_dust"
+        }
+      }
+    ]
+  }
+}

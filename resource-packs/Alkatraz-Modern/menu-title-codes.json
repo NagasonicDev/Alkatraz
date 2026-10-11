@@ -1,0 +1,353 @@
+[
+  {
+    "key": "spells",
+    "code": "\\uF808\\uF001",
+    "codepoint": "U+F001",
+    "slots": 54,
+    "glyph_size": "176x137",
+    "title": "SPELLS",
+    "menu": "SpellsMenu"
+  },
+  {
+    "key": "equipment",
+    "code": "\\uF808\\uF002",
+    "codepoint": "U+F002",
+    "slots": 45,
+    "glyph_size": "176x119",
+    "title": "EQUIPMENT",
+    "menu": "EquipmentMenu"
+  },
+  {
+    "key": "research",
+    "code": "\\uF808\\uF003",
+    "codepoint": "U+F003",
+    "slots": 54,
+    "glyph_size": "176x137",
+    "title": "RESEARCH LIBRARY",
+    "menu": "ResearchGraphMenu"
+  },
+  {
+    "key": "recipe_category",
+    "code": "\\uF808\\uF004",
+    "codepoint": "U+F004",
+    "slots": 45,
+    "glyph_size": "176x119",
+    "title": "RECIPE MANAGER",
+    "menu": "RecipeCategoryMenu"
+  },
+  {
+    "key": "stats",
+    "code": "\\uF808\\uF005",
+    "codepoint": "U+F005",
+    "slots": 54,
+    "glyph_size": "176x137",
+    "title": "STATS",
+    "menu": "StatsMenu (title was '<player>'s Stats')"
+  },
+  {
+    "key": "grimoire",
+    "code": "\\uF808\\uF006",
+    "codepoint": "U+F006",
+    "slots": 54,
+    "glyph_size": "176x137",
+    "title": "GRIMOIRE",
+    "menu": "GrimoirePageMenu"
+  },
+  {
+    "key": "arcane_choice",
+    "code": "\\uF808\\uF010",
+    "codepoint": "U+F010",
+    "slots": 27,
+    "glyph_size": "176x83",
+    "title": "ARCANE TABLE",
+    "menu": "EnchantingTableChoiceMenu (2 choices)"
+  },
+  {
+    "key": "arcane_hub",
+    "code": "\\uF808\\uF011",
+    "codepoint": "U+F011",
+    "slots": 27,
+    "glyph_size": "176x83",
+    "title": "ARCANE TABLE",
+    "menu": "WandTableSelectionMenu (3 choices)"
+  },
+  {
+    "key": "progression",
+    "code": "\\uF808\\uF012",
+    "codepoint": "U+F012",
+    "slots": 27,
+    "glyph_size": "176x83",
+    "title": "PROGRESSION",
+    "menu": "ProgressionMenu (circle track I-IX)"
+  },
+  {
+    "key": "circle_confirm",
+    "code": "\\uF808\\uF013",
+    "codepoint": "U+F013",
+    "slots": 27,
+    "glyph_size": "176x83",
+    "title": "CONFIRM CIRCLE UP",
+    "menu": "CircleUpConfirmationMenu"
+  },
+  {
+    "key": "warp_points",
+    "code": "\\uF808\\uF014",
+    "codepoint": "U+F014",
+    "slots": 27,
+    "glyph_size": "176x83",
+    "title": "WARP POINTS",
+    "menu": "WarpPointsMenu"
+  },
+  {
+    "key": "warp_destination",
+    "code": "\\uF808\\uF015",
+    "codepoint": "U+F015",
+    "slots": 27,
+    "glyph_size": "176x83",
+    "title": "WARP DESTINATION",
+    "menu": "WarpDestinationMenu (title was \"Warp - Destination\")"
+  },
+  {
+    "key": "engraving_table",
+    "code": "\\uF808\\uF016",
+    "codepoint": "U+F016",
+    "slots": 45,
+    "glyph_size": "176x119",
+    "title": "ENGRAVING TABLE",
+    "menu": "EngravingTableMenu"
+  },
+  {
+    "key": "confirm_engraving",
+    "code": "\\uF808\\uF017",
+    "codepoint": "U+F017",
+    "slots": 45,
+    "glyph_size": "176x119",
+    "title": "CONFIRM ENGRAVING",
+    "menu": "ConfirmEngravingMenu"
+  },
+  {
+    "key": "recipe_create",
+    "code": "\\uF808\\uF018",
+    "codepoint": "U+F018",
+    "slots": 45,
+    "glyph_size": "176x119",
+    "title": "CREATE RECIPE",
+    "menu": "RecipeCreateMenu"
+  },
+  {
+    "key": "recipe_delete",
+    "code": "\\uF808\\uF019",
+    "codepoint": "U+F019",
+    "slots": 45,
+    "glyph_size": "176x119",
+    "title": "DELETE RECIPE?",
+    "menu": "RecipeDeleteConfirmMenu"
+  },
+  {
+    "key": "recipe_shape",
+    "code": "\\uF808\\uF01A",
+    "codepoint": "U+F01A",
+    "slots": 45,
+    "glyph_size": "176x119",
+    "title": "RECIPE SHAPE",
+    "menu": "RecipeShapeSubMenu"
+  },
+  {
+    "key": "recipe_shapeless",
+    "code": "\\uF808\\uF01B",
+    "codepoint": "U+F01B",
+    "slots": 45,
+    "glyph_size": "176x119",
+    "title": "INGREDIENTS",
+    "menu": "RecipeShapelessIngredientsSubMenu"
+  },
+  {
+    "key": "recipe_requirements",
+    "code": "\\uF808\\uF01C",
+    "codepoint": "U+F01C",
+    "slots": 45,
+    "glyph_size": "176x119",
+    "title": "REQUIREMENTS",
+    "menu": "RecipeRequirementsSubMenu"
+  },
+  {
+    "key": "recipe_permissions",
+    "code": "\\uF808\\uF01D",
+    "codepoint": "U+F01D",
+    "slots": 45,
+    "glyph_size": "176x119",
+    "title": "PERMISSIONS",
+    "menu": "RecipePermissionsSubMenu"
+  },
+  {
+    "key": "item_detail",
+    "code": "\\uF808\\uF01E",
+    "codepoint": "U+F01E",
+    "slots": 45,
+    "glyph_size": "176x119",
+    "title": "EDIT ITEM",
+    "menu": "ItemDetailMenu (title was \"Edit: <defKey>\")"
+  },
+  {
+    "key": "lore",
+    "code": "\\uF808\\uF01F",
+    "codepoint": "U+F01F",
+    "slots": 45,
+    "glyph_size": "176x119",
+    "title": "EDIT LORE",
+    "menu": "LoreSubMenu"
+  },
+  {
+    "key": "components",
+    "code": "\\uF808\\uF020",
+    "codepoint": "U+F020",
+    "slots": 45,
+    "glyph_size": "176x119",
+    "title": "EDIT COMPONENTS",
+    "menu": "ComponentsSubMenu"
+  },
+  {
+    "key": "attributes",
+    "code": "\\uF808\\uF021",
+    "codepoint": "U+F021",
+    "slots": 45,
+    "glyph_size": "176x119",
+    "title": "EDIT ATTRIBUTES",
+    "menu": "AttributesSubMenu (title was \"Edit: attributes\")"
+  },
+  {
+    "key": "recipe_sub",
+    "code": "\\uF808\\uF022",
+    "codepoint": "U+F022",
+    "slots": 45,
+    "glyph_size": "176x119",
+    "title": "EDIT RECIPE",
+    "menu": "RecipeSubMenu (editor)"
+  },
+  {
+    "key": "requirements_editor",
+    "code": "\\uF808\\uF023",
+    "codepoint": "U+F023",
+    "slots": 45,
+    "glyph_size": "176x119",
+    "title": "EDIT REQUIREMENTS",
+    "menu": "RequirementsSubMenu (editor)"
+  },
+  {
+    "key": "hotbar_config",
+    "code": "\\uF808\\uF024",
+    "codepoint": "U+F024",
+    "slots": 54,
+    "glyph_size": "176x137",
+    "title": "CONFIGURE SPELL HOTBAR",
+    "menu": "HotbarSpellSelectionMenu"
+  },
+  {
+    "key": "spell_options",
+    "code": "\\uF808\\uF025",
+    "codepoint": "U+F025",
+    "slots": 54,
+    "glyph_size": "176x137",
+    "title": "SPELL OPTIONS",
+    "menu": "SpellOptionsMenu (title was \"<spell> - Options\")"
+  },
+  {
+    "key": "spell_option_values",
+    "code": "\\uF808\\uF026",
+    "codepoint": "U+F026",
+    "slots": 54,
+    "glyph_size": "176x137",
+    "title": "SELECT VALUE",
+    "menu": "SpellOptionValuesMenu (title was \"<option> - Select Value\")"
+  },
+  {
+    "key": "grimoire_select",
+    "code": "\\uF808\\uF027",
+    "codepoint": "U+F027",
+    "slots": 54,
+    "glyph_size": "176x137",
+    "title": "SELECT A SPELL",
+    "menu": "GrimoireSpellSelectMenu"
+  },
+  {
+    "key": "item_editor",
+    "code": "\\uF808\\uF028",
+    "codepoint": "U+F028",
+    "slots": 54,
+    "glyph_size": "176x137",
+    "title": "ITEM EDITOR",
+    "menu": "ItemEditorMenu"
+  },
+  {
+    "key": "pooled_3",
+    "code": "\\uF808\\uF029",
+    "codepoint": "U+F029",
+    "slots": 54,
+    "glyph_size": "176x137",
+    "title": "CONFIGURE SLOTS",
+    "menu": "PooledSlotSelectionMenu, 3 header slots (buff / debuff)"
+  },
+  {
+    "key": "pooled_2",
+    "code": "\\uF808\\uF02A",
+    "codepoint": "U+F02A",
+    "slots": 54,
+    "glyph_size": "176x137",
+    "title": "CONFIGURE SLOTS",
+    "menu": "PooledSlotSelectionMenu, 2 header slots (apotheosis)"
+  },
+  {
+    "key": "trigger_select",
+    "code": "\\uF808\\uF02B",
+    "codepoint": "U+F02B",
+    "slots": 54,
+    "glyph_size": "176x137",
+    "title": "SELECT TRIGGER TYPE",
+    "menu": "TriggerSelectionMenu"
+  },
+  {
+    "key": "research_entry",
+    "code": "\\uF808\\uF02C",
+    "codepoint": "U+F02C",
+    "slots": 54,
+    "glyph_size": "176x137",
+    "title": "RESEARCH ENTRY",
+    "menu": "ResearchEntryMenu (title was \"Research: <node>\")"
+  },
+  {
+    "key": "disguise",
+    "code": "\\uF808\\uF02D",
+    "codepoint": "U+F02D",
+    "slots": 54,
+    "glyph_size": "176x137",
+    "title": "DISGUISE TARGET",
+    "menu": "Disguise spell GUI (title was \"Disguise Target\")"
+  },
+  {
+    "key": "recipe_list",
+    "code": "\\uF808\\uF02E",
+    "codepoint": "U+F02E",
+    "slots": 54,
+    "glyph_size": "176x137",
+    "title": "RECIPE MANAGER",
+    "menu": "RecipeListMenu"
+  },
+  {
+    "key": "recipe_detail",
+    "code": "\\uF808\\uF02F",
+    "codepoint": "U+F02F",
+    "slots": 54,
+    "glyph_size": "176x137",
+    "title": "RECIPE DETAILS",
+    "menu": "RecipeDetailMenu"
+  },
+  {
+    "key": "recipe_edit",
+    "code": "\\uF808\\uF030",
+    "codepoint": "U+F030",
+    "slots": 54,
+    "glyph_size": "176x137",
+    "title": "EDIT RECIPE",
+    "menu": "RecipeEditMenu"
+  }
+]

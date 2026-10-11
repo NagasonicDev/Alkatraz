@@ -1,0 +1,54 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/purple_stained_glass_pane"
+    },
+    "entries": [
+      {
+        "threshold": 6001,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/connector_straight_h_completed"
+        }
+      },
+      {
+        "threshold": 6006,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/connector_straight_v_completed"
+        }
+      },
+      {
+        "threshold": 6011,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/connector_corner_ne_completed"
+        }
+      },
+      {
+        "threshold": 6016,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/connector_corner_se_completed"
+        }
+      },
+      {
+        "threshold": 6021,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/connector_corner_sw_completed"
+        }
+      },
+      {
+        "threshold": 6026,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/connector_corner_nw_completed"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/crying_obsidian"
+    },
+    "entries": [
+      {
+        "threshold": 6131,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_crying_obsidian"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:block/conduit"
+    },
+    "entries": [
+      {
+        "threshold": 4143,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_thousand_waves"
+        }
+      },
+      {
+        "threshold": 6129,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_conduit"
+        }
+      }
+    ]
+  }
+}

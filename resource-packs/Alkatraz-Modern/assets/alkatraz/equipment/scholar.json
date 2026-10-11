@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "alkatraz:scholar"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "alkatraz:scholar"
+      }
+    ]
+  }
+}

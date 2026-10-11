@@ -1,0 +1,400 @@
+{
+  "providers": [
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_1001.png",
+      "height": 16,
+      "ascent": 12,
+      "chars": [
+        "ခ"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_1002.png",
+      "height": 16,
+      "ascent": 12,
+      "chars": [
+        "ဂ"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_1003.png",
+      "height": 16,
+      "ascent": 12,
+      "chars": [
+        "ဃ"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_1004.png",
+      "height": 16,
+      "ascent": 12,
+      "chars": [
+        "င"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_f001.png",
+      "height": 137,
+      "ascent": 13,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_f002.png",
+      "height": 119,
+      "ascent": 13,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_f003.png",
+      "height": 137,
+      "ascent": 13,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_f004.png",
+      "height": 119,
+      "ascent": 13,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_f005.png",
+      "height": 137,
+      "ascent": 13,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_f006.png",
+      "height": 137,
+      "ascent": 13,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_f808.png",
+      "height": -10,
+      "ascent": -32768,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_f010.png",
+      "height": 83,
+      "ascent": 13,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_f011.png",
+      "height": 83,
+      "ascent": 13,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_f012.png",
+      "height": 83,
+      "ascent": 13,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_f013.png",
+      "height": 83,
+      "ascent": 13,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_f014.png",
+      "height": 83,
+      "ascent": 13,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_f015.png",
+      "height": 83,
+      "ascent": 13,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_f016.png",
+      "height": 119,
+      "ascent": 13,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_f017.png",
+      "height": 119,
+      "ascent": 13,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_f018.png",
+      "height": 119,
+      "ascent": 13,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_f019.png",
+      "height": 119,
+      "ascent": 13,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_f01a.png",
+      "height": 119,
+      "ascent": 13,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_f01b.png",
+      "height": 119,
+      "ascent": 13,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_f01c.png",
+      "height": 119,
+      "ascent": 13,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_f01d.png",
+      "height": 119,
+      "ascent": 13,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_f01e.png",
+      "height": 119,
+      "ascent": 13,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_f01f.png",
+      "height": 119,
+      "ascent": 13,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_f020.png",
+      "height": 119,
+      "ascent": 13,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_f021.png",
+      "height": 119,
+      "ascent": 13,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_f022.png",
+      "height": 119,
+      "ascent": 13,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_f023.png",
+      "height": 119,
+      "ascent": 13,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_f024.png",
+      "height": 137,
+      "ascent": 13,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_f025.png",
+      "height": 137,
+      "ascent": 13,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_f026.png",
+      "height": 137,
+      "ascent": 13,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_f027.png",
+      "height": 137,
+      "ascent": 13,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_f028.png",
+      "height": 137,
+      "ascent": 13,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_f029.png",
+      "height": 137,
+      "ascent": 13,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_f02a.png",
+      "height": 137,
+      "ascent": 13,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_f02b.png",
+      "height": 137,
+      "ascent": 13,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_f02c.png",
+      "height": 137,
+      "ascent": 13,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_f02d.png",
+      "height": 137,
+      "ascent": 13,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_f02e.png",
+      "height": 137,
+      "ascent": 13,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_f02f.png",
+      "height": 137,
+      "ascent": 13,
+      "chars": [
+        ""
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "alkatraz:font/glyph_f030.png",
+      "height": 137,
+      "ascent": 13,
+      "chars": [
+        ""
+      ]
+    }
+  ]
+}

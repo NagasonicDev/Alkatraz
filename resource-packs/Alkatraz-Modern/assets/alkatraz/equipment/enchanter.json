@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "alkatraz:enchanter"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "alkatraz:enchanter"
+      }
+    ]
+  }
+}

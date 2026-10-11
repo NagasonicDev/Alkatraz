@@ -1,0 +1,19 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/sculk_sensor"
+    },
+    "entries": [
+      {
+        "threshold": 6148,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_sculk_sensor"
+        }
+      }
+    ]
+  }
+}

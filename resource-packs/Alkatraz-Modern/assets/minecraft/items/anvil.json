@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:block/anvil"
+    },
+    "entries": [
+      {
+        "threshold": 4145,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_tectonic_strike"
+        }
+      },
+      {
+        "threshold": 6132,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_anvil"
+        }
+      }
+    ]
+  }
+}

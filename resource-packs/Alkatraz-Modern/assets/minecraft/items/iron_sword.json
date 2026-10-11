@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/iron_sword"
+    },
+    "entries": [
+      {
+        "threshold": 6110,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_iron_sword"
+        }
+      },
+      {
+        "threshold": 6176,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_iron_sword"
+        }
+      }
+    ]
+  }
+}

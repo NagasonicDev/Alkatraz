@@ -1,0 +1,19 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/gunpowder"
+    },
+    "entries": [
+      {
+        "threshold": 4113,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_stealth"
+        }
+      }
+    ]
+  }
+}

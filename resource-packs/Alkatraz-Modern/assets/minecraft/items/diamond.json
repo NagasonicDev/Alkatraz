@@ -1,0 +1,124 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/diamond"
+    },
+    "entries": [
+      {
+        "threshold": 1209,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/inferno_ring"
+        }
+      },
+      {
+        "threshold": 1221,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/abyss_ring"
+        }
+      },
+      {
+        "threshold": 1233,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/tempest_ring"
+        }
+      },
+      {
+        "threshold": 1245,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/titan_ring"
+        }
+      },
+      {
+        "threshold": 1257,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/divine_ring"
+        }
+      },
+      {
+        "threshold": 1269,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/nether_ring"
+        }
+      },
+      {
+        "threshold": 1281,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/ethereal_ring"
+        }
+      },
+      {
+        "threshold": 1285,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/phoenix_ring"
+        }
+      },
+      {
+        "threshold": 1289,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/leviathan_ring"
+        }
+      },
+      {
+        "threshold": 1293,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/cyclone_ring"
+        }
+      },
+      {
+        "threshold": 1297,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/colossus_ring"
+        }
+      },
+      {
+        "threshold": 1301,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/seraphic_ring"
+        }
+      },
+      {
+        "threshold": 1305,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/oblivion_ring"
+        }
+      },
+      {
+        "threshold": 1309,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/primordial_ring"
+        }
+      },
+      {
+        "threshold": 6114,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_diamond"
+        }
+      },
+      {
+        "threshold": 6160,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_diamond"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/leather_boots"
+    },
+    "entries": [
+      {
+        "threshold": 2800,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/apprentice_boots"
+        }
+      },
+      {
+        "threshold": 2804,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/scholar_boots"
+        }
+      },
+      {
+        "threshold": 2808,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/enchanter_boots"
+        }
+      },
+      {
+        "threshold": 2812,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/archmage_boots"
+        }
+      }
+    ]
+  }
+}

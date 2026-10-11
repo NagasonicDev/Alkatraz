@@ -1,0 +1,61 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/feather"
+    },
+    "entries": [
+      {
+        "threshold": 4104,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_tornado"
+        }
+      },
+      {
+        "threshold": 4114,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_air_blades"
+        }
+      },
+      {
+        "threshold": 4115,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_air_burst"
+        }
+      },
+      {
+        "threshold": 4133,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_wind_vortex"
+        }
+      },
+      {
+        "threshold": 4151,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_cyclone_nest"
+        }
+      },
+      {
+        "threshold": 6135,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_feather"
+        }
+      },
+      {
+        "threshold": 6139,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_feather"
+        }
+      }
+    ]
+  }
+}

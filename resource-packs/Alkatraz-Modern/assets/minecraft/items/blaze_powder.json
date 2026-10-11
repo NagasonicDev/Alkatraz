@@ -1,0 +1,40 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/blaze_powder"
+    },
+    "entries": [
+      {
+        "threshold": 4135,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_fire_wall"
+        }
+      },
+      {
+        "threshold": 4152,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_stormcaller"
+        }
+      },
+      {
+        "threshold": 4155,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_radiant_brand"
+        }
+      },
+      {
+        "threshold": 6120,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_blaze_powder"
+        }
+      }
+    ]
+  }
+}

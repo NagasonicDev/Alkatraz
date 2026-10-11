@@ -1,0 +1,19 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/lapis_lazuli"
+    },
+    "entries": [
+      {
+        "threshold": 6102,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_lapis_lazuli"
+        }
+      }
+    ]
+  }
+}

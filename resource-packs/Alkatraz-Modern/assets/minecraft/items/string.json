@@ -1,0 +1,61 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/string"
+    },
+    "entries": [
+      {
+        "threshold": 1202,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/ember_necklace"
+        }
+      },
+      {
+        "threshold": 1214,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/frost_necklace"
+        }
+      },
+      {
+        "threshold": 1226,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/zephyr_necklace"
+        }
+      },
+      {
+        "threshold": 1238,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/boulder_necklace"
+        }
+      },
+      {
+        "threshold": 1250,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/radiant_necklace"
+        }
+      },
+      {
+        "threshold": 1262,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/shadow_necklace"
+        }
+      },
+      {
+        "threshold": 1274,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/mystic_necklace"
+        }
+      }
+    ]
+  }
+}

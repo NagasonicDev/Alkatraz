@@ -1,0 +1,82 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/end_rod"
+    },
+    "entries": [
+      {
+        "threshold": 1003,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/runic_wand"
+        }
+      },
+      {
+        "threshold": 1004,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/blaze_wand"
+        }
+      },
+      {
+        "threshold": 1005,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/glacier_wand"
+        }
+      },
+      {
+        "threshold": 1006,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/mountain_wand"
+        }
+      },
+      {
+        "threshold": 1007,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/storm_wand"
+        }
+      },
+      {
+        "threshold": 1008,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/luminous_wand"
+        }
+      },
+      {
+        "threshold": 1009,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/void_wand"
+        }
+      },
+      {
+        "threshold": 1010,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/astral_wand"
+        }
+      },
+      {
+        "threshold": 6117,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_end_rod"
+        }
+      },
+      {
+        "threshold": 6193,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_end_rod"
+        }
+      }
+    ]
+  }
+}

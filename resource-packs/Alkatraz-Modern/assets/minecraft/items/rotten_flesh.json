@@ -1,0 +1,19 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/rotten_flesh"
+    },
+    "entries": [
+      {
+        "threshold": 4126,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_summon_zombies"
+        }
+      }
+    ]
+  }
+}

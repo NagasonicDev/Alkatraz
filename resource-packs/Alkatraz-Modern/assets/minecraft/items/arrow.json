@@ -1,0 +1,82 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/arrow"
+    },
+    "entries": [
+      {
+        "threshold": 4001,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/gui_next_page"
+        }
+      },
+      {
+        "threshold": 4002,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/gui_prev_page"
+        }
+      },
+      {
+        "threshold": 6201,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_pan_arrow_up_left"
+        }
+      },
+      {
+        "threshold": 6202,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_pan_arrow_up"
+        }
+      },
+      {
+        "threshold": 6203,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_pan_arrow_up_right"
+        }
+      },
+      {
+        "threshold": 6204,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_pan_arrow_left"
+        }
+      },
+      {
+        "threshold": 6205,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_pan_arrow_right"
+        }
+      },
+      {
+        "threshold": 6206,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_pan_arrow_down_left"
+        }
+      },
+      {
+        "threshold": 6207,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_pan_arrow_down"
+        }
+      },
+      {
+        "threshold": 6208,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_pan_arrow_down_right"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,117 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/gold_nugget"
+    },
+    "entries": [
+      {
+        "threshold": 1201,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/ember_ring"
+        }
+      },
+      {
+        "threshold": 1205,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/blaze_ring"
+        }
+      },
+      {
+        "threshold": 1213,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/frost_ring"
+        }
+      },
+      {
+        "threshold": 1217,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/glacier_ring"
+        }
+      },
+      {
+        "threshold": 1225,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/zephyr_ring"
+        }
+      },
+      {
+        "threshold": 1229,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/storm_ring"
+        }
+      },
+      {
+        "threshold": 1237,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/boulder_ring"
+        }
+      },
+      {
+        "threshold": 1241,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/mountain_ring"
+        }
+      },
+      {
+        "threshold": 1249,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/radiant_ring"
+        }
+      },
+      {
+        "threshold": 1253,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/luminous_ring"
+        }
+      },
+      {
+        "threshold": 1261,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/shadow_ring"
+        }
+      },
+      {
+        "threshold": 1265,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/void_ring"
+        }
+      },
+      {
+        "threshold": 1273,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/mystic_ring"
+        }
+      },
+      {
+        "threshold": 1277,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/arcane_ring"
+        }
+      },
+      {
+        "threshold": 4136,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_lesser_heal"
+        }
+      }
+    ]
+  }
+}

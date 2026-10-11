@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/wither_skeleton_skull"
+    },
+    "entries": [
+      {
+        "threshold": 6147,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_wither_skeleton_skull"
+        }
+      },
+      {
+        "threshold": 6195,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_wither_skeleton_skull"
+        }
+      }
+    ]
+  }
+}

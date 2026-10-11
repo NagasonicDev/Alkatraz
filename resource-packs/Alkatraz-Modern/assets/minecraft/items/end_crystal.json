@@ -1,0 +1,19 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/end_crystal"
+    },
+    "entries": [
+      {
+        "threshold": 6115,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_end_crystal"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/rabbit_foot"
+    },
+    "entries": [
+      {
+        "threshold": 4127,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_swift"
+        }
+      },
+      {
+        "threshold": 6174,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_rabbit_foot"
+        }
+      }
+    ]
+  }
+}

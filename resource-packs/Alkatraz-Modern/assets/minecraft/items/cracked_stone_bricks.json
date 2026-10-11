@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:block/cracked_stone_bricks"
+    },
+    "entries": [
+      {
+        "threshold": 4128,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_tremor"
+        }
+      },
+      {
+        "threshold": 4146,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_fault_line"
+        }
+      }
+    ]
+  }
+}

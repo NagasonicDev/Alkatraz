@@ -1,0 +1,19 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/flint_and_steel"
+    },
+    "entries": [
+      {
+        "threshold": 6124,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_flint_and_steel"
+        }
+      }
+    ]
+  }
+}

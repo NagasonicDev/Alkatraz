@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:block/sculk_catalyst"
+    },
+    "entries": [
+      {
+        "threshold": 4161,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_oblivion"
+        }
+      },
+      {
+        "threshold": 6194,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_sculk_catalyst"
+        }
+      }
+    ]
+  }
+}

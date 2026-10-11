@@ -1,0 +1,691 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/enchanted_book"
+    },
+    "entries": [
+      {
+        "threshold": 6101,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6102,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6103,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6104,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6105,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6106,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6107,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6108,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6109,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6110,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6111,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6112,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6113,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6114,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6115,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6116,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6117,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6118,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6119,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6120,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6121,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6122,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6123,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6124,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6125,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6126,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6127,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6128,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6129,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6130,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6131,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6132,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6133,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6134,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6135,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6136,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6137,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6138,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6139,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6140,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6141,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6142,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6143,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6144,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6145,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6146,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6147,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6148,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6149,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6150,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6151,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6152,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6153,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6154,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6155,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6156,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6157,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6158,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6159,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6160,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6161,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6162,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6163,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6164,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6165,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6166,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6167,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6168,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6169,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6170,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6171,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6172,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6173,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6174,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6175,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6176,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6177,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6178,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6179,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6180,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6181,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6182,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6183,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6184,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6185,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6186,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6187,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6188,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6189,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6190,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6191,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6192,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6193,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6194,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6195,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6196,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      },
+      {
+        "threshold": 6197,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_enchanted_book"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/leather_helmet"
+    },
+    "entries": [
+      {
+        "threshold": 2797,
+        "model": {
+          "type": "minecraft:select",
+          "property": "minecraft:display_context",
+          "cases": [
+            {
+              "when": "gui",
+              "model": {
+                "type": "minecraft:model",
+                "model": "alkatraz:item/apprentice_hat"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "alkatraz:item/apprentice_hat_3d"
+          }
+        }
+      },
+      {
+        "threshold": 2801,
+        "model": {
+          "type": "minecraft:select",
+          "property": "minecraft:display_context",
+          "cases": [
+            {
+              "when": "gui",
+              "model": {
+                "type": "minecraft:model",
+                "model": "alkatraz:item/scholar_hat"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "alkatraz:item/scholar_hat_3d"
+          }
+        }
+      },
+      {
+        "threshold": 2805,
+        "model": {
+          "type": "minecraft:select",
+          "property": "minecraft:display_context",
+          "cases": [
+            {
+              "when": "gui",
+              "model": {
+                "type": "minecraft:model",
+                "model": "alkatraz:item/enchanter_hat"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "alkatraz:item/enchanter_hat_3d"
+          }
+        }
+      },
+      {
+        "threshold": 2809,
+        "model": {
+          "type": "minecraft:select",
+          "property": "minecraft:display_context",
+          "cases": [
+            {
+              "when": "gui",
+              "model": {
+                "type": "minecraft:model",
+                "model": "alkatraz:item/archmage_hat"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "alkatraz:item/archmage_hat_3d"
+          }
+        }
+      }
+    ]
+  }
+}

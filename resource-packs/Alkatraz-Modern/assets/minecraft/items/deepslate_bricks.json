@@ -1,0 +1,19 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:block/deepslate_bricks"
+    },
+    "entries": [
+      {
+        "threshold": 6169,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_deepslate_bricks"
+        }
+      }
+    ]
+  }
+}

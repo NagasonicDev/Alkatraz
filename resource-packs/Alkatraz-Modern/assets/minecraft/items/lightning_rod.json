@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:block/lightning_rod"
+    },
+    "entries": [
+      {
+        "threshold": 4150,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_thunderclap"
+        }
+      },
+      {
+        "threshold": 6137,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_lightning_rod"
+        }
+      }
+    ]
+  }
+}

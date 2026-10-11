@@ -1,0 +1,19 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/glistering_melon_slice"
+    },
+    "entries": [
+      {
+        "threshold": 6161,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_glistering_melon_slice"
+        }
+      }
+    ]
+  }
+}

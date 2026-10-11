@@ -1,0 +1,33 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:block/beacon"
+    },
+    "entries": [
+      {
+        "threshold": 4110,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_buff"
+        }
+      },
+      {
+        "threshold": 4162,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_arcane_ward"
+        }
+      },
+      {
+        "threshold": 6186,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/research_node_beacon"
+        }
+      }
+    ]
+  }
+}

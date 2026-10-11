@@ -1,0 +1,33 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/ender_pearl"
+    },
+    "entries": [
+      {
+        "threshold": 4014,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/gui_duplicate_button"
+        }
+      },
+      {
+        "threshold": 4109,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_shadow_realm"
+        }
+      },
+      {
+        "threshold": 4117,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_blink"
+        }
+      }
+    ]
+  }
+}
