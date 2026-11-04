@@ -140,3 +140,4 @@ rename_nms_packages.ps1
 .worktrees/
 
 /resource-packs/
+/.archify/
