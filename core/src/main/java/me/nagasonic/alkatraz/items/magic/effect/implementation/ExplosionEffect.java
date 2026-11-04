@@ -32,13 +32,13 @@ public final class ExplosionEffect implements Effect {
         World world = loc.getWorld();
         if (world == null) return;
 
+        if (!Protection.explosion(context.actor(), loc)) {
+            return;
+        }
         Player actor = context.playerActor().orElse(null);
         double magicDamage = actor != null ? MagicDamage.of(context.sourceItem()) : 0.0;
         if (magicDamage > 0) {
             MagicDamageListener.registerExplosionBonus(actor.getUniqueId(), magicDamage);
-        }
-        if (!Protection.explosion(context.actor(), loc)) {
-            return;
         }
         try {
             world.createExplosion(loc, power, setFire, breakBlocks, actor);

@@ -18,8 +18,8 @@ import java.util.*;
 
 public class MagicProfile extends Profile {
 
-    private transient List<SpellModifier> spellModifiers;
-    private transient Map<SpellModifier, String> spellModifierTypes;
+    private transient List<SpellModifier> spellModifiers = new ArrayList<>();
+    private transient Map<SpellModifier, String> spellModifierTypes = new HashMap<>();
     private transient Spell castingSpell;
     private transient ItemStack castingWand;
     private transient int currentCircleTaskId = -1;
@@ -100,7 +100,7 @@ public class MagicProfile extends Profile {
         boolStat("casting", false);
         boolStat("stealth", false);
         boolStat("canCast", true);
-        boolStat("tutorialSeen", false);
+        boolStat("starterSpellGranted", false);
         // One-time notice flag for the affinity curve change. Must be declared here:
         // Profile.getBool throws for an unregistered stat, and ProfilePersistence only
         // registers what it reads back, so a profile with no saved copy of this key
@@ -147,11 +147,11 @@ public class MagicProfile extends Profile {
     public record WarpPoint(int slot, String world, double x, double y, double z, float yaw, float pitch) {
 
         public static String serialize(WarpPoint p) {
-            return p.slot + ":" + p.world + ":" + p.x + ":" + p.y + ":" + p.z + ":" + p.yaw + ":" + p.pitch;
+            return p.slot + "|" + p.world + "|" + p.x + "|" + p.y + "|" + p.z + "|" + p.yaw + "|" + p.pitch;
         }
 
         public static WarpPoint parse(String s) {
-            String[] parts = s.split(":");
+            String[] parts = s.contains("|") ? s.split("\\|", -1) : s.split(":", -1);
             return new WarpPoint(
                     Integer.parseInt(parts[0].trim()),
                     parts[1].trim(),
@@ -202,7 +202,8 @@ public class MagicProfile extends Profile {
         try {
             return WarpPoint.parse(s).slot() == slot;
         } catch (RuntimeException e) {
-            return true;
+            // Leave unparseable entries untouched rather than deleting them.
+            return false;
         }
     }
 
@@ -499,6 +500,8 @@ public class MagicProfile extends Profile {
     // Boolean Stats Getters/Setters
     // ============================================
 
+    public boolean isStarterSpellGranted() { return getBool("starterSpellGranted"); }
+    public void setStarterSpellGranted(boolean value) { setBool("starterSpellGranted", value); }
     public boolean canCast() { return getBool("canCast"); }
     public void setCanCast(boolean value) { setBool("canCast", value); }
 
@@ -516,17 +519,24 @@ public class MagicProfile extends Profile {
      * Checks if player has discovered a spell (matches old PlayerData.hasDiscovered())
      */
     public boolean hasDiscoveredSpell(Spell spell) {
-        return getStringSet("discoveredSpells").contains(spell.getType().toLowerCase());
+        Collection<String> discovered = getStringSet("discoveredSpells");
+        String idKey = spell.getId().toLowerCase(java.util.Locale.ROOT);
+        return discovered.contains(idKey) || discovered.contains(spell.getType().toLowerCase(java.util.Locale.ROOT));
     }
 
     /**
      * Marks a spell as discovered (matches old PlayerData.setDiscovered())
      */
     public void setDiscoveredSpell(Spell spell, boolean discovered) {
+        Collection<String> discoveredSpells = getStringSet("discoveredSpells");
+        String idKey = spell.getId().toLowerCase(java.util.Locale.ROOT);
+        String typeKey = spell.getType().toLowerCase(java.util.Locale.ROOT);
         if (discovered) {
-            getStringSet("discoveredSpells").add(spell.getType().toLowerCase());
+            discoveredSpells.add(idKey);
+            discoveredSpells.add(typeKey);
         } else {
-            getStringSet("discoveredSpells").remove(spell.getType().toLowerCase());
+            discoveredSpells.remove(idKey);
+            discoveredSpells.remove(typeKey);
         }
     }
 
@@ -951,13 +961,6 @@ public class MagicProfile extends Profile {
         }
         if (getMana() >= getMaxMana()) return;
         StatUtils.addMana(player, getManaRegeneration());
-    }
-
-    /**
-     * Retained for callers that used to stop a per-profile regeneration task.
-     * Regeneration is shared, so there is nothing left to cancel.
-     */
-    public void cancelManaRegenTask(){
     }
 
     // ============================================

@@ -136,10 +136,20 @@ public class SpellOption {
     public boolean openCustomMenu(Player viewer) {
         if (!useCustomMenu || customMenuClass == null) return false;
 
+        String allowed;
+        if ("me.nagasonic.alkatraz.gui.implementation.options.PooledSlotSelectionMenu".equals(customMenuClass)) {
+            allowed = customMenuClass;
+        } else if ("me.nagasonic.alkatraz.gui.implementation.options.WarpPointsMenu".equals(customMenuClass)) {
+            allowed = customMenuClass;
+        } else {
+            Alkatraz.getInstance().getLogger().log(Level.WARNING,
+                    "[SpellOption] Custom menu class is not on the allow-list: " + customMenuClass);
+            return false;
+        }
         try {
             @SuppressWarnings("unchecked")
             Class<? extends Menu> clazz =
-                    (Class<? extends Menu>) Class.forName(customMenuClass);
+                    (Class<? extends Menu>) Class.forName(allowed);
 
             Constructor<? extends Menu> ctor =
                     clazz.getConstructor(Player.class, Spell.class, SpellOption.class);

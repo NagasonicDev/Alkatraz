@@ -25,7 +25,7 @@ public class RecipeShapelessIngredientsSubMenu extends Menu {
     private final RecipeEditMenu parent;
 
     public RecipeShapelessIngredientsSubMenu(Player viewer, RecipeEditMenu parent) {
-        super(viewer, ColorFormat.format(Alkatraz.getLangManager().get("recipes.edit.ingredients")), 45);
+        super(viewer, packTitle("recipe_shapeless", ColorFormat.format(Alkatraz.getLangManager().get("recipes.edit.ingredients"))), 45);
         this.parent = parent;
     }
 
@@ -50,11 +50,13 @@ public class RecipeShapelessIngredientsSubMenu extends Menu {
             } else {
                 inventory.setItem(SLOTS[i], ItemBuilder.of(Material.GRAY_STAINED_GLASS_PANE)
                         .name(lang().get("recipes.edit.drop_hint"))
+                        .guiModel("blank_pane")
                         .build());
             }
         }
         ItemStack back = ItemBuilder.of(Material.BARRIER)
                 .name(lang().get("recipes.edit.back"))
+                .guiModel("back_button")
                 .build();
         setMenuData(back, "action", "back");
         inventory.setItem(BACK_SLOT, back);

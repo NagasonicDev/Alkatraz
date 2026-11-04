@@ -13,6 +13,7 @@ import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
+import me.nagasonic.alkatraz.spells.util.TeleportSafety;
 import me.nagasonic.alkatraz.spells.vfx.CastCircle;
 import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
 import me.nagasonic.alkatraz.util.ParticleCaster;
@@ -244,7 +245,8 @@ public class Undertow extends AttackSpell {
         if (unit == null) return 0.0;
 
         Location next = target.getLocation().clone().add(unit.multiply(step));
-        if (target instanceof Player player && !Protection.teleport(player, next)) return 0.0;
+        if (target instanceof Player player
+                && (!TeleportSafety.isSafePullPosition(next) || !Protection.teleport(player, next))) return 0.0;
 
         target.teleport(next);
         target.setFallDistance(0.0f);

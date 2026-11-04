@@ -118,11 +118,7 @@ public class ResearchGraphMenu extends Menu {
     }
 
     private static String getResourceTitle() {
-        String code = Alkatraz.getTexturePackManager().getMenuTitleCode("research");
-        if (code == null || code.isEmpty() || !TexturePackManager.isResourcePackEnabled()) {
-            return lang().get("menu.research_library");
-        }
-        return code;
+        return TexturePackManager.getMenuTitle("research", lang().get("menu.research_library"));
     }
 
     @Override
@@ -379,10 +375,8 @@ public class ResearchGraphMenu extends Menu {
     }
 
     private ItemStack createNodeItem(ResearchNode node, ResearchState state) {
-        String cacheKey = node.getId() + "|" + state;
         int source = System.identityHashCode(node);
-        CachedItem cached = NODE_CACHE.get(cacheKey);
-        if (cached != null && cached.source() == source) return cached.item();
+        CachedItem cached;
 
         Material material = switch (state) {
             case HIDDEN -> Material.RED_DYE;
@@ -404,7 +398,14 @@ public class ResearchGraphMenu extends Menu {
             }
             lore.add(ColorFormat.format(lang().get("research.click_inspect")));
         }
-        ItemStack item = ItemBuilder.of(material)
+        int nodeTexture = TexturePackManager.getResearchNodeCMD(node.getId());
+        String cacheKey = node.getId() + "|" + state + "|" + nodeTexture;
+        cached = NODE_CACHE.get(cacheKey);
+        if (cached != null && cached.source() == source) return cached.item();
+
+        ItemBuilder builder = ItemBuilder.of(material);
+        if (nodeTexture > 0) builder.customModelData(nodeTexture);
+        ItemStack item = builder
                 .rawName(ColorFormat.format(name))
                 .rawLore(lore)
                 .build();
@@ -412,7 +413,10 @@ public class ResearchGraphMenu extends Menu {
             setMenuData(item, "action", "research");
             setMenuData(item, "research_id", node.getId());
         }
-        if (NODE_CACHE.size() >= NODE_CACHE_LIMIT) NODE_CACHE.clear();
+        if (NODE_CACHE.size() >= NODE_CACHE_LIMIT) {
+            var it = NODE_CACHE.keySet().iterator();
+            if (it.hasNext()) NODE_CACHE.remove(it.next());
+        }
         NODE_CACHE.put(cacheKey, new CachedItem(item, source));
         return item;
     }
@@ -420,11 +424,17 @@ public class ResearchGraphMenu extends Menu {
 
 
     private ItemStack panArrow(String nameKey) {
-        return ItemBuilder.of(Material.ARROW).rawName(ColorFormat.format(lang().get(nameKey))).build();
+        String direction = nameKey.replace("research.pan_", "");
+        int customModelData = TexturePackManager.getResearchPanArrowCMD(direction);
+        ItemBuilder builder = ItemBuilder.of(Material.ARROW);
+        if (customModelData > 0) builder.customModelData(customModelData);
+        return builder.rawName(ColorFormat.format(lang().get(nameKey))).build();
     }
 
     private ItemStack button(Material material, String name, String action) {
-        ItemStack item = ItemBuilder.of(material).rawName(ColorFormat.format(name)).build();
+        ItemBuilder builder = ItemBuilder.of(material).rawName(ColorFormat.format(name));
+        if (material == Material.BARRIER) builder.guiModel("back_button");
+        ItemStack item = builder.build();
         setMenuData(item, "action", action);
         return item;
     }
@@ -509,12 +519,22 @@ public class ResearchGraphMenu extends Menu {
             return (incoming == Direction.E || incoming == Direction.W)
                 ? PieceType.STRAIGHT_H : PieceType.STRAIGHT_V;
         }
-        return switch (incoming) {
-            case N -> outgoing == Direction.E ? PieceType.CORNER_NE : PieceType.CORNER_NW;
-            case S -> outgoing == Direction.E ? PieceType.CORNER_SE : PieceType.CORNER_SW;
-            case E -> outgoing == Direction.N ? PieceType.CORNER_NE : PieceType.CORNER_SE;
-            case W -> outgoing == Direction.N ? PieceType.CORNER_NW : PieceType.CORNER_SW;
+        // A turn's texture arms point back toward the previous cell and
+        // forward toward the next cell. Convert movement directions to those
+        // two arms before selecting the named NE/SE/SW/NW model.
+        Direction fromPrevious = switch (incoming) {
+            case N -> Direction.S;
+            case S -> Direction.N;
+            case E -> Direction.W;
+            case W -> Direction.E;
         };
+        if ((fromPrevious == Direction.N && outgoing == Direction.E)
+                || (fromPrevious == Direction.E && outgoing == Direction.N)) return PieceType.CORNER_NE;
+        if ((fromPrevious == Direction.S && outgoing == Direction.E)
+                || (fromPrevious == Direction.E && outgoing == Direction.S)) return PieceType.CORNER_SE;
+        if ((fromPrevious == Direction.S && outgoing == Direction.W)
+                || (fromPrevious == Direction.W && outgoing == Direction.S)) return PieceType.CORNER_SW;
+        return PieceType.CORNER_NW;
     }
 
     private String getStateKey(ResearchState parentState, ResearchState childState) {
@@ -531,7 +551,7 @@ public class ResearchGraphMenu extends Menu {
     private ItemStack createConnectorItem(PieceType piece, String stateKey) {
         String cacheKey = piece + "|" + stateKey;
         ItemStack cached = CONNECTOR_CACHE.get(cacheKey);
-        if (cached != null) return cached;
+        if (cached != null) return cached.clone();
         Material mat = switch (stateKey) {
             case "completed" -> Material.PURPLE_STAINED_GLASS_PANE;
             case "available" -> Material.PINK_STAINED_GLASS_PANE;
@@ -540,7 +560,7 @@ public class ResearchGraphMenu extends Menu {
         int cmd = TexturePackManager.getConnectorCMD(piece.name().toLowerCase() + "_" + stateKey);
         ItemStack item = ItemBuilder.of(mat).name(" ").glint("in_progress".equals(stateKey)).customModelData(cmd).build();
         CONNECTOR_CACHE.put(cacheKey, item);
-        return item;
+        return item.clone();
     }
 
     private boolean isBlankSlot(int slot) {

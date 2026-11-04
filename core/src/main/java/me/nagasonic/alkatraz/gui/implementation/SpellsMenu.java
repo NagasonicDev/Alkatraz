@@ -3,6 +3,7 @@ package me.nagasonic.alkatraz.gui.implementation;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.gui.ItemBuilder;
 import me.nagasonic.alkatraz.gui.PagedMenu;
+import me.nagasonic.alkatraz.gui.SpellGuiItems;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.texturepack.TexturePackManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
@@ -44,11 +45,7 @@ public class SpellsMenu extends PagedMenu<Spell> {
     }
 
     private static String getResourceTitle() {
-        String code = Alkatraz.getTexturePackManager().getMenuTitleCode("spells");
-        if (code == null || code.isEmpty() || !TexturePackManager.isResourcePackEnabled()) {
-            return lang().get("menu.spells");
-        }
-        return code;
+        return TexturePackManager.getMenuTitle("spells", lang().get("menu.spells"));
     }
 
     private static int[] getInnerContentSlots() {
@@ -73,6 +70,7 @@ public class SpellsMenu extends PagedMenu<Spell> {
                 .name(lang().get("spells.configure_hotbar"))
                 .lore(lang().get("spells.configure_hotbar_lore"),
                       "&7These appear when you hold a wand.")
+                .guiModel("hotbar_button")
                 .build();
         setMenuData(item, "action", "open_hotbar_config");
         return item;
@@ -112,11 +110,10 @@ public class SpellsMenu extends PagedMenu<Spell> {
             lore.add(lang().get("spells.has_options_lore"));
         }
 
-        ItemStack item = ItemBuilder.of(spell.getGuiItem().clone())
+        ItemStack item = ItemBuilder.of(SpellGuiItems.create(spell))
                 .rawName(ColorFormat.format(spell.getDisplayName()))
                 .rawLore(lore)
                 .hideAttributes()
-                .customModelData(spell.getGuiCustomModelData())
                 .glint(false)
                 .build();
 
@@ -130,6 +127,7 @@ public class SpellsMenu extends PagedMenu<Spell> {
         return ItemBuilder.of(Material.RED_DYE)
                 .name(lang().get("spells.locked_name"))
                 .rawLore(List.of(lang().get("spells.locked_lore", "circle", String.valueOf(spell.getRequiredCircleLevel()))))
+                .guiModel("locked_spell")
                 .build();
     }
 

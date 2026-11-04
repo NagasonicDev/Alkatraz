@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Central progression entry point. Content is loaded from configuration;
@@ -42,6 +43,7 @@ public final class ProgressionService {
 
     private static final Map<Integer, CircleDefinition> circles = new LinkedHashMap<>();
     private static boolean autoAdvance;
+    private static final Map<String, Double> arcaneKnowledgeBoosters = new ConcurrentHashMap<>();
 
     private static LangManager lang() { return Alkatraz.getLangManager(); }
 
@@ -73,14 +75,67 @@ public final class ProgressionService {
                 .ifPresent(source -> addArcaneKnowledge(player, source.getAmount(circle)));
     }
 
+    public static void addArcaneKnowledge(OfflinePlayer player, String sourceId, String world) {
+        addArcaneKnowledge(player, sourceId, 0, world, null);
+    }
+
+    public static void addArcaneKnowledge(OfflinePlayer player, String sourceId, int circle, String world, String group) {
+        ArcaneKnowledgeRegistry.get(sourceId)
+                .filter(ArcaneKnowledgeSource::isEnabled)
+                .ifPresent(source -> addArcaneKnowledge(player, source.getAmount(circle), world, group));
+    }
+
     public static void addArcaneKnowledge(OfflinePlayer player, double amount) {
+        String world = player instanceof Player online ? online.getWorld().getName() : null;
+        addArcaneKnowledge(player, amount, world, null);
+    }
+
+    public static void addArcaneKnowledge(OfflinePlayer player, double amount, String world) {
+        addArcaneKnowledge(player, amount, world, null);
+    }
+
+    public static void addArcaneKnowledge(OfflinePlayer player, double amount, String world, String group) {
         if (player == null || amount == 0) return;
+        String resolvedWorld = (world == null && player instanceof Player online) ? online.getWorld().getName() : world;
         MagicProfile profile = ProfileManager.getOrLoadProfile(player.getUniqueId(), MagicProfile.class);
-        profile.setArcaneKnowledge(Math.max(0, profile.getArcaneKnowledge() + amount));
+        double multiplier = ProgressionMultiplierService.resolve(resolvedWorld, group)
+                * getArcaneKnowledgeMultiplier(resolvedWorld, group);
+        double adjusted = amount * multiplier;
+        profile.setArcaneKnowledge(Math.max(0, profile.getArcaneKnowledge() + adjusted));
         showArcaneKnowledgeBar(player, profile);
         if (player instanceof Player online) {
             UnlockManager.evaluate(online);
         }
+    }
+
+    public static void clearArcaneKnowledgeBoosters() {
+        arcaneKnowledgeBoosters.clear();
+    }
+
+    public static void addArcaneKnowledgeBooster(String name, double multiplier) {
+        if (name == null || name.isBlank()) return;
+        if (!Double.isFinite(multiplier) || multiplier <= 0) return;
+        arcaneKnowledgeBoosters.put(name, multiplier);
+    }
+
+    public static double getArcaneKnowledgeMultiplier() {
+        return getArcaneKnowledgeMultiplier((String) null, (String) null);
+    }
+
+    public static double getArcaneKnowledgeMultiplier(String world, String group) {
+        double result = 1.0;
+        for (Double value : arcaneKnowledgeBoosters.values()) {
+            if (value != null) result *= value;
+        }
+        return result;
+    }
+
+    public static double getArcaneKnowledgeMultiplier(OfflinePlayer player, String world, String group) {
+        return getArcaneKnowledgeMultiplier(world, group);
+    }
+
+    public static double getArcaneKnowledgeMultiplier(OfflinePlayer player) {
+        return getArcaneKnowledgeMultiplier();
     }
 
     public static boolean canAdvance(Player player) {

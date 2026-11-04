@@ -35,10 +35,8 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -204,26 +202,33 @@ public class EchoCast extends Spell implements Listener {
                     return;
                 }
                 Spell replayed = sequence.get(index++);
-                spawnEchoGlyph(caster, index);
-                replayed.castAction(caster, wand);
+                try {
+                    replayed.castAction(caster, wand);
+                } catch (RuntimeException ex) {
+                    Alkatraz.getInstance().getLogger().severe("Echo Cast failed to replay spell '"
+                            + replayed.getId() + "' for " + caster.getName() + ": " + ex.getMessage());
+                    Alkatraz.getInstance().getLogger().log(java.util.logging.Level.SEVERE, "Echo Cast stack trace", ex);
+                    cancel();
+                    return;
+                }
+                // Cosmetic effects must never prevent the actual replay from firing.
+                try {
+                    spawnEchoGlyph(caster, index);
+                } catch (RuntimeException ex) {
+                    Alkatraz.getInstance().getLogger().fine("Echo Cast visual effect failed: " + ex.getMessage());
+                }
             }
         }.runTaskTimer(Alkatraz.getInstance(), 0L, config.replayGapTicks());
     }
 
     /**
-     * Oldest first, de-duplicated, skip-filtered - the rotation replayed the way it was played.
-     *
-     * <p>The de-duplication is what stops {@code echo_cast} being a triple-tap: three casts of the
-     * same spell replay it <b>once</b>. {@code seen} is a {@link LinkedHashSet} so insertion order
-     * is the rotation's own order.
+     * Oldest first and skip-filtered, preserving repeated casts in the caster's recent sequence.
      */
     private List<Spell> resolveSequence(Deque<String> history) {
         List<Spell> out = new ArrayList<>();
-        Set<String> seen = new LinkedHashSet<>();
         // Snapshot: the runnable below reads the sequence, and a cast made mid-sequence would
         // otherwise mutate the deque underneath it.
         for (String id : new ArrayList<>(history)) {
-            if (!seen.add(id)) continue;
             if (config.isSkipped(id)) continue;
             Spell spell = SpellRegistry.getSpell(id);
             if (spell != null && spell != this) {
@@ -251,7 +256,8 @@ public class EchoCast extends Spell implements Listener {
         }
 
         ParticleCaster.spawn(caster, eye.getWorld(), Utils.PORTAL, eye, 30, 0.3, 0.3, 0.3, 0.05);
-        ParticleCaster.spawn(caster, eye.getWorld(), Utils.WITCH, eye, 10, 0.3, 0.3, 0.3, 0.0, ECHO_SPARKLE);
+        // WITCH has no particle payload on current Paper; use DUST to preserve the tint.
+        ParticleCaster.spawn(caster, eye.getWorld(), Utils.DUST, eye, 10, 0.3, 0.3, 0.3, 0.0, ECHO_SPARKLE);
         caster.getWorld().playSound(eye, Sound.ENTITY_EVOKER_AMBIENT, 0.6f, 1.4f);
     }
 

@@ -15,7 +15,9 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Optional;
@@ -26,6 +28,31 @@ import java.util.Optional;
  * in the held item's {@link ItemDefinition}.
  */
 public final class MagicItemComponentListener implements Listener {
+
+    /** Upgrades stored legacy magic armor to the current equippable visuals on supported servers. */
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        PlayerInventory inventory = event.getPlayer().getInventory();
+
+        ItemStack[] storage = inventory.getStorageContents();
+        boolean storageChanged = false;
+        for (ItemStack stack : storage) {
+            storageChanged |= MagicItemStack.ensureEquipmentModel(stack);
+        }
+        if (storageChanged) inventory.setStorageContents(storage);
+
+        ItemStack[] armor = inventory.getArmorContents();
+        boolean armorChanged = false;
+        for (ItemStack stack : armor) {
+            armorChanged |= MagicItemStack.ensureEquipmentModel(stack);
+        }
+        if (armorChanged) inventory.setArmorContents(armor);
+
+        ItemStack offhand = inventory.getItemInOffHand();
+        if (MagicItemStack.ensureEquipmentModel(offhand)) {
+            inventory.setItemInOffHand(offhand);
+        }
+    }
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerInteract(PlayerInteractEvent event) {

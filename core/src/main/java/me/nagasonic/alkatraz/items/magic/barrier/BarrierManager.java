@@ -27,10 +27,14 @@ public final class BarrierManager {
         scheduled = true;
         tickTask = Alkatraz.getInstance().getServer().getScheduler().runTaskTimer(Alkatraz.getInstance(), () -> {
             if (SESSIONS.isEmpty()) return;
-            for (Map<String, BarrierSession> byItem : SESSIONS.values()) {
-                for (BarrierSession session : byItem.values()) {
+            for (Map<String, BarrierSession> byItem : new ArrayList<>(SESSIONS.values())) {
+                for (BarrierSession session : new ArrayList<>(byItem.values())) {
                     if (session != null && !session.isDisposed()) {
-                        session.tick();
+                        try {
+                            session.tick();
+                        } catch (Exception e) {
+                            Alkatraz.getInstance().getLogger().log(java.util.logging.Level.SEVERE, "Barrier session tick failed", e);
+                        }
                     }
                 }
             }
@@ -91,7 +95,9 @@ public final class BarrierManager {
                 }
             }
         }
+        SESSIONS.clear();
         PERSISTED_HP.clear();
+        BarrierSession.clearAllBars();
         BukkitTask current = tickTask;
         tickTask = null;
         scheduled = false;

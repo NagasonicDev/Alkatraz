@@ -157,6 +157,18 @@ public class EarthenWall extends AttackSpell implements Listener {
             @Override
             public void run() {
                 ticks++;
+                if (!player.isOnline() || player.isDead()) {
+                    for (Map.Entry<Location, Material> e : originals.entrySet()) {
+                        Location loc = e.getKey();
+                        if (loc == null || loc.getWorld() == null) continue;
+                        Block block = loc.getBlock();
+                        if (block.getType() == e.getValue()) continue;
+                        if (!Protection.blockEdit(player, loc)) continue;
+                        block.setType(e.getValue(), false);
+                    }
+                    cancel();
+                    return;
+                }
 
                 // === BUILD PHASE — steer and add new segments ===
                 if (!buildDone && !props.isCountered() && !props.isCancelled()) {
@@ -395,6 +407,18 @@ public class EarthenWall extends AttackSpell implements Listener {
             @Override
             public void run() {
                 ticks++;
+                if (!caster.isValid() || caster.isDead()) {
+                    for (Map.Entry<Location, Material> e : originals.entrySet()) {
+                        Location loc = e.getKey();
+                        if (loc == null || loc.getWorld() == null) continue;
+                        Block block = loc.getBlock();
+                        if (block.getType() == e.getValue()) continue;
+                        if (!Protection.blockEdit(caster, loc)) continue;
+                        block.setType(e.getValue(), false);
+                    }
+                    cancel();
+                    return;
+                }
 
                 // === BUILD PHASE ===
                 if (!buildDone && !props.isCountered() && !props.isCancelled()) {

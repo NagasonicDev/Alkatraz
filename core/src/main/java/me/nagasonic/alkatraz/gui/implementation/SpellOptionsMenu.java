@@ -4,6 +4,7 @@ import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.gui.ItemBuilder;
 import me.nagasonic.alkatraz.gui.Menu;
 import me.nagasonic.alkatraz.gui.PagedMenu;
+import me.nagasonic.alkatraz.gui.SpellGuiItems;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.configuration.SpellOption;
@@ -37,7 +38,7 @@ public class SpellOptionsMenu extends PagedMenu<SpellOption> {
 
     public SpellOptionsMenu(Player viewer, Spell spell) {
         super(viewer,
-                ColorFormat.format(lang().get("menu.spell_options", "spell", spell.getDisplayName())),
+                packTitle("spell_options", ColorFormat.format(lang().get("menu.spell_options", "spell", spell.getDisplayName()))),
                 54,
                 buildDisplayOptions(viewer, spell),
                 28);
@@ -138,7 +139,7 @@ public class SpellOptionsMenu extends PagedMenu<SpellOption> {
         }
 
         // Fallback icon / name
-        if (icon == null) icon = members.get(0).getIcon();
+        if (icon == null && !members.isEmpty()) icon = members.get(0).getIcon();
         if (name == null || name.isBlank()) {
             name = toTitleCase(groupId.replace('_', ' '));
         }
@@ -190,7 +191,7 @@ public class SpellOptionsMenu extends PagedMenu<SpellOption> {
     protected void addDecorations() {
         addStandardBorder();
 
-        inventory.setItem(4, ItemBuilder.of(spell.getGuiItem().clone())
+        inventory.setItem(4, ItemBuilder.of(SpellGuiItems.create(spell))
                 .name("&6" + spell.getDisplayName())
                 .lore(lang().get("spell_options.configure"), "",
                       lang().get("spell_options.circle", "circle", String.valueOf(spell.getRequiredCircleLevel())))
@@ -201,6 +202,7 @@ public class SpellOptionsMenu extends PagedMenu<SpellOption> {
     protected void addBackButton() {
         ItemStack back = ItemBuilder.of(Material.BARRIER)
                 .name(lang().get("spell_options.back_to_spells"))
+                .guiModel("back_button")
                 .build();
         setMenuData(back, "action", "back");
         inventory.setItem(backButtonSlot, back);

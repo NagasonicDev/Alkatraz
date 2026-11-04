@@ -38,8 +38,17 @@ public class MobLootInjector implements Listener {
         this.totalWeight = total;
     }
 
+    private static boolean listenerRegistered = false;
+
     public static void register(Plugin plugin){
+        if (listenerRegistered) return;
+        listenerRegistered = true;
         plugin.getServer().getPluginManager().registerEvents(new MobLootInjector.LootListener(), plugin);
+    }
+
+    /** Resets the registration guard after disable so a later enable can re-register. */
+    public static void resetRegistration() {
+        listenerRegistered = false;
     }
 
     public static class LootListener implements Listener {

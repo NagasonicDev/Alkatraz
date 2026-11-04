@@ -37,6 +37,8 @@ import java.util.UUID;
 public final class BarrierSession extends SpellProperties implements DamageableBarrier {
 
     private static final int REGEN_INTERVAL_TICKS = 20;
+    private static final java.util.concurrent.ConcurrentHashMap.KeySetView<BossBar, Boolean> REGISTERED_BARS =
+            java.util.concurrent.ConcurrentHashMap.newKeySet();
 
     private final Player caster;
     private final MagicItemInstance sourceItem;
@@ -75,6 +77,7 @@ public final class BarrierSession extends SpellProperties implements DamageableB
                 : "spells.barrier.health_bar";
         this.healthBar = Bukkit.createBossBar(title(), config.healthBar().color(), config.healthBar().style());
         this.healthBar.setProgress(1.0);
+        REGISTERED_BARS.add(this.healthBar);
         if (config.healthBar().enabled() && config.healthBar().visibleTo().contains("CASTER")) {
             this.healthBar.addPlayer(caster);
         }
@@ -130,6 +133,7 @@ public final class BarrierSession extends SpellProperties implements DamageableB
         }
         activeComponents.clear();
         if (!shatter && healthBar != null) {
+            REGISTERED_BARS.remove(healthBar);
             healthBar.removeAll();
             healthBar = null;
         }
@@ -137,6 +141,13 @@ public final class BarrierSession extends SpellProperties implements DamageableB
             playFx(config.sfx().onEnd(), anchor);
         }
         BarrierManager.onDisposed(this, shatter);
+    }
+
+    public static void clearAllBars() {
+        for (BossBar bar : java.util.List.copyOf(REGISTERED_BARS)) {
+            bar.removeAll();
+        }
+        REGISTERED_BARS.clear();
     }
 
     @Override
@@ -232,6 +243,7 @@ public final class BarrierSession extends SpellProperties implements DamageableB
             @Override
             public void run() {
                 if (bar != null) {
+                    REGISTERED_BARS.remove(bar);
                     bar.removeAll();
                     healthBar = null;
                 }

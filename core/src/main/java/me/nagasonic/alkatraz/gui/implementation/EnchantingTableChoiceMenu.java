@@ -21,7 +21,7 @@ public class EnchantingTableChoiceMenu extends Menu {
     private final Location enchantingTableLocation;
 
     public EnchantingTableChoiceMenu(Player viewer, Location enchantingTableLocation) {
-        super(viewer, lang().get("menu.arcane_table"), 27);
+        super(viewer, packTitle("arcane_choice", lang().get("menu.arcane_table")), 27);
         this.enchantingTableLocation = enchantingTableLocation;
     }
 

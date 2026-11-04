@@ -37,7 +37,7 @@ public class ResearchEntryMenu extends Menu {
     private final int offsetY;
 
     public ResearchEntryMenu(Player viewer, ResearchNode node, String category, int offsetX, int offsetY) {
-        super(viewer, lang().get("menu.research_entry", "name", node.getDisplayName()), 54);
+        super(viewer, packTitle("research_entry", lang().get("menu.research_entry", "name", node.getDisplayName())), 54);
         this.node = node;
         this.category = category;
         this.offsetX = offsetX;
@@ -46,7 +46,7 @@ public class ResearchEntryMenu extends Menu {
 
     @Override
     protected void build() {
-        inventory.clear();
+        fillAll();
         ResearchState state = ResearchService.getState(viewer, node);
         inventory.setItem(SLOT_SUMMARY, summaryItem(state));
         inventory.setItem(SLOT_TASKS, tasksItem());
@@ -120,10 +120,13 @@ public class ResearchEntryMenu extends Menu {
             }
         }
 
-        return ItemBuilder.of(material)
+        ItemBuilder summary = ItemBuilder.of(material)
                 .rawName(ColorFormat.format(name))
-                .rawLore(lore)
-                .build();
+                .rawLore(lore);
+        if (state == ResearchState.COMPLETED) {
+            summary.guiModel("research_node_done");
+        }
+        return summary.build();
     }
 
     private ItemStack tasksItem() {
@@ -145,6 +148,7 @@ public class ResearchEntryMenu extends Menu {
         return ItemBuilder.of(material)
                 .rawName(ColorFormat.format(lang().get("research.entry_tasks")))
                 .rawLore(lore)
+                .guiModel("research_overview")
                 .build();
     }
 
@@ -170,6 +174,7 @@ public class ResearchEntryMenu extends Menu {
         String actionName;
         Material actionMat;
         String actionTag = null;
+        String actionGuiModel = null;
 
         switch (state) {
             case AVAILABLE -> {
@@ -186,6 +191,7 @@ public class ResearchEntryMenu extends Menu {
                 }
                 lore.add(ColorFormat.format("&7Click to begin studying."));
                 actionTag = "start";
+                actionGuiModel = "research_start";
             }
             case IN_PROGRESS -> {
                 actionMat = Material.EXPERIENCE_BOTTLE;
@@ -196,15 +202,18 @@ public class ResearchEntryMenu extends Menu {
                     lore.add(ColorFormat.format("&7Complete all research tasks first."));
                 }
                 actionTag = "complete";
+                actionGuiModel = "research_spend";
             }
             case COMPLETED -> {
                 actionMat = Material.LIME_CONCRETE;
                 actionName = lang().get("research.entry_completed");
                 lore.add(ColorFormat.format("&7This research is finished."));
+                actionGuiModel = "research_complete";
             }
             case LOCKED -> {
                 actionMat = Material.RED_DYE;
                 actionName = lang().get("research.entry_locked");
+                actionGuiModel = "research_locked";
                 List<String> missingParents = new ArrayList<>();
                 for (String parentId : node.getParents()) {
                     ResearchService.getNode(parentId).ifPresent(parent -> {
@@ -233,6 +242,9 @@ public class ResearchEntryMenu extends Menu {
                 .rawLore(lore)
                 .build();
 
+        if (actionGuiModel != null) {
+            me.nagasonic.alkatraz.texturepack.TexturePackManager.applyGuiModel(item, actionGuiModel);
+        }
         if (actionTag != null) {
             setMenuData(item, "action", actionTag);
         }
@@ -258,9 +270,12 @@ public class ResearchEntryMenu extends Menu {
             String color = isParent ? "&7" : "&8";
             String name = color + linked.getDisplayName();
 
-            ItemStack item = ItemBuilder.of(state == ResearchState.COMPLETED ? Material.ENCHANTED_BOOK : linked.getIcon())
-                    .rawName(ColorFormat.format(name))
-                    .build();
+            ItemBuilder linkedBuilder = ItemBuilder.of(state == ResearchState.COMPLETED ? Material.ENCHANTED_BOOK : linked.getIcon())
+                    .rawName(ColorFormat.format(name));
+            if (state == ResearchState.COMPLETED) {
+                linkedBuilder.guiModel("research_node_done");
+            }
+            ItemStack item = linkedBuilder.build();
             setMenuData(item, "action", "linked_research");
             setMenuData(item, "research_id", linked.getId());
             inventory.setItem(SLOT_LINKED_START + i, item);
@@ -270,6 +285,7 @@ public class ResearchEntryMenu extends Menu {
     private ItemStack backItem() {
         ItemStack item = ItemBuilder.of(Material.BARRIER)
                 .name(lang().get("research.back_to_graph"))
+                .guiModel("back_button")
                 .build();
         setMenuData(item, "action", "back");
         return item;

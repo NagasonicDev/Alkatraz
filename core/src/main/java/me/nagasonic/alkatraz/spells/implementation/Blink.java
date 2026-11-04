@@ -12,11 +12,11 @@ import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.spells.vfx.CastCircle;
 import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
 import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
+import me.nagasonic.alkatraz.spells.util.TeleportSafety;
 import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.Color;
 import org.bukkit.*;
-import org.bukkit.block.Block;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
@@ -77,7 +77,7 @@ public class Blink extends Spell {
         double distance = (Double) getOption("blink_distance").getSelectedValue(caster).getValue();
 
         Vector direction = caster.getEyeLocation().getDirection().normalize();
-        Location start = caster.getEyeLocation();
+        Location start = caster.getLocation();
         Location target = findTeleportLocation(start, direction, distance);
 
         if (target == null) {
@@ -132,10 +132,8 @@ public class Blink extends Spell {
 
         for (double d = 0.5; d <= maxDistance; d += 0.5) {
             Location current = start.clone().add(direction.clone().multiply(d));
-            Block block = current.getBlock();
-
-            if (block.getType().isSolid()) {
-                if (moved) {
+            if (!safeBlinkDestination(current)) {
+                if (moved && safeBlinkDestination(prev)) {
                     prev.setYaw(start.getYaw());
                     prev.setPitch(start.getPitch());
                     return prev;
@@ -148,9 +146,17 @@ public class Blink extends Spell {
         }
 
         Location end = start.clone().add(direction.clone().multiply(maxDistance));
+        if (!safeBlinkDestination(end)) {
+            return moved && safeBlinkDestination(prev) ? prev : null;
+        }
         end.setYaw(start.getYaw());
         end.setPitch(start.getPitch());
         return end;
+    }
+
+    private boolean safeBlinkDestination(Location location) {
+        return TeleportSafety.isSafePlayerDestination(location)
+                || TeleportSafety.isSafePlayerDestinationInAir(location);
     }
 
     private void spawnTeleportParticles(LivingEntity caster, Location loc) {

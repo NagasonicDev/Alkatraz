@@ -24,27 +24,12 @@ public class LoreSubMenu extends Menu {
     private static final int ADD_SLOT = 38;
     private static final int BACK_SLOT = 42;
 
-    private static ItemStack backgroundPanePrototype;
-
-    private static ItemStack backgroundPane() {
-        if (backgroundPanePrototype == null) {
-            ItemStack item = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
-            ItemMeta meta = item.getItemMeta();
-            if (meta != null) {
-                meta.setDisplayName(ColorFormat.format("&7"));
-                item.setItemMeta(meta);
-            }
-            backgroundPanePrototype = item;
-        }
-        return backgroundPanePrototype;
-    }
-
     private final ItemDetailMenu parent;
     private final EditorSession session;
     private List<String> lore;
 
     public LoreSubMenu(Player viewer, ItemDetailMenu parent) {
-        super(viewer, ColorFormat.format("&8Edit Lore"), 45);
+        super(viewer, packTitle("lore", ColorFormat.format("&8Edit Lore")), 45);
         this.parent = parent;
         this.session = EditorSession.get(viewer.getUniqueId());
         this.lore = new ArrayList<>(session.config().getStringList("lore"));
@@ -52,9 +37,7 @@ public class LoreSubMenu extends Menu {
 
     @Override
     protected void build() {
-        for (int i = 0; i < size; i++) {
-            inventory.setItem(i, backgroundPane());
-        }
+        fillAll();
 
         for (int i = 0; i < LORE_SLOTS.length && i < lore.size(); i++) {
             inventory.setItem(LORE_SLOTS[i], createLoreLineItem(i));
@@ -77,6 +60,7 @@ public class LoreSubMenu extends Menu {
             meta.setLore(lineLore);
             item.setItemMeta(meta);
         }
+        me.nagasonic.alkatraz.texturepack.TexturePackManager.applyGuiModel(item, "editor_entry_lore");
         setMenuData(item, "lore_index", index);
         return item;
     }
@@ -91,6 +75,7 @@ public class LoreSubMenu extends Menu {
             meta.setLore(lore);
             item.setItemMeta(meta);
         }
+        me.nagasonic.alkatraz.texturepack.TexturePackManager.applyGuiModel(item, "editor_add");
         setMenuData(item, "action", "add");
         return item;
     }
@@ -102,6 +87,7 @@ public class LoreSubMenu extends Menu {
             meta.setDisplayName(lang().get("common.back"));
             item.setItemMeta(meta);
         }
+        me.nagasonic.alkatraz.texturepack.TexturePackManager.applyGuiModel(item, "back_button");
         setMenuData(item, "action", "back");
         return item;
     }

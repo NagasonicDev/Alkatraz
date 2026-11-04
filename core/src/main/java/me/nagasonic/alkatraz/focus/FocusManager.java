@@ -72,9 +72,18 @@ public final class FocusManager implements Listener {
      * No listener anywhere registers for {@link PlayerFocusChangeEvent}, so the
      * dispatch was pure overhead up to 20x/sec. Flip this to true to restore it.
      */
-    private static boolean fireChangeEvent = false;
+    private static volatile boolean fireChangeEvent = true;
 
     static boolean shouldFireChangeEvent() {
+        return fireChangeEvent;
+    }
+
+    /** Enable/disable firing {@link me.nagasonic.alkatraz.events.PlayerFocusChangeEvent}. */
+    public static void setFireChangeEvent(boolean enabled) {
+        fireChangeEvent = enabled;
+    }
+
+    public static boolean isFireChangeEvent() {
         return fireChangeEvent;
     }
 
@@ -115,7 +124,6 @@ public final class FocusManager implements Listener {
     // ============================
 
     private void tick() {
-        FocusConfig.reload();
         cacheConfig();
         if (!focusEnabled) return;
         long now = System.currentTimeMillis();

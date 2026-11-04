@@ -51,7 +51,7 @@ public record CycloneNestConfig(
                 doubleOf(map.get("nest_radius"), 2.5),
                 doubleOf(map.get("nest_height"), 6.0),
                 doubleOf(map.get("nest_pull"), 0.55),
-                doubleOf(map.get("nest_wander_speed"), 0.18),
+                doubleOf(map.get("nest_wander_speed"), 0.4),
                 doubleOf(map.get("nest_spawn_spread"), 4.0));
     }
 

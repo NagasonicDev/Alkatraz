@@ -3,6 +3,7 @@ package me.nagasonic.alkatraz.dom;
 import me.nagasonic.alkatraz.Alkatraz;
 
 public enum MinecraftVersion {
+    MINECRAFT_26_3(26.3F, "26.3", "26.3", "v26_R3"),
     MINECRAFT_26_2(26.2F, "26.2", "26.2", "v26_R2"),
     MINECRAFT_26_1(26.1F, "26.1", "26.1.2", "v26_R1"),
     MINECRAFT_1_26(19, "1_26", "1.26", null),
@@ -59,9 +60,16 @@ public enum MinecraftVersion {
         String v = Alkatraz.getInstance().getServer().getVersion();
         for (MinecraftVersion version : MinecraftVersion.values()){
             if (version.versionString1 == null || version.versionString2 == null) continue;
-            if (v.contains(version.versionString1) || v.contains(version.versionString2)) return version;
+            // Match the numeric version as a whole token so that, e.g., "1.20.1"
+            // does not incorrectly match a "1.20.10" (or similar) version string.
+            if (matchesVersion(v, version.versionString1) || matchesVersion(v, version.versionString2)) return version;
         }
         return INCOMPATIBLE;
+    }
+
+    private static boolean matchesVersion(String haystack, String needle){
+        return java.util.regex.Pattern.compile("(?<!\\d)" + java.util.regex.Pattern.quote(needle) + "(?!\\d)")
+                .matcher(haystack).find();
     }
 
     MinecraftVersion(float v, String v1, String v2, String nmsVersion){

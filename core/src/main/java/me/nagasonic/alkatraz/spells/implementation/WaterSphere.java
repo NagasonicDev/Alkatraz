@@ -8,6 +8,7 @@ import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.vfx.CastCircle;
 import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
 import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
+import me.nagasonic.alkatraz.spells.vfx.FakeWaterVfx;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
 import me.nagasonic.alkatraz.spells.components.SpellParticleComponent;
@@ -147,6 +148,7 @@ public class WaterSphere extends AttackSpell {
 
     private void shootSphere(LivingEntity caster, ItemStack wand, AttackProperties props,
                               Location targetLoc, double radius, double range) {
+        if (caster == null || caster.getWorld() == null || targetLoc == null || targetLoc.getWorld() == null) return;
         List<Location> path = ParticleUtils.line(1, caster.getEyeLocation(), targetLoc);
         int totalSteps = path.size();
 
@@ -168,20 +170,32 @@ public class WaterSphere extends AttackSpell {
 
             @Override
             public void run() {
+                if (caster.isDead() || !caster.isValid() || caster.getWorld() == null) {
+                    cancel();
+                    return;
+                }
                 if (props.isCancelled() || props.isCountered()) {
-                    splash(caster.getEyeLocation().add(caster.getEyeLocation().getDirection().multiply(step)), 0.6);
+                    Location splashLoc = caster.getEyeLocation().add(caster.getEyeLocation().getDirection().multiply(step));
+                    if (splashLoc.getWorld() != null) splash(splashLoc, 0.6);
                     cancel();
                     return;
                 }
 
                 if (step >= totalSteps) {
-                    splash(targetLoc, 1.0);
-                    placeWater(caster, targetLoc);
+                    if (targetLoc.getWorld() != null) {
+                        splash(targetLoc, 1.0);
+                        placeWater(caster, targetLoc);
+                    }
                     cancel();
                     return;
                 }
 
                 Location center = path.get(step);
+                if (center == null || center.getWorld() == null) { step++; return; }
+
+                // A short client-side water flash gives the projectile a visible body even
+                // when the viewer has particles disabled. It never edits the real world.
+                if (step % 2 == 0) FakeWaterVfx.show(center, 3L);
 
                 // Signature shape: a travelling cluster with a tail. The head is `core` (the
                 // leading edge - what the eye tracks from the caster to the impact) and the tail
@@ -221,6 +235,8 @@ public class WaterSphere extends AttackSpell {
                     }
                     if (entity.equals(caster)) continue;
                     if (!(entity instanceof LivingEntity le)) continue;
+                    // Protection gate before damage.
+                    if (!Protection.damage(le, caster, le.getLocation())) continue;
                     // One getPower per damage instance, deduped for the whole cast.
                     if (props.hasHit(le)) continue;
                     props.hit(le);
@@ -258,7 +274,9 @@ public class WaterSphere extends AttackSpell {
     }
 
     private void splash(Location center, double sizeScale) {
+        if (center == null) return;
         World world = center.getWorld();
+        if (world == null) return;
         double r = sphereRadius * sizeScale;
 
         ParticleCaster.spawn(null, world, Utils.SPLASH, center, (int) (80 * sizeScale), r, r, r, 0.5);
@@ -269,6 +287,7 @@ public class WaterSphere extends AttackSpell {
     }
 
     private void placeWater(LivingEntity caster, Location center) {
+        if (center == null || center.getWorld() == null) return;
         Block centerBlock = center.getBlock();
         if (centerBlock.getType() == Material.AIR) {
             if (Protection.blockEdit(caster, center)) {

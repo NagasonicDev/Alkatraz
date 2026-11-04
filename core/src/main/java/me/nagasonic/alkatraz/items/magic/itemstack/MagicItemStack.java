@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.lang.reflect.Method;
 
 /**
  * Reads and writes magic item data on Bukkit {@link ItemStack}s using PDC.
@@ -121,7 +122,12 @@ public final class MagicItemStack {
         if (rawInstance == null || rawInstance.isBlank()) {
             return Optional.of(MagicItemInstance.createDefault(read.definitionKey().get()));
         }
-        return Optional.of(ItemInstanceSerializer.deserialize(rawInstance));
+        try {
+            return Optional.of(ItemInstanceSerializer.deserialize(rawInstance));
+        } catch (Exception e) {
+            Alkatraz.getInstance().getLogger().warning("Skipping corrupt magic item instance: " + e.getMessage());
+            return Optional.of(MagicItemInstance.createDefault(read.definitionKey().get()));
+        }
     }
 
     public static ItemStack create(ItemDefinition definition, MagicItemInstance instance) {
@@ -145,6 +151,8 @@ public final class MagicItemStack {
         if (definition.visual().dyeColor() != null && meta instanceof LeatherArmorMeta leatherMeta) {
             leatherMeta.setColor(definition.visual().dyeColor());
         }
+
+        applyEquipmentModel(meta, definition);
 
         for (Map.Entry<Attribute, Double> entry : definition.vanillaAttributes().entrySet()) {
             String modName = definition.getKey().getKey() + "_" + entry.getKey().name().toLowerCase();
@@ -179,6 +187,7 @@ public final class MagicItemStack {
             MagicItemRegistries.ITEM_DEFINITIONS.get(instance.definitionKey()).ifPresent(def -> {
                 List<String> lore = buildLore(def, instance);
                 meta.setLore(lore);
+                applyEquipmentModel(meta, def);
             });
         }
         stack.setItemMeta(meta);
@@ -202,6 +211,17 @@ public final class MagicItemStack {
 
     public static Optional<ItemDefinition> readDefinition(ItemStack stack) {
         return readDefinitionKey(stack).flatMap(MagicItemRegistries.ITEM_DEFINITIONS::get);
+    }
+
+    /** Applies current armor visuals to an already-created plugin item when supported by the server API. */
+    public static boolean ensureEquipmentModel(ItemStack stack) {
+        if (stack == null || stack.getType().isAir() || !stack.hasItemMeta()) return false;
+        ItemDefinition definition = readDefinition(stack).orElse(null);
+        if (definition == null) return false;
+        ItemMeta meta = stack.getItemMeta();
+        if (meta == null || !applyEquipmentModel(meta, definition)) return false;
+        stack.setItemMeta(meta);
+        return true;
     }
 
     public static boolean isEngravingItem(ItemStack stack) {
@@ -249,8 +269,62 @@ public final class MagicItemStack {
         if (definition.visual().dyeColor() != null && meta instanceof LeatherArmorMeta leatherMeta) {
             leatherMeta.setColor(definition.visual().dyeColor());
         }
+
         stack.setItemMeta(meta);
         return stack;
+    }
+
+    /**
+     * Selects the resource-pack equipment layer on Paper versions which expose
+     * the equippable item component. Reflection keeps core loadable on the
+     * older Spigot APIs this plugin still supports; those servers retain the
+     * ordinary dyed-leather appearance.
+     */
+    private static boolean applyEquipmentModel(ItemMeta meta, ItemDefinition definition) {
+        if (!definition.hasComponent(EQUIPMENT_COMPONENT)
+                || !definition.visual().material().name().startsWith("LEATHER_")) {
+            return false;
+        }
+
+        String itemKey = definition.getKey().getKey();
+        int separator = itemKey.indexOf('_');
+        if (separator <= 0) return false;
+        String setName = itemKey.substring(0, separator);
+        if (!setName.equals("apprentice") && !setName.equals("scholar")
+                && !setName.equals("enchanter") && !setName.equals("archmage")) {
+            return false;
+        }
+
+        try {
+            Class<?> itemMetaApi = Class.forName("org.bukkit.inventory.meta.ItemMeta");
+            Method getEquippable = itemMetaApi.getMethod("getEquippable");
+            Object equippable = getEquippable.invoke(meta);
+            if (equippable == null) return false;
+            Class<?> equippableApi = getEquippable.getReturnType();
+            String materialName = definition.visual().material().name();
+            String slotName = materialName.endsWith("HELMET") ? "HEAD"
+                    : materialName.endsWith("CHESTPLATE") ? "CHEST"
+                    : materialName.endsWith("LEGGINGS") ? "LEGS"
+                    : materialName.endsWith("BOOTS") ? "FEET" : null;
+            if (slotName == null) return false;
+
+            Class<?> slotApi = Class.forName("org.bukkit.inventory.EquipmentSlot");
+            @SuppressWarnings({"rawtypes", "unchecked"})
+            Object slot = Enum.valueOf((Class<? extends Enum>) slotApi.asSubclass(Enum.class), slotName);
+            equippableApi.getMethod("setSlot", slotApi).invoke(equippable, slot);
+
+            Method setModel = equippableApi.getMethod("setModel", NamespacedKey.class);
+            // Hats use the custom item model itself in the head slot. Other
+            // armor pieces use the set's equipment asset for their worn layers.
+            setModel.invoke(equippable, materialName.endsWith("HELMET")
+                    ? null : new NamespacedKey("alkatraz", setName));
+            Method setEquippable = itemMetaApi.getMethod("setEquippable", equippableApi);
+            setEquippable.invoke(meta, equippable);
+            return true;
+        } catch (Exception ignored) {
+            // The legacy Bukkit API has no equippable model component.
+            return false;
+        }
     }
 
     private static String resolveTypeLabel(ItemDefinition definition) {

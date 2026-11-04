@@ -64,8 +64,11 @@ public interface MagicBrainService {
     @Nullable
     String getBrain(LivingEntity entity);
 
-    /** Returns the registered service instance. */
-    static MagicBrainService getInstance() {
+    /**
+     * Returns the registered service instance, or {@code null} before core registers it.
+     * Callers must null-check.
+     */
+    static @Nullable MagicBrainService getInstance() {
         return Holder.INSTANCE;
     }
 

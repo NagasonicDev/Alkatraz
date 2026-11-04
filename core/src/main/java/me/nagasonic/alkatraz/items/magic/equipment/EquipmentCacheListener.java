@@ -32,8 +32,17 @@ public final class EquipmentCacheListener implements Listener {
 
     private EquipmentCacheListener() {}
 
+    private static boolean registered = false;
+
     public static void tryRegister(Alkatraz plugin) {
+        if (registered) return;
+        registered = true;
         plugin.getServer().getPluginManager().registerEvents(new EquipmentCacheListener(), plugin);
+    }
+
+    /** Resets the registration guard after the plugin is disabled so a later enable re-registers. */
+    public static void resetRegistration() {
+        registered = false;
     }
 
     @EventHandler(priority = EventPriority.MONITOR)

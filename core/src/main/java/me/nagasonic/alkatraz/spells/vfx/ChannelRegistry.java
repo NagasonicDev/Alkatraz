@@ -9,6 +9,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.Map;
+import me.nagasonic.alkatraz.Alkatraz;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -127,7 +128,8 @@ public final class ChannelRegistry implements Listener {
             if (canceller != null) {
                 try {
                     canceller.run();
-                } catch (RuntimeException ignored) {
+                } catch (RuntimeException ex) {
+                    Alkatraz.logWarning("Channel canceller failed: " + ex.getMessage());
                     // A broken canceller must not stop the rest of the shutdown.
                 }
             }
@@ -180,7 +182,8 @@ public final class ChannelRegistry implements Listener {
         if (canceller != null) {
             try {
                 canceller.run();
-            } catch (RuntimeException ignored) {
+            } catch (RuntimeException ex) {
+                Alkatraz.logWarning("Channel canceller failed: " + ex.getMessage());
                 // Nothing to salvage on a quit.
             }
         }
@@ -195,8 +198,8 @@ public final class ChannelRegistry implements Listener {
         if (canceller != null) {
             try {
                 canceller.run();
-            } catch (RuntimeException ignored) {
-                // An interruption must not throw back into an event handler.
+            } catch (RuntimeException ex) {
+                Alkatraz.logWarning("Channel canceller failed: " + ex.getMessage());
             }
         }
         windUp.cancel(INTERRUPTED_LANG_KEY);

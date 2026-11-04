@@ -112,6 +112,7 @@ public class CastSpellGoal implements Goal {
         float baseCastTime = spell.getFullCastTime(wand, spell.getCastTime());
         long finalCastTime = (long) (baseCastTime * 20.0f);
         Bukkit.getScheduler().runTaskLater(Alkatraz.getInstance(), () -> {
+            if (ctx.self() == null || ctx.self().isDead()) return;
             Bukkit.getScheduler().cancelTask(circleTaskId);
             spell.mobCast(ctx.self(), wand);
         }, finalCastTime);

@@ -49,6 +49,7 @@ public class MagicBrainServiceImpl implements MagicBrainService {
             return true;
         }
         ensureMainThread(() -> {
+            if (entity == null || !entity.isValid()) return;
             MagicBrains.reload(brainId);
             GoalBrain brain = MagicBrains.brain(brainId);
             if (brain == null) return;
@@ -63,7 +64,9 @@ public class MagicBrainServiceImpl implements MagicBrainService {
         if (entity == null) return false;
         if (!(entity instanceof Mob)) return false;
         if (!Bukkit.isPrimaryThread()) {
-            ensureMainThread(() -> reloadBrain(entity));
+            ensureMainThread(() -> {
+                if (entity != null && entity.isValid()) reloadBrain(entity);
+            });
             return true;
         }
         String brainId = resolveBrainId(entity);
@@ -101,10 +104,17 @@ public class MagicBrainServiceImpl implements MagicBrainService {
     public boolean clearBrain(LivingEntity entity) {
         if (entity == null) return false;
         if (!(entity instanceof Mob)) return false;
-        ensureMainThread(() -> {
-            NBT.modifyPersistentData(entity, nbt -> { nbt.removeKey(MagicBrains.BRAIN_KEY); });
-            Alkatraz.getNms().applyBrain(entity, GoalBrain.builder().build());
-        });
+        if (!Bukkit.isPrimaryThread()) {
+            ensureMainThread(() -> {
+                if (entity != null && entity.isValid()) {
+                    NBT.modifyPersistentData(entity, nbt -> { nbt.removeKey(MagicBrains.BRAIN_KEY); });
+                    Alkatraz.getNms().applyBrain(entity, GoalBrain.builder().build());
+                }
+            });
+            return true;
+        }
+        NBT.modifyPersistentData(entity, nbt -> { nbt.removeKey(MagicBrains.BRAIN_KEY); });
+        Alkatraz.getNms().applyBrain(entity, GoalBrain.builder().build());
         return true;
     }
 

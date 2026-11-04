@@ -21,6 +21,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class SkinUtils {
+    /** Blocks the caller (up to ~4s). Never call from the main server thread; do network work async. */
     public static JsonObject generateFromURL(String url, boolean slim) throws InterruptedException, ExecutionException {
         return EXECUTOR.<JsonObject>submit(() -> {
             DataOutputStream out = null;
@@ -35,7 +36,7 @@ public class SkinUtils {
                 con.setRequestProperty("Accept", "application/json");
                 con.setRequestProperty("Content-Type", "application/json");
                 con.setConnectTimeout(1000);
-                con.setReadTimeout(30000);
+                con.setReadTimeout(3000);
                 out = new DataOutputStream(con.getOutputStream());
                 JsonObject req = new JsonObject();
                 req.addProperty("url", url);
@@ -54,11 +55,15 @@ public class SkinUtils {
                 if (out != null)
                     try {
                         out.close();
-                    } catch (IOException iOException) {}
+                    } catch (IOException iOException) {
+                        Alkatraz.logDebug("Failed to close skin stream: " + iOException.getMessage());
+                    }
                 if (reader != null)
                     try {
                         reader.close();
-                    } catch (IOException iOException) {}
+                    } catch (IOException iOException) {
+                        Alkatraz.logDebug("Failed to close skin stream: " + iOException.getMessage());
+                    }
             }
         }).get();
     }
@@ -68,14 +73,7 @@ public class SkinUtils {
         return Bukkit.getServer().createPlayerProfile(UUID.nameUUIDFromBytes(("OfflinePlayer:" + name).getBytes()), name);
     }
 
-    private static Map<UUID, String> names = new HashMap<>();
-    public static PlayerProfile getEffectiveProfile(Player player) {
-        String effectiveName = names.getOrDefault(player.getUniqueId(), player.getName());
-        PlayerProfile profile = Bukkit.getServer().createPlayerProfile(effectiveName);
-        profile.update();
-        if (profile.getUniqueId() == null) {
-            return getOfflineProfile(effectiveName);
-        }
-        return profile;
+    public static void shutdown() {
+        EXECUTOR.shutdownNow();
     }
 }

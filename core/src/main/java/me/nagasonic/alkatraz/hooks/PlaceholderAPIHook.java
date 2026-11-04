@@ -19,6 +19,10 @@ public class PlaceholderAPIHook extends PluginHook {
         expansion.registerHandler(new ResearchPlaceholder());
         expansion.registerHandler(new HotbarPlaceholder());
         expansion.registerHandler(new FocusPlaceholder());
+        expansion.registerHandler(new EffectPlaceholder());
+        expansion.registerHandler(new EffectPlaceholder("effects"));
+        expansion.registerHandler(new EffectPlaceholder("activeeffect"));
+        expansion.registerHandler(new EffectPlaceholder("activeeffects"));
 
         YamlConfiguration config = Alkatraz.getPluginConfig();
         if (config.getBoolean("placeholders.leaderboard.enabled", true)) {

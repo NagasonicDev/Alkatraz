@@ -33,10 +33,12 @@ public final class SocialTriggerListener implements Listener {
     public void onChat(AsyncPlayerChatEvent event) {
         if (!TriggerPipeline.isBound(ON_CHAT)) return;
         Player player = event.getPlayer();
-        Map<String, Object> params = new HashMap<>();
-        params.put("message", event.getMessage());
-        org.bukkit.Bukkit.getScheduler().runTask(Alkatraz.getInstance(), () ->
-                TriggerDispatch.dispatch(player, "on_chat", params));
+        String message = event.getMessage();
+        org.bukkit.Bukkit.getScheduler().runTask(Alkatraz.getInstance(), () -> {
+            Map<String, Object> params = new HashMap<>();
+            params.put("message", message);
+            TriggerDispatch.dispatch(player, "on_chat", params);
+        });
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

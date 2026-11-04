@@ -23,7 +23,7 @@ public class RecipeRequirementsSubMenu extends Menu {
     private final RecipeEditMenu parent;
 
     public RecipeRequirementsSubMenu(Player viewer, RecipeEditMenu parent) {
-        super(viewer, ColorFormat.format(Alkatraz.getLangManager().get("recipes.edit.requirements")), 45);
+        super(viewer, packTitle("recipe_requirements", ColorFormat.format(Alkatraz.getLangManager().get("recipes.edit.requirements"))), 45);
         this.parent = parent;
     }
 
@@ -49,12 +49,14 @@ public class RecipeRequirementsSubMenu extends Menu {
         }
         ItemStack add = ItemBuilder.of(Material.LIME_CONCRETE)
                 .name(lang().get("recipes.edit.add_requirement"))
+                .guiModel("confirm_button")
                 .build();
         setMenuData(add, "action", "add");
         inventory.setItem(ADD_SLOT, add);
 
         ItemStack back = ItemBuilder.of(Material.BARRIER)
                 .name(lang().get("recipes.edit.back"))
+                .guiModel("back_button")
                 .build();
         setMenuData(back, "action", "back");
         inventory.setItem(BACK_SLOT, back);

@@ -188,6 +188,14 @@ public class Buff extends Spell {
         return CastCircle.start(this, caster, e);
     }
 
+    /**
+     * Clears any modifiers previously applied by this spell instance to the given
+     * target, so buffs do not outlive a quit, death or world change.
+     */
+    public void clearActiveModifiersFor(LivingEntity target) {
+        PooledModifierSpellSupport.clearActiveModifiers(target, this, activeModifiers);
+    }
+
     @Override
     public ItemStack getSpellBook() {
         return new Spellbook(getId())

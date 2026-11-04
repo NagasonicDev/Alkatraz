@@ -10,6 +10,8 @@ import me.nagasonic.alkatraz.mobs.ai.task.TaskBrainEngine;
 import me.nagasonic.alkatraz.mobs.ai.task.TaskBrainTicker;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
 import org.jetbrains.annotations.Nullable;
@@ -41,7 +43,9 @@ public final class MagicAiServiceImpl extends MagicBrainServiceImpl implements M
         if (entity == null || brainId == null || brainId.isBlank()) return false;
         if (!(entity instanceof Mob)) return false;
         if (!Bukkit.isPrimaryThread()) {
-            ensureMainThread(() -> setBrain(entity, brainId));
+            ensureMainThread(() -> {
+                if (entity != null && entity.isValid()) setBrain(entity, brainId);
+            });
             return true;
         }
         MagicBrains.reload(brainId);
@@ -62,7 +66,9 @@ public final class MagicAiServiceImpl extends MagicBrainServiceImpl implements M
         if (entity == null) return false;
         if (!(entity instanceof Mob)) return false;
         if (!Bukkit.isPrimaryThread()) {
-            ensureMainThread(() -> reloadBrain(entity));
+            ensureMainThread(() -> {
+                if (entity != null && entity.isValid()) reloadBrain(entity);
+            });
             return true;
         }
         String brainId = resolveBrainId(entity);
@@ -110,7 +116,7 @@ public final class MagicAiServiceImpl extends MagicBrainServiceImpl implements M
     public boolean clearBrain(LivingEntity entity) {
         if (entity == null) return false;
         if (!(entity instanceof Mob)) return false;
-        ensureMainThread(() -> {
+        Runnable core = () -> {
             TaskBrainTicker.detach(entity, true);
             NBT.modifyPersistentData(entity, nbt -> {
                 nbt.removeKey(MagicBrains.BRAIN_KEY);
@@ -118,7 +124,14 @@ public final class MagicAiServiceImpl extends MagicBrainServiceImpl implements M
                 nbt.removeKey(TaskBrainTicker.MEMORY_KEY);
             });
             Alkatraz.getNms().applyBrain(entity, GoalBrain.builder().build());
-        });
+        };
+        if (Bukkit.isPrimaryThread()) {
+            core.run();
+        } else {
+            ensureMainThread(() -> {
+                if (entity != null && entity.isValid()) core.run();
+            });
+        }
         return true;
     }
 
@@ -177,6 +190,28 @@ public final class MagicAiServiceImpl extends MagicBrainServiceImpl implements M
             return true;
         }
         return TaskBrainTicker.setPinnedActivity(entity, activityId);
+    }
+
+    @Override
+    public boolean setAttribute(LivingEntity entity, String name, double value) {
+        if (entity == null || name == null || name.isBlank()) return false;
+        if (!Bukkit.isPrimaryThread()) {
+            ensureMainThread(() -> setAttribute(entity, name, value));
+            return true;
+        }
+        Attribute attribute = null;
+        String key = name.trim().toUpperCase().replace('-', '_');
+        for (Attribute candidate : Attribute.values()) {
+            if (candidate.name().equals(key)) {
+                attribute = candidate;
+                break;
+            }
+        }
+        if (attribute == null) return false;
+        AttributeInstance instance = entity.getAttribute(attribute);
+        if (instance == null) return false;
+        instance.setBaseValue(value);
+        return true;
     }
 
     @Override

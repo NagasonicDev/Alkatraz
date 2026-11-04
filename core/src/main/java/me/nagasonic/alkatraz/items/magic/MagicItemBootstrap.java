@@ -27,7 +27,7 @@ import me.nagasonic.alkatraz.items.magic.condition.implementation.WorldCondition
 import me.nagasonic.alkatraz.items.magic.config.MagicItemConfigLoader;
 import me.nagasonic.alkatraz.api.magic.definition.ItemDefinition;
 import me.nagasonic.alkatraz.items.magic.effect.implementation.ApplyPotionEffect;
-import me.nagasonic.alkatraz.items.magic.effect.implementation.CommandEffect;
+// Command-effect registration intentionally removed for safety; see shortcut comment.
 import me.nagasonic.alkatraz.items.magic.effect.implementation.DamageEffect;
 import me.nagasonic.alkatraz.api.magic.effect.EffectType;
 import me.nagasonic.alkatraz.items.magic.effect.implementation.ExplosionEffect;
@@ -77,6 +77,7 @@ public final class MagicItemBootstrap {
         equipmentService.registerVirtualSlot(EquipmentSlot.NECKLACE, new StorageSlotResolver(EquipmentSlot.NECKLACE));
         equipmentService.registerVirtualSlot(EquipmentSlot.BRACELET, new StorageSlotResolver(EquipmentSlot.BRACELET));
         equipmentService.registerVirtualSlot(EquipmentSlot.PENDANT, new StorageSlotResolver(EquipmentSlot.PENDANT));
+        equipmentService.registerVirtualSlot(EquipmentSlot.BODY, new StorageSlotResolver(EquipmentSlot.BODY));
         AttributeService attributeService = AttributeService.getInstance();
         attributeService.registerSource(new EquipmentAttributeSource(equipmentService));
         attributeService.registerSource(StatPointsAttributeSource.getInstance());
@@ -259,9 +260,13 @@ public final class MagicItemBootstrap {
 
         final int[] itemCount = {0};
         MagicItemService.loadYamlDefinitions("magic/items", (path, config) -> {
-            ItemDefinition definition = MagicItemConfigLoader.loadItemDefinition(config);
-            MagicItemRegistries.ITEM_DEFINITIONS.register(definition);
-            itemCount[0]++;
+            try {
+                ItemDefinition definition = MagicItemConfigLoader.loadItemDefinition(config);
+                MagicItemRegistries.ITEM_DEFINITIONS.register(definition);
+                itemCount[0]++;
+            } catch (Exception e) {
+                Alkatraz.logWarning("Skipping invalid item definition " + path + ": " + e.getMessage());
+            }
         });
 
         final int[] recipeCount = {0};
@@ -272,12 +277,16 @@ public final class MagicItemBootstrap {
 
         final int[] engravingCount = {0};
         MagicItemService.loadYamlDefinitions("magic/engravings", (path, config) -> {
-            EngravingDefinition engraving = MagicItemConfigLoader.loadEngravingDefinition(config);
-            MagicItemRegistries.ENGRAVING_DEFINITIONS.register(engraving);
-            if (config.contains("recipe")) {
-                MagicItemRecipeManager.registerEngravingRecipe(engraving, config);
+            try {
+                EngravingDefinition engraving = MagicItemConfigLoader.loadEngravingDefinition(config);
+                MagicItemRegistries.ENGRAVING_DEFINITIONS.register(engraving);
+                if (config.contains("recipe")) {
+                    MagicItemRecipeManager.registerEngravingRecipe(engraving, config);
+                }
+                engravingCount[0]++;
+            } catch (Exception e) {
+                Alkatraz.logWarning("Skipping invalid engraving definition " + path + ": " + e.getMessage());
             }
-            engravingCount[0]++;
         });
 
         me.nagasonic.alkatraz.items.magic.util.ItemTypeMapper.load();
@@ -466,8 +475,8 @@ public final class MagicItemBootstrap {
                 MagicKeys.alkatraz("particle"), ParticleEffect::fromConfig));
         MagicItemRegistries.EFFECT_TYPES.register(new EffectType(
                 MagicKeys.alkatraz("teleport"), TeleportEffect::fromConfig));
-        MagicItemRegistries.EFFECT_TYPES.register(new EffectType(
-                MagicKeys.alkatraz("command"), CommandEffect::fromConfig));
+// NOTE: command effects are intentionally disabled; executing console commands from item/research config
+        // is a privilege escalation path. Remove this comment when a safe allow-list exists.
         MagicItemRegistries.EFFECT_TYPES.register(new EffectType(
                 MagicKeys.alkatraz("message"), MessageEffect::fromConfig));
         MagicItemRegistries.EFFECT_TYPES.register(new EffectType(

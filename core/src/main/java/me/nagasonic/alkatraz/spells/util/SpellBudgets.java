@@ -39,12 +39,13 @@ public final class SpellBudgets {
      */
     private static final double[] AFFINITY = {0, 28, 45, 63, 85, 105, 130, 154, 182, 215};
 
-    private static final double[] BURST = {1.5, 3.9, 6.1, 9.0, 13.9, 22.1, 34.1, 48.0, 64.1, 90.0};
-    private static final double[] SUSTAIN = {0, 0, 0, 14, 22, 36, 54, 76, 102, 144};
-    private static final double[] TERRAIN = {0, 0, 0, 120, 220, 380, 620, 950, 1400, 2000};
+    /** Smoother early progression (circles 1-2); circles 3-9 match existing spell designs. Circle 9 remains a massive 2.8x capstone jump. */
+    private static final double[] BURST = {1.5, 3.5, 6.0, 9.0, 13.9, 22.1, 34.1, 48.0, 64.1, 180.0};
+    private static final double[] SUSTAIN = {0, 0, 0, 14, 22, 36, 54, 76, 102, 280.0};
+    private static final double[] TERRAIN = {0, 0, 0, 120, 220, 380, 620, 950, 1400, 3600};
     private static final double[] DENIAL = {0, 0, 0, 900, 1400, 2100, 3000, 4200, 5600, 7500};
 
-    private static final double[] POWER = {1.5, 3.0, 4.2, 5.5, 7.5, 10.8, 14.8, 18.9, 22.7, 28.6};
+    private static final double[] POWER = {1.5, 3.0, 4.2, 5.5, 7.5, 10.8, 14.8, 18.9, 22.7, 57.2};
     private static final double[] MANA = {5, 15, 24, 48, 75, 120, 165, 240, 450, 600};
     /**
      * Cast time is a per-circle <em>range</em>, not a ladder. The single-value ladder

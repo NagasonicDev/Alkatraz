@@ -33,8 +33,10 @@ import static me.nagasonic.alkatraz.util.ColorFormat.format;
 
 public class StatUtils {
     public static void addMana(Player p, double amount) {
+        if (p == null) return;
         MagicProfile profile = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
-
+        if (profile == null) return;
+        double maxMana = Math.max(1.0, profile.getMaxMana());
         profile.setMana(profile.getMana() + amount);
         if (profile.getMana() > profile.getMaxMana()) {
             profile.setMana(profile.getMaxMana());
@@ -45,7 +47,7 @@ public class StatUtils {
             if (WandUtils.isWand(item) || WandUtils.isGrimoire(item) || SpellHotbarManager.isActive(p)){
                 Alkatraz.getNms().fakeExp(
                         p,
-                        (float) (profile.getMana() / profile.getMaxMana()),
+                        (float) (profile.getMana() / maxMana),
                         (int) profile.getMana(),
                         1
                 );
@@ -54,8 +56,10 @@ public class StatUtils {
     }
 
     public static void subMana(Player p, double amount) {
+        if (p == null) return;
         MagicProfile profile = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
-
+        if (profile == null) return;
+        double maxMana = Math.max(1.0, profile.getMaxMana());
         double previousMana = profile.getMana();
         profile.setMana(previousMana - amount);
         if (profile.getMana() < 0) {
@@ -67,7 +71,7 @@ public class StatUtils {
             if (WandUtils.isWand(item) || WandUtils.isGrimoire(item) || SpellHotbarManager.isActive(p)) {
                 Alkatraz.getNms().fakeExp(
                         p,
-                        (float) (profile.getMana() / profile.getMaxMana()),
+                        (float) (profile.getMana() / maxMana),
                         (int) profile.getMana(),
                         1
                 );
@@ -107,15 +111,18 @@ public class StatUtils {
     }
 
     public static void addSpellMastery(Player p, Spell spell, int mastery){
+        if (p == null) return;
         MagicProfile profile = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
-        if (profile.getSpellMastery(spell) + mastery < 0){
-            profile.setSpellMastery(spell, 0);
-        }else if (profile.getSpellMastery(spell) + mastery >= spell.getMaxMastery()){
+        if (profile == null) return;
+        int current = profile.getSpellMastery(spell);
+        if (mastery > 0 && current + mastery >= spell.getMaxMastery()) {
             profile.setSpellMastery(spell, spell.getMaxMastery());
             profile.setStatPoints(profile.getStatPoints() + getStatPointsMastery(spell.getLevel()));
             ResearchPointService.addPoints(p, "mastery_max");
-        }else {
-            profile.setSpellMastery(spell, profile.getSpellMastery(spell) + mastery);
+        } else if (current + mastery < 0) {
+            profile.setSpellMastery(spell, 0);
+        } else {
+            profile.setSpellMastery(spell, current + mastery);
         }
         if (p.isOnline()){
             Map<Spell, BossBar> masteryBars = profile.getMasteryBars();
@@ -124,9 +131,9 @@ public class StatUtils {
                 BossBar bar = masteryBars.get(spell);
                 bar.removePlayer(p.getPlayer());
                 bar.setTitle(format(spell.getDisplayName() + " Mastery: " + profile.getSpellMastery(spell) + "/" + spell.getMaxMastery()));
-                if (profile.getSpellMastery(spell) / spell.getMaxMastery() > 1){
+                if ((double) profile.getSpellMastery(spell) / spell.getMaxMastery() > 1){
                     bar.setProgress(1);
-                }else if (profile.getSpellMastery(spell) / spell.getMaxMastery() < 0){
+                }else if ((double) profile.getSpellMastery(spell) / spell.getMaxMastery() < 0){
                     bar.setProgress(0);
                 }else {bar.setProgress((double) profile.getSpellMastery(spell) / spell.getMaxMastery()); }
                 bar.addPlayer(p.getPlayer());
@@ -145,9 +152,9 @@ public class StatUtils {
                 profile.setMasteryBarTaskIds(taskIds);
             }else{
                 BossBar bar = Bukkit.createBossBar(format(spell.getDisplayName() + ": " + profile.getSpellMastery(spell) + "/" + spell.getMaxMastery()), spell.getMasteryBarColor(), BarStyle.SOLID);
-                if (profile.getSpellMastery(spell) / spell.getMaxMastery() > 1){
+                if ((double) profile.getSpellMastery(spell) / spell.getMaxMastery() > 1){
                     bar.setProgress(1);
-                }else if (profile.getSpellMastery(spell) / spell.getMaxMastery() < 0){
+                }else if ((double) profile.getSpellMastery(spell) / spell.getMaxMastery() < 0){
                     bar.setProgress(0);
                 }else {bar.setProgress((double) profile.getSpellMastery(spell) / spell.getMaxMastery()); }
                 bar.addPlayer(p.getPlayer());
@@ -196,12 +203,32 @@ public class StatUtils {
         ProgressionService.addArcaneKnowledge(p, amount);
     }
 
+    public static void addArcaneKnowledge(OfflinePlayer p, double amount, String world) {
+        ProgressionService.addArcaneKnowledge(p, amount, world);
+    }
+
+    public static void addArcaneKnowledge(OfflinePlayer p, double amount, String world, String group) {
+        ProgressionService.addArcaneKnowledge(p, amount, world, group);
+    }
+
     public static void addArcaneKnowledge(OfflinePlayer p, String sourceId) {
         ProgressionService.addArcaneKnowledge(p, sourceId);
     }
 
+    public static void addArcaneKnowledge(OfflinePlayer p, String sourceId, String world) {
+        ProgressionService.addArcaneKnowledge(p, sourceId, world);
+    }
+
+    public static void addArcaneKnowledge(OfflinePlayer p, String sourceId, String world, String group) {
+        ProgressionService.addArcaneKnowledge(p, sourceId, 0, world, group);
+    }
+
     public static void addArcaneKnowledge(OfflinePlayer p, String sourceId, int circle) {
         ProgressionService.addArcaneKnowledge(p, sourceId, circle);
+    }
+
+    public static void addArcaneKnowledge(OfflinePlayer p, String sourceId, int circle, String world, String group) {
+        ProgressionService.addArcaneKnowledge(p, sourceId, circle, world, group);
     }
 
     public static int getStatPoints(int circle) {
@@ -222,6 +249,7 @@ public class StatUtils {
     }
 
     public static void addCircle(@NotNull Player p, int circle) {
+        if (p == null) return;
         MagicProfile profile = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
 
         int previousCircle = profile.getCircleLevel();

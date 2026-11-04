@@ -42,7 +42,7 @@ public class ConfirmEngravingMenu extends Menu {
     }
 
     public ConfirmEngravingMenu(Player viewer) {
-        super(viewer, ColorFormat.format(lang().get("menu.confirm_engraving")), 45);
+        super(viewer, packTitle("confirm_engraving", ColorFormat.format(lang().get("menu.confirm_engraving"))), 45);
     }
 
     @Override
@@ -107,6 +107,7 @@ public class ConfirmEngravingMenu extends Menu {
         lore.add(ColorFormat.format("&7You have: &b" + currentMana + " &7mana"));
         return ItemBuilder.of(Material.ENDER_PEARL)
                 .name("&bMana Cost")
+                .guiModel("engrave_mana")
                 .rawLore(lore)
                 .build();
     }
@@ -121,6 +122,7 @@ public class ConfirmEngravingMenu extends Menu {
         lore.add(ColorFormat.format("&7The engraving is added to the item."));
         return ItemBuilder.of(Material.GREEN_DYE)
                 .name("&aSuccess Chance")
+                .guiModel("engrave_success")
                 .rawLore(lore)
                 .build();
     }
@@ -135,6 +137,7 @@ public class ConfirmEngravingMenu extends Menu {
         lore.add(ColorFormat.format("&7On failure the rune &fand mana &7are lost."));
         return ItemBuilder.of(Material.RED_CONCRETE)
                 .name("&cFailure Chance")
+                .guiModel("engrave_failure")
                 .rawLore(lore)
                 .build();
     }
@@ -153,6 +156,7 @@ public class ConfirmEngravingMenu extends Menu {
         return ItemBuilder.of(Material.LIME_CONCRETE)
                 .name("&aConfirm Engraving")
                 .rawLore(lore)
+                .guiModel("confirm_button")
                 .build();
     }
 
@@ -160,6 +164,7 @@ public class ConfirmEngravingMenu extends Menu {
         return ItemBuilder.of(Material.BARRIER)
                 .name("&cCancel")
                 .lore("&7Return to the engraving table.")
+                .guiModel("cancel_button")
                 .build();
     }
 

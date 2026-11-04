@@ -48,7 +48,7 @@ public class PooledSlotSelectionMenu extends PagedMenu<OptionValue<?>> {
 
     public PooledSlotSelectionMenu(Player viewer, Spell spell, SpellOption groupEntry) {
         super(viewer,
-                ColorFormat.format("&5" + resolveTitle(groupEntry, spell)),
+                pooledPackTitle(spell, groupEntry),
                 54,
                 resolvePoolValues(spell, groupEntry),
                 14);
@@ -81,6 +81,13 @@ public class PooledSlotSelectionMenu extends PagedMenu<OptionValue<?>> {
         SpellOption pool = findPoolOption(spell, resolveGroupId(groupEntry));
         if (pool != null) return pool.getDisplayName();
         return groupEntry.getDisplayName();
+    }
+
+    private static String pooledPackTitle(Spell spell, SpellOption groupEntry) {
+        String fallback = ColorFormat.format("&5" + resolveTitle(groupEntry, spell));
+        String groupId = resolveGroupId(groupEntry);
+        int displayCount = resolveDisplaySlotCount(findPoolOption(spell, groupId), findSlotOptions(spell, groupId));
+        return packTitle(displayCount <= 2 ? "pooled_2" : "pooled_3", fallback);
     }
 
     private static List<OptionValue<?>> resolvePoolValues(Spell spell, SpellOption groupEntry) {
@@ -140,6 +147,7 @@ public class PooledSlotSelectionMenu extends PagedMenu<OptionValue<?>> {
     protected void addBackButton() {
         ItemStack back = ItemBuilder.of(Material.BARRIER)
                 .name(lang().get("pooled.back_to_options"))
+                .guiModel("back_button")
                 .build();
         setMenuData(back, "action", "back");
         inventory.setItem(backButtonSlot, back);
@@ -224,7 +232,8 @@ public class PooledSlotSelectionMenu extends PagedMenu<OptionValue<?>> {
 
     private ItemStack buildLockedSlotItem(SpellOption slotOption) {
         ItemBuilder builder = ItemBuilder.of(Material.GRAY_STAINED_GLASS_PANE)
-                .name("&8" + slotOption.getDisplayName() + " &7(Locked)");
+                .name("&8" + slotOption.getDisplayName() + " &7(Locked)")
+                .guiModel("locked_slot");
 
         if (!slotOption.getUnmetRequirements(viewer).isEmpty()) {
             builder.lore("&c&lRequirements:");

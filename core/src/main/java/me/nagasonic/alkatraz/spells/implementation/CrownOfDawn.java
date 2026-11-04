@@ -4,7 +4,10 @@ import de.tr7zw.changeme.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
+import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.lang.LangManager;
+import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
+import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
 import me.nagasonic.alkatraz.spells.components.SpellParticleComponent;
@@ -16,82 +19,87 @@ import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.BarrierType;
 import me.nagasonic.alkatraz.spells.types.SpellAttackContext;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
+import me.nagasonic.alkatraz.spells.types.properties.implementation.BarrierProperties;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
+import me.nagasonic.alkatraz.spells.util.SustainEffect;
 import me.nagasonic.alkatraz.spells.vfx.CastCircle;
+import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.ParticleUtils;
+import me.nagasonic.alkatraz.util.StatUtils;
 import me.nagasonic.alkatraz.util.Utils;
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.World;
+import org.bukkit.boss.BarStyle;
+import org.bukkit.boss.BossBar;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
 /**
- * Circle 9 LIGHT, the element's DENIAL capstone: a wall of light that denies passage and
- * executes anything it touches below 30% health.
+ * Circle 9 LIGHT, the element's SUSTAIN capstone: a crown of light that hovers the caster
+ * {@code hover_altitude} above the ground and sears the armour off everything standing under
+ * it for as long as the mana holds, and never longer than {@code duration_seconds}. Cast it, it
+ * drains; cast it again, it lets go.
  *
- * <p><b>No blocks are ever placed, changed or restored.</b> A wall of light is not terrain
- * and light never reshapes land, which is what the deviations table records. The wall is
- * particles, a radial push and an execution. There is no {@code Block.setType}, no
- * {@code FallingBlock}, no {@code Protection.blockEdit} and no {@code SpellBlockComponent}
- * anywhere in this class, and the yml carries no {@code terrain_budget} key.
- *
- * <h2>Why the push is load-bearing</h2>
- * Without it an enemy walks straight through a wall, which is the entire point of a wall.
- * It is {@code Barrier.java}'s radial push with its literal {@code 0.3} replaced by
- * {@code push_strength}, run per segment over the band.
+ * <p><b>No blocks are ever placed, changed or restored.</b> A crown of light is not terrain and
+ * light never reshapes land. There is no {@code Block.setType}, no {@code FallingBlock}, no
+ * {@code Protection.blockEdit} and no {@code SpellBlockComponent} anywhere in this class, and
+ * the yml carries no {@code terrain_budget} key.
  *
  * <h2>Damage contract</h2>
- * One {@link SpellAttackContext} for the whole wall, created at cast time and never scaled
- * there. {@code context.power(target)} inside {@link #damageInBand} is the only scaling
- * call, once per target per cast. {@code AttackProperties.hasHit} is per-cast and
- * {@code context.tick()} never clears it, so one application per target per cast is the hard
- * ceiling - one of the wall's eighteen overlapping segment scans finding a body is what the
- * guard exists to stop.
- *
- * <p>{@code denial_damage_cap} caps the spell's <em>total</em> incidental damage per cast
- * across however many entities walk into the wall, not one target's share of it, so the
- * accumulator is cast-level. Fifteen passes at 6.0 is the theoretical 90.0; the clip is
- * applied after {@code getPower} by {@code Math.min}, which is legal and does not
- * double-apply - only the resulting number is clipped, and clipping before {@code getPower}
- * would under-scale the option modifiers. The execution is not damage and is not priced.
+ * One {@link SpellAttackContext} for the whole sustain. {@code AttackProperties}' hit set is
+ * never cleared for the life of a cast, so {@code context.hit(target)} would admit the FIRST
+ * opening and refuse the other twenty-nine; the opening clock is the {@code elapsedTicks %
+ * damageIntervalTicks} test below and the hit is recorded with {@code properties.hit(target)} so
+ * a single counter still kills the whole crown. {@code context.power(target)} is called exactly
+ * once per target per opening - that is the call {@code SpellAttackContext} throws on a repeat.
  */
-public class CrownOfDawn extends AttackSpell {
+public class CrownOfDawn extends AttackSpell implements Listener {
 
     /** Pure white - the brightest thing in the element. */
     private static final Color CROWN_COLOR = Color.fromRGB(255, 255, 255);
     private static final Particle.DustOptions CROWN_DUST = new Particle.DustOptions(CROWN_COLOR, 1.0F);
-    private static final Particle.DustOptions CROWN_EDGE = new Particle.DustOptions(CROWN_COLOR, 0.6F);
 
-    /** The only non-light colour in all five light spells, and only ever used on a break. */
-    private static final Particle.DustOptions BREAK_DUST =
-            new Particle.DustOptions(Color.fromRGB(120, 90, 60), 0.5F);
+    /** The opening tick's launch, in blocks per tick. A LAUNCH, not the old radial push. */
+    private static final double LIFT = 2.6;
+    /** Largest vertical correction the hover may make in one tick, up or down. */
+    private static final double HOVER_STEP = 0.7;
+    /** How far below the caster the ground search reaches before the hover holds still. */
+    private static final int GROUND_DEPTH = 24;
+    /** Light pillar geometry. */
+    private static final int PILLAR_LAYERS = 8;
+    private static final int PILLAR_POINTS = 10;
+    private static final double PILLAR_PHASE = Math.PI / 6.0;
+    private static final double PILLAR_RADIUS = 0.6;
+    /**
+     * Inert hitpoints on the bulwark's properties carrier. Nothing damages it -
+     * {@code SpellComponentHandler.resolveDefense} needs a {@code DamageableBarrier} for that,
+     * and the crown only exists here so that {@code deflectProjectiles}, which requires a
+     * {@code BarrierProperties}, sees a DEFENSE component at all.
+     */
+    private static final double BULWARK_HITPOINTS = 60.0;
+    /** The mob path gets a five second crown on the ground, not the player's sixty second hover. */
+    private static final int MOB_TICKS = 100;
 
-    /** Extra blocks either side of {@code wall_half_thickness} that the push and the damage scan share. */
-    private static final double BAND_MARGIN = 0.6;
-    /** Vertical step the wall's particles climb on, in blocks. */
-    private static final double RISE_STEP = 0.5;
-    /** Lifetime of each per-segment DEFENSE component. 2 keeps a steady overlap at period 1. */
-    private static final int COMPONENT_LIFETIME = 2;
-    /** The mob path's wall is half the player path's length. */
-    private static final double MOB_LENGTH_FACTOR = 0.5;
+    private static CrownOfDawn registeredListener;
 
     private CrownOfDawnConfig config = CrownOfDawnConfig.fromConfig(null);
+    /** The sustain's hard ceiling. Without it the mana alone would buy three times the budget. */
+    private double durationSeconds = 60.0;
 
     public CrownOfDawn(String type) {
         super(type);
@@ -99,19 +107,6 @@ public class CrownOfDawn extends AttackSpell {
 
     private static LangManager lang() {
         return Alkatraz.getLangManager();
-    }
-
-    /**
-     * One cast's wall geometry, resolved once so the runnable does not re-derive it every tick.
-     *
-     * @param segments   the grounded foot of each wall segment, in order along the aim
-     * @param height     how far the wall reaches upward, in blocks
-     * @param push       horizontal velocity added to everything in the band each tick
-     * @param threshold  the health fraction below which an entity is executed
-     * @param thickness  half the wall's thickness in blocks, which is also the component radius
-     */
-    private record WallPlan(List<Location> segments, double height, double push,
-                            double threshold, double thickness) {
     }
 
     @Override
@@ -122,23 +117,128 @@ public class CrownOfDawn extends AttackSpell {
         loadCommonConfig(spellConfig);
         loadOptions();
         this.config = CrownOfDawnConfig.fromConfig(spellConfig.getValues(false));
+        this.durationSeconds = spellConfig.getDouble("duration_seconds", 60.0);
+        if (registeredListener != null && registeredListener != this) {
+            HandlerList.unregisterAll(registeredListener);
+        }
+        registeredListener = this;
+        Alkatraz.getInstance().getServer().getPluginManager()
+                .registerEvents(this, Alkatraz.getInstance());
+    }
+
+    /**
+     * The crown's whole life, in ticks. {@code hit_count} must equal the openings it fits;
+     * the cap is enforced in the sustain body, not left to the mana to stop at.
+     */
+    private int lifetimeTicks() {
+        return Math.max(1, (int) Math.round(durationSeconds * 20.0));
     }
 
     @Override
     public void castAction(Player caster, ItemStack wand) {
         if (caster.isDead()) return;
 
-        // ONE context for the whole wall. The wall's incidental damage shares it, exactly as a
-        // volley shares one context. No getPower at cast time.
+        double upkeep = Math.max(0.0,
+                getModifiedStat(caster, "upkeep_mana_per_second", config.upkeepManaPerSecond()));
+        double radius = Math.max(1.0, getModifiedStat(caster, "hover_radius", config.hoverRadius()));
+        double altitude = getModifiedStat(caster, "hover_altitude", config.hoverAltitude());
+        // A zero interval would be a modulo by zero on the first tick. Clamp to one.
+        int interval = Math.max(1, config.damageIntervalTicks());
+
+        // ONE context for the whole sustain, created here and never scaled here.
         SpellAttackContext context = SpellAttackContext.of(this, caster, wand, AttackType.MAGIC);
+        AttackProperties props = context.properties();
 
-        double length = getModifiedStat(caster, "wall_length", config.wallLength());
-        double height = getModifiedStat(caster, "wall_height", config.wallHeight());
-        Vector direction = Utils.safeNormalize(caster.getEyeLocation().getDirection());
-        if (direction == null) return;
+        // ONE properties carrier for the whole sustain: its constructor creates a BossBar, and
+        // deflectProjectiles only reads DEFENSE components whose properties ARE a
+        // BarrierProperties, so one per opening would both leak bars and defeat the bulwark.
+        BarrierProperties bulwark = new BarrierProperties(
+                caster, caster.getLocation(), BULWARK_HITPOINTS, BarrierType.PHYSICAL, radius);
 
-        WallPlan plan = buildPlan(caster, direction, length, height);
-        raiseWall(caster, wand, context, plan);
+        BossBar[] bar = new BossBar[1];
+
+        SustainEffect.Toggle toggled = SustainEffect.toggle(caster, upkeep, CrownOfDawn.this, (p, elapsedTicks) -> {
+            context.tick();
+
+            Location ground = groundUnder(p);
+            double targetY = hoverTargetY(p, ground, altitude);
+            hold(p, targetY);
+
+            // AFTER the hold, so the launch is what the opening tick actually ends on. A hold
+            // first would cap the opening tick at HOVER_STEP and the launch would never be felt.
+            if (elapsedTicks == 0) {
+                launch(p, radius);
+            }
+
+            // The pillar tracks the caster, foot on the ground the crown hovers over.
+            if (ground != null) {
+                SpellVfx.column(CROWN_COLOR, p, ground, targetY - ground.getY(), PILLAR_RADIUS,
+                        PILLAR_LAYERS, PILLAR_POINTS, PILLAR_PHASE);
+            }
+            double crownSpin = elapsedTicks * 0.18;
+            SpellVfx.orbit(CROWN_COLOR, p, p.getLocation().add(0, 2.2, 0), 1.25, 0.55,
+                    3, crownSpin);
+            ParticleCaster.spawn(p, p.getWorld(), Utils.END_ROD,
+                    p.getLocation().add(0, 2.0, 0), 3, 0.45, 0.8, 0.45, 0.01);
+
+            updateBar(bar, p, upkeep);
+
+            if (elapsedTicks % interval == 0) {
+                // BULWARK. deflectProjectiles reads the carrier's cast location, so it moves with
+                // the caster rather than staying where the crown was opened.
+                bulwark.setCastLocation(p.getLocation());
+                SpellComponentHandler.register(new SpellParticleComponent(
+                        CrownOfDawn.this, bulwark, p, wand, SpellComponentType.DEFENSE,
+                        p.getLocation(), radius, interval));
+
+                // DISPERSAL. The only circle-9 spell that clears its caster's own debuffs.
+                p.removePotionEffect(PotionEffectType.WEAKNESS);
+                p.removePotionEffect(PotionEffectType.BLINDNESS);
+                p.removePotionEffect(PotionEffectType.WITHER);
+
+                sear(p, wand, context, props, radius);
+            }
+
+            // THE CAP. duration_seconds is the only thing making power x hit_count true: the
+            // mana alone would buy 208s = 104 openings = 832.0, three times the circle-9
+            // sustain budget, and SpellBudgetTest only ever reads the yml's two numbers.
+            return elapsedTicks + 1 < lifetimeTicks();
+        }, (p) -> {
+            // Runs on EVERY end path - a second cast, exhausted mana, death, quit, disable.
+            bulwark.getHealthBar().removeAll();
+            if (bar[0] != null) {
+                bar[0].removeAll();
+            }
+            // p is null when the player has already left the online list; only the work that
+            // needs a live player is guarded.
+            if (p != null) {
+                p.setGravity(true);
+                p.setVelocity(new Vector(0, -HOVER_STEP, 0));
+            }
+        });
+
+        World world = caster.getWorld();
+        if (toggled == SustainEffect.Toggle.OPENED) {
+            world.playSound(caster.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 1.0f, 1.2f);
+            return;
+        }
+        if (toggled == SustainEffect.Toggle.BLOCKED) {
+            // Another circle-9 sustain owns the single slot. It was NOT stopped, so there is no
+            // closing burst - this cast is simply refused, and the framework gives the mana back.
+            cancelCast(caster);
+            Utils.sendActionBar(caster, Alkatraz.getLangManager().get("spells.sustain.blocked"));
+            return;
+        }
+
+        // CLOSED - this cast owned the running crown and just let it go.
+        // Refund what Spell actually charged, not the base cost.
+        StatUtils.addMana(caster, getModifiedManaCost(caster));
+        // CLOSING BURST - the crown collapses where it stood rather than simply stopping.
+        Location at = caster.getLocation().add(0, 1, 0);
+        for (Location point : ParticleUtils.sphere(at, 1.2, 16)) {
+            ParticleCaster.spawn(caster, world, Utils.DUST, point, 1, CROWN_DUST);
+        }
+        world.playSound(at, Sound.BLOCK_BEACON_DEACTIVATE, 0.9f, 0.7f);
     }
 
     @Override
@@ -149,240 +249,136 @@ public class CrownOfDawn extends AttackSpell {
                 getBasePower() * getWandPowerOrDefault(wand),
                 AttackType.MAGIC);
         SpellAttackContext context = SpellAttackContext.of(this, props, caster, wand);
-        Vector direction = Utils.safeNormalize(
-                caster.getTarget().getLocation().toVector().subtract(caster.getLocation().toVector()));
-        if (direction == null) return;
-
-        WallPlan plan = buildPlan(caster, direction,
-                config.wallLength() * MOB_LENGTH_FACTOR, config.wallHeight());
-        raiseWall(caster, wand, context, plan);
-    }
-
-    /**
-     * Resolves the wall's feet once, before the runnable starts.
-     *
-     * <p>The un-grounded fallback matters: over water or a void the wall still rises rather
-     * than silently vanishing, which is what a terrain spell would be for and this is not.
-     *
-     * @param caster    the casting entity
-     * @param direction the already-normalised aim
-     * @param length    how far the wall spans along the aim
-     * @param height    how far the wall reaches upward
-     * @return the resolved plan, or null when nothing could be resolved at all
-     */
-    private WallPlan buildPlan(LivingEntity caster, Vector direction, double length, double height) {
-        int segmentCount = Math.max(1, (int) Math.round(length / Math.max(0.1, config.segmentSpacing())));
-        List<Location> segments = new ArrayList<>(segmentCount);
-        for (int i = 0; i < segmentCount; i++) {
-            Location probe = caster.getEyeLocation().add(direction.clone().multiply(i * config.segmentSpacing()));
-            Location grounded = Utils.findTopSolid(probe.clone().add(0, 1, 0), 12);
-            segments.add(grounded != null ? grounded : probe.add(0, -1.2, 0));
-        }
-        if (segments.isEmpty()) return null;
-        return new WallPlan(segments, height, config.pushStrength(),
-                config.executionThreshold(), config.wallHalfThickness());
-    }
-
-    /**
-     * The wall itself: one {@link BukkitRunnable} at period 1 for the wall's whole life.
-     *
-     * <p>Every exit removes the BossBar, so there is no path that leaves one on screen:
-     * broken, natural expiry, or caster dead/offline.
-     *
-     * @param caster  the casting entity, for per-player particle density falloff
-     * @param wand    the casting wand, or null on a mob cast
-     * @param context the single per-cast handle
-     * @param plan    the resolved wall geometry
-     */
-    private void raiseWall(LivingEntity caster, ItemStack wand, SpellAttackContext context, WallPlan plan) {
-        // EXACTLY ONE properties object for the whole cast. BarrierProperties' constructor
-        // calls Bukkit.createBossBar, so a per-tick or per-segment construction would leak one
-        // BossBar each. It also means attackProps.getCollided().contains(barrierProps) dedupes
-        // the wall correctly against a single attacking volley.
-        CrownOfDawnBarrierProperties properties = new CrownOfDawnBarrierProperties(
-                caster,
-                plan.segments().get(plan.segments().size() / 2),
-                config.barrierHitpoints(),
-                BarrierType.PHYSICAL,
-                plan.thickness());
-        if (caster instanceof Player owner) properties.getHealthBar().addPlayer(owner);
-
-        // Per-cast holders, so nothing leaks across casts.
-        Set<UUID> executed = new HashSet<>();
-        double[] damageSpent = {0.0};
+        int interval = Math.max(1, config.damageIntervalTicks());
+        // A mob does not hover and does not pay upkeep; it gets a short ground crown instead,
+        // because SustainEffect.toggle is a Player toggle and Player#setGravity has no mob path.
+        LivingEntity target = caster.getTarget();
 
         new BukkitRunnable() {
             int elapsed = 0;
-            long lastDamage = -SpellAttackContext.DAMAGE_INTERVAL_TICKS;
 
             @Override
             public void run() {
                 context.tick();
+                if (caster.isDead() || elapsed >= MOB_TICKS || target.isDead() || !target.isValid()) {
+                    cancel();
+                    return;
+                }
+                SpellVfx.column(CROWN_COLOR, caster, caster.getLocation(), 2.5, PILLAR_RADIUS,
+                        PILLAR_LAYERS, PILLAR_POINTS, PILLAR_PHASE);
+                if (elapsed % interval == 0) {
+                    props.hit(target);
+                    SpellDamageUtil.damageWithSpell(target, context.power(target),
+                            caster, wand, CrownOfDawn.this);
+                }
                 elapsed++;
-
-                if (properties.isBroken()) {
-                    onWallBreak(caster, properties);
-                    properties.getHealthBar().removeAll();
-                    cancel();
-                    return;
-                }
-                if (elapsed >= config.durationTicks()) {
-                    onWallFade(caster, plan);
-                    properties.getHealthBar().removeAll();
-                    cancel();
-                    return;
-                }
-                if (caster.isDead() || (caster instanceof Player offline && !offline.isOnline())) {
-                    properties.getHealthBar().removeAll();
-                    cancel();
-                    return;
-                }
-
-                double rise = Math.min(1.0, elapsed / (double) config.riseTickCount());
-                double band = plan.thickness() + BAND_MARGIN;
-
-                for (Location segment : plan.segments()) {
-                    World world = segment.getWorld();
-                    if (world == null) continue;
-
-                    // The rise. Particles only - no block is placed, changed or restored.
-                    drawSegment(caster, world, segment, plan.height() * rise);
-
-                    // DEFENSE registration, every tick, short lifetime. Required, not optional:
-                    // the projectile deflection in SpellComponentHandler walks only REGISTERED
-                    // components, so a wall that stopped registering would stop deflecting arrows.
-                    Location mid = segment.clone().add(0, plan.height() * rise / 2.0, 0);
-                    SpellParticleComponent component = new SpellParticleComponent(
-                            CrownOfDawn.this, properties, caster, wand,
-                            SpellComponentType.DEFENSE, mid, plan.thickness(), COMPONENT_LIFETIME);
-                    SpellComponentHandler.register(component);
-
-                    for (Entity entity : world.getNearbyEntities(segment, band, plan.height() / 2.0, band)) {
-                        if (!(entity instanceof LivingEntity living)) continue;
-                        if (living.equals(caster)) continue;
-                        if (living.isDead() || !living.isValid()) continue;
-                        if (NBT.getPersistentData(living, nbt -> nbt.getBoolean("summoned_zombie"))) continue;
-
-                        // THE PUSH. Without it an enemy walks straight through the wall, which
-                        // is the entire point of a wall.
-                        Vector push = living.getLocation().toVector().subtract(mid.toVector());
-                        push.setY(0);
-                        if (push.lengthSquared() >= 0.01) {
-                            push = Utils.safeNormalize(push).multiply(plan.push());
-                            living.setVelocity(living.getVelocity().add(push));
-                        }
-
-                        // THE DENIAL. Strictly below the threshold, and add() returns false for
-                        // an already-executed entity, so the burst and sound fire once per
-                        // entity per cast. setHealth(0.0) is not a damage event, which is why it
-                        // is not priced against denial_damage_cap.
-                        if (living.getMaxHealth() > 0.0
-                                && living.getHealth() / living.getMaxHealth() < plan.threshold()
-                                && executed.add(living.getUniqueId())) {
-                            onExecute(caster, living);
-                            living.setHealth(0.0);
-                        }
-                    }
-                }
-
-                // The incidental damage passes. With lastDamage starting at -20 and elapsed
-                // incremented first, they run at elapsed 1, 21, 41, ... 281 - exactly 15 over the
-                // 300-tick life, which is what hit_count declares.
-                if (elapsed - lastDamage >= SpellAttackContext.DAMAGE_INTERVAL_TICKS) {
-                    lastDamage = elapsed;
-                    damageInBand(caster, wand, context, plan, damageSpent, executed);
-                }
             }
         }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
     }
 
     /**
-     * One capped, deduped, once-per-pass damage sweep over the wall's band.
-     *
-     * @param caster       the casting entity
-     * @param wand         the casting wand
-     * @param context      the single per-cast handle
-     * @param plan         the resolved wall geometry
-     * @param damageSpent  a one-element cast-level accumulator; the ceiling is the whole cast's
-     * @param executed     entities already executed this cast, which are not burned as well
+     * The opening tick: the caster is LAUNCHED, and every non-player inside the crown goes up
+     * with them. This is not the old radial push - nothing is shoved away from the caster here,
+     * the whole room is lifted.
      */
-    private void damageInBand(LivingEntity caster, ItemStack wand, SpellAttackContext context,
-                              WallPlan plan, double[] damageSpent, Set<UUID> executed) {
-        double band = plan.thickness() + BAND_MARGIN;
-        double cap = config.denialDamageCap();
-        for (Location segment : plan.segments()) {
-            World world = segment.getWorld();
-            if (world == null) continue;
-            for (Entity entity : world.getNearbyEntities(segment, band, plan.height() / 2.0, band)) {
-                // Once the ceiling is spent, no entity anywhere in the band can be damaged
-                // again this cast - so return, do not continue.
-                if (damageSpent[0] >= cap) return;
-                if (!(entity instanceof LivingEntity target)) continue;
-                if (target.equals(caster)) continue;
-                if (target.isDead() || !target.isValid()) continue;
-                if (executed.contains(target.getUniqueId())) continue;
-                if (target.getMaxHealth() > 0.0
-                        && target.getHealth() / target.getMaxHealth() < plan.threshold()) {
-                    continue;                       // it is being executed, not burned
-                }
-                // Rule 2: ONE application per target per cast. A false here must continue the
-                // scan, never damage again.
-                if (!context.hit(target)) continue;
+    private void launch(Player caster, double radius) {
+        caster.setGravity(false);
+        caster.setVelocity(new Vector(0, LIFT, 0));
+        for (LivingEntity living : Utils.getNearbyLivingEntities(caster.getLocation(), radius)) {
+            if (living instanceof Player || living.equals(caster)) continue;
+            if (living.isDead() || !living.isValid()) continue;
+            living.setVelocity(new Vector(living.getVelocity().getX(), LIFT, living.getVelocity().getZ()));
+        }
+    }
 
-                double scaled = context.power(target);               // ONE getPower
-                double amount = Math.min(scaled, cap - damageSpent[0]);
-                if (amount <= 0.0) return;
-                SpellDamageUtil.damageWithSpell(target, amount, caster, wand, CrownOfDawn.this);
-                damageSpent[0] += amount;
+    /** The highest solid block at or below the caster, or null over a void. */
+    private static Location groundUnder(Player caster) {
+        return Utils.findTopSolid(caster.getLocation(), GROUND_DEPTH);
+    }
+
+    /**
+     * The Y the caster is held at: the ground beneath them plus {@code hover_altitude}, CEILING
+     * CLAMPED. The walk upward stops at the first solid block between their feet and that height
+     * and holds them BELOW it - block index {@code y} spans world Y {@code [y, y+1)}, so putting
+     * the feet at {@code y + 1.0} is the far face: a one block roof would seat the caster on top
+     * of it and a two block roof would bury them inside it while hold() rewrote their Y velocity
+     * every tick. The feet go to just under the obstacle, sized for the player's eye height, and
+     * never below where the caster already is - the hover only ever rises. Over a void there is
+     * no ground to measure from, so the caster simply holds wherever they are rather than
+     * climbing forever.
+     */
+    private static double hoverTargetY(Player caster, Location ground, double altitude) {
+        Location feet = caster.getLocation();
+        if (ground == null) return feet.getY();
+        double wanted = ground.getY() + 1.0 + Math.max(1.0, altitude);
+        World world = feet.getWorld();
+        if (world == null) return wanted;
+        int x = feet.getBlockX();
+        int z = feet.getBlockZ();
+        int top = (int) Math.floor(wanted);
+        for (int y = Math.max(0, feet.getBlockY()); y <= top; y++) {
+            if (world.getBlockAt(x, y, z).getType().isSolid()) {
+                return Math.max(feet.getY(), y - caster.getEyeHeight() - 0.1);
+            }
+        }
+        return wanted;
+    }
+
+    /** Gravity off, and one velocity nudge toward the held height. */
+    private static void hold(Player caster, double targetY) {
+        caster.setGravity(false);
+        double step = targetY - caster.getLocation().getY();
+        caster.setVelocity(new Vector(0,
+                Math.max(-HOVER_STEP, Math.min(HOVER_STEP, step)),
+                0));
+    }
+
+    /** The boss bar: how many more seconds of upkeep the caster's remaining mana buys. */
+    private void updateBar(BossBar[] holder, Player caster, double upkeep) {
+        BossBar bar = holder[0];
+        if (bar == null) {
+            bar = Bukkit.createBossBar("", getMasteryBarColor(), BarStyle.SEGMENTED_10);
+            bar.addPlayer(caster);
+            holder[0] = bar;
+        }
+        MagicProfile profile = ProfileManager.getProfile(caster.getUniqueId(), MagicProfile.class);
+        double mana = profile == null ? 0.0 : profile.getMana();
+        double seconds = upkeep > 0 ? Math.max(0.0, mana / upkeep) : 0.0;
+        bar.setTitle(lang().get("spells.crownofdawn.boss_bar",
+                "seconds", String.valueOf((int) Math.ceil(seconds))));
+        bar.setProgress(Math.min(1.0, seconds / Math.max(1.0, durationSeconds)));
+    }
+
+    /** One armour-sear opening: the declared power to everything under the crown, armour off. */
+    private void sear(Player caster, ItemStack wand, SpellAttackContext context,
+                      AttackProperties props, double radius) {
+        for (LivingEntity target : Utils.getNearbyLivingEntities(caster.getLocation(), radius)) {
+            if (target.equals(caster) || target.isDead() || !target.isValid()) continue;
+            if (NBT.getPersistentData(target, nbt -> nbt.getBoolean("summoned_zombie"))) continue;
+
+            // props.hit, not context.hit: the context's own gate consults a set that is never
+            // cleared for the life of a cast, so it would admit one opening and refuse the rest.
+            props.hit(target);
+            SpellDamageUtil.damageWithSpell(target, context.power(target),
+                    caster, wand, CrownOfDawn.this);
+
+            // Region gate ONCE MORE here: damageWithSpell already checks it, but the strip is a
+            // separate world effect and a no-pvp region must not lose its armour either.
+            if (target instanceof Player victim
+                    && Protection.damage(target, caster, target.getLocation())) {
+                victim.getInventory().setHelmet(null);
+                victim.getInventory().setChestplate(null);
+                victim.getInventory().setLeggings(null);
+                victim.getInventory().setBoots(null);
             }
         }
     }
 
-    /** Paints one segment's column. Visual only. */
-    private void drawSegment(LivingEntity caster, World world, Location segment, double currentHeight) {
-        if (currentHeight <= 0.0) return;
-        int steps = (int) Math.ceil(currentHeight / RISE_STEP);
-        for (int i = 0; i < steps; i++) {
-            boolean crest = i == steps - 1;
-            Location point = segment.clone().add(0, i * RISE_STEP, 0);
-            ParticleCaster.spawn(caster, world, Utils.DUST, point, 1, crest ? CROWN_DUST : CROWN_EDGE);
-            if (crest) {
-                ParticleCaster.spawn(caster, world, Utils.ENTITY_EFFECT, point, 1, 0.0, 0.0, 0.0, 0.05, CROWN_COLOR);
-            }
-        }
-    }
-
-    private void onExecute(LivingEntity caster, LivingEntity victim) {
-        Location at = victim.getLocation().add(0, 1, 0);
-        World world = at.getWorld();
-        if (world == null) return;
-        ParticleCaster.spawn(caster, world, Utils.ENTITY_EFFECT, at, 60, 0.4, 0.6, 0.4, 0.0, CROWN_COLOR);
-        ParticleCaster.spawn(caster, world, Utils.DUST, at, 40, 0.3, 0.3, 0.3, 0.0, CROWN_DUST);
-        world.playSound(at, Sound.ENTITY_WITHER_DEATH, 1.0f, 1.8f);
-    }
-
-    private void onWallBreak(LivingEntity caster, CrownOfDawnBarrierProperties properties) {
-        Location mid = properties.getCastLocation();
-        World world = mid.getWorld();
-        if (world == null) return;
-        for (Location point : ParticleUtils.sphere(mid, properties.getRadius() + 0.8, 24)) {
-            ParticleCaster.spawn(caster, world, Utils.DUST, point, 1, BREAK_DUST);
-        }
-        world.playSound(mid, Sound.ENTITY_GENERIC_EXPLODE, 1.2f, 0.6f);
-        if (caster instanceof Player owner) {
-            Utils.sendActionBar(owner, lang().get("spells.crownofdawn.broken"));
-        }
-    }
-
-    private void onWallFade(LivingEntity caster, WallPlan plan) {
-        for (Location segment : plan.segments()) {
-            World world = segment.getWorld();
-            if (world == null) continue;
-            Location centre = segment.clone().add(0, plan.height() / 2.0, 0);
-            for (Location point : ParticleUtils.sphere(centre, 0.7, 8)) {
-                ParticleCaster.spawn(caster, world, Utils.DUST, point, 1, CROWN_EDGE);
-            }
-        }
+    @EventHandler
+    public void onQuit(PlayerQuitEvent e) {
+        // Cleanup rule: a caster who leaves mid-hover must not be left gravity-less on relog.
+        // SustainEffect's own tick also stops on !isOnline(); this takes the bar down at once.
+        SustainEffect.stop(e.getPlayer());
     }
 
     @Override

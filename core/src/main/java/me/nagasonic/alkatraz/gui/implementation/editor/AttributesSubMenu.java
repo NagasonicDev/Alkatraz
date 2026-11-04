@@ -26,21 +26,6 @@ public class AttributesSubMenu extends Menu {
     private static final int ADD_SLOT = 38;
     private static final int BACK_SLOT = 42;
 
-    private static ItemStack backgroundPanePrototype;
-
-    private static ItemStack backgroundPane() {
-        if (backgroundPanePrototype == null) {
-            ItemStack item = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
-            ItemMeta meta = item.getItemMeta();
-            if (meta != null) {
-                meta.setDisplayName(ColorFormat.format("&7"));
-                item.setItemMeta(meta);
-            }
-            backgroundPanePrototype = item;
-        }
-        return backgroundPanePrototype;
-    }
-
     private final ItemDetailMenu parent;
     private final EditorSession session;
     private final String sectionPath;
@@ -48,7 +33,7 @@ public class AttributesSubMenu extends Menu {
     private int offset;
 
     public AttributesSubMenu(Player viewer, ItemDetailMenu parent, String sectionPath) {
-        super(viewer, ColorFormat.format("&8Edit: " + sectionPath), 45);
+        super(viewer, packTitle("attributes", ColorFormat.format("&8Edit: " + sectionPath)), 45);
         this.parent = parent;
         this.session = EditorSession.get(viewer.getUniqueId());
         this.sectionPath = sectionPath;
@@ -59,9 +44,7 @@ public class AttributesSubMenu extends Menu {
 
     @Override
     protected void build() {
-        for (int i = 0; i < size; i++) {
-            inventory.setItem(i, backgroundPane());
-        }
+        fillAll();
 
         int end = Math.min(offset + ATTR_SLOTS.length, keys.size());
         for (int i = offset; i < end; i++) {
@@ -98,6 +81,7 @@ public class AttributesSubMenu extends Menu {
             meta.setLore(lore);
             item.setItemMeta(meta);
         }
+        me.nagasonic.alkatraz.texturepack.TexturePackManager.applyGuiModel(item, "editor_entry_attribute");
         setMenuData(item, "attr_index", index);
         return item;
     }
@@ -109,6 +93,7 @@ public class AttributesSubMenu extends Menu {
             meta.setDisplayName(lang().get("editor.add_attribute"));
             item.setItemMeta(meta);
         }
+        me.nagasonic.alkatraz.texturepack.TexturePackManager.applyGuiModel(item, "editor_add");
         setMenuData(item, "action", "add");
         return item;
     }
@@ -119,6 +104,11 @@ public class AttributesSubMenu extends Menu {
         if (meta != null) {
             meta.setDisplayName(ColorFormat.format(name));
             item.setItemMeta(meta);
+        }
+        if ("prev".equals(action)) {
+            me.nagasonic.alkatraz.texturepack.TexturePackManager.applyGuiModel(item, "prev_page");
+        } else if ("next".equals(action)) {
+            me.nagasonic.alkatraz.texturepack.TexturePackManager.applyGuiModel(item, "next_page");
         }
         setMenuData(item, "action", action);
         return item;
@@ -131,6 +121,7 @@ public class AttributesSubMenu extends Menu {
             meta.setDisplayName(lang().get("common.back"));
             item.setItemMeta(meta);
         }
+        me.nagasonic.alkatraz.texturepack.TexturePackManager.applyGuiModel(item, "back_button");
         setMenuData(item, "action", "back");
         return item;
     }

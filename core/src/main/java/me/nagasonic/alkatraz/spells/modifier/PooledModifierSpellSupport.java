@@ -17,6 +17,7 @@ import org.bukkit.World;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
@@ -28,6 +29,8 @@ import java.util.UUID;
  * Shared cast / expiry logic for Buff and Debuff spells.
  */
 public final class PooledModifierSpellSupport {
+
+    private static final Map<UUID, BukkitTask> expiryTasks = new java.util.concurrent.ConcurrentHashMap<>();
 
     private PooledModifierSpellSupport() {}
 
@@ -105,8 +108,9 @@ public final class PooledModifierSpellSupport {
 
         activeByTarget.put(target.getUniqueId(), new ArrayList<>(modifiers));
 
-        new ModifierExpiry(target, spell, activeByTarget, expiredMessage)
-                .runTaskLater(Alkatraz.getInstance(), durationTicks);
+        ModifierExpiry expiry = new ModifierExpiry(target, spell, activeByTarget, expiredMessage);
+        BukkitTask task = expiry.runTaskLater(Alkatraz.getInstance(), durationTicks);
+        expiryTasks.put(target.getUniqueId(), task);
 
         spawnCastParticles(target, particleColor);
         float pitch = "debuff".equals(spell.getId()) ? 0.7f : 1.2f;
@@ -124,9 +128,14 @@ public final class PooledModifierSpellSupport {
     public static void clearActiveModifiers(LivingEntity target,
                                             Spell spell,
                                             Map<UUID, List<AppliedModifier>> activeByTarget) {
+        BukkitTask task = expiryTasks.remove(target.getUniqueId());
+        if (task != null) task.cancel();
         List<AppliedModifier> previous = activeByTarget.remove(target.getUniqueId());
         if (previous == null) return;
         for (AppliedModifier modifier : previous) {
+            for (ActiveEffect effect : EffectRegistry.effectsOn(target.getUniqueId())) {
+                if (effect.handle() == modifier) EffectRegistry.remove(effect);
+            }
             modifier.remove(target, spell);
         }
     }
@@ -184,6 +193,7 @@ public final class PooledModifierSpellSupport {
             }
 
             List<AppliedModifier> active = activeByTarget.remove(target.getUniqueId());
+            expiryTasks.remove(target.getUniqueId());
             if (active != null) {
                 for (AppliedModifier modifier : active) {
                     for (ActiveEffect effect : EffectRegistry.effectsOn(target.getUniqueId())) {
@@ -191,10 +201,9 @@ public final class PooledModifierSpellSupport {
                     }
                     modifier.remove(target, spell);
                 }
-            }
-
-            if (target instanceof Player player && player.isOnline()) {
-                Utils.sendActionBar(player, ColorFormat.format(expiredMessage));
+                if (target instanceof Player player && player.isOnline()) {
+                    Utils.sendActionBar(player, ColorFormat.format(expiredMessage));
+                }
             }
         }
     }

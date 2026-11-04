@@ -17,9 +17,13 @@ public final class CommandEffect implements Effect {
     @Override
     public void execute(TriggerContext context) {
         String parsed = command
-                .replace("%player%", context.actor() != null ? context.actor().getName() : "")
-                .replace("%target%", context.target() != null ? context.target().getName() : "");
+                .replace("%player%", quote(context.actor() != null ? context.actor().getName() : ""))
+                .replace("%target%", quote(context.target() != null ? context.target().getName() : ""));
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), parsed);
+    }
+
+    private static String quote(String value) {
+        return value == null ? "" : "\"" + value.replace("\"", "") + "\"";
     }
 
     public static Effect fromConfig(Map<String, Object> config) {

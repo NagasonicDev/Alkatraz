@@ -1,5 +1,6 @@
 package me.nagasonic.alkatraz.gui;
 
+import me.nagasonic.alkatraz.texturepack.TexturePackManager;
 import me.nagasonic.alkatraz.util.ColorFormat;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -123,6 +124,12 @@ public class ItemBuilder {
     /** Set custom model data (for texture pack integration). */
     public ItemBuilder customModelData(int cmd) {
         meta.setCustomModelData(cmd);
+        return this;
+    }
+
+    /** Apply a {@code custom_model_data.gui} model from {@code texturepack.yml}. */
+    public ItemBuilder guiModel(String guiElement) {
+        TexturePackManager.applyGuiModel(meta, guiElement);
         return this;
     }
 

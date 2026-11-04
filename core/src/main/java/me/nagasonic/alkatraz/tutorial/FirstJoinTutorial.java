@@ -21,10 +21,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class FirstJoinTutorial implements Listener {
 
-    private static final Map<UUID, List<BukkitTask>> pendingTasks = new HashMap<>();
+    private static final Map<UUID, List<BukkitTask>> pendingTasks = new ConcurrentHashMap<>();
 
     private static LangManager lang() { return Alkatraz.getLangManager(); }
 
@@ -35,6 +36,7 @@ public class FirstJoinTutorial implements Listener {
         Player player = event.getPlayer();
         MagicProfile profile = ProfileManager.getProfile(player.getUniqueId(), MagicProfile.class);
 
+        if (profile == null) return;
         if (profile.getBool("tutorialSeen")) return;
 
         profile.setBool("tutorialSeen", true);
@@ -67,6 +69,7 @@ public class FirstJoinTutorial implements Listener {
 
     private void scheduleSteps(Player player) {
         UUID uuid = player.getUniqueId();
+        cancelPending(uuid);
         List<BukkitTask> tasks = new ArrayList<>(7);
         pendingTasks.put(uuid, tasks);
 

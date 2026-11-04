@@ -11,41 +11,20 @@ import java.util.Map;
  * as an ordinary equality check inside {@code CrownOfDawnTest}.</p>
  */
 public record CrownOfDawnConfig(
-        double wallDuration,
-        double wallLength,
-        double wallHeight,
-        double barrierHitpoints,
-        double wallHalfThickness,
-        double pushStrength,
-        double executionThreshold,
-        double segmentSpacing,
-        double riseTicks,
-        double denialDamageCap) {
-
-    /**
-     * Mirrors {@code SpellAttackContext.DAMAGE_INTERVAL_TICKS}. Declared locally so this
-     * record stays provably Bukkit-free; {@code CrownOfDawnTest} pins the two constants
-     * together so they cannot drift.
-     */
-    public static final long DAMAGE_INTERVAL_TICKS = 20L;
+        double hoverRadius,
+        int hoverAltitude,
+        int damageIntervalTicks,
+        int upkeepManaPerSecond) {
 
     private static final double TICKS_PER_SECOND = 20.0;
-    /** Floor on the segment spacing divisor, so a zero cannot divide by zero. */
-    private static final double MIN_SPACING = 0.1;
 
     public static CrownOfDawnConfig fromConfig(Map<String, Object> map) {
         if (map == null) map = Map.of();
         return new CrownOfDawnConfig(
-                doubleOf(map.get("wall_duration"), 15.0),
-                doubleOf(map.get("wall_length"), 9.0),
-                doubleOf(map.get("wall_height"), 3.5),
-                doubleOf(map.get("barrier_hitpoints"), 60.0),
-                doubleOf(map.get("wall_half_thickness"), 0.9),
-                doubleOf(map.get("push_strength"), 0.45),
-                doubleOf(map.get("execution_threshold"), 0.3),
-                doubleOf(map.get("segment_spacing"), 0.5),
-                doubleOf(map.get("rise_ticks"), 10.0),
-                doubleOf(map.get("denial_damage_cap"), 90.0));
+                doubleOf(map.get("hover_radius"), 10.0),
+                intOf(map.get("hover_altitude"), 6),
+                intOf(map.get("damage_interval_ticks"), 40),
+                intOf(map.get("upkeep_mana_per_second"), 60));
     }
 
     /**
@@ -61,33 +40,16 @@ public record CrownOfDawnConfig(
         return o instanceof Number n ? n.doubleValue() : def;
     }
 
-    /** How long the wall stands, in ticks. Never zero. */
-    public int durationTicks() {
-        return Math.max(1, (int) Math.round(wallDuration * TICKS_PER_SECOND));
-    }
-
-    /** How many segments the wall is built from along its length. Never fewer than one. */
-    public int segmentCount() {
-        return Math.max(1, (int) Math.round(wallLength / Math.max(MIN_SPACING, segmentSpacing)));
-    }
-
-    /** How many ticks the wall takes to reach full height. Never zero. */
-    public int riseTickCount() {
-        return Math.max(1, (int) Math.round(riseTicks));
+    private static int intOf(Object o, int def) {
+        return o instanceof Number n ? n.intValue() : def;
     }
 
     /**
-     * How many damage passes one cast makes. {@code SpellBudgetTest} reads
-     * {@code power * hit_count} as the spell's PER-CAST total, so this is a cadence
-     * count, not a per-target one - {@code AttackProperties.hasHit} caps any single
-     * entity at one application per cast.
+     * How many armour-sear openings one target takes over a sustain of that length. 60s at the
+     * declared 40-tick cadence is the 30 the yml declares in {@code hit_count}.
      */
-    public int hitCount() {
-        return Math.max(1, durationTicks() / (int) DAMAGE_INTERVAL_TICKS);
-    }
-
-    /** The per-application power that fills {@code denialDamageCap} exactly. */
-    public double powerForCap() {
-        return denialDamageCap / hitCount();
+    public int hitsPerTarget(double durationSeconds) {
+        if (damageIntervalTicks <= 0) return 1;
+        return Math.max(1, (int) Math.round(durationSeconds * TICKS_PER_SECOND / damageIntervalTicks));
     }
 }

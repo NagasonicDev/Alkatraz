@@ -4,6 +4,7 @@ import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.api.magic.registry.MagicItemRegistries;
 import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
 import me.nagasonic.alkatraz.api.magic.trigger.TriggerType;
+import me.nagasonic.alkatraz.gui.ItemBuilder;
 import me.nagasonic.alkatraz.gui.PagedMenu;
 import me.nagasonic.alkatraz.items.magic.util.ItemTypeMapper;
 import me.nagasonic.alkatraz.util.ColorFormat;
@@ -25,28 +26,13 @@ public class TriggerSelectionMenu extends PagedMenu<TriggerType> {
 
     private static final int[] CONTENT_SLOTS = {19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34};
 
-    private static ItemStack borderPanePrototype;
-
-    private static ItemStack borderPane() {
-        if (borderPanePrototype == null) {
-            ItemStack item = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
-            ItemMeta meta = item.getItemMeta();
-            if (meta != null) {
-                meta.setDisplayName(ColorFormat.format("&7"));
-                item.setItemMeta(meta);
-            }
-            borderPanePrototype = item;
-        }
-        return borderPanePrototype;
-    }
-
     private static me.nagasonic.alkatraz.lang.LangManager lang() {
         return Alkatraz.getLangManager();
     }
 
     public TriggerSelectionMenu(Player viewer) {
         super(viewer,
-                ColorFormat.format(lang().get("menu.trigger_select")),
+                packTitle("trigger_select", ColorFormat.format(lang().get("menu.trigger_select"))),
                 54,
                 getFilteredTriggers(viewer),
                 14);
@@ -90,16 +76,7 @@ public class TriggerSelectionMenu extends PagedMenu<TriggerType> {
 
     @Override
     protected void addDecorations() {
-        for (int i = 0; i < 9; i++) {
-            inventory.setItem(i, borderPane());
-            inventory.setItem(i + 45, borderPane());
-        }
-        for (int i = 9; i < 18; i++) {
-            inventory.setItem(i, borderPane());
-        }
-        for (int i = 36; i < 45; i++) {
-            inventory.setItem(i, borderPane());
-        }
+        addStandardBorder();
     }
 
     @Override
@@ -107,6 +84,7 @@ public class TriggerSelectionMenu extends PagedMenu<TriggerType> {
         ItemStack item = new ItemStack(Material.TRIPWIRE_HOOK);
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return item;
+        me.nagasonic.alkatraz.texturepack.TexturePackManager.applyGuiModel(meta, "trigger");
 
         meta.setDisplayName(lang().get("engraving.trigger_prefix", "trigger", trigger.getKey().getKey()));
         List<String> lore = new ArrayList<>();
@@ -132,12 +110,10 @@ public class TriggerSelectionMenu extends PagedMenu<TriggerType> {
 
     @Override
     protected void addBackButton() {
-        ItemStack back = new ItemStack(Material.BARRIER);
-        ItemMeta meta = back.getItemMeta();
-        if (meta != null) {
-            meta.setDisplayName(ColorFormat.format(lang().get("common.back")));
-            back.setItemMeta(meta);
-        }
+        ItemStack back = ItemBuilder.of(Material.BARRIER)
+                .name(lang().get("common.back"))
+                .guiModel("back_button")
+                .build();
         setMenuData(back, "action", "back");
         inventory.setItem(backButtonSlot, back);
     }

@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,17 +16,26 @@ public final class UnlockSweep {
     private static final String CONFIG_PATH = "recipes.unlock_check_interval_ticks";
     private static final long DEFAULT_INTERVAL = 600L;
 
+    private static BukkitTask task;
     private static int cursor;
 
     private UnlockSweep() {}
 
     public static void start() {
-        new BukkitRunnable() {
+        if (task != null) task.cancel();
+        task = new BukkitRunnable() {
             @Override
             public void run() {
                 sweep();
             }
         }.runTaskTimer(Alkatraz.getInstance(), DEFAULT_INTERVAL, intervalTicks());
+    }
+
+    public static void stop() {
+        if (task != null) {
+            task.cancel();
+            task = null;
+        }
     }
 
     /**

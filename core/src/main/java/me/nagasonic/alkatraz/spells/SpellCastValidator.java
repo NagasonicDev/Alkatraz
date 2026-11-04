@@ -40,6 +40,12 @@ public final class SpellCastValidator {
             }
         }
 
+        if (profile == null) {
+            Utils.sendActionBar(player, lang().get("spells.cast.too_low_circle"));
+            me.nagasonic.alkatraz.Alkatraz.logDebug("[Grimoire] SpellCastValidator: FAILED profile not loaded");
+            return false;
+        }
+
         if (profile.getCircleLevel() < spell.getRequiredCircleLevel()) {
             Utils.sendActionBar(player, lang().get("spells.cast.too_low_circle"));
             me.nagasonic.alkatraz.Alkatraz.logDebug("[Grimoire] SpellCastValidator: FAILED player circle level too low");
@@ -74,7 +80,8 @@ public final class SpellCastValidator {
             // Fall back to legacy NBT
             wandLimit = NBT.get(wand, nbt -> {
                 if (nbt.hasTag("circle_limit")) {
-                    return nbt.getInteger("circle_limit");
+                    int legacy = nbt.getInteger("circle_limit");
+                    return Math.max(1, Math.min(legacy, 5));
                 }
                 return 1;
             });

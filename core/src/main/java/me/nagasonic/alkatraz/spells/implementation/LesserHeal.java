@@ -55,6 +55,9 @@ public class LesserHeal extends Spell {
      */
     private static final Color CAST_COLOR = Color.fromRGB(255, 255, 135);
 
+    /** The LIGHT palette, resolved once. */
+    private static final ElementPalette.Palette PALETTE = ElementPalette.of(Element.LIGHT);
+
     /**
      * Column height in blocks - just over half of {@code heal}'s 3.2, which is what
      * makes the silhouette read as a different spell rather than a smaller one.
@@ -171,7 +174,7 @@ public class LesserHeal extends Spell {
      * @param subject the entity that was healed; both shapes follow it
      */
     private void drawLesserColumn(LivingEntity subject) {
-        ElementPalette.Palette palette = ElementPalette.of(Element.LIGHT);
+        ElementPalette.Palette palette = PALETTE;
         new BukkitRunnable() {
             int elapsed = 0;
 

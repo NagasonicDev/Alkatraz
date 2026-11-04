@@ -3,6 +3,7 @@ package me.nagasonic.alkatraz.gui.implementation;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.gui.ItemBuilder;
 import me.nagasonic.alkatraz.gui.PagedMenu;
+import me.nagasonic.alkatraz.gui.SpellGuiItems;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.playerdata.SpellHotbarManager;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
@@ -58,7 +59,7 @@ public class HotbarSpellSelectionMenu extends PagedMenu<Spell> {
 
     public HotbarSpellSelectionMenu(Player viewer) {
         super(viewer,
-                ColorFormat.format(lang().get("menu.hotbar_config")),
+                packTitle("hotbar_config", ColorFormat.format(lang().get("menu.hotbar_config"))),
                 54,
                 getDiscoveredSpells(viewer),
                 14);
@@ -93,7 +94,7 @@ public class HotbarSpellSelectionMenu extends PagedMenu<Spell> {
     protected void addDecorations() {
         assignedIds = new HashSet<>(ProfileManager.getProfile(viewer, MagicProfile.class)
                 .getHotbarSpellIds().values());
-        ItemStack blank = Alkatraz.getGuiItemRegistry().getItem("blank");
+        ItemStack blank = me.nagasonic.alkatraz.texturepack.TexturePackManager.createBlankPane();
         for (int i = 0; i < 54; i++) {
             if (isReserved(i)) continue;
             inventory.setItem(i, blank);
@@ -105,6 +106,7 @@ public class HotbarSpellSelectionMenu extends PagedMenu<Spell> {
     protected void addBackButton() {
         ItemStack back = ItemBuilder.of(Material.BARRIER)
                 .name(lang().get("hotbar.back_to_spells"))
+                .guiModel("back_button")
                 .build();
         setMenuData(back, "action", "back");
         inventory.setItem(backButtonSlot, back);
@@ -137,6 +139,7 @@ public class HotbarSpellSelectionMenu extends PagedMenu<Spell> {
                 ? assigned.getGuiItem().getType()
                 : Material.GRAY_STAINED_GLASS_PANE;
 
+        String guiModel = (assigned != null) ? null : "blank_pane";
         String prefix  = focused ? "&b▶ " : "&e";
         String content = (assigned != null) ? assigned.getDisplayName()
                 : lang().get("hotbar.slot_empty", "slot", String.valueOf(slotIndex + 1));
@@ -144,6 +147,12 @@ public class HotbarSpellSelectionMenu extends PagedMenu<Spell> {
         ItemBuilder builder = ItemBuilder.of(mat)
                 .name(prefix + lang().get("hotbar.slot_header", "slot", String.valueOf(slotIndex + 1)) + ": &f" + content)
                 .glint(focused);
+        if (guiModel != null) {
+            builder.guiModel(guiModel);
+        }
+        if (assigned != null && assigned.getGuiCustomModelData() > 0) {
+            builder.customModelData(assigned.getGuiCustomModelData());
+        }
 
         if (focused) {
             builder.lore(lang().get("hotbar.currently_selected"), lang().get("hotbar.click_assign_lore"));
@@ -169,7 +178,7 @@ public class HotbarSpellSelectionMenu extends PagedMenu<Spell> {
         boolean alreadyAssigned = assignedIds.contains(spell.getId());
         boolean canAssign = !alreadyAssigned;
 
-        ItemBuilder builder = ItemBuilder.of(spell.getGuiItem().clone())
+        ItemBuilder builder = ItemBuilder.of(SpellGuiItems.create(spell))
                 .name(canAssign ? "&f" + spell.getDisplayName() : "&7" + spell.getDisplayName())
                 .lore("&7" + spell.getElement().getName() + "  &eCircle " + spell.getRequiredCircleLevel(),
                       "&bMana Cost: &f" + spell.getCost(),

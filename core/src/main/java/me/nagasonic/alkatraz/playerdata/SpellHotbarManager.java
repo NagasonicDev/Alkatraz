@@ -3,6 +3,7 @@ package me.nagasonic.alkatraz.playerdata;
 import de.tr7zw.changeme.nbtapi.NBT;
 import de.tr7zw.changeme.nbtapi.iface.ReadWriteNBT;
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.gui.SpellGuiItems;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
@@ -24,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Manages the spell hotbar mode that activates when a player equips a wand.
@@ -50,6 +52,8 @@ public class SpellHotbarManager {
     /** Number of configurable spell slots (slots 0-7). */
     public static final int SPELL_SLOT_COUNT = 8;
 
+    private static final Map<UUID, Long> persistedSnapshotGeneration = new ConcurrentHashMap<>();
+    private static final AtomicLong snapshotCounter = new AtomicLong();
     private static final Map<UUID, ItemStack[]> savedInventories = new ConcurrentHashMap<>();
     private static final Map<UUID, ItemStack> savedOffhand = new ConcurrentHashMap<>();
     private static final Map<UUID, Integer> savedHeldSlot = new ConcurrentHashMap<>();
@@ -83,6 +87,7 @@ public class SpellHotbarManager {
         profile.setCanCast(false);
 
         UUID uuid = player.getUniqueId();
+        long snapshotGenerationValue = snapshotCounter.incrementAndGet();
 
         ItemStack[] storageContents = player.getInventory().getStorageContents().clone();
         ItemStack offhand = player.getInventory().getItemInOffHand();
@@ -96,8 +101,9 @@ public class SpellHotbarManager {
             savedOffhand.remove(uuid);
         }
         savedHeldSlot.put(uuid, heldSlot);
+        persistedSnapshotGeneration.put(uuid, snapshotGenerationValue);
 
-        persistSnapshot(uuid, storageContents, offhand, heldSlot);
+        persistSnapshot(uuid, snapshotGenerationValue, storageContents, offhand, heldSlot);
 
         justEntered.put(uuid, System.currentTimeMillis() + 500);
 
@@ -174,6 +180,13 @@ public class SpellHotbarManager {
         UUID uuid = player.getUniqueId();
         justEntered.remove(uuid);
         justExited.remove(uuid);
+        // Release the in-memory inventory snapshot: the persisted backup (if any)
+        // is still on disk for recovery on next join, so there is no need to keep
+        // full inventories for players who have left.
+        savedInventories.remove(uuid);
+        savedOffhand.remove(uuid);
+        savedHeldSlot.remove(uuid);
+        persistedSnapshotGeneration.remove(uuid);
     }
 
     private static void exit(Player player, boolean clearPersisted) {
@@ -184,14 +197,16 @@ public class SpellHotbarManager {
         justEntered.remove(uuid);
         justExited.put(uuid, System.currentTimeMillis() + 500);
 
+        persistedSnapshotGeneration.remove(uuid);
+
         MagicProfile profile = ProfileManager.getProfile(player, MagicProfile.class);
         if (profile != null) {
             profile.setCanCast(true);
         }
 
-        restoreFromMemory(player, uuid);
+        boolean restored = restoreFromMemory(player, uuid);
 
-        if (clearPersisted) {
+        if (clearPersisted && restored) {
             deletePersistedSnapshot(uuid);
         }
     }
@@ -209,6 +224,7 @@ public class SpellHotbarManager {
      */
     public static boolean restoreIfNeeded(Player player) {
         UUID uuid = player.getUniqueId();
+        persistedSnapshotGeneration.remove(uuid);
         boolean fromMemory = savedInventories.containsKey(uuid);
         boolean fromDisk = snapshotFile(uuid).exists();
         if (!fromMemory && !fromDisk) return false;
@@ -223,19 +239,30 @@ public class SpellHotbarManager {
         }
 
         if (fromMemory) {
-            restoreFromMemory(player, uuid);
-            deletePersistedSnapshot(uuid);
+            if (restoreFromMemory(player, uuid)) {
+                deletePersistedSnapshot(uuid);
+            }
         } else {
             restoreFromPersisted(player, uuid);
         }
         return true;
     }
 
-    private static void restoreFromMemory(Player player, UUID uuid) {
-        ItemStack[] storage = savedInventories.remove(uuid);
-        ItemStack offhand = savedOffhand.remove(uuid);
-        Integer heldSlot = savedHeldSlot.remove(uuid);
-        applySnapshot(player, storage, offhand, heldSlot);
+    private static boolean restoreFromMemory(Player player, UUID uuid) {
+        ItemStack[] storage = savedInventories.get(uuid);
+        ItemStack offhand = savedOffhand.get(uuid);
+        Integer heldSlot = savedHeldSlot.get(uuid);
+        try {
+            applySnapshot(player, storage, offhand, heldSlot);
+        } catch (Exception e) {
+            Alkatraz.getInstance().getLogger().severe("Failed to restore hotbar inventory for " + uuid
+                    + " (" + e.getClass().getSimpleName() + ": " + e.getMessage() + "), keeping snapshot");
+            return false;
+        }
+        savedInventories.remove(uuid);
+        savedOffhand.remove(uuid);
+        savedHeldSlot.remove(uuid);
+        return true;
     }
 
     private static void restoreFromPersisted(Player player, UUID uuid) {
@@ -247,11 +274,18 @@ public class SpellHotbarManager {
             ItemStack offhand = compound.hasTag("offhand") ? compound.getItemStack("offhand") : null;
             Integer heldSlot = compound.hasTag("heldSlot") ? compound.getInteger("heldSlot") : null;
             applySnapshot(player, storage, offhand, heldSlot);
+            // Move the backup out of the way before deleting it so a failed delete
+            // cannot make an already-restored snapshot load again on the next join.
+            File consumed = new File(file.getParentFile(), file.getName() + ".consumed");
+            boolean moved = file.renameTo(consumed);
+            File target = moved ? consumed : file;
+            if (!target.delete()) {
+                Alkatraz.getInstance().getLogger().severe("Restored hotbar inventory for " + uuid
+                        + " but could not delete backup at " + file);
+            }
         } catch (Exception e) {
             Alkatraz.getInstance().getLogger().severe("Failed to read hotbar inventory snapshot for " + uuid
-                    + " (" + e.getClass().getSimpleName() + ": " + e.getMessage() + ")");
-        } finally {
-            deletePersistedSnapshot(uuid);
+                    + " (" + e.getClass().getSimpleName() + ": " + e.getMessage() + "), keeping backup at " + file);
         }
     }
 
@@ -269,7 +303,7 @@ public class SpellHotbarManager {
         player.updateInventory();
     }
 
-    private static void persistSnapshot(UUID uuid, ItemStack[] storage, ItemStack offhand, int heldSlot) {
+    private static void persistSnapshot(UUID uuid, long generation, ItemStack[] storage, ItemStack offhand, int heldSlot) {
         ReadWriteNBT compound = NBT.createNBTObject();
         compound.setItemStackArray("storage", storage);
         if (offhand != null && !offhand.getType().isAir()) {
@@ -278,8 +312,12 @@ public class SpellHotbarManager {
         compound.setInteger("heldSlot", heldSlot);
         File file = snapshotFile(uuid);
         Bukkit.getScheduler().runTaskAsynchronously(Alkatraz.getInstance(), () -> {
-            if (!hotbarActive.containsKey(uuid)) return;
-            if (savedInventories.get(uuid) != storage) return;
+            Long currentGeneration = persistedSnapshotGeneration.get(uuid);
+            if (currentGeneration == null || currentGeneration.longValue() != generation) return;
+            if (!hotbarActive.containsKey(uuid)) {
+                deletePersistedSnapshot(uuid);
+                return;
+            }
             try {
                 if (file.getParentFile() != null) {
                     file.getParentFile().mkdirs();
@@ -289,8 +327,9 @@ public class SpellHotbarManager {
                 Alkatraz.getInstance().getLogger().severe("Failed to persist hotbar inventory snapshot for " + uuid
                         + " (" + e.getClass().getSimpleName() + ": " + e.getMessage() + ")");
             }
-            ItemStack[] current = savedInventories.get(uuid);
-            if (!hotbarActive.containsKey(uuid) || (current != null && current != storage)) {
+            currentGeneration = persistedSnapshotGeneration.get(uuid);
+            if (currentGeneration == null || currentGeneration.longValue() != generation
+                    || !hotbarActive.containsKey(uuid)) {
                 deletePersistedSnapshot(uuid);
             }
         });
@@ -305,7 +344,7 @@ public class SpellHotbarManager {
 
     private static File snapshotFile(UUID uuid) {
         return new File(
-                new File(Alkatraz.getInstance().getDataFolder().getParentFile(), "Alkatraz/playerdata/" + uuid),
+                new File(Alkatraz.getInstance().getDataFolder(), "playerdata/" + uuid),
                 "hotbar_snapshot.nbt");
     }
 
@@ -328,7 +367,13 @@ public class SpellHotbarManager {
      * or {@code null} if no inventory is saved.
      */
     public static ItemStack[] peekSavedContents(UUID uuid) {
-        return savedInventories.get(uuid);
+        ItemStack[] saved = savedInventories.get(uuid);
+        if (saved == null) return null;
+        ItemStack[] copy = new ItemStack[saved.length];
+        for (int i = 0; i < saved.length; i++) {
+            copy[i] = saved[i] == null ? null : saved[i].clone();
+        }
+        return copy;
     }
 
     /**
@@ -404,6 +449,7 @@ public class SpellHotbarManager {
         savedInventories.remove(uuid);
         savedOffhand.remove(uuid);
         savedHeldSlot.remove(uuid);
+        persistedSnapshotGeneration.remove(uuid);
 
         MagicProfile profile = ProfileManager.getProfile(player, MagicProfile.class);
         if (profile != null) {
@@ -436,7 +482,7 @@ public class SpellHotbarManager {
      * so players can read it at a glance while in combat.
      */
     public static ItemStack buildSpellItem(Spell spell) {
-        ItemStack item = spell.getGuiItem().clone();
+        ItemStack item = SpellGuiItems.create(spell);
         ItemMeta meta = item.getItemMeta();
 
         meta.setDisplayName(ColorFormat.format(spell.getDisplayName()));

@@ -1,4 +1,5 @@
 package me.nagasonic.alkatraz.mobs.goals;
+import java.util.concurrent.ConcurrentHashMap;
 
 import me.nagasonic.alkatraz.api.mobs.Goal;
 import me.nagasonic.alkatraz.api.mobs.GoalBrain;
@@ -13,8 +14,8 @@ import java.util.function.Function;
 
 public final class GoalFactory {
 
-    private static final Map<String, Function<ConfigurationSection, Goal>> CUSTOM = new HashMap<>();
-    private static final Map<String, Function<ConfigurationSection, NativeGoalSpec>> NATIVE = new HashMap<>();
+    private static final Map<String, Function<ConfigurationSection, Goal>> CUSTOM = new ConcurrentHashMap<>();
+    private static final Map<String, Function<ConfigurationSection, NativeGoalSpec>> NATIVE = new ConcurrentHashMap<>();
 
     static {
         CUSTOM.put("cast_spell", section -> {
@@ -52,15 +53,9 @@ public final class GoalFactory {
         NATIVE.put("nearest_attackable_target", section -> {
             String className = section.getString("target-class", "org.bukkit.entity.Player");
             boolean mustSee = section.getBoolean("must-see", true);
-            try {
-                Class<?> clazz = Class.forName(className);
-                if (LivingEntity.class.isAssignableFrom(clazz)) {
-                    @SuppressWarnings("unchecked")
-                    Class<? extends LivingEntity> livingClass = (Class<? extends LivingEntity>) clazz;
-                    return new NativeGoalSpec.NearestAttackableTarget(livingClass, mustSee);
-                }
-            } catch (ClassNotFoundException ignored) {}
-            return new NativeGoalSpec.NearestAttackableTarget(org.bukkit.entity.Player.class, mustSee);
+            return loadEntityClass(className)
+                    .map(clazz -> new NativeGoalSpec.NearestAttackableTarget(clazz, mustSee))
+                    .orElse(new NativeGoalSpec.NearestAttackableTarget(org.bukkit.entity.Player.class, mustSee));
         });
         NATIVE.put("panic", section -> new NativeGoalSpec.Panic(section.getDouble("speed", 1.25)));
         NATIVE.put("avoid_entity", section -> {
@@ -68,16 +63,24 @@ public final class GoalFactory {
             float maxDist = (float) section.getDouble("max-dist", 8.0);
             double walkSpeed = section.getDouble("walk-speed", 0.8);
             double sprintSpeed = section.getDouble("sprint-speed", 1.2);
-            try {
-                Class<?> clazz = Class.forName(className);
-                if (LivingEntity.class.isAssignableFrom(clazz)) {
-                    @SuppressWarnings("unchecked")
-                    Class<? extends LivingEntity> livingClass = (Class<? extends LivingEntity>) clazz;
-                    return new NativeGoalSpec.AvoidEntity(livingClass, maxDist, walkSpeed, sprintSpeed);
-                }
-            } catch (ClassNotFoundException ignored) {}
-            return new NativeGoalSpec.AvoidEntity(org.bukkit.entity.Player.class, maxDist, walkSpeed, sprintSpeed);
+            Class<? extends LivingEntity> livingClass = loadEntityClass(className).orElse(org.bukkit.entity.Player.class);
+            return new NativeGoalSpec.AvoidEntity(livingClass, maxDist, walkSpeed, sprintSpeed);
         });
+    }
+
+    private static java.util.Optional<Class<? extends LivingEntity>> loadEntityClass(String className) {
+        if (className == null || !className.startsWith("org.bukkit.entity.")) {
+            return java.util.Optional.empty();
+        }
+        try {
+            Class<?> clazz = Class.forName(className);
+            if (LivingEntity.class.isAssignableFrom(clazz)) {
+                @SuppressWarnings("unchecked")
+                Class<? extends LivingEntity> livingClass = (Class<? extends LivingEntity>) clazz;
+                return java.util.Optional.of(livingClass);
+            }
+        } catch (ClassNotFoundException ignored) {}
+        return java.util.Optional.empty();
     }
 
     private GoalFactory() {}

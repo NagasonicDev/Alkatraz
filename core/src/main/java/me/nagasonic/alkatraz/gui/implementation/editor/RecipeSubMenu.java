@@ -3,6 +3,7 @@ package me.nagasonic.alkatraz.gui.implementation.editor;
 import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.gui.Menu;
+import me.nagasonic.alkatraz.texturepack.TexturePackManager;
 import me.nagasonic.alkatraz.items.magic.recipe.AlkatrazRecipe;
 import me.nagasonic.alkatraz.items.magic.recipe.Ingredient;
 import me.nagasonic.alkatraz.items.magic.recipe.MaterialIngredient;
@@ -31,28 +32,13 @@ public class RecipeSubMenu extends Menu {
     private static final int SAVE_SLOT = 38;
     private static final int BACK_SLOT = 42;
 
-    private static ItemStack backgroundPanePrototype;
-
-    private static ItemStack backgroundPane() {
-        if (backgroundPanePrototype == null) {
-            ItemStack item = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
-            ItemMeta meta = item.getItemMeta();
-            if (meta != null) {
-                meta.setDisplayName(ColorFormat.format("&7"));
-                item.setItemMeta(meta);
-            }
-            backgroundPanePrototype = item;
-        }
-        return backgroundPanePrototype;
-    }
-
     private final ItemDetailMenu parent;
     private final EditorSession session;
     private Map<Character, String> ingredients;
     private String[] recipeShape;
 
     public RecipeSubMenu(Player viewer, ItemDetailMenu parent) {
-        super(viewer, ColorFormat.format("&8Edit Recipe"), 45);
+        super(viewer, packTitle("recipe_sub", ColorFormat.format("&8Edit Recipe")), 45);
         this.parent = parent;
         this.session = EditorSession.get(viewer.getUniqueId());
         this.ingredients = new LinkedHashMap<>();
@@ -104,9 +90,7 @@ public class RecipeSubMenu extends Menu {
 
     @Override
     protected void build() {
-        for (int i = 0; i < size; i++) {
-            inventory.setItem(i, backgroundPane());
-        }
+        fillAll();
 
         // Use the recipeShape field instead of loading from config
         List<String> shape = recipeShape != null ? Arrays.asList(recipeShape) : new ArrayList<>();
@@ -174,6 +158,7 @@ public class RecipeSubMenu extends Menu {
             meta.setLore(lore);
             item.setItemMeta(meta);
         }
+        TexturePackManager.applyGuiModel(item, "editor_entry_recipe_key");
         return item;
     }
 
@@ -187,6 +172,7 @@ public class RecipeSubMenu extends Menu {
             meta.setLore(lore);
             item.setItemMeta(meta);
         }
+        TexturePackManager.applyGuiModel(item, "confirm_button");
         setMenuData(item, "action", "save_recipe");
         return item;
     }
@@ -198,6 +184,7 @@ public class RecipeSubMenu extends Menu {
             meta.setDisplayName(lang().get("common.back"));
             item.setItemMeta(meta);
         }
+        TexturePackManager.applyGuiModel(item, "back_button");
         setMenuData(item, "action", "back");
         return item;
     }

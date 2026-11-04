@@ -16,7 +16,9 @@ import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.SpellAttackContext;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
+import me.nagasonic.alkatraz.api.Element;
 import me.nagasonic.alkatraz.spells.vfx.CastCircle;
+import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
 import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.Color;
@@ -50,7 +52,7 @@ import org.bukkit.util.Vector;
  * No {@code getPower} at cast time - the context is seeded with RAW
  * {@code getBasePower() * getWandPower(...)} and {@code context.power(target)} is the only
  * scaling call, at the moment of impact. One context per cast, so one counter kills the
- * bolt. Worst case per cast: {@code 3.0 x 1 = 3.0}, against {@code burstBudget(1) = 3.9}.
+ * bolt. Worst case per cast: {@code 3.0 x 1 = 3.0}, against {@code burstBudget(1) = 3.5}.
  */
 public class LightBolt extends AttackSpell {
 

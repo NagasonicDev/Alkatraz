@@ -67,17 +67,16 @@ public final class MagicItemTriggerAdapter implements Listener {
     private final Map<UUID, Map<Integer, ItemStack>> previousEquipment = new ConcurrentHashMap<>();
 
     /**
-     * Fast paths for the damage triggers so the parameter {@link HashMap} and, for projectiles,
-     * the weapon-instance deserialisation are skipped when no definition declares them. These
-     * are {@code static final} on purpose: the bound-trigger index is only consulted for
-     * membership, and {@code isBound} fails open while the index is still unbuilt, so the worst
-     * case is the previous behaviour. Recomputing per event would risk caching a premature
-     * "unbound" verdict if the index is (re)built after this class loads.
+     * Re-read the bound-trigger index at dispatch time so spells/engravings added during a reload
+     * can activate the damage-trigger fast path without a full restart.
      */
-    private static final boolean DAMAGE_TAKEN_BOUND =
-            TriggerPipeline.isBound(TriggerPipeline.boundKey("on_damage_taken"));
-    private static final boolean DAMAGE_DEALT_BOUND =
-            TriggerPipeline.isBound(TriggerPipeline.boundKey("on_damage_dealt"));
+    private static boolean damageTakenBound() {
+        return TriggerPipeline.isBound(TriggerPipeline.boundKey("on_damage_taken"));
+    }
+
+    private static boolean damageDealtBound() {
+        return TriggerPipeline.isBound(TriggerPipeline.boundKey("on_damage_dealt"));
+    }
 
     // -----------------------------------------------------------------------
     // Existing adapters
@@ -146,25 +145,27 @@ public final class MagicItemTriggerAdapter implements Listener {
         if (!(event.getEntity() instanceof Player player)) return;
 
         EquipmentService equipment = MagicItemServices.equipment();
-        var bootInstance = equipment.profile(player).instance(EquipmentSlot.FEET);
-        if (bootInstance.isEmpty()) return;
+        var profile = equipment.profile(player);
 
         Map<String, Object> params = new HashMap<>();
         params.put("cause", event.getCause().name());
         params.put("damage", event.getDamage());
 
-        MagicItemInstance instance = bootInstance.get();
-        for (Engraving engraving : instance.engravings()) {
-            EngravingDefinition def = MagicItemRegistries.ENGRAVING_DEFINITIONS.get(engraving.engravingKey()).orElse(null);
-            if (def == null) continue;
+        for (Map.Entry<EquipmentSlot, MagicItemInstance> entry : profile.instances().entrySet()) {
+            EquipmentSlot slot = entry.getKey();
+            MagicItemInstance instance = entry.getValue();
+            for (Engraving engraving : instance.engravings()) {
+                EngravingDefinition def = MagicItemRegistries.ENGRAVING_DEFINITIONS.get(engraving.engravingKey()).orElse(null);
+                if (def == null) continue;
 
-            TriggerContext ctx = new TriggerContext(player, null, null, instance, EquipmentSlot.FEET, params);
-            if (!ConditionEvaluator.allMatch(def.conditions(), ctx)) continue;
+                TriggerContext ctx = new TriggerContext(player, null, null, instance, slot, params);
+                if (!ConditionEvaluator.allMatch(def.conditions(), ctx)) continue;
 
-            event.setCancelled(true);
-            EffectExecutor.executeAll(def.effects(), ctx);
-            CooldownCondition.commitPending(def.conditions(), ctx);
-            return;
+                event.setCancelled(true);
+                EffectExecutor.executeAll(def.effects(), ctx);
+                CooldownCondition.commitPending(def.conditions(), ctx);
+                return;
+            }
         }
     }
 
@@ -173,7 +174,7 @@ public final class MagicItemTriggerAdapter implements Listener {
      */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onDamageTaken(EntityDamageEvent event) {
-        if (!DAMAGE_TAKEN_BOUND) return;
+        if (!damageTakenBound()) return;
         if (!(event.getEntity() instanceof Player player)) return;
 
         LivingEntity damager = event instanceof EntityDamageByEntityEvent de
@@ -210,7 +211,7 @@ public final class MagicItemTriggerAdapter implements Listener {
         } else if (event.getDamager() instanceof Projectile projectile
                 && projectile.getShooter() instanceof Player player) {
             attacker = player;
-            if (DAMAGE_DEALT_BOUND) {
+            if (damageDealtBound()) {
                 String raw = projectile.getPersistentDataContainer().get(
                         ItemDataKeys.projectileWeaponInstance(), PersistentDataType.STRING);
                 if (raw != null && !raw.isBlank()) {
@@ -231,7 +232,7 @@ public final class MagicItemTriggerAdapter implements Listener {
             return;
         }
 
-        if (!DAMAGE_DEALT_BOUND) return;
+        if (!damageDealtBound()) return;
 
         Map<String, Object> params = new HashMap<>();
         params.put("damage", event.getFinalDamage());

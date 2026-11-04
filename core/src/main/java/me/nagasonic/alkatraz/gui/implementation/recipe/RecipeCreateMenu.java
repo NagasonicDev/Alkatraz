@@ -38,12 +38,12 @@ public class RecipeCreateMenu extends Menu {
     private final AlkatrazRecipe source; // null = create; non-null = duplicate
 
     public RecipeCreateMenu(Player viewer) {
-        super(viewer, ColorFormat.format(Alkatraz.getLangManager().get("menu.recipe_create")), 45);
+        super(viewer, packTitle("recipe_create", ColorFormat.format(Alkatraz.getLangManager().get("menu.recipe_create"))), 45);
         this.source = null;
     }
 
     public RecipeCreateMenu(Player viewer, AlkatrazRecipe source) {
-        super(viewer, ColorFormat.format(Alkatraz.getLangManager().get("menu.recipe_create")), 45);
+        super(viewer, packTitle("recipe_create", ColorFormat.format(Alkatraz.getLangManager().get("menu.recipe_create"))), 45);
         this.source = source;
         this.type = source.getType();
         this.result = source.getResult().clone();
@@ -82,6 +82,7 @@ public class RecipeCreateMenu extends Menu {
             inventory.setItem(RESULT_SLOT, ItemBuilder.of(Material.GRAY_STAINED_GLASS_PANE)
                     .name(lang().get("recipes.create.result"))
                     .lore(lang().get("recipes.create.result_hint"))
+                    .guiModel("blank_pane")
                     .build());
         }
 

@@ -1,4 +1,5 @@
 package me.nagasonic.alkatraz.configuration.requirement;
+import java.util.concurrent.ConcurrentHashMap;
 
 import me.nagasonic.alkatraz.api.configuration.requirement.Requirement;
 import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
@@ -31,7 +32,7 @@ public final class RequirementFactory {
         Requirement build(Spell spell, ConfigurationSection section);
     }
 
-    private static final Map<String, Builder> REGISTRY = new HashMap<>();
+    private static final Map<String, Builder> REGISTRY = new ConcurrentHashMap<>();
 
     static {
         register("number_stat", (spell, s) -> new NumberStatRequirement<>(

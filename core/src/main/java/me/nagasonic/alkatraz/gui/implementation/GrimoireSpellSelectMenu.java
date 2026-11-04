@@ -2,6 +2,8 @@ package me.nagasonic.alkatraz.gui.implementation;
 
 import me.nagasonic.alkatraz.api.magic.definition.ItemDefinition;
 import me.nagasonic.alkatraz.api.magic.instance.MagicItemInstance;
+import me.nagasonic.alkatraz.gui.ItemBuilder;
+import me.nagasonic.alkatraz.gui.SpellGuiItems;
 import me.nagasonic.alkatraz.gui.PagedMenu;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
@@ -41,7 +43,7 @@ public class GrimoireSpellSelectMenu extends PagedMenu<Spell> {
 
     public GrimoireSpellSelectMenu(Player viewer, ItemStack grimoireStack, MagicItemInstance instance, ItemDefinition definition, int targetPageIndex) {
         super(viewer,
-                lang().get("grimoire.spell_select_title"),
+                packTitle("grimoire_select", lang().get("grimoire.spell_select_title")),
                 54,
                 getDiscoverableSpells(viewer),
                 28);
@@ -74,10 +76,10 @@ public class GrimoireSpellSelectMenu extends PagedMenu<Spell> {
 
     @Override
     protected void addBackButton() {
-        ItemStack back = new ItemStack(Material.BARRIER);
-        ItemMeta m = back.getItemMeta();
-        m.setDisplayName(lang().get("grimoire.spell_select_back"));
-        back.setItemMeta(m);
+        ItemStack back = ItemBuilder.of(Material.BARRIER)
+                .name(lang().get("grimoire.spell_select_back"))
+                .guiModel("back_button")
+                .build();
         setMenuData(back, "action", "back");
         inventory.setItem(backButtonSlot, back);
     }
@@ -89,7 +91,7 @@ public class GrimoireSpellSelectMenu extends PagedMenu<Spell> {
 
     @Override
     protected ItemStack createDisplayItem(Spell spell, int index) {
-        ItemStack item = spell.getGuiItem().clone();
+        ItemStack item = SpellGuiItems.create(spell);
         ItemMeta meta = item.getItemMeta();
 
         meta.setDisplayName(ColorFormat.format("&f" + spell.getDisplayName()));

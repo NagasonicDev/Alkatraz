@@ -14,8 +14,19 @@ public class Config {
     private final Alkatraz plugin = Alkatraz.getInstance();
 
     public Config(String name) {
+        if (!isValidName(name)) {
+            throw new IllegalArgumentException("Invalid config name: " + name);
+        }
         this.name = name;
         save();
+    }
+
+    public static boolean isValidName(String name) {
+        return name != null && !name.isBlank()
+                && !name.contains("..")
+                && !name.contains("\\")
+                && !name.startsWith("/")
+                && !name.contains(":");
     }
 
     public Config save() {
@@ -26,7 +37,7 @@ public class Config {
             if (section != null && !section.getKeys(true).isEmpty())
                 config.save(this.file);
         } catch (IOException ex) {
-            ex.printStackTrace();
+            Alkatraz.getInstance().getLogger().log(java.util.logging.Level.SEVERE, "Failed to save config", ex);
         }
         return this;
     }

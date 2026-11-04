@@ -20,6 +20,7 @@ import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
 import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.spells.vfx.WindUp;
 import me.nagasonic.alkatraz.util.ParticleCaster;
+import me.nagasonic.alkatraz.util.SummonSpawnLocation;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.Color;
 import org.bukkit.*;
@@ -175,7 +176,7 @@ public class SkeletalKnights extends AttackSpell implements Listener {
         List<UUID> ids = new ArrayList<>();
 
         for (int i = 0; i < count; i++) {
-            Location spawnLoc = findSpawnLocation(caster.getLocation());
+            Location spawnLoc = SummonSpawnLocation.resolve(caster);
             if (spawnLoc == null) continue;
             if (!Protection.spawnMob(caster, spawnLoc)) continue;
 
@@ -211,12 +212,18 @@ public class SkeletalKnights extends AttackSpell implements Listener {
                 nbt.setString("summoner_uuid", caster.getUniqueId().toString());
                 nbt.setBoolean("summoned_mount", true);
             });
-            MagicAiService.getInstance().setBrain(horse, "summoned_horse");
+            MagicAiService horseAi = MagicAiService.getInstance();
+            if (horseAi != null) {
+                horseAi.setBrain(horse, "summoned_horse");
+            }
             NBT.modifyPersistentData(knight, nbt -> {
                 nbt.setString("summoner_uuid", caster.getUniqueId().toString());
                 nbt.setBoolean("summoned_knight", true);
             });
-            MagicAiService.getInstance().setBrain(knight, "summoned_knight");
+            MagicAiService knightAi = MagicAiService.getInstance();
+            if (knightAi != null) {
+                knightAi.setBrain(knight, "summoned_knight");
+            }
 
             horse.addPassenger(knight);
             ids.add(knight.getUniqueId());
@@ -256,22 +263,6 @@ public class SkeletalKnights extends AttackSpell implements Listener {
                 summonedKnights.remove(caster.getUniqueId());
             }
         }.runTaskLater(Alkatraz.getInstance(), config.knightDuration() * 20L);
-    }
-
-    private Location findSpawnLocation(Location center) {
-        World world = center.getWorld();
-        double range = config.summonRange();
-        for (int i = 0; i < 10; i++) {
-            double x = center.getX() + (Math.random() - 0.5) * range * 2;
-            double z = center.getZ() + (Math.random() - 0.5) * range * 2;
-            int bx = (int) Math.floor(x);
-            int bz = (int) Math.floor(z);
-            int y = world.getHighestBlockYAt(bx, bz) + 1;
-            if (world.getBlockAt(bx, y, bz).getType() == Material.AIR && world.getBlockAt(bx, y - 1, bz).getType().isSolid()) {
-                return new Location(world, x, y, z);
-            }
-        }
-        return null;
     }
 
     private void spawnSummonBurst(LivingEntity caster, Location loc) {

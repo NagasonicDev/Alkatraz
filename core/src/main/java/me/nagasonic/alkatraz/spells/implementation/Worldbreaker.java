@@ -28,14 +28,22 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Circle 9 EARTH capstone: two faults tear the arena apart in parallel, perpendicular to wherever
@@ -46,9 +54,9 @@ import java.util.Map;
  * <h2>One block allowance, not two</h2>
  * {@code int[] blocksLeft = {terrainBudget}} is allocated once and the <em>same array reference</em>
  * is threaded through the fault-advance loop and the slab-lift loop. Two counters would each be
- * able to spend 2000, giving 4000; the sum could then only be held under the ceiling by every call
+ * able to spend 3600, giving 7200; the sum could then only be held under the ceiling by every call
  * site remembering to check the other one. One shared counter decrements from a single number
- * that starts at the ceiling, so {@code destroyed_so_far + placed_so_far <= 2000} holds by
+ * that starts at the ceiling, so {@code destroyed_so_far + placed_so_far <= 3600} holds by
  * construction - there is no arrangement of options, region permissions or chunk boundaries that
  * can exceed it. If the allowance runs out mid-dig the first fault to ask takes what is left and
  * the second gets nothing for that tick, which is the correct behaviour rather than a special case.
@@ -59,14 +67,19 @@ import java.util.Map;
  * and putting them back would duplicate the material. A fault line that heals itself is not a fault
  * line.
  *
+ * <p>While the slab is up its restore ticket lives in {@link #PENDING}, so a quit or a
+ * {@code /stop} mid-hold puts the ground back instead of stranding blackstone in the arena.
+ *
  * <h2>Damage contract</h2>
- * The slab crushes everything on it exactly once, on the single lift tick: one
- * {@link SpellAttackContext}, one {@link AttackProperties}, one {@code ctx.tick()}, one
- * {@code ctx.power(target)} per target. {@code power: 28.6} is the section 6 circle-9 ladder value
- * and {@code 28.6 <= burstBudget(9) = 90.0}; no {@code hit_count} is declared because there is
- * exactly one application per target.
+ * {@code crush_events} crushes per target, on three separate ticks: the lift, the fall when the
+ * hold ends, and the slab dropping into the chasm. One {@link SpellAttackContext}, one
+ * {@link AttackProperties}, one {@code ctx.tick()} per event, one {@code ctx.power(target)} per
+ * target per event. {@code power: 57.2} is the section 6 circle-9 ladder value and
+ * {@code 57.2 x 3 = 171.6 <= burstBudget(9)}; no {@code hit_count} is declared because the events
+ * are separate ticks, not separate hits inside one tick.
  */
-public class Worldbreaker extends AttackSpell {
+public class Worldbreaker extends AttackSpell implements Listener {
+    private static boolean listenerInstalled = false;
 
     /** Violet-black basalt. Hoisted to a static so it is allocated once, and deliberately NOT
      * derived from {@code element}: this element's other three new spells are ember orange,
@@ -90,19 +103,28 @@ public class Worldbreaker extends AttackSpell {
      * {@code TerrainEditor.placeBlocks} takes one material for the whole list, so a per-column
      * material would need N calls - and one call per layer is both cheaper and easier to reason
      * about against the budget. */
-    private static final Material SLAB_MATERIAL = Material.POLISHED_BLACKSTONE;
+    private static final Material SLAB_MATERIAL = Material.DEEPSLATE;
 
     /** Every ad-hoc read below carries the literal the yml ships, so a missing key is not a 0. */
     private int telegraphTicks = 20;
     private double riftSpacing = 14.0;
-    private int riftLength = 30;
+    private int riftLength = 38;
     private int riftStep = 2;
-    private double riftRadius = 2.0;
+    private double riftRadius = 2.4;
     private int crushWidth = 10;
     private int crushLift = 3;
     private double crushLiftVelocity = 1.8;
     private double riftHoldSeconds = 6.0;
-    private int terrainBudget = 2000;
+    private int collapseTicks = 200;
+    private double chasmRadius = 3.0;
+    private int terrainBudget = 3600;
+
+    /** Raised slabs still owing a restore, keyed by caster. A slab is here from the moment the
+     * cast starts until {@link #settlePending} empties it, so quit and {@code /stop} can reach it
+     * from outside the BukkitRunnable that would otherwise be cancelled with it. */
+    private static final Map<UUID, PendingSlab> PENDING = new ConcurrentHashMap<>();
+
+    private record PendingSlab(LivingEntity caster, Map<Location, Material> originals) {}
 
     public Worldbreaker(String type) {
         super(type);
@@ -121,14 +143,20 @@ public class Worldbreaker extends AttackSpell {
         loadOptions();
         this.telegraphTicks = Math.max(1, spellConfig.getInt("telegraph_ticks", 20));
         this.riftSpacing = spellConfig.getDouble("rift_spacing", 14.0);
-        this.riftLength = Math.max(0, spellConfig.getInt("rift_length", 30));
+        this.riftLength = Math.max(0, spellConfig.getInt("rift_length", 38));
         this.riftStep = Math.max(1, spellConfig.getInt("rift_step", 2));
-        this.riftRadius = spellConfig.getDouble("rift_radius", 2.0);
+        this.riftRadius = spellConfig.getDouble("rift_radius", 2.4);
         this.crushWidth = Math.max(0, spellConfig.getInt("crush_width", 10));
         this.crushLift = Math.max(0, spellConfig.getInt("crush_lift", 3));
         this.crushLiftVelocity = spellConfig.getDouble("crush_lift_velocity", 1.8);
         this.riftHoldSeconds = spellConfig.getDouble("rift_hold_seconds", 6.0);
-        this.terrainBudget = Math.max(0, spellConfig.getInt("terrain_budget", 2000));
+        this.collapseTicks = Math.max(1, spellConfig.getInt("collapse_ticks", 200));
+        this.chasmRadius = spellConfig.getDouble("chasm_radius", 3.0);
+        this.terrainBudget = Math.max(0, spellConfig.getInt("terrain_budget", 3600));
+        if (!listenerInstalled) {
+            Alkatraz.getInstance().getServer().getPluginManager().registerEvents(this, Alkatraz.getInstance());
+            listenerInstalled = true;
+        }
     }
 
     @Override
@@ -140,6 +168,13 @@ public class Worldbreaker extends AttackSpell {
 
         Vector dir = caster.getEyeLocation().getDirection().setY(0);
         Utils.safeNormalizeInPlace(dir);
+        // Looking straight up or down normalises to a zero vector, which would put both rifts on
+        // the same spot and collapse the whole footprint onto it. Refuse rather than charge for
+        // three blocks of trench.
+        if (dir.lengthSquared() < 1e-12) {
+            cancelCast(caster);
+            return;
+        }
         Vector perp = new Vector(-dir.getZ(), 0, dir.getX());
 
         Location found = Utils.findTopSolid(caster.getLocation(), 8);
@@ -154,15 +189,23 @@ public class Worldbreaker extends AttackSpell {
             rifts.add(ground != null ? ground : anchor);
         }
 
-        int digWindow = digTicks(getModifiedStat(caster, "rift_length", riftLength));
+        // Resolved ONCE. Every consumer - the telegraph, both crush boxes and the slab footprint -
+        // takes this value, so an option that shortens the fault also shortens what it raises.
+        int length = Math.max(0, (int) Math.round(getModifiedStat(caster, "rift_length", riftLength)));
+        int digWindow = digTicks(length);
         int lift = Math.max(0, (int) Math.round(getModifiedStat(caster, "crush_lift", crushLift)));
-        runSplit(caster, wand, ctx, props, centre, dir, perp, rifts, digWindow, lift);
+        runSplit(caster, wand, ctx, props, centre, dir, perp, rifts, digWindow, lift, length);
     }
 
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
-        // Player-only spell. A capstone that rewrites 1890 blocks of an arena should not be
+        // Player-only spell. A capstone that rewrites thousands of blocks of an arena should not be
         // something a scheduled mob repeats every CastSpellGoal cooldown.
+    }
+
+    @Override
+    public boolean canMobCast(Mob mob) {
+        return false;
     }
 
     /** Dig ticks each fault takes to run its full length. */
@@ -171,29 +214,37 @@ public class Worldbreaker extends AttackSpell {
     }
 
     /**
-     * All three phases - telegraph, dig, lift - in one task, closing over the single
+     * All four phases - telegraph, dig, lift, collapse - in one task, closing over the single
      * {@link SpellAttackContext} and the single block allowance, so countering kills the whole cast.
      */
     private void runSplit(LivingEntity caster, ItemStack wand, SpellAttackContext ctx,
                            AttackProperties props, Location centre, Vector dir, Vector perp,
-                           List<Location> rifts, int digWindow, int lift) {
-        // ONE shared allowance for the WHOLE cast - both faults and the slab. This is why there is
-        // no second counter: a single int[] that starts at the ceiling and is decremented by every
-        // write makes the SUM a structural guarantee rather than something two code paths must
-        // politely agree on.
+                           List<Location> rifts, int digWindow, int lift, int length) {
+        // ONE shared allowance for the WHOLE cast - both faults, the slab and the collapse. This is
+        // why there is no second counter: a single int[] that starts at the ceiling and is
+        // decremented by every write makes the SUM a structural guarantee rather than something
+        // three code paths must politely agree on.
         int[] blocksLeft = {terrainBudget};
         Map<Location, Material> slabOriginals = new LinkedHashMap<>();
+        Location slabCentre = midpoint(rifts.get(0), rifts.get(1));
+
+        // Published before the task starts, so quit/disable can settle it even while the cast is
+        // still digging. A second cast while the first slab is still up settles the first first.
+        UUID uuid = caster.getUniqueId();
+        settlePending(uuid);
+        PENDING.put(uuid, new PendingSlab(caster, slabOriginals));
 
         new BukkitRunnable() {
-            int phase = 0;                 // 0 telegraph, 1 dig, 2 lift
+            int phase = 0;                 // 0 telegraph, 1 dig, 2 lift-hold-collapse
             int ticks = 0;
+            boolean fell = false;
 
             @Override
             public void run() {
                 if (ctx.isSpent() || caster.isDead()
                         || (caster instanceof Player player && !player.isOnline())) {
                     cancel();
-                    settleSlab(caster, slabOriginals);
+                    settlePending(uuid);
                     return;
                 }
 
@@ -203,7 +254,7 @@ public class Worldbreaker extends AttackSpell {
                         ticks = 0;
                         return;
                     }
-                    telegraph(caster, centre, dir, rifts, ticks);
+                    telegraph(caster, centre, dir, rifts, length, ticks);
                     ticks++;
                     return;
                 }
@@ -212,7 +263,8 @@ public class Worldbreaker extends AttackSpell {
                     if (ticks >= digWindow) {
                         phase = 2;
                         ticks = 0;
-                        liftSlab(caster, wand, ctx, props, dir, perp, rifts, slabOriginals, blocksLeft, lift);
+                        liftSlab(caster, wand, ctx, props, slabCentre, dir, perp, length,
+                                slabOriginals, blocksLeft, lift);
                         return;
                     }
                     dig(caster, dir, rifts, ticks, blocksLeft);
@@ -221,9 +273,16 @@ public class Worldbreaker extends AttackSpell {
                 }
 
                 ticks++;
-                if (ticks >= holdTicks()) {
+                if (!fell && ticks >= holdTicks()) {
+                    fell = true;
+                    fallSlab(caster, wand, ctx, props, slabCentre, dir, perp, length);
+                }
+                // The collapse opens the chasm the slab drops into, so it MUST run before the
+                // restore - the recorded originals are the pre-cast ground, not the chasm floor.
+                if (ticks >= collapseTicks) {
+                    collapse(caster, wand, ctx, props, rifts, blocksLeft);
                     cancel();
-                    settleSlab(caster, slabOriginals);
+                    settlePending(uuid);
                 }
             }
         }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
@@ -234,11 +293,11 @@ public class Worldbreaker extends AttackSpell {
      * <b>No block is written during the telegraph</b> - it is twenty ticks of lines and a rumble.
      */
     private void telegraph(LivingEntity caster, Location centre, Vector dir,
-                           List<Location> rifts, int ticks) {
+                           List<Location> rifts, int length, int ticks) {
         double progress = (double) ticks / telegraphTicks;
         for (Location rift : rifts) {
             for (int end = -1; end <= 1; end += 2) {
-                int reach = (int) Math.floor(riftLength / 2.0 * progress);
+                int reach = (int) Math.floor(length / 2.0 * progress);
                 Location from = rift.clone().add(dir.clone().multiply(end * reach));
                 Location to = rift.clone().add(dir.clone().multiply(-end * reach));
                 for (Location point : ParticleUtils.line(0.5, from, to)) {
@@ -284,29 +343,21 @@ public class Worldbreaker extends AttackSpell {
     }
 
     /**
-     * Phase 2: the crush tick and the lift. The damage happens on the same tick the slab starts
-     * moving, exactly once per target, off the one shared {@link AttackProperties}.
+     * Phase 2: crush event 1 (the lift) and the raise. The damage happens on the same tick the slab
+     * starts moving, exactly once per target, off the one shared {@link AttackProperties}.
      */
     private void liftSlab(LivingEntity caster, ItemStack wand, SpellAttackContext ctx,
-                          AttackProperties props, Vector dir, Vector perp, List<Location> rifts,
-                          Map<Location, Material> slabOriginals, int[] blocksLeft, int lift) {
-        Location slabCentre = midpoint(rifts.get(0), rifts.get(1));
+                          AttackProperties props, Location slabCentre, Vector dir, Vector perp,
+                          int length, Map<Location, Material> slabOriginals, int[] blocksLeft, int lift) {
         if (slabCentre.getWorld() == null) return;
 
         ctx.tick();
-        for (LivingEntity target : Utils.getNearbyLivingEntities(slabCentre, crushWidth / 2.0,
-                CRUSH_SCAN_HEIGHT, riftLength / 2.0)) {
-            if (target.equals(caster) || target.isDead()) continue;
-            if (props.hasHit(target)) continue;
-            props.hit(target);
-            target.setVelocity(new Vector(0, crushLiftVelocity, 0));
-            // The ONLY getPower call in this spell.
-            SpellDamageUtil.damageWithSpell(target, ctx.power(target), caster, wand, Worldbreaker.this);
-        }
+        crush(caster, wand, ctx, props, slabCentre, dir, perp,
+                crushWidth / 2.0, CRUSH_SCAN_HEIGHT, length / 2.0, crushLiftVelocity);
 
         for (int layer = 1; layer <= lift; layer++) {
             if (blocksLeft[0] <= 0) break;
-            List<Location> targets = slabFootprint(slabCentre, dir, perp, layer);
+            List<Location> targets = slabFootprint(caster, slabCentre, dir, perp, length, layer);
             if (targets.isEmpty()) break;
             // RECORD EVERY ORIGINAL BEFORE WRITING ANY OF IT.
             for (Location loc : targets) {
@@ -325,40 +376,136 @@ public class Worldbreaker extends AttackSpell {
         }
 
         slabCentre.getWorld().playSound(slabCentre, Sound.ENTITY_ENDER_DRAGON_GROWL, 1.2f, 0.6f);
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                settleSlab(caster, slabOriginals);
+    }
+
+    /**
+     * Crush event 2: the hold ends and the slab settles back onto the ground it came from. The
+     * blocks stay up until after the collapse - the restore must come last - so this event is the
+     * fall and the damage, not the write.
+     */
+    private void fallSlab(LivingEntity caster, ItemStack wand, SpellAttackContext ctx,
+                          AttackProperties props, Location slabCentre, Vector dir, Vector perp,
+                          int length) {
+        if (slabCentre.getWorld() == null) return;
+        ctx.tick();
+        crush(caster, wand, ctx, props, slabCentre, dir, perp,
+                crushWidth / 2.0, CRUSH_SCAN_HEIGHT, length / 2.0, -crushLiftVelocity);
+        slabCentre.getWorld().playSound(slabCentre, Sound.BLOCK_STONE_BREAK, 1.0f, 0.5f);
+    }
+
+    /**
+     * The collapse and crush event 3: a {@code chasm_radius} sphere is destroyed at each rift centre
+     - out of the SAME {@code blocksLeft} as the faults and the slab - and everything standing over
+     * the hole is dropped into it. The chasm is never restored; {@code breakNaturally} paid it out.
+     */
+    private void collapse(LivingEntity caster, ItemStack wand, SpellAttackContext ctx,
+                          AttackProperties props, List<Location> rifts, int[] blocksLeft) {
+        // Two rifts are rift_spacing apart, which is wider than twice chasm_radius, so the scans
+        // cannot overlap - except if the caster's facing collapsed to a zero horizontal vector and
+        // both rifts resolved to the same spot. Dedupe so ctx.power never sees one target twice.
+        Set<LivingEntity> crushed = new HashSet<>();
+        ctx.tick();
+        for (Location rift : rifts) {
+            World world = rift.getWorld();
+            if (world == null) continue;
+
+            if (blocksLeft[0] > 0) {
+                int allowed = Math.min(blocksLeft[0], sphereCount(chasmRadius));
+                blocksLeft[0] -= TerrainEditor.destroySphere(
+                        caster, rift.clone().add(0, -1, 0), chasmRadius, true, allowed);
             }
-        }.runTaskLater(Alkatraz.getInstance(), holdTicks());
+
+            world.playSound(rift, Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 0.3f);
+            for (Location point : ParticleUtils.circle(rift.clone().add(0, 0.06, 0),
+                    chasmRadius, 16, rift.getYaw(), 0)) {
+                ParticleCaster.spawn(caster, world, Utils.DUST, point, 0, FAULT_DUST);
+            }
+
+// shortcut: the collapse does not verify that an entity is standing on solid ground before
+// dropping it - it drops everything in radius. That is the point of the spell; if a future
+// version needs "only things on the surface", that is when to add the ray trace.
+            for (LivingEntity target : Utils.getNearbyLivingEntities(rift, chasmRadius)) {
+                if (target.equals(caster) || target.isDead() || !crushed.add(target)) continue;
+                props.hit(target);
+                target.setVelocity(new Vector(0, -3, 0));
+                SpellDamageUtil.damageWithSpell(target, ctx.power(target), caster, wand, Worldbreaker.this);
+            }
+        }
+    }
+
+    /**
+     * One crush event, tested in the caster's YAW FRAME rather than the world axes: {@code dir} runs
+     * along the slab and {@code perp} across it, so the hit box matches the block rectangle that was
+     * actually raised. The world-AABB scan is widened to the circumscribing square and used only as
+     * a candidate filter. Every entity inside is dropped by {@code drop} and hit exactly once, off
+     * the one shared context - the caller has already advanced {@code ctx.tick()} this event.
+     */
+    private void crush(LivingEntity caster, ItemStack wand, SpellAttackContext ctx,
+                       AttackProperties props, Location centre, Vector dir, Vector perp,
+                       double rangeX, double rangeY, double rangeZ, double drop) {
+        if (centre.getWorld() == null) return;
+        double scan = Math.hypot(rangeX, rangeZ);
+        for (LivingEntity target : Utils.getNearbyLivingEntities(centre, scan, rangeY, scan)) {
+            if (target.equals(caster) || target.isDead()) continue;
+            Vector d = target.getLocation().toVector().subtract(centre.toVector());
+            if (Math.abs(d.dot(dir)) > rangeZ || Math.abs(d.dot(perp)) > rangeX) continue;
+            props.hit(target);
+            target.setVelocity(new Vector(0, drop, 0));
+            SpellDamageUtil.damageWithSpell(target, ctx.power(target), caster, wand, Worldbreaker.this);
+        }
     }
 
     /**
      * The one restore. Re-checks Protection per block, so a region entered during the hold is not
      * rewritten - the exact defect {@link TerrainEditor} exists to close. Idempotent, because the
-     * map is cleared after the restore and an empty ticket makes {@code restoreAll} a no-op.
+     * entry is removed from {@link #PENDING} first, so the timer, the quit handler and the disable
+     * handler can never restore the same blocks twice.
      */
-    private void settleSlab(LivingEntity caster, Map<Location, Material> slabOriginals) {
-        if (slabOriginals.isEmpty()) return;
-        TerrainEditor.restoreAll(caster, new TerrainEditor.RestoreTicket(slabOriginals));
-        slabOriginals.clear();
+    private void settlePending(UUID uuid) {
+        PendingSlab pending = PENDING.remove(uuid);
+        if (pending == null) return;
+        if (pending.originals().isEmpty()) return;
+        TerrainEditor.restoreAll(pending.caster(), new TerrainEditor.RestoreTicket(pending.originals()));
+        pending.originals().clear();
     }
 
-    /** One layer of the trapped slab: a rectangle centred between the two faults. */
-    private List<Location> slabFootprint(Location slabCentre, Vector dir, Vector perp, int layer) {
+    @EventHandler
+    private void onQuit(PlayerQuitEvent e) {
+        settlePending(e.getPlayer().getUniqueId());
+    }
+
+    @EventHandler
+    private void onPluginDisable(PluginDisableEvent e) {
+        if (e.getPlugin() != Alkatraz.getInstance()) return;
+        for (UUID uuid : PENDING.keySet()) settlePending(uuid);
+        PENDING.clear();
+    }
+
+    /**
+     * One layer of the trapped slab: a rectangle centred between the two faults, in the caster's
+     * yaw frame. The caster's own column is skipped - the block they are standing on is the block
+     * {@link Utils#findTopSolid} reported, so layer 1 is their feet and sealing it suffocates them.
+     */
+    private List<Location> slabFootprint(LivingEntity caster, Location slabCentre, Vector dir,
+                                         Vector perp, int length, int layer) {
         World world = slabCentre.getWorld();
         if (world == null) return new ArrayList<>();
-        int halfLength = Math.max(1, riftLength / 2);
+        int halfLength = Math.max(1, length / 2);
         int halfWidth = Math.max(0, crushWidth / 2);
         int y = slabCentre.getBlockY() + layer;
+        Location casterLoc = caster.getLocation();
+        int casterX = casterLoc.getBlockX();
+        int casterZ = casterLoc.getBlockZ();
         List<Location> out = new ArrayList<>();
         for (int along = -halfLength; along <= halfLength; along++) {
             for (int across = -halfWidth; across <= halfWidth; across++) {
                 Vector offset = dir.clone().multiply(along).add(perp.clone().multiply(across));
-                out.add(new Location(world,
+                Location loc = new Location(world,
                         slabCentre.getBlockX() + offset.getX(),
                         y,
-                        slabCentre.getBlockZ() + offset.getZ()));
+                        slabCentre.getBlockZ() + offset.getZ());
+                if (loc.getBlockX() == casterX && loc.getBlockZ() == casterZ) continue;
+                out.add(loc);
             }
         }
         return out;
@@ -396,6 +543,7 @@ public class Worldbreaker extends AttackSpell {
 
     @Override
     public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
+        int[] signatureFrame = {0};
         return Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
             if (e.isCancelled()) return;
             Location loc = caster.getEyeLocation();
@@ -404,6 +552,11 @@ public class Worldbreaker extends AttackSpell {
             for (Location point : points) {
                 ParticleCaster.spawn(caster, point.getWorld(), Utils.DUST, point, 0, CIRCLE_DUST);
             }
+            Location signatureCenter = loc.clone().add(loc.getDirection().normalize().multiply(1.5));
+            me.nagasonic.alkatraz.spells.vfx.SpellCastSignature.draw(getId(), caster, signatureCenter,
+                    signatureFrame[0]++, 3.0,
+                    me.nagasonic.alkatraz.spells.vfx.ElementPalette.of(BASALT).coreDust(),
+                    me.nagasonic.alkatraz.spells.vfx.ElementPalette.of(BASALT).deepDust());
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());
     }
 

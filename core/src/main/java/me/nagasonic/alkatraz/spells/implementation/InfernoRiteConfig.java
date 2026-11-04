@@ -26,8 +26,8 @@ public record InfernoRiteConfig(
                 intOf(map.get("hit_count"), 3),
                 intOf(map.get("chain_targets_per_trigger"), 2),
                 doubleOf(map.get("chain_radius"), 8.0),
-                doubleOf(map.get("duration"), 8.0),
-                intOf(map.get("ignite_ticks"), 40),
+                doubleOf(map.get("duration"), 12.0),
+                intOf(map.get("ignite_ticks"), 240),
                 intOf(map.get("opening_ring_ticks"), 12),
                 doubleOf(map.get("detonation_knockback"), 0.6),
                 doubleOf(map.get("detonation_knockback_y"), 0.5));

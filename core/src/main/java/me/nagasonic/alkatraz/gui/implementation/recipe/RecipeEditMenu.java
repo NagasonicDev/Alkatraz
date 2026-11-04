@@ -54,21 +54,6 @@ public class RecipeEditMenu extends Menu {
             RecipeField.HIDDEN_WHEN_LOCKED, Material.LEATHER
     );
 
-    private static ItemStack blankPanePrototype;
-
-    private static ItemStack blankPane() {
-        if (blankPanePrototype == null) {
-            ItemStack pane = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
-            ItemMeta meta = pane.getItemMeta();
-            if (meta != null) {
-                meta.setDisplayName(ColorFormat.format("&7"));
-                pane.setItemMeta(meta);
-            }
-            blankPanePrototype = pane;
-        }
-        return blankPanePrototype;
-    }
-
     private final RecipeEditorSession session;
     private final AlkatrazRecipe recipe;
     private final RecipeType type;
@@ -76,8 +61,8 @@ public class RecipeEditMenu extends Menu {
     private boolean suppressCleanup;
 
     public RecipeEditMenu(Player viewer, AlkatrazRecipe recipe) {
-        super(viewer, ColorFormat.format(
-                Alkatraz.getLangManager().get("menu.recipe_edit")), 54);
+        super(viewer, packTitle("recipe_edit", ColorFormat.format(
+                Alkatraz.getLangManager().get("menu.recipe_edit"))), 54);
         this.recipe = recipe;
         this.type = recipe.getType();
         this.session = RecipeEditorSession.start(viewer, recipe.getKey());
@@ -112,9 +97,7 @@ public class RecipeEditMenu extends Menu {
 
     @Override
     protected void build() {
-        for (int i = 0; i < size; i++) {
-            inventory.setItem(i, blankPane());
-        }
+        fillAll();
 
         inventory.setItem(FIELD_SLOT_DISPLAY_NAME, createTextField(
                 Material.NAME_TAG, RecipeField.DISPLAY_NAME, currentString(RecipeField.DISPLAY_NAME)));
@@ -174,6 +157,7 @@ public class RecipeEditMenu extends Menu {
                 : ItemBuilder.of(Material.GRAY_STAINED_GLASS_PANE)
                         .name(lang().get("recipes.edit.result"))
                         .lore(lang().get("recipes.edit.drop_hint"))
+                        .guiModel("blank_pane")
                         .build());
 
         ItemStack save = Alkatraz.getGuiItemRegistry().getItem("confirm_button").clone();

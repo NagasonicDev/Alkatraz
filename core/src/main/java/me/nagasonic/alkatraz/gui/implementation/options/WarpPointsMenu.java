@@ -37,7 +37,7 @@ public class WarpPointsMenu extends Menu {
     private final Warp warp;
 
     public WarpPointsMenu(Player viewer, Spell spell, SpellOption option) {
-        super(viewer, ColorFormat.format(lang().get("menu.warp_points")), 27);
+        super(viewer, packTitle("warp_points", ColorFormat.format(lang().get("menu.warp_points"))), 27);
         this.spell = spell;
         this.warp = (Warp) spell;
     }
@@ -63,6 +63,7 @@ public class WarpPointsMenu extends Menu {
 
         ItemStack back = ItemBuilder.of(Material.BARRIER)
                 .name(lang().get("pooled.back_to_options"))
+                .guiModel("back_button")
                 .build();
         setMenuData(back, "action", "back");
         inventory.setItem(22, back);
@@ -77,6 +78,7 @@ public class WarpPointsMenu extends Menu {
 
         if (slot >= max) {
             ItemStack locked = ItemBuilder.of(Material.IRON_BARS)
+                    .guiModel("locked_slot")
                     .name("&8Locked Slot " + (slot + 1))
                     .lore("&7Requires &f" + warp.slotsMasteryRequirement(slot) + " &7Warp mastery")
                     .build();
@@ -87,6 +89,7 @@ public class WarpPointsMenu extends Menu {
         MagicProfile.WarpPoint point = points.get(slot);
         if (point == null) {
             ItemStack empty = ItemBuilder.of(Material.LIGHT_GRAY_DYE)
+                    .guiModel("warp_empty")
                     .name("&7Slot " + (slot + 1))
                     .lore("&7Empty.", "&eClick to set current location.")
                     .build();

@@ -25,8 +25,11 @@ public class ConfigManager {
         return defaultConfigs;
     }
 
-    private static final Collection<String> reloadedConfigs = new HashSet<>();
+
     public static Config getConfig(String name) {
+        if (!Config.isValidName(name)) {
+            throw new IllegalArgumentException("Invalid config name: " + name);
+        }
         if (!configs.containsKey(name)){
             configs.put(name, new Config(name));
             configs.get(name).reload();
@@ -37,6 +40,9 @@ public class ConfigManager {
 
     private static final Collection<String> fetchedConfigs = new HashSet<>();
     public static YamlConfiguration getDefault(String name) {
+        if (!Config.isValidName(name)) {
+            throw new IllegalArgumentException("Invalid config name: " + name);
+        }
         try {
             if (!fetchedConfigs.contains(name) && !defaultConfigs.containsKey(name)) {
                 // if a config has already been fetched and didn't exist, we don't need to try again and spam console with errors

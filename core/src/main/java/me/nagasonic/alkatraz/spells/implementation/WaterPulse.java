@@ -6,6 +6,7 @@ import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.spells.vfx.CastCircle;
 import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
+import me.nagasonic.alkatraz.spells.vfx.FakeWaterVfx;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.components.SpellComponentType;
 import me.nagasonic.alkatraz.spells.components.SpellParticleComponent;
@@ -89,6 +90,7 @@ public class WaterPulse extends AttackSpell implements Listener {
         AttackProperties props = new AttackProperties(p, Utils.castLocation(p),
                 getBasePower() * getWandPower(wand, p), AttackType.MAGIC);
         Location centre = p.getLocation();
+        if (centre.getWorld() == null) return;
         double maxRadius = (Double) getOption("pulse_radius").getSelectedValue(p).getValue();
         double step = (Double) getOption("pulse_speed").getSelectedValue(p).getValue();
 
@@ -99,6 +101,10 @@ public class WaterPulse extends AttackSpell implements Listener {
 
             @Override
             public void run() {
+                if (p.isDead() || !p.isOnline() || centre.getWorld() == null) {
+                    cancel();
+                    return;
+                }
                 if (props.isCancelled() || props.isCountered()) {
                     cancel();
                     return;
@@ -119,6 +125,7 @@ public class WaterPulse extends AttackSpell implements Listener {
                     if (entity.equals(p)) continue;
 
                     LivingEntity target = (LivingEntity) entity;
+                    if (!Protection.damage(target, p, target.getLocation())) continue;
 
                     // water_pulse was knockback-only. It is a BURST now.
                     if (!props.hasHit(target)) {
@@ -146,11 +153,13 @@ public class WaterPulse extends AttackSpell implements Listener {
 
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
+        if (caster.isDead() || caster.getWorld() == null) return;
         double wandp = getWandPowerOrDefault(wand);
         // RAW base power. getPower is applied once per pulse, below.
         AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster),
                 getBasePower() * wandp, AttackType.MAGIC);
         Location centre = caster.getLocation();
+        if (centre.getWorld() == null) return;
 
         BukkitRunnable task = new BukkitRunnable() {
             double r = 0;
@@ -159,6 +168,10 @@ public class WaterPulse extends AttackSpell implements Listener {
 
             @Override
             public void run() {
+                if (caster.isDead() || !caster.isValid() || centre.getWorld() == null) {
+                    cancel();
+                    return;
+                }
                 if (props.isCancelled() || props.isCountered()){
                     cancel();
                     return;
@@ -179,6 +192,7 @@ public class WaterPulse extends AttackSpell implements Listener {
                     if (entity.equals(caster)) continue;
 
                     LivingEntity target = (LivingEntity) entity;
+                    if (!Protection.damage(target, caster, target.getLocation())) continue;
 
                     // water_pulse was knockback-only. It is a BURST now.
                     if (!props.hasHit(target)) {
@@ -209,10 +223,17 @@ public class WaterPulse extends AttackSpell implements Listener {
 
     private void spawnPulseRing(Location centre, double r, AttackProperties props, LivingEntity caster,
                                 ItemStack wand, double rotation) {
+        if (centre == null || centre.getWorld() == null) return;
         // Signature shape: an EXPANDING ring. `ringRadius` is monotonically increasing across the
         // cast, which is the whole tell - whirlpool is the same builder with the opposite sign.
         // No shadow ring here: this is a blast front standing on open ground, not ground decal.
         SpellVfx.ring(CAST_COLOR, caster, centre, r, RING_POINTS, rotation, 0.0);
+
+        // Sparse client-side water blocks make the expanding front readable without particles.
+        for (int i = 0; i < 8; i++) {
+            double angle = rotation + (Math.PI * 2.0 * i / 8.0);
+            FakeWaterVfx.show(centre.clone().add(Math.cos(angle) * r, 0, Math.sin(angle) * r), 3L);
+        }
 
         SpellParticleComponent comp = new SpellParticleComponent(
                 WaterPulse.this,
@@ -228,6 +249,7 @@ public class WaterPulse extends AttackSpell implements Listener {
     }
 
     private int convertWaveBlocks(Location centre, int scannedRadius, int outerRadius, LivingEntity caster) {
+        if (centre == null || centre.getWorld() == null) return scannedRadius;
         World world = centre.getWorld();
         int cx = centre.getBlockX();
         int cy = centre.getBlockY();

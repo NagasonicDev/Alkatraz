@@ -21,7 +21,7 @@ public class WandTableSelectionMenu extends Menu {
     private static final int SLOT_ENGINEERING = 13;
 
     public WandTableSelectionMenu(Player viewer) {
-        super(viewer, lang().get("menu.arcane_table"), 27);
+        super(viewer, packTitle("arcane_hub", lang().get("menu.arcane_table")), 27);
     }
 
     @Override

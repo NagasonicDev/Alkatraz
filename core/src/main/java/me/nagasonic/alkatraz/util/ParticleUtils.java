@@ -9,6 +9,8 @@ import java.util.List;
 public class ParticleUtils {
     public static List<Location> line(double frequency, Location loc1, Location loc2) {
         List<Location> locs = new ArrayList<>();
+        if (loc1 == null || loc2 == null || loc1.getWorld() == null || !loc1.getWorld().equals(loc2.getWorld())) return locs;
+        if (frequency <= 0) frequency = 1.0;
         Location loc = loc1;
         Vector line = LocationUtils.getDirectionBetweenLocations(loc1, loc2);
         for (double i = 1; i <= loc1.distance(loc2); i += frequency) {
@@ -26,11 +28,14 @@ public class ParticleUtils {
 
     public static List<Location> circle(Location center, double radius, double frequency, float yaw, float pitch){
         List<Location> locations = new ArrayList<>();
+        if (center == null || center.getWorld() == null) return locations;
+        if (frequency <= 0) return locations;
 
         // Convert yaw and pitch to radians
         double yawRad = Math.toRadians(-yaw); // In Minecraft, yaw is inverted
         double pitchRad = Math.toRadians(-pitch);
         int points = (int) (360 / frequency);
+        if (points < 1) return locations;
         for (int i = 0; i < points; i++) {
             double angle = 2 * Math.PI * i / points;
 
@@ -58,6 +63,8 @@ public class ParticleUtils {
 
     public static List<Location> createHelix(Location center, int loops, double radius, double height, int pointsPerLoop) {
         List<Location> locations = new ArrayList<>();
+        if (center == null || center.getWorld() == null) return locations;
+        if (pointsPerLoop <= 0 || loops <= 0) return locations;
 
         int totalPoints = loops * pointsPerLoop;
         double heightStep = height / totalPoints;
@@ -78,9 +85,12 @@ public class ParticleUtils {
 
     public static List<Location> spiral(Location origin, double height, double initialRadius, double endRadius, double revolutions, double degreesPerPoint) {
         List<Location> points = new ArrayList<>();
+        if (origin == null || origin.getWorld() == null) return points;
+        if (degreesPerPoint <= 0) return points;
 
         double totalDegrees = revolutions * 360.0;
         int numPoints = (int) Math.ceil(totalDegrees / degreesPerPoint);
+        if (numPoints < 1) return points;
 
         for (int i = 0; i <= numPoints; i++) {
             double t = (double) i / numPoints;
@@ -137,7 +147,11 @@ public class ParticleUtils {
 
     public static List<Location> sphere(Location center, double radius, int points) {
         List<Location> locations = new ArrayList<>();
-        if (center.getWorld() == null) return locations;
+        if (center == null || center.getWorld() == null) return locations;
+        if (points < 2) {
+            if (points == 1) locations.add(center.clone());
+            return locations;
+        }
 
         double phi = Math.PI * (3.0 - Math.sqrt(5.0)); // golden angle
 

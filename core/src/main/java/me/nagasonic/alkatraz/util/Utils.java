@@ -155,15 +155,11 @@ public class Utils {
                 return registry.getItem("blank").clone();
             }
         } catch (Exception e) {
+            Alkatraz.getInstance().getLogger().log(java.util.logging.Level.WARNING, "GUI blank pane registry lookup failed", e);
             // Fallback to original implementation if registry is not available
         }
         
-        // Original implementation as fallback
-        ItemStack blank = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
-        ItemMeta meta = blank.getItemMeta();
-        meta.setDisplayName("");
-        blank.setItemMeta(meta);
-        return blank;
+        return me.nagasonic.alkatraz.texturepack.TexturePackManager.createBlankPane();
     }
 
     public static boolean withinManhattanRange(Location l1, Location l2, double range){
@@ -333,7 +329,7 @@ public class Utils {
                     if (args.length > 0) title = args[0];
                     if (args.length > 1) subtitle = args[1];
                     if (args.length > 2) titleDuration = Catch.catchOrElse(() -> Integer.parseInt(args[2]), 100);
-                    if (args.length > 3) fadeDuration = Catch.catchOrElse(() -> Integer.parseInt(args[2]), 10);
+                    if (args.length > 3) fadeDuration = Catch.catchOrElse(() -> Integer.parseInt(args[3]), 10);
                 }
                 sendTitle(p, title, subtitle, titleDuration, fadeDuration);
             } else {
@@ -357,39 +353,23 @@ public class Utils {
     }
 
     public static <T> T random(Collection<T> coll) {
+        if (coll == null || coll.isEmpty()) return null;
         int num = (int) (Math.random() * coll.size());
         for(T t: coll) if (--num < 0) return t;
-        throw new AssertionError();
+        return null;
     }
 
     public static void repeat(int times, Action<Integer> what){
         for (int i = 0; i < times; i++) what.act(i);
     }
 
-    public static ScheduledExecutorService threadPool(String name, int timeoutMs, boolean daemon, int count) {
-        ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(count, threadFactory(name, daemon));
-        if (timeoutMs > 0) {
-            executor.setKeepAliveTime(timeoutMs, TimeUnit.MILLISECONDS);
-            executor.allowCoreThreadTimeOut(true);
-        }
-        return executor;
-    }
-
-    public static ThreadFactory threadFactory(String name, boolean daemon) {
-        return r -> {
-            Thread thread = new Thread(r);
-            thread.setName("Alkatraz-Async-" + name + "-Thread");
-            thread.setDaemon(daemon);
-            return thread;
-        };
-    }
-
     public static ItemStack materialFromString(String item){
         ItemStack def = new ItemStack(Material.BARRIER);
+        if (item == null) return def;
         try {
             if (item.contains("$")){
-                String[] aitem = item.split("$");
-                if (aitem[0] == "WAND"){
+                String[] aitem = item.split("\\$");
+                if (aitem.length >= 2 && "WAND".equals(aitem[0])){
                     def = MagicItemServices.get().createItem(MagicKeys.alkatraz(aitem[1].toLowerCase()));
                 }
             }else{
@@ -545,15 +525,19 @@ public class Utils {
 
     public static String genCode(){
         String chars = "RSL";
-        StringBuilder builder = new  StringBuilder();
-        Random random = new Random();
-        for (int i = 1; i <= 5; i++){
-            builder.append(chars.charAt(random.nextInt(chars.length())));
+        // Bounded retries so a saturated code space cannot overflow the stack.
+        for (int attempt = 0; attempt < 1000; attempt++){
+            StringBuilder builder = new StringBuilder(5);
+            ThreadLocalRandom rng = ThreadLocalRandom.current();
+            for (int i = 0; i < 5; i++){
+                builder.append(chars.charAt(rng.nextInt(chars.length())));
+            }
+            String code = builder.toString();
+            if (SpellRegistry.getSpellByCode(code) == null){
+                return code;
+            }
         }
-        if (SpellRegistry.getSpellByCode(builder.toString()) != null){
-            return genCode();
-        }
-        return builder.toString();
+        throw new IllegalStateException("No unique 5-character spell code available");
     }
 
     public static Location findTopSolid(Location top, int depth){

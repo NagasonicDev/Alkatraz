@@ -100,16 +100,18 @@ public class StringUtils {
                 .replace("%seconds%", String.format("%." + (decimal ? 1 : 0) + "f", seconds));
     }
 
-    static final Pattern hexPattern = Pattern.compile("&#([A-Fa-f0-9]{6})");
+
     public static List<String> separateStringIntoLines(String string, int maxLength){
         List<String> lines = new ArrayList<>();
+        if (string == null || string.isEmpty()) return lines;
+        if (maxLength <= 0) maxLength = 1;
         String[] byNewLines = string.split("/n");
-        for (String line : byNewLines){
+        for (String line : byNewLines) {
             String[] words = line.split(" ");
             StringBuilder sentence = new StringBuilder(words[0]);
             for (String word : Arrays.copyOfRange(words, 1, words.length)){
-                String rawWord = ChatColor.stripColor(Utils.chat(word.replaceAll(hexPattern.pattern(), "")));
-                String rawSentence = ChatColor.stripColor(Utils.chat(sentence.toString().replaceAll(hexPattern.pattern(), "")));
+                String rawWord = ChatColor.stripColor(Utils.chat(word.replaceAll(Utils.hexPattern.pattern(), "")));
+                String rawSentence = ChatColor.stripColor(Utils.chat(sentence.toString().replaceAll(Utils.hexPattern.pattern(), "")));
                 if (rawSentence.length() + rawWord.length() > maxLength){
                     lines.add(sentence.toString());
                     String previousSentence = sentence.toString();

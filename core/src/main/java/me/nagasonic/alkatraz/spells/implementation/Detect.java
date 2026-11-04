@@ -119,6 +119,7 @@ public class Detect extends Spell {
                                     }
                                     if (le instanceof Player target){
                                         MagicProfile tdata = ProfileManager.getProfile(target.getUniqueId(), MagicProfile.class);
+                                        if (tdata == null) continue;
                                         if (data.getCircleLevel() >= tdata.getCircleLevel()){
                                             if (tdata.isStealth()){
                                                 Alkatraz.getNms().setGlowing(target, p, ChatColor.DARK_GRAY);
@@ -152,7 +153,26 @@ public class Detect extends Spell {
 
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
-
+        // Mob Detect is an announce sweep only - the player path's glow reveal is
+        // per-viewer NMS state, which a mob caster has no use for.
+        Location a = caster.getLocation();
+        AtomicDouble l = new AtomicDouble(1);
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (!caster.isValid() || caster.isDead()) {
+                    cancel();
+                    return;
+                }
+                if (l.get() < SCAN_MAX_RADIUS) {
+                    SpellVfx.ring(CAST_COLOR, caster, a, l.get(), RING_POINTS,
+                            l.get() * 0.3D, RING_SHADOW_OFFSET);
+                    l.addAndGet(SCAN_STEP);
+                } else {
+                    cancel();
+                }
+            }
+        }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
     }
 
     @Override

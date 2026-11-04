@@ -347,9 +347,15 @@ public class SpellComponentHandler implements Listener {
 
     private static void removeOffenseComponent(SpellComponent comp) {
         if (comp instanceof SpellEntityComponent sec) {
-            sec.getEntity().remove();
+            Entity entity = sec.getEntity();
+            if (entity != null) {
+                try { entity.remove(); } catch (Exception ignored) {}
+            }
         } else if (comp instanceof SpellBlockComponent sbc) {
-            sbc.getBlock().setType(Material.AIR);
+            Block block = sbc.getBlock();
+            if (block != null) {
+                try { block.setType(Material.AIR); } catch (Exception ignored) {}
+            }
         }
     }
 

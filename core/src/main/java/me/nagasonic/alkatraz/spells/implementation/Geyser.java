@@ -205,6 +205,7 @@ public class Geyser extends AttackSpell {
         int[] taskId = {-1};
         final int[] last = {0};
         final World spiralWorld = epicentre.getWorld();
+if (spiralWorld == null) return;
 
         taskId[0] = Bukkit.getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
             tick[0]++;
@@ -261,6 +262,7 @@ public class Geyser extends AttackSpell {
                               double launchPower, AttackProperties props) {
 
         World world = epicentre.getWorld();
+        if (world == null) return;
 
         // Impact sound and ground burst particles
         world.playSound(epicentre, Sound.ENTITY_GENERIC_SPLASH, 1.4f, 0.6f);

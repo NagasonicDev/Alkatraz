@@ -5,6 +5,7 @@ import me.nagasonic.alkatraz.api.magic.definition.ItemDefinition;
 import me.nagasonic.alkatraz.api.magic.instance.MagicItemInstance;
 import me.nagasonic.alkatraz.gui.ItemBuilder;
 import me.nagasonic.alkatraz.gui.Menu;
+import me.nagasonic.alkatraz.gui.SpellGuiItems;
 import me.nagasonic.alkatraz.items.magic.component.handler.grimoire.GrimoireComponentHandler;
 import me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack;
 import me.nagasonic.alkatraz.spells.Spell;
@@ -48,31 +49,13 @@ public class GrimoirePageMenu extends Menu {
     }
 
     private static String getResourceTitle() {
-        String code = Alkatraz.getTexturePackManager().getMenuTitleCode("grimoire");
-        if (code == null || code.isEmpty() || !TexturePackManager.isResourcePackEnabled()) {
-            return lang().get("menu.grimoire");
-        }
-        return code;
+
+        return TexturePackManager.getMenuTitle("grimoire", lang().get("menu.grimoire"));
     }
 
     @Override
     protected void build() {
-        ItemStack cover = ItemBuilder.of(Material.BROWN_STAINED_GLASS_PANE).rawName("").build();
-        ItemStack spine = ItemBuilder.of(Material.BLACK_STAINED_GLASS_PANE).rawName("").build();
-
         fillAll();
-
-        for (int i = 0; i < 9; i++) {
-            inventory.setItem(i, cover);
-            inventory.setItem(45 + i, cover);
-        }
-        for (int row = 1; row <= 4; row++) {
-            inventory.setItem(row * 9, cover);
-            inventory.setItem(row * 9 + 8, cover);
-        }
-        for (int row = 1; row <= 4; row++) {
-            inventory.setItem(row * 9 + 4, spine);
-        }
 
         List<String> pages = getPages();
         int totalPages = pages.size();
@@ -89,6 +72,7 @@ public class GrimoirePageMenu extends Menu {
         if (currentSpread > 0) {
             ItemStack prev = ItemBuilder.of(Material.ARROW)
                     .name(lang().get("grimoire.previous_pages"))
+                    .guiModel("prev_page")
                     .build();
             setMenuData(prev, "action", "prev_spread");
             inventory.setItem(PREV_SPREAD_SLOT, prev);
@@ -97,6 +81,7 @@ public class GrimoirePageMenu extends Menu {
         if ((currentSpread + 1) * 2 < totalPages) {
             ItemStack next = ItemBuilder.of(Material.ARROW)
                     .name(lang().get("grimoire.next_pages"))
+                    .guiModel("next_page")
                     .build();
             setMenuData(next, "action", "next_spread");
             inventory.setItem(NEXT_SPREAD_SLOT, next);
@@ -123,7 +108,7 @@ public class GrimoirePageMenu extends Menu {
                     .build();
         }
 
-        ItemStack item = spell.getGuiItem().clone();
+        ItemStack item = SpellGuiItems.create(spell);
         List<String> lore = new ArrayList<>();
         lore.add(lang().get("grimoire.spell_element_circle", "element", spell.getElement().getName(), "circle", spell.getRequiredCircleLevel()));
         lore.add(lang().get("spells.mana_cost", "value", spell.getCost()));

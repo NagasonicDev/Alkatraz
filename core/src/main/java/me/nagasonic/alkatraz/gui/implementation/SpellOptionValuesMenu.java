@@ -33,7 +33,7 @@ public class SpellOptionValuesMenu extends PagedMenu<OptionValue<?>> {
 
     public SpellOptionValuesMenu(Player viewer, Spell spell, SpellOption option) {
         super(viewer,
-              ColorFormat.format(lang().get("menu.spell_option_values", "option", option.getId())),
+              packTitle("spell_option_values", ColorFormat.format(lang().get("menu.spell_option_values", "option", option.getId()))),
               54,
               option.getOptionValues(),
               28);
@@ -69,6 +69,7 @@ public class SpellOptionValuesMenu extends PagedMenu<OptionValue<?>> {
     protected void addBackButton() {
         ItemStack back = ItemBuilder.of(Material.BARRIER)
                 .name(lang().get("pooled.back_to_options"))
+                .guiModel("back_button")
                 .build();
         setMenuData(back, "action", "back");
         inventory.setItem(backButtonSlot, back);

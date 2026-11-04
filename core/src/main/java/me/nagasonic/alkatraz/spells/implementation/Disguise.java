@@ -156,11 +156,11 @@ public class Disguise extends Spell implements Listener {
      */
     @SuppressWarnings("deprecation")
     public void createGUI(int page, Player player, int totalPages, DisguiseProperties props) {
-        Inventory inv = Bukkit.createInventory(null, 54, "Disguise Target");
+        Inventory inv = Bukkit.createInventory(null, 54,
+                me.nagasonic.alkatraz.texturepack.TexturePackManager.getMenuTitle("disguise", "Disguise Target"));
 
-        // Top and bottom border rows.
-        for (int i = 0; i < 9; i++)  inv.setItem(i,      Utils.getBlank());
-        for (int i = 45; i < 54; i++) inv.setItem(i,     Utils.getBlank());
+        ItemStack blank = Utils.getBlank();
+        for (int i = 0; i < 54; i++) inv.setItem(i, blank);
 
         // Next-page arrow.
         if (page < totalPages) {
@@ -169,6 +169,7 @@ public class Disguise extends Spell implements Listener {
             meta.setDisplayName(format(lang().get("spells.disguise.next_page")));
             meta.setLore(List.of(format(lang().get("spells.disguise.page_number", "page", String.valueOf(page + 1)))));
             next.setItemMeta(meta);
+            me.nagasonic.alkatraz.texturepack.TexturePackManager.applyGuiModel(next, "next_page");
             NBT.modify(next, nbt -> {
                 nbt.setInteger("page", page + 1);
                 nbt.setString("player", player.getUniqueId().toString());
@@ -184,6 +185,7 @@ public class Disguise extends Spell implements Listener {
             meta.setDisplayName(format(lang().get("spells.disguise.previous_page")));
             meta.setLore(List.of(format(lang().get("spells.disguise.page_number", "page", String.valueOf(page - 1)))));
             prev.setItemMeta(meta);
+            me.nagasonic.alkatraz.texturepack.TexturePackManager.applyGuiModel(prev, "prev_page");
             NBT.modify(prev, nbt -> {
                 nbt.setInteger("page", page - 1);
                 nbt.setString("player", player.getUniqueId().toString());

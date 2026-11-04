@@ -25,7 +25,7 @@ public class RecipeDeleteConfirmMenu extends Menu {
     private final AlkatrazRecipe recipe;
 
     public RecipeDeleteConfirmMenu(Player viewer, AlkatrazRecipe recipe) {
-        super(viewer, ColorFormat.format(Alkatraz.getLangManager().get("recipes.delete.title")), 45);
+        super(viewer, packTitle("recipe_delete", ColorFormat.format(Alkatraz.getLangManager().get("recipes.delete.title"))), 45);
         this.recipe = recipe;
     }
 

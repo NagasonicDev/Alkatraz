@@ -1,31 +1,39 @@
 package me.nagasonic.alkatraz.texturepack;
 
+import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
+import me.nagasonic.alkatraz.util.ColorFormat;
 import me.nagasonic.alkatraz.util.MaterialCompat;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.Map;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class TexturePackManager {
     private static final String CONFIG_NAME = "texturepack.yml";
     private static YamlConfiguration config;
-    private static final Map<String, Integer> itemCMDCache = new HashMap<>();
-    private static final Map<String, String> asciiCodeCache = new HashMap<>();
-    private static final Map<String, Material> guiMaterialCache = new HashMap<>();
-    private static final Map<String, Integer> connectorCMDCache = new HashMap<>();
+    private static final Map<String, Integer> itemCMDCache = new ConcurrentHashMap<>();
+    private static final Map<String, String> asciiCodeCache = new ConcurrentHashMap<>();
+    private static final Map<String, Material> guiMaterialCache = new ConcurrentHashMap<>();
+    private static final Map<String, Integer> connectorCMDCache = new ConcurrentHashMap<>();
+    private static final Map<String, Integer> researchNodeCMDCache = new ConcurrentHashMap<>();
+    private static final Map<String, Integer> researchPanArrowCMDCache = new ConcurrentHashMap<>();
     
     // Load the texture pack configuration
     public static void load() {
         // Alkatraz.onLoad already ran saveConfig("texturepack.yml"), so the file exists.
-        config = ConfigManager.getConfig(CONFIG_NAME).get();
-        reloadCaches();
+        reload();
     }
     
     // Reload all caches from config
     public static void reload() {
+        // Config.reload() swaps in a brand new YamlConfiguration, so the static reference has to
+        // be re-fetched or every cache below would be rebuilt from the boot-time object.
+        config = ConfigManager.reloadConfig(CONFIG_NAME).get();
         reloadCaches();
     }
     
@@ -34,6 +42,9 @@ public class TexturePackManager {
         itemCMDCache.clear();
         asciiCodeCache.clear();
         guiMaterialCache.clear();
+        connectorCMDCache.clear();
+        researchNodeCMDCache.clear();
+        researchPanArrowCMDCache.clear();
         
         // Load resource pack settings
         loadResourcePackSettings();
@@ -49,6 +60,8 @@ public class TexturePackManager {
 
         // Load connector CMDs
         loadConnectorCMDs();
+        loadResearchNodeCMDs();
+        loadResearchPanArrowCMDs();
     }
     
     private static String resourcePackUrl = "";
@@ -69,50 +82,67 @@ public class TexturePackManager {
     public static String getResourcePackMessage() { return resourcePackMessage; }
     
     private static void loadAsciiCodes() {
-        // Load menu title codes
-        asciiCodeCache.put("menu_title_spells", config.getString("ascii_codes.menu_titles.spells"));
-        asciiCodeCache.put("menu_title_equipment", config.getString("ascii_codes.menu_titles.equipment"));
-        asciiCodeCache.put("menu_title_research", config.getString("ascii_codes.menu_titles.research"));
-        asciiCodeCache.put("menu_title_recipes", config.getString("ascii_codes.menu_titles.recipes"));
-        asciiCodeCache.put("menu_title_stats", config.getString("ascii_codes.menu_titles.stats"));
-        asciiCodeCache.put("menu_title_grimoire", config.getString("ascii_codes.menu_titles.grimoire"));
-        
-        // Load icon codes
-        asciiCodeCache.put("icon_back", config.getString("ascii_codes.icons.back"));
-        asciiCodeCache.put("icon_confirm", config.getString("ascii_codes.icons.confirm"));
-        asciiCodeCache.put("icon_cancel", config.getString("ascii_codes.icons.cancel"));
-        asciiCodeCache.put("icon_info", config.getString("ascii_codes.icons.info"));
+        // Jar defaults first so a stale on-disk texturepack.yml still gets new menu glyphs.
+        loadMenuTitles(ConfigManager.getDefault(CONFIG_NAME));
+        loadMenuTitles(config);
+    }
+
+    private static void loadMenuTitles(YamlConfiguration source) {
+        if (source == null) return;
+        ConfigurationSection menuTitles = source.getConfigurationSection("ascii_codes.menu_titles");
+        if (menuTitles == null) return;
+        for (String key : menuTitles.getKeys(false)) {
+            String value = menuTitles.getString(key);
+            if (value != null && !value.isEmpty()) {
+                asciiCodeCache.put("menu_title_" + key.toLowerCase(), value);
+            }
+        }
     }
     
     private static void loadItemCMDs() {
-        // Load GUI CMDs
-        itemCMDCache.put("gui_next_page", config.getInt("custom_model_data.gui.next_page"));
-        itemCMDCache.put("gui_prev_page", config.getInt("custom_model_data.gui.prev_page"));
-        itemCMDCache.put("gui_back_button", config.getInt("custom_model_data.gui.back_button"));
-        itemCMDCache.put("gui_blank_pane", config.getInt("custom_model_data.gui.blank_pane"));
-        itemCMDCache.put("gui_border_pane", config.getInt("custom_model_data.gui.border_pane"));
-        itemCMDCache.put("gui_header_pane", config.getInt("custom_model_data.gui.header_pane"));
+        loadGuiCmds(ConfigManager.getDefault(CONFIG_NAME));
+        loadGuiCmds(config);
+        loadItemCmds(ConfigManager.getDefault(CONFIG_NAME));
+        loadItemCmds(config);
+    }
 
-        // Load default item CMDs
-        if (config.contains("custom_model_data.items")) {
-            for (String key : config.getConfigurationSection("custom_model_data.items").getKeys(false)) {
-                itemCMDCache.put("item_" + key, config.getInt("custom_model_data.items." + key));
+    private static void loadGuiCmds(YamlConfiguration source) {
+        if (source == null) return;
+        ConfigurationSection guiSection = source.getConfigurationSection("custom_model_data.gui");
+        if (guiSection == null) return;
+        for (String key : guiSection.getKeys(false)) {
+            if (!key.startsWith("spell_")) {
+                itemCMDCache.put("gui_" + key.toLowerCase(), guiSection.getInt(key));
             }
+        }
+    }
+
+    private static void loadItemCmds(YamlConfiguration source) {
+        if (source == null) return;
+        ConfigurationSection items = source.getConfigurationSection("custom_model_data.items");
+        if (items == null) return;
+        for (String key : items.getKeys(false)) {
+            itemCMDCache.put("item_" + key.toLowerCase(), items.getInt(key));
         }
     }
     
     private static void loadGuiMaterials() {
-        // Load decorative materials
-        if (config.contains("gui_items.decorative")) {
-            for (String key : config.getConfigurationSection("gui_items.decorative").getKeys(false)) {
-                guiMaterialCache.put("decorative_" + key, MaterialCompat.resolve(config.getString("gui_items.decorative." + key)));
+        loadGuiMaterials(ConfigManager.getDefault(CONFIG_NAME));
+        loadGuiMaterials(config);
+    }
+
+    private static void loadGuiMaterials(YamlConfiguration source) {
+        if (source == null) return;
+        ConfigurationSection decorative = source.getConfigurationSection("gui_items.decorative");
+        if (decorative != null) {
+            for (String key : decorative.getKeys(false)) {
+                guiMaterialCache.put("decorative_" + key.toLowerCase(), MaterialCompat.resolve(decorative.getString(key)));
             }
         }
-
-        // Load button materials
-        if (config.contains("gui_items.buttons")) {
-            for (String key : config.getConfigurationSection("gui_items.buttons").getKeys(false)) {
-                guiMaterialCache.put("button_" + key, MaterialCompat.resolve(config.getString("gui_items.buttons." + key)));
+        ConfigurationSection buttons = source.getConfigurationSection("gui_items.buttons");
+        if (buttons != null) {
+            for (String key : buttons.getKeys(false)) {
+                guiMaterialCache.put("button_" + key.toLowerCase(), MaterialCompat.resolve(buttons.getString(key)));
             }
         }
     }
@@ -125,13 +155,56 @@ public class TexturePackManager {
         }
     }
 
+    private static void loadResearchNodeCMDs() {
+        YamlConfiguration defaults = ConfigManager.getDefault(CONFIG_NAME);
+        ConfigurationSection defaultSection = defaults != null
+                ? defaults.getConfigurationSection("research_node_textures") : null;
+        if (defaultSection != null) {
+            for (String key : defaultSection.getKeys(false)) {
+                researchNodeCMDCache.put(key.toLowerCase(), defaultSection.getInt(key));
+            }
+        }
+        ConfigurationSection section = config.getConfigurationSection("research_node_textures");
+        if (section != null) {
+            for (String key : section.getKeys(false)) {
+                researchNodeCMDCache.put(key.toLowerCase(), section.getInt(key));
+            }
+        }
+    }
+
+    private static void loadResearchPanArrowCMDs() {
+        YamlConfiguration defaults = ConfigManager.getDefault(CONFIG_NAME);
+        ConfigurationSection defaultSection = defaults != null
+                ? defaults.getConfigurationSection("research_pan_arrows") : null;
+        if (defaultSection != null) {
+            for (String key : defaultSection.getKeys(false)) {
+                researchPanArrowCMDCache.put(key.toLowerCase(), defaultSection.getInt(key));
+            }
+        }
+        ConfigurationSection section = config.getConfigurationSection("research_pan_arrows");
+        if (section != null) {
+            for (String key : section.getKeys(false)) {
+                researchPanArrowCMDCache.put(key.toLowerCase(), section.getInt(key));
+            }
+        }
+    }
+
+    /**
+     * Title for a menu: the resource-pack glyph when one is configured and the pack is
+     * enabled or forced, otherwise the plain language title.
+     *
+     * <p>Menus call this in their constructor, before {@code Bukkit.createInventory}, because
+     * {@code Menu.matches} compares the open inventory title by exact string equality.
+     */
+    public static String getMenuTitle(String menuType, String fallback) {
+        if (!isResourcePackEnabled() && !Alkatraz.isResourcePackForced()) return fallback;
+        String code = getMenuTitleCode(menuType);
+        return code == null || code.isEmpty() ? fallback : ColorFormat.format("&f" + code);
+    }
+
     // Get methods for ASCII codes
     public static String getMenuTitleCode(String menuType) {
         return asciiCodeCache.getOrDefault("menu_title_" + menuType.toLowerCase(), "");
-    }
-    
-    public static String getIconCode(String iconType) {
-        return asciiCodeCache.getOrDefault("icon_" + iconType.toLowerCase(), "");
     }
     
     // Get methods for custom model data
@@ -142,6 +215,77 @@ public class TexturePackManager {
     public static int getGUICMD(String guiElement) {
         return itemCMDCache.getOrDefault("gui_" + guiElement.toLowerCase(), 0);
     }
+
+    /**
+     * Transparent filler pane (CMD {@code blank_pane} / 4004). Title-font menu art
+     * draws behind items; an unmodelled glass pane would hide it.
+     */
+    public static ItemStack createBlankPane() {
+        return createGuiControl("blank_pane", getGuiMaterial("decorative_blank"), " ");
+    }
+
+    /**
+     * Pack-backed GUI control: the configured material plus {@code custom_model_data.gui}
+     * ({@code back_button} 4003, {@code confirm_button} 4007, {@code cancel_button} 4008, …).
+     */
+    public static ItemStack createGuiControl(String guiElement, Material fallback, String displayName) {
+        Material material = controlMaterial(guiElement, fallback);
+        ItemStack item = new ItemStack(material);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            if (displayName != null) meta.setDisplayName(displayName);
+            applyGuiModel(meta, guiElement);
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
+
+    public static ItemStack createBackButton(String displayName) {
+        return createGuiControl("back_button", Material.BARRIER, displayName);
+    }
+
+    public static ItemStack createConfirmButton(String displayName) {
+        return createGuiControl("confirm_button", Material.LIME_CONCRETE, displayName);
+    }
+
+    public static ItemStack createCancelButton(String displayName) {
+        return createGuiControl("cancel_button", Material.RED_CONCRETE, displayName);
+    }
+
+    private static Material controlMaterial(String guiElement, Material fallback) {
+        String materialKey = switch (guiElement == null ? "" : guiElement.toLowerCase()) {
+            case "blank_pane" -> "decorative_blank";
+            case "border_pane" -> "decorative_border";
+            case "header_pane" -> "decorative_header";
+            case "back_button" -> "button_back";
+            case "confirm_button" -> "button_confirm";
+            case "cancel_button" -> "button_cancel";
+            case "next_page" -> "button_next_page";
+            case "prev_page" -> "button_prev_page";
+            case "info_button" -> "button_info";
+            case "close_button" -> "button_close";
+            default -> null;
+        };
+        Material fromConfig = materialKey != null ? guiMaterialCache.get(materialKey) : null;
+        if (fromConfig != null) return fromConfig;
+        return fallback != null ? fallback : Material.GRAY_STAINED_GLASS_PANE;
+    }
+
+    /** Applies the configured custom model data for a GUI control, if any. */
+    public static void applyGuiModel(ItemStack item, String guiElement) {
+        if (item == null) return;
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null || !applyGuiModel(meta, guiElement)) return;
+        item.setItemMeta(meta);
+    }
+
+    /** @return true if {@code meta} was given a custom model data value */
+    public static boolean applyGuiModel(ItemMeta meta, String guiElement) {
+        int cmd = getGUICMD(guiElement);
+        if (cmd <= 0 || meta == null) return false;
+        meta.setCustomModelData(cmd);
+        return true;
+    }
     
     // Get methods for GUI materials
     public static Material getGuiMaterial(String materialType) {
@@ -151,6 +295,14 @@ public class TexturePackManager {
 
     public static int getConnectorCMD(String pieceKey) {
         return connectorCMDCache.getOrDefault(pieceKey, 0);
+    }
+
+    public static int getResearchNodeCMD(String nodeId) {
+        return researchNodeCMDCache.getOrDefault(nodeId.toLowerCase(), 0);
+    }
+
+    public static int getResearchPanArrowCMD(String direction) {
+        return researchPanArrowCMDCache.getOrDefault(direction.toLowerCase(), 0);
     }
 
     // Get the raw config for admin interface

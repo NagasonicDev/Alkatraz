@@ -11,6 +11,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -50,13 +51,29 @@ public final class EquipmentReconcileTask implements Runnable, Listener {
 
     private int idleSweeps;
 
+    private static BukkitTask task = null;
+    private static EquipmentReconcileTask listener = null;
+
     private EquipmentReconcileTask() {}
 
     public static void start() {
+        if (listener != null) stop();
         Alkatraz plugin = Alkatraz.getInstance();
-        EquipmentReconcileTask task = new EquipmentReconcileTask();
-        plugin.getServer().getScheduler().runTaskTimer(plugin, task, INTERVAL, INTERVAL);
-        plugin.getServer().getPluginManager().registerEvents(task, plugin);
+        EquipmentReconcileTask instance = new EquipmentReconcileTask();
+        listener = instance;
+        task = plugin.getServer().getScheduler().runTaskTimer(plugin, instance, INTERVAL, INTERVAL);
+        plugin.getServer().getPluginManager().registerEvents(instance, plugin);
+    }
+
+    public static void stop() {
+        if (task != null) {
+            task.cancel();
+            task = null;
+        }
+        if (listener != null) {
+            org.bukkit.event.HandlerList.unregisterAll(listener);
+            listener = null;
+        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -71,6 +88,7 @@ public final class EquipmentReconcileTask implements Runnable, Listener {
         }
         idleSweeps = 0;
         for (Player player : Bukkit.getOnlinePlayers()) {
+            if (!wearsMagicItem(player)) continue;
             UUID uuid = player.getUniqueId();
             long fingerprint = fingerprint(player);
             Long previous = fingerprints.putIfAbsent(uuid, fingerprint);
@@ -85,7 +103,7 @@ public final class EquipmentReconcileTask implements Runnable, Listener {
         }
     }
 
-    private static boolean wearsMagicItem(Player player) {
+    public static boolean wearsMagicItem(Player player) {
         PlayerInventory inventory = player.getInventory();
         if (isMagicItem(inventory.getItemInMainHand()) || isMagicItem(inventory.getItemInOffHand())) {
             return true;

@@ -39,6 +39,8 @@ import org.bukkit.entity.WitherSkeleton;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.ItemStack;
@@ -400,8 +402,10 @@ public class VoidAnchor extends AttackSpell implements Listener {
                 // reference to a possibly-unloaded Location.
                 nbt.setString("anchor_pos", anchorTag);
             });
-            MagicAiService.getInstance().setBrain(horror, SUMMON_BRAIN);
-
+            MagicAiService aiService = MagicAiService.getInstance();
+            if (aiService != null) {
+                aiService.setBrain(horror, SUMMON_BRAIN);
+            }
             ids.add(horror.getUniqueId());
             ParticleCaster.spawn(caster, world, Utils.PORTAL, spawnAt, 40, 0.5, 0.5, 0.5, 0.05);
             ParticleCaster.spawn(caster, world, Utils.DUST, spawnAt, 20, 0.4, 0.4, 0.4, 0, ANCHOR_DUST);
@@ -450,7 +454,7 @@ public class VoidAnchor extends AttackSpell implements Listener {
                 }
                 // Safety net for any path that removes a caster without firing onQuit:
                 // a scheduled task holding a Player pins its whole profile in memory.
-                if (!caster.isOnline()) {
+                if (!caster.isOnline() || caster.isDead()) {
                     cancel();
                     if (holder[0] != null) lashTasks.remove(holder[0]);
                     for (UUID id : ids) {
@@ -596,6 +600,11 @@ public class VoidAnchor extends AttackSpell implements Listener {
     @EventHandler
     private void onQuit(PlayerQuitEvent e) {
         despawnAll(e.getPlayer());
+    }
+
+    @EventHandler
+    private void onDeath(PlayerDeathEvent e) {
+        despawnAll(e.getEntity());
     }
 
     /** Nothing this spell made outlives the plugin. */

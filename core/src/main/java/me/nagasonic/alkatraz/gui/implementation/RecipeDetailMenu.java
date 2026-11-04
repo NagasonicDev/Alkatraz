@@ -41,7 +41,7 @@ public class RecipeDetailMenu extends Menu {
     private final RecipeCategory category;
 
     public RecipeDetailMenu(Player viewer, AlkatrazRecipe recipe) {
-        super(viewer, ColorFormat.format(Alkatraz.getLangManager().get("menu.recipe_details")), 54);
+        super(viewer, packTitle("recipe_detail", ColorFormat.format(Alkatraz.getLangManager().get("menu.recipe_details"))), 54);
         this.recipe = recipe;
         this.category = RecipeCategory.of(recipe.getType());
     }
@@ -98,6 +98,7 @@ public class RecipeDetailMenu extends Menu {
             ItemStack delete = ItemBuilder.of(Material.RED_CONCRETE)
                     .name(lang().get("recipes.detail_delete"))
                     .lore(lang().get("recipes.detail_delete_lore"))
+                    .guiModel("cancel_button")
                     .build();
             setMenuData(delete, "action", "delete");
             inventory.setItem(DELETE_SLOT, delete);

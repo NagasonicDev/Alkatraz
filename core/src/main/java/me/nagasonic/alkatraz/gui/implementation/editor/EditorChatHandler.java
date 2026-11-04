@@ -66,6 +66,16 @@ public class EditorChatHandler implements Listener {
         callbacks.clear();
     }
 
+    /** Unregisters the chat listener and clears pending state; call on disable/reload. */
+    public static void shutdown() {
+        if (instance != null) {
+            org.bukkit.event.HandlerList.unregisterAll(instance);
+            instance = null;
+        }
+        clearAll();
+    }
+
+
     @EventHandler
     public void onChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();

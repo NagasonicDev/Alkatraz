@@ -94,10 +94,9 @@ public class CycloneNest extends AttackSpell {
     private static final int FUNNEL_LAYERS = 8;
     /** Points on the bottom layer's ring; each layer above adds one. */
     private static final int FUNNEL_BASE_POINTS = 8;
-    /** Radians the wander heading advances per tick - one turn every 30 ticks. */
-    private static final double NEST_TURN_PER_TICK = 0.21;
-    /** A nest reverses if it would step onto a wall. */
-    private static final int NEST_WALL_LOOKAHEAD = 1;
+    /** A nest may choose a fresh heading after this many ticks. */
+    private static final int NEST_MIN_DIRECTION_TICKS = 20;
+    private static final int NEST_DIRECTION_VARIANCE_TICKS = 40;
     /** How far below a candidate position the ground is probed. */
     private static final int NEST_GROUND_PROBE = 6;
     /** Blocks above the nest the ground probe starts from. */
@@ -257,26 +256,41 @@ public class CycloneNest extends AttackSpell {
     }
 
     /**
-     * One nest's drift. The heading turns a fixed amount per tick and reverses on a
-     * wall or a drop steeper than {@link #NEST_MAX_DROP}, so a nest paces its own
-     * little circle instead of sliding off a cliff.
+     * One nest's independent roaming step. It keeps a heading for a short random
+     * interval, drifts it slightly each tick, and chooses a new heading on its own
+     * schedule. Walls and steep drops redirect it instead of trapping it in a
+     * small orbit around its spawn point.
      */
     private void wander(Nest nest, double speed) {
-        nest.moveAngle += NEST_TURN_PER_TICK;
+        nest.directionTicks++;
+        if (nest.directionTicks > nest.nextDirectionTicks) {
+            nest.moveAngle = Math.random() * 2 * Math.PI;
+            nest.directionTicks = 0;
+            nest.nextDirectionTicks = NEST_MIN_DIRECTION_TICKS
+                    + (int) (Math.random() * NEST_DIRECTION_VARIANCE_TICKS);
+        }
+        nest.moveAngle += (Math.random() - 0.5) * 0.3;
+
         Location next = nest.origin.clone().add(
                 Math.cos(nest.moveAngle) * speed, 0.0, Math.sin(nest.moveAngle) * speed);
-
-        if (!next.getBlock().isPassable()
-                || !next.clone().add(0, NEST_WALL_LOOKAHEAD, 0).getBlock().isPassable()) {
-            nest.moveAngle += Math.PI;
-            return;
+        if (!next.getBlock().isPassable()) {
+            Location stepUp = next.clone().add(0, 1, 0);
+            if (stepUp.getBlock().isPassable()) {
+                next = stepUp;
+            } else {
+                nest.moveAngle += Math.PI;
+                nest.directionTicks = 0;
+                return;
+            }
         }
-        Location below = Utils.findTopSolid(next.clone().add(0, NEST_GROUND_PROBE_LIFT, 0),
-                NEST_GROUND_PROBE);
+
+        Location below = Utils.findTopSolid(next.clone().add(0, NEST_GROUND_PROBE_LIFT, 0), NEST_GROUND_PROBE);
         if (below == null || Math.abs(below.getY() + 1 - next.getY()) > NEST_MAX_DROP) {
             nest.moveAngle += Math.PI;
+            nest.directionTicks = 0;
             return;
         }
+        next.setY(below.getY() + 1);
         nest.origin = next;
     }
 
@@ -421,6 +435,9 @@ public class CycloneNest extends AttackSpell {
 
         private Location origin;
         private double moveAngle;
+        private int directionTicks;
+        private int nextDirectionTicks = NEST_MIN_DIRECTION_TICKS
+                + (int) (Math.random() * NEST_DIRECTION_VARIANCE_TICKS);
 
         private Nest(Location origin, double moveAngle) {
             this.origin = origin;

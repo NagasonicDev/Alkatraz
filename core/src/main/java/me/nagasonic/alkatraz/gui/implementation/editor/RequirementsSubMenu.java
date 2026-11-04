@@ -3,11 +3,10 @@ package me.nagasonic.alkatraz.gui.implementation.editor;
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.gui.Menu;
 import me.nagasonic.alkatraz.lang.LangManager;
+import me.nagasonic.alkatraz.texturepack.TexturePackManager;
 import me.nagasonic.alkatraz.util.ColorFormat;
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -25,28 +24,13 @@ public class RequirementsSubMenu extends Menu {
     private static final int ADD_SLOT = 38;
     private static final int BACK_SLOT = 42;
 
-    private static ItemStack backgroundPanePrototype;
-
-    private static ItemStack backgroundPane() {
-        if (backgroundPanePrototype == null) {
-            ItemStack item = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
-            ItemMeta meta = item.getItemMeta();
-            if (meta != null) {
-                meta.setDisplayName(ColorFormat.format("&7"));
-                item.setItemMeta(meta);
-            }
-            backgroundPanePrototype = item;
-        }
-        return backgroundPanePrototype;
-    }
-
     private final ItemDetailMenu parent;
     private final EditorSession session;
     private final List<Map<String, Object>> requirements;
     private int offset;
 
     public RequirementsSubMenu(Player viewer, ItemDetailMenu parent) {
-        super(viewer, ColorFormat.format("&8Edit Requirements"), 45);
+        super(viewer, packTitle("requirements_editor", ColorFormat.format("&8Edit Requirements")), 45);
         this.parent = parent;
         this.session = EditorSession.get(viewer.getUniqueId());
         this.requirements = loadRequirements();
@@ -69,9 +53,7 @@ public class RequirementsSubMenu extends Menu {
 
     @Override
     protected void build() {
-        for (int i = 0; i < size; i++) {
-            inventory.setItem(i, backgroundPane());
-        }
+        fillAll();
 
         int end = Math.min(offset + REQ_SLOTS.length, requirements.size());
         for (int i = offset; i < end; i++) {
@@ -110,6 +92,7 @@ public class RequirementsSubMenu extends Menu {
             meta.setLore(lore);
             item.setItemMeta(meta);
         }
+        TexturePackManager.applyGuiModel(item, "editor_entry_requirement");
         setMenuData(item, "req_index", index);
         return item;
     }
@@ -124,6 +107,7 @@ public class RequirementsSubMenu extends Menu {
             meta.setLore(lore);
             item.setItemMeta(meta);
         }
+        TexturePackManager.applyGuiModel(item, "editor_add");
         setMenuData(item, "action", "add");
         return item;
     }
@@ -134,6 +118,11 @@ public class RequirementsSubMenu extends Menu {
         if (meta != null) {
             meta.setDisplayName(ColorFormat.format(name));
             item.setItemMeta(meta);
+        }
+        if ("prev".equals(action)) {
+            TexturePackManager.applyGuiModel(item, "prev_page");
+        } else if ("next".equals(action)) {
+            TexturePackManager.applyGuiModel(item, "next_page");
         }
         setMenuData(item, "action", action);
         return item;
@@ -146,6 +135,7 @@ public class RequirementsSubMenu extends Menu {
             meta.setDisplayName(lang().get("common.back"));
             item.setItemMeta(meta);
         }
+        TexturePackManager.applyGuiModel(item, "back_button");
         setMenuData(item, "action", "back");
         return item;
     }

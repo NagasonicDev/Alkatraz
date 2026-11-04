@@ -3,6 +3,7 @@ package me.nagasonic.alkatraz.configuration.impact;
 import me.nagasonic.alkatraz.api.configuration.impact.Impact;
 import me.nagasonic.alkatraz.spells.Spell;
 import org.bukkit.configuration.ConfigurationSection;
+import java.util.concurrent.ConcurrentHashMap;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,7 +15,7 @@ public final class ImpactFactory {
         Impact build(Spell spell, ConfigurationSection section);
     }
 
-    private static final Map<String, Builder> REGISTRY = new HashMap<>();
+    private static final Map<String, Builder> REGISTRY = new ConcurrentHashMap<>();
 
     public static void register(String type, Builder builder) {
         if (type == null || type.isBlank() || builder == null) {

@@ -35,17 +35,30 @@ public class WandComponentHandler implements ComponentHandler {
         .build();
 
     private static final Map<UUID, String> castCodes = new ConcurrentHashMap<>();
+    private static final Map<UUID, Long> castCodeTimes = new ConcurrentHashMap<>();
+    private static final long CAST_CODE_IDLE_MS = 30_000L;
 
     public static String getCastCode(UUID playerId) {
+        expireIfIdle(playerId);
         return castCodes.getOrDefault(playerId, "");
     }
 
     public static void setCastCode(UUID playerId, String code) {
         castCodes.put(playerId, code);
+        castCodeTimes.put(playerId, System.currentTimeMillis());
     }
 
     public static void resetCastCode(UUID playerId) {
         castCodes.remove(playerId);
+        castCodeTimes.remove(playerId);
+    }
+
+    private static void expireIfIdle(UUID playerId) {
+        Long last = castCodeTimes.get(playerId);
+        if (last == null || System.currentTimeMillis() - last > CAST_CODE_IDLE_MS) {
+            castCodes.remove(playerId);
+            castCodeTimes.remove(playerId);
+        }
     }
 
     @Override
@@ -102,6 +115,7 @@ public class WandComponentHandler implements ComponentHandler {
         }
         
         MagicProfile data = ProfileManager.getProfile(player, MagicProfile.class);
+        if (data == null) return;
         if (data.getCastMode().equals("hotbar") && !data.isCasting()) {
             SpellHotbarManager.enter(player, stack);
             return;
@@ -139,6 +153,7 @@ public class WandComponentHandler implements ComponentHandler {
         if (!WandUtils.isWand(stack)) return;
 
         MagicProfile data = ProfileManager.getProfile(player, MagicProfile.class);
+        if (data == null) return;
         if (data.isCasting()) return;
 
         String code = getCastCode(player.getUniqueId());

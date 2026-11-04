@@ -32,7 +32,7 @@ public class WarpDestinationMenu extends Menu {
     private final Warp warp;
 
     public WarpDestinationMenu(Player viewer, Spell spell) {
-        super(viewer, ColorFormat.format(lang().get("menu.warp_destination")), 27);
+        super(viewer, packTitle("warp_destination", ColorFormat.format(lang().get("menu.warp_destination"))), 27);
         this.warp = (Warp) spell;
     }
 
@@ -58,6 +58,7 @@ public class WarpDestinationMenu extends Menu {
 
         ItemStack back = ItemBuilder.of(Material.BARRIER)
                 .name(lang().get("pooled.back_to_options"))
+                .guiModel("back_button")
                 .build();
         setMenuData(back, "action", "back");
         inventory.setItem(22, back);
@@ -81,7 +82,7 @@ public class WarpDestinationMenu extends Menu {
         boolean selectable = false;
 
         if (point == null) {
-            builder = ItemBuilder.of(Material.GRAY_DYE);
+            builder = ItemBuilder.of(Material.GRAY_DYE).guiModel("warp_dest_empty");
         } else {
             Location dest = point.toLocation();
             boolean crossWorld = dest == null || !dest.getWorld().equals(viewer.getWorld());
@@ -90,12 +91,12 @@ public class WarpDestinationMenu extends Menu {
             boolean inRange = !crossWorld && distance <= maxRange;
 
             if (crossWorld) {
-                builder = ItemBuilder.of(Material.LIGHT_GRAY_DYE);
+                builder = ItemBuilder.of(Material.LIGHT_GRAY_DYE).guiModel("warp_foreign");
             } else if (inRange) {
-                builder = ItemBuilder.of(Material.ENDER_PEARL);
+                builder = ItemBuilder.of(Material.ENDER_PEARL).guiModel("warp_set");
                 selectable = true;
             } else {
-                builder = ItemBuilder.of(Material.REDSTONE);
+                builder = ItemBuilder.of(Material.REDSTONE).guiModel("warp_far");
             }
             decoratePoint(builder, point, crossWorld, distance, maxRange, inRange);
         }

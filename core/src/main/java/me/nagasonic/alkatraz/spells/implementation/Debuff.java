@@ -121,12 +121,18 @@ public class Debuff extends Spell {
         int durationTicks = baseDuration * 20;
         target.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, durationTicks, 1, false, true));
         target.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, durationTicks, 0, false, true));
+        // Same mark as the player path so the debuff is visible to players fighting the mob.
+        SpellVfx.selfAura(CAST_COLOR, caster, target, TARGET_AURA_RADIUS, TARGET_AURA_POINTS, 0.0);
         caster.getWorld().playSound(caster.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 0.8f, 0.7f);
     }
 
     @Override
     public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
         return CastCircle.start(this, caster, e, 3.0, 0);
+    }
+
+    public void clearActiveModifiersFor(LivingEntity target) {
+        PooledModifierSpellSupport.clearActiveModifiers(target, this, activeModifiers);
     }
 
     @Override

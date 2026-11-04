@@ -33,6 +33,7 @@ public final class RecipeRegistry {
      * {@link #BY_INGREDIENT} and must always be considered when narrowing candidates.
      */
     private static final Set<NamespacedKey> UNINDEXED = new HashSet<>();
+    private static volatile long registryGeneration = 0;
 
     private static final Map<NamespacedKey, File> BY_FILE = new HashMap<>();
 
@@ -60,6 +61,7 @@ public final class RecipeRegistry {
         UNINDEXED.clear();
         BY_FILE.clear();
         UnlockManager.invalidateLockableKeys();
+        registryGeneration++;
     }
 
     public static AlkatrazRecipe get(NamespacedKey key) {
@@ -76,6 +78,11 @@ public final class RecipeRegistry {
      */
     public static Set<NamespacedKey> getAllKeys() {
         return Collections.unmodifiableSet(BY_KEY.keySet());
+    }
+
+    /** Monotonic counter incremented whenever the registry is fully cleared/rebuilt. */
+    public static long getRegistryGeneration() {
+        return registryGeneration;
     }
 
     public static List<Requirement> getRequirements(NamespacedKey key) {

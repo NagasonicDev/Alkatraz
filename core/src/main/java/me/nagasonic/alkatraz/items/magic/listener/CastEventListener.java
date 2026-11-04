@@ -18,6 +18,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -37,9 +38,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import static me.nagasonic.alkatraz.util.Utils.notAir;
 
 public class CastEventListener implements Listener {
-    private static final Map<UUID, Integer> changedExp = new ConcurrentHashMap<>();
-
-    private static final Set<UUID> spellDamageTargets = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private static final Map<UUID, Long> spellDamageMarkedUntil = new ConcurrentHashMap<>();
 
     /**
      * Timestamp of the last {@link #sweepSpellDamageTargets()} pass. The sweep resolves
@@ -48,19 +47,31 @@ public class CastEventListener implements Listener {
      * 50 ms tick bucket keeps the stale-mark cleanup while collapsing that to a single pass.
      */
     private static final long SWEEP_WINDOW_NANOS = 50_000_000L;
-    private static long lastSweepNanos;
+    private static volatile long lastSweepNanos;
 
     public static void markSpellDamage(LivingEntity target) {
-        sweepSpellDamageTargets();
-        spellDamageTargets.add(target.getUniqueId());
+        if (target == null) return;
+        sweepSpellDamageMarks();
+        spellDamageMarkedUntil.put(target.getUniqueId(), System.nanoTime() + MARK_EXPIRY_NANOS);
     }
 
     public static boolean isSpellDamage(LivingEntity target) {
-        return spellDamageTargets.contains(target.getUniqueId());
+        if (target == null) return false;
+        if (System.nanoTime() - lastSweepNanos >= SWEEP_WINDOW_NANOS) {
+            sweepSpellDamageMarks();
+        }
+        Long deadline = spellDamageMarkedUntil.get(target.getUniqueId());
+        if (deadline == null) return false;
+        if (System.nanoTime() > deadline) {
+            spellDamageMarkedUntil.remove(target.getUniqueId(), deadline);
+            return false;
+        }
+        return true;
     }
 
     public static void clearSpellDamage(LivingEntity target) {
-        spellDamageTargets.remove(target.getUniqueId());
+        if (target == null) return;
+        spellDamageMarkedUntil.remove(target.getUniqueId());
     }
 
     // ============================
@@ -231,17 +242,13 @@ public class CastEventListener implements Listener {
     }
 
     @EventHandler
-    private void onExp(PlayerExpChangeEvent e) {
-        UUID uuid = e.getPlayer().getUniqueId();
-        changedExp.merge(uuid, e.getAmount(), Integer::sum);
+    private void onEntityDeath(EntityDeathEvent e) {
+        spellDamageMarkedUntil.remove(e.getEntity().getUniqueId());
     }
-
-    // ============================
-    // CONNECT / DISCONNECT
-    // ============================
 
     @EventHandler
     private void onQuit(PlayerQuitEvent e) {
+        spellDamageMarkedUntil.remove(e.getPlayer().getUniqueId());
         Player p = e.getPlayer();
         ItemStack wand = p.getInventory().getItem(p.getInventory().getHeldItemSlot());
         if (wand != null){
@@ -250,9 +257,16 @@ public class CastEventListener implements Listener {
             }
         }
         MagicProfile data = ProfileManager.getProfile(e.getPlayer().getUniqueId(), MagicProfile.class);
-        if (data.isCasting()){ data.setCasting(false); }
-        data.setCastingSpell(null);
-        changedExp.remove(p.getUniqueId());
+        if (data != null) {
+            if (data.isCasting()){ data.setCasting(false); }
+            data.setCastingSpell(null);
+        }
+        WandComponentHandler.resetCastCode(p.getUniqueId());
+    }
+
+    @EventHandler
+    private void onWorldChange(PlayerChangedWorldEvent e) {
+        WandComponentHandler.resetCastCode(e.getPlayer().getUniqueId());
     }
 
     @EventHandler
@@ -263,8 +277,13 @@ public class CastEventListener implements Listener {
         if (wand != null){
             if (wand.getType() != Material.AIR && wand.getAmount() != 0){
                 if (isManaDisplayItem(wand)){
+                    int heldSlot = p.getInventory().getHeldItemSlot();
                     Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(Alkatraz.getInstance(), () -> {
-                        switchTo(p, wand);
+                        if (p.getInventory().getHeldItemSlot() != heldSlot) return;
+                        ItemStack current = p.getInventory().getItem(heldSlot);
+                        if (current != null && current.getType() != Material.AIR && current.getAmount() != 0 && isManaDisplayItem(current)) {
+                            switchTo(p, current);
+                        }
                     }, 1L);
                 }
             }
@@ -324,8 +343,8 @@ public class CastEventListener implements Listener {
     private void onHotbarPluginDisable(PluginDisableEvent e) {
         if (e.getPlugin() == Alkatraz.getInstance()) {
             SpellHotbarManager.exitAll();
-            changedExp.clear();
-            spellDamageTargets.clear();
+
+            spellDamageMarkedUntil.clear();
             lastSweepNanos = 0L;
         }
     }
@@ -335,7 +354,8 @@ public class CastEventListener implements Listener {
         Player p = e.getPlayer();
         if (!SpellHotbarManager.isActive(p)) return;
         e.setCancelled(true);
-        if (ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class).isCasting()) return;
+        MagicProfile hotbarProfile = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
+        if (hotbarProfile != null && hotbarProfile.isCasting()) return;
         ItemStack wand = SpellHotbarManager.getWand(p);
         if (wand == null) return;
         ItemStack item = e.getItem();
@@ -362,7 +382,8 @@ public class CastEventListener implements Listener {
         Player p = e.getPlayer();
         if (!SpellHotbarManager.isActive(p)) return;
         e.setCancelled(true);
-        if (ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class).isCasting()) return;
+        MagicProfile hotbarProfile = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
+        if (hotbarProfile != null && hotbarProfile.isCasting()) return;
         ItemStack wand = SpellHotbarManager.getWand(p);
         if (wand == null) return;
         ItemStack item = p.getInventory().getItem(p.getInventory().getHeldItemSlot());
@@ -495,34 +516,36 @@ public class CastEventListener implements Listener {
         return slot[1];
     }
 
-    public static void resetExperience(Player p){
-        changedExp.remove(p.getUniqueId());
-    }
-
     /**
      * Drops spell-damage marks whose entity no longer exists. A spell that lands on an
      * entity that never takes damage (a blocked hit, a dead target) would otherwise leave
      * the mark behind forever.
      */
-    private static void sweepSpellDamageTargets() {
-        if (spellDamageTargets.isEmpty()) {
-            return;
-        }
+    private static final long MARK_EXPIRY_NANOS = 1_000_000_000L; // tick-bounded expiry (1s) so stale marks cannot survive forever
+
+    /**
+     * Drops spell-damage marks that have expired or whose entity no longer exists.
+     */
+    private static void sweepSpellDamageMarks() {
+        if (spellDamageMarkedUntil.isEmpty()) return;
         long now = System.nanoTime();
-        if (now - lastSweepNanos < SWEEP_WINDOW_NANOS) {
-            return;
-        }
+        if (now - lastSweepNanos < SWEEP_WINDOW_NANOS) return;
         lastSweepNanos = now;
-        Iterator<UUID> iterator = spellDamageTargets.iterator();
-        while (iterator.hasNext()) {
-            if (Bukkit.getEntity(iterator.next()) == null) {
-                iterator.remove();
+        for (Map.Entry<UUID, Long> entry : spellDamageMarkedUntil.entrySet()) {
+            Long deadline = entry.getValue();
+            if (deadline != null && now > deadline) {
+                spellDamageMarkedUntil.remove(entry.getKey(), deadline);
+                continue;
+            }
+            if (Bukkit.getEntity(entry.getKey()) == null) {
+                spellDamageMarkedUntil.remove(entry.getKey(), deadline);
             }
         }
     }
 
     public static void switchTo(Player p, ItemStack wand) {
         MagicProfile data = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
+        if (data == null) return; // shortcut: profile may be null during join timing; skip display rather than blocking
         Alkatraz.getNms().fakeExp(p, (float) (data.getMana() / data.getMaxMana()), (int) data.getMana(), 1);
     }
 

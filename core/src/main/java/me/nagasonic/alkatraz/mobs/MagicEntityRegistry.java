@@ -1,4 +1,5 @@
 package me.nagasonic.alkatraz.mobs;
+import java.util.concurrent.ConcurrentHashMap;
 
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.Config;
@@ -22,8 +23,8 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public final class MagicEntityRegistry {
 
-    private static final Map<String, MobProfile> profileCache = new HashMap<>();
-    private static final Map<EntityType, List<SpawnReplacement>> replacementsByBaseType = new HashMap<>();
+    private static final Map<String, MobProfile> profileCache = new ConcurrentHashMap<>();
+    private static final Map<EntityType, List<SpawnReplacement>> replacementsByBaseType = new ConcurrentHashMap<>();
 
     private MagicEntityRegistry() {}
 

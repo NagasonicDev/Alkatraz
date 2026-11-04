@@ -412,6 +412,7 @@ public class ContinentalShift extends AttackSpell implements Listener {
 
     @Override
     public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
+        int[] signatureFrame = {0};
         return Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(Alkatraz.getInstance(), () -> {
             if (e.isCancelled()) return;
             Location loc = caster.getEyeLocation();
@@ -420,6 +421,11 @@ public class ContinentalShift extends AttackSpell implements Listener {
             for (Location point : points) {
                 ParticleCaster.spawn(caster, point.getWorld(), Utils.DUST, point, 0, CIRCLE_DUST);
             }
+            Location signatureCenter = loc.clone().add(loc.getDirection().normalize().multiply(1.5));
+            me.nagasonic.alkatraz.spells.vfx.SpellCastSignature.draw(getId(), caster, signatureCenter,
+                    signatureFrame[0]++, 3.0,
+                    me.nagasonic.alkatraz.spells.vfx.ElementPalette.of(CAST_COLOR).coreDust(),
+                    me.nagasonic.alkatraz.spells.vfx.ElementPalette.of(CAST_COLOR).deepDust());
         }, 0L, (Long) Configs.CIRCLE_TICKS.get());
     }
 

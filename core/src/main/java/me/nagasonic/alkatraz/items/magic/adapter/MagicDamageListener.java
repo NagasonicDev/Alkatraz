@@ -40,6 +40,10 @@ public final class MagicDamageListener implements Listener {
         EXPLOSION_BONUS.remove(playerId);
     }
 
+    public static void clearAll() {
+        EXPLOSION_BONUS.clear();
+    }
+
     static double explosionBonus(UUID playerId) {
         return EXPLOSION_BONUS.getOrDefault(playerId, 0.0);
     }

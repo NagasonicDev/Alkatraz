@@ -9,11 +9,12 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.texturepack.TexturePackManager;
 
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
+import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.UUID;
 
 /**
@@ -26,13 +27,22 @@ public abstract class Menu {
     protected Inventory inventory;
     
     // Track menu instances for event handling
-    private static final Map<UUID, Menu> activeMenus = new HashMap<>();
+    private static final Map<UUID, Menu> activeMenus = new ConcurrentHashMap<>();
 
     public Menu(Player viewer, String title, int size) {
         this.viewer = viewer;
         this.title = title;
         this.size = size;
         this.inventory = Bukkit.createInventory(null, size, title);
+    }
+
+    /**
+     * Resource-pack title glyph when the pack is enabled, otherwise {@code fallback}.
+     * Call from constructors before {@code super(...)} via a static helper, or pass
+     * the result into {@code super}.
+     */
+    protected static String packTitle(String menuType, String fallback) {
+        return TexturePackManager.getMenuTitle(menuType, fallback);
     }
 
     /**
@@ -96,7 +106,7 @@ public abstract class Menu {
     }
 
     protected void fillAll() {
-        ItemStack blank = Alkatraz.getGuiItemRegistry().getItem("blank");
+        ItemStack blank = TexturePackManager.createBlankPane();
         for (int i = 0; i < size; i++) {
             inventory.setItem(i, blank);
         }
@@ -105,7 +115,7 @@ public abstract class Menu {
     protected void fillBorders(int... excludeSlots) {
         Set<Integer> excluded = new HashSet<>();
         for (int s : excludeSlots) excluded.add(s);
-        ItemStack blank = Alkatraz.getGuiItemRegistry().getItem("blank");
+        ItemStack blank = TexturePackManager.createBlankPane();
         for (int i = 0; i < size; i++) {
             if (!excluded.contains(i)) {
                 inventory.setItem(i, blank);

@@ -28,6 +28,8 @@ public class UpdateChecker implements Listener {
 
     private static LangManager lang() { return Alkatraz.getLangManager(); }
 
+    private static volatile Listener updateListener;
+
     private static void getVersion(Consumer<String> consumer) {
         HttpURLConnection connection = null;
         try {
@@ -61,12 +63,12 @@ public class UpdateChecker implements Listener {
 
     private static void fetchAndAnnounce() {
         getVersion(v -> {
-            if (!Alkatraz.getInstance().getDescription().getVersion().equals(v)) {
+            if (isRemoteNewer(v, Alkatraz.getInstance().getDescription().getVersion())) {
                 Bukkit.getScheduler().runTask(Alkatraz.getInstance(), () -> {
                     Alkatraz.logWarning("There is a new version of Alkatraz available: " + v);
                     Alkatraz.logWarning("Please don't forget to look at the change log, the update may have important changes that require additional steps to work.");
                     Alkatraz.logWarning("");
-                    Bukkit.getPluginManager().registerEvents(new Listener() {
+                    Listener listener = new Listener() {
                         private final Collection<UUID> messagedOperators = new HashSet<>();
 
                         @EventHandler
@@ -78,9 +80,51 @@ public class UpdateChecker implements Listener {
                                     lang().get("update.recommend_notes"),
                                     lang().get("update.see_importance"));
                         }
-                    }, Alkatraz.getInstance());
+                    };
+                    Bukkit.getPluginManager().registerEvents(listener, Alkatraz.getInstance());
+                    updateListener = listener;
                 });
             }
         });
+    }
+
+    /**
+     * True only when the remote release is numerically ahead of the running build.
+     * A local build ahead of the latest public release (e.g. 0.9.2 vs 0.9.1) is not "outdated".
+     */
+    static boolean isRemoteNewer(String remote, String current) {
+        int[] r = parseVersion(remote);
+        int[] c = parseVersion(current);
+        if (r == null || c == null) return !current.equals(remote);
+        for (int i = 0; i < Math.max(r.length, c.length); i++) {
+            int a = i < r.length ? r[i] : 0;
+            int b = i < c.length ? c[i] : 0;
+            if (a != b) return a > b;
+        }
+        return false;
+    }
+
+    private static int[] parseVersion(String version) {
+        String[] parts = version.replaceFirst("^[vV]", "").split("\\.");
+        int[] numbers = new int[parts.length];
+        for (int i = 0; i < parts.length; i++) {
+            String digits = parts[i].replaceAll("[^0-9].*$", "");
+            if (digits.isEmpty()) return null;
+            try {
+                numbers[i] = Integer.parseInt(digits);
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+        return numbers;
+    }
+
+    public static void shutdown() {
+        Listener current = updateListener;
+        updateListener = null;
+        if (current != null) {
+            org.bukkit.event.HandlerList.unregisterAll(current);
+        }
+        CHECKED.set(false);
     }
 }

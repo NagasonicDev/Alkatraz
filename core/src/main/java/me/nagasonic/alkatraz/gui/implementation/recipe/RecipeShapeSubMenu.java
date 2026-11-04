@@ -25,7 +25,7 @@ public class RecipeShapeSubMenu extends Menu {
     private final RecipeEditMenu parent;
 
     public RecipeShapeSubMenu(Player viewer, RecipeEditMenu parent) {
-        super(viewer, ColorFormat.format(Alkatraz.getLangManager().get("recipes.edit.shape")), 45);
+        super(viewer, packTitle("recipe_shape", ColorFormat.format(Alkatraz.getLangManager().get("recipes.edit.shape"))), 45);
         this.parent = parent;
     }
 
@@ -53,6 +53,7 @@ public class RecipeShapeSubMenu extends Menu {
         }
         ItemStack back = ItemBuilder.of(Material.BARRIER)
                 .name(lang().get("recipes.edit.back"))
+                .guiModel("back_button")
                 .build();
         setMenuData(back, "action", "back");
         inventory.setItem(BACK_SLOT, back);

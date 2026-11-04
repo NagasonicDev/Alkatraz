@@ -11,6 +11,8 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -29,15 +31,8 @@ public class ProfilePersistence {
      * @return File object for player's folder
      */
     private static File getPlayerFolder(UUID uuid) {
-        File cached = playerFolders.get(uuid);
-        if (cached != null) return cached;
-
-        File folder = new File(Alkatraz.getInstance().getDataFolder().getParentFile(), "Alkatraz/" + PLAYERDATA_FOLDER + "/" + uuid);
-        if (!folder.exists()) {
-            folder.mkdirs();
-        }
-        playerFolders.put(uuid, folder);
-        return folder;
+        return playerFolders.computeIfAbsent(uuid, ignored ->
+                new File(Alkatraz.getInstance().getDataFolder(), PLAYERDATA_FOLDER + "/" + uuid));
     }
 
     /**
@@ -77,8 +72,8 @@ public class ProfilePersistence {
      * Saves a profile to disk
      * @param profile The profile to save
      */
-    public static void saveProfile(Profile profile) {
-        saveProfile(profile.getOwner(), profile);
+    public static boolean saveProfile(Profile profile) {
+        return saveProfile(profile.getOwner(), profile);
     }
 
     /**
@@ -86,8 +81,9 @@ public class ProfilePersistence {
      * @param uuid Player UUID
      * @param profile The profile to save
      */
-    public static void saveProfile(UUID uuid, Profile profile) {
+    public static boolean saveProfile(UUID uuid, Profile profile) {
         File file = getProfileFile(uuid, profile.getClass());
+        file.getParentFile().mkdirs();
         FileConfiguration config = new YamlConfiguration();
 
         // Save all integer stats
@@ -135,12 +131,24 @@ public class ProfilePersistence {
 
 
 
+        if (!file.getParentFile().exists()) file.getParentFile().mkdirs();
+        File temp = new File(file.getParentFile(), file.getName() + ".tmp");
         try {
-            config.save(file);
+            config.save(temp);
+            try {
+                Files.move(temp.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+            } catch (Exception moveEx) {
+                Files.move(temp.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            }
         } catch (IOException e) {
             Alkatraz.getInstance().getLogger().severe("Failed to save profile " + profile.getClass().getSimpleName() + " for player " + uuid);
-            e.printStackTrace();
+            Alkatraz.getInstance().getLogger().log(java.util.logging.Level.SEVERE, "Failed to save profile", e);
+            playerFolders.remove(uuid);
+            return false;
+        } finally {
+            if (temp.exists()) temp.delete();
         }
+        return true;
     }
 
     /**

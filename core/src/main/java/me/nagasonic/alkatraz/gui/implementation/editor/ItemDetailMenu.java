@@ -12,6 +12,7 @@ import me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack;
 import me.nagasonic.alkatraz.items.magic.recipe.AlkatrazRecipe;
 import me.nagasonic.alkatraz.items.magic.recipe.RecipeCategory;
 import me.nagasonic.alkatraz.items.magic.recipe.RecipeRegistry;
+import me.nagasonic.alkatraz.texturepack.TexturePackManager;
 import me.nagasonic.alkatraz.util.ColorFormat;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -36,21 +37,6 @@ public class ItemDetailMenu extends Menu {
             28, 29, 30, 32, 33, 34,
             39, 40, 41, 43};
 
-    private static ItemStack backgroundPane;
-
-    private static ItemStack backgroundPane() {
-        if (backgroundPane == null) {
-            ItemStack item = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
-            ItemMeta meta = item.getItemMeta();
-            if (meta != null) {
-                meta.setDisplayName(ColorFormat.format("&7"));
-                item.setItemMeta(meta);
-            }
-            backgroundPane = item;
-        }
-        return backgroundPane;
-    }
-
     final ItemDefinition definition;
     final String defKey;
     private final EditorSession session;
@@ -62,7 +48,7 @@ public class ItemDetailMenu extends Menu {
     }
 
     public ItemDetailMenu(Player viewer, ItemDefinition definition, String defKey, AlkatrazRecipe sourceRecipe) {
-        super(viewer, ColorFormat.format("&8Edit: " + defKey), 45);
+        super(viewer, packTitle("item_detail", ColorFormat.format("&8Edit: " + defKey)), 45);
         this.definition = definition;
         this.defKey = defKey;
         this.session = EditorSession.get(viewer.getUniqueId());
@@ -72,74 +58,72 @@ public class ItemDetailMenu extends Menu {
 
     @Override
     protected void build() {
-        for (int i = 0; i < size; i++) {
-            inventory.setItem(i, backgroundPane());
-        }
+        fillAll();
 
         inventory.setItem(PREVIEW_SLOT, createPreviewItem());
 
-        inventory.setItem(10, createFieldItem(Material.NAME_TAG, lang().get("editor.display_name"),
+        inventory.setItem(10, createFieldItem(Material.NAME_TAG, "editor_display_name", lang().get("editor.display_name"),
                 "&7Current: &f" + getConfigString("display_name", definition.getKey().getKey()),
                 "&7Click to edit", "edit_display_name"));
-        inventory.setItem(11, createFieldItem(Material.WRITABLE_BOOK, lang().get("editor.lore"),
+        inventory.setItem(11, createFieldItem(Material.WRITABLE_BOOK, "editor_lore", lang().get("editor.lore"),
                 "&7" + getConfigListSize("lore") + " line(s)", "&7Click to edit", "edit_lore"));
-        inventory.setItem(12, createFieldItem(Material.BRICK, lang().get("editor.material"),
+        inventory.setItem(12, createFieldItem(Material.BRICK, "editor_material", lang().get("editor.material"),
                 "&7Current: &f" + getConfigString("material", definition.visual().material().name()),
                 "&7Click to edit", "edit_material"));
-        inventory.setItem(13, createFieldItem(Material.LEATHER, lang().get("editor.dye_color"),
+        inventory.setItem(13, createFieldItem(Material.LEATHER, "editor_dye_color", lang().get("editor.dye_color"),
                 "&7Current: &f" + getConfigString("dye_color", "none"),
                 "&7Click to edit", "edit_dye_color"));
-        inventory.setItem(14, createFieldItem(Material.REPEATER, lang().get("editor.custom_model_data"),
+        inventory.setItem(14, createFieldItem(Material.REPEATER, "editor_custom_model_data", lang().get("editor.custom_model_data"),
                 "&7Current: &f" + getConfigInt("custom_model_data", 0),
                 "&7Click to edit", "edit_cmd"));
         inventory.setItem(FIELD_SLOT_UNBREAKABLE, createUnbreakableField());
         inventory.setItem(FIELD_SLOT_HIDE_ATTRIBUTES, createHideAttributesField());
 
-        inventory.setItem(19, createFieldItem(Material.CRAFTING_TABLE, lang().get("editor.components"),
+        inventory.setItem(19, createFieldItem(Material.CRAFTING_TABLE, "editor_components", lang().get("editor.components"),
                 "&7" + getConfigListSize("components") + " component(s)", "&7Click to edit", "edit_components"));
-        inventory.setItem(20, createFieldItem(Material.GOLD_NUGGET, lang().get("editor.attributes"),
+        inventory.setItem(20, createFieldItem(Material.GOLD_NUGGET, "editor_attributes", lang().get("editor.attributes"),
                 "&7" + getConfigSectionSize("attributes") + " attribute(s)", "&7Click to edit", "edit_attributes"));
-        inventory.setItem(21, createFieldItem(Material.IRON_NUGGET, lang().get("editor.vanilla_attributes"),
+        inventory.setItem(21, createFieldItem(Material.IRON_NUGGET, "editor_vanilla_attributes", lang().get("editor.vanilla_attributes"),
                 "&7" + getConfigSectionSize("vanilla_attributes") + " attribute(s)", "&7Click to edit", "edit_vanilla_attributes"));
-        inventory.setItem(23, createFieldItem(Material.ENCHANTED_BOOK, lang().get("editor.max_engravings"),
+        inventory.setItem(23, createFieldItem(Material.ENCHANTED_BOOK, "editor_max_engravings", lang().get("editor.max_engravings"),
                 "&7Current: &f" + getConfigInt("max_engravings", 1),
                 "&7Click to edit", "edit_max_engravings"));
-        inventory.setItem(24, createFieldItem(Material.PAPER, lang().get("editor.spell_id"),
+        inventory.setItem(24, createFieldItem(Material.PAPER, "editor_spell_id", lang().get("editor.spell_id"),
                 "&7Current: &f" + getConfigString("spell_id", "none"),
                 "&7Click to edit", "edit_spell_id"));
-        inventory.setItem(25, createFieldItem(Material.REDSTONE, lang().get("editor.triggers"),
+        inventory.setItem(25, createFieldItem(Material.REDSTONE, "editor_triggers", lang().get("editor.triggers"),
                 "&7" + getConfigListSize("triggers") + " trigger(s)", "&7Click to edit", "edit_triggers"));
 
-        inventory.setItem(28, createFieldItem(Material.CRAFTING_TABLE, lang().get("editor.recipe_shape"),
+        inventory.setItem(28, createFieldItem(Material.CRAFTING_TABLE, "editor_recipe_shape", lang().get("editor.recipe_shape"),
                 "&7Configure the crafting grid", "&7Click to edit", "edit_recipe_shape"));
-        inventory.setItem(29, createFieldItem(Material.HOPPER, lang().get("editor.recipe_ingredients"),
+        inventory.setItem(29, createFieldItem(Material.HOPPER, "editor_recipe_ingredients", lang().get("editor.recipe_ingredients"),
                 "&7Configure ingredient materials", "&7Click to edit", "edit_recipe_ingredients"));
-        inventory.setItem(30, createFieldItem(Material.BOOK, lang().get("editor.recipe_requirements"),
+        inventory.setItem(30, createFieldItem(Material.BOOK, "editor_recipe_requirements", lang().get("editor.recipe_requirements"),
                 "&7" + getRecipeRequirementsCount() + " requirement(s)", "&7Click to edit", "edit_requirements"));
 
         inventory.setItem(SAVE_SLOT, createSaveItem());
-        inventory.setItem(40, createActionItem(Material.YELLOW_DYE, lang().get("editor.reload"),
+        inventory.setItem(40, createActionItem(Material.YELLOW_DYE, "editor_reload", lang().get("editor.reload"),
                 "&7Discard changes and reload from file", "", "reload"));
-        inventory.setItem(41, createActionItem(Material.BARRIER, lang().get("common.back"),
+        inventory.setItem(41, createActionItem(Material.BARRIER, "back_button", lang().get("common.back"),
                 "&7Return to item list", "", "back"));
-        inventory.setItem(43, createActionItem(Material.EMERALD, lang().get("editor.get_item"),
+        inventory.setItem(43, createActionItem(Material.EMERALD, "editor_get_item", lang().get("editor.get_item"),
                 "&7Get a copy of this item", "", "get_item"));
     }
 
     private ItemStack createUnbreakableField() {
-        return createFieldItem(Material.SHIELD, lang().get("editor.unbreakable"),
+        return createFieldItem(Material.SHIELD, "editor_unbreakable", lang().get("editor.unbreakable"),
                 "&7Current: &f" + getConfigBool("unbreakable", false),
                 "&7Click to toggle", "toggle_unbreakable");
     }
 
     private ItemStack createHideAttributesField() {
-        return createFieldItem(Material.ENDER_EYE, lang().get("editor.hide_attributes"),
+        return createFieldItem(Material.ENDER_EYE, "editor_hide_attributes", lang().get("editor.hide_attributes"),
                 "&7Current: &f" + getConfigBool("hide_attributes", true),
                 "&7Click to toggle", "toggle_hide_attributes");
     }
 
     private ItemStack createSaveItem() {
-        return createActionItem(Material.LIME_DYE, lang().get("editor.save"),
+        return createActionItem(Material.LIME_DYE, "editor_save", lang().get("editor.save"),
                 "&7Save changes to config file",
                 needsSave ? "&eYou have unsaved changes!" : "", "save");
     }
@@ -160,7 +144,7 @@ public class ItemDetailMenu extends Menu {
         return display;
     }
 
-    private ItemStack createFieldItem(Material material, String displayName, String... loreLines) {
+    private ItemStack createFieldItem(Material material, String guiModel, String displayName, String... loreLines) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
@@ -174,10 +158,11 @@ public class ItemDetailMenu extends Menu {
             meta.setLore(lore);
             item.setItemMeta(meta);
         }
+        TexturePackManager.applyGuiModel(item, guiModel);
         return item;
     }
 
-    private ItemStack createActionItem(Material material, String displayName, String... loreLines) {
+    private ItemStack createActionItem(Material material, String guiModel, String displayName, String... loreLines) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
@@ -191,6 +176,7 @@ public class ItemDetailMenu extends Menu {
             meta.setLore(lore);
             item.setItemMeta(meta);
         }
+        TexturePackManager.applyGuiModel(item, guiModel);
         return item;
     }
 

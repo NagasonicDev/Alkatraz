@@ -1,6 +1,7 @@
 package me.nagasonic.alkatraz.gui;
 
 import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.texturepack.TexturePackManager;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -84,7 +85,7 @@ public abstract class PagedMenu<T> extends Menu {
         reserved.add(nextPageSlot);
         reserved.add(previousPageSlot);
         reserved.add(backButtonSlot);
-        ItemStack blank = Alkatraz.getGuiItemRegistry().getItem("blank");
+        ItemStack blank = TexturePackManager.createBlankPane();
         for (int i = 0; i < size; i++) {
             if (!reserved.contains(i)) {
                 inventory.setItem(i, blank);
@@ -126,7 +127,7 @@ public abstract class PagedMenu<T> extends Menu {
      * Adds next/previous page buttons
      */
     protected void addNavigationButtons() {
-        ItemStack blank = Alkatraz.getGuiItemRegistry().getItem("blank");
+        ItemStack blank = TexturePackManager.createBlankPane();
 
         // Next page button
         if (currentPage < totalPages) {

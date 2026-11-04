@@ -17,6 +17,8 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -135,14 +137,26 @@ public final class TaskBrainTicker implements Listener {
     }
 
     private static void tickAll() {
-        if (attached.isEmpty()) return;
-        for (TaskBrainEngine engine : attached.values()) {
+        List<TaskBrainEngine> snapshot;
+        synchronized (lock) { snapshot = new ArrayList<>(attached.values()); }
+        if (snapshot.isEmpty()) return;
+        for (TaskBrainEngine engine : snapshot) {
             LivingEntity entity = engine.getEntity();
+            // Skip engines that have been detached since the snapshot was taken.
+            if (attached.get(entity.getUniqueId()) != engine) continue;
             if (entity.isDead() || !entity.isValid()) {
-                detach(entity, true);
+                try {
+                    detach(entity, true);
+                } catch (Exception e) {
+                    Alkatraz.getInstance().getLogger().severe("Failed to persist brain memory for " + entity.getType() + " " + entity.getUniqueId() + ": " + e);
+                }
                 continue;
             }
-            engine.tick(currentTick);
+            try {
+                engine.tick(currentTick);
+            } catch (Exception e) {
+                Alkatraz.getInstance().getLogger().severe("Task brain tick failed for " + entity.getType() + " " + entity.getUniqueId() + ": " + e);
+            }
         }
         currentTick += TICK_INTERVAL;
     }

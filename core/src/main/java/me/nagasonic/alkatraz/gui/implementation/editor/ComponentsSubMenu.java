@@ -25,35 +25,18 @@ public class ComponentsSubMenu extends Menu {
             28, 29, 30, 31, 32, 33, 34};
     private static final int BACK_SLOT = 42;
 
-    private static ItemStack backgroundPanePrototype;
-
-    private static ItemStack backgroundPane() {
-        if (backgroundPanePrototype == null) {
-            ItemStack item = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
-            ItemMeta meta = item.getItemMeta();
-            if (meta != null) {
-                meta.setDisplayName(ColorFormat.format("&7"));
-                item.setItemMeta(meta);
-            }
-            backgroundPanePrototype = item;
-        }
-        return backgroundPanePrototype;
-    }
-
     private final ItemDetailMenu parent;
     private final EditorSession session;
 
     public ComponentsSubMenu(Player viewer, ItemDetailMenu parent) {
-        super(viewer, ColorFormat.format("&8Edit Components"), 45);
+        super(viewer, packTitle("components", ColorFormat.format("&8Edit Components")), 45);
         this.parent = parent;
         this.session = EditorSession.get(viewer.getUniqueId());
     }
 
     @Override
     protected void build() {
-        for (int i = 0; i < size; i++) {
-            inventory.setItem(i, backgroundPane());
-        }
+        fillAll();
 
         List<String> currentComps = session.config().getStringList("components");
         var allTypes = MagicItemRegistries.COMPONENT_TYPES.values();
@@ -80,6 +63,7 @@ public class ComponentsSubMenu extends Menu {
             meta.setLore(lore);
             item.setItemMeta(meta);
         }
+        me.nagasonic.alkatraz.texturepack.TexturePackManager.applyGuiModel(item, enabled ? "editor_toggle_on" : "editor_toggle_off");
         setMenuData(item, "comp_key", key);
         return item;
     }
@@ -91,6 +75,7 @@ public class ComponentsSubMenu extends Menu {
             meta.setDisplayName(lang().get("common.back"));
             item.setItemMeta(meta);
         }
+        me.nagasonic.alkatraz.texturepack.TexturePackManager.applyGuiModel(item, "back_button");
         setMenuData(item, "action", "back");
         return item;
     }

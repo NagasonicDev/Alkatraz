@@ -20,6 +20,9 @@ public class EditorSession {
     private String pendingChatAction;
 
     public EditorSession(Player player, String defKey) {
+        if (defKey == null || !defKey.matches("[A-Za-z0-9_.:-]+")) {
+            throw new IllegalArgumentException("Invalid item definition key: " + defKey);
+        }
         this.defKey = defKey;
         this.file = new File(Alkatraz.getInstance().getDataFolder(), "magic/items/" + defKey + ".yml");
         reload();

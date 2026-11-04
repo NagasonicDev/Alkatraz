@@ -8,6 +8,7 @@ import org.bukkit.plugin.Plugin;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
+import java.nio.file.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -30,13 +31,15 @@ public class ConfigUpdater {
      * @throws IOException If an IOException occurs
      */
     public static void update(Plugin plugin, String resourceName, File toUpdate, List<String> ignoredSections) throws IOException {
+        if (plugin.getResource(resourceName) == null) {
+            throw new IOException("Missing resource: " + resourceName);
+        }
         BufferedReader newReader = new BufferedReader(new InputStreamReader(plugin.getResource(resourceName), StandardCharsets.UTF_8));
         List<String> newLines = newReader.lines().collect(Collectors.toList());
         newReader.close();
 
         FileConfiguration oldConfig = YamlConfiguration.loadConfiguration(toUpdate);
         FileConfiguration newConfig = YamlConfiguration.loadConfiguration(new InputStreamReader(plugin.getResource(resourceName), StandardCharsets.UTF_8));
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(toUpdate), StandardCharsets.UTF_8));
 
         List<String> ignoredSectionsArrayList = new ArrayList<>(ignoredSections);
         //ignoredSections can ONLY contain configurations sections
@@ -44,7 +47,23 @@ public class ConfigUpdater {
 
         Yaml yaml = new Yaml();
         Map<String, String> comments = parseComments(newLines, ignoredSectionsArrayList, oldConfig, yaml);
-        write(newConfig, oldConfig, comments, ignoredSectionsArrayList, writer, yaml);
+
+        File tmp = new File(toUpdate.getParentFile(), toUpdate.getName() + ".tmp");
+        try {
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tmp), StandardCharsets.UTF_8));
+            write(newConfig, oldConfig, comments, ignoredSectionsArrayList, writer, yaml);
+            // writer is closed by write(...)
+            try {
+                java.nio.file.Files.move(tmp.toPath(), toUpdate.toPath(),
+                        java.nio.file.StandardCopyOption.REPLACE_EXISTING,
+                        java.nio.file.StandardCopyOption.ATOMIC_MOVE);
+            } catch (java.nio.file.AtomicMoveNotSupportedException e) {
+                java.nio.file.Files.move(tmp.toPath(), toUpdate.toPath(),
+                        java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            }
+        } finally {
+            try { java.nio.file.Files.deleteIfExists(tmp.toPath()); } catch (IOException ignored) { }
+        }
     }
 
     /**
@@ -58,21 +77,39 @@ public class ConfigUpdater {
      * @throws IOException if an I/O error occurs while reading or writing
      */
     public static void updateWithFilter(Plugin plugin, String resourceName, File toUpdate, List<String> onlyUpdateTheseSections) throws IOException {
+        if (plugin.getResource(resourceName) == null) {
+            throw new IOException("Missing resource: " + resourceName);
+        }
         BufferedReader newReader = new BufferedReader(new InputStreamReader(plugin.getResource(resourceName), StandardCharsets.UTF_8));
         List<String> newLines = newReader.lines().collect(Collectors.toList());
         newReader.close();
 
         FileConfiguration oldConfig = YamlConfiguration.loadConfiguration(toUpdate);
         FileConfiguration newConfig = YamlConfiguration.loadConfiguration(new InputStreamReader(plugin.getResource(resourceName), StandardCharsets.UTF_8));
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(toUpdate), StandardCharsets.UTF_8));
 
         List<String> includedSectionsArrayList = new ArrayList<>(onlyUpdateTheseSections);
         //ignoredSections can ONLY contain configurations sections
-        includedSectionsArrayList.removeIf(newConfig::isConfigurationSection);
+        includedSectionsArrayList.removeIf(ignoredSection -> !newConfig.isConfigurationSection(ignoredSection));
 
         Yaml yaml = new Yaml();
         Map<String, String> comments = parseComments(newLines, includedSectionsArrayList, oldConfig, yaml);
-        write(newConfig, oldConfig, comments, includedSectionsArrayList, writer, yaml);
+
+        File tmp = new File(toUpdate.getParentFile(), toUpdate.getName() + ".tmp");
+        try {
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tmp), StandardCharsets.UTF_8));
+            write(newConfig, oldConfig, comments, includedSectionsArrayList, writer, yaml);
+            // writer is closed by write(...)
+            try {
+                java.nio.file.Files.move(tmp.toPath(), toUpdate.toPath(),
+                        java.nio.file.StandardCopyOption.REPLACE_EXISTING,
+                        java.nio.file.StandardCopyOption.ATOMIC_MOVE);
+            } catch (java.nio.file.AtomicMoveNotSupportedException e) {
+                java.nio.file.Files.move(tmp.toPath(), toUpdate.toPath(),
+                        java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            }
+        } finally {
+            try { java.nio.file.Files.deleteIfExists(tmp.toPath()); } catch (IOException ignored) { }
+        }
     }
 
     private static void writeWithFilter(FileConfiguration newConfig, FileConfiguration oldConfig, Map<String, String> comments, List<String> includedSections, BufferedWriter writer, Yaml yaml) throws IOException {

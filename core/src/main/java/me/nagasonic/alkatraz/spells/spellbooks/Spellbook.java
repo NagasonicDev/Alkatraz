@@ -88,6 +88,9 @@ public class Spellbook {
         
         lore.add("");
         lore.add(lang().get("spellbook.element_info", "circle", spell.getRequiredCircleLevel(), "element", spell.getElement().name()));
+        lore.add(lang().get("spellbook.cast_cost", "mana", spell.getCost()));
+        lore.add(lang().get("spellbook.cooldown", "seconds", spell.getCooldown()));
+        lore.add(lang().get("spellbook.cast_time", "seconds", spell.getCastTime()));
         lore.add("");
         lore.add(lang().get("spellbook.right_click_discover"));
     }

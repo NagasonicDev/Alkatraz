@@ -160,6 +160,11 @@ public final class CastCircle {
         Particle.DustOptions accentDust = palette.deepDust();
         RingGeometry geometry = geometryFor(size);
         long period = circleTicks(spell);
+        int circle = spell == null ? 0 : Math.max(0, Math.min(9, spell.getRequiredCircleLevel()));
+        int spellPhase = spell == null || spell.getId() == null ? 0 : spell.getId().hashCode();
+        double visualScale = 1.0 + circle * 0.075;
+        int satellites = 2 + circle;
+        int[] frame = {0};
 
         return new BukkitRunnable() {
             @Override
@@ -168,13 +173,16 @@ public final class CastCircle {
                     cancel();
                     return;
                 }
-                draw(caster, geometry, rotationStep, bodyDust, accentDust);
+                draw(caster, geometry, rotationStep, bodyDust, accentDust,
+                        visualScale, satellites, spellPhase, frame[0]++, spell, size);
             }
         }.runTaskTimer(Alkatraz.getInstance(), 0L, period).getTaskId();
     }
 
     private static void draw(LivingEntity caster, RingGeometry geometry, int rotationStep,
-                             Particle.DustOptions bodyDust, Particle.DustOptions accentDust) {
+                             Particle.DustOptions bodyDust, Particle.DustOptions accentDust,
+                             double visualScale, int satellites, int spellPhase, int frame,
+                             Spell spell, double size) {
         Location eye = caster.getEyeLocation();
         World world = eye.getWorld();
         if (world == null) return;
@@ -190,6 +198,40 @@ public final class CastCircle {
                     ParticleCaster.spawn(caster, world, Utils.DUST, scratch, 0,
                             accent ? accentDust : bodyDust);
                 });
+
+        // Each cast circle gets its own moving constellation. The spell id offsets the phase,
+        // while the circle level adds satellites and a wider orbit, so tiers visibly ascend
+        // without forcing every spell author to hand-build a bespoke wind-up.
+        double phase = Math.toRadians(Math.floorMod(spellPhase, 360)) + frame * 0.10;
+        double radius = (0.42 + satellites * 0.055) * visualScale;
+        float ringPitch = RING_PITCH_OFFSET - origin.getPitch();
+        float planeYaw = origin.getYaw() + rotationStep;
+        for (int i = 0; i < satellites; i++) {
+            double angle = phase + Math.PI * 2.0 * i / satellites;
+            double x = Math.cos(angle) * radius;
+            double y = Math.sin(angle) * radius * 0.72;
+            double z = 0.0;
+            Vector offset = place(new Vector(x, y, z), planeYaw, ringPitch);
+            scratch.setX(origin.getX() + offset.getX());
+            scratch.setY(origin.getY() + offset.getY());
+            scratch.setZ(origin.getZ() + offset.getZ());
+            ParticleCaster.spawn(caster, world, Utils.DUST, scratch, 0, accentDust);
+
+            // A short, counter-rotating arc makes each mote read as a rune fragment, not a dot.
+            for (int trail = 1; trail <= 2; trail++) {
+                double trailAngle = angle - trail * 0.11;
+                Vector trailOffset = place(new Vector(Math.cos(trailAngle) * radius,
+                        Math.sin(trailAngle) * radius * 0.72, 0.0), planeYaw, ringPitch);
+                scratch.setX(origin.getX() + trailOffset.getX());
+                scratch.setY(origin.getY() + trailOffset.getY());
+                scratch.setZ(origin.getZ() + trailOffset.getZ());
+                ParticleCaster.spawn(caster, world, Utils.DUST, scratch, 0, bodyDust);
+            }
+        }
+        if (spell != null && spell.getRequiredCircleLevel() >= 6) {
+            SpellCastSignature.draw(spell.getId(), caster, origin, frame,
+                    size * visualScale, bodyDust, accentDust);
+        }
     }
 
     /**
@@ -295,7 +337,7 @@ public final class CastCircle {
      * @return the immutable offsets for that size
      */
     static RingGeometry geometryFor(double size) {
-        double effective = (Double.isNaN(size) || size < MIN_SIZE) ? DEFAULT_SIZE : size;
+        double effective = (Double.isNaN(size) || size < MIN_SIZE) ? DEFAULT_SIZE : Math.round(size * 100.0) / 100.0;
         return GEOMETRY.computeIfAbsent(effective, CastCircle::build);
     }
 

@@ -3,6 +3,7 @@ package me.nagasonic.alkatraz.util;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -147,21 +148,33 @@ public class ItemUtils {
         }
     }
 
+    private static final Map<String, String> SKIN_VALUE_CACHE = new ConcurrentHashMap<>();
+
     public static String getValue(ItemStack head){
         SkullMeta meta = (SkullMeta) head.getItemMeta();
         PlayerProfile profile = meta.getOwnerProfile();
-        String url = profile.getTextures().getSkin().toString();
+        URL url = profile.getTextures().getSkin();
+        if (url == null) return null;
+        String key = url.toString();
+        String cached = SKIN_VALUE_CACHE.get(key);
+        if (cached != null) return cached;
         JsonObject data = null;
         try {
-            data = SkinUtils.generateFromURL(url, false);
-        } catch (ExecutionException ex) {
-            throw new RuntimeException(ex);
-        } catch (InterruptedException ex) {
-            throw new RuntimeException(ex);
+            data = SkinUtils.generateFromURL(url.toString(), false);
+        } catch (Exception ex) {
+            return null;
         }
-        JsonObject texture = data.get("texture").getAsJsonObject();
-        String value = texture.get("value").getAsString();
-        return value;
+        if (data == null) return null;
+        JsonObject texture = data.getAsJsonObject("texture");
+        if (texture == null) return null;
+        JsonPrimitive value = texture.getAsJsonPrimitive("value");
+        if (value == null) return null;
+        String result = value.getAsString();
+        if (result != null) {
+            if (SKIN_VALUE_CACHE.size() > CACHE_LIMIT) SKIN_VALUE_CACHE.clear();
+            SKIN_VALUE_CACHE.put(key, result);
+        }
+        return result;
     }
 
     public static URL getURL(ItemStack head){

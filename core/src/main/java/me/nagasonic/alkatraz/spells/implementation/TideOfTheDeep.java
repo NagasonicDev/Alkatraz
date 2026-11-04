@@ -6,23 +6,29 @@ import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.lang.LangManager;
+import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
+import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.SpellAttackContext;
-import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
+import me.nagasonic.alkatraz.spells.util.SustainEffect;
 import me.nagasonic.alkatraz.spells.vfx.CastCircle;
 import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
+import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.util.ParticleCaster;
+import me.nagasonic.alkatraz.util.StatUtils;
 import me.nagasonic.alkatraz.util.Utils;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Particle;
 import org.bukkit.Sound;
-import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.boss.BarColor;
+import org.bukkit.boss.BarStyle;
+import org.bukkit.boss.BossBar;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
@@ -31,54 +37,53 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
-import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
 
 /**
- * Circle 9 WATER capstone. The area the caster chooses becomes a tide: it heals <b>them</b>,
- * and only them, while it crushes everything else inside it - and both halves climb across
- * the ten seconds it lasts.
+ * Circle 9 WATER capstone, and one of the five circle-9 sustains: a mana-drain
+ * <b>toggle</b>. The first cast raises the tide, the second takes it back down, and
+ * {@code upkeep_mana_per_second} is charged every second in between, so running out of
+ * mana ends it on its own.
  *
- * <h2>Why {@code power} is 14.4 and not the ladder's 28.6</h2>
+ * <h2>Why {@code power} is 14.0 and not the ladder's 57.2</h2>
  * Three things are mandated at once and cannot all hold: {@code power} comes off the
- * section 6 ladder, which puts circle 9 at 28.6; {@code hit_count} is 10 because the ramp
- * runs for ten seconds at one window per second; and {@code power x hit_count} must sit
- * inside {@code sustainBudget(9)} = 144.
+ * section 6 ladder, which puts circle 9 at 57.2; the tide is a sixty-second toggle that
+ * bleeds every {@code damage_interval_ticks}, which is twenty windows; and
+ * {@code power x hit_count} must sit inside {@code sustainBudget(9)} = 280.
  *
  * <pre>
- * 28.6 x 10 = 286.0  &gt;  144    the ladder value does not fit
- * 144 / 10  = 14.4               the only per-hit value that does
- * 14.4 x 10 = 144.0  ==  144     exactly on the budget
+ * 57.2 x 20 = 1144.0 &gt;  280    the ladder value does not fit
+ * 280 / 20 =  14.0               the only per-window value that does
+ * 14.0 x 20 =  280.0  ==  280     exactly on the budget
  * </pre>
  *
  * This is the same shape as {@code inferno_pilgrimage}'s documented 3 x 16 = 48: a
  * deliberate, budget-checked departure with the arithmetic shown, landing <i>on</i> the
  * budget. {@code hit_count} is the free variable here; {@code power} is the value every
  * damage instance scales from, so dividing it is the honest way to spend the budget.
+ * {@link #damageWindows()} re-derives the count at runtime, so a hand-edited admin copy
+ * that raises {@code duration_seconds} without raising {@code hit_count} cannot escape it.
  *
- * <h2>The ramp climbs, and the real total is under the declared one</h2>
- * {@code tide_ramp[i]} is the fraction of {@code power} dealt on window {@code i}. The ten
- * values sum to 9.40, so a body standing through the whole tide takes
- * {@code 14.4 x 9.40 = 135.36} - comfortably inside 144, and up from a first window of 5.76
- * to a last of 21.31, a 3.7x climb the player can read on their own health bars.
+ * <h2>No preconditions</h2>
+ * The caster heals from everything the tide catches, from wherever they are standing.
+ * There is no "stand in the tide" gate - positioning was the old spell's precondition,
+ * and a spell whose effect only exists if you aim well is a spell that reads as broken.
+ * {@code mend_radius} therefore sizes the heal aura drawn around the caster rather than
+ * gating anything.
  *
- * <h2>The dedupe is the WINDOW, not {@code hasHit}</h2>
- * {@link AttackProperties#hasHit} is per-<em>cast</em>, which is the wrong scope for a field
- * that is <i>supposed</i> to re-hit the same body once a second. {@code hitThisWindow} is a
- * {@code Set<UUID>} cleared at the top of every window instead; {@code props.hit(le)} is still
- * called so one counter ends the whole tide. The damage branch is gated on
- * {@link SpellAttackContext#DAMAGE_INTERVAL_TICKS}, named rather than written as a literal
- * {@code 20}.
+ * <h2>The dedupe is the WINDOW clock, not a set</h2>
+ * Every body inside the radius is scanned on the same three-second cadence, so a set is
+ * unnecessary: a body that walks in is caught on the next window, and a body that stands
+ * there is caught on all twenty. {@code ctx.hit(le)} is still called - its return value is
+ * deliberately ignored - so one counter ends the whole tide, which is the point of having
+ * a per-cast {@code AttackProperties}.
  *
- * <h2>The heal is capped three ways, and is not a second {@code getPower}</h2>
- * By the caster's missing health, by the 20-tick cadence, and by
- * {@code power x ramp[i] x heal_ratio} <i>per window regardless of how many bodies were
- * drained</i> - so walking five mobs into the tide cannot turn the heal into a health
- * engine. It is derived from the damage values already produced in the same window; scaling
- * it again would be rule 1's exact failure mode.
+ * <h2>The heal is derived, never re-scaled</h2>
+ * {@link #mendCaster} spends the damage numbers {@link #tideOnce} already produced in the
+ * same window, at {@code heal_ratio}, capped at the caster's maximum health. Calling
+ * {@code getPower} a second time here would square both the option multipliers and the
+ * affinity term. A protected body never reaches the accumulator at all: the region gate is
+ * checked once, before anything else in the scan.
  *
  * <p>No {@code TerrainEditor}, no block write of any kind, no {@code SpellBlockComponent}:
  * a tide is a sphere of pressure, not a wall, so a barrier should not absorb it. The only
@@ -89,39 +94,14 @@ public class TideOfTheDeep extends AttackSpell {
 
     private static final ElementPalette.Palette PALETTE = ElementPalette.of(Element.WATER);
 
-    /** The outer ring: the tide's leading edge. */
-    private static final Particle.DustOptions SURGE_DUST = PALETTE.coreDust();
-    /** The middle ring, the tide's body. */
-    private static final Particle.DustOptions TIDE_DUST = PALETTE.accentDust();
-    /** The inner ring and the rising axis: the caster's own half of the effect. */
-    private static final Particle.DustOptions MENDER_DUST = PALETTE.deepDust();
-
-    /** Points on the outer ring. */
+    /** Points on the wave's leading edge. */
     private static final int OUTER_POINTS = 24;
-    /** Points on the middle ring. */
-    private static final int MIDDLE_POINTS = 16;
-    /** Points on the inner ring. */
-    private static final int INNER_POINTS = 10;
-    /** Points on the vertical axis climbing out of the tide. */
-    private static final int AXIS_POINTS = 12;
-    /** How high that axis climbs, in blocks. */
-    private static final double AXIS_HEIGHT = 4.0;
-    /** Splash cadence. */
-    private static final int SPLASH_EVERY = 4;
-    /** Bubble column cadence. */
-    private static final int BUBBLE_EVERY = 8;
-    /** The per-window punctuation: a burst of pops and a rising note. */
-    private static final int WINDOW_EVERY = (int) SpellAttackContext.DAMAGE_INTERVAL_TICKS;
-    /** The tide's smallest radius, as a fraction of the full radius, at the start of the ramp. */
-    private static final double RAMP_START = 0.35;
-
-    /**
-     * The ramp this tide climbs when the yml's is missing, empty, or contains a non-number.
-     * The ten values sum to 9.40, which is what holds the real total at 135.36 against a
-     * budget of 144.
-     */
-    private static final double[] DEFAULT_RAMP =
-            {0.40, 0.52, 0.64, 0.76, 0.88, 1.00, 1.12, 1.24, 1.36, 1.48};
+    /** Points inside the wave. */
+    private static final int FILL_POINTS = 16;
+    /** How tall the rolled-out wave reads against its own radius. */
+    private static final double HEIGHT_PER_RADIUS = 0.6;
+    /** The tide's whole life for a mob, who cannot afford the sixty-second player upkeep. */
+    private static final int MOB_LIFETIME_TICKS = 200;
 
     private double durationSeconds;
     private double tideRadius;
@@ -129,7 +109,9 @@ public class TideOfTheDeep extends AttackSpell {
     private double healRatio;
     private double pullStrength;
     private double lift;
-    private double[] ramp;
+    private int damageIntervalTicks;
+    private double mendRadius;
+    private double upkeepManaPerSecond;
 
     public TideOfTheDeep(String type) {
         super(type);
@@ -141,9 +123,10 @@ public class TideOfTheDeep extends AttackSpell {
 
     /**
      * Circle 9 shape, read inline. No {@code saveConfig} call and no config record: the tide's
-     * radius, duration and ramp <i>are</i> its budget, so there is no key that could be sold
+     * radius, duration and upkeep <i>are</i> its budget, so there is no key that could be sold
      * as an option without {@code SpellBudgetTest} asserting a number the player can
-     * invalidate from a menu.
+     * invalidate from a menu. This spell declares no {@code @EventHandler}, so it needs no
+     * self-registration.
      */
     @Override
     public void loadConfiguration() {
@@ -151,44 +134,29 @@ public class TideOfTheDeep extends AttackSpell {
         YamlConfiguration spellConfig = ConfigManager.getConfig("spells/tide_of_the_deep.yml").get();
         loadCommonConfig(spellConfig);
         loadOptions();
-        this.durationSeconds = spellConfig.getDouble("duration_seconds", 10.0);
+        this.durationSeconds = spellConfig.getDouble("duration_seconds", 60.0);
         this.tideRadius = spellConfig.getDouble("tide_radius", 8.0);
         this.targetRange = spellConfig.getDouble("target_range", 20.0);
         this.healRatio = spellConfig.getDouble("heal_ratio", 0.5);
         this.pullStrength = spellConfig.getDouble("pull_strength", 0.2);
         this.lift = spellConfig.getDouble("lift", 0.15);
-        this.ramp = doublesOf(spellConfig.get("tide_ramp"), DEFAULT_RAMP);
+        this.damageIntervalTicks = Math.max(1, spellConfig.getInt("damage_interval_ticks", 60));
+        this.mendRadius = spellConfig.getDouble("mend_radius", 8.0);
+        this.upkeepManaPerSecond = spellConfig.getDouble("upkeep_mana_per_second", 80.0);
     }
 
-    /** Falls back to {@code def} whenever the list is absent, empty, or holds a non-number. */
-    private static double[] doublesOf(Object raw, double[] def) {
-        if (!(raw instanceof List<?> list) || list.isEmpty()) return def;
-        double[] out = new double[list.size()];
-        for (int i = 0; i < list.size(); i++) {
-            if (!(list.get(i) instanceof Number n)) return def;
-            out[i] = n.doubleValue();
-        }
-        return out;
-    }
-
-    /** The tide's whole life, in ticks. {@code hit_count} must equal {@code durationSeconds}. */
+    /** The tide's whole life, in ticks. {@code hit_count} must equal the windows it opens. */
     private int lifetimeTicks() {
         return Math.max(1, (int) Math.round(durationSeconds * 20.0));
     }
 
     /**
-     * Damage windows the tide opens at the shared cadence - the yml's {@code hit_count}.
+     * Damage windows the tide opens at its own cadence - the yml's {@code hit_count}.
      * Enforced rather than merely documented, so raising {@code duration_seconds} in an
-     * admin's copy without raising {@code hit_count} cannot push the spell past 144.0.
+     * admin's copy without raising {@code hit_count} cannot push the spell past 280.0.
      */
     private int damageWindows() {
-        return Math.max(0, lifetimeTicks() / (int) SpellAttackContext.DAMAGE_INTERVAL_TICKS);
-    }
-
-    /** Index-safe ramp read - a short list clamps to its last entry rather than throwing. */
-    private double rampAt(int window) {
-        if (ramp.length == 0) return 1.0;
-        return ramp[Math.min(Math.max(window, 0), ramp.length - 1)];
+        return Math.max(0, lifetimeTicks() / damageIntervalTicks);
     }
 
     @Override
@@ -198,84 +166,128 @@ public class TideOfTheDeep extends AttackSpell {
         Location centre = Utils.resolveTarget(caster,
                 (int) getModifiedStat(caster, "target_range", targetRange));
 
-        raiseTide(centre, caster, wand, radius, getWandPower(wand, caster));
+        // ONE context per cast: twenty windows share a single set of AttackProperties, so one
+        // counter ends the whole tide. Created before the toggle because a cast that ends up
+        // owning nothing is the only path that never uses it.
+        SpellAttackContext ctx = SpellAttackContext.of(this, caster, wand, AttackType.MAGIC);
+        BossBar bar = Bukkit.createBossBar(getDisplayName(), BarColor.BLUE, BarStyle.SOLID);
+
+        SustainEffect.Toggle toggled = SustainEffect.toggle(caster, upkeepManaPerSecond, this,
+                (p, elapsedTicks) -> tideTick(p, centre, radius, wand, ctx, bar, elapsedTicks),
+                p -> bar.removeAll());
+
+        // All five circle-9 sustains share the one slot. A foreign owner means this cast changed
+        // nothing - the running tide is untouched and the bar built above was never shown - so
+        // the player is told why instead of being left to think the spell did nothing.
+        if (toggled == SustainEffect.Toggle.BLOCKED) {
+            // Blocked changed nothing, so Spell.cast must refund this cast and skip cooldown/mastery.
+            cancelCast(caster);
+            Utils.sendActionBar(caster, Alkatraz.getLangManager().get("spells.sustain.blocked"));
+            return;
+        }
+
+        if (toggled == SustainEffect.Toggle.CLOSED) {
+            // This cast took the tide back down. The bar built above was never shown to anyone.
+            // What Spell.cast charged was getModifiedManaCost(p), so that is what goes back:
+            // refunding the bare getCost() would mint mana for a caster with a mana_cost modifier.
+            StatUtils.addMana(caster, getModifiedManaCost(caster));
+            caster.getWorld().playSound(caster.getLocation(), Sound.ENTITY_DROWNED_SWIM, 1.0f, 0.5f);
+            ParticleCaster.spawn(caster, caster.getWorld(), Utils.SPLASH,
+                    caster.getLocation().add(0, 0.2, 0), 40, 0.8, 0.4, 0.8, 0);
+            return;
+        }
+
+        bar.addPlayer(caster);
+        centre.getWorld().playSound(centre, Sound.BLOCK_WATER_AMBIENT, 1.4f, 0.4f);
+        centre.getWorld().playSound(centre, Sound.ENTITY_ELDER_GUARDIAN_CURSE, 1.0f, 0.3f);
+    }
+
+    /**
+     * Every tick of the sustain. The wave is rolled out once on the opening tick; from then on
+     * the tide only bleeds on its own cadence and repaints the BossBar.
+     *
+     * @return false on the last tick, which ends the sustain
+     */
+    private boolean tideTick(Player caster, Location centre, double radius, ItemStack wand,
+                             SpellAttackContext ctx, BossBar bar, int elapsedTicks) {
+        if (ctx.isSpent()) return false;
+
+        // Redrawn every tick: a one-shot field vanishes after a second, so the tide would
+        // read as nothing for the other fifty-nine. Spin keeps it from reading as static.
+        SpellVfx.field(PALETTE.core(), caster, centre, radius, radius * HEIGHT_PER_RADIUS,
+                OUTER_POINTS, FILL_POINTS, elapsedTicks * 0.1);
+        if (elapsedTicks % damageIntervalTicks == 0
+                && elapsedTicks / damageIntervalTicks < damageWindows()) {
+            tideOnce(caster, centre, radius, wand, ctx);
+        }
+        bar.setProgress(manaBarProgress(caster));
+        return elapsedTicks + 1 < lifetimeTicks();
+    }
+
+    /**
+     * How much of the tide the caster's current purse can still pay for. Read from the first
+     * tick onward, so the bar is a mana clock rather than a duration clock - the tide can end
+     * long before its sixty seconds are up.
+     */
+    private double manaBarProgress(Player caster) {
+        MagicProfile profile = ProfileManager.getProfile(caster.getUniqueId(), MagicProfile.class);
+        if (profile == null || upkeepManaPerSecond <= 0.0) return 0.0;
+        double secondsLeft = profile.getMana() / upkeepManaPerSecond;
+        return Math.min(1.0, Math.max(0.0, secondsLeft / (lifetimeTicks() / 20.0)));
     }
 
     @Override
     public void mobCastAction(Mob caster, ItemStack wand) {
         if (caster.isDead() || caster.getTarget() == null) return;
-        // A mob's tide is narrower and centred on its target: the same mechanic, scaled.
-        raiseTide(caster.getTarget().getLocation(), caster, wand,
-                Math.min(tideRadius, 5.0), getWandPowerOrDefault(wand));
-    }
-
-    /**
-     * The tide, shared by both cast paths. ONE {@link AttackProperties} lives for the whole
-     * two-hundred-tick life, so a single counter ends it outright.
-     *
-     * @param centre    where the tide rises
-     * @param caster    the casting entity, and the only thing it heals
-     * @param wand      the casting wand, or null on a mob cast
-     * @param radius    the tide's radius in blocks
-     * @param wandPower the wand scaling factor, applied once when the properties are seeded
-     */
-    private void raiseTide(Location centre, LivingEntity caster, ItemStack wand,
-                           double radius, double wandPower) {
-        AttackProperties props = new AttackProperties(
-                caster, Utils.castLocation(caster), getBasePower() * wandPower, AttackType.MAGIC);
-
-        centre.getWorld().playSound(centre, Sound.BLOCK_WATER_AMBIENT, 1.4f, 0.4f);
-        centre.getWorld().playSound(centre, Sound.ENTITY_ELDER_GUARDIAN_CURSE, 1.0f, 0.3f);
+        // A mob's tide is narrower, shorter and centred on its target: the same mechanic,
+        // scaled. It cannot be a toggle - only a player holds mana.
+        double radius = Math.min(tideRadius, 5.0);
+        Location centre = caster.getTarget().getLocation();
+        SpellAttackContext ctx = SpellAttackContext.of(this, caster, wand, AttackType.MAGIC);
 
         new BukkitRunnable() {
             int ticks = 0;
-            int window = -1;
-            final Set<UUID> hitThisWindow = new HashSet<>();
 
             @Override
             public void run() {
-                if (props.isCancelled() || props.isCountered() || ticks >= lifetimeTicks()) {
-                    centre.getWorld().playSound(centre, Sound.ENTITY_DROWNED_SWIM, 1.0f, 0.5f);
+                if (caster.isDead() || !caster.isValid() || ticks >= MOB_LIFETIME_TICKS) {
                     cancel();
                     return;
                 }
-
-                drawTide(centre, caster, radius, ticks, window);
-
-                if (ticks % SpellAttackContext.DAMAGE_INTERVAL_TICKS == 0
-                        && ticks / SpellAttackContext.DAMAGE_INTERVAL_TICKS < damageWindows()) {
-                    hitThisWindow.clear();
-                    tideOnce(centre, caster, wand, radius, props, hitThisWindow, window);
-                    window++;
+                // Four windows at most, so a mob tide spends 56.0 of the circle-9 budget the
+                // player's twenty windows spend.
+                if (ticks % damageIntervalTicks == 0) {
+                    tideOnce(caster, centre, radius, wand, ctx);
                 }
+                SpellVfx.field(PALETTE.core(), caster, centre, radius, radius * HEIGHT_PER_RADIUS,
+                        OUTER_POINTS, FILL_POINTS, ticks * 0.1);
                 ticks++;
             }
         }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
     }
 
     /**
-     * One twenty-tick window: drown everything in the tide, then mend the caster if they are
-     * standing in it. This method and {@link #drawTide} are the only two places damage or
+     * One bleed window: drown everything in the tide, then mend the caster out of what was
+     * actually dealt. Together with {@link #mendCaster} this is the only place damage or
      * healing can originate.
-     *
-     * @param hitThisWindow cleared by the caller at the top of every window
-     * @param window        the zero-based index of this window, which selects the ramp entry
      */
-    private void tideOnce(Location centre, LivingEntity caster, ItemStack wand, double radius,
-                          AttackProperties props, Set<UUID> hitThisWindow, int window) {
-        double multiplier = rampAt(window);
+    private void tideOnce(LivingEntity caster, Location centre, double radius, ItemStack wand,
+                          SpellAttackContext ctx) {
+        ctx.tick();
         double drainedThisWindow = 0.0;
 
         for (LivingEntity le : Utils.getNearbyLivingEntities(centre, radius, radius, radius)) {
             if (le.equals(caster) || le.isDead() || !le.isValid()) continue;
-            if (!hitThisWindow.add(le.getUniqueId())) continue;
 
             // The region gate is checked ONCE, before anything at all. Without this a
             // protected body would still be counted into the caster's heal.
             if (!Protection.damage(le, caster, le.getLocation())) continue;
 
-            props.hit(le);
-            double damage = getPower(caster, le, props.getInitialPower() * multiplier);   // ONE getPower
+            // Records the per-cast counter so one hit still ends the tide; the return value is
+            // ignored on purpose - the window clock above, not this set, is the dedupe.
+            ctx.hit(le);
+
+            double damage = ctx.power(le);   // ONE getPower
             SpellDamageUtil.damageWithSpell(le, damage, caster, wand, this);
             drainedThisWindow += damage;
 
@@ -288,83 +300,29 @@ public class TideOfTheDeep extends AttackSpell {
                     le.getLocation().add(0, 0.3, 0), 10, 0.3, 0.4, 0.3, 0);
         }
 
-        // The tide heals the caster and nobody else, and only while they stand in it.
-        if (caster.getLocation().distanceSquared(centre) <= radius * radius) {
-            mendCaster(caster, drainedThisWindow, multiplier);
-            ParticleCaster.spawn(caster, caster.getWorld(), Utils.HEART,
-                    caster.getEyeLocation().add(0, 0.5, 0), 4, 0.3, 0.3, 0.3, 0);
-        }
+        ParticleCaster.spawn(caster, centre.getWorld(), Utils.SPLASH,
+                centre.clone().add(0, 0.2, 0), 20, radius, 0.2, radius, 0);
+        mendCaster(caster, drainedThisWindow);
     }
 
     /**
-     * The caster's half of the capstone. Capped at ONE window's worth of ramped power however
-     * many bodies were drained, and at the caster's maximum health - so the heal is a reward
-     * for standing in your own tide, not a health engine.
+     * The caster's half of the capstone, with no positional gate at all: whatever the window
+     * drained is theirs, capped only at {@code heal_ratio} of it and at their maximum health.
      *
      * <p>Derived from the damage already produced in this window, never re-scaled: calling
      * {@code getPower} a second time here would square both the option multipliers and the
-     * affinity term.
+     * affinity term. {@code mend_radius} sizes the aura drawn around them - it does not decide
+     * whether they heal.
      */
-    private void mendCaster(LivingEntity caster, double drainedThisWindow, double multiplier) {
-        double cap = getBasePower() * multiplier * healRatio;
-        double heal = Math.min(drainedThisWindow * healRatio, cap);
-        if (heal <= 0.0) return;
-
+    private void mendCaster(LivingEntity caster, double drainedThisWindow) {
+        if (drainedThisWindow <= 0.0) return;
         double maxHealth = Objects.requireNonNull(
                 caster.getAttribute(Attribute.GENERIC_MAX_HEALTH)).getValue();
         if (caster.getHealth() >= maxHealth) return;
-        caster.setHealth(Math.min(maxHealth, caster.getHealth() + heal));
-    }
 
-    /**
-     * One frame of the tide: three concentric rings widening across the life, an axis
-     * climbing out of the centre, and a per-window punctuation of spray, bubbles and a note
-     * that rises with the ramp. Particles and one sound only - this deals nothing.
-     *
-     * @param window the index of the current damage window, or -1 before the first one
-     */
-    private void drawTide(Location centre, LivingEntity caster, double radius, int ticks, int window) {
-        World world = centre.getWorld();
-        double progress = Math.min(1.0, (double) ticks / lifetimeTicks());
-        double ringRadius = radius * (RAMP_START + (1.0 - RAMP_START) * progress);
-
-        drawRing(world, caster, centre, ringRadius, OUTER_POINTS, ticks * 0.05, SURGE_DUST);
-        drawRing(world, caster, centre, ringRadius * 0.72, MIDDLE_POINTS, -ticks * 0.08, TIDE_DUST);
-        drawRing(world, caster, centre, ringRadius * 0.44, INNER_POINTS, ticks * 0.13, MENDER_DUST);
-
-        for (int i = 0; i < AXIS_POINTS; i++) {
-            double angle = ticks * 0.2 + 2.0 * Math.PI * i / AXIS_POINTS;
-            Location point = centre.clone().add(
-                    Math.cos(angle) * 0.4, AXIS_HEIGHT * i / (AXIS_POINTS - 1.0), Math.sin(angle) * 0.4);
-            ParticleCaster.spawn(caster, world, Utils.DUST, point, 0, TIDE_DUST);
-        }
-
-        if (ticks % SPLASH_EVERY == 0) {
-            ParticleCaster.spawn(caster, world, Utils.SPLASH,
-                    centre.clone().add(0, 0.2, 0), 20, ringRadius, 0.2, ringRadius, 0);
-        }
-        if (ticks % BUBBLE_EVERY == 0) {
-            ParticleCaster.spawn(caster, world, Utils.BUBBLE_COLUMN_UP, centre, 12,
-                    ringRadius, 0.4, ringRadius, 0);
-        }
-        if (ticks % WINDOW_EVERY == 0) {
-            ParticleCaster.spawn(caster, world, Utils.BUBBLE_POP,
-                    centre.clone().add(0, 1.5, 0), 24, ringRadius * 0.8, 0.3, ringRadius * 0.8, 0);
-            centre.getWorld().playSound(centre, Sound.ENTITY_ELDER_GUARDIAN_CURSE, 0.4f,
-                    (float) (0.3 + 0.03 * Math.max(0, window)));
-        }
-    }
-
-    private static void drawRing(World world, LivingEntity caster, Location centre, double ringRadius,
-                                 int points, double spin, Particle.DustOptions dust) {
-        for (int i = 0; i < points; i++) {
-            double angle = 2.0 * Math.PI * i / points + spin;
-            Location point = centre.clone().add(
-                    Math.cos(angle) * ringRadius,
-                    0.25 + Math.sin(spin + i) * 0.35,
-                    Math.sin(angle) * ringRadius);
-            ParticleCaster.spawn(caster, world, Utils.DUST, point, 0, dust);
-        }
+        caster.setHealth(Math.min(maxHealth, caster.getHealth() + drainedThisWindow * healRatio));
+        ParticleCaster.spawn(caster, caster.getWorld(), Utils.HEART,
+                caster.getEyeLocation().add(0, 0.5, 0), 8, mendRadius, 0.5, mendRadius, 0);
     }
 
     @Override

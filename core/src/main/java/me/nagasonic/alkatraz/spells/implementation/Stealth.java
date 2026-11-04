@@ -83,6 +83,7 @@ public class Stealth extends Spell implements Listener {
     public void castAction(Player p, ItemStack wand) {
         if (!p.isDead()) {
             MagicProfile data = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
+            if (data == null) return;
             if (data.isStealth()){
                 data.setStealth(false);
                 StatUtils.addMana(p, getCost()); //Give cost to reverse canceling
@@ -98,6 +99,7 @@ public class Stealth extends Spell implements Listener {
                 for (Player player : Bukkit.getOnlinePlayers()){
                     if (player != p){
                         MagicProfile td = ProfileManager.getProfile(player.getUniqueId(), MagicProfile.class);
+                        if (td == null) continue;
                         if (td.getCircleLevel() < data.getCircleLevel()){
                             Alkatraz.getNms().setInvisible(p, true);
                             if (armorInvis){
@@ -296,6 +298,7 @@ public class Stealth extends Spell implements Listener {
         for (Player player : world.getPlayers()) {
             if (player == p) continue;
             MagicProfile td = ProfileManager.getProfile(player.getUniqueId(), MagicProfile.class);
+            if (td == null) continue;
             if (td.getCircleLevel() <= data.getCircleLevel()) {
                 ParticleCaster.spawnForPlayer(player, world, Utils.ASH, p.getLocation(), td.getCircleLevel() - data.getCircleLevel() + 11);
             }
@@ -306,6 +309,7 @@ public class Stealth extends Spell implements Listener {
     private void onInventoryClick(InventoryClickEvent e){
         Player p = (Player) e.getWhoClicked();
         MagicProfile data = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
+        if (data == null) return;
         if (data.isStealth()){
             boolean armorInvis = (boolean) getOption("armor_invis").getSelectedValue(p).getValue();
             for (Player player : Bukkit.getOnlinePlayers()){
@@ -322,10 +326,12 @@ public class Stealth extends Spell implements Listener {
         for (Player caster : Bukkit.getOnlinePlayers()) {
             if (caster != null){
                 MagicProfile td = ProfileManager.getProfile(caster.getUniqueId(), MagicProfile.class);
+                if (td == null) continue;
                 if (td.isStealth()){
                     EffectApplicator.applyConcealment(caster, this, EffectApplicator.stealthHandle());
                     boolean armorInvis = (boolean) getOption("armor_invis").getSelectedValue(caster).getValue();
                     MagicProfile data = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
+                    if (data == null) continue;
                     if (p != caster){
                         if (td.getCircleLevel() < data.getCircleLevel()){
                             Alkatraz.getNms().setInvisible(caster, true);
@@ -356,15 +362,13 @@ public class Stealth extends Spell implements Listener {
         Player player = e.getPlayer();
         stop(player);
         MagicProfile data = ProfileManager.getProfile(player.getUniqueId(), MagicProfile.class);
-        if (data.isStealth()){
-            data.setStealth(false);
-            Alkatraz.getNms().setInvisible(player, false);
-            Alkatraz.getNms().fakeArmor(player, player, player.getInventory().getHelmet(), player.getInventory().getChestplate(), player.getInventory().getLeggings(), player.getInventory().getBoots());
-            Alkatraz.getNms().setTransparent(player, player, false);
-            unstampConcealment(player);
-        }
+        if (data == null || !data.isStealth()) return;
+        data.setStealth(false);
+        Alkatraz.getNms().setInvisible(player, false);
+        Alkatraz.getNms().fakeArmor(player, player, player.getInventory().getHelmet(), player.getInventory().getChestplate(), player.getInventory().getLeggings(), player.getInventory().getBoots());
+        Alkatraz.getNms().setTransparent(player, player, false);
+        unstampConcealment(player);
     }
-
     private static final double TRAIL_RANGE_SQ = 64.0;
     private static final Particle.DustOptions TRAIL_DUST = PALETTE.deepDust();
 
@@ -372,7 +376,7 @@ public class Stealth extends Spell implements Listener {
     private void onWalk(PlayerMoveEvent e){
         Player mover = e.getPlayer();
         MagicProfile data = ProfileManager.getProfile(mover.getUniqueId(), MagicProfile.class);
-        if (!data.isStealth()) return;
+        if (data == null || !data.isStealth()) return;
 
         Location to = e.getTo();
         Location from = e.getFrom();
@@ -397,6 +401,7 @@ public class Stealth extends Spell implements Listener {
             double dz = oLoc.getZ() - bz;
             if (dx * dx + dy * dy + dz * dz > TRAIL_RANGE_SQ) continue;
             MagicProfile odata = ProfileManager.getProfile(other.getUniqueId(), MagicProfile.class);
+            if (odata == null) continue;
             if (odata.getCircleLevel() >= data.getCircleLevel()) {
                 ParticleCaster.spawnForPlayer(other, world, Utils.DUST, base, 5, TRAIL_DUST);
             }

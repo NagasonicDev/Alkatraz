@@ -35,6 +35,10 @@ public final class EquipmentSlot implements Keyed {
     /** A custom virtual pendant slot. */
     public static final EquipmentSlot PENDANT = of("pendant");
 
+    private static final java.util.Set<String> RESERVED_SLOT_PATHS = java.util.Set.of(
+            "main_hand", "off_hand", "head", "chest", "legs", "feet", "body",
+            "ring", "necklace", "bracelet", "pendant");
+    private static volatile boolean EQUIPMENT_SLOT_INITIALIZED = false;
     private final NamespacedKey key;
     private final org.bukkit.inventory.EquipmentSlot vanillaSlot;
 
@@ -50,6 +54,10 @@ public final class EquipmentSlot implements Keyed {
      * @return a new virtual {@link EquipmentSlot}
      */
     public static EquipmentSlot of(String path) {
+        if (EQUIPMENT_SLOT_INITIALIZED && path != null
+                && RESERVED_SLOT_PATHS.contains(path.trim().toLowerCase(java.util.Locale.ROOT))) {
+            throw new IllegalArgumentException("Reserved equipment slot path: " + path);
+        }
         return new EquipmentSlot(MagicKeys.alkatraz(path), null);
     }
 
@@ -88,5 +96,9 @@ public final class EquipmentSlot implements Keyed {
      */
     public boolean isVirtual() {
         return vanillaSlot == null;
+    }
+
+    static {
+        EQUIPMENT_SLOT_INITIALIZED = true;
     }
 }

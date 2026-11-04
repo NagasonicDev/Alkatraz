@@ -5,29 +5,29 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Pure, Bukkit-free scaling configuration for Arcane Resonance.
+ * Pure, Bukkit-free tuning configuration for Arcane Resonance.
  *
  * <p>Parsed from the spell's YAML by {@link ArcaneResonance} and consumed by both the in-game logic
  * and the unit tests.
  *
- * <h2>The three caps are the spell</h2>
- * An amplified cast lands twice at {@link #powerMultiplier()} each, so this is a real 2.4x on up to
- * {@link #chargeCount()} casts. Without {@code charge_count} it would be a permanent damage button;
- * without {@link #chargeExpirySeconds()} a charge could be banked across a whole fight; without the
- * unstackable guard in {@code castAction} it would compound. All three are server-authority knobs,
- * which is why this spell ships no options file at all.
+ * <h2>The caps are the spell</h2>
+ * An amplified cast lands twice at {@link #powerMultiplier()} each, so this is a real 2.5x on every
+ * cast made while the sustain is live. Without {@code charge_count} the four charges would be an
+ * unbounded damage button; without {@link #duplicateDelayTicks()} the twin would land on the same
+ * tick and collide with the original's hit set; without {@link #duplicateSkipIds()} copying a
+ * sustain would toggle it straight back off. All of them are server-authority knobs, which is why
+ * this spell ships no options file at all.
  */
 public record ArcaneResonanceConfig(
         int chargeCount,
         double powerMultiplier,
-        double chargeExpirySeconds,
-        List<String> skipIds) {
-
-    /** Ticks per second; the yml declares the expiry in seconds and the timer wants ticks. */
-    private static final double TICKS_PER_SECOND = 20.0;
+        int duplicateDelayTicks,
+        double upkeepManaPerSecond,
+        List<String> skipIds,
+        List<String> duplicateSkipIds) {
 
     /**
-     * Spells that are never amplified and never burn a charge.
+     * Spells that are never amplified.
      *
      * <p>{@code arcane_resonance} is self-amplification, which would compound without bound.
      * {@code echo_cast} re-fires other spells, so amplifying it would double an already-multiplied
@@ -36,17 +36,36 @@ public record ArcaneResonanceConfig(
      */
     public static final List<String> DEFAULT_SKIP_IDS = List.of("arcane_resonance", "echo_cast", "warp");
 
+    /**
+     * Spells the sustain never copies.
+     *
+     * <p>A DIFFERENT question from {@link #DEFAULT_SKIP_IDS}: the skip list decides whether a
+     * spell is amplified, this one decides whether it is fired a second time. The five circle-9
+     * sustains are here because a duplicated toggle cast would end the sustain on the same tick
+     * it amplified something, and the two terrain spells because a second cast spends their block
+     * budget twice.
+     */
+    public static final List<String> DEFAULT_DUPLICATE_SKIP_IDS = List.of(
+            "arcane_resonance", "skywrath", "tide_of_the_deep", "crown_of_dawn", "oblivion",
+            "worldbreaker", "inferno_rite");
+
     public ArcaneResonanceConfig {
         skipIds = skipIds == null || skipIds.isEmpty() ? DEFAULT_SKIP_IDS : List.copyOf(skipIds);
+        duplicateSkipIds = duplicateSkipIds == null || duplicateSkipIds.isEmpty()
+                ? DEFAULT_DUPLICATE_SKIP_IDS : List.copyOf(duplicateSkipIds);
     }
 
     public static ArcaneResonanceConfig fromConfig(Map<String, Object> map) {
         if (map == null) map = Map.of();
         return new ArcaneResonanceConfig(
-                intOf(map.get("charge_count"), 3),
-                doubleOf(map.get("power_multiplier"), 1.2),
-                doubleOf(map.get("charge_expiry_seconds"), 20.0),
-                stringsOf(map.get("skip_ids"), DEFAULT_SKIP_IDS));
+                intOf(map.get("charge_count"), 4),
+                doubleOf(map.get("power_multiplier"), 1.25),
+                // A zero here would put the twin on the same tick as the original, colliding with
+                // its SpellParticleComponent registrations and AttackProperties hit set.
+                Math.max(1, intOf(map.get("duplicate_delay_ticks"), 10)),
+                Math.max(0.0, doubleOf(map.get("upkeep_mana_per_second"), 55.0)),
+                stringsOf(map.get("skip_ids"), DEFAULT_SKIP_IDS),
+                stringsOf(map.get("duplicate_skip_ids"), DEFAULT_DUPLICATE_SKIP_IDS));
     }
 
     private static int intOf(Object o, int def) {
@@ -68,18 +87,18 @@ public record ArcaneResonanceConfig(
         return def;
     }
 
-    /** Whether a spell id is skipped: never amplified, and casting it never burns a charge. */
+    /** Whether a spell id is amplified while the sustain is live. */
     public boolean isSkipped(String spellId) {
         return spellId != null && skipIds.contains(spellId);
     }
 
     /**
-     * The unused-charge timer, in ticks.
+     * Whether a spell id may be fired a second time by the sustain.
      *
-     * <p>Floored at one: {@code runTaskLater(..., 0)} fires on the current tick, which would clear
-     * the charge before the caster could ever spend it.
+     * <p>Inverse of {@link #duplicateSkipIds}, so a null id is not duplicable rather than an NPE -
+     * {@link List#contains} on an immutable list rejects null.
      */
-    public int expiryTicks() {
-        return Math.max(1, (int) Math.round(chargeExpirySeconds * TICKS_PER_SECOND));
+    public boolean isDuplicable(String spellId) {
+        return spellId != null && !duplicateSkipIds.contains(spellId);
     }
 }

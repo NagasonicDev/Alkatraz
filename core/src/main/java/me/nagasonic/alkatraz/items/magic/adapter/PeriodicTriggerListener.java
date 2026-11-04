@@ -2,6 +2,7 @@ package me.nagasonic.alkatraz.items.magic.adapter;
 
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
+import me.nagasonic.alkatraz.items.magic.equipment.EquipmentReconcileTask;
 import me.nagasonic.alkatraz.items.magic.trigger.TriggerDispatch;
 import me.nagasonic.alkatraz.items.magic.trigger.TriggerPipeline;
 import me.nagasonic.alkatraz.items.magic.trigger.WorldTimeTracker;
@@ -10,6 +11,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,14 +41,27 @@ public final class PeriodicTriggerListener {
         return KEY_CACHE.computeIfAbsent(path, MagicKeys::alkatraz).getKey();
     }
 
+    private static BukkitTask periodicTask;
+
     /** Starts the repeating sweep that powers this listener. */
     public void start() {
-        new BukkitRunnable() {
+        if (periodicTask != null) {
+            periodicTask.cancel();
+            periodicTask = null;
+        }
+        periodicTask = new BukkitRunnable() {
             @Override
             public void run() {
                 PeriodicTriggerListener.this.tick();
             }
         }.runTaskTimer(Alkatraz.getInstance(), INTERVAL_TICKS, INTERVAL_TICKS);
+    }
+
+    /** Cancels the repeating sweep. */
+    public static void stop() {
+        BukkitTask current = periodicTask;
+        periodicTask = null;
+        if (current != null) current.cancel();
     }
 
     void tick() {
@@ -65,12 +80,14 @@ public final class PeriodicTriggerListener {
             params.put("world", world.getName());
             params.put("is_night", transition.equals(triggerKey("on_night")));
             for (Player player : world.getPlayers()) {
+                if (!EquipmentReconcileTask.wearsMagicItem(player)) continue;
                 TriggerDispatch.dispatch(player, transition, params);
             }
         }
 
         if (!intervalBound) return;
         for (Player player : Bukkit.getOnlinePlayers()) {
+            if (!EquipmentReconcileTask.wearsMagicItem(player)) continue;
             TriggerDispatch.dispatch(player, interval);
         }
     }

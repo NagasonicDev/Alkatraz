@@ -31,7 +31,7 @@ public class CircleUpConfirmationMenu extends Menu {
     private static final int SLOT_CANCEL = 15;
 
     public CircleUpConfirmationMenu(Player viewer, int targetCircle) {
-        super(viewer, lang().get("menu.circle_up_confirm"), 27);
+        super(viewer, packTitle("circle_confirm", lang().get("menu.circle_up_confirm")), 27);
         this.targetCircle = targetCircle;
     }
 
@@ -64,12 +64,14 @@ public class CircleUpConfirmationMenu extends Menu {
         inventory.setItem(SLOT_CONFIRM, ItemBuilder.of(Material.LIME_CONCRETE)
                 .name(lang().get("circleup.confirm_yes"))
                 .lore(lang().get("circleup.confirm_lore", "ordinal", StringUtils.toOrdinal(targetCircle)))
+                .guiModel("confirm_button")
                 .build());
 
         setMenuData(inventory.getItem(SLOT_CONFIRM), "action", "confirm");
 
         inventory.setItem(SLOT_CANCEL, ItemBuilder.of(Material.RED_CONCRETE)
                 .name(lang().get("circleup.confirm_no"))
+                .guiModel("cancel_button")
                 .build());
 
         setMenuData(inventory.getItem(SLOT_CANCEL), "action", "cancel");

@@ -5,11 +5,11 @@ import me.nagasonic.alkatraz.texturepack.TexturePackManager;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class GUIItemRegistry {
-    private static final Map<String, ItemStack> itemCache = new HashMap<>();
+    private static final Map<String, ItemStack> itemCache = new ConcurrentHashMap<>();
     
     // Initialize the registry
     public static void init() {

@@ -1,4 +1,5 @@
 package me.nagasonic.alkatraz.mobs;
+import java.util.concurrent.ConcurrentHashMap;
 
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.api.ai.task.TaskBrain;
@@ -27,7 +28,7 @@ import java.util.Map;
  */
 public final class MagicBrains {
 
-    private static final Map<String, GoalBrain> brainCache = new HashMap<>();
+    private static final Map<String, GoalBrain> brainCache = new ConcurrentHashMap<>();
     private static final Map<String, String> displayNameCache = new HashMap<>();
     private static final Map<String, Double> meleeRangeCache = new HashMap<>();
     private static final Map<String, String> wandCache = new HashMap<>();

@@ -95,11 +95,13 @@ public final class MagicEntities {
     }
 
     public static List<Spell> getSpells(LivingEntity entity) {
-        List<Spell> cached = SPELL_CACHE.get(entity);
-        if (cached != null) return cached;
-        List<Spell> resolved = resolveSpells(entity);
-        SPELL_CACHE.put(entity, resolved);
-        return resolved;
+        synchronized (SPELL_CACHE) {
+            List<Spell> cached = SPELL_CACHE.get(entity);
+            if (cached != null) return cached;
+            List<Spell> resolved = resolveSpells(entity);
+            SPELL_CACHE.put(entity, resolved);
+            return resolved;
+        }
     }
 
     private static List<Spell> resolveSpells(LivingEntity entity) {

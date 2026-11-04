@@ -12,6 +12,7 @@ import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
+import me.nagasonic.alkatraz.spells.util.TeleportSafety;
 import me.nagasonic.alkatraz.spells.vfx.CastCircle;
 import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
 import me.nagasonic.alkatraz.util.ParticleCaster;
@@ -137,6 +138,12 @@ public class WaystoneRecall extends Spell {
 
         MagicProfile.WarpPoint point = destination.point();
         Location dest = destination.location();
+
+        if (!TeleportSafety.isSafePlayerDestination(dest)) {
+            Utils.sendActionBar(caster, lang().get("spells.waystonerecall.blocked"));
+            cancelCast(caster);
+            return;
+        }
 
         // Captured before the move. ParticleCaster scopes visibility off the caster's position at
         // dispatch time, so the collapse puff has to be placed on the origin explicitly - reading

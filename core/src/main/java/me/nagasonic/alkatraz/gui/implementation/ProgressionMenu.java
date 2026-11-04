@@ -30,7 +30,7 @@ public class ProgressionMenu extends Menu {
     }
 
     public ProgressionMenu(Player viewer) {
-        super(viewer, lang().get("menu.progression"), 27);
+        super(viewer, packTitle("progression", lang().get("menu.progression")), 27);
     }
 
     @Override
@@ -57,6 +57,7 @@ public class ProgressionMenu extends Menu {
 
         inventory.setItem(22, ItemBuilder.of(Material.BARRIER)
                 .name(lang().get("common.back_white"))
+                .guiModel("back_button")
                 .build());
 
         setMenuData(inventory.getItem(22), "action", "back");
@@ -87,19 +88,23 @@ public class ProgressionMenu extends Menu {
         boolean isNext = circle == currentCircle + 1;
 
         Material material;
+        String guiModel;
         String color;
         String statusText;
 
         if (completed) {
             material = Material.LIME_STAINED_GLASS_PANE;
+            guiModel = "circle_completed";
             color = "&a";
             statusText = lang().get("progression.status_completed");
         } else if (isNext) {
             material = Material.YELLOW_STAINED_GLASS_PANE;
+            guiModel = "circle_next";
             color = "&e";
             statusText = lang().get("progression.status_working");
         } else {
             material = Material.RED_STAINED_GLASS_PANE;
+            guiModel = "circle_locked";
             color = "&c";
             statusText = lang().get("progression.status_locked");
         }
@@ -148,6 +153,7 @@ public class ProgressionMenu extends Menu {
 
         ItemStack item = ItemBuilder.of(material)
                 .name(ColorFormat.format(color + lang().get("progression.circle_name", "circle", StringUtils.toRoman(circle))))
+                .guiModel(guiModel)
                 .rawLore(lore)
                 .build();
 

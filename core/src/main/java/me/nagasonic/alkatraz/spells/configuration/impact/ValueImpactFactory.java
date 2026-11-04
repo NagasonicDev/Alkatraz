@@ -1,4 +1,5 @@
 package me.nagasonic.alkatraz.spells.configuration.impact;
+import java.util.concurrent.ConcurrentHashMap;
 
 import me.nagasonic.alkatraz.api.configuration.impact.Impact;
 import me.nagasonic.alkatraz.configuration.impact.ImpactFactory;
@@ -37,7 +38,7 @@ public final class ValueImpactFactory {
         ValueImpact build(Spell spell, ConfigurationSection section);
     }
 
-    private static final Map<String, Builder> REGISTRY = new HashMap<>();
+    private static final Map<String, Builder> REGISTRY = new ConcurrentHashMap<>();
 
     // ── Built-in registrations ────────────────────────────────────────────────
     static {

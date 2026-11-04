@@ -1,0 +1,286 @@
+package me.nagasonic.alkatraz.nms_v26_R3;
+import me.nagasonic.alkatraz.nms.NMS;
+import me.nagasonic.alkatraz.nms_v26_R3.entity.AiSpecRegistration;
+import me.nagasonic.alkatraz.nms_v26_R3.entity.GoalBridge;
+import me.nagasonic.alkatraz.nms_v26_R3.entity.NmsMobBrainContext;
+
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
+import com.mojang.datafixers.util.Pair;
+import java.lang.reflect.Field;
+import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.commands.CastCommand;
+import me.nagasonic.alkatraz.nms_v26_R3.entity.MagicEntitySpawner;
+import me.nagasonic.alkatraz.util.Skin;
+import me.nagasonic.alkatraz.gui.grimoire.GrimoireLecternState;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.*;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.PositionMoveRotation;
+import net.minecraft.world.entity.Relative;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.goal.GoalSelector;
+import net.minecraft.world.inventory.LecternMenu;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.inventory.SimpleContainerData;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
+import org.bukkit.Location;
+import org.bukkit.craftbukkit.entity.CraftEntity;
+import org.bukkit.craftbukkit.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
+import org.bukkit.craftbukkit.inventory.CraftItemStack;
+import org.bukkit.entity.*;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
+
+import java.util.*;
+
+public final class NMS_v26_R3 implements NMS {
+
+    @Override
+    public void setInvisible(org.bukkit.entity.Entity target, boolean invis) {
+        if (!(target instanceof LivingEntity livingTarget)) return;
+
+        if (invis) {
+            livingTarget.addPotionEffect(new PotionEffect(
+                    PotionEffectType.INVISIBILITY,
+                    Integer.MAX_VALUE,
+                    1,
+                    false,
+                    false,
+                    false
+            ));
+        } else {
+            livingTarget.removePotionEffect(PotionEffectType.INVISIBILITY);
+        }
+    }
+
+    @Override
+    public void setTransparent(org.bukkit.entity.Entity e, Player target, boolean trans) {
+        if (!(e instanceof Player entityPlayer)) return;
+
+        Scoreboard scoreboard = target.getScoreboard();
+        Team team = scoreboard.getTeam(e.getUniqueId() + "_stealth");
+
+        if (team == null) {
+            team = scoreboard.registerNewTeam(e.getUniqueId() + "_stealth");
+            team.setCanSeeFriendlyInvisibles(true);
+        }
+
+        if (trans) {
+            team.addEntry(target.getName());
+            team.addEntry(entityPlayer.getName());
+        } else {
+            if (team.hasEntry(target.getName())) team.removeEntry(target.getName());
+            if (team.hasEntry(entityPlayer.getName())) team.removeEntry(entityPlayer.getName());
+        }
+    }
+
+    @Override
+    public void fakeArmor(HumanEntity e, Player target, org.bukkit.inventory.ItemStack helmet, org.bukkit.inventory.ItemStack chest, org.bukkit.inventory.ItemStack legs, org.bukkit.inventory.ItemStack boots) {
+        Entity nmsEntity = ((CraftEntity) e).getHandle();
+        ServerPlayer viewer = ((CraftPlayer) target).getHandle();
+
+        List<Pair<EquipmentSlot, ItemStack>> equipmentList = new ArrayList<>();
+        java.util.function.Function<org.bukkit.inventory.ItemStack, ItemStack> toNms =
+                (item) -> item != null ? org.bukkit.craftbukkit.inventory.CraftItemStack.asNMSCopy(item) : ItemStack.EMPTY;
+        equipmentList.add(new Pair<>(EquipmentSlot.HEAD, toNms.apply(helmet)));
+        equipmentList.add(new Pair<>(EquipmentSlot.CHEST, toNms.apply(chest)));
+        equipmentList.add(new Pair<>(EquipmentSlot.LEGS, toNms.apply(legs)));
+        equipmentList.add(new Pair<>(EquipmentSlot.FEET, toNms.apply(boots)));
+
+        ClientboundSetEquipmentPacket packet =
+                new ClientboundSetEquipmentPacket(nmsEntity.getId(), equipmentList);
+
+        viewer.connection.send(packet);
+    }
+
+    @Override
+    public void fakeExp(Player player, float progress, int level, int totalExp) {
+        ServerPlayer nmsPlayer = ((CraftPlayer) player).getHandle();
+
+        ClientboundSetExperiencePacket packet = new ClientboundSetExperiencePacket(progress, totalExp, level);
+        nmsPlayer.connection.send(packet);
+    }
+
+    @Override
+    public void changeSkin(Player player, List<Player> viewers, Skin skin) {
+        changeSkinElse(player, viewers, skin);
+        refresh(player);
+    }
+
+    @Override
+    public void changeSkinElse(Player player, List<Player> viewers, Skin skin) {
+        ServerPlayer nmsPlayer = ((CraftPlayer) player).getHandle();
+        GameProfile profile = nmsPlayer.getGameProfile();
+        profile.properties().removeAll("textures");
+        profile.properties().put("textures", new Property("textures", skin.getTexture(), skin.getSignature()));
+        for (Player other : viewers){
+            if (other != player){
+                hideAndShow(other, player);
+            }
+        }
+    }
+
+@Override
+    public void registerMagicEntities() {
+        AiSpecRegistration.registerAll();
+    }
+
+    @Override
+    public Optional<org.bukkit.entity.Entity> spawnMagicEntity(String key, Location location) {
+        return MagicEntitySpawner.INSTANCE.spawnMagicEntity(key, location);
+    }
+
+    @Override
+    public Object unwrapMob(org.bukkit.entity.LivingEntity entity) {
+        return ((CraftLivingEntity) entity).getHandle();
+    }
+
+    @Override
+    public void wipeGoals(Object nativeMob) {
+        Mob mob = (Mob) nativeMob;
+        goalSelector(mob).removeAllGoals(g -> true);
+        targetSelector(mob).removeAllGoals(g -> true);
+    }
+
+    @Override
+    public void addGoal(Object nativeMob, Object nativeGoal, int priority, boolean target) {
+        Mob mob = (Mob) nativeMob;
+        Goal goal = (Goal) nativeGoal;
+        if (target) targetSelector(mob).addGoal(priority, goal);
+        else goalSelector(mob).addGoal(priority, goal);
+    }
+
+    private static GoalSelector goalSelector(Mob mob) {
+        return (GoalSelector) accessField(mob, "goalSelector");
+    }
+
+    private static GoalSelector targetSelector(Mob mob) {
+        return (GoalSelector) accessField(mob, "targetSelector");
+    }
+
+    private static Object accessField(Mob mob, String name) {
+        try {
+            Field field = Mob.class.getDeclaredField(name);
+            field.setAccessible(true);
+            return field.get(mob);
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException("Cannot access Mob." + name, e);
+        }
+    }
+
+    @Override
+    public Object bridgeCustomGoal(Object nativeMob, me.nagasonic.alkatraz.api.mobs.Goal apiGoal) {
+        Mob mob = (Mob) nativeMob;
+        return new GoalBridge(apiGoal, new NmsMobBrainContext(mob));
+    }
+
+    public void refresh(Player player) {
+        ServerPlayer nmsPlayer = ((CraftPlayer) player).getHandle();
+        resendInfoPackets(player, player);
+        CommonPlayerSpawnInfo info = nmsPlayer.createCommonSpawnInfo(nmsPlayer.level());
+        nmsPlayer.connection.send(new ClientboundRespawnPacket(info, ClientboundRespawnPacket.KEEP_ALL_DATA));
+        Location l = player.getLocation();
+        Vec3 posVec = new Vec3(l.getX(), l.getY(), l.getZ());
+        Vec3 feetVec = new Vec3(l.getX(), l.getY(), l.getZ());
+        PositionMoveRotation posRot = new PositionMoveRotation(posVec, feetVec, l.getYaw(), l.getPitch());
+        Set<Relative> relative = EnumSet.noneOf(Relative.class);
+        int teleportId = nmsPlayer.level().getServer().getTickCount();
+        ClientboundPlayerPositionPacket pos = new ClientboundPlayerPositionPacket(teleportId, posRot, relative);
+        nmsPlayer.connection.send(pos);
+        nmsPlayer.connection.send(new ClientboundSetHeldSlotPacket(player.getInventory().getHeldItemSlot()));
+        ((CraftPlayer) player).updateScaledHealth();
+        player.updateInventory();
+    }
+
+    public void resendInfoPackets(Player toResend, Player toSendTo) {
+        ServerPlayer nmsPlayer = ((CraftPlayer) toResend).getHandle();
+        ServerPlayer nmsViewer = ((CraftPlayer) toSendTo).getHandle();
+        ClientboundPlayerInfoRemovePacket removePacket = new ClientboundPlayerInfoRemovePacket(Collections.singletonList(nmsPlayer.getUUID()));
+        ClientboundPlayerInfoUpdatePacket addPacket = new ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER, nmsPlayer);
+        nmsViewer.connection.send(removePacket);
+        nmsViewer.connection.send(addPacket);
+    }
+
+    @SuppressWarnings("deprecation")
+    private void hideAndShow(Player player, Player other) {
+        try {
+            player.hidePlayer(Alkatraz.getInstance(), other);
+        } catch (NoSuchMethodError ignored) {
+            player.hidePlayer(other);
+        }
+
+        try {
+            player.showPlayer(Alkatraz.getInstance(), other);
+        } catch (NoSuchMethodError ignored) {
+            player.showPlayer(other);
+        }
+    }
+
+    @Override
+    public boolean openGrimoireLectern(Player player, org.bukkit.inventory.ItemStack writtenBook, String title,
+                                       int startPage, int totalPages, java.util.function.Consumer<Integer> onPageChange) {
+        try {
+            ServerPlayer sp = ((CraftPlayer) player).getHandle();
+
+            SimpleContainer lecternContainer = new SimpleContainer(1);
+            lecternContainer.setItem(0, CraftItemStack.asNMSCopy(writtenBook));
+
+            SimpleContainerData pageData = new SimpleContainerData(1);
+            pageData.set(0, startPage);
+
+            int containerId = sp.containerMenu.containerId;
+            final int pages = totalPages;
+            final Player bkPlayer = player;
+
+            LecternMenu menu = new LecternMenu(containerId, lecternContainer, pageData, sp.getInventory()) {
+                private int trackedPage = startPage;
+
+                @Override
+                public boolean clickMenuButton(net.minecraft.world.entity.player.Player nmsPlayer, int buttonId) {
+                    if (buttonId == 0) {
+                        CastCommand.castFromGrimoire(bkPlayer);
+                        bkPlayer.closeInventory();
+                        return true;
+                    }
+                    if (buttonId == 3) {
+                        CastCommand.castFromGrimoire(bkPlayer);
+                        bkPlayer.closeInventory();
+                        return true;
+                    }
+                    boolean result = super.clickMenuButton(nmsPlayer, buttonId);
+                    if (result) {
+                        if (buttonId == 1) trackedPage = Math.max(0, trackedPage - 1);
+                        else if (buttonId == 2) trackedPage = Math.min(pages - 1, trackedPage + 1);
+                        else if (buttonId >= 100) trackedPage = Math.min(pages - 1, buttonId - 100);
+                        onPageChange.accept(trackedPage);
+                    }
+                    return result;
+                }
+            };
+            menu.checkReachable = false;
+
+            sp.containerMenu = menu;
+            sp.connection.send(new ClientboundOpenScreenPacket(containerId, MenuType.LECTERN, Component.literal(title)));
+            menu.sendAllDataToRemote();
+
+            return true;
+        } catch (Exception e) {
+            Alkatraz.logWarning("Failed to open fake lectern: " + e.getMessage());
+            return false;
+        }
+    }
+
+    @Override
+    public void onEnable() {
+        NMS.super.onEnable();
+    }
+}

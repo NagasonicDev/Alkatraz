@@ -52,6 +52,7 @@ public final class SpellDamageUtil {
 
         // Respect region PvP / mob-damage flags before dealing damage
         if (!Protection.damage(target, caster, target.getLocation())) {
+            CastEventListener.clearSpellDamage(target);
             return;
         }
 

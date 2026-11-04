@@ -38,12 +38,10 @@ public final class EquipmentStorage {
     }
 
     public static Optional<ItemStack> getItem(UUID uuid, EquipmentSlot slot) {
-        Map<String, ItemStack> playerItems = cache.get(uuid);
-        if (playerItems == null) {
-            playerItems = load(uuid);
-            cache.put(uuid, playerItems);
-        }
-        return Optional.ofNullable(playerItems.get(slot.getKey().getKey()));
+        Map<String, ItemStack> playerItems = loaded(uuid);
+        if (playerItems == null) return Optional.empty();
+        ItemStack found = playerItems.get(slot.getKey().getKey());
+        return Optional.ofNullable(found == null ? null : found.clone());
     }
 
     /** Null-returning variant of {@link #getItem(Player, EquipmentSlot)} that avoids an Optional allocation. */
@@ -52,12 +50,10 @@ public final class EquipmentStorage {
     }
 
     public static ItemStack getItemOrNull(UUID uuid, EquipmentSlot slot) {
-        Map<String, ItemStack> playerItems = cache.get(uuid);
-        if (playerItems == null) {
-            playerItems = load(uuid);
-            cache.put(uuid, playerItems);
-        }
-        return playerItems.get(slot.getKey().getKey());
+        Map<String, ItemStack> playerItems = loaded(uuid);
+        if (playerItems == null) return null;
+        ItemStack found = playerItems.get(slot.getKey().getKey());
+        return found == null ? null : found.clone();
     }
 
     private static void markDirty(UUID uuid) {
@@ -101,8 +97,8 @@ public final class EquipmentStorage {
         }
         if (changed) {
             Alkatraz.logDebug("Equipment change for " + player.getName() + " [" + slot.getKey().getKey() + "]");
+            markDirty(player.getUniqueId());
         }
-        markDirty(player.getUniqueId());
         EquipmentService.invalidate(player.getUniqueId());
         EquipmentStatService service = EquipmentStatService.getInstance();
         service.syncEquipmentStats(player);
@@ -165,16 +161,41 @@ public final class EquipmentStorage {
     }
 
     public static void save(Player player) {
-        Map<String, ItemStack> playerItems = cache.get(player.getUniqueId());
+        save(player.getUniqueId());
+    }
+
+    public static void save(UUID uuid) {
+        Map<String, ItemStack> playerItems = cache.get(uuid);
         if (playerItems != null) {
-            save(player.getUniqueId(), playerItems);
+            save(uuid, playerItems);
         }
     }
 
+    /**
+     * Returns the cached equipment map for an online player, loading it from disk only
+     * when the player is currently online. Offline lookups never touch disk or cache.
+     */
+    private static Map<String, ItemStack> loaded(UUID uuid) {
+        Map<String, ItemStack> existing = cache.get(uuid);
+        if (existing != null) return existing;
+        if (Bukkit.getPlayer(uuid) == null) return null;
+        return cache.computeIfAbsent(uuid, EquipmentStorage::load);
+    }
+
+    /** Explicit load for offline/admin paths; mirrors ProfileManager semantics. */
+    public static Map<String, ItemStack> getOrLoad(UUID uuid) {
+        return cache.computeIfAbsent(uuid, EquipmentStorage::load);
+    }
     public static void unload(Player player) {
         save(player);
         DIRTY.remove(player.getUniqueId());
         cache.remove(player.getUniqueId());
+    }
+
+    /** Drops a UUID's cached equipment without saving; for transient/offline loads. */
+    public static void forget(UUID uuid) {
+        DIRTY.remove(uuid);
+        cache.remove(uuid);
     }
 
     private static Map<String, ItemStack> load(UUID uuid) {
@@ -186,14 +207,18 @@ public final class EquipmentStorage {
         Map<String, ItemStack> items = new HashMap<>();
         for (String key : config.getKeys(false)) {
             Object raw = config.get(key);
-            if (raw instanceof ItemStack stack) {
-                items.put(key, stack);
-            } else if (raw instanceof Map<?, ?> map) {
-                @SuppressWarnings("unchecked")
-                ItemStack deserialized = ItemStack.deserialize((Map<String, Object>) map);
-                if (deserialized != null) {
-                    items.put(key, deserialized);
+            try {
+                if (raw instanceof ItemStack stack) {
+                    items.put(key, stack.clone());
+                } else if (raw instanceof Map<?, ?> map) {
+                    @SuppressWarnings("unchecked")
+                    ItemStack deserialized = ItemStack.deserialize((Map<String, Object>) map);
+                    if (deserialized != null) {
+                        items.put(key, deserialized.clone());
+                    }
                 }
+            } catch (Exception e) {
+                Alkatraz.logWarning("Failed to load equipment entry '" + key + "' for " + uuid + ": " + e.getMessage());
             }
         }
         return items;
@@ -210,10 +235,20 @@ public final class EquipmentStorage {
                 config.set(entry.getKey(), entry.getValue().serialize());
             }
         }
+        File tmp = new File(file.getParentFile(), file.getName() + ".tmp");
         try {
-            config.save(file);
+            config.save(tmp);
+            try {
+                java.nio.file.Files.move(tmp.toPath(), file.toPath(),
+                        java.nio.file.StandardCopyOption.REPLACE_EXISTING,
+                        java.nio.file.StandardCopyOption.ATOMIC_MOVE);
+            } catch (java.io.IOException e) {
+                java.nio.file.Files.move(tmp.toPath(), file.toPath(),
+                        java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            }
         } catch (IOException e) {
             Alkatraz.logWarning("Failed to save equipment for " + uuid + ": " + e.getMessage());
+            tmp.delete();
         }
     }
 

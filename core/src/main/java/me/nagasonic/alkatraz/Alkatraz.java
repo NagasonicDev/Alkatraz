@@ -10,10 +10,15 @@ import me.nagasonic.alkatraz.config.VerbosityLevel;
 import me.nagasonic.alkatraz.dom.MinecraftVersion;
 import me.nagasonic.alkatraz.focus.FocusManager;
 import me.nagasonic.alkatraz.gui.EnchantingTableListener;
+import me.nagasonic.alkatraz.gui.Menu;
 import me.nagasonic.alkatraz.gui.MenuListener;
 import me.nagasonic.alkatraz.items.magic.MagicItemBootstrap;
+import me.nagasonic.alkatraz.items.magic.equipment.EquipmentStorage;
+import me.nagasonic.alkatraz.items.magic.equipment.EquipmentCacheListener;
+import me.nagasonic.alkatraz.items.magic.equipment.EquipmentReconcileTask;
 import me.nagasonic.alkatraz.items.magic.adapter.MagicItemTriggerAdapter;
 import me.nagasonic.alkatraz.items.magic.barrier.BarrierEventListener;
+import me.nagasonic.alkatraz.spells.modifier.ModifierLifecycleListener;
 import me.nagasonic.alkatraz.items.magic.barrier.BarrierManager;
 import me.nagasonic.alkatraz.items.magic.adapter.MagicItemComponentListener;
 import me.nagasonic.alkatraz.items.magic.adapter.CombatTriggerListener;
@@ -54,13 +59,16 @@ import me.nagasonic.alkatraz.progression.AffinityCurveMigrationNotice;
 import me.nagasonic.alkatraz.progression.ProgressionService;
 import me.nagasonic.alkatraz.progression.research.ResearchObjectiveListener;
 import me.nagasonic.alkatraz.progression.research.ResearchService;
+import me.nagasonic.alkatraz.progression.BoosterManager;
 import me.nagasonic.alkatraz.spells.CoreSpellRegistryProvider;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
 import me.nagasonic.alkatraz.spells.implementation.SummonCombatGuard;
 import me.nagasonic.alkatraz.playerdata.profiles.CoreProfileProvider;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
 import me.nagasonic.alkatraz.spells.spellbooks.SpellbookListener;
+import me.nagasonic.alkatraz.spells.modifier.ModifierManager;
 import me.nagasonic.alkatraz.spells.spellbooks.SpellbookVillagerListener;
+import me.nagasonic.alkatraz.spells.util.SustainEffect;
 import me.nagasonic.alkatraz.spells.vfx.ChannelRegistry;
 import me.nagasonic.alkatraz.texturepack.ResourcePackListener;
 import me.nagasonic.alkatraz.tutorial.FirstJoinTutorial;
@@ -69,6 +77,7 @@ import me.nagasonic.alkatraz.api.mobs.MagicAiService;
 import me.nagasonic.alkatraz.api.mobs.MagicBrainService;
 import me.nagasonic.alkatraz.api.mobs.MagicEntityType;
 import me.nagasonic.alkatraz.mobs.MagicBrains;
+import me.nagasonic.alkatraz.util.SkinUtils;
 import me.nagasonic.alkatraz.util.UpdateChecker;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.Bukkit;
@@ -119,6 +128,8 @@ public final class Alkatraz extends JavaPlugin {
         saveConfig("progression.yml");
         saveConfig("research.yml");
         saveConfig("texturepack.yml"); // Save texture pack config
+        saveConfig("modifiers.yml"); // Save reusable modifier definitions
+saveConfig("boosters.yml"); // Save booster definitions
 
         verbosity = VerbosityLevel.fromString(pluginConfig.getString("verbose"));
         saveSpellConfigs();
@@ -133,6 +144,7 @@ public final class Alkatraz extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        SustainEffect.install();
         long enableStart = System.nanoTime();
         logVeryHigh("Alkatraz enabling...");
         // Plugin startup logic
@@ -208,6 +220,7 @@ public final class Alkatraz extends JavaPlugin {
         registerListener(new MagicItemTriggerAdapter());
         BarrierManager.initialize();
         registerListener(new BarrierEventListener());
+registerListener(new ModifierLifecycleListener());
         registerListener(new CombatTriggerListener());
         registerListener(new MagicDamageListener());
         registerListener(new SummonCombatGuard());
@@ -264,16 +277,45 @@ public final class Alkatraz extends JavaPlugin {
         }
         TaskBrainTicker.shutdown();
         SpellComponentHandler.shutdown();
+        // Drop stale mastery boss bars before profiles are unloaded.
+        for (org.bukkit.entity.Player p : Bukkit.getOnlinePlayers()) {
+            me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile mp =
+                    me.nagasonic.alkatraz.playerdata.profiles.ProfileManager.getProfile(p, me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile.class);
+            if (mp == null) continue;
+            for (org.bukkit.boss.BossBar bar : new java.util.ArrayList<>(mp.getMasteryBars().values())) {
+                try { bar.removeAll(); } catch (Exception ignored) { }
+            }
+            for (int taskId : mp.getMasteryBarTaskIds().values()) {
+                try { Bukkit.getScheduler().cancelTask(taskId); } catch (Exception ignored) { }
+            }
+            mp.getMasteryBars().clear();
+            mp.getMasteryBarTaskIds().clear();
+        }
+        me.nagasonic.alkatraz.gui.implementation.editor.EditorChatHandler.shutdown();
         ProfileManager.shutdown();
         BarrierManager.disposeAll();
         if (focusManager != null) {
             focusManager.shutdown();
         }
+        PeriodicTriggerListener.stop();
+        EquipmentReconcileTask.stop();
         ChannelRegistry.shutdown();
+        BoosterManager.clear();
+        ModifierManager.clear();
+        SkinUtils.shutdown();
+        UnlockSweep.stop();
+         UpdateChecker.shutdown();
+         LootInjector.resetRegistration();
+         MobLootInjector.resetRegistration();
+        SpellHotbarManager.exitAll();
+        me.nagasonic.alkatraz.items.magic.adapter.MagicDamageListener.clearAll();
+        me.nagasonic.alkatraz.spells.vfx.FakeWaterVfx.shutdown();
         for (Player p : Bukkit.getOnlinePlayers()){
-            ItemStack wand = p.getInventory().getItem(p.getInventory().getHeldItemSlot());
-            if (wand != null && !wand.getType().isAir()){
-                switchFrom(p);
+            try {
+                EquipmentStorage.unload(p);
+            } catch (Exception e) {
+                Alkatraz.getInstance().getLogger().log(java.util.logging.Level.SEVERE,
+                        "Failed to unload equipment for player: " + p.getName(), e);
             }
         }
     }
@@ -316,6 +358,8 @@ public final class Alkatraz extends JavaPlugin {
      */
     public static void reloadPluginConfig() {
         pluginConfig = ConfigManager.reloadConfig("config.yml").get();
+        // Derived purely from config.yml, so it went stale the same way pluginConfig did.
+        resourcePackForced = pluginConfig.getBoolean("resource_pack_override");
     }
 
     /**
@@ -396,7 +440,7 @@ public final class Alkatraz extends JavaPlugin {
 
             return nms != null;
         } catch (Exception | Error e) {
-            e.printStackTrace();
+            getLogger().severe("Failed to load NMS adapter: " + e.getMessage());
             return false;
         }
     }
@@ -428,7 +472,7 @@ public final class Alkatraz extends JavaPlugin {
         try {
             ConfigUpdater.update(instance, name, configFile, new ArrayList<>());
         } catch (IOException e) {
-            e.printStackTrace();
+            getLogger().severe("Failed to update config file: " + e.getMessage());
         }
     }
 
@@ -437,7 +481,7 @@ public final class Alkatraz extends JavaPlugin {
         try {
             ConfigUpdater.update(instance, name, configFile, excludedSections);
         } catch (IOException e) {
-            e.printStackTrace();
+            getLogger().severe("Failed to update config file: " + e.getMessage());
         }
     }
 

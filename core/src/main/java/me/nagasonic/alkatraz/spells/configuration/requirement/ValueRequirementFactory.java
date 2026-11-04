@@ -1,4 +1,5 @@
 package me.nagasonic.alkatraz.spells.configuration.requirement;
+import java.util.concurrent.ConcurrentHashMap;
 
 import me.nagasonic.alkatraz.api.configuration.requirement.Requirement;
 import me.nagasonic.alkatraz.configuration.requirement.RequirementFactory;
@@ -35,7 +36,7 @@ public final class ValueRequirementFactory {
         ValueRequirement build(Spell spell, ConfigurationSection section);
     }
 
-    private static final Map<String, Builder> REGISTRY = new HashMap<>();
+    private static final Map<String, Builder> REGISTRY = new ConcurrentHashMap<>();
 
     // ── Built-in registrations ────────────────────────────────────────────────
     static {

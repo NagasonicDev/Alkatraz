@@ -41,11 +41,7 @@ public class EquipmentMenu extends Menu {
     }
 
     private static String getResourceTitle() {
-        String code = Alkatraz.getTexturePackManager().getMenuTitleCode("equipment");
-        if (code == null || code.isEmpty() || !TexturePackManager.isResourcePackEnabled()) {
-            return ColorFormat.format(Alkatraz.getLangManager().get("menu.equipment"));
-        }
-        return code;
+        return TexturePackManager.getMenuTitle("equipment", ColorFormat.format(Alkatraz.getLangManager().get("menu.equipment")));
     }
 
     @Override
@@ -93,6 +89,7 @@ public class EquipmentMenu extends Menu {
         String slotName = lang().get("equipment.slot_" + equipSlot.getKey().getKey());
         ItemStack item = ItemBuilder.of(Material.GRAY_STAINED_GLASS_PANE)
                 .name(lang().get("equipment.empty_slot", "slot", slotName))
+                .guiModel("blank_pane")
                 .lore(lang().get("equipment.empty_slot_lore"))
                 .build();
         setMenuData(item, "equip_slot", equipSlot.getKey().getKey());
@@ -209,7 +206,8 @@ public class EquipmentMenu extends Menu {
         // Try to add to inventory, drop if full
         HashMap<Integer, ItemStack> remaining = viewer.getInventory().addItem(item);
         if (!remaining.isEmpty()) {
-            viewer.getWorld().dropItemNaturally(viewer.getLocation(), remaining.get(0));
+            ItemStack leftover = remaining.values().iterator().next();
+            viewer.getWorld().dropItemNaturally(viewer.getLocation(), leftover);
             viewer.sendMessage(lang().get("equipment.inventory_full_dropped"));
         }
 

@@ -48,19 +48,24 @@ public class ProfileCache {
      * Caches a profile
      * @param player The player
      * @param profile The profile to cache
+     * @return the cached instance (the already-cached one if a race occurred)
      */
-    public void cacheProfile(OfflinePlayer player, Profile profile) {
-        cacheProfile(player.getUniqueId(), profile);
+    public Profile cacheProfile(OfflinePlayer player, Profile profile) {
+        return cacheProfile(player.getUniqueId(), profile);
     }
 
     /**
      * Caches a profile by UUID
      * @param uuid The player UUID
      * @param profile The profile to cache
+     * @return the cached instance (the already-cached one if a race occurred)
      */
-    public void cacheProfile(UUID uuid, Profile profile) {
-        cache.computeIfAbsent(uuid, k -> new ConcurrentHashMap<>())
-             .put(profile.getClass(), profile);
+    @SuppressWarnings("unchecked")
+    public Profile cacheProfile(UUID uuid, Profile profile) {
+        Map<Class<? extends Profile>, Profile> playerProfiles =
+                cache.computeIfAbsent(uuid, k -> new ConcurrentHashMap<>());
+        Profile existing = playerProfiles.putIfAbsent(profile.getClass(), profile);
+        return existing != null ? existing : profile;
     }
 
     /**
@@ -160,8 +165,8 @@ public class ProfileCache {
     public Collection<Profile> getAllProfiles(UUID uuid) {
         Map<Class<? extends Profile>, Profile> playerProfiles = cache.get(uuid);
         return playerProfiles != null
-                ? Collections.unmodifiableCollection(playerProfiles.values())
-                : Collections.emptyList();
+                ? List.copyOf(playerProfiles.values())
+                : List.of();
     }
 
     /**

@@ -17,7 +17,7 @@ public enum Permission {
     /** Permission to use the /experience command. */
     COMMAND_EXPERIENCE("alkatraz.command.experience"),
     /** Permission to use the /circle command. */
-    COMMAND_CIRCLE("alkatraz.command.cirlce"),
+    COMMAND_CIRCLE("alkatraz.command.circle"),
     /** Permission to use the /discoverspell command. */
     COMMAND_DISCOVER("alkatraz.command.discoverspell"),
     /** Permission to use the /undiscoverspell command. */
@@ -63,9 +63,17 @@ public enum Permission {
     /** Permission to cast spells without a cooldown. */
     NO_COOLDOWN("alkatraz.nocooldown"),
     /** Permission to bypass WorldGuard region constraints for spells and engravings. */
-    REGION_BYPASS("alkatraz.bypass.regions");
-
-
+    REGION_BYPASS("alkatraz.bypass.regions"),
+    /** Permission to run plugin debug/test hooks. */
+    COMMAND_DEBUG("alkatraz.command.debug"),
+    /** Permission to use the /alkatraz modifier command. */
+    COMMAND_MODIFIER("alkatraz.command.modifier"),
+    /** Permission to use the /alkatraz booster command. */
+    COMMAND_BOOSTER("alkatraz.command.booster"),
+    /** Permission to inspect and diagnose plugin configuration. */
+    COMMAND_CONFIG("alkatraz.command.config"),
+    /** Permission to run runtime and configuration diagnostics. */
+    COMMAND_DIAGNOSE("alkatraz.command.diagnose");
     private final String permission;
 
     Permission(String permission){
@@ -89,6 +97,11 @@ public enum Permission {
      * @return {@code true} if the permissible has the permission, {@code false} otherwise
      */
     public static boolean hasPermission(Permissible p, Permission perm){
+        // Keep the legacy (misspelled) node working for upgraded installs.
+        if (perm == COMMAND_CIRCLE) {
+            return p.hasPermission("alkatraz.command.cirlce")
+                    || p.hasPermission(perm.getPermissionString());
+        }
         return p.hasPermission(perm.getPermissionString());
     }
 }

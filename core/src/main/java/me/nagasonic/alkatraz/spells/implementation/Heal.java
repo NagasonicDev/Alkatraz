@@ -9,6 +9,7 @@ import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.spells.vfx.CastCircle;
+import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
 import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.Color;
@@ -43,6 +44,9 @@ public class Heal extends Spell {
      * two supporting shades follow automatically.
      */
     private static final Color CAST_COLOR = Color.fromRGB(255, 255, 135);
+
+    /** The LIGHT palette, resolved once so a per-tick column allocates no colour objects. */
+    private static final ElementPalette.Palette PALETTE = ElementPalette.of(Element.LIGHT);
 
     /**
      * Full column height in blocks. {@code lesser_heal} uses roughly half this, which is

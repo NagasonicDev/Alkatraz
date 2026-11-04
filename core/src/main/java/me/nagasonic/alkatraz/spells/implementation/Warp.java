@@ -17,6 +17,7 @@ import me.nagasonic.alkatraz.spells.vfx.ChannelRegistry;
 import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
 import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.spells.vfx.WindUp;
+import me.nagasonic.alkatraz.spells.util.TeleportSafety;
 import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.StatUtils;
 import me.nagasonic.alkatraz.util.Utils;
@@ -154,8 +155,12 @@ public class Warp extends Spell {
         if (ChannelRegistry.isChanneling(uuid)) return;
 
         Location destination = point.toLocation();
-        if (destination == null || !destination.getWorld().equals(caster.getWorld())) {
-            Utils.sendActionBar(caster, lang().get("spells.warp.too_far"));
+        boolean invalidWorld = destination == null || destination.getWorld() == null
+                || !destination.getWorld().equals(caster.getWorld());
+        if (invalidWorld
+                || !TeleportSafety.isSafePlayerDestination(destination)) {
+            Utils.sendActionBar(caster, invalidWorld
+                    ? lang().get("spells.warp.too_far") : lang().get("spells.warp.blocked"));
             playFailSound(caster);
             return;
         }
@@ -213,8 +218,11 @@ public class Warp extends Spell {
         Location destination = point.toLocation();
         if (caster.isDead() || !caster.isOnline()
                 || destination == null
+                || destination.getWorld() == null
                 || !destination.getWorld().equals(caster.getWorld())
+                || !TeleportSafety.isSafePlayerDestination(destination)
                 || caster.getLocation().distance(destination) > maxDistance(profile)) {
+            Utils.sendActionBar(caster, lang().get("spells.warp.blocked"));
             return;
         }
         if (!Protection.teleport(caster, destination)) {

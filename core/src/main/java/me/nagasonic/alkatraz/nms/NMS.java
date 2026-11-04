@@ -194,5 +194,6 @@ public interface NMS extends Listener {
 final class GlowPalette {
     private GlowPalette() {}
 
-    static final ChatColor[] COLORS = ChatColor.values();
+    static final ChatColor[] COLORS = java.util.Arrays.stream(ChatColor.values())
+            .filter(ChatColor::isColor).toArray(ChatColor[]::new);
 }

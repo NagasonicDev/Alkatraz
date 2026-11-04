@@ -15,6 +15,7 @@ import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.api.Element;
 import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.util.ParticleCaster;
+import me.nagasonic.alkatraz.util.SummonSpawnLocation;
 import me.nagasonic.alkatraz.util.Utils;
 import me.nagasonic.alkatraz.api.mobs.MagicAiService;
 import org.bukkit.Color;
@@ -95,7 +96,7 @@ public class SummonZombies extends AttackSpell implements Listener {
 
         List<UUID> zombieIds = new ArrayList<>();
         for (int i = 0; i < count; i++) {
-            Location spawnLoc = findSpawnLocation(caster.getLocation());
+            Location spawnLoc = SummonSpawnLocation.resolve(caster);
             if (spawnLoc == null) continue;
 
             if (!Protection.spawnMob(caster, spawnLoc)) continue;
@@ -113,8 +114,10 @@ public class SummonZombies extends AttackSpell implements Listener {
                 nbt.setString("summoner_uuid", caster.getUniqueId().toString());
                 nbt.setBoolean("summoned_zombie", true);
             });
-            MagicAiService.getInstance().setBrain(zombie, "summoned_zombie");
-
+            MagicAiService aiService = MagicAiService.getInstance();
+            if (aiService != null) {
+                aiService.setBrain(zombie, "summoned_zombie");
+            }
             zombieIds.add(zombie.getUniqueId());
 
             spawnSummonParticles(caster, spawnLoc);
@@ -148,7 +151,7 @@ public class SummonZombies extends AttackSpell implements Listener {
         List<UUID> zombieIds = new ArrayList<>();
 
         for (int i = 0; i < zombieCount; i++) {
-            Location spawnLoc = findSpawnLocation(caster.getLocation());
+            Location spawnLoc = SummonSpawnLocation.resolve(caster);
             if (spawnLoc == null) continue;
 
             if (!Protection.spawnMob(caster, spawnLoc)) continue;
@@ -165,8 +168,10 @@ public class SummonZombies extends AttackSpell implements Listener {
                 nbt.setString("summoner_uuid", caster.getUniqueId().toString());
                 nbt.setBoolean("summoned_zombie", true);
             });
-            MagicAiService.getInstance().setBrain(zombie, "summoned_zombie");
-
+            MagicAiService aiService = MagicAiService.getInstance();
+            if (aiService != null) {
+                aiService.setBrain(zombie, "summoned_zombie");
+            }
             zombieIds.add(zombie.getUniqueId());
             spawnSummonParticles(caster, spawnLoc);
         }
@@ -183,21 +188,6 @@ public class SummonZombies extends AttackSpell implements Listener {
                 summonedZombies.remove(caster.getUniqueId());
             }
         }.runTaskLater(Alkatraz.getInstance(), zombieDuration * 20L);
-    }
-
-    private Location findSpawnLocation(Location center) {
-        World world = center.getWorld();
-        for (int i = 0; i < 10; i++) {
-            double x = center.getX() + (Math.random() - 0.5) * summonRange * 2;
-            double z = center.getZ() + (Math.random() - 0.5) * summonRange * 2;
-            int bx = (int) Math.floor(x);
-            int bz = (int) Math.floor(z);
-            int y = world.getHighestBlockYAt(bx, bz) + 1;
-            if (world.getBlockAt(bx, y, bz).getType() == Material.AIR && world.getBlockAt(bx, y - 1, bz).getType().isSolid()) {
-                return new Location(world, x, y, z);
-            }
-        }
-        return null;
     }
 
     private void spawnSummonParticles(LivingEntity caster, Location loc) {

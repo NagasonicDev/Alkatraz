@@ -61,8 +61,17 @@ public class LootInjector implements Listener {
         this.totalWeight = total;
     }
 
+    private static boolean listenerRegistered = false;
+
     public static void register(Plugin plugin){
+        if (listenerRegistered) return;
+        listenerRegistered = true;
         plugin.getServer().getPluginManager().registerEvents(new LootListener(), plugin);
+    }
+
+    /** Resets the registration guard after disable so a later enable can re-register. */
+    public static void resetRegistration() {
+        listenerRegistered = false;
     }
 
     private static String keyString(NamespacedKey key) {

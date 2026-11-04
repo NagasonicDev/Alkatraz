@@ -65,9 +65,9 @@ public final class UnlockManager {
     public static void unlock(Player player, String recipeKey) {
         if (player == null || recipeKey == null || recipeKey.isBlank()) return;
         String key = recipeKey.toLowerCase();
-        if (isUnlocked(player, key)) return;
+        Set<String> unlocked = CACHE.computeIfAbsent(player.getUniqueId(), id -> store.loadUnlocked(id));
+        if (!unlocked.add(key)) return;
         store.setUnlocked(player.getUniqueId(), key, true);
-        CACHE.computeIfAbsent(player.getUniqueId(), id -> store.loadUnlocked(id)).add(key);
         Bukkit.getPluginManager().callEvent(new RecipeUnlockedEvent(player, key));
         NotificationManager.notify(player, key);
     }
@@ -95,27 +95,27 @@ public final class UnlockManager {
      * every reachable reload path drops the set regardless of the count.
      */
     private static volatile Map<String, NamespacedKey> LOCKABLE = Map.of();
-    private static volatile int lockableKeySourceSize = -1;
+    private static volatile long lockableSourceGeneration = -1L;
 
     private static Map<String, NamespacedKey> lockableKeys() {
-        Collection<NamespacedKey> all = RecipeRegistry.getAllKeys();
-        if (all.size() == lockableKeySourceSize) {
+        long generation = RecipeRegistry.getRegistryGeneration();
+        if (generation == lockableSourceGeneration) {
             return LOCKABLE;
         }
-        Map<String, NamespacedKey> lockable = new HashMap<>(Math.max(4, all.size()));
-        for (NamespacedKey key : all) {
+        Map<String, NamespacedKey> lockable = new HashMap<>();
+        for (NamespacedKey key : RecipeRegistry.getAllKeys()) {
             if (!MagicItemRecipeManager.getRequirements(key).isEmpty()) {
                 lockable.put(key.toString(), key);
             }
         }
         LOCKABLE = Map.copyOf(lockable);
-        lockableKeySourceSize = all.size();
+        lockableSourceGeneration = generation;
         return LOCKABLE;
     }
 
     /** Discards the cached lockable-key map so the next evaluation rebuilds it. */
     public static void invalidateLockableKeys() {
-        lockableKeySourceSize = -1;
+        lockableSourceGeneration = -1L;
         LOCKABLE = Map.of();
     }
 

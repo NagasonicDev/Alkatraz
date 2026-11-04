@@ -67,9 +67,13 @@ public final class ParticleCaster {
      * {@code data} null, so fill in a neutral default based on the declared type.
      */
     private static <T> T withDefaultData(Particle particle, T data) {
-        if (data != null || particle == null) return data;
+        if (particle == null) return data;
         Class<?> required = particle.getDataType();
+        // Newer Bukkit versions reject payloads for particles whose data type is Void.
+        // Older renamed particles may have accepted/ignored them, so discard the payload
+        // instead of letting one bad cosmetic call fail its scheduled task.
         if (required == Void.class || required == null) return null;
+        if (data != null) return required.isInstance(data) ? data : null;
         if (required == Color.class) return cast(DEFAULT_COLOR);
         if (required == Particle.DustOptions.class) return cast(DEFAULT_DUST);
         return null;

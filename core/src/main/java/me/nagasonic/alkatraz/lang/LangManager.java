@@ -1,5 +1,6 @@
 package me.nagasonic.alkatraz.lang;
 
+import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.util.ColorFormat;
 
 import java.io.*;
@@ -37,8 +38,7 @@ public class LangManager {
                 new InputStreamReader(new FileInputStream(langFile), StandardCharsets.UTF_8))) {
             loadFromReader(reader);
         } catch (IOException e) {
-            System.err.println("[Alkatraz] Failed to load lang file: " + langFile.getName());
-            e.printStackTrace();
+            Alkatraz.getInstance().getLogger().log(java.util.logging.Level.SEVERE, "Failed to load language file", e);
         }
     }
 
@@ -48,7 +48,7 @@ public class LangManager {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
             loadFromReader(reader);
         } catch (IOException e) {
-            e.printStackTrace();
+            Alkatraz.getInstance().getLogger().log(java.util.logging.Level.SEVERE, "Failed to load language file", e);
         }
     }
 

@@ -1,4 +1,5 @@
 package me.nagasonic.alkatraz.items.magic.trigger;
+import java.util.concurrent.ConcurrentHashMap;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,7 +15,7 @@ public class WorldTimeTracker {
     public static final long FULL_CYCLE = 24000L;
     public static final long NIGHT_START = 13000L;
 
-    private final Map<UUID, Long> lastTimes = new HashMap<>();
+    private final Map<UUID, Long> lastTimes = new ConcurrentHashMap<>();
 
     /**
      * Returns the trigger key ({@code "on_day"} or {@code "on_night"}) whose

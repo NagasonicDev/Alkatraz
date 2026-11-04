@@ -7,8 +7,10 @@ import me.nagasonic.alkatraz.mobs.MagicEntities;
 import me.nagasonic.alkatraz.api.mobs.MagicEntityType;
 import me.nagasonic.alkatraz.api.mobs.MagicBrainService;
 import me.nagasonic.alkatraz.config.ConfigManager;
-import me.nagasonic.alkatraz.config.ParticleConfig;
-import me.nagasonic.alkatraz.api.dom.Permission;
+import me.nagasonic.alkatraz.config.Configs;
+import me.nagasonic.alkatraz.config.ModifierConfig;
+import me.nagasonic.alkatraz.config.ParticleConfig;import me.nagasonic.alkatraz.api.dom.Permission;
+import me.nagasonic.alkatraz.gui.GUIItemRegistry;
 import me.nagasonic.alkatraz.gui.implementation.EquipmentMenu;
 import me.nagasonic.alkatraz.gui.implementation.StatsMenu;
 import me.nagasonic.alkatraz.gui.implementation.editor.ItemEditorMenu;
@@ -27,8 +29,15 @@ import org.bukkit.inventory.PlayerInventory;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.progression.ProgressionService;
-import me.nagasonic.alkatraz.spells.Spell;
+import me.nagasonic.alkatraz.progression.BoosterManager;
+import me.nagasonic.alkatraz.progression.ProgressionMultiplierService;import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
+import me.nagasonic.alkatraz.spells.effect.ActiveEffect;
+import me.nagasonic.alkatraz.spells.effect.EffectKind;
+import me.nagasonic.alkatraz.spells.effect.EffectRegistry;
+import me.nagasonic.alkatraz.spells.modifier.ModifierInstance;
+import me.nagasonic.alkatraz.spells.modifier.ModifierManager;
+import me.nagasonic.alkatraz.texturepack.TexturePackManager;
 import me.nagasonic.alkatraz.util.StatUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import me.nagasonic.alkatraz.util.WandUtils;
@@ -44,6 +53,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -83,8 +93,25 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
             case "convert" -> handleConvert(sender, args);
             case "profile" -> handleProfile(sender, args);
             case "editor" -> handleEditor(sender, args);
-            case "test" -> handleTest(sender, args);
-            case "gencode" -> sender.sendMessage(Utils.genCode());
+            case "modifier" -> handleModifier(sender, args);
+            case "effect", "effects" -> handleEffect(sender, args);            // Debug-only hook; requires the dedicated debug permission.
+            case "booster" -> handleBooster(sender, args);
+            case "config" -> handleConfig(sender, args);
+            case "diagnostics", "diagnose", "diag" -> handleDiagnostics(sender, args);
+            case "test" -> {
+            if (!Permission.hasPermission(sender, Permission.COMMAND_DEBUG)) {
+                sender.sendMessage(lang().get("commands.no_permission"));
+                return true;
+            }
+            handleTest(sender, args);
+        }
+            case "gencode" -> {
+                if (!Permission.hasPermission(sender, Permission.COMMAND_DEBUG)) {
+                    sender.sendMessage(lang().get("commands.no_permission"));
+                    return true;
+                }
+                sender.sendMessage(Utils.genCode());
+            }
         }
 
         return true;
@@ -108,7 +135,9 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
         Player p = resolvePlayer(sender, args, 2);
         if (p == null) return;
 
-        ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class).setDiscoveredSpell(spell, discover);
+        MagicProfile profile = ProfileManager.getOrLoadProfile(p.getUniqueId(), MagicProfile.class);
+        profile.setDiscoveredSpell(spell, discover);
+        ProfileManager.saveProfile(profile);
         if (discover) {
             Bukkit.getPluginManager().callEvent(new SpellDiscoveredEvent(p, spell));
         }
@@ -138,9 +167,15 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                 playerIndex = 3;
             } catch (NumberFormatException e) {
                 playerIndex = 2;
+                if (args.length >= 4) {
+                    try {
+                        count = Integer.parseInt(args[3]);
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
             }
         }
-        if (count < 1) {
+        if (count < 1 || count > 4096) {
             sender.sendMessage(lang().get("commands.give_usage"));
             return;
         }
@@ -200,9 +235,9 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
             if (stack == null || stack.getType().isAir()) continue;
             if (!WandUtils.isWand(stack)) continue;
 
-            double magicPower = NBT.get(stack, nbt -> (Double) nbt.getDouble("magic_power"));
-            int circleLimit = NBT.get(stack, nbt -> (Integer) nbt.getInteger("circle_limit"));
-            double castTime = NBT.get(stack, nbt -> (Double) nbt.getDouble("casting_time"));
+            double magicPower = NBT.get(stack, nbt -> nbt.hasTag("magic_power") ? nbt.getDouble("magic_power") : 0.0);
+            int circleLimit = NBT.get(stack, nbt -> nbt.hasTag("circle_limit") ? nbt.getInteger("circle_limit") : 0);
+            double castTime = NBT.get(stack, nbt -> nbt.hasTag("casting_time") ? nbt.getDouble("casting_time") : 0.0);
 
             NamespacedKey defKey;
             if (circleLimit >= 5 && magicPower >= 10) {
@@ -211,7 +246,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                 defKey = MagicKeys.alkatraz("wooden_wand");
             }
             MagicItemInstance instance = MagicItemInstance.createDefault(defKey);
-            instance.putCustomData("mana", NBT.get(stack, nbt -> (Double) nbt.getDouble("mana")));
+            instance.putCustomData("mana", NBT.get(stack, nbt -> nbt.hasTag("mana") ? nbt.getDouble("mana") : 0.0));
 
             MagicItemStack.writeInstance(stack, instance);
 
@@ -247,8 +282,18 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
         Player p = resolvePlayer(sender, args, 3);
         if (p == null) return;
 
-        MagicProfile data = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
-        double amount = Double.parseDouble(args[2]);
+        MagicProfile data = ProfileManager.getOrLoadProfile(p.getUniqueId(), MagicProfile.class);
+        double amount;
+        try {
+            amount = Double.parseDouble(args[2]);
+        } catch (NumberFormatException e) {
+            sender.sendMessage(lang().get("commands.ak_usage"));
+            return;
+        }
+        if (!Double.isFinite(amount)) {
+            sender.sendMessage(lang().get("commands.ak_usage"));
+            return;
+        }
 
         switch (args[1].toLowerCase()) {
             case "set" -> {
@@ -258,6 +303,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                 }
                 data.setArcaneKnowledge(amount);
                 ProgressionService.advanceWhileEligible(p);
+                ProfileManager.saveProfile(data);
                 sender.sendMessage(lang().get("commands.ak_set", "player", p.getName(), "amount", String.valueOf(amount)));
             }
             case "add" -> {
@@ -266,6 +312,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                     return;
                 }
                 StatUtils.addArcaneKnowledge(p, amount);
+                ProfileManager.saveProfile(data);
                 sender.sendMessage(lang().get("commands.ak_add", "player", p.getName(), "amount", String.valueOf(amount)));
             }
             default -> sender.sendMessage(lang().get("commands.ak_invalid_op"));
@@ -284,8 +331,14 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
         Player p = resolvePlayer(sender, args, 3);
         if (p == null) return;
 
-        MagicProfile data = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
-        int amount = Integer.parseInt(args[2]);
+        MagicProfile data = ProfileManager.getOrLoadProfile(p.getUniqueId(), MagicProfile.class);
+        int amount;
+        try {
+            amount = Integer.parseInt(args[2]);
+        } catch (NumberFormatException e) {
+            sender.sendMessage(lang().get("commands.circle_usage"));
+            return;
+        }
 
         switch (args[1].toLowerCase()) {
             case "set" -> {
@@ -294,6 +347,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                     return;
                 }
                 StatUtils.addCircle(p, amount - data.getCircleLevel());
+                ProfileManager.saveProfile(data);
                 sender.sendMessage(lang().get("commands.circle_set", "player", p.getName(), "amount", String.valueOf(amount)));
             }
             case "add" -> {
@@ -303,6 +357,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                     return;
                 }
                 StatUtils.addCircle(p, amount);
+                ProfileManager.saveProfile(data);
                 sender.sendMessage(lang().get("commands.circle_add", "player", p.getName(), "amount", String.valueOf(amount), "new", String.valueOf(data.getCircleLevel())));
             }
             default -> sender.sendMessage(lang().get("commands.ak_invalid_op"));
@@ -326,8 +381,18 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
         Player p = resolvePlayer(sender, args, 4);
         if (p == null) return;
 
-        MagicProfile data = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
-        double amount = Double.parseDouble(args[3]);
+        MagicProfile data = ProfileManager.getOrLoadProfile(p.getUniqueId(), MagicProfile.class);
+        double amount;
+        try {
+            amount = Double.parseDouble(args[3]);
+        } catch (NumberFormatException e) {
+            sender.sendMessage(lang().get("commands.mastery_usage"));
+            return;
+        }
+        if (!Double.isFinite(amount)) {
+            sender.sendMessage(lang().get("commands.mastery_usage"));
+            return;
+        }
 
         switch (args[2].toLowerCase()) {
             case "add" -> {
@@ -337,6 +402,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                 }
                 int clamped = (int) Math.min(amount + data.getSpellMastery(spell), spell.getMaxMastery());
                 data.setSpellMastery(spell, clamped);
+                ProfileManager.saveProfile(data);
                 sender.sendMessage(lang().get("commands.mastery_added", "player", p.getName(), "amount", String.valueOf(amount), "spell", spell.getDisplayName()));
             }
             case "set" -> {
@@ -346,6 +412,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                 }
                 int clamped = (int) Math.min(amount, spell.getMaxMastery());
                 data.setSpellMastery(spell, clamped);
+                ProfileManager.saveProfile(data);
                 sender.sendMessage(lang().get("commands.mastery_set", "player", p.getName(), "spell", spell.getDisplayName(), "value", String.valueOf(data.getSpellMastery(spell))));
             }
             default -> sender.sendMessage(lang().get("commands.ak_invalid_op"));
@@ -381,16 +448,28 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
         // Language first: SpellRegistry.reload() re-runs Spell.loadCommonConfig, which is
         // where spell names and descriptions are read. A lang edit must land before that.
         Alkatraz.reloadLangManager();
-        ConfigManager.getDefaultConfigs().keySet().forEach(ConfigManager::reloadConfig);
+        new ArrayList<>(ConfigManager.getDefaultConfigs().keySet()).forEach(ConfigManager::reloadConfig);
         ConfigManager.reloadConfig("progression.yml");
+        ConfigManager.reloadConfig("modifiers.yml");
+        me.nagasonic.alkatraz.config.ModifierConfig.reload();
+        ConfigManager.reloadConfig("boosters.yml");
+        me.nagasonic.alkatraz.config.BoosterConfig.reload();
         // config.yml feeds the static pluginConfig reference and, through it, the particle
         // performance settings. Without this the particles: block stayed at boot-time values.
         Alkatraz.reloadPluginConfig();
+        Configs.reload();
         ParticleConfig.reload();
+        // texturepack.yml feeds the menu title glyphs, the GUI custom model data and the GUI
+        // materials. TexturePackManager has to reload first because GUIItemRegistry caches
+        // ItemStacks built from it, so rebuilding them any earlier would reuse the old codes.
+        TexturePackManager.reload();
+        GUIItemRegistry.reload();
         SpellRegistry.reload();
         ProgressionService.reload();
+        me.nagasonic.alkatraz.progression.BoosterManager.onReload();
         MagicEntities.registerProfiles();
-        MagicBrainService.getInstance().reloadBrains();
+        MagicBrainService brainService = MagicBrainService.getInstance();
+        if (brainService != null) brainService.reloadBrains();
         MagicItemBootstrap.reload();
         // Spellbook weights are baked into ItemStack NBT at build time, and registerAll()
         // only ran from onEnable, so loot.yml edits did nothing until a restart. Rebuilding
@@ -399,6 +478,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
         // spellbook.circle_weights change STILL needs a full restart - see
         // SpellbookLoot.reloadLoot's javadoc.
         SpellbookLoot.reloadLoot();
+        me.nagasonic.alkatraz.gui.implementation.research.ResearchGraphMenu.clearCaches();
         refreshStaticCompletions();
         sender.sendMessage(lang().get("commands.reload_success"));
     }
@@ -428,7 +508,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                 targetIndex = 2;
             }
         }
-        if (count < 1) {
+        if (count < 1 || count > 100) {
             sender.sendMessage(lang().get("commands.summon_usage"));
             return;
         }
@@ -454,6 +534,13 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                     double x = Double.parseDouble(coords[0]);
                     double y = Double.parseDouble(coords[1]);
                     double z = Double.parseDouble(coords[2]);
+                    if (!Double.isFinite(x) || !Double.isFinite(y) || !Double.isFinite(z)) {
+                        throw new NumberFormatException("non-finite");
+                    }
+                    if (Math.abs(x) > 30000000 || Math.abs(y) > 30000000 || Math.abs(z) > 30000000) {
+                        sender.sendMessage(lang().get("commands.summon_usage"));
+                        return null;
+                    }
                     World world = sender instanceof Player p ? p.getWorld() : Bukkit.getWorlds().get(0);
                     return new SummonTarget(new Location(world, x, y, z), raw);
                 } catch (NumberFormatException ignored) {
@@ -481,7 +568,9 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
             return;
         }
         String mode = args[1].toLowerCase();
-        ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class).setString("castMode", mode);
+        MagicProfile castModeProfile = ProfileManager.getOrLoadProfile(p.getUniqueId(), MagicProfile.class);
+        castModeProfile.setString("castMode", mode);
+        ProfileManager.saveProfile(castModeProfile);
         sender.sendMessage(lang().get("commands.cast_mode_set", "mode", mode));
     }
 
@@ -500,7 +589,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
             return;
         }
 
-        MagicProfile profile = ProfileManager.getProfile(target.getUniqueId(), MagicProfile.class);
+        MagicProfile profile = ProfileManager.getOrLoadProfile(target.getUniqueId(), MagicProfile.class);
 
         sender.sendMessage(format("&8&m&l---&r &d" + target.getName() + "'s Profile &8&m&l---"));
 
@@ -611,9 +700,286 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
         Alkatraz.getNms().spawnGrimoireLectern(p);
     }
 
-    private Player resolvePlayer(CommandSender sender, String[] args, int argIndex) {
-        if (args.length > argIndex) {
-            Player p = Bukkit.getPlayer(args[argIndex]);
+    private void handleModifier(CommandSender sender, String[] args) {
+        if (!Permission.hasPermission(sender, Permission.COMMAND_MODIFIER)) {
+            sender.sendMessage(lang().get("commands.no_permission"));
+            return;
+        }
+        if (args.length < 2) {
+            sender.sendMessage(lang().get("commands.modifier_usage"));
+            return;
+        }
+        switch (args[1].toLowerCase()) {
+            case "revoke" -> handleModifierRevoke(sender, args);
+            case "list", "inspect", "show" -> handleModifierList(sender, args);
+            default -> sender.sendMessage(lang().get("commands.modifier_usage"));
+        }
+    }
+
+    private void handleModifierRevoke(CommandSender sender, String[] args) {
+        if (args.length < 3) {
+            sender.sendMessage(lang().get("commands.modifier_usage"));
+            return;
+        }
+        java.util.UUID instanceId;
+        try {
+            instanceId = java.util.UUID.fromString(args[2]);
+        } catch (IllegalArgumentException e) {
+            sender.sendMessage(lang().get("commands.modifier_usage"));
+            return;
+        }
+        Player target = resolvePlayer(sender, args, 3);
+        if (target == null) return;
+        boolean removed = ModifierManager.revoke(target.getUniqueId(), instanceId);
+        sender.sendMessage(removed ? lang().get("commands.modifier_revoked")
+                : lang().get("commands.modifier_not_found"));
+    }
+
+    private void handleModifierList(CommandSender sender, String[] args) {
+        Player target = resolvePlayer(sender, args, 2);
+        if (target == null) return;
+        java.util.List<ModifierInstance> mods = ModifierManager.list(target.getUniqueId());
+        if (mods.isEmpty()) {
+            sender.sendMessage(lang().get("commands.modifier_list_empty"));
+            return;
+        }
+        sender.sendMessage(format("&8&m&l---&r &d" + target.getName() + "'s Active Modifiers &8&m&l---"));
+        long now = System.currentTimeMillis();
+        for (ModifierInstance mod : mods) {
+            long remaining = mod.expiresAtMillis() == Long.MAX_VALUE
+                    ? Long.MAX_VALUE
+                    : Math.max(0L, mod.expiresAtMillis() - now);
+            String duration = remaining == Long.MAX_VALUE ? "permanent" : (remaining / 1000L) + "s";
+            sender.sendMessage(format("&7source=&f" + mod.source()
+                    + " &8| &7target=&f" + mod.statOrAttributeId()
+                    + " &8| &7operation=&f" + mod.operation()
+                    + " &8| &7amount=&f" + mod.amount()
+                    + " &8| &7duration=&f" + duration
+                    + " &8| &7type=&f" + mod.type()));
+        }
+    }
+
+    private void handleEffect(CommandSender sender, String[] args) {
+        if (!Permission.hasPermission(sender, Permission.COMMAND_DEBUG)) {
+            sender.sendMessage(lang().get("commands.no_permission"));
+            return;
+        }
+        // Accept both "/alkatraz effects <player>" and "/alkatraz effect list <player>".
+        int playerArgIndex = 1;
+        if (args.length >= 2 && ("list".equals(args[1].toLowerCase())
+                || "inspect".equals(args[1].toLowerCase())
+                || "show".equals(args[1].toLowerCase()))) {
+            playerArgIndex = 2;
+        }
+        Player target = resolvePlayer(sender, args, playerArgIndex);
+        if (target == null) return;
+        java.util.List<ActiveEffect> effects = EffectRegistry.effectsOn(target.getUniqueId());
+        if (effects.isEmpty()) {
+            sender.sendMessage(lang().get("commands.effect_list_empty"));
+            return;
+        }
+        sender.sendMessage(format("&8&m&l---&r &d" + target.getName() + "'s Active Effects &8&m&l---"));
+        long now = System.currentTimeMillis();
+        for (ActiveEffect effect : effects) {
+            long remaining = effect.expiresAtMillis() == Long.MAX_VALUE
+                    ? Long.MAX_VALUE
+                    : Math.max(0L, effect.expiresAtMillis() - now);
+            String duration = remaining == Long.MAX_VALUE ? "permanent" : (remaining / 1000L) + "s";
+            sender.sendMessage(format("&7source=&f" + effect.sourceSpellId()
+                    + " &8| &7kind=&f" + effect.kind()
+                    + " &8| &7duration=&f" + duration
+                    + " &8| &7circle=&f" + effect.sourceCircle()
+                    + " &8| &7element=&f" + effect.element()));
+        }
+    }
+
+    private void handleBooster(CommandSender sender, String[] args) {
+        if (!Permission.hasPermission(sender, Permission.COMMAND_BOOSTER)) {
+            sender.sendMessage(lang().get("commands.no_permission"));
+            return;
+        }
+        if (args.length < 2) {
+            sender.sendMessage(lang().get("commands.booster_usage"));
+            return;
+        }
+        String action = args[1].toLowerCase();
+        switch (action) {
+            case "start" -> {
+                int idx = 2;
+                String scope = "world";
+                if (idx < args.length && isBoosterScope(args[idx])) {
+                    scope = args[idx++].toLowerCase();
+                }
+                String target = idx < args.length ? args[idx++] : null;
+                double multiplier = 2.0;
+                if (idx < args.length) {
+                    try {
+                        multiplier = Double.parseDouble(args[idx++]);
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+                if (target == null) {
+                    if (sender instanceof Player p && scope.equals("world")) {
+                        target = p.getWorld().getName();
+                    } else {
+                        sender.sendMessage(lang().get("commands.booster_usage"));
+                        return;
+                    }
+                }
+                if (!Double.isFinite(multiplier) || multiplier <= 0) {
+                    sender.sendMessage(lang().get("commands.booster_usage"));
+                    return;
+                }
+                boolean ok = BoosterManager.start(scope, target, multiplier);
+                sender.sendMessage(lang().get(ok ? "commands.booster_started" : "commands.booster_failed",
+                        "scope", scope, "target", target, "multiplier", String.valueOf(multiplier)));
+            }
+            case "stop" -> {
+                int idx = 2;
+                String scope = "world";
+                if (idx < args.length && isBoosterScope(args[idx])) {
+                    scope = args[idx++].toLowerCase();
+                }
+                String target = idx < args.length ? args[idx++] : null;
+                if (target == null) {
+                    if (sender instanceof Player p && scope.equals("world")) {
+                        target = p.getWorld().getName();
+                    } else {
+                        sender.sendMessage(lang().get("commands.booster_usage"));
+                        return;
+                    }
+                }
+                boolean ok = BoosterManager.stop(scope, target);
+                sender.sendMessage(lang().get(ok ? "commands.booster_stopped" : "commands.booster_not_found",
+                        "scope", scope, "target", target));
+            }
+            case "list" -> {
+                int idx = 2;
+                String scopeFilter = null;
+                if (idx < args.length && isBoosterScope(args[idx])) {
+                    scopeFilter = args[idx++].toLowerCase();
+                }
+                List<BoosterManager.Booster> boosters = BoosterManager.list(scopeFilter);                if (boosters.isEmpty()) {
+                    sender.sendMessage(lang().get("commands.booster_list_empty"));
+                    return;
+                }
+                for (BoosterManager.Booster b : boosters) {                    sender.sendMessage(format("&7" + b.scope() + " &8| &f" + b.target()
+                            + " &8| &fx" + String.valueOf(b.multiplier())));
+                }
+            }
+            default -> sender.sendMessage(lang().get("commands.booster_usage"));
+        }
+    }
+
+    private void handleConfig(CommandSender sender, String[] args) {
+        if (!Permission.hasPermission(sender, Permission.COMMAND_CONFIG)) {
+            sender.sendMessage(lang().get("commands.no_permission"));
+            return;
+        }
+        if (args.length < 2) {
+            sender.sendMessage(format("&cUsage: /alkatraz config show|validate [file|all]"));
+            return;
+        }
+        switch (args[1].toLowerCase()) {
+            case "show", "list" -> handleConfigShow(sender, args);
+            case "validate" -> handleConfigValidate(sender, args);
+            case "diagnose", "diagnostics" -> handleConfigDiagnose(sender, args);
+            default -> sender.sendMessage(format("&cUsage: /alkatraz config show|validate [file|all]"));
+        }
+    }
+
+    private void handleConfigShow(CommandSender sender, String[] args) {
+        if (args.length == 2) {
+            sender.sendMessage(format("&8&m&l---&r &dConfig files &8&m&l---"));
+            List<String> names = new java.util.ArrayList<>(ConfigManager.getConfigs().keySet());
+            names.addAll(ConfigManager.getDefaultConfigs().keySet());
+            names = names.stream().distinct().sorted().collect(Collectors.toList());
+            for (String name : names) sender.sendMessage(format("&7" + name));
+            sender.sendMessage(format("&7Use &f/alkatraz config show <file>"));
+            return;
+        }
+        String name = args[2];
+        org.bukkit.configuration.file.YamlConfiguration yml;
+        try {
+            yml = ConfigManager.getConfig(name).get();
+        } catch (Exception e) {
+            sender.sendMessage(format("&cCould not load &f" + name + "&c: " + e.getMessage()));
+            return;
+        }
+        if (yml == null) {
+            sender.sendMessage(format("&cConfig not found: &f" + name));
+            return;
+        }
+        sender.sendMessage(format("&8&m&l---&r &d" + name + " &8&m&l---"));
+        sender.sendMessage(format("&7top-level keys: &f" + yml.getKeys(false).size()));
+        for (String key : yml.getKeys(false)) {
+            String type = yml.isConfigurationSection(key) ? "section" : "value";
+            sender.sendMessage(format("&7- &f" + key + " &8(" + type + "&8)"));
+        }
+    }
+
+    private void handleConfigValidate(CommandSender sender, String[] args) {
+        String target = args.length >= 3 ? args[2] : "all";
+        List<String> names;
+        if ("all".equalsIgnoreCase(target)) {
+            java.util.Set<String> collected = new java.util.LinkedHashSet<>();
+            collected.addAll(ConfigManager.getConfigs().keySet());
+            collected.addAll(ConfigManager.getDefaultConfigs().keySet());
+            names = new java.util.ArrayList<>(collected);
+        } else {
+            names = List.of(target);
+        }
+        int issueCount = 0;
+        sender.sendMessage(format("&8&m&l---&r &dConfig validation &8&m&l---"));
+        for (String name : names) {
+            try {
+                org.bukkit.configuration.file.YamlConfiguration yml = ConfigManager.getConfig(name).reload().get();
+                org.bukkit.configuration.file.YamlConfiguration def = ConfigManager.getDefault(name);
+                int warnings = 0;
+                if (yml.getKeys(false).isEmpty()) warnings++;
+                if (def != null) {
+                    for (String key : def.getKeys(false)) {
+                        if (!yml.isSet(key)) {
+                            warnings++;
+                            sender.sendMessage(format("&e" + name + "&7: missing key &f" + key));
+                        }
+                    }
+                }
+                issueCount += warnings;
+                sender.sendMessage((warnings == 0
+                        ? format("&a" + name + "&7: OK (" + yml.getKeys(false).size() + " top-level keys)")
+                        : format("&e" + name + "&7: " + warnings + " warning(s)")));
+            } catch (Exception e) {
+                issueCount++;
+                sender.sendMessage(format("&c" + name + "&7: ERROR " + e.getMessage()));
+            }
+        }
+        sender.sendMessage(issueCount == 0 ? format("&aValidation complete: no issues found")
+                : format("&eValidation complete: " + issueCount + " issue(s) reported"));
+    }
+
+    private void handleConfigDiagnose(CommandSender sender, String[] args) {
+        handleDiagnostics(sender, args);
+    }
+
+    private void handleDiagnostics(CommandSender sender, String[] args) {
+        if (!Permission.hasPermission(sender, Permission.COMMAND_DIAGNOSE)) {
+            sender.sendMessage(lang().get("commands.no_permission"));
+            return;
+        }
+        sender.sendMessage(format("&8&m&l---&r &dAlkatraz diagnostics &8&m&l---"));
+        for (String line : me.nagasonic.alkatraz.util.PluginDiagnostics.run()) {
+            sender.sendMessage(format(line));
+        }
+    }
+
+    private boolean isBoosterScope(String token) {
+        if (token == null) return false;
+        String t = token.toLowerCase();
+        return t.equals("world") || t.equals("worlds") || t.equals("group") || t.equals("groups");
+    }
+
+    private Player resolvePlayer(CommandSender sender, String[] args, int argIndex) {        if (args.length > argIndex) {            Player p = Bukkit.getPlayer(args[argIndex]);
             if (p == null) {
                 sender.sendMessage(lang().get("commands.player_not_found", "name", args[argIndex]));
             }
@@ -646,8 +1012,9 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
             case "profile" -> tabProfile(sender, args);
             case "convert" -> tabConvert(sender, args);
             case "editor" -> List.of();
-            case "test" -> tabTest(sender, args);
-            default -> List.of();
+            case "modifier" -> tabModifier(sender, args);
+            case "effect", "effects" -> tabEffect(sender, args);
+            case "booster" -> tabBooster(sender, args);            case "config" -> tabConfig(sender, args);            case "diagnostics", "diagnose", "diag" -> tabDiagnostics(sender, args);            case "test" -> tabTest(sender, args);            default -> List.of();
         };
     }
 
@@ -663,13 +1030,20 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
         if (Permission.hasPermission(sender, Permission.COMMAND_SUMMON)) list.add("summon");
         if (Permission.hasPermission(sender, Permission.COMMAND_CONVERT)) list.add("convert");
         if (Permission.hasPermission(sender, Permission.COMMAND_EDITOR)) list.add("editor");
-        list.add("stats");
-        list.add("profile");
+        if (Permission.hasPermission(sender, Permission.COMMAND_MODIFIER)) list.add("modifier");
+        if (Permission.hasPermission(sender, Permission.COMMAND_BOOSTER)) list.add("booster");
+        if (Permission.hasPermission(sender, Permission.COMMAND_CONFIG)) {
+            list.add("config");
+            list.add("diagnostics");
+            list.add("diagnose");
+            list.add("diag");
+        }
+        list.add("stats");        list.add("profile");
         list.add("castmode");
         list.add("mode");
         list.add("equipment");
         list.add("eq");
-        list.add("test");
+        if (Permission.hasPermission(sender, Permission.COMMAND_RELOAD)) list.add("test");
         return list;
     }
 
@@ -745,11 +1119,76 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
         return List.of();
     }
 
+    private List<String> tabConfig(CommandSender sender, String[] args) {
+        if (!Permission.hasPermission(sender, Permission.COMMAND_CONFIG)) return List.of();
+        if (args.length == 2) return List.of("show", "validate");
+        if (args.length == 3) {
+            if (args[1].equalsIgnoreCase("validate") || args[1].equalsIgnoreCase("show")) {
+                List<String> names = new java.util.ArrayList<>(ConfigManager.getConfigs().keySet());
+                names.addAll(ConfigManager.getDefaultConfigs().keySet());
+                return names.stream().distinct().collect(Collectors.toList());
+            }
+        }
+        return List.of();
+    }
+
+    private List<String> tabDiagnostics(CommandSender sender, String[] args) {
+        if (!Permission.hasPermission(sender, Permission.COMMAND_DIAGNOSE)) return List.of();
+        return List.of();
+    }
+
     private List<String> tabCastMode(CommandSender sender, String[] args) {
         if (args.length == 2) return CAST_MODES;
         return List.of();
     }
 
+    private List<String> tabModifier(CommandSender sender, String[] args) {
+        if (!Permission.hasPermission(sender, Permission.COMMAND_MODIFIER)) return List.of();
+        return switch (args.length) {
+            case 2 -> List.of("revoke", "list", "inspect", "show");
+            case 3 -> switch (args[1].toLowerCase()) {
+                case "grant" -> modifierIds();
+                case "revoke" -> List.of();
+                case "list", "inspect", "show" -> playerNames();
+                default -> List.of();
+            };
+            case 4 -> switch (args[1].toLowerCase()) {
+                case "grant", "revoke" -> playerNames();
+                default -> List.of();
+            };
+            default -> List.of();
+        };
+    }
+
+    private List<String> modifierIds() {
+        var mods = ModifierConfig.getModifiers();
+        if (mods == null) return List.of();
+        return new java.util.ArrayList<>(mods.getKeys(false));
+    }
+    private List<String> tabBooster(CommandSender sender, String[] args) {
+        if (!Permission.hasPermission(sender, Permission.COMMAND_BOOSTER)) return List.of();
+        return switch (args.length) {
+            case 2 -> List.of("start", "stop", "list");
+            case 3 -> List.of("world", "group");
+            case 4 -> {
+                String scope = args[2].toLowerCase();
+                if (scope.equals("world") || scope.equals("worlds"))
+                    yield Bukkit.getWorlds().stream().map(World::getName).collect(Collectors.toList());
+                if (scope.equals("group") || scope.equals("groups"))
+                    yield new java.util.ArrayList<>(ProgressionMultiplierService.getGroupMultipliers().keySet());
+                yield List.of();
+            }
+            default -> List.of();
+        };
+    }
+
+    private List<String> tabEffect(CommandSender sender, String[] args) {        if (!Permission.hasPermission(sender, Permission.COMMAND_DEBUG)) return List.of();
+        if (args.length == 2) return playerNames();
+        if (args.length == 3 && ("list".equals(args[1].toLowerCase())
+                || "inspect".equals(args[1].toLowerCase())
+                || "show".equals(args[1].toLowerCase()))) return playerNames();
+        return List.of();
+    }
     private List<String> tabSummon(CommandSender sender, String[] args) {
         if (!Permission.hasPermission(sender, Permission.COMMAND_SUMMON)) return List.of();
         return switch (args.length) {

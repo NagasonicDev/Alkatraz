@@ -38,7 +38,7 @@ public class ItemEditorMenu extends PagedMenu<Object> {
     private boolean showingRunes = false;
 
     public ItemEditorMenu(Player viewer) {
-        super(viewer, lang().get("menu.item_editor"), 54, getSortedItems(), 28);
+        super(viewer, packTitle("item_editor", lang().get("menu.item_editor")), 54, getSortedItems(), 28);
         clearPrototypes();
         this.contentSlots = CONTENT_SLOTS;
         this.nextPageSlot = 53;
@@ -69,6 +69,7 @@ public class ItemEditorMenu extends PagedMenu<Object> {
             ItemStack item = ItemBuilder.of(Material.COMMAND_BLOCK)
                     .name(lang().get("editor.rune_editor_title"))
                     .lore(lang().get("editor.switch_to_items"))
+                    .guiModel("editor_item_list")
                     .build();
             setMenuData(item, "action", "toggle_mode");
             return item;
@@ -77,6 +78,7 @@ public class ItemEditorMenu extends PagedMenu<Object> {
                 .name(lang().get("editor.item_editor_title"))
                 .lore("&7Click an item to edit its config and recipe.",
                       lang().get("editor.switch_to_runes"))
+                .guiModel("editor_item_list")
                 .build();
         setMenuData(item, "action", "toggle_mode");
         return item;
@@ -179,6 +181,7 @@ public class ItemEditorMenu extends PagedMenu<Object> {
     protected void addBackButton() {
         ItemStack back = ItemBuilder.of(Material.BARRIER)
                 .name("&cClose")
+                .guiModel("close_button")
                 .build();
         setMenuData(back, "action", "back");
         inventory.setItem(backButtonSlot, back);

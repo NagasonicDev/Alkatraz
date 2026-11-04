@@ -5,6 +5,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -55,6 +56,7 @@ public class LeaderboardPlaceholder implements Placeholder {
 
     private volatile List<LeaderboardEntry> cachedBoard = Collections.emptyList();
     private volatile boolean scheduled = false;
+    private volatile BukkitTask refreshTask = null;
 
     public LeaderboardPlaceholder(long refreshIntervalMinutes, int maxEntries) {
         this.refreshIntervalMs = refreshIntervalMinutes * 60 * 1000;
@@ -114,16 +116,13 @@ public class LeaderboardPlaceholder implements Placeholder {
                 || params.startsWith("top_");
     }
 
-    private void ensureRefreshScheduled() {
-        if (scheduled) return;
-        synchronized (this) {
-            if (scheduled) return;
-            if (!Alkatraz.getInstance().isEnabled()) return;
-            long periodTicks = Math.max(1L, refreshIntervalMs / 50L);
-            Bukkit.getScheduler().runTaskTimerAsynchronously(
-                    Alkatraz.getInstance(), this::refreshAsync, 0L, periodTicks);
-            scheduled = true;
-        }
+    private synchronized void ensureRefreshScheduled() {
+        if (scheduled && refreshTask != null) return;
+        if (!Alkatraz.getInstance().isEnabled()) return;
+        long periodTicks = Math.max(1L, refreshIntervalMs / 50L);
+        refreshTask = Bukkit.getScheduler().runTaskTimerAsynchronously(
+                Alkatraz.getInstance(), this::refreshAsync, 0L, periodTicks);
+        scheduled = true;
     }
 
     private void refreshAsync() {
@@ -132,15 +131,14 @@ public class LeaderboardPlaceholder implements Placeholder {
             List<LeaderboardEntry> entries = buildSnapshot();
             publish(entries);
         } catch (Exception e) {
-            Alkatraz.getInstance().getLogger().warning("[Alkatraz] Failed to refresh leaderboard snapshot");
-            e.printStackTrace();
+            Alkatraz.getInstance().getLogger().log(java.util.logging.Level.WARNING, "[Alkatraz] Failed to refresh leaderboard snapshot", e);
         } finally {
             building.set(false);
         }
     }
 
     private List<LeaderboardEntry> buildSnapshot() {
-        File playerDataDir = new File(Alkatraz.getInstance().getDataFolder().getParentFile(), "Alkatraz/playerdata");
+        File playerDataDir = new File(Alkatraz.getInstance().getDataFolder(), "playerdata");
         if (!playerDataDir.exists() || !playerDataDir.isDirectory()) return Collections.emptyList();
 
         File[] uuidFolders = playerDataDir.listFiles(File::isDirectory);

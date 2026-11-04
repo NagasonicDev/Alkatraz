@@ -32,8 +32,16 @@ public final class MagicItemConfigLoader {
     private MagicItemConfigLoader() {}
 
     public static ItemDefinition loadItemDefinition(YamlConfiguration config) {
-        NamespacedKey key = MagicKeys.require(config.getString("key"));
-        Material material = Utils.materialFromString(config.getString("material", "STONE")).getType();
+        String rawKey = config.getString("key");
+        if (rawKey == null || rawKey.isBlank()) {
+            throw new IllegalArgumentException("Missing 'key' in item definition");
+        }
+        NamespacedKey key = MagicKeys.require(rawKey);
+        String materialName = config.getString("material", "STONE");
+        Material material = Utils.materialFromString(materialName == null ? "STONE" : materialName).getType();
+        if (material == null || material == Material.AIR) {
+            material = Material.STONE;
+        }
         String displayName = config.getString("display_name", key.getKey());
         List<String> lore = config.getStringList("lore");
         int customModelData = config.getInt("custom_model_data", 0);
@@ -58,6 +66,9 @@ public final class MagicItemConfigLoader {
         ItemVisual visual;
         if (config.contains("item")) {
             ConfigurationSection itemSection = config.getConfigurationSection("item");
+            if (itemSection == null) {
+                throw new IllegalArgumentException("Invalid 'item' section in engraving definition");
+            }
             Material material = Utils.materialFromString(itemSection.getString("material", "STONE")).getType();
             String displayName = itemSection.getString("display_name", key.getKey());
             List<String> lore = itemSection.getStringList("lore");
@@ -87,7 +98,12 @@ public final class MagicItemConfigLoader {
             NamespacedKey triggerType = MagicKeys.require(String.valueOf(map.get("trigger")));
             List<Condition> conditions = ConditionLoader.fromSectionList(castList(map.get("conditions")));
             List<Effect> effects = EffectLoader.fromSectionList(castList(map.get("effects")));
-            int priority = Integer.parseInt(String.valueOf(map.getOrDefault("priority", 0)));
+            int priority = 0;
+            try {
+                Object rawPriority = map.get("priority");
+                if (rawPriority != null) priority = Integer.parseInt(String.valueOf(rawPriority));
+            } catch (NumberFormatException ignored) {
+            }
             bindings.add(new TriggerBinding(triggerType, conditions, effects, priority));
         }
         return List.copyOf(bindings);

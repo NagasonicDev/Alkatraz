@@ -73,9 +73,7 @@ public class Skin {
             if (CACHE.size() > CACHE_LIMIT) CACHE.clear();
             CACHE.put(urlString, skin);
             return skin;
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

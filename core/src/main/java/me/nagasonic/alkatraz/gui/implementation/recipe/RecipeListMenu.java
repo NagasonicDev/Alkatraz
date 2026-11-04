@@ -54,8 +54,8 @@ public class RecipeListMenu extends PagedMenu<AlkatrazRecipe> {
     }
 
     public RecipeListMenu(Player viewer, RecipeCategory category) {
-        super(viewer, ColorFormat.format(
-                Alkatraz.getLangManager().get("menu.recipe_categories")), 54, new ArrayList<>(), 27);
+        super(viewer, packTitle("recipe_list", ColorFormat.format(
+                Alkatraz.getLangManager().get("menu.recipe_categories"))), 54, new ArrayList<>(), 27);
         this.category = category;
         this.searchQuery = null;
         this.contentSlots = getDefaultContentSlots();
@@ -64,8 +64,8 @@ public class RecipeListMenu extends PagedMenu<AlkatrazRecipe> {
     }
 
     public RecipeListMenu(Player viewer, List<AlkatrazRecipe> searchResults, String query) {
-        super(viewer, ColorFormat.format(
-                Alkatraz.getLangManager().get("menu.recipe_categories")), 54, searchResults, 27);
+        super(viewer, packTitle("recipe_list", ColorFormat.format(
+                Alkatraz.getLangManager().get("menu.recipe_categories"))), 54, searchResults, 27);
         this.category = null;
         this.searchQuery = query;
         this.contentSlots = getDefaultContentSlots();
@@ -151,6 +151,7 @@ public class RecipeListMenu extends PagedMenu<AlkatrazRecipe> {
         } else {
             ItemStack clear = ItemBuilder.of(Material.BARRIER)
                     .name(lang().get("recipes.search.clear"))
+                    .guiModel("cancel_button")
                     .build();
             setMenuData(clear, "action", "clear_search");
             inventory.setItem(CLEAR_SLOT, clear);

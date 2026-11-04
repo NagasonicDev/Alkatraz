@@ -4,6 +4,8 @@ import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.lang.LangManager;
+import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
+import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.configuration.requirement.implementation.NumberStatRequirement;
 import me.nagasonic.alkatraz.spells.spellbooks.Spellbook;
 import me.nagasonic.alkatraz.spells.types.AttackSpell;
@@ -12,8 +14,11 @@ import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.SpellAttackContext;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
+import me.nagasonic.alkatraz.spells.util.SustainEffect;
 import me.nagasonic.alkatraz.spells.vfx.CastCircle;
+import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.util.ParticleCaster;
+import me.nagasonic.alkatraz.util.StatUtils;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
@@ -21,72 +26,29 @@ import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.World;
+import org.bukkit.boss.BarStyle;
+import org.bukkit.boss.BossBar;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Circle 9 AIR capstone: a fifteen-second storm centred on you, one bolt a second
- * into anything that comes near, and <b>flight for exactly as long as the storm
- * lasts</b>.
+ * Circle 9 AIR capstone: call down a storm that follows the caster, buffets nearby
+ * enemies and repeatedly strikes the nearest target. It grants no flight.
  *
- * <h2>Why this is SUSTAIN and not UTILITY</h2>
- * The flight is a movement grant, which is air's whole identity. But
- * {@code SpellBudgetTest.utilitySpellsCarryNoDamageKey} fails any UTILITY spell
- * that carries a {@code power:} key, and this spell's
- * {@code power 9.6 x hit_count 15 = 144.0} is the number that prices the circle-9
- * air row. The storm is the product; the flight is how you survive while casting
- * it. So the grant is real, it has its own yml keys, and it is measured - but the
- * spell's role, budget and identity are the storm's.
- *
- * <h2>The flight grant is always revoked</h2>
- * {@code allowFlight}, {@code flying} and {@code flySpeed} are captured
- * <em>before</em> the grant and restored verbatim afterwards. The restore is
- * idempotent and runs from three places - the storm's own expiry branch, a safety
- * net scheduled at launch in case the storm's task is cancelled out from under it,
- * and the quit handler - so a player is never left permanently airborne. The
- * portal halo drawn on the caster's own body every tick is the visual tell that
- * flight is live.
- *
- * <h2>Damage contract</h2>
- * <ul>
- *   <li><b>One getPower per damage instance.</b> {@link AttackProperties} is seeded
- *       with RAW base power; the two-arg overload is never called. The three-arg
- *       form runs once per strike. The flight grant touches no damage path at all.</li>
- *   <li><b>Deduped per target per cast.</b> {@code props.hit(struck)} on every
- *       application, plus an explicit per-cast {@code nextStrikeTick} map which is
- *       what actually enforces one application per 20 ticks. See the note in
- *       {@code CycloneNest}'s Javadoc: {@code AttackProperties.hit} writes to a
- *       {@code Set} that is never cleared, so gating a SUSTAIN's <em>repeats</em>
- *       on it would allow one application per cast rather than fifteen.</li>
- *   <li><b>power reaches damage.</b> {@code props.getRemainingPower()} is the raw
- *       {@code power} key and goes straight to
- *       {@link SpellDamageUtil#damageWithSpell}. No separate damage key exists.</li>
- *   <li><b>One shared AttackProperties per cast.</b> Created once in
- *       {@link #castAction}, captured by the single runnable; a counter kills the
- *       storm and returns flight in the same tick.</li>
- * </ul>
- *
- * <h2>No terrain, ever</h2>
- * AIR is forbidden from TERRAIN (spec 5.2). This class contains no
- * {@code TerrainEditor} call, no {@code setType(} and no {@code Material}
- * reference. {@code Player#setFlySpeed} changes a movement attribute, not the
- * world.
+ * <p>The storm is a mana-drained toggle sustain. Its teardown is owned by
+ * {@link SustainEffect}, so it stops cleanly on expiry, recast, insufficient mana,
+ * death, quit or counter. Air never edits terrain.</p>
  */
-public class Skywrath extends AttackSpell implements Listener {
+public class Skywrath extends AttackSpell {
 
     /** Pale violet - the only purple in the air element, and the palest dust of the five. */
     private static final Color SKY_TINT = Color.fromRGB(235, 200, 255);
@@ -112,43 +74,30 @@ public class Skywrath extends AttackSpell implements Listener {
     private static final int SKY_CLOUD_COUNT = 40;
     private static final double SKY_CLOUD_SPREAD_H = 0.6;
     private static final double SKY_CLOUD_SPREAD_V = 0.12;
-    /** Portal halo drawn on the caster's own body while flight is live. */
-    private static final int SKY_PORTAL_COUNT = 20;
-    private static final double SKY_PORTAL_SPREAD_H = 0.6;
-    private static final double SKY_PORTAL_SPREAD_V = 1.2;
     /** Horizontal and vertical jitter written to a buffeted target, per tick. */
     private static final double SKY_BUFF_JITTER = 0.16;
     private static final double SKY_BUFF_LIFT = 0.14;
+    /**
+     * Vertical velocity at or above which a target is left alone. {@link #SKY_BUFF_LIFT} is an
+     * impulse added every tick, so without this gate a mob standing still reaches 0.43 after two
+     * ticks and keeps climbing - it is thrown ~12 blocks up and vanilla fall damage from there is
+     * 9 hearts. 0.3 tops out the lift at one impulse of ~1.2 blocks, far under the 3-block fall
+     * damage threshold, so the buffet displaces without ever killing.
+     */
+    private static final double SKY_BUFF_CEILING = 0.3;
     /** Dust points drawn on a buffeted target. */
     private static final int SKY_BUFF_DUST = 2;
     /** Segments in one bolt, excluding both endpoints. */
     private static final int SKY_BOLT_SEGMENTS = 17;
     /** Vertical velocity written to a struck target. */
     private static final double SKY_STRIKE_LIFT = 0.75;
-    /** How often the flight is topped up, in ticks, so landing mid-storm re-lifts you. */
-    private static final int SKY_FLIGHT_TOP_UP = 20;
     /** Dispersion counts when the storm ends. */
     private static final int SKY_DISPERSE_EMITTER = 1;
     private static final int SKY_DISPERSE_SMOKE = 50;
-    /**
-     * The mob path's own storm: shorter, tighter and anchored over the mob's
-     * target. This is NOT the yml's {@code storm_duration} - the yml describes the
-     * player cast, which is what {@code hit_count: 15} and {@code power: 9.6}
-     * describe. A mob also never gets flight, because {@code Player#setAllowFlight}
-     * does not exist on {@code Mob}.
-     */
+    /** The mob path uses a short storm anchored around the combat area. */
     private static final double MOB_STORM_DURATION = 5.0;
     private static final double MOB_STORM_RADIUS = 5.0;
     private static final double MOB_STORM_HEIGHT = 6.0;
-
-    /**
-     * A caster's flight attributes as they were <em>before</em> the grant. Held
-     * statically rather than per-cast because {@code Player} is the only entity the
-     * grant applies to and one player holds at most one skywrath.
-     */
-    private static final Map<UUID, FlightState> FLIGHT_STATES = new ConcurrentHashMap<>();
-    /** Casters whose flight has already been returned, so the restore lands exactly once. */
-    private static final Set<UUID> FLIGHT_RESTORED = ConcurrentHashMap.newKeySet();
 
     private SkywrathConfig config;
 
@@ -168,42 +117,56 @@ public class Skywrath extends AttackSpell implements Listener {
         loadCommonConfig(spellConfig);
         loadOptions();
         this.config = SkywrathConfig.from(spellConfig);
-        Alkatraz.getInstance().getServer().getPluginManager()
-                .registerEvents(this, Alkatraz.getInstance());
     }
 
     @Override
     public void castAction(Player caster, ItemStack wand) {
         if (caster.isDead()) return;
-        AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster),
-                getBasePower() * getWandPower(wand, caster), AttackType.MAGIC);
 
         double duration = getModifiedStat(caster, "storm_duration", config.stormDuration());
         double radius = getModifiedStat(caster, "storm_radius", config.stormRadius());
         double height = getModifiedStat(caster, "storm_height", config.stormHeight());
-
         int stormTicks = Math.max(1, (int) Math.round(duration * 20.0));
-        int flightTicks = config.flightTicksWithin(stormTicks);
 
-        // The `flight` option writes a `flight_allow` stat modifier, so the switch
-        // is player-selectable rather than a hardcoded true.
-        boolean flightOn = getModifiedStat(caster, "flight_allow",
-                config.flightAllow() ? 1.0 : 0.0) > 0.5;
+        AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster),
+                getBasePower() * getWandPower(wand, caster), AttackType.MAGIC);
+        StormClock clock = new StormClock();
+        double upkeep = getModifiedStat(caster, "upkeep_mana_per_second", config.upkeepManaPerSecond());
+
+        // The toggle runs first: recasting ends this live storm without opening a
+        // second instance. Circle-9 sustains share one slot, so a foreign owner
+        // blocks this cast without affecting that sustain.
+        SustainEffect.Toggle toggled = SustainEffect.toggle(caster, upkeep, this,
+                (c, elapsed) -> {
+                    if (elapsed == 0) {
+                        clock.bar = Bukkit.createBossBar(lang().get("spells.skywrath.name"),
+                                getMasteryBarColor(), BarStyle.SEGMENTED_10);
+                        clock.bar.addPlayer(c);
+                    }
+                    boolean keepGoing = tickStorm(c, clock, wand, props,
+                            stormTicks, radius, height);
+                    if (clock.bar != null) {
+                        clock.bar.setProgress(remainingFraction(c, elapsed, stormTicks, upkeep));
+                    }
+                    return keepGoing;
+                },
+                p -> endStorm(p, clock, radius));
+        if (toggled == SustainEffect.Toggle.BLOCKED) {
+            // Blocked changed nothing, so Spell.cast must refund this cast and skip cooldown/mastery.
+            cancelCast(caster);
+            Utils.sendActionBar(caster, lang().get("spells.sustain.blocked"));
+            return;
+        }
+        if (toggled == SustainEffect.Toggle.CLOSED) {
+            // Return this cast's modified mana cost when toggling the storm off.
+            StatUtils.addMana(caster, getModifiedManaCost(caster));
+            return;
+        }
 
         World world = caster.getWorld();
         if (world != null) {
             world.playSound(caster.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 1.5f, 0.8f);
         }
-
-        grantFlight(caster, flightOn, getModifiedStat(caster, "flight_speed", config.flightSpeed()));
-        // SAFETY NET. The storm's own expiry restores flight, but if its task is
-        // cancelled from outside - a reload, a scheduler wipe - this is what stops a
-        // player being stranded in the air. restoreFlight is idempotent, so the two
-        // paths cannot double-restore.
-        Bukkit.getScheduler().runTaskLater(Alkatraz.getInstance(),
-                () -> restoreFlight(caster), Math.max(1L, flightTicks));
-
-        runStorm(caster, wand, props, stormTicks, radius, height, flightOn);
     }
 
     @Override
@@ -211,74 +174,89 @@ public class Skywrath extends AttackSpell implements Listener {
         if (caster.isDead() || caster.getTarget() == null) return;
         AttackProperties props = new AttackProperties(caster, Utils.castLocation(caster),
                 getBasePower() * getWandPowerOrDefault(wand), AttackType.MAGIC);
-        // No flight: Player#setAllowFlight does not exist on Mob.
-        runStorm(caster, wand, props,
-                (int) Math.round(MOB_STORM_DURATION * 20.0), MOB_STORM_RADIUS, MOB_STORM_HEIGHT, false);
-    }
-
-    /**
-     * The storm, shared by both cast paths. One runnable, one cadence clock and one
-     * per-target map, so countering the cast kills the whole storm and, for a
-     * player, returns flight in the same tick.
-     */
-    private void runStorm(LivingEntity caster, ItemStack wand, AttackProperties props,
-                          int life, double radius, double height, boolean flightOn) {
-        final Map<UUID, Long> nextStrikeTick = new ConcurrentHashMap<>();
-
+        StormClock clock = new StormClock();
+        int life = (int) Math.round(MOB_STORM_DURATION * 20.0);
         new BukkitRunnable() {
-            int t = 0;
-            long lastStrikeTick = -SpellAttackContext.DAMAGE_INTERVAL_TICKS;
-
             @Override
             public void run() {
-                World world = caster.getWorld();
-                if (world == null || props.isCountered() || props.isCancelled()
-                        || caster.isDead() || t >= life
-                        || (caster instanceof Player online && !online.isOnline())) {
-                    if (world != null) {
-                        dissipate(caster, world, radius);
-                        if (caster instanceof Player player) {
-                            restoreFlight(player);
-                            // Only on the natural-expiry path: a counter or a death
-                            // should not announce that the sky closed.
-                            if (t >= life && !props.isCountered()) {
-                                Utils.sendActionBar(player, lang().get("spells.skywrath.ending"));
-                            }
-                        }
-                    }
-                    cancel();
+                if (tickStorm(caster, clock, wand, props, life, MOB_STORM_RADIUS, MOB_STORM_HEIGHT)) {
                     return;
                 }
-
-                // The storm follows the caster: re-anchored every tick, which is why
-                // Utils.resolveTarget is never called anywhere in this class.
-                Location anchor = caster.getLocation();
-                Location storm = anchor.clone().add(0.0, height, 0.0);
-
-                drawStorm(caster, world, storm, anchor, radius, height, t);
-                buffet(caster, world, storm, radius, height);
-
-                if (t - lastStrikeTick < SpellAttackContext.DAMAGE_INTERVAL_TICKS) {
-                    t++;
-                } else {
-                    lastStrikeTick = t;
-                    LivingEntity struck = nearestStrikeable(caster, storm, radius);
-                    if (struck != null) {
-                        bolt(caster, wand, props, world, storm, struck, nextStrikeTick, t);
-                    }
-                    t++;
-                }
-
-                if (t % SKY_FLIGHT_TOP_UP == 0 && flightOn) {
-                    if (caster instanceof Player player && player.isOnline() && !player.isDead()) {
-                        player.setFlying(true);
-                    }
-                }
+                World world = caster.getWorld();
+                if (world != null) dissipate(caster, world, MOB_STORM_RADIUS);
+                cancel();
             }
         }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
     }
 
-    /** Six shrinking rings, the sky column down to the caster, the cloud halo and the flight tell. */
+    /**
+     * The single end path of a player's storm. Runs exactly once per instance
+     * whichever way it ended - the duration elapsed, the second cast, mana ran
+     * dry, the caster died, quit or the cast was countered - because
+     * {@link SustainEffect} owns the lifecycle.
+     */
+    private void endStorm(Player caster, StormClock clock, double radius) {
+        if (clock.bar != null) {
+            clock.bar.removeAll();
+            clock.bar = null;
+        }
+        if (caster == null) return;
+        World world = caster.getWorld();
+        if (world != null) dissipate(caster, world, radius);
+    }
+
+    /** The bar empties on whichever runs out first: the clock, or the caster's mana. */
+    private double remainingFraction(Player caster, int elapsed, int life, double upkeepPerSecond) {
+        double byTime = (life - elapsed) / 20.0;
+        MagicProfile manaProfile = upkeepPerSecond > 0
+                ? ProfileManager.getProfile(caster.getUniqueId(), MagicProfile.class)
+                : null;
+        double byMana = (upkeepPerSecond > 0 && manaProfile != null)
+                ? manaProfile.getMana() / upkeepPerSecond
+                : byTime;
+        return Math.max(0.0, Math.min(byTime, byMana) / (life / 20.0));
+    }
+
+    /**
+     * The storm, shared by both cast paths. One clock, one cadence gate and one
+     * per-target map, so countering the cast kills the whole storm.
+     *
+     * @return false once the storm is over; the caller owns the closing VFX
+     */
+    private boolean tickStorm(LivingEntity caster, StormClock clock, ItemStack wand, AttackProperties props,
+                              int life, double radius, double height) {
+        World world = caster.getWorld();
+        if (world == null || props.isCountered() || props.isCancelled()
+                || caster.isDead() || clock.t >= life
+                || (caster instanceof Player online && !online.isOnline())) {
+            return false;
+        }
+
+        // The storm follows the caster: re-anchored every tick, which is why
+        // Utils.resolveTarget is never called anywhere in this class.
+        Location anchor = caster.getLocation();
+        Location storm = anchor.clone().add(0.0, height, 0.0);
+
+        drawStorm(caster, world, storm, anchor, radius, height, clock.t);
+        // Keep a visible outer edge throughout the full storm sustain.
+        SpellVfx.ring(SKY_TINT, caster, storm, radius * 1.5, SKY_RING_POINTS, clock.t * SKY_SPIN, 0.8);
+        buffet(caster, world, storm, radius, height);
+
+        if (clock.t - clock.lastStrikeTick < SpellAttackContext.DAMAGE_INTERVAL_TICKS) {
+            clock.t++;
+        } else {
+            clock.lastStrikeTick = clock.t;
+            LivingEntity struck = nearestStrikeable(caster, storm, radius);
+            if (struck != null) {
+                bolt(caster, wand, props, world, storm, struck, clock.nextStrikeTick, clock.t);
+            }
+            clock.t++;
+        }
+
+        return true;
+    }
+
+    /** Six shrinking rings, the sky column down to the caster, and the cloud halo. */
     private void drawStorm(LivingEntity caster, World world, Location storm, Location anchor,
                            double radius, double height, int tick) {
         for (int layer = 0; layer < SKY_LAYERS; layer++) {
@@ -318,22 +296,24 @@ public class Skywrath extends AttackSpell implements Listener {
         ParticleCaster.spawn(caster, world, Utils.CLOUD, storm, SKY_CLOUD_COUNT,
                 radius * SKY_CLOUD_SPREAD_H, height * SKY_CLOUD_SPREAD_V,
                 radius * SKY_CLOUD_SPREAD_H, 0.03);
-        ParticleCaster.spawn(caster, world, Utils.PORTAL, anchor.clone().add(0, 1.0, 0),
-                SKY_PORTAL_COUNT, SKY_PORTAL_SPREAD_H, SKY_PORTAL_SPREAD_V,
-                SKY_PORTAL_SPREAD_H, 0.05);
     }
 
     /**
-     * The displacement, on every tick, unconditionally and with no damage at all.
-     * This is what the storm is really doing; the bolt is what rides along with it.
+     * The displacement, every tick, on everything caught under the storm that is not already
+     * rising. The lift is skipped once a target is climbing ({@link #SKY_BUFF_CEILING}), so the
+     * impulse cannot compound into a throw the target then dies falling off - the storm shoves,
+     * it does not kill. This is what the storm is really doing; the bolt is what rides along
+     * with it.
      */
     private void buffet(LivingEntity caster, World world, Location storm, double radius, double height) {
         for (LivingEntity le : Utils.getNearbyLivingEntities(storm, radius, height, radius)) {
             if (le.equals(caster) || le.isDead()) continue;
-            le.setVelocity(le.getVelocity().add(new Vector(
-                    (Math.random() - 0.5) * SKY_BUFF_JITTER,
-                    SKY_BUFF_LIFT,
-                    (Math.random() - 0.5) * SKY_BUFF_JITTER)));
+            Vector v = le.getVelocity();
+            if (v.getY() >= SKY_BUFF_CEILING) continue;
+            le.setVelocity(new Vector(
+                    v.getX() + (Math.random() - 0.5) * SKY_BUFF_JITTER,
+                    v.getY() + SKY_BUFF_LIFT,
+                    v.getZ() + (Math.random() - 0.5) * SKY_BUFF_JITTER));
             ParticleCaster.spawn(caster, world, Utils.DUST, le.getLocation().add(0, 1.0, 0),
                     SKY_BUFF_DUST, SKY_DUST);
         }
@@ -364,13 +344,22 @@ public class Skywrath extends AttackSpell implements Listener {
 
         Long next = nextStrikeTick.get(struck.getUniqueId());
         if (next == null || tick >= next) {
-            nextStrikeTick.put(struck.getUniqueId(), (long) tick + SpellAttackContext.DAMAGE_INTERVAL_TICKS);
+            nextStrikeTick.put(struck.getUniqueId(), (long) tick + strikeIntervalTicks());
             props.hit(struck);
             SpellDamageUtil.damageWithSpell(struck,
                     getPower(caster, struck, props.getRemainingPower()),
                     caster, wand, Skywrath.this);
             struck.setVelocity(new Vector(0.0, SKY_STRIKE_LIFT, 0.0));
         }
+    }
+
+    /**
+     * The per-target damage gap, in ticks. This is the gate that makes
+     * {@code hit_count} true, so it reads the yml's {@code strike_interval_seconds}
+     * and never drops below spec 4.1's 20-tick floor.
+     */
+    private int strikeIntervalTicks() {
+        return (int) Math.max(SpellAttackContext.DAMAGE_INTERVAL_TICKS, config.strikeIntervalTicks());
     }
 
     /**
@@ -391,77 +380,12 @@ public class Skywrath extends AttackSpell implements Listener {
         return nearest;
     }
 
-    /**
-     * Grants creative-style flight, capturing the three attributes it is about to
-     * overwrite so {@link #restoreFlight} can put them back verbatim. Never
-     * double-grants: a second call while a grant is live is a no-op.
-     */
-    private void grantFlight(Player caster, boolean allow, double flySpeed) {
-        if (!allow) return;
-        UUID uuid = caster.getUniqueId();
-        if (FLIGHT_STATES.containsKey(uuid)) return;
-        FLIGHT_STATES.put(uuid, new FlightState(
-                caster.getAllowFlight(), caster.isFlying(), caster.getFlySpeed()));
-        FLIGHT_RESTORED.remove(uuid);
-        caster.setAllowFlight(true);
-        caster.setFlying(true);
-        caster.setFlySpeed(clampFlySpeed(flySpeed));
-        World world = caster.getWorld();
-        if (world != null) {
-            world.playSound(caster.getLocation(), Sound.ENTITY_PHANTOM_AMBIENT, 1.0f, 0.7f);
-        }
-    }
-
-    /**
-     * Returns flight exactly once, however many of the three restore paths reach it.
-     * A player who was already flying before the cast is left flying.
-     */
-    private void restoreFlight(Player caster) {
-        UUID uuid = caster.getUniqueId();
-        if (!FLIGHT_RESTORED.add(uuid)) return;
-        FlightState state = FLIGHT_STATES.remove(uuid);
-        if (state == null) return;
-        caster.setFlySpeed(state.flySpeed());
-        caster.setAllowFlight(state.allowFlight());
-        caster.setFlying(state.flying());
-        World world = caster.getWorld();
-        if (world != null) {
-            world.playSound(caster.getLocation(), Sound.ENTITY_PHANTOM_FLAP, 0.6f, 1.4f);
-        }
-    }
-
-    /** {@code Player#setFlySpeed} rejects anything outside -1.0 .. 1.0, so clamp before writing. */
-    private static float clampFlySpeed(double speed) {
-        if (Double.isNaN(speed)) return 0.05F;
-        return (float) Math.max(-1.0, Math.min(1.0, speed));
-    }
-
     private void dissipate(LivingEntity caster, World world, double radius) {
         Location at = caster.getLocation();
         ParticleCaster.spawn(caster, world, Utils.EXPLOSION_EMITTER, at, SKY_DISPERSE_EMITTER);
         ParticleCaster.spawn(caster, world, Utils.SMOKE, at, SKY_DISPERSE_SMOKE,
                 radius, 1.2, radius, 0.06);
         world.playSound(at, Sound.ENTITY_BLAZE_DEATH, 1.0f, 0.9f);
-    }
-
-    /** A quitting player's stored state is dropped rather than leaked. */
-    @EventHandler
-    public void onQuit(PlayerQuitEvent e) {
-        UUID uuid = e.getPlayer().getUniqueId();
-        FLIGHT_STATES.remove(uuid);
-        FLIGHT_RESTORED.add(uuid);
-    }
-
-    /** Nothing may outlive a reload. */
-    @EventHandler
-    public void onPluginDisable(PluginDisableEvent e) {
-        if (e.getPlugin() != Alkatraz.getInstance()) return;
-        for (UUID uuid : FLIGHT_STATES.keySet()) {
-            Player player = Bukkit.getPlayer(uuid);
-            if (player != null && player.isOnline()) restoreFlight(player);
-        }
-        FLIGHT_STATES.clear();
-        FLIGHT_RESTORED.clear();
     }
 
     @Override
@@ -495,9 +419,15 @@ public class Skywrath extends AttackSpell implements Listener {
     }
 
     /**
-     * A caster's flight attributes as they were before the grant. A record because
-     * it is a fixed snapshot taken once and never mutated.
+     * The mutable state one live storm carries: its own tick count, the last global
+     * strike, the per-target strike gate and the sustain's boss bar. Held on an
+     * object rather than in locals because the storm's body and its teardown are two
+     * different callbacks and must see the same clock.
      */
-    private record FlightState(boolean allowFlight, boolean flying, float flySpeed) {
+    private static final class StormClock {
+        private final Map<UUID, Long> nextStrikeTick = new ConcurrentHashMap<>();
+        private int t;
+        private long lastStrikeTick = -SpellAttackContext.DAMAGE_INTERVAL_TICKS;
+        private BossBar bar;
     }
 }
