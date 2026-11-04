@@ -2,6 +2,7 @@ package me.nagasonic.alkatraz.spells.vfx;
 
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.util.Vector;
 import org.junit.jupiter.api.Test;
 
@@ -11,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 /**
  * Covers the pure geometry of {@link CastCircle}.
@@ -155,7 +157,9 @@ class CastCircleGeometryTest {
      * @param rotationStep  degrees added to the yaw to spin the layout
      */
     private void matchesMagicCircleExactly(double size, float yaw, float pitch, int rotationStep) {
-        Location origin = new Location(null, 10.0, 70.0, -5.0, yaw, pitch);
+        // circle() drops its four and nine ring points on a worldless centre, while CastCircle's
+        // cached geometry is world independent - a stuffed world keeps both sides at 89 points.
+        Location origin = new Location(mock(World.class), 10.0, 70.0, -5.0, yaw, pitch);
         List<Location> expected = ParticleUtils.magicCircle(
                 origin, yaw, pitch, new Vector(0.0, 0.0, 0.0), size, rotationStep);
         List<Vector> actual = CastCircle.worldOffsets(size, yaw, pitch, rotationStep);

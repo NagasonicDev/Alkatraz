@@ -49,7 +49,7 @@ class SpellBudgetsTest {
 
     @Test
     void burstBudgetMatchesTheSpecLadder() {
-        double[] expected = {1.5, 3.9, 6.1, 9.0, 13.9, 22.1, 34.1, 48.0, 64.1, 90.0};
+        double[] expected = {1.5, 3.5, 6.0, 9.0, 13.9, 22.1, 34.1, 48.0, 64.1, 180.0};
         for (int circle = 0; circle <= 9; circle++) {
             assertEquals(expected[circle], SpellBudgets.burstBudget(circle), 1e-9,
                     "circle " + circle + " burst budget");
@@ -75,7 +75,7 @@ class SpellBudgetsTest {
     @Test
     void statPointsAndPowerMatchTheSpecLadder() {
         int[] points = {0, 5, 10, 17, 27, 37, 52, 67, 87, 112};
-        double[] power = {1.5, 3.0, 4.2, 5.5, 7.5, 10.8, 14.8, 18.9, 22.7, 28.6};
+        double[] power = {1.5, 3.0, 4.2, 5.5, 7.5, 10.8, 14.8, 18.9, 22.7, 57.2};
         for (int circle = 0; circle <= 9; circle++) {
             assertEquals(points[circle], SpellBudgets.statPointsFor(circle),
                     "circle " + circle + " cumulative stat points");
@@ -271,8 +271,8 @@ class SpellBudgetsTest {
 
     @Test
     void sustainTerrainAndDenialMatchTheSpecLadder() {
-        int[] sustain = {0, 0, 0, 14, 22, 36, 54, 76, 102, 144};
-        int[] terrain = {0, 0, 0, 120, 220, 380, 620, 950, 1400, 2000};
+        int[] sustain = {0, 0, 0, 14, 22, 36, 54, 76, 102, 280};
+        int[] terrain = {0, 0, 0, 120, 220, 380, 620, 950, 1400, 3600};
         int[] denial = {0, 0, 0, 900, 1400, 2100, 3000, 4200, 5600, 7500};
         for (int circle = 0; circle <= 9; circle++) {
             assertEquals(sustain[circle], SpellBudgets.sustainBudget(circle), 1e-9,

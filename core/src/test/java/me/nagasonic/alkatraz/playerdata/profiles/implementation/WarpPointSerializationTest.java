@@ -13,7 +13,7 @@ class WarpPointSerializationTest {
 
     @Test
     void serializeFormat() {
-        assertEquals("2:world:120.5:64.0:-45.3:90.0:0.0", WarpPoint.serialize(POINT));
+        assertEquals("2|world|120.5|64.0|-45.3|90.0|0.0", WarpPoint.serialize(POINT));
     }
 
     @Test

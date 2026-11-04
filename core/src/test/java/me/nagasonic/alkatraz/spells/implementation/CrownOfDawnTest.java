@@ -1,7 +1,6 @@
 package me.nagasonic.alkatraz.spells.implementation;
 
 import me.nagasonic.alkatraz.api.Element;
-import me.nagasonic.alkatraz.spells.types.SpellAttackContext;
 import me.nagasonic.alkatraz.spells.types.SpellRole;
 import me.nagasonic.alkatraz.spells.util.SpellBudgets;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -11,7 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -19,12 +18,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * crown_of_dawn is light's circle-9 DENIAL capstone and the sharpest test of LIGHT's ban on
- * TERRAIN: it is literally a wall. The last method therefore asserts that no terrain key
- * exists and that the pure config record carries the same literals the yml does, including
- * the derived {@code power} and {@code hit_count} that fill the declared cap exactly.
+ * Spec sections 5, 5.2, 4.1 and 12.1: crown_of_dawn declares SUSTAIN rather than DENIAL, its
+ * thirty armour-sear openings land inside the circle-9 SUSTAIN budget, and the whole static
+ * wall - the keys it existed for - is gone from the yml.
  */
 class CrownOfDawnTest {
+
+    private static final String ID = "crown_of_dawn";
 
     private static YamlConfiguration load() throws IOException {
         try (InputStream in = CrownOfDawnTest.class.getResourceAsStream("/spells/crown_of_dawn.yml")) {
@@ -34,115 +34,90 @@ class CrownOfDawnTest {
     }
 
     @Test
-    void roleIsDenialAndAllowedForLight() throws IOException {
+    void roleIsSustainAndAllowedForLight() throws IOException {
         YamlConfiguration yml = load();
         SpellRole role = SpellRole.parse(yml.getString("role"));
         assertNotNull(role, "crown_of_dawn must declare a role: key");
-        assertEquals(SpellRole.DENIAL, role,
-                "the capstone denies passage and executes; that is what DENIAL means");
+        assertEquals(SpellRole.SUSTAIN, role,
+                "crown_of_dawn now hovers the caster and burns armour for 60s, so its damage is "
+                        + "damage-over-time and SUSTAIN is what judges it");
         assertEquals("LIGHT", yml.getString("element"), "crown_of_dawn is light's circle-9 capstone");
         assertTrue(SpellBudgets.isAllowed(Element.LIGHT, role),
                 role + " must be in LIGHT's allowlist");
     }
 
     @Test
-    void incidentalDamageIsCappedAtTheCircleNineBurstBudget() throws IOException {
-        YamlConfiguration yml = load();
-        assertTrue(yml.isSet("denial_damage_cap"),
-                "SpellBudgetTest.denialSpellsCapIncidentalDamageAtTheCircleBurstBudget "
-                        + "requires an explicit cap on any DENIAL spell that damages");
-        double cap = yml.getDouble("denial_damage_cap");
-        assertEquals(90.0, cap, 1e-9, "the cap is the section 6 circle-9 BURST budget, verbatim");
-        assertTrue(cap > 0.0, "a declared cap must be positive");
-        assertTrue(cap <= SpellBudgets.burstBudget(9),
-                "the cap must not exceed the circle-9 BURST budget of " + SpellBudgets.burstBudget(9));
-        assertTrue(yml.getDouble("power") <= SpellBudgets.burstBudget(9),
-                "the single power key must sit inside the burst budget on its own too");
+    void itsDamageLandsInsideTheCircleNineSustainBudget() throws IOException {
+        YamlConfiguration y = load();
+        double total = y.getDouble("power") * hitCount(y);
+        assertEquals(8.0, y.getDouble("power"), 1e-9, "8.0 per opening x 30 openings = 240.0");
+        assertEquals(30, hitCount(y), "60s at one opening every 2s is 30 openings");
+        assertEquals(240.0, total, 1e-9);
+        assertTrue(total <= SpellBudgets.sustainBudget(9),
+                ID + " deals " + total + " against the circle-9 SUSTAIN budget of "
+                        + SpellBudgets.sustainBudget(9));
+    }
+
+    /**
+     * The cap is what makes the declared 8.0 x 30 = 240.0 true, so the yml has to carry one and
+     * hit_count has to be exactly what fits inside it. Nothing enforced a lifetime before: at
+     * 9400 mana left after the 600 cast, 60/s upkeep against 15/s regen is a net 45/s, so the
+     * purse alone bought 208s = 104 openings = 832.0 - and SpellBudgetTest cannot see that,
+     * because it only ever reads {@code power x hit_count} out of this file.
+     */
+    @Test
+    void theDeclaredHitCountFitsInsideTheEnforcedDuration() throws IOException {
+        YamlConfiguration y = load();
+        double seconds = y.getDouble("duration_seconds");
+        int interval = y.getInt("damage_interval_ticks");
+        assertTrue(y.isSet("duration_seconds"),
+                "an unenforced duration_seconds lets the sustain run until the mana stops it");
+        assertEquals(60.0, seconds, 1e-9, "the cap the arithmetic above needs");
+        assertTrue(hitCount(y) * interval <= Math.round(seconds * 20.0),
+                hitCount(y) + " openings at every " + interval + " ticks do not fit inside "
+                        + seconds + "s, so the crown deals more than it declares");
+        assertEquals(Math.round(seconds * 20.0 / interval), hitCount(y),
+                "hit_count must be exactly what duration_seconds allows");
     }
 
     @Test
-    void powerTimesHitCountLandsExactlyOnTheDeclaredCap() throws IOException {
-        YamlConfiguration yml = load();
-        double power = yml.getDouble("power");
-        int hitCount = Math.max(1, yml.getInt("hit_count"));
-        double cap = yml.getDouble("denial_damage_cap");
-        assertEquals(6.0, power, 1e-9, "90.0 / 15 = 6.0, derived from the cap, not invented");
-        assertEquals(15, hitCount,
-                "wall_duration 15.0s is 300 ticks, which is 15 twenty-tick passes");
-        assertEquals(90.0, power * hitCount, 1e-9,
-                "6.0 x 15 passes = exactly the declared denial_damage_cap");
-        assertEquals(cap, power * hitCount, 1e-9,
-                "the cap and the declared per-cast total must be the same number, or the "
-                        + "cap is decoration rather than a ceiling");
-    }
-
-    @Test
-    void ladderCostsMatchTheCircleNineRow() throws IOException {
-        YamlConfiguration yml = load();
-        assertEquals(600, yml.getInt("mana_cost"), "section 6 circle-9 mana");
-        assertEquals(20, yml.getInt("cooldown"), "section 6 circle-9 cooldown");
-        assertEquals(161, yml.getInt("required_focus"), "section 6 circle-9 focus");
-        // The spec section 6 ladder lists 3.0s for circle 9, but SpellBudgets collapses
-        // circles 6-9 to one legal cast time each and circle 9's is 40 ticks = 2.0s.
-        assertEquals(2.0, yml.getDouble("cast_time"), 1e-9,
-                "SpellBudgets.castTimeRange collapses circle 9 to the single point 40 ticks, so 2.0 is "
-                        + "the only legal circle-9 cast time");
-        assertTrue(SpellBudgets.castTimeRange(9).contains((int) Math.round(yml.getDouble("cast_time") * 20.0)),
-                "circle 9 allows " + SpellBudgets.castTimeRange(9).minTicks() + ".."
-                        + SpellBudgets.castTimeRange(9).maxTicks() + " ticks");
-    }
-
-    @Test
-    void levelIsCircleNineTheWallPlacesNoBlocksAndTheRecordMatchesTheYml() throws IOException {
-        YamlConfiguration yml = load();
-        assertEquals(9, yml.getInt("level"), "crown_of_dawn is light's circle-9 capstone");
-        assertEquals("SSSSL", yml.getString("code"), "the allocated cast code");
-        assertEquals(4158, yml.getInt("gui_custom_model_data"),
-                "the allocated custom model data value");
-        for (String terrainish : new String[]{
-                "terrain_budget", "block_type", "material", "blocks_placed"}) {
-            assertFalse(yml.isSet(terrainish),
-                    terrainish + " must not exist: a wall of light is not terrain, so "
-                            + "crown_of_dawn places no blocks and spends from no "
-                            + "TERRAIN budget");
+    void theDenialBlockIsGoneAndItNeverPlacesBlocks() throws IOException {
+        YamlConfiguration y = load();
+        for (String gone : List.of("denial_damage_cap", "execution_threshold", "push_strength",
+                "wall_duration", "wall_length", "wall_height", "barrier_hitpoints",
+                "wall_half_thickness", "segment_spacing", "rise_ticks")) {
+            assertFalse(y.isSet(gone), gone + " belonged to the static wall and must be deleted");
         }
-        assertEquals(60.0, yml.getDouble("barrier_hitpoints"), 1e-9,
-                "the wall's BarrierProperties hitpoints");
-        assertEquals(0.45, yml.getDouble("push_strength"), 1e-9,
-                "the radial push that makes it a wall rather than a decoration");
-        assertEquals(0.3, yml.getDouble("execution_threshold"), 1e-9,
-                "anything below 30% health is executed, which is the denial itself");
+        assertFalse(y.isSet("terrain_budget"), "crown_of_dawn places no blocks at all");
+        assertEquals(10.0, y.getDouble("hover_radius"), 1e-9);
+        assertEquals(6, y.getInt("hover_altitude"));
+        assertEquals(60, y.getInt("upkeep_mana_per_second"));
+        assertEquals(0, y.getInt("cooldown"), "a cooldown would block the toggle-off cast");
+        assertEquals(9, y.getInt("level"));
+        assertEquals("SSSSL", y.getString("code"));
+        assertEquals(4158, y.getInt("gui_custom_model_data"));
+        assertEquals(600, y.getInt("mana_cost"));
+        assertEquals(161, y.getDouble("required_focus"), 1e-9);
+        assertEquals(2.0, y.getDouble("cast_time"), 1e-9);
+    }
 
-        assertEquals(SpellAttackContext.DAMAGE_INTERVAL_TICKS, CrownOfDawnConfig.DAMAGE_INTERVAL_TICKS,
-                "the record's local cadence constant must not drift from the context's");
-
-        // The pure config record must carry the SAME literals the yml does, and its derived
-        // counts must be the ones the yml declares.
-        CrownOfDawnConfig defaults = CrownOfDawnConfig.defaults();
-        assertEquals(defaults, CrownOfDawnConfig.fromConfig(Map.of()),
-                "defaults() and fromConfig(Map.of()) are one set of literals");
-        assertEquals(defaults, CrownOfDawnConfig.fromConfig(null),
-                "a null map is the same set of literals");
-        assertEquals(yml.getDouble("wall_duration"), defaults.wallDuration(), 1e-9, "wall_duration");
-        assertEquals(yml.getDouble("wall_length"), defaults.wallLength(), 1e-9, "wall_length");
-        assertEquals(yml.getDouble("wall_height"), defaults.wallHeight(), 1e-9, "wall_height");
-        assertEquals(yml.getDouble("barrier_hitpoints"), defaults.barrierHitpoints(), 1e-9,
-                "barrier_hitpoints");
-        assertEquals(yml.getDouble("wall_half_thickness"), defaults.wallHalfThickness(), 1e-9,
-                "wall_half_thickness");
-        assertEquals(yml.getDouble("push_strength"), defaults.pushStrength(), 1e-9, "push_strength");
-        assertEquals(yml.getDouble("execution_threshold"), defaults.executionThreshold(), 1e-9,
-                "execution_threshold");
-        assertEquals(yml.getDouble("segment_spacing"), defaults.segmentSpacing(), 1e-9, "segment_spacing");
-        assertEquals(yml.getDouble("rise_ticks"), defaults.riseTicks(), 1e-9, "rise_ticks");
-        assertEquals(yml.getDouble("denial_damage_cap"), defaults.denialDamageCap(), 1e-9,
-                "denial_damage_cap");
-        assertEquals(300, defaults.durationTicks(), "15.0 seconds is 300 ticks");
-        assertEquals(10, defaults.riseTickCount(), "10 ticks to full height");
-        assertEquals(18, defaults.segmentCount(), "9.0 blocks at 0.5 spacing is 18 segments");
-        assertEquals(15, defaults.hitCount(), "300 ticks over the 20-tick interval is 15 passes");
-        assertEquals(6.0, defaults.powerForCap(), 1e-9, "90.0 / 15 = 6.0");
-        assertEquals(90.0, defaults.powerForCap() * defaults.hitCount(), 1e-9,
-                "the derived power and hit count fill the declared cap exactly");
+    /**
+     * The openings {@code duration_seconds} actually allows, cross-checked against
+     * {@code hit_count} the way TideOfTheDeepTest does it. A hand-edited copy that moves one
+     * without the other would under-report the spell to SpellBudgetTest, which only ever reads
+     * the declared pair. Absent {@code hit_count} means one damage application per cast.
+     */
+    private static int hitCount(YamlConfiguration y) {
+        if (!y.isSet("hit_count")) return 1;
+        int declared = Math.max(1, y.getInt("hit_count"));
+        assertTrue(y.isSet("duration_seconds"),
+                "crown_of_dawn must declare an enforced duration_seconds; without one the sustain "
+                        + "runs until the mana stops it and blows the budget by 3x");
+        int openings = (int) Math.round(y.getDouble("duration_seconds") * 20.0
+                / y.getInt("damage_interval_ticks"));
+        assertEquals(declared, openings,
+                "hit_count must equal the openings duration_seconds allows, or SpellBudgetTest "
+                        + "under-reports the spell");
+        return openings;
     }
 }

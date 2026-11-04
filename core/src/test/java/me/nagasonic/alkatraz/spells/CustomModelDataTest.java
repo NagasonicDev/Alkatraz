@@ -22,10 +22,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * collisions existed - warp 4118 (same as dark_tendrils) and skeletal_knights 4130
  * (same as water_sphere) - and are repaired to 4166 and 4167.
  *
- * <p>{@code texturepack.yml}'s matching {@code spell_*} keys are DEAD CONFIG:
- * {@code TexturePackManager.loadItemCMDs()} reads only six hardcoded
- * {@code custom_model_data.gui.*} keys and never loops the section. Nothing depends
- * on them; this test asserts only the per-spell yml keys.
+ * <p>{@code texturepack.yml}'s matching {@code spell_*} keys are unused by the
+ * plugin: {@code TexturePackManager.loadItemCMDs()} skips any {@code spell_*}
+ * GUI key. This test asserts only the per-spell yml keys.
  */
 class CustomModelDataTest {
 

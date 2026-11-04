@@ -84,8 +84,8 @@ class AffinityCurveTest {
      * Spec section 6 and section 15: spot-check the ladder end to end.
      *
      * <p>A naked circle-0 Magic Missile deals 1.5 and a naked circle-9 capstone spends
-     * the whole 90.0 BURST budget, so the naked spread is x60. Fully geared with max
-     * options the same cast reaches roughly 129, an x86 spread, of which affinity
+     * the whole 180.0 BURST budget, so the naked spread is x120. Fully geared with max
+     * options the same cast reaches roughly 258, an x172 spread, of which affinity
      * supplies x3.15 and gear roughly x1.43.
      *
      * <p>The geared figure is asserted as a BAND rather than a point, because the
@@ -97,18 +97,18 @@ class AffinityCurveTest {
         double nakedZero = SpellBudgets.burstBudget(0);
         double nakedNine = SpellBudgets.burstBudget(9);
         assertEquals(1.5, nakedZero, 1e-9, "a naked circle-0 magic missile deals 1.5");
-        assertEquals(90.0, nakedNine, 1e-9, "a naked circle-9 capstone spends the 90.0 BURST budget");
-        assertEquals(60.0, nakedNine / nakedZero, 1e-9, "the naked spread is x60");
+        assertEquals(180.0, nakedNine, 1e-9, "a naked circle-9 capstone spends the 180.0 BURST budget");
+        assertEquals(120.0, nakedNine / nakedZero, 1e-9, "the naked spread is x120");
 
         double affinityNine = affinity(112);                    // 215 -> x3.15
         double gear = 1.43;                                     // astral wand 20 + grimoire 15
         // + 4 jewellery + 4pc set = 43
         double geared = SpellBudgets.powerFor(9) * (1 + affinityNine / 100.0) * gear;
-        assertTrue(geared >= 120.0 && geared <= 145.0,
-                "a fully geared circle-9 capstone with max options lands near the design's ~129; "
+        assertTrue(geared >= 240.0 && geared <= 280.0,
+                "a fully geared circle-9 capstone with max options lands near the design's ~258; "
                         + "powerFor(9) x affinity x gear is " + geared);
-        assertTrue(geared / nakedZero > 80.0,
-                "which is an x80+ spread from the naked circle-0 cast, the design's ~x86 including "
+        assertTrue(geared / nakedZero > 150.0,
+                "which is an x150+ spread from the naked circle-0 cast, the design's ~x172 including "
                         + "the per-spell max-option term");
     }
 

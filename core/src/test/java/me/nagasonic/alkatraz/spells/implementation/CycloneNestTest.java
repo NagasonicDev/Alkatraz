@@ -131,7 +131,7 @@ class CycloneNestTest {
         assertEquals(2.5, defaults.nestRadius(), 1e-9);
         assertEquals(6.0, defaults.nestHeight(), 1e-9);
         assertEquals(0.55, defaults.nestPull(), 1e-9);
-        assertEquals(0.18, defaults.nestWanderSpeed(), 1e-9);
+        assertEquals(0.4, defaults.nestWanderSpeed(), 1e-9);
         assertEquals(4.0, defaults.nestSpawnSpread(), 1e-9);
         assertEquals(defaults, CycloneNestConfig.fromConfig(null),
                 "a null map falls back to exactly the documented defaults");

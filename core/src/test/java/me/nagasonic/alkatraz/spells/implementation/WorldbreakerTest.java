@@ -22,12 +22,24 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * <p>Zero Bukkit mocks. The block arithmetic is recomputed here from the yml rather than read off
  * the spell, so the ceiling the implementation enforces with one shared int[] and the figure the
  * budget is charged at are two independent statements of the same number.
+ *
+ * <p>At the shipped defaults the natural layout WANTS 3696 blocks and only gets 3600, so the
+ * arithmetic that guards the cap is the inclusive footprint minus the caster's own column - not
+ * {@code crush_width x rift_length}. These tests therefore assert the counter's behaviour: the
+ * wish exceeds the cap, and the counter truncates to exactly the cap.
  */
 class WorldbreakerTest {
 
     private static YamlConfiguration spell() throws IOException {
         try (InputStream in = WorldbreakerTest.class.getResourceAsStream("/spells/worldbreaker.yml")) {
             assertNotNull(in, "bundled resource /spells/worldbreaker.yml is missing");
+            return YamlConfiguration.loadConfiguration(new InputStreamReader(in, StandardCharsets.UTF_8));
+        }
+    }
+
+    private static YamlConfiguration options() throws IOException {
+        try (InputStream in = WorldbreakerTest.class.getResourceAsStream("/spells/worldbreaker_options.yml")) {
+            assertNotNull(in, "bundled resource /spells/worldbreaker_options.yml is missing");
             return YamlConfiguration.loadConfiguration(new InputStreamReader(in, StandardCharsets.UTF_8));
         }
     }
@@ -46,6 +58,38 @@ class WorldbreakerTest {
         return count;
     }
 
+    /** One slab layer, mirroring Worldbreaker.slabFootprint: both axes INCLUSIVE, minus the
+     *  single column the caster is standing in (layer 1 would otherwise seal them in). */
+    private static int slabLayer(int riftLength, YamlConfiguration y) {
+        int halfLength = Math.max(1, riftLength / 2);
+        int halfWidth = Math.max(0, y.getInt("crush_width") / 2);
+        return (2 * halfLength + 1) * (2 * halfWidth + 1) - 1;
+    }
+
+    /** Every block the layout would touch with no cap at all: both faults, the slab, both chasms. */
+    private static int wanted(int riftLength, int crushLift, YamlConfiguration y) {
+        int digTicks = (int) Math.floor(riftLength / (double) y.getInt("rift_step"));
+        int dug = 2 * digTicks * sphereBlockCount(y.getDouble("rift_radius"));
+        int raised = slabLayer(riftLength, y) * crushLift;
+        int chasms = 2 * sphereBlockCount(y.getDouble("chasm_radius"));
+        return dug + raised + chasms;
+    }
+
+    /** What is LEFT in the one shared int[] after the cast, in Worldbreaker's own spend order:
+     *  faults, then slab layers one at a time, then one chasm per rift - each clamped to the
+     *  remainder, exactly as {@code Math.min(blocksLeft[0], n)} clamps at every call site. */
+    private static int remainingAfterCast(int budget, int riftLength, int crushLift, YamlConfiguration y) {
+        int digTicks = (int) Math.floor(riftLength / (double) y.getInt("rift_step"));
+        // shortcut: the per-site clamp is skipped here because no shipped option digs more than
+        // the cap on its own (the largest is world_end at 2508). Model it if that ever changes.
+        int left = budget - 2 * digTicks * sphereBlockCount(y.getDouble("rift_radius"));
+        int perLayer = slabLayer(riftLength, y);
+        for (int layer = 1; layer <= crushLift && left > 0; layer++) left -= Math.min(left, perLayer);
+        int perChasm = sphereBlockCount(y.getDouble("chasm_radius"));
+        for (int rift = 0; rift < 2 && left > 0; rift++) left -= Math.min(left, perChasm);
+        return left;
+    }
+
     @Test
     void roleIsParseableAndAllowedForEarth() throws IOException {
         YamlConfiguration y = spell();
@@ -62,12 +106,14 @@ class WorldbreakerTest {
     @Test
     void powerIsTheLadderValueAndThereIsNoHitCount() throws IOException {
         YamlConfiguration y = spell();
-        assertEquals(28.6, y.getDouble("power"), 1e-9,
+        assertEquals(57.2, y.getDouble("power"), 1e-9,
                 "power is the section 6 circle-9 ladder value, verbatim");
         assertFalse(y.isSet("hit_count"),
-                "the slab crushes each target exactly once, so hit_count is absent and defaults to 1");
-        assertTrue(y.getDouble("power") <= SpellBudgets.burstBudget(y.getInt("level")),
-                "the declared single power key must sit inside the same-circle BURST budget");
+                "the slab crushes each target on three separate ticks, so hit_count is absent "
+                        + "and defaults to 1");
+        assertEquals(3, y.getInt("crush_events"), "lift, fall, slab");
+        assertTrue(y.getDouble("power") * y.getInt("crush_events") <= SpellBudgets.burstBudget(y.getInt("level")),
+                "all three crush events together must sit inside the same-circle BURST budget");
     }
 
     @Test
@@ -103,37 +149,62 @@ class WorldbreakerTest {
     }
 
     @Test
-    void bothFaultsAndTheSlabShareOneCeiling() throws IOException {
+    void terrainBudgetIsTheCircleNineCeiling() throws IOException {
         YamlConfiguration y = spell();
-        assertEquals(SpellBudgets.terrainBudget(9), y.getInt("terrain_budget"),
-                "terrain_budget traces back to SpellBudgets.terrainBudget(9) = 2000");
-        assertEquals(2000, y.getInt("terrain_budget"), "and 2000 is the circle-9 ceiling");
+        assertEquals(SpellBudgets.terrainBudget(9), y.getInt("terrain_budget"));
+        assertEquals(3600, y.getInt("terrain_budget"), "and 3600 is the new circle-9 ceiling");
+    }
 
-        int step = Math.max(1, y.getInt("rift_step"));
-        int digTicks = y.getInt("rift_length") / step;
-        assertEquals(15, digTicks, "rift_length 30 / rift_step 2 = 15 dig ticks per fault");
-        int perSite = sphereBlockCount(y.getDouble("rift_radius"));
-        assertEquals(33, perSite, "a radius-2 sphere is 33 candidate blocks");
-        int faultBlocks = 2 * digTicks * perSite;
-        assertEquals(990, faultBlocks, "two faults x 15 sites x 33 blocks");
-        int slabBlocks = y.getInt("crush_width") * y.getInt("rift_length") * y.getInt("crush_lift");
-        assertEquals(900, slabBlocks, "the slab places crush_width x rift_length x crush_lift");
-        int natural = faultBlocks + slabBlocks;
-        assertEquals(1890, natural, "990 dug plus 900 raised");
-        assertTrue(natural <= y.getInt("terrain_budget"),
-                "ONE shared allowance covers both faults and the slab: " + natural + " of "
-                        + y.getInt("terrain_budget"));
+    @Test
+    void theSharedAllowanceTruncatesTheNaturalLayoutToExactlyTheCap() throws IOException {
+        YamlConfiguration y = spell();
+        int cap = SpellBudgets.terrainBudget(y.getInt("level"));
+        int length = y.getInt("rift_length");
+        int lift = y.getInt("crush_lift");
 
-        // The paid 'world_end' option asks for more than the ceiling, which is why it carries a
-        // mana_cost impact and why both loops share one int[] counter rather than one each.
-        int worldEndTicks = 44 / step;
-        int worldEndBlocks = 2 * worldEndTicks * perSite + y.getInt("crush_width") * 44
-                * y.getInt("crush_lift");
-        assertEquals(22, worldEndTicks, "44 / 2 = 22 dig ticks per fault");
-        assertEquals(2772, worldEndBlocks, "1452 dug plus 1320 raised");
-        assertTrue(worldEndBlocks > y.getInt("terrain_budget"),
-                worldEndBlocks + " blocks is over the ceiling of " + y.getInt("terrain_budget"));
-        assertEquals(y.getInt("terrain_budget"), Math.min(worldEndBlocks, y.getInt("terrain_budget")),
-                "the shared int[] allowance truncates at the budget rather than overshooting it");
+        int digTicks = (int) Math.floor(length / (double) y.getInt("rift_step"));
+        int dug = 2 * digTicks * sphereBlockCount(y.getDouble("rift_radius"));
+        int raised = slabLayer(length, y) * lift;
+        int chasms = 2 * sphereBlockCount(y.getDouble("chasm_radius"));
+
+        // The four figures every comment in worldbreaker.yml and its options file quotes.
+        assertEquals(19, digTicks, "digTicks floors rift_length / rift_step, so 38 / 2 = 19");
+        assertEquals(57, sphereBlockCount(y.getDouble("rift_radius")), "a radius-2.4 sphere is 57");
+        assertEquals(123, sphereBlockCount(y.getDouble("chasm_radius")), "a radius-3.0 sphere is 123");
+        assertEquals(350, slabLayer(length, y),
+                "39 x 11 with both axes inclusive, less the one column the caster stands in - NOT "
+                        + "crush_width x rift_length, which is 380");
+        assertEquals(1050, raised, "350 per layer x 3 layers");
+
+        assertEquals(3462, dug + raised + chasms,
+                "the natural layout at the shipped defaults wants 3462 of a 3600 cap");
+        assertEquals(3462, cap - remainingAfterCast(cap, length, lift, y),
+                "the one shared int[] spends 3462 of the 3600 ceiling");
+        assertEquals(138, remainingAfterCast(cap, length, lift, y),
+                "the default cast leaves 138 blocks of headroom");
+    }
+
+    @Test
+    void bothWideningOptionsAskForMoreThanTheCapSoWideningTheSlabFailsCi() throws IOException {
+        YamlConfiguration y = spell();
+        YamlConfiguration o = options();
+        int cap = y.getInt("terrain_budget");
+
+        int longRift = o.getInt("options.rift_length.values.world_end.value");
+        assertEquals(44, longRift, "world_end is the rift_length option that pays extra mana");
+        assertTrue(wanted(longRift, y.getInt("crush_lift"), y) > cap,
+                "rift_length " + longRift + " wants " + wanted(longRift, y.getInt("crush_lift"), y)
+                        + ", over the cap, so it is clipped - not silently affordable");
+
+        int tallLift = o.getInt("options.crush_lift.values.upthrust.value");
+        assertEquals(5, tallLift, "upthrust is the crush_lift option that pays extra mana");
+        assertTrue(wanted(y.getInt("rift_length"), tallLift, y) > cap,
+                "crush_lift " + tallLift + " wants " + wanted(y.getInt("rift_length"), tallLift, y)
+                        + ", over the cap, so it is clipped - not silently affordable");
+
+        assertEquals(0, remainingAfterCast(cap, longRift, y.getInt("crush_lift"), y),
+                "the widest rift still ends on the ceiling");
+        assertEquals(0, remainingAfterCast(cap, y.getInt("rift_length"), tallLift, y),
+                "the tallest slab still ends on the ceiling");
     }
 }
