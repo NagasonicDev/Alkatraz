@@ -19,6 +19,7 @@ import me.nagasonic.alkatraz.api.magic.instance.MagicItemInstance;
 import me.nagasonic.alkatraz.api.magic.modifier.EngravingDefinition;
 import me.nagasonic.alkatraz.items.magic.itemstack.MagicItemStack;
 import me.nagasonic.alkatraz.items.magic.MagicItemBootstrap;
+import me.nagasonic.alkatraz.items.magic.adapter.PeriodicTriggerListener;
 import me.nagasonic.alkatraz.loot.implementation.SpellbookLoot;
 import me.nagasonic.alkatraz.api.magic.registry.MagicItemRegistries;
 import me.nagasonic.alkatraz.api.magic.registry.MagicKeys;
@@ -445,6 +446,9 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage(lang().get("commands.no_permission"));
             return;
         }
+        me.nagasonic.alkatraz.playerdata.profiles.ProfileManager.beginReload();
+        me.nagasonic.alkatraz.items.magic.adapter.PeriodicTriggerListener.stop();
+        try {
         // Language first: SpellRegistry.reload() re-runs Spell.loadCommonConfig, which is
         // where spell names and descriptions are read. A lang edit must land before that.
         Alkatraz.reloadLangManager();
@@ -464,13 +468,26 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
         // ItemStacks built from it, so rebuilding them any earlier would reuse the old codes.
         TexturePackManager.reload();
         GUIItemRegistry.reload();
+        // Revoke stale effect/modifier handles before spell definitions are replaced.
+        EffectRegistry.clearAll();
+        ModifierManager.clear();
+        me.nagasonic.alkatraz.spells.modifier.PooledModifierSpellSupport.clearAllExpiryTasks();
+        // Clear stale SpellModifier objects before spell maps are replaced.
+        for (org.bukkit.entity.Player _p : org.bukkit.Bukkit.getOnlinePlayers()) {
+            me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile _mp =
+                    me.nagasonic.alkatraz.playerdata.profiles.ProfileManager.getProfile(_p, me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile.class);
+            if (_mp != null) _mp.clearAllSpellModifiers();
+        }
         SpellRegistry.reload();
+        MagicEntities.clearSpellCache();
+        me.nagasonic.alkatraz.items.magic.equipment.EquipmentService.invalidateAll();
         ProgressionService.reload();
         me.nagasonic.alkatraz.progression.BoosterManager.onReload();
         MagicEntities.registerProfiles();
         MagicBrainService brainService = MagicBrainService.getInstance();
         if (brainService != null) brainService.reloadBrains();
         MagicItemBootstrap.reload();
+        new PeriodicTriggerListener().start();
         // Spellbook weights are baked into ItemStack NBT at build time, and registerAll()
         // only ran from onEnable, so loot.yml edits did nothing until a restart. Rebuilding
         // here fixes every roll generated from now on. Books already in an inventory or
@@ -479,8 +496,17 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
         // SpellbookLoot.reloadLoot's javadoc.
         SpellbookLoot.reloadLoot();
         me.nagasonic.alkatraz.gui.implementation.research.ResearchGraphMenu.clearCaches();
+        // Drop stale timed effects/modifiers already revoked above; remaining cleanup.
+        me.nagasonic.alkatraz.items.magic.adapter.MagicDamageListener.clearAll();
+        me.nagasonic.alkatraz.items.magic.barrier.BarrierManager.disposeAll();
+        me.nagasonic.alkatraz.items.magic.barrier.BarrierManager.initialize();
+        Alkatraz.clearFocusCaches();
+        me.nagasonic.alkatraz.gui.Menu.clearActiveMenus();
         refreshStaticCompletions();
         sender.sendMessage(lang().get("commands.reload_success"));
+        } finally {
+            me.nagasonic.alkatraz.playerdata.profiles.ProfileManager.endReload();
+        }
     }
 
     private void handleSummon(CommandSender sender, String[] args) {
@@ -695,6 +721,10 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
     private void handleTest(CommandSender sender, String[] args) {
         if (!(sender instanceof Player p)) {
             sender.sendMessage(lang().get("commands.player_only"));
+            return;
+        }
+        if (!Alkatraz.getNms().supportsGrimoireLectern()) {
+            sender.sendMessage(format("&cGrimoire lectern is not supported on this server version."));
             return;
         }
         Alkatraz.getNms().spawnGrimoireLectern(p);

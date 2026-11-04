@@ -367,6 +367,9 @@ public final class NMS_v26_R1 implements NMS {
 
 
     @Override
+    public boolean supportsGrimoireLectern() { return true; }
+
+    @Override
     public void onEnable() {
         NMS.super.onEnable();
     }

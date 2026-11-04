@@ -28,12 +28,12 @@ import java.util.Map;
  */
 public final class MagicBrains {
 
-    private static final Map<String, GoalBrain> brainCache = new ConcurrentHashMap<>();
-    private static final Map<String, String> displayNameCache = new HashMap<>();
-    private static final Map<String, Double> meleeRangeCache = new HashMap<>();
-    private static final Map<String, String> wandCache = new HashMap<>();
-    private static final Map<String, TaskBrain> taskBrainCache = new HashMap<>();
-    private static final Map<String, Map<String, GoalBrain>> activityBrainCache = new HashMap<>();
+        private static final Map<String, GoalBrain> brainCache = new ConcurrentHashMap<>();
+    private static final Map<String, String> displayNameCache = new ConcurrentHashMap<>();
+    private static final Map<String, Double> meleeRangeCache = new ConcurrentHashMap<>();
+    private static final Map<String, String> wandCache = new ConcurrentHashMap<>();
+    private static final Map<String, TaskBrain> taskBrainCache = new ConcurrentHashMap<>();
+    private static final Map<String, Map<String, GoalBrain>> activityBrainCache = new ConcurrentHashMap<>();
 
     public static final String BRAIN_KEY = "alkatraz_brain";
 
@@ -66,21 +66,28 @@ public final class MagicBrains {
         Config cfg = ConfigManager.getConfig("brains/" + id + ".yml");
         var root = cfg.get();
 
-        displayNameCache.put(id, root.getString("display-name", "&f" + id));
-        meleeRangeCache.put(id, root.getDouble("melee-range", 0));
+        String displayName = root.getString("display-name", "&f" + id);
+        if (displayName != null) displayNameCache.put(id, displayName);
+        double meleeRange = root.getDouble("melee-range", 0);
+        meleeRangeCache.put(id, meleeRange);
         String wand = root.getString("wand");
-        wandCache.put(id, wand);
+        if (wand != null) {
+            wandCache.put(id, wand);
+        } else {
+            wandCache.remove(id);
+        }
 
         GoalBrain.Builder builder = GoalBrain.builder();
         applySection(builder, root, "goals", false);
         applySection(builder, root, "targets", true);
-        brainCache.put(id, builder.build());
+        GoalBrain built = builder.build();
+        if (built != null) brainCache.put(id, built);
 
         ConfigurationSection tasks = root.getConfigurationSection("tasks");
         if (tasks != null) {
             TaskBrainFactory.Result result = TaskBrainFactory.load(tasks);
-            taskBrainCache.put(id, result.brain());
-            activityBrainCache.put(id, result.activityBrains());
+            if (result.brain() != null) taskBrainCache.put(id, result.brain());
+            if (result.activityBrains() != null) activityBrainCache.put(id, result.activityBrains());
         } else {
             taskBrainCache.remove(id);
             activityBrainCache.remove(id);

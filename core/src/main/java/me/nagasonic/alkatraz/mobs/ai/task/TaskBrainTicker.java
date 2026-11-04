@@ -109,13 +109,21 @@ public final class TaskBrainTicker implements Listener {
     }
 
     public static boolean setPinnedActivity(LivingEntity entity, @Nullable String activityId) {
+        if (!Bukkit.isPrimaryThread()) {
+            Bukkit.getScheduler().runTask(Alkatraz.getInstance(), () -> setPinnedActivity(entity, activityId));
+            return false;
+        }
+        if (entity == null || !entity.isValid()) return false;
         TaskBrainEngine engine = engine(entity);
         if (engine == null) return false;
         engine.setPinnedActivity(activityId);
-        NBT.modifyPersistentData(entity, nbt -> {
-            if (activityId == null) nbt.removeKey(ACTIVITY_KEY);
-            else nbt.setString(ACTIVITY_KEY, activityId);
-        });
+        try {
+            NBT.modifyPersistentData(entity, nbt -> {
+                if (activityId == null) nbt.removeKey(ACTIVITY_KEY);
+                else nbt.setString(ACTIVITY_KEY, activityId);
+            });
+        } catch (Exception ignored) {
+        }
         return true;
     }
 
@@ -127,9 +135,14 @@ public final class TaskBrainTicker implements Listener {
 
     private static void detachWithPersistence(TaskBrainEngine engine) {
         LivingEntity entity = engine.getEntity();
-        NBT.modifyPersistentData(entity, nbt -> {
-            engine.writeMemoryTo((NBTCompound) nbt.getOrCreateCompound(MEMORY_KEY));
-        });
+        if (entity == null) return;
+        try {
+            NBT.modifyPersistentData(entity, nbt -> {
+                engine.writeMemoryTo((NBTCompound) nbt.getOrCreateCompound(MEMORY_KEY));
+            });
+        } catch (Exception ignored) {
+            // Entity may be removed or NBT unavailable; avoid crashing caller.
+        }
     }
 
     private static MobMemoryStore readMemory(LivingEntity entity) {

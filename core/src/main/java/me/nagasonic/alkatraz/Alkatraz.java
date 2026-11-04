@@ -196,6 +196,7 @@ saveConfig("boosters.yml"); // Save booster definitions
         ProfileManager.initialize();
         logVeryHigh("Initializing ProgressionService...");
         ProgressionService.initialize();
+        me.nagasonic.alkatraz.progression.BoosterManager.startExpiryTask();
         logVeryHigh("Initializing ResearchService...");
         ResearchService.initialize();
         logVeryHigh("Initializing MagicItemBootstrap...");
@@ -271,6 +272,7 @@ registerListener(new ModifierLifecycleListener());
 
     @Override
     public void onDisable() {
+        try { Bukkit.getScheduler().cancelTasks(this); } catch (Exception ignored) { }
         if (metrics != null) {
             metrics.shutdown();
             metrics = null;
@@ -300,6 +302,8 @@ registerListener(new ModifierLifecycleListener());
         PeriodicTriggerListener.stop();
         EquipmentReconcileTask.stop();
         ChannelRegistry.shutdown();
+me.nagasonic.alkatraz.spells.effect.EffectRegistry.clearAll();
+        BoosterManager.stopExpiryTask();
         BoosterManager.clear();
         ModifierManager.clear();
         SkinUtils.shutdown();
@@ -367,6 +371,15 @@ registerListener(new ModifierLifecycleListener());
      * SpellRegistry.reload(), which is what re-reads spell names and descriptions, so a
      * lang edit takes effect on reload instead of needing a server restart.
      */
+    /**
+     * Clears cached focus movement state on reload (defence against stale entries).
+     */
+    public static void clearFocusCaches() {
+        if (instance != null && instance.focusManager != null) {
+            instance.focusManager.clearCaches();
+        }
+    }
+
     public static void reloadLangManager() {
         langManager = new me.nagasonic.alkatraz.lang.LangManager(
                 pluginConfig.getString("language", "english"), instance.getDataFolder());

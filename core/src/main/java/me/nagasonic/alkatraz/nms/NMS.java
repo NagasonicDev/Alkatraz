@@ -89,6 +89,13 @@ public interface NMS extends Listener {
     // -----------------------------------------------------------------------
 
     /**
+     * Whether this server version supports the fake grimoire lectern feature.
+     * Adapters that implement {@link #spawnGrimoireLectern(Player)} override
+     * this to {@code true}.
+     */
+    default boolean supportsGrimoireLectern() { return false; }
+
+    /**
      * Spawns a fake lectern block with a book in front of the player,
      * visible only to that player via client-side packets.
      *

@@ -55,6 +55,13 @@ public final class MagicEntities {
         MagicBrains.registerAll();
     }
 
+    /** Drops cached spell resolutions so reloads re-resolve against current SpellRegistry. */
+    public static void clearSpellCache() {
+        synchronized (SPELL_CACHE) {
+            SPELL_CACHE.clear();
+        }
+    }
+
     // -------------------------------------------------------------------------
     // Spawning
     // -------------------------------------------------------------------------

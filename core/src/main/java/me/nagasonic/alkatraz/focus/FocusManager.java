@@ -19,7 +19,9 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
@@ -48,8 +50,8 @@ public final class FocusManager implements Listener {
      *  maximum. At higher maxFocus values the same penalty is proportionally smaller. */
     private static final double MOVEMENT_PENALTY_BASE = 100.0;
 
-    private final Map<UUID, Long> lastMoveTime = new HashMap<>();
-    private final Map<UUID, Double> movementPenalty = new HashMap<>();
+    private final Map<UUID, Long> lastMoveTime = new java.util.concurrent.ConcurrentHashMap<>();
+    private final Map<UUID, Double> movementPenalty = new java.util.concurrent.ConcurrentHashMap<>();
     private final FocusBossBar bossBar = new FocusBossBar();
     private BukkitTask regenTask;
 
@@ -115,6 +117,12 @@ public final class FocusManager implements Listener {
             regenTask = null;
         }
         bossBar.hideAll();
+        lastMoveTime.clear();
+        movementPenalty.clear();
+    }
+
+    /** Clears cached per-player movement state (used on reload). */
+    public void clearCaches() {
         lastMoveTime.clear();
         movementPenalty.clear();
     }
@@ -282,6 +290,20 @@ public final class FocusManager implements Listener {
     public void onQuit(PlayerQuitEvent event) {
         UUID uuid = event.getPlayer().getUniqueId();
         bossBar.hide(event.getPlayer());
+        lastMoveTime.remove(uuid);
+        movementPenalty.remove(uuid);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onChangedWorld(PlayerChangedWorldEvent event) {
+        UUID uuid = event.getPlayer().getUniqueId();
+        lastMoveTime.remove(uuid);
+        movementPenalty.remove(uuid);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onDeath(PlayerDeathEvent event) {
+        UUID uuid = event.getEntity().getUniqueId();
         lastMoveTime.remove(uuid);
         movementPenalty.remove(uuid);
     }
