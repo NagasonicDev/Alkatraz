@@ -13,7 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.LinkedHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -52,7 +52,7 @@ public class LeaderboardPlaceholder implements Placeholder {
     private final long refreshIntervalMs;
     private final int maxEntries;
     private final AtomicBoolean building = new AtomicBoolean(false);
-    private final Map<UUID, String> nameCache = new ConcurrentHashMap<>();
+    private final Map<UUID, String> nameCache;
 
     private volatile List<LeaderboardEntry> cachedBoard = Collections.emptyList();
     private volatile boolean scheduled = false;
@@ -61,6 +61,12 @@ public class LeaderboardPlaceholder implements Placeholder {
     public LeaderboardPlaceholder(long refreshIntervalMinutes, int maxEntries) {
         this.refreshIntervalMs = refreshIntervalMinutes * 60 * 1000;
         this.maxEntries = maxEntries;
+        this.nameCache = Collections.synchronizedMap(new LinkedHashMap<>(16, 0.75f, true) {
+            @Override
+            protected boolean removeEldestEntry(Map.Entry<UUID, String> eldest) {
+                return size() > 1024;
+            }
+        });
     }
 
     @Override

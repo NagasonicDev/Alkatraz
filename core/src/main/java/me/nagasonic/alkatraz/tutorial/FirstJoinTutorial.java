@@ -107,7 +107,7 @@ public class FirstJoinTutorial implements Listener {
 
         tasks.add(step(player, () -> {
             sendTitle(player, lang().get("tutorial.done_title"), lang().get("tutorial.done_subtitle"), 80, 20);
-            pendingTasks.remove(uuid);
+            pendingTasks.remove(uuid, tasks);
         }, delay += gap));
     }
 
