@@ -6,13 +6,13 @@ import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class EditorSession {
 
-    private static final Map<UUID, EditorSession> sessions = new HashMap<>();
+    private static final Map<UUID, EditorSession> sessions = new ConcurrentHashMap<>();
 
     private final String defKey;
     private final File file;

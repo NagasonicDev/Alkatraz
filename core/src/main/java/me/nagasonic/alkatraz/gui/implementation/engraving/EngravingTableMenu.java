@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.Set;
 
 public class EngravingTableMenu extends Menu {
@@ -364,7 +364,7 @@ public class EngravingTableMenu extends Menu {
 
         Engraving engraving = new Engraving(session.selectedEngravingKey(), session.selectedTriggerKey());
 
-        if (new Random().nextDouble() >= SUCCESS_CHANCE) {
+        if (ThreadLocalRandom.current().nextDouble() >= SUCCESS_CHANCE) {
             viewer.sendMessage(ColorFormat.format("&cThe engraving failed! The rune was consumed."));
             viewer.playSound(viewer.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
             ItemStack stack = session.targetStack();

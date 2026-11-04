@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -36,7 +37,7 @@ import java.util.UUID;
 
 public class RecipeEditorSession {
 
-    private static final Map<UUID, RecipeEditorSession> sessions = new HashMap<>();
+    private static final Map<UUID, RecipeEditorSession> sessions = new ConcurrentHashMap<>();
 
     private final NamespacedKey key;
     private final File file;
