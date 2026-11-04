@@ -101,6 +101,11 @@ public class MagicProfile extends Profile {
         boolStat("stealth", false);
         boolStat("canCast", true);
         boolStat("starterSpellGranted", false);
+        // Tutorial completion flag read by FirstJoinTutorial on every join. Must be
+        // declared here: Profile.getBool throws for an unregistered stat, and
+        // ProfilePersistence only registers what it reads back, so a profile with no
+        // saved copy of this key would throw on every join.
+        boolStat("tutorialSeen", false);
         // One-time notice flag for the affinity curve change. Must be declared here:
         // Profile.getBool throws for an unregistered stat, and ProfilePersistence only
         // registers what it reads back, so a profile with no saved copy of this key

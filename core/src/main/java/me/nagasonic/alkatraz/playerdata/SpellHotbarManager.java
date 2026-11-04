@@ -20,6 +20,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
 import java.io.IOException;
@@ -61,6 +62,7 @@ public class SpellHotbarManager {
     private static final Map<UUID, ItemStack> hotbarActive = new ConcurrentHashMap<>();
     private static final Map<UUID, Long> justEntered = new ConcurrentHashMap<>();
     private static final Map<UUID, Long> justExited = new ConcurrentHashMap<>();
+    private static final Map<UUID, BukkitTask> canCastTasks = new ConcurrentHashMap<>();
 
     // -------------------------------------------------------------------------
     // Public API
@@ -126,9 +128,14 @@ public class SpellHotbarManager {
         player.getInventory().setItem(EXIT_SLOT, wand != null ? wand.clone() : null);
         player.getInventory().setHeldItemSlot(0);
         player.updateInventory();
-        Bukkit.getScheduler().scheduleSyncDelayedTask(Alkatraz.getInstance(), () -> {
-            profile.setCanCast(true);
+        cancelCanCastTask(uuid);
+        BukkitTask canCastTask = Bukkit.getScheduler().runTaskLater(Alkatraz.getInstance(), () -> {
+            canCastTasks.remove(uuid);
+            if (Bukkit.getPlayer(uuid) != null && profile != null) {
+                profile.setCanCast(true);
+            }
         }, 4L);
+        canCastTasks.put(uuid, canCastTask);
     }
 
     /**
@@ -178,6 +185,7 @@ public class SpellHotbarManager {
      */
     public static void onQuit(Player player) {
         UUID uuid = player.getUniqueId();
+        cancelCanCastTask(uuid);
         justEntered.remove(uuid);
         justExited.remove(uuid);
         // Release the in-memory inventory snapshot: the persisted backup (if any)
@@ -189,9 +197,17 @@ public class SpellHotbarManager {
         persistedSnapshotGeneration.remove(uuid);
     }
 
+    private static void cancelCanCastTask(UUID uuid) {
+        BukkitTask task = canCastTasks.remove(uuid);
+        if (task != null) {
+            try { task.cancel(); } catch (Exception ignored) { }
+        }
+    }
+
     private static void exit(Player player, boolean clearPersisted) {
         if (!hotbarActive.containsKey(player.getUniqueId())) return;
         UUID uuid = player.getUniqueId();
+        cancelCanCastTask(uuid);
 
         hotbarActive.remove(uuid);
         justEntered.remove(uuid);
@@ -224,26 +240,32 @@ public class SpellHotbarManager {
      */
     public static boolean restoreIfNeeded(Player player) {
         UUID uuid = player.getUniqueId();
-        persistedSnapshotGeneration.remove(uuid);
         boolean fromMemory = savedInventories.containsKey(uuid);
         boolean fromDisk = snapshotFile(uuid).exists();
         if (!fromMemory && !fromDisk) return false;
+        cancelCanCastTask(uuid);
 
         hotbarActive.remove(uuid);
         justEntered.remove(uuid);
         justExited.remove(uuid);
 
         MagicProfile profile = ProfileManager.getProfile(player, MagicProfile.class);
-        if (profile != null) {
-            profile.setCanCast(true);
-        }
 
+        boolean restored = false;
         if (fromMemory) {
             if (restoreFromMemory(player, uuid)) {
                 deletePersistedSnapshot(uuid);
+                persistedSnapshotGeneration.remove(uuid);
+                restored = true;
             }
         } else {
-            restoreFromPersisted(player, uuid);
+            if (restoreFromPersisted(player, uuid)) {
+                persistedSnapshotGeneration.remove(uuid);
+                restored = true;
+            }
+        }
+        if (restored && profile != null) {
+            profile.setCanCast(true);
         }
         return true;
     }
@@ -265,9 +287,9 @@ public class SpellHotbarManager {
         return true;
     }
 
-    private static void restoreFromPersisted(Player player, UUID uuid) {
+    private static boolean restoreFromPersisted(Player player, UUID uuid) {
         File file = snapshotFile(uuid);
-        if (!file.exists()) return;
+        if (!file.exists()) return false;
         try {
             ReadWriteNBT compound = NBT.readFile(file);
             ItemStack[] storage = compound.getItemStackArray("storage");
@@ -283,9 +305,11 @@ public class SpellHotbarManager {
                 Alkatraz.getInstance().getLogger().severe("Restored hotbar inventory for " + uuid
                         + " but could not delete backup at " + file);
             }
+            return true;
         } catch (Exception e) {
             Alkatraz.getInstance().getLogger().severe("Failed to read hotbar inventory snapshot for " + uuid
                     + " (" + e.getClass().getSimpleName() + ": " + e.getMessage() + "), keeping backup at " + file);
+            return false;
         }
     }
 
@@ -304,10 +328,17 @@ public class SpellHotbarManager {
     }
 
     private static void persistSnapshot(UUID uuid, long generation, ItemStack[] storage, ItemStack offhand, int heldSlot) {
+        ItemStack[] storageCopy = storage == null ? null : new ItemStack[storage.length];
+        if (storage != null) {
+            for (int i = 0; i < storage.length; i++) {
+                storageCopy[i] = storage[i] == null ? null : storage[i].clone();
+            }
+        }
+        ItemStack offhandCopy = offhand == null ? null : offhand.clone();
         ReadWriteNBT compound = NBT.createNBTObject();
-        compound.setItemStackArray("storage", storage);
-        if (offhand != null && !offhand.getType().isAir()) {
-            compound.setItemStack("offhand", offhand);
+        if (storageCopy != null) compound.setItemStackArray("storage", storageCopy);
+        if (offhandCopy != null && !offhandCopy.getType().isAir()) {
+            compound.setItemStack("offhand", offhandCopy);
         }
         compound.setInteger("heldSlot", heldSlot);
         File file = snapshotFile(uuid);
@@ -381,7 +412,8 @@ public class SpellHotbarManager {
      * or {@code null} if nothing is saved.
      */
     public static ItemStack peekSavedOffhand(UUID uuid) {
-        return savedOffhand.get(uuid);
+        ItemStack saved = savedOffhand.get(uuid);
+        return saved == null ? null : saved.clone();
     }
 
     /**
@@ -441,6 +473,7 @@ public class SpellHotbarManager {
     public static void cleanupForDeath(Player player) {
         UUID uuid = player.getUniqueId();
         if (!hotbarActive.containsKey(uuid)) return;
+        cancelCanCastTask(uuid);
 
         hotbarActive.remove(uuid);
         justEntered.remove(uuid);
@@ -464,6 +497,17 @@ public class SpellHotbarManager {
      * Called on plugin disable to ensure no inventories are left in a broken state.
      */
     public static void exitAll() {
+        // Cancel any in-flight canCast grace tasks directly (do not rely on a global
+        // scheduler cancel) and make sure holders are not left with canCast(false).
+        for (UUID uuid : List.copyOf(canCastTasks.keySet())) {
+            cancelCanCastTask(uuid);
+            Player player = Bukkit.getPlayer(uuid);
+            if (player != null) {
+                me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile profile =
+                        me.nagasonic.alkatraz.playerdata.profiles.ProfileManager.getProfile(player, me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile.class);
+                if (profile != null) profile.setCanCast(true);
+            }
+        }
         for (UUID uuid : List.copyOf(hotbarActive.keySet())) {
             Player player = Bukkit.getPlayer(uuid);
             if (player != null) {

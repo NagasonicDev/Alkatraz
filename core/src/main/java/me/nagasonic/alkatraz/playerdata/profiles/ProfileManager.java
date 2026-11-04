@@ -34,12 +34,15 @@ public class ProfileManager implements Listener {
     private static boolean initialized = false;
     private static BukkitTask manaRegenTask;
     private static BukkitTask autosaveTask;
+    private static final java.util.List<BukkitTask> autosaveSteps = new java.util.ArrayList<>();
     private static final Map<UUID, Long> flushGenerations = new ConcurrentHashMap<>();
+    private static final java.util.Set<UUID> flushBlocked = ConcurrentHashMap.newKeySet();
     private static final Map<UUID, Object> loadLocks = new ConcurrentHashMap<>();
     private static final java.util.concurrent.atomic.AtomicLong flushGenCounter = new java.util.concurrent.atomic.AtomicLong();
     // Serializes periodic/synchronous saves so shutdown cannot overlap an in-flight autosave.
     private static final ReentrantLock saveLock = new ReentrantLock();
     private static volatile boolean shuttingDown = false;
+    private static volatile boolean reloading = false;
 
     /** One shared regeneration pass per second for every online player. */
     private static final long MANA_REGEN_PERIOD_TICKS = 20L;
@@ -71,6 +74,8 @@ public class ProfileManager implements Listener {
 
     private static void startManaRegenTask() {
         manaRegenTask = Bukkit.getScheduler().runTaskTimer(Alkatraz.getInstance(), () -> {
+            // Periodic sweep of expired timed modifiers/effects so empty buckets do not linger.
+            me.nagasonic.alkatraz.spells.modifier.ModifierManager.pruneAll();
             for (Player player : Bukkit.getOnlinePlayers()) {
                 MagicProfile profile = getProfile(player.getUniqueId(), MagicProfile.class);
                 if (profile == null) continue;
@@ -79,18 +84,58 @@ public class ProfileManager implements Listener {
         }, MANA_REGEN_INITIAL_DELAY_TICKS, MANA_REGEN_PERIOD_TICKS);
     }
 
+    /** Number of players snapshotted per main-thread tick during an autosave pass. */
+    private static final int AUTOSAVE_CHUNK_SIZE = 8;
+
     private static void startAutosaveTask() {
-        autosaveTask = Bukkit.getScheduler().runTaskTimerAsynchronously(Alkatraz.getInstance(), () -> {
-            if (!initialized || shuttingDown) return;
-            try {
-                saveLock.lock();
-                if (shuttingDown) return;
-                saveAllCachedProfiles();
-            } catch (Exception e) {
-                Alkatraz.getInstance().getLogger().log(Level.SEVERE, "Periodic profile save failed", e);
-            } finally {
-                saveLock.unlock();
-            }
+        autosaveTask = Bukkit.getScheduler().runTaskTimer(Alkatraz.getInstance(), () -> {
+            if (!initialized || shuttingDown || reloading || cache == null) return;
+            // Spread the main-thread snapshot work across ticks: only AUTOSAVE_CHUNK_SIZE
+            // players are copied per tick, preserving copy-before-write semantics while
+            // keeping each sweep off the hot path.
+            final java.util.List<UUID> players = new java.util.ArrayList<>(cache.getCachedPlayers());
+            if (players.isEmpty()) return;
+            final java.util.Map<UUID, java.util.List<Profile>> snapshots = new java.util.HashMap<>();
+            final int[] cursor = { 0 };
+            Runnable[] step = new Runnable[1];
+            step[0] = () -> {
+                if (!initialized || shuttingDown || reloading) return;
+                int end = Math.min(cursor[0] + AUTOSAVE_CHUNK_SIZE, players.size());
+                for (; cursor[0] < end; cursor[0]++) {
+                    UUID uuid = players.get(cursor[0]);
+                    snapshots.put(uuid, snapshotProfiles(uuid, cache.getAllProfiles(uuid)));
+                }
+                if (cursor[0] < players.size()) {
+                    synchronized (autosaveSteps) {
+                        autosaveSteps.add(Bukkit.getScheduler().runTaskLater(Alkatraz.getInstance(), step[0], 1L));
+                    }
+                    return;
+                }
+                // All snapshots taken on the main thread; hand them to a writer.
+                Bukkit.getScheduler().runTaskAsynchronously(Alkatraz.getInstance(), () -> {
+                    if (!initialized || shuttingDown || reloading) return;
+                    try {
+                        saveLock.lock();
+                        if (shuttingDown || reloading) return;
+                        int saved = 0;
+                        for (java.util.Map.Entry<UUID, java.util.List<Profile>> entry : snapshots.entrySet()) {
+                            try {
+                                ProfilePersistence.saveAllProfiles(entry.getKey(), entry.getValue());
+                                saved++;
+                            } catch (Exception e) {
+                                Alkatraz.getInstance().getLogger().log(Level.WARNING,
+                                        "Periodic profile save failed for " + entry.getKey(), e);
+                            }
+                        }
+                        Alkatraz.getInstance().getLogger().info("Saved " + saved + " player profiles");
+                    } catch (Exception e) {
+                        Alkatraz.getInstance().getLogger().log(Level.SEVERE, "Periodic profile save failed", e);
+                    } finally {
+                        saveLock.unlock();
+                    }
+                });
+            };
+            step[0].run();
         }, AUTOSAVE_PERIOD_TICKS, AUTOSAVE_PERIOD_TICKS);
     }
 
@@ -111,6 +156,12 @@ public class ProfileManager implements Listener {
             autosaveTask.cancel();
             autosaveTask = null;
         }
+        synchronized (autosaveSteps) {
+            for (BukkitTask t : autosaveSteps) {
+                try { if (t != null) t.cancel(); } catch (Exception ignored) { }
+            }
+            autosaveSteps.clear();
+        }
 
         // Wait for any in-flight periodic save to finish before writing synchronously.
         saveLock.lock();
@@ -125,6 +176,31 @@ public class ProfileManager implements Listener {
 
         Alkatraz.getInstance().getLogger().info("ProfileManager shut down - all profiles saved");
     }
+
+    public static void beginReload() {
+        reloading = true;
+        if (autosaveTask != null) {
+            try { autosaveTask.cancel(); } catch (Exception ignored) { }
+            autosaveTask = null;
+        }
+        synchronized (autosaveSteps) {
+            for (BukkitTask t : autosaveSteps) {
+                try { if (t != null) t.cancel(); } catch (Exception ignored) { }
+            }
+            autosaveSteps.clear();
+        }
+    }
+
+    public static void endReload() {
+        reloading = false;
+        if (initialized && !shuttingDown) {
+            startAutosaveTask();
+        }
+    }
+
+    public static boolean isReloading() { return reloading; }
+
+    public static boolean isShuttingDown() { return shuttingDown; }
 
     /**
      * Gets a profile for a player, loading from disk if needed
@@ -169,27 +245,33 @@ public class ProfileManager implements Listener {
         // Serialise the miss path per UUID so two async callers cannot each
         // build a different profile object and have one overwrite the other.
         Object lock = loadLocks.computeIfAbsent(uuid, k -> new Object());
-        synchronized (lock) {
-            profile = cache.getProfile(uuid, profileClass);
-            if (profile != null) {
+        try {
+            synchronized (lock) {
+                profile = cache.getProfile(uuid, profileClass);
+                if (profile != null) {
+                    return profile;
+                }
+                if (Bukkit.getPlayer(uuid) == null) {
+                    if (Alkatraz.isLoggable(VerbosityLevel.DEBUG)) {
+                        Alkatraz.logDebug("Profile cache miss for non-online player " + uuid
+                                + " (" + profileClass.getSimpleName() + ") - skipped disk load");
+                    }
+                    return null;
+                }
+
+                // Load from disk
+                if (Alkatraz.isLoggable(VerbosityLevel.HIGH)) {
+                    Alkatraz.logHigh("Loading profile " + profileClass.getSimpleName() + " for " + uuid);
+                }
+                profile = ProfilePersistence.loadProfile(uuid, profileClass);
+                cache.cacheProfile(uuid, profile);
+
                 return profile;
             }
-            if (Bukkit.getPlayer(uuid) == null) {
-                if (Alkatraz.isLoggable(VerbosityLevel.DEBUG)) {
-                    Alkatraz.logDebug("Profile cache miss for non-online player " + uuid
-                            + " (" + profileClass.getSimpleName() + ") - skipped disk load");
-                }
-                return null;
-            }
-
-            // Load from disk
-            if (Alkatraz.isLoggable(VerbosityLevel.HIGH)) {
-                Alkatraz.logHigh("Loading profile " + profileClass.getSimpleName() + " for " + uuid);
-            }
-            profile = ProfilePersistence.loadProfile(uuid, profileClass);
-            cache.cacheProfile(uuid, profile);
-
-            return profile;
+        } finally {
+            // Evict the per-UUID lock after the load completes so admin inspection
+            // of offline players (and transient lookups) do not leak lock objects.
+            loadLocks.remove(uuid, lock);
         }
     }
 
@@ -213,19 +295,25 @@ public class ProfileManager implements Listener {
         }
 
         Object lock = loadLocks.computeIfAbsent(uuid, k -> new Object());
-        synchronized (lock) {
-            profile = cache.getProfile(uuid, profileClass);
-            if (profile != null) {
+        try {
+            synchronized (lock) {
+                profile = cache.getProfile(uuid, profileClass);
+                if (profile != null) {
+                    return profile;
+                }
+
+                if (Alkatraz.isLoggable(VerbosityLevel.HIGH)) {
+                    Alkatraz.logHigh("Loading profile " + profileClass.getSimpleName() + " for " + uuid);
+                }
+                profile = ProfilePersistence.loadProfile(uuid, profileClass);
+                cache.cacheProfile(uuid, profile);
+
                 return profile;
             }
-
-            if (Alkatraz.isLoggable(VerbosityLevel.HIGH)) {
-                Alkatraz.logHigh("Loading profile " + profileClass.getSimpleName() + " for " + uuid);
-            }
-            profile = ProfilePersistence.loadProfile(uuid, profileClass);
-            cache.cacheProfile(uuid, profile);
-
-            return profile;
+        } finally {
+            // Evict the per-UUID lock after the load completes so admin inspection
+            // of offline players does not leak lock objects for the process lifetime.
+            loadLocks.remove(uuid, lock);
         }
     }
 
@@ -358,9 +446,11 @@ public class ProfileManager implements Listener {
                 mp.getMasteryBarTaskIds().clear();
             }
 
-            // Remove from cache
-            cache.removePlayer(uuid);
         } finally {
+            // Always evict from cache even if save/cleanup threw, so a failed quit
+            // cannot leave a stale row cached.
+            try { cache.removePlayer(uuid); } catch (Exception ignored) { }
+            loadLocks.remove(uuid);
             saveLock.unlock();
         }
     }
@@ -460,7 +550,9 @@ public class ProfileManager implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        
+        UUID joinUuid = player.getUniqueId();
+        flushBlocked.remove(joinUuid);
+
         try {
             loadPlayer(player);
             Alkatraz.getInstance().getLogger().log(Level.FINE, 
@@ -505,9 +597,14 @@ public class ProfileManager implements Listener {
         UUID uuid = player.getUniqueId();
         String name = player.getName();
         // Snapshot cached profiles on the main thread so the async save never has
-        // to touch Bukkit or the profile cache's lookup rules.
+        // to touch the live (main-thread-mutated) Profile objects.
         Collection<Profile> profiles =
                 cache != null ? new ArrayList<>(cache.getAllProfiles(uuid)) : java.util.List.of();
+        final java.util.List<Profile> snapshots = snapshotProfiles(uuid, profiles);
+        // Snapshot equipment on the main thread too, so the async write does not
+        // read the live cache map.
+        final java.util.Map<String, org.bukkit.inventory.ItemStack> equipmentSnapshot =
+                me.nagasonic.alkatraz.items.magic.equipment.EquipmentStorage.snapshot(uuid);
         long gen = flushGenCounter.incrementAndGet();
         flushGenerations.put(uuid, gen);
         Bukkit.getScheduler().runTaskAsynchronously(Alkatraz.getInstance(), () -> {
@@ -515,14 +612,19 @@ public class ProfileManager implements Listener {
                 saveLock.lock();
                 // Re-check generation and cache membership after obtaining the lock,
                 // so a synchronous quit/unload cannot race this save.
+if (flushBlocked.contains(uuid)) return;
                 Long currentGen = flushGenerations.get(uuid);
                 if (currentGen == null || currentGen.longValue() != gen) return;
                 if (cache == null || !cache.hasPlayer(uuid)) return;
                 try {
-                    for (Profile profile : profiles) {
+                    for (Profile profile : snapshots) {
                         ProfilePersistence.saveProfile(uuid, profile);
                     }
-                    EquipmentStorage.save(uuid);
+                    if (equipmentSnapshot != null) {
+                        me.nagasonic.alkatraz.items.magic.equipment.EquipmentStorage.save(uuid, equipmentSnapshot);
+                    } else {
+                        me.nagasonic.alkatraz.items.magic.equipment.EquipmentStorage.save(uuid);
+                    }
                 } catch (Exception e) {
                     Alkatraz.getInstance().getLogger().log(Level.WARNING,
                             "Failed to flush player data for " + name, e);
@@ -532,6 +634,28 @@ public class ProfileManager implements Listener {
                 flushGenerations.remove(uuid, gen);
             }
         });
+    }
+
+    /**
+     * Builds detached copies of the given profiles so they can be serialised on a
+     * background thread without racing the main-thread mutations of the originals.
+     */
+    private static java.util.List<Profile> snapshotProfiles(UUID uuid, Collection<Profile> profiles) {
+        java.util.List<Profile> copies = new java.util.ArrayList<>();
+        for (Profile p : profiles) {
+            try {
+                Profile copy = ProfileRegistry.createBlankProfile(uuid, p.getClass());
+                copy.copyStats(p);
+                copies.add(copy);
+            } catch (Exception e) {
+                // Do not fall back to the live object: that would hand a
+                // main-thread-mutated profile to an async writer. Skip this
+                // profile's save and log the failure instead.
+                Alkatraz.getInstance().getLogger().log(Level.WARNING,
+                        "Failed to snapshot profile for " + uuid + " (" + p.getClass().getSimpleName() + "); skipping save", e);
+            }
+        }
+        return copies;
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -545,24 +669,30 @@ public class ProfileManager implements Listener {
                 "Failed to unload equipment for player: " + player.getName(), e);
         }
 
+        UUID quitUuid = player.getUniqueId();
         // Mark this UUID as no longer flushable before unloading so any flush already
         // in flight cannot overwrite the synchronous save below with a stale snapshot.
-        flushGenerations.put(player.getUniqueId(), Long.MIN_VALUE);
+        flushBlocked.add(quitUuid);
         try {
             unloadPlayer(player);
-            Alkatraz.getInstance().getLogger().log(Level.FINE, 
+            Alkatraz.getInstance().getLogger().log(Level.FINE,
                 "Saved and unloaded profiles for player: " + player.getName());
         } catch (Exception e) {
-            Alkatraz.getInstance().getLogger().log(Level.SEVERE, 
+            Alkatraz.getInstance().getLogger().log(Level.SEVERE,
                 "Failed to save profiles for player: " + player.getName(), e);
+        } finally {
+            // Always clear these, even if unloadPlayer threw, so a failed quit save
+            // cannot permanently disable flushing for this UUID.
+            flushGenerations.remove(quitUuid);
+            flushBlocked.remove(quitUuid);
+            // Regeneration is shared, but the memoised player folder would otherwise
+            // keep an entry for this UUID for the lifetime of the process. Dropped
+            // last, because the save above re-memoises it.
+            loadLocks.remove(quitUuid);
+            ProfilePersistence.forgetPlayer(quitUuid);
+            // Release any per-actor coordinator cooldown bucket tracked for this player.
+            me.nagasonic.alkatraz.items.magic.condition.implementation.CooldownTracker.clear(quitUuid);
         }
-
-        // Prune the flush generation entry now that the synchronous save is done.
-        flushGenerations.remove(player.getUniqueId());
-        // Regeneration is shared, but the memoised player folder would otherwise
-        // keep an entry for this UUID for the lifetime of the process. Dropped
-        // last, because the save above re-memoises it.
-        ProfilePersistence.forgetPlayer(player.getUniqueId());
     }
 
     // Helper Methods

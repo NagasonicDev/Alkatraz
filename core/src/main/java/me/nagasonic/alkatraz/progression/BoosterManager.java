@@ -3,6 +3,9 @@ package me.nagasonic.alkatraz.progression;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
+import me.nagasonic.alkatraz.Alkatraz;
+import org.bukkit.Bukkit;
+import org.bukkit.scheduler.BukkitTask;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -58,6 +61,7 @@ public class BoosterManager {
 
     private static final Map<String, Booster> ACTIVE = new ConcurrentHashMap<>();
     private static final Map<String, Double> PREVIOUS = new ConcurrentHashMap<>();
+    private static volatile BukkitTask expiryTask;
 
     protected BoosterManager() {}
 
@@ -92,18 +96,29 @@ public class BoosterManager {
     }
 
     public static boolean start(String scope, String target, double multiplier, long durationMillis) {
-        if (target == null || target.isBlank()) return false;
         if (!Double.isFinite(multiplier) || multiplier <= 0) return false;
         String sc = normalizeScope(scope);
-        String k = key(sc, target);
-        if (ACTIVE.containsKey(k)) return false;
-        PREVIOUS.putIfAbsent(k, currentMultiplier(sc, target));
-        long now = System.currentTimeMillis();
-        long expires = durationMillis > 0 ? now + durationMillis : Long.MAX_VALUE;
-        Booster b = new Booster(sc, target, multiplier, now, expires, UUID.randomUUID());
-        ACTIVE.put(k, b);
-        applyMultiplier(sc, target, multiplier);
-        return true;
+        boolean global = sc.equals("global") || sc.equals("server");
+        // Global/server boosters have no meaningful per-target key: use an empty target.
+        String tgt = global ? "" : (target == null ? "" : target.trim());
+        if (!global && tgt.isBlank()) return false;
+        // Drop expired boosters first so re-armed schedules can claim their slot.
+        processExpired();
+        String k = key(sc, tgt);
+        synchronized (ACTIVE) {
+            if (ACTIVE.containsKey(k)) return false;
+            PREVIOUS.putIfAbsent(k, currentMultiplier(sc, tgt));
+            long now = System.currentTimeMillis();
+            long expires = durationMillis > 0 ? now + durationMillis : Long.MAX_VALUE;
+            Booster b = new Booster(sc, tgt, multiplier, now, expires, UUID.randomUUID());
+            // Reserve the slot atomically before applying any multiplier.
+            if (ACTIVE.putIfAbsent(k, b) != null) {
+                PREVIOUS.remove(k); // lost the race; do not leave a stale restore value
+                return false;
+            }
+            applyMultiplier(sc, tgt, multiplier);
+            return true;
+        }
     }
 
     public static boolean start(String target, double multiplier) {
@@ -146,13 +161,16 @@ public class BoosterManager {
     }
 
     public static boolean stop(String scope, String target) {
-        if (target == null || target.isBlank()) return false;
         String sc = normalizeScope(scope);
-        String k = key(sc, target);
+        boolean global = sc.equals("global") || sc.equals("server");
+        String tgt = global ? "" : (target == null ? "" : target.trim());
+        if (!global && tgt.isBlank()) return false;
+        processExpired();
+        String k = key(sc, tgt);
         Booster b = ACTIVE.remove(k);
         Double prev = PREVIOUS.remove(k);
         double restore = prev == null ? 1.0 : prev;
-        applyMultiplier(sc, target, restore);
+        applyMultiplier(sc, tgt, restore);
         return b != null;
     }
 
@@ -232,7 +250,23 @@ public class BoosterManager {
         PREVIOUS.clear();
     }
 
-    public static void shutdown() { clear(); }
+    public static void shutdown() { stopExpiryTask(); clear(); }
+
+    public static void startExpiryTask() {
+        if (expiryTask != null) return;
+        try {
+            if (Bukkit.getServer() == null || Alkatraz.getInstance() == null) return;
+            expiryTask = Bukkit.getScheduler().runTaskTimer(Alkatraz.getInstance(), (Runnable) BoosterManager::processExpired, 20L, 20L);
+        } catch (Exception ignored) {
+            expiryTask = null;
+        }
+    }
+
+    public static void stopExpiryTask() {
+        if (expiryTask == null) return;
+        try { expiryTask.cancel(); } catch (Exception ignored) { }
+        expiryTask = null;
+    }
 
     // Expiry processor
     public static void processExpired() { processExpired(System.currentTimeMillis()); }

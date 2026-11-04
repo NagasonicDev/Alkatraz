@@ -220,7 +220,10 @@ public class BoosterScheduler {
             return;
         }
         long next = schedule.nextRunAtMillis() + schedule.intervalMillis();
-        while (next <= nowMillis) next += schedule.intervalMillis();
+        long interval = schedule.intervalMillis();
+        if (next <= nowMillis && interval > 0) {
+            next += ((nowMillis - next) / interval + 1) * interval;
+        }
         if (schedule.endAtMillis() > 0 && next > schedule.endAtMillis()) next = Long.MAX_VALUE;
         schedule.setNextRunAtMillis(next);
     }
