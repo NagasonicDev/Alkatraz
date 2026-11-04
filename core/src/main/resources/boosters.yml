@@ -1,0 +1,91 @@
+# boosters.yml - timed booster and event definitions for Alkatraz
+#
+# `/alkatraz reload` regenerates/merges defaults and reloads this file.
+# Definitions here are read by the booster foundation (Wave 3+); invalid
+# entries are skipped with a warning instead of aborting the load.
+
+limits:
+  name_max_length: 64
+  multiplier_min: 0.1
+  multiplier_max: 100.0
+  duration_min_seconds: 1
+  duration_max_seconds: 2592000
+  scope_values:
+    - server
+    - world
+    - group
+    - player
+  stack_policies:
+    - replace
+    - stack
+    - strongest
+
+defaults:
+  type: progression
+  multiplier: 2.0
+  duration_seconds: 3600
+  stack_policy: strongest
+  scope: server
+  persistent: false
+  source: event
+  announce: true
+  countdown: true
+
+boosters:
+  double_arcane_knowledge:
+    name: Double Arcane Knowledge
+    type: arcane_knowledge
+    multiplier: 2.0
+    duration_seconds: 7200
+    stack_policy: strongest
+    scope: server
+    source: event
+    announce: true
+    countdown: true
+
+  double_research_points:
+    name: Double Research Points
+    type: research_points
+    multiplier: 2.0
+    duration_seconds: 7200
+    stack_policy: strongest
+    scope: server
+    source: event
+    announce: true
+    countdown: true
+
+  swift_progression:
+    name: Swift Progression
+    type: progression
+    multiplier: 1.5
+    duration_seconds: 1800
+    stack_policy: strongest
+    scope: server
+    source: event
+    announce: true
+    countdown: false
+
+  world_bonus:
+    name: World Bonus
+    type: progression
+    multiplier: 1.25
+    duration_seconds: 86400
+    stack_policy: stack
+    scope: world
+    world: world
+    source: admin
+    announce: true
+    countdown: false
+
+# Recurring schedules (Agent D). Times are wall-clock based; missed runs during
+# downtime are skipped (no catch-up burst) and boost durations are not paused.
+schedules:
+  weekend_progression:
+    booster_id: swift_progression
+    scope: server
+    target: progression
+    multiplier: 1.5
+    duration_seconds: 3600
+    interval_seconds: 604800
+    stack_policy: strongest
+    enabled: true

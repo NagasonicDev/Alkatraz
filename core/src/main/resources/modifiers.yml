@@ -1,0 +1,69 @@
+# modifiers.yml - reusable temporary modifier definitions for Alkatraz
+#
+# `/alkatraz reload` regenerates/merges defaults and reloads this file.
+# Definitions here are read by the modifier foundation (Wave 1+); invalid
+# entries are skipped with a warning instead of aborting the load.
+
+# Validation limits applied to every definition below. These also document the
+# accepted ranges for administrators editing this file by hand.
+limits:
+  stat_id_pattern: "^[a-z][a-z0-9_]*$"
+  amount_min: -1000000.0
+  amount_max: 1000000.0
+  duration_min_seconds: 1
+  duration_max_seconds: 2592000
+
+# Accepted operations per modifier kind. Bukkit attribute operations use the
+# org.bukkit.attribute.AttributeModifier.Operation names (case-insensitive).
+operations:
+  stat:
+    - ADD
+    - MULTIPLY
+    - SET
+  attribute:
+    - ADD_NUMBER
+    - ADD_SCALAR
+    - MULTIPLY
+    - MULTIPLY_SCALAR
+    - MULTIPLY_SCALAR_1
+    - DIVIDE
+
+# Accepted stack policies when two modifiers touch the same target.
+stack_policies:
+  - replace
+  - stack
+  - strongest
+
+# Default values applied when a definition omits a field.
+defaults:
+  kind: stat
+  operation: ADD
+  amount: 1.0
+  duration_seconds: 300
+  stack_policy: replace
+  persistent: false
+  scope: player
+
+# Reusable modifier definitions. Keys are modifier ids.
+modifiers:
+  example_magic_affinity:
+    kind: stat
+    stat: magic_affinity
+    operation: ADD
+    amount: 5.0
+    duration_seconds: 300
+    stack_policy: replace
+    persistent: false
+    scope: player
+    source: admin
+
+  example_max_health:
+    kind: attribute
+    attribute: generic_max_health
+    operation: ADD_NUMBER
+    amount: 4.0
+    duration_seconds: 120
+    stack_policy: strongest
+    persistent: false
+    scope: player
+    source: admin
