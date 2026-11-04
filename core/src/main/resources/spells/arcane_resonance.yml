@@ -20,9 +20,11 @@ level: 9
 # point 40 ticks, so 2.0 is the only legal value; the spec's original single-value ladder
 # (3.0) was withdrawn when the range replaced it. inferno_rite at circle 9 takes 2.0s.
 required_focus: 161
-cooldown: 20
 cast_time: 2.0
 mana_cost: 600
+
+# RESONANCE IS A SUSTAINED TOGGLE, NOT A COOLDOWNED ACTION. CAST IT AGAIN TO STOP IT.
+cooldown: 0
 
 maximum_mastery: 100
 
@@ -49,28 +51,20 @@ maximum_mastery: 100
 # with the default shown here, so a missing key is a no-op rather than a zero.
 # ---------------------------------------------------------------------------
 
-# HOW MANY OF THE CASTER'S NEXT CASTS ARE AMPLIFIED. The counter lives in a
-# private static Map<UUID, Resonance> inside ArcaneResonance, holds exactly this many
-# charges, loses exactly one per non-skipped cast, and is consumed - modifiers removed -
-# when it reaches zero. IT IS NOT STACKABLE: casting while already armed self-cancels.
-charge_count: 3
+# MANA DRAINED PER SECOND WHILE IT IS ACTIVE. CIRCLE 9 REGENERATES 15/S, SO A 60S RUN
+# COSTS 3300 GROSS AND 2400 NET - ROUGHLY A THIRD OF THE 10,000 POOL.
+upkeep_mana_per_second: 55
+duration_seconds: 42.0
 
-# THE AMPLIFICATION, AS A MULTIPLY MODIFIER ON THE "damage" STAT OF EVERY OTHER
-# REGISTERED SPELL. THIS IS A MODIFIER, NOT A SECOND getPower CALL AND NOT A
-# MULTIPLIER ON getPower'S OUTPUT.
-#
-# AttackSpell.getPower computes getModifiedStat(caster, "damage", power) BEFORE the
-# affinity term, so the 1.2 lands exactly once, in the right order, and getPower is still
-# called exactly once per damage instance. Multiplying getPower's output instead would
-# re-apply the option multipliers and the affinity term - squaring, so 2.24 affinity
-# would become 3.24^2 = 10.5x rather than 4.48x - and calling getPower twice per
-# instance makes SpellAttackContext throw IllegalStateException.
-power_multiplier: 1.2
+# THE NEXT N SPELLS FIRE TWICE. CHARGES REFRESH ON EVERY CAST RATHER THAN BEING SPENT,
+# SO HOLDING IT CAN NEVER WASTE IT.
+charge_count: 4
 
-# HOW LONG AN ARMED RESONANCE SURVIVES UNUSED, IN SECONDS (20.0 -> 400 ticks at a
-# 1-tick-equivalent runTaskLater). Bounds the abuse ceiling: a charge cannot be banked
-# across a whole fight and spent all at once.
-charge_expiry_seconds: 20.0
+# MULTIPLY MODIFIER ON THE DAMAGE STAT, APPLIED INSIDE getPower's OWN getModifiedStat CALL.
+power_multiplier: 1.25
+
+# TICKS BETWEEN THE FIRST LANDING AND THE DUPLICATE.
+duplicate_delay_ticks: 10
 
 # SPELLS THAT ARE NEVER AMPLIFIED AND NEVER BURN A CHARGE WHEN CAST.
 #   arcane_resonance - self-amplification would compound without bound, and its own
@@ -84,6 +78,17 @@ skip_ids:
   - 'arcane_resonance'
   - 'echo_cast'
   - 'warp'
+
+# NEVER COPIED. A DUPLICATED SUSTAIN WOULD TOGGLE ITSELF STRAIGHT BACK OFF, AND A
+# DUPLICATED TERRAIN CAST WOULD SPEND THE BLOCK BUDGET TWICE IN ONE TICK.
+duplicate_skip_ids:
+  - 'arcane_resonance'
+  - 'skywrath'
+  - 'tide_of_the_deep'
+  - 'crown_of_dawn'
+  - 'oblivion'
+  - 'worldbreaker'
+  - 'inferno_rite'
 
 #THE COLOR OF THE SPELL MASTERY BOSSBAR.
 mastery_bar_color: 'PINK'

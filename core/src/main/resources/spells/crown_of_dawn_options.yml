@@ -19,50 +19,51 @@
 #           impacts:      [...]   # optional
 # =============================================================================
 #
-# NEITHER OPTION CHANGES HOW MUCH DAMAGE A SINGLE TARGET TAKES. THE DAMAGE BAND IS
-# wall_half_thickness + 0.6, NOT THE WALL'S LENGTH OR HEIGHT, AND THE PER-CAST
-# TOTAL IS PINNED AT denial_damage_cap = 90.0 REGARDLESS. SO NEITHER OPTION
-# CARRIES A mana_cost IMPACT - THERE IS NO OVER-BUDGET MAX OPTION HERE.
+# NEITHER OPTION CHANGES HOW HARD THE CROWN HITS. THE SEAR IS power 8.0 ONCE EVERY
+# damage_interval_ticks REGARDLESS, SO THE PER-TARGET TOTAL IS PINNED AT
+# power x hit_count = 240.0 REGARDLESS. WHAT THEY CHANGE IS HOW MUCH ROOM YOU HOLD
+# IT OVER AND HOW HIGH ABOVE THAT ROOM YOU FLOAT - both are area and shape, not
+# damage, so NEITHER OPTION CARRIES A mana_cost IMPACT.
 # =============================================================================
 
 options:
 
   # ---------------------------------------------------------------------------
-  # wall_length - how far the wall spans along the caster's aim
+  # hover_radius - how much room the crown holds
   # ---------------------------------------------------------------------------
-  wall_length:
-    description: "How far the wall of dawn reaches"
+  hover_radius:
+    description: "How far the crown of dawn reaches"
     icon: WHITE_STAINED_GLASS
     default_index: 1
 
     values:
 
-      short_wall:
-        display_name: "Short Wall"
-        description: "Six blocks of dawn."
+      narrow:
+        display_name: "Narrow Dawn"
+        description: "Eight blocks of dawn."
         icon: WHITE_STAINED_GLASS_PANE
         value_type: double
-        value: 6.0
+        value: 8.0
         impacts:
           - type: stat_modifier
-            stat: wall_length
-            value: 6.0
+            stat: hover_radius
+            value: 8.0
             modifier: SET
 
-      dawn_wall:
-        display_name: "Wall of Dawn"
-        description: "Nine blocks of dawn."
+      dawn:
+        display_name: "Dawn"
+        description: "The ten blocks the spell casts with by default."
         icon: WHITE_STAINED_GLASS
         value_type: double
-        value: 9.0
+        value: 10.0
         impacts:
           - type: stat_modifier
-            stat: wall_length
-            value: 9.0
+            stat: hover_radius
+            value: 10.0
             modifier: SET
 
-      world_wall:
-        display_name: "Wall of the World"
+      world:
+        display_name: "Dawn of the World"
         description: "Fourteen blocks of dawn."
         icon: LIGHTNING_ROD
         value_type: double
@@ -78,50 +79,50 @@ options:
             description: "Requires 60 Crown of Dawn mastery"
         impacts:
           - type: stat_modifier
-            stat: wall_length
+            stat: hover_radius
             value: 14.0
             modifier: SET
 
   # ---------------------------------------------------------------------------
-  # wall_height - how far the wall reaches upward
+  # hover_altitude - how high above that room you float
   # ---------------------------------------------------------------------------
-  wall_height:
-    description: "How high the wall of dawn reaches"
+  hover_altitude:
+    description: "How high the crown of dawn holds you"
     icon: LADDER
     default_index: 1
 
     values:
 
-      low_wall:
-        display_name: "Low Wall"
-        description: "Breaks ankles. Two and a half blocks."
+      low:
+        display_name: "Low Dawn"
+        description: "Breaks ankles. Three blocks."
         icon: OAK_SLAB
-        value_type: double
-        value: 2.5
+        value_type: int
+        value: 3
         impacts:
           - type: stat_modifier
-            stat: wall_height
-            value: 2.5
+            stat: hover_altitude
+            value: 3.0
             modifier: SET
 
-      dawn_height:
-        display_name: "Full Dawn"
-        description: "Three and a half blocks."
-        icon: LADDER
-        value_type: double
-        value: 3.5
+      dawn:
+        display_name: "Dawn"
+        description: "The six blocks the spell casts with by default."
+        icon: WHITE_STAINED_GLASS
+        value_type: int
+        value: 6
         impacts:
           - type: stat_modifier
-            stat: wall_height
-            value: 3.5
+            stat: hover_altitude
+            value: 6.0
             modifier: SET
 
-      vault_wall:
+      vault:
         display_name: "Vault"
-        description: "Five blocks. Nothing vaults it."
+        description: "Nine blocks. Nothing vaults it."
         icon: LIGHTNING_ROD
-        value_type: double
-        value: 5.0
+        value_type: int
+        value: 9
         requirements:
           - type: number_stat
             stat: circleLevel
@@ -133,6 +134,6 @@ options:
             description: "Requires 80 Crown of Dawn mastery"
         impacts:
           - type: stat_modifier
-            stat: wall_height
-            value: 5.0
+            stat: hover_altitude
+            value: 9.0
             modifier: SET

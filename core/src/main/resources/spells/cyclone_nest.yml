@@ -55,9 +55,9 @@ nest_height: 6.0
 # HORIZONTAL PULL TOWARD THE FUNNEL AXIS, IN BLOCKS/TICK, FALLING OFF LINEARLY
 # TO 10% AT THE EDGE.
 nest_pull: 0.55
-# WANDER SPEED IN BLOCKS/TICK. The heading advances 0.21 rad/tick, one full turn
-# every 30 ticks, and reverses on a wall or a drop of more than 2.5 blocks.
-nest_wander_speed: 0.18
+# WANDER SPEED IN BLOCKS/TICK. Matches the full Tornado spell's default speed.
+# Each nest picks its own changing heading and redirects at walls or steep drops.
+nest_wander_speed: 0.4
 # THE THREE NESTS ARE PLACED DETERMINISTICALLY - never Math.random - at 0, 120 and
 # 240 degrees around the aim point, each at half this distance from the centre.
 nest_spawn_spread: 4.0

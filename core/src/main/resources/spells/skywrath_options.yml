@@ -1,43 +1,10 @@
-# =============================================================================
-# skywrath_options.yml
-# Spell option configuration for the Skywrath spell.
-#
-# Structure overview:
-#   options:
-#     <option-id>:
-#       description:   <string>
-#       icon:          <Material name>
-#       default_index: <int>   # 0-based index into 'values' list order
-#       values:
-#         <value-id>:
-#           display_name: <string>
-#           description:  <string>
-#           icon:         <Material name>
-#           value_type:   int | double | float | boolean | string | auto
-#           value:        <typed value>
-#           requirements: [...]   # optional
-#           impacts:      [...]   # optional
-#
-# NOTHING HERE CARRIES A `damage` STAT MODIFIER, AND THAT IS LOAD-BEARING.
-# power 9.6 x hit_count 15 = 144.0 is EXACTLY sustainBudget(9) - the circle-9
-# SUSTAIN budget has zero headroom, so the widest option is a paid-over area
-# option per spec 4.3 (up to x2.0 provided it costs extra mana), never a
-# paid-over damage option. `wide` changes how much sky you hold, not how hard
-# it hits.
-# =============================================================================
-
+# Spell options for Skywrath's storm radius.
 options:
-
-  # ---------------------------------------------------------------------------
-  # sky - how much sky the storm holds
-  # ---------------------------------------------------------------------------
   sky:
-    description: "How much sky the storm holds"
-    icon: ELYTRA
+    description: "How much sky the storm claims"
+    icon: FEATHER
     default_index: 1
-
     values:
-
       narrow:
         display_name: "Narrow Sky"
         description: "A tight 6 block storm."
@@ -49,10 +16,9 @@ options:
             stat: storm_radius
             value: 6.0
             modifier: SET
-
       standard:
         display_name: "Open Sky"
-        description: "The 8 block storm the spell casts with by default."
+        description: "The standard 8 block storm."
         icon: FEATHER
         value_type: double
         value: 8.0
@@ -61,10 +27,9 @@ options:
             stat: storm_radius
             value: 8.0
             modifier: SET
-
       wide:
         display_name: "Wide Sky"
-        description: "A 10 block storm. Covers a whole room. Costs extra mana."
+        description: "A 10 block storm. Costs extra mana."
         icon: ELYTRA
         value_type: double
         value: 10.0
@@ -84,37 +49,3 @@ options:
             modifier: SET
           - type: mana_cost
             change: 150
-
-  # ---------------------------------------------------------------------------
-  # flight - whether the grant happens at all
-  # ---------------------------------------------------------------------------
-  flight:
-    description: "Whether the storm grants flight"
-    icon: FEATHER
-    default_index: 1
-
-    values:
-
-      no_flight:
-        display_name: "No Flight"
-        description: "The storm still burns, but you stay on the ground."
-        icon: HEAVY_WEIGHTED_PRESSURE_PLATE
-        value_type: boolean
-        value: false
-        impacts:
-          - type: stat_modifier
-            stat: flight_allow
-            value: 0.0
-            modifier: SET
-
-      flight:
-        display_name: "Flight"
-        description: "Fly for the storm's duration. The default."
-        icon: FEATHER
-        value_type: boolean
-        value: true
-        impacts:
-          - type: stat_modifier
-            stat: flight_allow
-            value: 1.0
-            modifier: SET

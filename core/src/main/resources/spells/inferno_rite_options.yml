@@ -6,7 +6,7 @@
 # are close enough to count; 'spread' changes how many a single triggering hit may
 # detonate, but InfernoRiteConfig.detonationsPerTrigger() clamps that to hit_count,
 # and the per-cast charge counter is the real ceiling at 3. So no configuration of
-# this spell can exceed 3 x 28.6 = 85.8, which is inside burstBudget(9) = 90.0.
+# this spell can exceed 3 x 57.2 = 171.6, which is inside burstBudget(9) = 180.0.
 # =============================================================================
 
 options:

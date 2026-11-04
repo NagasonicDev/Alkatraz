@@ -3,11 +3,15 @@
 # Spell option configuration for the Oblivion spell.
 #
 # NEITHER OPTION BELOW TOUCHES DAMAGE, SO NEITHER CARRIES A mana_cost IMPACT. The
-# damage ceiling is fixed by power 28.6 x missing_health_multiplier 3.15, capped
-# at burst_damage_cap 90.0, on EVERY value of EVERY option - there is no damage
-# knob in this file for a player to overreach with, and 90.0 IS burstBudget(9).
-# debuff_duration selects between two non-damaging potion effects; target_range only
-# changes how far the crosshair reaches.
+# spell was reworked from BURST to SUSTAIN and no longer scales off what a target
+# has already lost - missing_health_multiplier and burst_damage_cap are gone, and
+# the damage is flat. power 28.0 x hit_count 10 = 280.0 IS SpellBudgets.sustainBudget(9),
+# spent as ten openings one every 6 seconds across the 60 second life of the hole,
+# and upkeep_mana_per_second 75 drains the caster while it stays open. The damage
+# ceiling is therefore fixed on EVERY value of EVERY option - there is no damage
+# knob in this file for a player to overreach with. debuff_duration selects between
+# two non-damaging potion effects; target_range only changes how far the crosshair
+# reaches.
 #
 # Structure overview:
 #   options:

@@ -3,10 +3,8 @@ enabled: true
 
 # WHAT THIS SPELL IS JUDGED ON. READ BY Spell.loadConfiguration AND SpellBudgetTest.
 #
-# SUSTAIN, NOT UTILITY, despite the flight grant. SpellBudgetTest fails any UTILITY
-# spell that carries a power: key, and this spell's 144.0 damage-over-time is the
-# number that prices the circle-9 air row. The flight is the delivery mechanism for
-# the storm, not a second product - see the spell file.
+# The circle-9 AIR capstone is the damage sustain: it calls down a storm that
+# batters nearby foes. Flight belongs to the circle-8 Stormcaller utility.
 role: 'SUSTAIN'
 
 # AIR IS FORBIDDEN FROM TERRAIN (spec 5.2). skywrath never calls TerrainEditor and
@@ -18,61 +16,47 @@ code: 'SLRSL'
 
 level: 9
 
-# SPEC SECTION 6 LADDER, CIRCLE 9. mana/cd/focus verbatim - required_focus 161 sits
+# SPEC SECTION 6 LADDER, CIRCLE 9. mana/focus verbatim - required_focus 161 sits
 # under SpellBudgetTest's 85%-of-max_focus ceiling of 0.85 * 190 = 161.5. cast_time
 # is NOT the ladder's 3.0s but the only value SpellBudgets.castTimeRange permits at
-# circle 9, which collapses to the single point 40 ticks = 2.0s.
+# circle 9, which collapses to the single point 40 ticks = 2.0s. cd IS withdrawn from
+# the ladder: this is a sustained toggle, and a cooldown would block the second cast
+# that turns the storm off.
 required_focus: 161
-cooldown: 20
+# A SUSTAINED TOGGLE. CAST IT AGAIN TO END THE STORM.
+cooldown: 0
 cast_time: 2.0
 mana_cost: 600
 
 maximum_mastery: 100
 
 # POWER DEVIATION, DOCUMENTED. The circle-9 ladder power of 28.6 is a PER-HIT value
-# and cannot be used unmodified by a SUSTAIN field. 9.6 x hit_count 15 = 144.0,
-# which is EXACTLY the circle-9 SUSTAIN budget of 144 - the same landing as
+# and cannot be used unmodified by a SUSTAIN field. 28.0 x hit_count 10 = 280.0,
+# which is EXACTLY the circle-9 SUSTAIN budget of 280 - the same landing as
 # whirlpool's 22.0 at circle 4 and tornado's 36.0 at circle 5. Same deviation shape
 # as inferno_pilgrimage's 16 x 3.
-power: 9.6
+power: 28.0
 
-# MANDATED BY THE SUSTAIN CADENCE RULE AND BY THE T21 BRIEF. The storm damages one
-# target once every SpellAttackContext.DAMAGE_INTERVAL_TICKS (20) ticks for
-# storm_duration seconds, so it applies damage exactly storm_duration times. 15.0
-# seconds is 15 applications. SkywrathConfig.hitsPerTarget() asserts the same number
-# and this key must equal it - there is ZERO headroom at circle 9, so no options
-# file entry may carry a `damage` stat modifier.
-hit_count: 15
+# MANDATED BY THE SUSTAIN CADENCE RULE. The storm damages one target once every
+# strike_interval_seconds for storm_duration seconds, so it applies exactly 10 times:
+# 24.0 / 2.4 = 10. SkywrathConfig.hitsPerTarget() asserts the same number; this
+# key must equal it. There is ZERO headroom at circle 9, so no options file entry may
+# carry a `damage` stat modifier.
+hit_count: 10
 
-# HOW LONG THE STORM LIVES, IN SECONDS. 15.0 -> 300 ticks, 15 damage openings.
-storm_duration: 15.0
-# THE CADENCE GAP, IN SECONDS. 1.0 -> the mandated 20 ticks. Configurable so the
-# number is visible, but 20 is the only legal value at this circle.
-strike_interval_seconds: 1.0
+# HOW LONG THE STORM LIVES, IN SECONDS. 24.0s at a 2.4s cadence -> 10 strikes.
+storm_duration: 24.0
+# THE CADENCE GAP, IN SECONDS. 2.4 -> 48 ticks between strikes on one target.
+strike_interval_seconds: 2.4
+# WHAT THE STORM COSTS WHILE IT RUNS, IN MANA PER SECOND. Charged every 20 ticks by
+# SustainEffect, and the storm ends the moment the caster cannot pay it.
+upkeep_mana_per_second: 70
 # HORIZONTAL RADIUS OF THE STORM COLUMN, IN BLOCKS. The drawn rings sit at
 # storm_radius * 1.5 down to storm_radius * 1.4.
 storm_radius: 8.0
 # HOW FAR ABOVE THE CASTER THE STORM RIDES, IN BLOCKS. Also the height of the
 # entity query, so nothing passes the storm unnoticed.
 storm_height: 12.0
-
-# --- THE FLIGHT GRANT -------------------------------------------------------
-# These three keys grant and revoke creative-style flight for exactly as long as
-# the storm lasts. The spell captures allowFlight / flying / flySpeed BEFORE the
-# grant and restores all three verbatim on expiry, on death, on quit and on plugin
-# disable, so a player is never left permanently airborne.
-#
-# flight_allow: the master switch. true = fly, false = the storm still runs and
-#   still deals 144.0 but the caster stays grounded. Read with a true default, so
-#   a missing key grants flight rather than silently denying it.
-flight_allow: true
-# The fraction of the storm's life the flight lasts. 1.0 means "for exactly the
-# storm's duration". The implementation asserts flight_ticks <= storm_ticks at
-# launch and clamps down to storm_ticks if a config edit ever breaks that.
-flight_ticks_per_storm_tick: 1.0
-# Written to Player#setFlySpeed. Valid range is -1.0 .. 1.0; the vanilla creative
-# default is 0.05, so 0.15 is a fast but controllable glide.
-flight_speed: 0.15
 
 #THE COLOR OF THE SPELL MASTERY BOSSBAR.
 mastery_bar_color: 'PURPLE'

@@ -71,10 +71,10 @@ options:
 
       fast:
         display_name: "Fast"
-        description: "Shoots slightly faster."
+        description: "Faster projectile with reduced damage."
         icon: FEATHER
         value_type: double
-        value: 0.03
+        value: 0.8
         requirements:
           - type: number_stat
             stat: circleLevel
@@ -96,10 +96,10 @@ options:
 
       blazing:
         display_name: "Blazing"
-        description: "Shoots blazingly fast."
+        description: "Very fast projectile with reduced damage and higher mana cost."
         icon: FEATHER
         value_type: double
-        value: 0.01
+        value: 1.2
         requirements:
           - type: number_stat
             stat: circleLevel
@@ -157,7 +157,7 @@ options:
 
       small_size:
         display_name: "Small Size"
-        description: "Smaller fireball."
+        description: "Smaller blast radius, higher damage, and a slightly faster projectile."
         icon: SNOWBALL
         value_type: double
         value: 0.5
@@ -173,7 +173,7 @@ options:
         impacts:
           - type: stat_modifier
             stat: size
-            value: 1.0
+            value: 0.5
             modifier: SET
           - type: stat_modifier
             stat: damage
@@ -186,7 +186,7 @@ options:
 
       normal_size:
         display_name: "Normal Size"
-        description: "Normal fireball explosion"
+        description: "Standard blast radius and damage."
         icon: IRON_INGOT
         value_type: double
         value: 1.5
@@ -198,7 +198,7 @@ options:
 
       large_size:
         display_name: "Large Size"
-        description: "Large fireball explosion"
+        description: "Larger blast radius with reduced damage and a slightly slower projectile."
         icon: IRON_BLOCK
         value_type: double
         value: 2.0
