@@ -38,6 +38,15 @@ public final class ItemTypeMapper {
             }
         }
 
+        // Version-gated materials that cannot be declared in the YAML statically:
+        // Mace only exists on Minecraft 1.21+, so resolve it at runtime instead of
+        // warning on every older server.
+        Material mace = Material.matchMaterial("MACE");
+        if (mace != null) {
+            map.computeIfAbsent(mace, k -> new HashSet<>()).add("mace");
+            reverse.computeIfAbsent("mace", k -> new HashSet<>()).add(mace);
+        }
+
         // Freeze the maps
         Map<Material, Set<String>> frozen = new HashMap<>();
         for (var entry : map.entrySet()) {

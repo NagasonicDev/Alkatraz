@@ -103,7 +103,7 @@ options:
       bombardment:
         display_name: "Bombardment"
         description: "A full second between impacts. Every stone lands."
-        icon: CANNON
+        icon: TNT
         value_type: int
         value: 20
         requirements:

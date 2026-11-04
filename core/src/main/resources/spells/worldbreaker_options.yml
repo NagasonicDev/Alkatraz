@@ -86,7 +86,7 @@ options:
   # ---------------------------------------------------------------------------
   crush_lift:
     description: "How high the trapped slab is levered up"
-    icon: SMOOTH_BLACKSTONE
+    icon: POLISHED_BLACKSTONE
     default_index: 1
 
     values:
@@ -111,7 +111,7 @@ options:
       standard:
         display_name: "Lever"
         description: "Three blocks up. 428 a layer x 3 = 1284 raised. Dig and slab alone want 3450, so the chasms get 150 of their 246."
-        icon: SMOOTH_BLACKSTONE
+        icon: POLISHED_BLACKSTONE
         value_type: int
         value: 3
         impacts:

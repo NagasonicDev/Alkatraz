@@ -58,7 +58,7 @@ options:
       paired_darts:
         display_name: "Paired Darts"
         description: "Two darts, half the damage each"
-        icon: BARB_ARROW
+        icon: SPECTRAL_ARROW
         value_type: int
         value: 2
         impacts:
