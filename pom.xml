@@ -41,6 +41,7 @@
         <module>v1_21_R7</module>
         <module>v26_R1</module>
         <module>v26_R2</module>
+        <module>v26_R3</module>
     </modules>
 
     <profiles>
@@ -67,8 +68,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
                 <configuration>
-                    <source>${javaVersion}</source>
-                    <target>${javaVersion}</target>
+                    <release>${javaVersion}</release>
                 </configuration>
             </plugin>
             <plugin>

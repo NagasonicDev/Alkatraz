@@ -18,6 +18,15 @@ out/
 
 # Python Scripts
 *.py
+!scripts/build_texture_pack_manifest.py
+!scripts/build_texture_pack_gui.py
+!scripts/build_spell_and_book_assets.py
+!scripts/build_jewelry_and_equipment_assets.py
+!scripts/build_texture_pack_research_and_font.py
+!scripts/verify_texture_pack.py
+!scripts/build_alkatraz_modern_pack.py
+!scripts/redesign_modern_textures.py
+!scripts/build_individual_spell_textures.py
 
 # Package Files #
 *.jar
@@ -130,3 +139,4 @@ rename_nms_packages.ps1
 # Git worktrees (superpowers)
 .worktrees/
 
+/resource-packs/

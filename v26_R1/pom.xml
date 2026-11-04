@@ -13,6 +13,7 @@
 
     <properties>
         <spigotVersion>26.1.2</spigotVersion>
+        <javaVersion>25</javaVersion>
     </properties>
 
     <dependencies>
@@ -37,8 +38,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
                 <configuration>
-                    <source>${javaVersion}</source>
-                    <target>${javaVersion}</target>
+                    <release>${javaVersion}</release>
                 </configuration>
             </plugin>
         </plugins>
