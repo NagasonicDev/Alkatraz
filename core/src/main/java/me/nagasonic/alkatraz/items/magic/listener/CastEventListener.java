@@ -29,6 +29,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -51,13 +52,15 @@ public class CastEventListener implements Listener {
 
     public static void markSpellDamage(LivingEntity target) {
         if (target == null) return;
-        sweepSpellDamageMarks();
+        if (Bukkit.isPrimaryThread()) {
+            sweepSpellDamageMarks();
+        }
         spellDamageMarkedUntil.put(target.getUniqueId(), System.nanoTime() + MARK_EXPIRY_NANOS);
     }
 
     public static boolean isSpellDamage(LivingEntity target) {
         if (target == null) return false;
-        if (System.nanoTime() - lastSweepNanos >= SWEEP_WINDOW_NANOS) {
+        if (Bukkit.isPrimaryThread() && (System.nanoTime() - lastSweepNanos >= SWEEP_WINDOW_NANOS)) {
             sweepSpellDamageMarks();
         }
         Long deadline = spellDamageMarkedUntil.get(target.getUniqueId());
@@ -267,6 +270,11 @@ public class CastEventListener implements Listener {
     @EventHandler
     private void onWorldChange(PlayerChangedWorldEvent e) {
         WandComponentHandler.resetCastCode(e.getPlayer().getUniqueId());
+    }
+
+    @EventHandler
+    private void onDeath(PlayerDeathEvent e) {
+        WandComponentHandler.resetCastCode(e.getEntity().getUniqueId());
     }
 
     @EventHandler
@@ -481,7 +489,8 @@ public class CastEventListener implements Listener {
      * Bukkit event handler.
      */
     private static PlayerItemHeldEvent handSwitchMemoEvent;
-    private static final Map<ItemStack, boolean[]> HAND_SWITCH_MEMO = new HashMap<>();
+    private static final Map<ItemStack, boolean[]> HAND_SWITCH_MEMO = new IdentityHashMap<>();
+    // shortcut: the memo is keyed on PlayerItemHeldEvent identity; safe only because memoSlot clears it when a new event arrives. Do not read outside event dispatch.
 
     private static boolean[] memoSlot(PlayerItemHeldEvent event, ItemStack item) {
         if (handSwitchMemoEvent != event) {
@@ -537,7 +546,7 @@ public class CastEventListener implements Listener {
                 spellDamageMarkedUntil.remove(entry.getKey(), deadline);
                 continue;
             }
-            if (Bukkit.getEntity(entry.getKey()) == null) {
+            if (Bukkit.isPrimaryThread() && Bukkit.getEntity(entry.getKey()) == null) {
                 spellDamageMarkedUntil.remove(entry.getKey(), deadline);
             }
         }

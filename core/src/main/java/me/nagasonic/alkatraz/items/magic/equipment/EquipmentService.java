@@ -51,14 +51,12 @@ public final class EquipmentService {
         anyMagicEquipped = true;
     }
 
-    private static void recomputeAnyMagicEquipped() {
+    public static void recomputeAnyMagicEquipped() {
+        boolean any = false;
         for (EquipmentProfile profile : PROFILE_CACHE.values()) {
-            if (!profile.instances().isEmpty()) {
-                anyMagicEquipped = true;
-                return;
-            }
+            if (!profile.instances().isEmpty()) { any = true; break; }
         }
-        anyMagicEquipped = false;
+        anyMagicEquipped = any;
     }
 
     public void registerVirtualSlot(EquipmentSlot slot, VirtualSlotResolver resolver) {
@@ -68,9 +66,8 @@ public final class EquipmentService {
     /** Drops the cached profile for a player so the next {@link #profile(Player)} rebuilds it. */
     public static void invalidate(UUID uuid) {
         if (uuid != null) {
-            if (PROFILE_CACHE.remove(uuid) != null) {
-                recomputeAnyMagicEquipped();
-            }
+            PROFILE_CACHE.remove(uuid);
+            recomputeAnyMagicEquipped();
         }
     }
 

@@ -72,7 +72,12 @@ public final class EquipmentStorage {
                 }
             }, FLUSH_DELAY_TICKS);
         } catch (RuntimeException e) {
-            // Scheduler unavailable (shutdown or reload); fall back to an immediate write.
+            // Scheduler unavailable (shutdown or reload); only fall back to an immediate write
+            // when we are not actively shutting down or reloading.
+            if (me.nagasonic.alkatraz.playerdata.profiles.ProfileManager.isShuttingDown()
+                    || me.nagasonic.alkatraz.playerdata.profiles.ProfileManager.isReloading()) {
+                return;
+            }
             Map<String, ItemStack> playerItems = cache.get(uuid);
             if (playerItems != null) {
                 save(uuid, playerItems);
@@ -81,7 +86,10 @@ public final class EquipmentStorage {
     }
 
     public static void setItem(Player player, EquipmentSlot slot, ItemStack item) {
-        Map<String, ItemStack> playerItems = cache.computeIfAbsent(player.getUniqueId(), EquipmentStorage::load);
+        UUID uuid = player.getUniqueId();
+        if (!Bukkit.isPrimaryThread() || Bukkit.getPlayer(uuid) == null) return;
+        Map<String, ItemStack> playerItems = loaded(uuid);
+        if (playerItems == null) return;
         ItemStack oldItem = playerItems.get(slot.getKey().getKey());
         boolean changed = false;
         if (item == null || item.getType().isAir()) {
@@ -172,24 +180,45 @@ public final class EquipmentStorage {
     }
 
     /**
+     * Returns a detached clone of a player's cached equipment map (or null when
+     * not cached) so it can be written from a background thread.
+     */
+    public static Map<String, ItemStack> snapshot(UUID uuid) {
+        Map<String, ItemStack> playerItems = cache.get(uuid);
+        if (playerItems == null) return null;
+        Map<String, ItemStack> copy = new HashMap<>();
+        for (Map.Entry<String, ItemStack> entry : playerItems.entrySet()) {
+            copy.put(entry.getKey(), entry.getValue() == null ? null : entry.getValue().clone());
+        }
+        return copy;
+    }
+
+    /**
      * Returns the cached equipment map for an online player, loading it from disk only
      * when the player is currently online. Offline lookups never touch disk or cache.
      */
     private static Map<String, ItemStack> loaded(UUID uuid) {
+        if (!Bukkit.isPrimaryThread()) {
+            return cache.get(uuid);
+        }
         Map<String, ItemStack> existing = cache.get(uuid);
         if (existing != null) return existing;
         if (Bukkit.getPlayer(uuid) == null) return null;
         return cache.computeIfAbsent(uuid, EquipmentStorage::load);
     }
 
-    /** Explicit load for offline/admin paths; mirrors ProfileManager semantics. */
+    /** Explicit load for offline/admin paths; stays on the primary thread. */
     public static Map<String, ItemStack> getOrLoad(UUID uuid) {
+        if (!Bukkit.isPrimaryThread()) {
+            return cache.get(uuid);
+        }
         return cache.computeIfAbsent(uuid, EquipmentStorage::load);
     }
     public static void unload(Player player) {
         save(player);
         DIRTY.remove(player.getUniqueId());
         cache.remove(player.getUniqueId());
+        EquipmentService.invalidate(player.getUniqueId());
     }
 
     /** Drops a UUID's cached equipment without saving; for transient/offline loads. */
@@ -224,7 +253,7 @@ public final class EquipmentStorage {
         return items;
     }
 
-    private static void save(UUID uuid, Map<String, ItemStack> items) {
+    public static void save(UUID uuid, Map<String, ItemStack> items) {
         File file = getFile(uuid);
         if (!file.getParentFile().exists()) {
             file.getParentFile().mkdirs();

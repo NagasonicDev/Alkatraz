@@ -27,6 +27,7 @@ public final class MagicDamageListener implements Listener {
         DamageCause cause = event.getCause();
         if (cause != DamageCause.ENTITY_EXPLOSION && cause != DamageCause.BLOCK_EXPLOSION) return;
         double bonus = EXPLOSION_BONUS.getOrDefault(player.getUniqueId(), 0.0);
+        EXPLOSION_BONUS.remove(player.getUniqueId());
         if (bonus > 0) {
             event.setDamage(event.getDamage() + bonus);
         }

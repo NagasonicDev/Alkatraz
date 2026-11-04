@@ -29,12 +29,21 @@ public final class BarrierManager {
             if (SESSIONS.isEmpty()) return;
             for (Map<String, BarrierSession> byItem : new ArrayList<>(SESSIONS.values())) {
                 for (BarrierSession session : new ArrayList<>(byItem.values())) {
-                    if (session != null && !session.isDisposed()) {
-                        try {
-                            session.tick();
-                        } catch (Exception e) {
-                            Alkatraz.getInstance().getLogger().log(java.util.logging.Level.SEVERE, "Barrier session tick failed", e);
+                    if (session == null) continue;
+                    org.bukkit.entity.Player caster = session.getCasterPlayer();
+                    if (session.isDisposed() || caster == null || !caster.isOnline()) {
+                        // Orphaned session (caster gone/disposed mid-flight): clean
+                        // up and drop the map entry so it cannot linger.
+                        if (!session.isDisposed()) {
+                            try { session.dispose(false); } catch (Exception ignored) { }
                         }
+                        try { removeSession(session); } catch (Exception ignored) { }
+                        continue;
+                    }
+                    try {
+                        session.tick();
+                    } catch (Exception e) {
+                        Alkatraz.getInstance().getLogger().log(java.util.logging.Level.SEVERE, "Barrier session tick failed", e);
                     }
                 }
             }
@@ -108,16 +117,19 @@ public final class BarrierManager {
 
     static void onDisposed(BarrierSession session, boolean shatter) {
         if (session == null) return;
-        if (!shatter) {
-            if (session.getConfig().persistHpAcrossSummons()) {
-                persistHp(session);
+        try {
+            if (!shatter) {
+                if (session.getConfig().persistHpAcrossSummons()) {
+                    persistHp(session);
+                }
+                if (session.getConfig().cooldown().on() == BarrierConfig.CooldownConfig.CooldownMoment.DISPOSE) {
+                    markShatterCooldown(session.actorId(), session.getItemKey(),
+                            System.currentTimeMillis(), session.getConfig().cooldown().seconds());
+                }
             }
-            if (session.getConfig().cooldown().on() == BarrierConfig.CooldownConfig.CooldownMoment.DISPOSE) {
-                markShatterCooldown(session.actorId(), session.getItemKey(),
-                        System.currentTimeMillis(), session.getConfig().cooldown().seconds());
-            }
+        } finally {
+            removeSession(session);
         }
-        removeSession(session);
     }
 
     static void onShattered(BarrierSession session) {
@@ -184,7 +196,8 @@ public final class BarrierManager {
         if (denySound == null || denySound.isBlank()) return;
         try {
             caster.playSound(caster.getLocation(), Sound.valueOf(denySound.trim().toUpperCase()), 1.0f, 1.0f);
-        } catch (IllegalArgumentException ignored) {
+        } catch (IllegalArgumentException e) {
+            Alkatraz.logDebug("Invalid barrier deny sound: " + e.getMessage());
         }
     }
 }
