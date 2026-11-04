@@ -4,7 +4,7 @@
     "property": "minecraft:custom_model_data",
     "fallback": {
       "type": "minecraft:model",
-      "model": "minecraft:item/wither_skeleton_skull"
+      "model": "minecraft:item/template_skull"
     },
     "entries": [
       {

@@ -4,7 +4,7 @@
     "property": "minecraft:custom_model_data",
     "fallback": {
       "type": "minecraft:model",
-      "model": "minecraft:item/blue_stained_glass"
+      "model": "minecraft:block/blue_stained_glass"
     },
     "entries": [
       {

@@ -4,7 +4,7 @@
     "property": "minecraft:custom_model_data",
     "fallback": {
       "type": "minecraft:model",
-      "model": "minecraft:item/player_head"
+      "model": "minecraft:item/template_skull"
     },
     "entries": [
       {

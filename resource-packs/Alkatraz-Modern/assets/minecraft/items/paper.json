@@ -34,6 +34,20 @@
           "type": "minecraft:model",
           "model": "alkatraz:item/earth_spike_scroll"
         }
+      },
+      {
+        "threshold": 4610,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/gui_editor_spell_id"
+        }
+      },
+      {
+        "threshold": 4626,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/gui_editor_entry_lore"
+        }
       }
     ]
   }

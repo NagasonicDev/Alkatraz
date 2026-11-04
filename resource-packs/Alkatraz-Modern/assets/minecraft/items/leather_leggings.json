@@ -10,29 +10,81 @@
       {
         "threshold": 2799,
         "model": {
-          "type": "minecraft:model",
-          "model": "alkatraz:item/apprentice_leggings"
+          "type": "minecraft:select",
+          "property": "minecraft:display_context",
+          "cases": [
+            {
+              "when": "gui",
+              "model": {
+                "type": "minecraft:model",
+                "model": "alkatraz:item/apprentice_leggings"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "alkatraz:item/apprentice_leggings_3d"
+          }
         }
       },
       {
         "threshold": 2803,
         "model": {
-          "type": "minecraft:model",
-          "model": "alkatraz:item/scholar_leggings"
+          "type": "minecraft:select",
+          "property": "minecraft:display_context",
+          "cases": [
+            {
+              "when": "gui",
+              "model": {
+                "type": "minecraft:model",
+                "model": "alkatraz:item/scholar_leggings"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "alkatraz:item/scholar_leggings_3d"
+          }
         }
       },
       {
         "threshold": 2807,
         "model": {
-          "type": "minecraft:model",
-          "model": "alkatraz:item/enchanter_leggings"
+          "type": "minecraft:select",
+          "property": "minecraft:display_context",
+          "cases": [
+            {
+              "when": "gui",
+              "model": {
+                "type": "minecraft:model",
+                "model": "alkatraz:item/enchanter_leggings"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "alkatraz:item/enchanter_leggings_3d"
+          }
         }
       },
       {
         "threshold": 2811,
         "model": {
-          "type": "minecraft:model",
-          "model": "alkatraz:item/archmage_leggings"
+          "type": "minecraft:select",
+          "property": "minecraft:display_context",
+          "cases": [
+            {
+              "when": "gui",
+              "model": {
+                "type": "minecraft:model",
+                "model": "alkatraz:item/archmage_leggings"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "alkatraz:item/archmage_leggings_3d"
+          }
         }
       }
     ]

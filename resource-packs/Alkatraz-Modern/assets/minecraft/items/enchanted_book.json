@@ -8,6 +8,27 @@
     },
     "entries": [
       {
+        "threshold": 4461,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/ui/engrave_installed"
+        }
+      },
+      {
+        "threshold": 4609,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/gui_editor_max_engravings"
+        }
+      },
+      {
+        "threshold": 4635,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/gui_research_node_done"
+        }
+      },
+      {
         "threshold": 6101,
         "model": {
           "type": "minecraft:model",

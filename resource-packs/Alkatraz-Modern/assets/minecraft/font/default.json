@@ -2,42 +2,6 @@
   "providers": [
     {
       "type": "bitmap",
-      "file": "alkatraz:font/glyph_1001.png",
-      "height": 16,
-      "ascent": 12,
-      "chars": [
-        "ခ"
-      ]
-    },
-    {
-      "type": "bitmap",
-      "file": "alkatraz:font/glyph_1002.png",
-      "height": 16,
-      "ascent": 12,
-      "chars": [
-        "ဂ"
-      ]
-    },
-    {
-      "type": "bitmap",
-      "file": "alkatraz:font/glyph_1003.png",
-      "height": 16,
-      "ascent": 12,
-      "chars": [
-        "ဃ"
-      ]
-    },
-    {
-      "type": "bitmap",
-      "file": "alkatraz:font/glyph_1004.png",
-      "height": 16,
-      "ascent": 12,
-      "chars": [
-        "င"
-      ]
-    },
-    {
-      "type": "bitmap",
       "file": "alkatraz:font/glyph_f001.png",
       "height": 137,
       "ascent": 13,
@@ -88,15 +52,6 @@
       "ascent": 13,
       "chars": [
         ""
-      ]
-    },
-    {
-      "type": "bitmap",
-      "file": "alkatraz:font/glyph_f808.png",
-      "height": -10,
-      "ascent": -32768,
-      "chars": [
-        ""
       ]
     },
     {
@@ -395,6 +350,12 @@
       "chars": [
         ""
       ]
+    },
+    {
+      "type": "space",
+      "advances": {
+        "": -8
+      }
     }
   ]
 }

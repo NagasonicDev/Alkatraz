@@ -4,7 +4,7 @@
     "property": "minecraft:custom_model_data",
     "fallback": {
       "type": "minecraft:model",
-      "model": "minecraft:block/amethyst_cluster"
+      "model": "minecraft:item/amethyst_cluster"
     },
     "entries": [
       {

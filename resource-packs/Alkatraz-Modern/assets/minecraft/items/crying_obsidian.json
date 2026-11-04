@@ -4,7 +4,7 @@
     "property": "minecraft:custom_model_data",
     "fallback": {
       "type": "minecraft:model",
-      "model": "minecraft:item/crying_obsidian"
+      "model": "minecraft:block/crying_obsidian"
     },
     "entries": [
       {

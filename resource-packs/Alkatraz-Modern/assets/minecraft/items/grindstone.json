@@ -4,7 +4,7 @@
     "property": "minecraft:custom_model_data",
     "fallback": {
       "type": "minecraft:model",
-      "model": "minecraft:item/grindstone"
+      "model": "minecraft:block/grindstone"
     },
     "entries": [
       {

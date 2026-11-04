@@ -8,6 +8,27 @@
     },
     "entries": [
       {
+        "threshold": 3007,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/rune/rune_book"
+        }
+      },
+      {
+        "threshold": 4614,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/gui_editor_recipe_requirements"
+        }
+      },
+      {
+        "threshold": 4625,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/gui_editor_entry_requirement"
+        }
+      },
+      {
         "threshold": 5002,
         "model": {
           "type": "minecraft:model",

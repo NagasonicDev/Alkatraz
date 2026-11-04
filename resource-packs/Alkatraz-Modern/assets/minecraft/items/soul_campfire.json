@@ -4,7 +4,7 @@
     "property": "minecraft:custom_model_data",
     "fallback": {
       "type": "minecraft:model",
-      "model": "minecraft:block/soul_campfire"
+      "model": "minecraft:item/soul_campfire"
     },
     "entries": [
       {

@@ -4,9 +4,23 @@
     "property": "minecraft:custom_model_data",
     "fallback": {
       "type": "minecraft:model",
-      "model": "minecraft:item/crafting_table"
+      "model": "minecraft:block/crafting_table"
     },
     "entries": [
+      {
+        "threshold": 4606,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/gui_editor_components"
+        }
+      },
+      {
+        "threshold": 4612,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/gui_editor_recipe_shape"
+        }
+      },
       {
         "threshold": 6142,
         "model": {

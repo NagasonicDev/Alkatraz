@@ -4,7 +4,7 @@
     "property": "minecraft:custom_model_data",
     "fallback": {
       "type": "minecraft:model",
-      "model": "minecraft:block/gray_stained_glass_pane"
+      "model": "minecraft:item/gray_stained_glass_pane"
     },
     "entries": [
       {
@@ -26,6 +26,13 @@
         "model": {
           "type": "minecraft:model",
           "model": "alkatraz:item/gui_header_pane"
+        }
+      },
+      {
+        "threshold": 4446,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/ui/locked_slot"
         }
       }
     ]

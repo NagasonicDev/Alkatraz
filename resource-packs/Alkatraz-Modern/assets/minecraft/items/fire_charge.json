@@ -8,10 +8,24 @@
     },
     "entries": [
       {
+        "threshold": 3001,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/rune/rune_fire_charge"
+        }
+      },
+      {
         "threshold": 4102,
         "model": {
           "type": "minecraft:model",
           "model": "alkatraz:item/spell_fireball"
+        }
+      },
+      {
+        "threshold": 4411,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/ui/stat_fire"
         }
       },
       {

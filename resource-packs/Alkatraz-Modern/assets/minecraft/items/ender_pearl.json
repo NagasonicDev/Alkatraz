@@ -8,6 +8,13 @@
     },
     "entries": [
       {
+        "threshold": 3009,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/rune/rune_ender_pearl"
+        }
+      },
+      {
         "threshold": 4014,
         "model": {
           "type": "minecraft:model",
@@ -26,6 +33,20 @@
         "model": {
           "type": "minecraft:model",
           "model": "alkatraz:item/spell_blink"
+        }
+      },
+      {
+        "threshold": 4444,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/ui/warp_set"
+        }
+      },
+      {
+        "threshold": 4471,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/ui/engrave_mana"
         }
       }
     ]

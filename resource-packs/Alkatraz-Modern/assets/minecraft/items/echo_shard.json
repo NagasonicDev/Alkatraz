@@ -106,6 +106,20 @@
         }
       },
       {
+        "threshold": 4416,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/ui/stat_dark"
+        }
+      },
+      {
+        "threshold": 4426,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/ui/invest_dark"
+        }
+      },
+      {
         "threshold": 6109,
         "model": {
           "type": "minecraft:model",

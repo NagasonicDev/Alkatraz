@@ -4,7 +4,7 @@
     "property": "minecraft:custom_model_data",
     "fallback": {
       "type": "minecraft:model",
-      "model": "minecraft:block/tube_coral_fan"
+      "model": "minecraft:item/tube_coral_fan"
     },
     "entries": [
       {

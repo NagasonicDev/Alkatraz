@@ -13,6 +13,27 @@
           "type": "minecraft:model",
           "model": "alkatraz:item/gui_confirm_button"
         }
+      },
+      {
+        "threshold": 4621,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/gui_editor_add"
+        }
+      },
+      {
+        "threshold": 4622,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/gui_editor_toggle_on"
+        }
+      },
+      {
+        "threshold": 4632,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/gui_research_complete"
+        }
       }
     ]
   }

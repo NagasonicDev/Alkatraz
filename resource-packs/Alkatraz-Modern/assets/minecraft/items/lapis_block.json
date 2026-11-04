@@ -4,7 +4,7 @@
     "property": "minecraft:custom_model_data",
     "fallback": {
       "type": "minecraft:model",
-      "model": "minecraft:item/lapis_block"
+      "model": "minecraft:block/lapis_block"
     },
     "entries": [
       {

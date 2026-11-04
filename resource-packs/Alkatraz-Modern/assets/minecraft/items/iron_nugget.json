@@ -111,6 +111,13 @@
           "type": "minecraft:model",
           "model": "alkatraz:item/spell_magic_missile"
         }
+      },
+      {
+        "threshold": 4608,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/gui_editor_vanilla_attributes"
+        }
       }
     ]
   }

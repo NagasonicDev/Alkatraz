@@ -8,6 +8,13 @@
     },
     "entries": [
       {
+        "threshold": 3005,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/rune/rune_glowstone_dust"
+        }
+      },
+      {
         "threshold": 4108,
         "model": {
           "type": "minecraft:model",
@@ -26,6 +33,20 @@
         "model": {
           "type": "minecraft:model",
           "model": "alkatraz:item/spell_light_bolt"
+        }
+      },
+      {
+        "threshold": 4415,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/ui/stat_light"
+        }
+      },
+      {
+        "threshold": 4425,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/ui/invest_light"
         }
       },
       {

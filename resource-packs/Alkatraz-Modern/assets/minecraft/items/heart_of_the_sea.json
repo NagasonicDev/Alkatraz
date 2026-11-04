@@ -22,6 +22,20 @@
         }
       },
       {
+        "threshold": 4412,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/ui/stat_water"
+        }
+      },
+      {
+        "threshold": 4422,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/ui/invest_water"
+        }
+      },
+      {
         "threshold": 6159,
         "model": {
           "type": "minecraft:model",

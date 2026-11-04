@@ -8,6 +8,13 @@
     },
     "entries": [
       {
+        "threshold": 3026,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/rune/rune_feather"
+        }
+      },
+      {
         "threshold": 4104,
         "model": {
           "type": "minecraft:model",
@@ -40,6 +47,20 @@
         "model": {
           "type": "minecraft:model",
           "model": "alkatraz:item/spell_cyclone_nest"
+        }
+      },
+      {
+        "threshold": 4414,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/ui/stat_air"
+        }
+      },
+      {
+        "threshold": 4424,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/ui/invest_air"
         }
       },
       {

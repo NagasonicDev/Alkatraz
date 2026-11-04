@@ -4,7 +4,7 @@
     "property": "minecraft:custom_model_data",
     "fallback": {
       "type": "minecraft:model",
-      "model": "minecraft:block/pointed_dripstone"
+      "model": "minecraft:item/pointed_dripstone"
     },
     "entries": [
       {

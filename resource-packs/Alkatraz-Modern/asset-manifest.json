@@ -2370,6 +2370,24 @@
     },
     {
       "kind": "research_node",
+      "key": "awakened_focus_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6101,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "awakened_focus_red_dye",
+      "material": "RED_DYE",
+      "cmd": 6101,
+      "model": "alkatraz:item/research_node_red_dye",
+      "texture": "minecraft:item/red_dye",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
       "key": "awakened_focus_red_concrete",
       "material": "RED_CONCRETE",
       "cmd": 6101,
@@ -2388,15 +2406,6 @@
     },
     {
       "kind": "research_node",
-      "key": "awakened_focus_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6101,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "awakened_focus_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6101,
@@ -2406,9 +2415,18 @@
     },
     {
       "kind": "research_node",
-      "key": "awakened_focus_red_dye",
+      "key": "mana_conservation_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6102,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "mana_conservation_red_dye",
       "material": "RED_DYE",
-      "cmd": 6101,
+      "cmd": 6102,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -2433,15 +2451,6 @@
     },
     {
       "kind": "research_node",
-      "key": "mana_conservation_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6102,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "mana_conservation_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6102,
@@ -2451,38 +2460,11 @@
     },
     {
       "kind": "research_node",
-      "key": "mana_conservation_red_dye",
-      "material": "RED_DYE",
-      "cmd": 6102,
-      "model": "alkatraz:item/research_node_red_dye",
-      "texture": "minecraft:item/red_dye",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "ritual_geometry_red_concrete",
-      "material": "RED_CONCRETE",
-      "cmd": 6103,
-      "model": "alkatraz:item/research_node_red_concrete",
-      "texture": "minecraft:item/red_concrete",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "ritual_geometry_enchanted_book",
       "material": "ENCHANTED_BOOK",
       "cmd": 6103,
       "model": "alkatraz:item/research_node_enchanted_book",
       "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "ritual_geometry_writable_book",
-      "material": "WRITABLE_BOOK",
-      "cmd": 6103,
-      "model": "alkatraz:item/research_node_writable_book",
-      "texture": "minecraft:item/writable_book",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -2505,6 +2487,42 @@
     },
     {
       "kind": "research_node",
+      "key": "ritual_geometry_red_concrete",
+      "material": "RED_CONCRETE",
+      "cmd": 6103,
+      "model": "alkatraz:item/research_node_red_concrete",
+      "texture": "minecraft:item/red_concrete",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "ritual_geometry_writable_book",
+      "material": "WRITABLE_BOOK",
+      "cmd": 6103,
+      "model": "alkatraz:item/research_node_writable_book",
+      "texture": "minecraft:item/writable_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "spellcraft_field_notes_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6104,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "spellcraft_field_notes_red_dye",
+      "material": "RED_DYE",
+      "cmd": 6104,
+      "model": "alkatraz:item/research_node_red_dye",
+      "texture": "minecraft:item/red_dye",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
       "key": "spellcraft_field_notes_red_concrete",
       "material": "RED_CONCRETE",
       "cmd": 6104,
@@ -2523,20 +2541,20 @@
     },
     {
       "kind": "research_node",
-      "key": "spellcraft_field_notes_red_dye",
-      "material": "RED_DYE",
-      "cmd": 6104,
-      "model": "alkatraz:item/research_node_red_dye",
-      "texture": "minecraft:item/red_dye",
+      "key": "disciplined_channel_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6105,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
       "source": "core/src/main/resources/research.yml"
     },
     {
       "kind": "research_node",
-      "key": "spellcraft_field_notes_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6104,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
+      "key": "disciplined_channel_red_dye",
+      "material": "RED_DYE",
+      "cmd": 6105,
+      "model": "alkatraz:item/research_node_red_dye",
+      "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -2559,15 +2577,6 @@
     },
     {
       "kind": "research_node",
-      "key": "disciplined_channel_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6105,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "disciplined_channel_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6105,
@@ -2577,9 +2586,18 @@
     },
     {
       "kind": "research_node",
-      "key": "disciplined_channel_red_dye",
+      "key": "focus_discipline_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6106,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "focus_discipline_red_dye",
       "material": "RED_DYE",
-      "cmd": 6105,
+      "cmd": 6106,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -2595,33 +2613,6 @@
     },
     {
       "kind": "research_node",
-      "key": "focus_discipline_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6106,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "focus_discipline_writable_book",
-      "material": "WRITABLE_BOOK",
-      "cmd": 6106,
-      "model": "alkatraz:item/research_node_writable_book",
-      "texture": "minecraft:item/writable_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "focus_discipline_red_dye",
-      "material": "RED_DYE",
-      "cmd": 6106,
-      "model": "alkatraz:item/research_node_red_dye",
-      "texture": "minecraft:item/red_dye",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "focus_discipline_crossbow",
       "material": "CROSSBOW",
       "cmd": 6106,
@@ -2631,11 +2622,11 @@
     },
     {
       "kind": "research_node",
-      "key": "ward_craft_red_concrete",
-      "material": "RED_CONCRETE",
-      "cmd": 6107,
-      "model": "alkatraz:item/research_node_red_concrete",
-      "texture": "minecraft:item/red_concrete",
+      "key": "focus_discipline_writable_book",
+      "material": "WRITABLE_BOOK",
+      "cmd": 6106,
+      "model": "alkatraz:item/research_node_writable_book",
+      "texture": "minecraft:item/writable_book",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -2658,6 +2649,24 @@
     },
     {
       "kind": "research_node",
+      "key": "ward_craft_red_dye",
+      "material": "RED_DYE",
+      "cmd": 6107,
+      "model": "alkatraz:item/research_node_red_dye",
+      "texture": "minecraft:item/red_dye",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "ward_craft_red_concrete",
+      "material": "RED_CONCRETE",
+      "cmd": 6107,
+      "model": "alkatraz:item/research_node_red_concrete",
+      "texture": "minecraft:item/red_concrete",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
       "key": "ward_craft_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6107,
@@ -2667,9 +2676,27 @@
     },
     {
       "kind": "research_node",
-      "key": "ward_craft_red_dye",
+      "key": "mana_reservoir_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6108,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "mana_reservoir_lapis_block",
+      "material": "LAPIS_BLOCK",
+      "cmd": 6108,
+      "model": "alkatraz:item/research_node_lapis_block",
+      "texture": "minecraft:item/lapis_block",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "mana_reservoir_red_dye",
       "material": "RED_DYE",
-      "cmd": 6107,
+      "cmd": 6108,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -2685,15 +2712,6 @@
     },
     {
       "kind": "research_node",
-      "key": "mana_reservoir_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6108,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "mana_reservoir_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6108,
@@ -2703,20 +2721,20 @@
     },
     {
       "kind": "research_node",
-      "key": "mana_reservoir_red_dye",
-      "material": "RED_DYE",
-      "cmd": 6108,
-      "model": "alkatraz:item/research_node_red_dye",
-      "texture": "minecraft:item/red_dye",
+      "key": "spell_resonance_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6109,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
       "source": "core/src/main/resources/research.yml"
     },
     {
       "kind": "research_node",
-      "key": "mana_reservoir_lapis_block",
-      "material": "LAPIS_BLOCK",
-      "cmd": 6108,
-      "model": "alkatraz:item/research_node_lapis_block",
-      "texture": "minecraft:item/lapis_block",
+      "key": "spell_resonance_red_dye",
+      "material": "RED_DYE",
+      "cmd": 6109,
+      "model": "alkatraz:item/research_node_red_dye",
+      "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -2739,38 +2757,11 @@
     },
     {
       "kind": "research_node",
-      "key": "spell_resonance_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6109,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "spell_resonance_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6109,
       "model": "alkatraz:item/research_node_writable_book",
       "texture": "minecraft:item/writable_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "spell_resonance_red_dye",
-      "material": "RED_DYE",
-      "cmd": 6109,
-      "model": "alkatraz:item/research_node_red_dye",
-      "texture": "minecraft:item/red_dye",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "combat_casting_red_concrete",
-      "material": "RED_CONCRETE",
-      "cmd": 6110,
-      "model": "alkatraz:item/research_node_red_concrete",
-      "texture": "minecraft:item/red_concrete",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -2784,11 +2775,29 @@
     },
     {
       "kind": "research_node",
+      "key": "combat_casting_red_dye",
+      "material": "RED_DYE",
+      "cmd": 6110,
+      "model": "alkatraz:item/research_node_red_dye",
+      "texture": "minecraft:item/red_dye",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
       "key": "combat_casting_iron_sword",
       "material": "IRON_SWORD",
       "cmd": 6110,
       "model": "alkatraz:item/research_node_iron_sword",
       "texture": "minecraft:item/iron_sword",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "combat_casting_red_concrete",
+      "material": "RED_CONCRETE",
+      "cmd": 6110,
+      "model": "alkatraz:item/research_node_red_concrete",
+      "texture": "minecraft:item/red_concrete",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -2802,9 +2811,18 @@
     },
     {
       "kind": "research_node",
-      "key": "combat_casting_red_dye",
+      "key": "mana_conduit_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6111,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "mana_conduit_red_dye",
       "material": "RED_DYE",
-      "cmd": 6110,
+      "cmd": 6111,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -2829,47 +2847,11 @@
     },
     {
       "kind": "research_node",
-      "key": "mana_conduit_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6111,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "mana_conduit_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6111,
       "model": "alkatraz:item/research_node_writable_book",
       "texture": "minecraft:item/writable_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "mana_conduit_red_dye",
-      "material": "RED_DYE",
-      "cmd": 6111,
-      "model": "alkatraz:item/research_node_red_dye",
-      "texture": "minecraft:item/red_dye",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "barrier_weave_red_concrete",
-      "material": "RED_CONCRETE",
-      "cmd": 6112,
-      "model": "alkatraz:item/research_node_red_concrete",
-      "texture": "minecraft:item/red_concrete",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "barrier_weave_iron_door",
-      "material": "IRON_DOOR",
-      "cmd": 6112,
-      "model": "alkatraz:item/research_node_iron_door",
-      "texture": "minecraft:item/iron_door",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -2883,6 +2865,33 @@
     },
     {
       "kind": "research_node",
+      "key": "barrier_weave_red_dye",
+      "material": "RED_DYE",
+      "cmd": 6112,
+      "model": "alkatraz:item/research_node_red_dye",
+      "texture": "minecraft:item/red_dye",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "barrier_weave_iron_door",
+      "material": "IRON_DOOR",
+      "cmd": 6112,
+      "model": "alkatraz:item/research_node_iron_door",
+      "texture": "minecraft:item/iron_door",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "barrier_weave_red_concrete",
+      "material": "RED_CONCRETE",
+      "cmd": 6112,
+      "model": "alkatraz:item/research_node_red_concrete",
+      "texture": "minecraft:item/red_concrete",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
       "key": "barrier_weave_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6112,
@@ -2892,9 +2901,18 @@
     },
     {
       "kind": "research_node",
-      "key": "barrier_weave_red_dye",
+      "key": "arcane_theory_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6113,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "arcane_theory_red_dye",
       "material": "RED_DYE",
-      "cmd": 6112,
+      "cmd": 6113,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -2919,47 +2937,11 @@
     },
     {
       "kind": "research_node",
-      "key": "arcane_theory_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6113,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "arcane_theory_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6113,
       "model": "alkatraz:item/research_node_writable_book",
       "texture": "minecraft:item/writable_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "arcane_theory_red_dye",
-      "material": "RED_DYE",
-      "cmd": 6113,
-      "model": "alkatraz:item/research_node_red_dye",
-      "texture": "minecraft:item/red_dye",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "mana_sovereignty_diamond",
-      "material": "DIAMOND",
-      "cmd": 6114,
-      "model": "alkatraz:item/research_node_diamond",
-      "texture": "minecraft:item/diamond",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "mana_sovereignty_red_concrete",
-      "material": "RED_CONCRETE",
-      "cmd": 6114,
-      "model": "alkatraz:item/research_node_red_concrete",
-      "texture": "minecraft:item/red_concrete",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -2973,15 +2955,6 @@
     },
     {
       "kind": "research_node",
-      "key": "mana_sovereignty_writable_book",
-      "material": "WRITABLE_BOOK",
-      "cmd": 6114,
-      "model": "alkatraz:item/research_node_writable_book",
-      "texture": "minecraft:item/writable_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "mana_sovereignty_red_dye",
       "material": "RED_DYE",
       "cmd": 6114,
@@ -2991,11 +2964,29 @@
     },
     {
       "kind": "research_node",
-      "key": "spell_synthesis_red_concrete",
+      "key": "mana_sovereignty_red_concrete",
       "material": "RED_CONCRETE",
-      "cmd": 6115,
+      "cmd": 6114,
       "model": "alkatraz:item/research_node_red_concrete",
       "texture": "minecraft:item/red_concrete",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "mana_sovereignty_diamond",
+      "material": "DIAMOND",
+      "cmd": 6114,
+      "model": "alkatraz:item/research_node_diamond",
+      "texture": "minecraft:item/diamond",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "mana_sovereignty_writable_book",
+      "material": "WRITABLE_BOOK",
+      "cmd": 6114,
+      "model": "alkatraz:item/research_node_writable_book",
+      "texture": "minecraft:item/writable_book",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -3009,11 +3000,29 @@
     },
     {
       "kind": "research_node",
+      "key": "spell_synthesis_red_dye",
+      "material": "RED_DYE",
+      "cmd": 6115,
+      "model": "alkatraz:item/research_node_red_dye",
+      "texture": "minecraft:item/red_dye",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
       "key": "spell_synthesis_end_crystal",
       "material": "END_CRYSTAL",
       "cmd": 6115,
       "model": "alkatraz:item/research_node_end_crystal",
       "texture": "minecraft:item/end_crystal",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "spell_synthesis_red_concrete",
+      "material": "RED_CONCRETE",
+      "cmd": 6115,
+      "model": "alkatraz:item/research_node_red_concrete",
+      "texture": "minecraft:item/red_concrete",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -3027,9 +3036,18 @@
     },
     {
       "kind": "research_node",
-      "key": "spell_synthesis_red_dye",
+      "key": "battle_mage_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6116,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "battle_mage_red_dye",
       "material": "RED_DYE",
-      "cmd": 6115,
+      "cmd": 6116,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -3041,15 +3059,6 @@
       "cmd": 6116,
       "model": "alkatraz:item/research_node_red_concrete",
       "texture": "minecraft:item/red_concrete",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "battle_mage_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6116,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -3072,9 +3081,18 @@
     },
     {
       "kind": "research_node",
-      "key": "battle_mage_red_dye",
+      "key": "arcane_nexus_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6117,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "arcane_nexus_red_dye",
       "material": "RED_DYE",
-      "cmd": 6116,
+      "cmd": 6117,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -3099,15 +3117,6 @@
     },
     {
       "kind": "research_node",
-      "key": "arcane_nexus_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6117,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "arcane_nexus_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6117,
@@ -3117,9 +3126,18 @@
     },
     {
       "kind": "research_node",
-      "key": "arcane_nexus_red_dye",
+      "key": "grand_ward_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6118,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "grand_ward_red_dye",
       "material": "RED_DYE",
-      "cmd": 6117,
+      "cmd": 6118,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -3144,15 +3162,6 @@
     },
     {
       "kind": "research_node",
-      "key": "grand_ward_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6118,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "grand_ward_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6118,
@@ -3162,9 +3171,18 @@
     },
     {
       "kind": "research_node",
-      "key": "grand_ward_red_dye",
+      "key": "archmage_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6119,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "archmage_red_dye",
       "material": "RED_DYE",
-      "cmd": 6118,
+      "cmd": 6119,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -3189,15 +3207,6 @@
     },
     {
       "kind": "research_node",
-      "key": "archmage_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6119,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "archmage_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6119,
@@ -3207,9 +3216,27 @@
     },
     {
       "kind": "research_node",
-      "key": "archmage_red_dye",
+      "key": "fire_spark_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6120,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "fire_spark_blaze_powder",
+      "material": "BLAZE_POWDER",
+      "cmd": 6120,
+      "model": "alkatraz:item/research_node_blaze_powder",
+      "texture": "minecraft:item/blaze_powder",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "fire_spark_red_dye",
       "material": "RED_DYE",
-      "cmd": 6119,
+      "cmd": 6120,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -3225,15 +3252,6 @@
     },
     {
       "kind": "research_node",
-      "key": "fire_spark_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6120,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "fire_spark_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6120,
@@ -3243,20 +3261,20 @@
     },
     {
       "kind": "research_node",
-      "key": "fire_spark_red_dye",
-      "material": "RED_DYE",
-      "cmd": 6120,
-      "model": "alkatraz:item/research_node_red_dye",
-      "texture": "minecraft:item/red_dye",
+      "key": "flame_study_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6121,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
       "source": "core/src/main/resources/research.yml"
     },
     {
       "kind": "research_node",
-      "key": "fire_spark_blaze_powder",
-      "material": "BLAZE_POWDER",
-      "cmd": 6120,
-      "model": "alkatraz:item/research_node_blaze_powder",
-      "texture": "minecraft:item/blaze_powder",
+      "key": "flame_study_red_dye",
+      "material": "RED_DYE",
+      "cmd": 6121,
+      "model": "alkatraz:item/research_node_red_dye",
+      "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -3279,15 +3297,6 @@
     },
     {
       "kind": "research_node",
-      "key": "flame_study_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6121,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "flame_study_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6121,
@@ -3297,9 +3306,18 @@
     },
     {
       "kind": "research_node",
-      "key": "flame_study_red_dye",
+      "key": "heat_siphon_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6122,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "heat_siphon_red_dye",
       "material": "RED_DYE",
-      "cmd": 6121,
+      "cmd": 6122,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -3315,11 +3333,11 @@
     },
     {
       "kind": "research_node",
-      "key": "heat_siphon_enchanted_book",
-      "material": "ENCHANTED_BOOK",
+      "key": "heat_siphon_magma_cream",
+      "material": "MAGMA_CREAM",
       "cmd": 6122,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
+      "model": "alkatraz:item/research_node_magma_cream",
+      "texture": "minecraft:item/magma_cream",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -3333,56 +3351,11 @@
     },
     {
       "kind": "research_node",
-      "key": "heat_siphon_red_dye",
-      "material": "RED_DYE",
-      "cmd": 6122,
-      "model": "alkatraz:item/research_node_red_dye",
-      "texture": "minecraft:item/red_dye",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "heat_siphon_magma_cream",
-      "material": "MAGMA_CREAM",
-      "cmd": 6122,
-      "model": "alkatraz:item/research_node_magma_cream",
-      "texture": "minecraft:item/magma_cream",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "smoke_shroud_red_concrete",
-      "material": "RED_CONCRETE",
-      "cmd": 6123,
-      "model": "alkatraz:item/research_node_red_concrete",
-      "texture": "minecraft:item/red_concrete",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "smoke_shroud_soul_campfire",
-      "material": "SOUL_CAMPFIRE",
-      "cmd": 6123,
-      "model": "alkatraz:item/research_node_soul_campfire",
-      "texture": "minecraft:item/soul_campfire",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "smoke_shroud_enchanted_book",
       "material": "ENCHANTED_BOOK",
       "cmd": 6123,
       "model": "alkatraz:item/research_node_enchanted_book",
       "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "smoke_shroud_writable_book",
-      "material": "WRITABLE_BOOK",
-      "cmd": 6123,
-      "model": "alkatraz:item/research_node_writable_book",
-      "texture": "minecraft:item/writable_book",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -3396,11 +3369,29 @@
     },
     {
       "kind": "research_node",
-      "key": "cinder_sigil_red_concrete",
+      "key": "smoke_shroud_soul_campfire",
+      "material": "SOUL_CAMPFIRE",
+      "cmd": 6123,
+      "model": "alkatraz:item/research_node_soul_campfire",
+      "texture": "minecraft:item/soul_campfire",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "smoke_shroud_red_concrete",
       "material": "RED_CONCRETE",
-      "cmd": 6124,
+      "cmd": 6123,
       "model": "alkatraz:item/research_node_red_concrete",
       "texture": "minecraft:item/red_concrete",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "smoke_shroud_writable_book",
+      "material": "WRITABLE_BOOK",
+      "cmd": 6123,
+      "model": "alkatraz:item/research_node_writable_book",
+      "texture": "minecraft:item/writable_book",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -3414,11 +3405,29 @@
     },
     {
       "kind": "research_node",
+      "key": "cinder_sigil_red_dye",
+      "material": "RED_DYE",
+      "cmd": 6124,
+      "model": "alkatraz:item/research_node_red_dye",
+      "texture": "minecraft:item/red_dye",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
       "key": "cinder_sigil_flint_and_steel",
       "material": "FLINT_AND_STEEL",
       "cmd": 6124,
       "model": "alkatraz:item/research_node_flint_and_steel",
       "texture": "minecraft:item/flint_and_steel",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "cinder_sigil_red_concrete",
+      "material": "RED_CONCRETE",
+      "cmd": 6124,
+      "model": "alkatraz:item/research_node_red_concrete",
+      "texture": "minecraft:item/red_concrete",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -3432,11 +3441,11 @@
     },
     {
       "kind": "research_node",
-      "key": "cinder_sigil_red_dye",
-      "material": "RED_DYE",
-      "cmd": 6124,
-      "model": "alkatraz:item/research_node_red_dye",
-      "texture": "minecraft:item/red_dye",
+      "key": "water_first_tide_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6125,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -3450,20 +3459,20 @@
     },
     {
       "kind": "research_node",
+      "key": "water_first_tide_red_dye",
+      "material": "RED_DYE",
+      "cmd": 6125,
+      "model": "alkatraz:item/research_node_red_dye",
+      "texture": "minecraft:item/red_dye",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
       "key": "water_first_tide_red_concrete",
       "material": "RED_CONCRETE",
       "cmd": 6125,
       "model": "alkatraz:item/research_node_red_concrete",
       "texture": "minecraft:item/red_concrete",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "water_first_tide_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6125,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -3477,11 +3486,11 @@
     },
     {
       "kind": "research_node",
-      "key": "water_first_tide_red_dye",
-      "material": "RED_DYE",
-      "cmd": 6125,
-      "model": "alkatraz:item/research_node_red_dye",
-      "texture": "minecraft:item/red_dye",
+      "key": "tidal_studies_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6126,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -3495,20 +3504,20 @@
     },
     {
       "kind": "research_node",
+      "key": "tidal_studies_red_dye",
+      "material": "RED_DYE",
+      "cmd": 6126,
+      "model": "alkatraz:item/research_node_red_dye",
+      "texture": "minecraft:item/red_dye",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
       "key": "tidal_studies_red_concrete",
       "material": "RED_CONCRETE",
       "cmd": 6126,
       "model": "alkatraz:item/research_node_red_concrete",
       "texture": "minecraft:item/red_concrete",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "tidal_studies_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6126,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -3522,29 +3531,20 @@
     },
     {
       "kind": "research_node",
-      "key": "tidal_studies_red_dye",
-      "material": "RED_DYE",
-      "cmd": 6126,
-      "model": "alkatraz:item/research_node_red_dye",
-      "texture": "minecraft:item/red_dye",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "current_sense_red_concrete",
-      "material": "RED_CONCRETE",
-      "cmd": 6127,
-      "model": "alkatraz:item/research_node_red_concrete",
-      "texture": "minecraft:item/red_concrete",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "current_sense_enchanted_book",
       "material": "ENCHANTED_BOOK",
       "cmd": 6127,
       "model": "alkatraz:item/research_node_enchanted_book",
       "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "current_sense_red_dye",
+      "material": "RED_DYE",
+      "cmd": 6127,
+      "model": "alkatraz:item/research_node_red_dye",
+      "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -3558,6 +3558,15 @@
     },
     {
       "kind": "research_node",
+      "key": "current_sense_red_concrete",
+      "material": "RED_CONCRETE",
+      "cmd": 6127,
+      "model": "alkatraz:item/research_node_red_concrete",
+      "texture": "minecraft:item/red_concrete",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
       "key": "current_sense_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6127,
@@ -3567,9 +3576,18 @@
     },
     {
       "kind": "research_node",
-      "key": "current_sense_red_dye",
+      "key": "frost_ward_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6128,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "frost_ward_red_dye",
       "material": "RED_DYE",
-      "cmd": 6127,
+      "cmd": 6128,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -3585,29 +3603,11 @@
     },
     {
       "kind": "research_node",
-      "key": "frost_ward_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6128,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "frost_ward_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6128,
       "model": "alkatraz:item/research_node_writable_book",
       "texture": "minecraft:item/writable_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "frost_ward_red_dye",
-      "material": "RED_DYE",
-      "cmd": 6128,
-      "model": "alkatraz:item/research_node_red_dye",
-      "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -3621,20 +3621,20 @@
     },
     {
       "kind": "research_node",
-      "key": "depth_mark_red_concrete",
-      "material": "RED_CONCRETE",
-      "cmd": 6129,
-      "model": "alkatraz:item/research_node_red_concrete",
-      "texture": "minecraft:item/red_concrete",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "depth_mark_enchanted_book",
       "material": "ENCHANTED_BOOK",
       "cmd": 6129,
       "model": "alkatraz:item/research_node_enchanted_book",
       "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "depth_mark_red_dye",
+      "material": "RED_DYE",
+      "cmd": 6129,
+      "model": "alkatraz:item/research_node_red_dye",
+      "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -3648,6 +3648,15 @@
     },
     {
       "kind": "research_node",
+      "key": "depth_mark_red_concrete",
+      "material": "RED_CONCRETE",
+      "cmd": 6129,
+      "model": "alkatraz:item/research_node_red_concrete",
+      "texture": "minecraft:item/red_concrete",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
       "key": "depth_mark_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6129,
@@ -3657,9 +3666,18 @@
     },
     {
       "kind": "research_node",
-      "key": "depth_mark_red_dye",
+      "key": "earth_stone_memory_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6130,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "earth_stone_memory_red_dye",
       "material": "RED_DYE",
-      "cmd": 6129,
+      "cmd": 6130,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -3675,11 +3693,11 @@
     },
     {
       "kind": "research_node",
-      "key": "earth_stone_memory_enchanted_book",
-      "material": "ENCHANTED_BOOK",
+      "key": "earth_stone_memory_moss_block",
+      "material": "MOSS_BLOCK",
       "cmd": 6130,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
+      "model": "alkatraz:item/research_node_moss_block",
+      "texture": "minecraft:item/moss_block",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -3693,20 +3711,11 @@
     },
     {
       "kind": "research_node",
-      "key": "earth_stone_memory_red_dye",
-      "material": "RED_DYE",
-      "cmd": 6130,
-      "model": "alkatraz:item/research_node_red_dye",
-      "texture": "minecraft:item/red_dye",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "earth_stone_memory_moss_block",
-      "material": "MOSS_BLOCK",
-      "cmd": 6130,
-      "model": "alkatraz:item/research_node_moss_block",
-      "texture": "minecraft:item/moss_block",
+      "key": "tectonic_sense_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6131,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -3720,20 +3729,20 @@
     },
     {
       "kind": "research_node",
+      "key": "tectonic_sense_red_dye",
+      "material": "RED_DYE",
+      "cmd": 6131,
+      "model": "alkatraz:item/research_node_red_dye",
+      "texture": "minecraft:item/red_dye",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
       "key": "tectonic_sense_red_concrete",
       "material": "RED_CONCRETE",
       "cmd": 6131,
       "model": "alkatraz:item/research_node_red_concrete",
       "texture": "minecraft:item/red_concrete",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "tectonic_sense_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6131,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -3747,9 +3756,18 @@
     },
     {
       "kind": "research_node",
-      "key": "tectonic_sense_red_dye",
+      "key": "stonebond_will_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6132,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "stonebond_will_red_dye",
       "material": "RED_DYE",
-      "cmd": 6131,
+      "cmd": 6132,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -3774,15 +3792,6 @@
     },
     {
       "kind": "research_node",
-      "key": "stonebond_will_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6132,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "stonebond_will_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6132,
@@ -3792,9 +3801,27 @@
     },
     {
       "kind": "research_node",
-      "key": "stonebond_will_red_dye",
+      "key": "bedrock_ward_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6133,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "bedrock_ward_deepslate",
+      "material": "DEEPSLATE",
+      "cmd": 6133,
+      "model": "alkatraz:item/research_node_deepslate",
+      "texture": "minecraft:item/deepslate",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "bedrock_ward_red_dye",
       "material": "RED_DYE",
-      "cmd": 6132,
+      "cmd": 6133,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -3810,24 +3837,6 @@
     },
     {
       "kind": "research_node",
-      "key": "bedrock_ward_deepslate",
-      "material": "DEEPSLATE",
-      "cmd": 6133,
-      "model": "alkatraz:item/research_node_deepslate",
-      "texture": "minecraft:item/deepslate",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "bedrock_ward_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6133,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "bedrock_ward_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6133,
@@ -3837,9 +3846,18 @@
     },
     {
       "kind": "research_node",
-      "key": "bedrock_ward_red_dye",
+      "key": "geode_lore_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6134,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "geode_lore_red_dye",
       "material": "RED_DYE",
-      "cmd": 6133,
+      "cmd": 6134,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -3864,38 +3882,11 @@
     },
     {
       "kind": "research_node",
-      "key": "geode_lore_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6134,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "geode_lore_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6134,
       "model": "alkatraz:item/research_node_writable_book",
       "texture": "minecraft:item/writable_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "geode_lore_red_dye",
-      "material": "RED_DYE",
-      "cmd": 6134,
-      "model": "alkatraz:item/research_node_red_dye",
-      "texture": "minecraft:item/red_dye",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "air_open_breath_red_concrete",
-      "material": "RED_CONCRETE",
-      "cmd": 6135,
-      "model": "alkatraz:item/research_node_red_concrete",
-      "texture": "minecraft:item/red_concrete",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -3909,11 +3900,29 @@
     },
     {
       "kind": "research_node",
+      "key": "air_open_breath_red_dye",
+      "material": "RED_DYE",
+      "cmd": 6135,
+      "model": "alkatraz:item/research_node_red_dye",
+      "texture": "minecraft:item/red_dye",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
       "key": "air_open_breath_feather",
       "material": "FEATHER",
       "cmd": 6135,
       "model": "alkatraz:item/research_node_feather",
       "texture": "minecraft:item/feather",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "air_open_breath_red_concrete",
+      "material": "RED_CONCRETE",
+      "cmd": 6135,
+      "model": "alkatraz:item/research_node_red_concrete",
+      "texture": "minecraft:item/red_concrete",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -3927,9 +3936,18 @@
     },
     {
       "kind": "research_node",
-      "key": "air_open_breath_red_dye",
+      "key": "gale_wisps_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6136,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "gale_wisps_red_dye",
       "material": "RED_DYE",
-      "cmd": 6135,
+      "cmd": 6136,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -3954,15 +3972,6 @@
     },
     {
       "kind": "research_node",
-      "key": "gale_wisps_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6136,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "gale_wisps_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6136,
@@ -3972,9 +3981,27 @@
     },
     {
       "kind": "research_node",
-      "key": "gale_wisps_red_dye",
+      "key": "static_cast_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6137,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "static_cast_lightning_rod",
+      "material": "LIGHTNING_ROD",
+      "cmd": 6137,
+      "model": "alkatraz:item/research_node_lightning_rod",
+      "texture": "minecraft:item/lightning_rod",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "static_cast_red_dye",
       "material": "RED_DYE",
-      "cmd": 6136,
+      "cmd": 6137,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -3990,47 +4017,11 @@
     },
     {
       "kind": "research_node",
-      "key": "static_cast_lightning_rod",
-      "material": "LIGHTNING_ROD",
-      "cmd": 6137,
-      "model": "alkatraz:item/research_node_lightning_rod",
-      "texture": "minecraft:item/lightning_rod",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "static_cast_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6137,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "static_cast_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6137,
       "model": "alkatraz:item/research_node_writable_book",
       "texture": "minecraft:item/writable_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "static_cast_red_dye",
-      "material": "RED_DYE",
-      "cmd": 6137,
-      "model": "alkatraz:item/research_node_red_dye",
-      "texture": "minecraft:item/red_dye",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "squall_ward_red_concrete",
-      "material": "RED_CONCRETE",
-      "cmd": 6138,
-      "model": "alkatraz:item/research_node_red_concrete",
-      "texture": "minecraft:item/red_concrete",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -4053,15 +4044,6 @@
     },
     {
       "kind": "research_node",
-      "key": "squall_ward_writable_book",
-      "material": "WRITABLE_BOOK",
-      "cmd": 6138,
-      "model": "alkatraz:item/research_node_writable_book",
-      "texture": "minecraft:item/writable_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "squall_ward_red_dye",
       "material": "RED_DYE",
       "cmd": 6138,
@@ -4071,11 +4053,20 @@
     },
     {
       "kind": "research_node",
-      "key": "wind_theory_red_concrete",
+      "key": "squall_ward_red_concrete",
       "material": "RED_CONCRETE",
-      "cmd": 6139,
+      "cmd": 6138,
       "model": "alkatraz:item/research_node_red_concrete",
       "texture": "minecraft:item/red_concrete",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "squall_ward_writable_book",
+      "material": "WRITABLE_BOOK",
+      "cmd": 6138,
+      "model": "alkatraz:item/research_node_writable_book",
+      "texture": "minecraft:item/writable_book",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -4089,11 +4080,29 @@
     },
     {
       "kind": "research_node",
+      "key": "wind_theory_red_dye",
+      "material": "RED_DYE",
+      "cmd": 6139,
+      "model": "alkatraz:item/research_node_red_dye",
+      "texture": "minecraft:item/red_dye",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
       "key": "wind_theory_feather",
       "material": "FEATHER",
       "cmd": 6139,
       "model": "alkatraz:item/research_node_feather",
       "texture": "minecraft:item/feather",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "wind_theory_red_concrete",
+      "material": "RED_CONCRETE",
+      "cmd": 6139,
+      "model": "alkatraz:item/research_node_red_concrete",
+      "texture": "minecraft:item/red_concrete",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -4107,9 +4116,18 @@
     },
     {
       "kind": "research_node",
-      "key": "wind_theory_red_dye",
+      "key": "light_first_lantern_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6140,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "light_first_lantern_red_dye",
       "material": "RED_DYE",
-      "cmd": 6139,
+      "cmd": 6140,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -4125,33 +4143,6 @@
     },
     {
       "kind": "research_node",
-      "key": "light_first_lantern_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6140,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "light_first_lantern_writable_book",
-      "material": "WRITABLE_BOOK",
-      "cmd": 6140,
-      "model": "alkatraz:item/research_node_writable_book",
-      "texture": "minecraft:item/writable_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "light_first_lantern_red_dye",
-      "material": "RED_DYE",
-      "cmd": 6140,
-      "model": "alkatraz:item/research_node_red_dye",
-      "texture": "minecraft:item/red_dye",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "light_first_lantern_lantern",
       "material": "LANTERN",
       "cmd": 6140,
@@ -4161,20 +4152,11 @@
     },
     {
       "kind": "research_node",
-      "key": "radiant_study_red_concrete",
-      "material": "RED_CONCRETE",
-      "cmd": 6141,
-      "model": "alkatraz:item/research_node_red_concrete",
-      "texture": "minecraft:item/red_concrete",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "radiant_study_glowstone_dust",
-      "material": "GLOWSTONE_DUST",
-      "cmd": 6141,
-      "model": "alkatraz:item/research_node_glowstone_dust",
-      "texture": "minecraft:item/glowstone_dust",
+      "key": "light_first_lantern_writable_book",
+      "material": "WRITABLE_BOOK",
+      "cmd": 6140,
+      "model": "alkatraz:item/research_node_writable_book",
+      "texture": "minecraft:item/writable_book",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -4206,20 +4188,20 @@
     },
     {
       "kind": "research_node",
-      "key": "blessed_will_crafting_table",
-      "material": "CRAFTING_TABLE",
-      "cmd": 6142,
-      "model": "alkatraz:item/research_node_crafting_table",
-      "texture": "minecraft:item/crafting_table",
+      "key": "radiant_study_red_concrete",
+      "material": "RED_CONCRETE",
+      "cmd": 6141,
+      "model": "alkatraz:item/research_node_red_concrete",
+      "texture": "minecraft:item/red_concrete",
       "source": "core/src/main/resources/research.yml"
     },
     {
       "kind": "research_node",
-      "key": "blessed_will_red_concrete",
-      "material": "RED_CONCRETE",
-      "cmd": 6142,
-      "model": "alkatraz:item/research_node_red_concrete",
-      "texture": "minecraft:item/red_concrete",
+      "key": "radiant_study_glowstone_dust",
+      "material": "GLOWSTONE_DUST",
+      "cmd": 6141,
+      "model": "alkatraz:item/research_node_glowstone_dust",
+      "texture": "minecraft:item/glowstone_dust",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -4233,15 +4215,6 @@
     },
     {
       "kind": "research_node",
-      "key": "blessed_will_writable_book",
-      "material": "WRITABLE_BOOK",
-      "cmd": 6142,
-      "model": "alkatraz:item/research_node_writable_book",
-      "texture": "minecraft:item/writable_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "blessed_will_red_dye",
       "material": "RED_DYE",
       "cmd": 6142,
@@ -4251,11 +4224,29 @@
     },
     {
       "kind": "research_node",
-      "key": "aegis_light_red_concrete",
+      "key": "blessed_will_red_concrete",
       "material": "RED_CONCRETE",
-      "cmd": 6143,
+      "cmd": 6142,
       "model": "alkatraz:item/research_node_red_concrete",
       "texture": "minecraft:item/red_concrete",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "blessed_will_crafting_table",
+      "material": "CRAFTING_TABLE",
+      "cmd": 6142,
+      "model": "alkatraz:item/research_node_crafting_table",
+      "texture": "minecraft:item/crafting_table",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "blessed_will_writable_book",
+      "material": "WRITABLE_BOOK",
+      "cmd": 6142,
+      "model": "alkatraz:item/research_node_writable_book",
+      "texture": "minecraft:item/writable_book",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -4278,6 +4269,24 @@
     },
     {
       "kind": "research_node",
+      "key": "aegis_light_red_dye",
+      "material": "RED_DYE",
+      "cmd": 6143,
+      "model": "alkatraz:item/research_node_red_dye",
+      "texture": "minecraft:item/red_dye",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "aegis_light_red_concrete",
+      "material": "RED_CONCRETE",
+      "cmd": 6143,
+      "model": "alkatraz:item/research_node_red_concrete",
+      "texture": "minecraft:item/red_concrete",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
       "key": "aegis_light_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6143,
@@ -4287,9 +4296,18 @@
     },
     {
       "kind": "research_node",
-      "key": "aegis_light_red_dye",
+      "key": "luminarch_theory_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6144,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "luminarch_theory_red_dye",
       "material": "RED_DYE",
-      "cmd": 6143,
+      "cmd": 6144,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -4314,20 +4332,20 @@
     },
     {
       "kind": "research_node",
-      "key": "luminarch_theory_red_dye",
-      "material": "RED_DYE",
-      "cmd": 6144,
-      "model": "alkatraz:item/research_node_red_dye",
-      "texture": "minecraft:item/red_dye",
+      "key": "dark_quiet_shadow_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6145,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
       "source": "core/src/main/resources/research.yml"
     },
     {
       "kind": "research_node",
-      "key": "luminarch_theory_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6144,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
+      "key": "dark_quiet_shadow_red_dye",
+      "material": "RED_DYE",
+      "cmd": 6145,
+      "model": "alkatraz:item/research_node_red_dye",
+      "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -4350,15 +4368,6 @@
     },
     {
       "kind": "research_node",
-      "key": "dark_quiet_shadow_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6145,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "dark_quiet_shadow_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6145,
@@ -4368,9 +4377,18 @@
     },
     {
       "kind": "research_node",
-      "key": "dark_quiet_shadow_red_dye",
+      "key": "shadow_insight_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6146,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "shadow_insight_red_dye",
       "material": "RED_DYE",
-      "cmd": 6145,
+      "cmd": 6146,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -4395,47 +4413,11 @@
     },
     {
       "kind": "research_node",
-      "key": "shadow_insight_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6146,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "shadow_insight_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6146,
       "model": "alkatraz:item/research_node_writable_book",
       "texture": "minecraft:item/writable_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "shadow_insight_red_dye",
-      "material": "RED_DYE",
-      "cmd": 6146,
-      "model": "alkatraz:item/research_node_red_dye",
-      "texture": "minecraft:item/red_dye",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "night_harvest_wither_skeleton_skull",
-      "material": "WITHER_SKELETON_SKULL",
-      "cmd": 6147,
-      "model": "alkatraz:item/research_node_wither_skeleton_skull",
-      "texture": "minecraft:item/wither_skeleton_skull",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "night_harvest_red_concrete",
-      "material": "RED_CONCRETE",
-      "cmd": 6147,
-      "model": "alkatraz:item/research_node_red_concrete",
-      "texture": "minecraft:item/red_concrete",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -4449,6 +4431,33 @@
     },
     {
       "kind": "research_node",
+      "key": "night_harvest_wither_skeleton_skull",
+      "material": "WITHER_SKELETON_SKULL",
+      "cmd": 6147,
+      "model": "alkatraz:item/research_node_wither_skeleton_skull",
+      "texture": "minecraft:item/wither_skeleton_skull",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "night_harvest_red_dye",
+      "material": "RED_DYE",
+      "cmd": 6147,
+      "model": "alkatraz:item/research_node_red_dye",
+      "texture": "minecraft:item/red_dye",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "night_harvest_red_concrete",
+      "material": "RED_CONCRETE",
+      "cmd": 6147,
+      "model": "alkatraz:item/research_node_red_concrete",
+      "texture": "minecraft:item/red_concrete",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
       "key": "night_harvest_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6147,
@@ -4458,9 +4467,18 @@
     },
     {
       "kind": "research_node",
-      "key": "night_harvest_red_dye",
+      "key": "void_ward_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6148,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "void_ward_red_dye",
       "material": "RED_DYE",
-      "cmd": 6147,
+      "cmd": 6148,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -4485,47 +4503,11 @@
     },
     {
       "kind": "research_node",
-      "key": "void_ward_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6148,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "void_ward_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6148,
       "model": "alkatraz:item/research_node_writable_book",
       "texture": "minecraft:item/writable_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "void_ward_red_dye",
-      "material": "RED_DYE",
-      "cmd": 6148,
-      "model": "alkatraz:item/research_node_red_dye",
-      "texture": "minecraft:item/red_dye",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "entropy_theory_red_concrete",
-      "material": "RED_CONCRETE",
-      "cmd": 6149,
-      "model": "alkatraz:item/research_node_red_concrete",
-      "texture": "minecraft:item/red_concrete",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "entropy_theory_wither_rose",
-      "material": "WITHER_ROSE",
-      "cmd": 6149,
-      "model": "alkatraz:item/research_node_wither_rose",
-      "texture": "minecraft:item/wither_rose",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -4539,6 +4521,33 @@
     },
     {
       "kind": "research_node",
+      "key": "entropy_theory_red_dye",
+      "material": "RED_DYE",
+      "cmd": 6149,
+      "model": "alkatraz:item/research_node_red_dye",
+      "texture": "minecraft:item/red_dye",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "entropy_theory_wither_rose",
+      "material": "WITHER_ROSE",
+      "cmd": 6149,
+      "model": "alkatraz:item/research_node_wither_rose",
+      "texture": "minecraft:item/wither_rose",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "entropy_theory_red_concrete",
+      "material": "RED_CONCRETE",
+      "cmd": 6149,
+      "model": "alkatraz:item/research_node_red_concrete",
+      "texture": "minecraft:item/red_concrete",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
       "key": "entropy_theory_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6149,
@@ -4548,9 +4557,18 @@
     },
     {
       "kind": "research_node",
-      "key": "entropy_theory_red_dye",
+      "key": "fire_ember_control_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6150,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "fire_ember_control_red_dye",
       "material": "RED_DYE",
-      "cmd": 6149,
+      "cmd": 6150,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -4566,24 +4584,6 @@
     },
     {
       "kind": "research_node",
-      "key": "fire_ember_control_campfire",
-      "material": "CAMPFIRE",
-      "cmd": 6150,
-      "model": "alkatraz:item/research_node_campfire",
-      "texture": "minecraft:item/campfire",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "fire_ember_control_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6150,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "fire_ember_control_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6150,
@@ -4593,29 +4593,11 @@
     },
     {
       "kind": "research_node",
-      "key": "fire_ember_control_red_dye",
-      "material": "RED_DYE",
+      "key": "fire_ember_control_campfire",
+      "material": "CAMPFIRE",
       "cmd": 6150,
-      "model": "alkatraz:item/research_node_red_dye",
-      "texture": "minecraft:item/red_dye",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "fire_inferno_rite_red_concrete",
-      "material": "RED_CONCRETE",
-      "cmd": 6151,
-      "model": "alkatraz:item/research_node_red_concrete",
-      "texture": "minecraft:item/red_concrete",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "fire_inferno_rite_blaze_rod",
-      "material": "BLAZE_ROD",
-      "cmd": 6151,
-      "model": "alkatraz:item/research_node_blaze_rod",
-      "texture": "minecraft:item/blaze_rod",
+      "model": "alkatraz:item/research_node_campfire",
+      "texture": "minecraft:item/campfire",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -4629,15 +4611,6 @@
     },
     {
       "kind": "research_node",
-      "key": "fire_inferno_rite_writable_book",
-      "material": "WRITABLE_BOOK",
-      "cmd": 6151,
-      "model": "alkatraz:item/research_node_writable_book",
-      "texture": "minecraft:item/writable_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "fire_inferno_rite_red_dye",
       "material": "RED_DYE",
       "cmd": 6151,
@@ -4647,20 +4620,29 @@
     },
     {
       "kind": "research_node",
-      "key": "pyroclasm_red_concrete",
+      "key": "fire_inferno_rite_blaze_rod",
+      "material": "BLAZE_ROD",
+      "cmd": 6151,
+      "model": "alkatraz:item/research_node_blaze_rod",
+      "texture": "minecraft:item/blaze_rod",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "fire_inferno_rite_red_concrete",
       "material": "RED_CONCRETE",
-      "cmd": 6152,
+      "cmd": 6151,
       "model": "alkatraz:item/research_node_red_concrete",
       "texture": "minecraft:item/red_concrete",
       "source": "core/src/main/resources/research.yml"
     },
     {
       "kind": "research_node",
-      "key": "pyroclasm_firework_star",
-      "material": "FIREWORK_STAR",
-      "cmd": 6152,
-      "model": "alkatraz:item/research_node_firework_star",
-      "texture": "minecraft:item/firework_star",
+      "key": "fire_inferno_rite_writable_book",
+      "material": "WRITABLE_BOOK",
+      "cmd": 6151,
+      "model": "alkatraz:item/research_node_writable_book",
+      "texture": "minecraft:item/writable_book",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -4674,15 +4656,6 @@
     },
     {
       "kind": "research_node",
-      "key": "pyroclasm_writable_book",
-      "material": "WRITABLE_BOOK",
-      "cmd": 6152,
-      "model": "alkatraz:item/research_node_writable_book",
-      "texture": "minecraft:item/writable_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "pyroclasm_red_dye",
       "material": "RED_DYE",
       "cmd": 6152,
@@ -4692,20 +4665,29 @@
     },
     {
       "kind": "research_node",
-      "key": "immolation_aura_nether_wart",
-      "material": "NETHER_WART",
-      "cmd": 6153,
-      "model": "alkatraz:item/research_node_nether_wart",
-      "texture": "minecraft:item/nether_wart",
+      "key": "pyroclasm_firework_star",
+      "material": "FIREWORK_STAR",
+      "cmd": 6152,
+      "model": "alkatraz:item/research_node_firework_star",
+      "texture": "minecraft:item/firework_star",
       "source": "core/src/main/resources/research.yml"
     },
     {
       "kind": "research_node",
-      "key": "immolation_aura_red_concrete",
+      "key": "pyroclasm_red_concrete",
       "material": "RED_CONCRETE",
-      "cmd": 6153,
+      "cmd": 6152,
       "model": "alkatraz:item/research_node_red_concrete",
       "texture": "minecraft:item/red_concrete",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "pyroclasm_writable_book",
+      "material": "WRITABLE_BOOK",
+      "cmd": 6152,
+      "model": "alkatraz:item/research_node_writable_book",
+      "texture": "minecraft:item/writable_book",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -4719,15 +4701,6 @@
     },
     {
       "kind": "research_node",
-      "key": "immolation_aura_writable_book",
-      "material": "WRITABLE_BOOK",
-      "cmd": 6153,
-      "model": "alkatraz:item/research_node_writable_book",
-      "texture": "minecraft:item/writable_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "immolation_aura_red_dye",
       "material": "RED_DYE",
       "cmd": 6153,
@@ -4737,11 +4710,29 @@
     },
     {
       "kind": "research_node",
-      "key": "cinder_ward_red_concrete",
+      "key": "immolation_aura_red_concrete",
       "material": "RED_CONCRETE",
-      "cmd": 6154,
+      "cmd": 6153,
       "model": "alkatraz:item/research_node_red_concrete",
       "texture": "minecraft:item/red_concrete",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "immolation_aura_nether_wart",
+      "material": "NETHER_WART",
+      "cmd": 6153,
+      "model": "alkatraz:item/research_node_nether_wart",
+      "texture": "minecraft:item/nether_wart",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "immolation_aura_writable_book",
+      "material": "WRITABLE_BOOK",
+      "cmd": 6153,
+      "model": "alkatraz:item/research_node_writable_book",
+      "texture": "minecraft:item/writable_book",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -4764,6 +4755,24 @@
     },
     {
       "kind": "research_node",
+      "key": "cinder_ward_red_dye",
+      "material": "RED_DYE",
+      "cmd": 6154,
+      "model": "alkatraz:item/research_node_red_dye",
+      "texture": "minecraft:item/red_dye",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "cinder_ward_red_concrete",
+      "material": "RED_CONCRETE",
+      "cmd": 6154,
+      "model": "alkatraz:item/research_node_red_concrete",
+      "texture": "minecraft:item/red_concrete",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
       "key": "cinder_ward_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6154,
@@ -4773,9 +4782,18 @@
     },
     {
       "kind": "research_node",
-      "key": "cinder_ward_red_dye",
+      "key": "ashen_theory_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6155,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "ashen_theory_red_dye",
       "material": "RED_DYE",
-      "cmd": 6154,
+      "cmd": 6155,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -4800,20 +4818,20 @@
     },
     {
       "kind": "research_node",
-      "key": "ashen_theory_red_dye",
-      "material": "RED_DYE",
-      "cmd": 6155,
-      "model": "alkatraz:item/research_node_red_dye",
-      "texture": "minecraft:item/red_dye",
+      "key": "inferno_mastery_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6156,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
       "source": "core/src/main/resources/research.yml"
     },
     {
       "kind": "research_node",
-      "key": "ashen_theory_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6155,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
+      "key": "inferno_mastery_red_dye",
+      "material": "RED_DYE",
+      "cmd": 6156,
+      "model": "alkatraz:item/research_node_red_dye",
+      "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -4823,15 +4841,6 @@
       "cmd": 6156,
       "model": "alkatraz:item/research_node_red_concrete",
       "texture": "minecraft:item/red_concrete",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "inferno_mastery_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6156,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -4854,9 +4863,18 @@
     },
     {
       "kind": "research_node",
-      "key": "inferno_mastery_red_dye",
+      "key": "hellfire_sovereign_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6157,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "hellfire_sovereign_red_dye",
       "material": "RED_DYE",
-      "cmd": 6156,
+      "cmd": 6157,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -4881,15 +4899,6 @@
     },
     {
       "kind": "research_node",
-      "key": "hellfire_sovereign_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6157,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "hellfire_sovereign_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6157,
@@ -4899,9 +4908,18 @@
     },
     {
       "kind": "research_node",
-      "key": "hellfire_sovereign_red_dye",
+      "key": "water_restorative_current_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6158,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "water_restorative_current_red_dye",
       "material": "RED_DYE",
-      "cmd": 6157,
+      "cmd": 6158,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -4926,38 +4944,11 @@
     },
     {
       "kind": "research_node",
-      "key": "water_restorative_current_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6158,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "water_restorative_current_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6158,
       "model": "alkatraz:item/research_node_writable_book",
       "texture": "minecraft:item/writable_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "water_restorative_current_red_dye",
-      "material": "RED_DYE",
-      "cmd": 6158,
-      "model": "alkatraz:item/research_node_red_dye",
-      "texture": "minecraft:item/red_dye",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "water_depth_oath_red_concrete",
-      "material": "RED_CONCRETE",
-      "cmd": 6159,
-      "model": "alkatraz:item/research_node_red_concrete",
-      "texture": "minecraft:item/red_concrete",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -4971,11 +4962,29 @@
     },
     {
       "kind": "research_node",
+      "key": "water_depth_oath_red_dye",
+      "material": "RED_DYE",
+      "cmd": 6159,
+      "model": "alkatraz:item/research_node_red_dye",
+      "texture": "minecraft:item/red_dye",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
       "key": "water_depth_oath_heart_of_the_sea",
       "material": "HEART_OF_THE_SEA",
       "cmd": 6159,
       "model": "alkatraz:item/research_node_heart_of_the_sea",
       "texture": "minecraft:item/heart_of_the_sea",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "water_depth_oath_red_concrete",
+      "material": "RED_CONCRETE",
+      "cmd": 6159,
+      "model": "alkatraz:item/research_node_red_concrete",
+      "texture": "minecraft:item/red_concrete",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -4989,20 +4998,20 @@
     },
     {
       "kind": "research_node",
-      "key": "water_depth_oath_red_dye",
-      "material": "RED_DYE",
-      "cmd": 6159,
-      "model": "alkatraz:item/research_node_red_dye",
-      "texture": "minecraft:item/red_dye",
+      "key": "pressure_surge_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6160,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
       "source": "core/src/main/resources/research.yml"
     },
     {
       "kind": "research_node",
-      "key": "pressure_surge_diamond",
-      "material": "DIAMOND",
+      "key": "pressure_surge_red_dye",
+      "material": "RED_DYE",
       "cmd": 6160,
-      "model": "alkatraz:item/research_node_diamond",
-      "texture": "minecraft:item/diamond",
+      "model": "alkatraz:item/research_node_red_dye",
+      "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -5016,11 +5025,11 @@
     },
     {
       "kind": "research_node",
-      "key": "pressure_surge_enchanted_book",
-      "material": "ENCHANTED_BOOK",
+      "key": "pressure_surge_diamond",
+      "material": "DIAMOND",
       "cmd": 6160,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
+      "model": "alkatraz:item/research_node_diamond",
+      "texture": "minecraft:item/diamond",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -5034,9 +5043,18 @@
     },
     {
       "kind": "research_node",
-      "key": "pressure_surge_red_dye",
+      "key": "healing_current_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6161,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "healing_current_red_dye",
       "material": "RED_DYE",
-      "cmd": 6160,
+      "cmd": 6161,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -5061,47 +5079,11 @@
     },
     {
       "kind": "research_node",
-      "key": "healing_current_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6161,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "healing_current_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6161,
       "model": "alkatraz:item/research_node_writable_book",
       "texture": "minecraft:item/writable_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "healing_current_red_dye",
-      "material": "RED_DYE",
-      "cmd": 6161,
-      "model": "alkatraz:item/research_node_red_dye",
-      "texture": "minecraft:item/red_dye",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "glacial_barrier_red_concrete",
-      "material": "RED_CONCRETE",
-      "cmd": 6162,
-      "model": "alkatraz:item/research_node_red_concrete",
-      "texture": "minecraft:item/red_concrete",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "glacial_barrier_blue_stained_glass",
-      "material": "BLUE_STAINED_GLASS",
-      "cmd": 6162,
-      "model": "alkatraz:item/research_node_blue_stained_glass",
-      "texture": "minecraft:item/blue_stained_glass",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -5115,6 +5097,33 @@
     },
     {
       "kind": "research_node",
+      "key": "glacial_barrier_red_dye",
+      "material": "RED_DYE",
+      "cmd": 6162,
+      "model": "alkatraz:item/research_node_red_dye",
+      "texture": "minecraft:item/red_dye",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "glacial_barrier_blue_stained_glass",
+      "material": "BLUE_STAINED_GLASS",
+      "cmd": 6162,
+      "model": "alkatraz:item/research_node_blue_stained_glass",
+      "texture": "minecraft:item/blue_stained_glass",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "glacial_barrier_red_concrete",
+      "material": "RED_CONCRETE",
+      "cmd": 6162,
+      "model": "alkatraz:item/research_node_red_concrete",
+      "texture": "minecraft:item/red_concrete",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
       "key": "glacial_barrier_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6162,
@@ -5124,9 +5133,18 @@
     },
     {
       "kind": "research_node",
-      "key": "glacial_barrier_red_dye",
+      "key": "oceanic_theory_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6163,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "oceanic_theory_red_dye",
       "material": "RED_DYE",
-      "cmd": 6162,
+      "cmd": 6163,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -5151,15 +5169,6 @@
     },
     {
       "kind": "research_node",
-      "key": "oceanic_theory_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6163,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "oceanic_theory_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6163,
@@ -5169,9 +5178,18 @@
     },
     {
       "kind": "research_node",
-      "key": "oceanic_theory_red_dye",
+      "key": "abyssal_mastery_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6164,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "abyssal_mastery_red_dye",
       "material": "RED_DYE",
-      "cmd": 6163,
+      "cmd": 6164,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -5196,38 +5214,11 @@
     },
     {
       "kind": "research_node",
-      "key": "abyssal_mastery_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6164,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "abyssal_mastery_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6164,
       "model": "alkatraz:item/research_node_writable_book",
       "texture": "minecraft:item/writable_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "abyssal_mastery_red_dye",
-      "material": "RED_DYE",
-      "cmd": 6164,
-      "model": "alkatraz:item/research_node_red_dye",
-      "texture": "minecraft:item/red_dye",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "tidal_sovereign_red_concrete",
-      "material": "RED_CONCRETE",
-      "cmd": 6165,
-      "model": "alkatraz:item/research_node_red_concrete",
-      "texture": "minecraft:item/red_concrete",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -5241,11 +5232,29 @@
     },
     {
       "kind": "research_node",
+      "key": "tidal_sovereign_red_dye",
+      "material": "RED_DYE",
+      "cmd": 6165,
+      "model": "alkatraz:item/research_node_red_dye",
+      "texture": "minecraft:item/red_dye",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
       "key": "tidal_sovereign_trident",
       "material": "TRIDENT",
       "cmd": 6165,
       "model": "alkatraz:item/research_node_trident",
       "texture": "minecraft:item/trident",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "tidal_sovereign_red_concrete",
+      "material": "RED_CONCRETE",
+      "cmd": 6165,
+      "model": "alkatraz:item/research_node_red_concrete",
+      "texture": "minecraft:item/red_concrete",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -5259,47 +5268,11 @@
     },
     {
       "kind": "research_node",
-      "key": "tidal_sovereign_red_dye",
-      "material": "RED_DYE",
-      "cmd": 6165,
-      "model": "alkatraz:item/research_node_red_dye",
-      "texture": "minecraft:item/red_dye",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "earth_quarry_signs_iron_pickaxe",
-      "material": "IRON_PICKAXE",
-      "cmd": 6166,
-      "model": "alkatraz:item/research_node_iron_pickaxe",
-      "texture": "minecraft:item/iron_pickaxe",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "earth_quarry_signs_red_concrete",
-      "material": "RED_CONCRETE",
-      "cmd": 6166,
-      "model": "alkatraz:item/research_node_red_concrete",
-      "texture": "minecraft:item/red_concrete",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "earth_quarry_signs_enchanted_book",
       "material": "ENCHANTED_BOOK",
       "cmd": 6166,
       "model": "alkatraz:item/research_node_enchanted_book",
       "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "earth_quarry_signs_writable_book",
-      "material": "WRITABLE_BOOK",
-      "cmd": 6166,
-      "model": "alkatraz:item/research_node_writable_book",
-      "texture": "minecraft:item/writable_book",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -5313,11 +5286,29 @@
     },
     {
       "kind": "research_node",
-      "key": "earth_bulwark_vow_red_concrete",
+      "key": "earth_quarry_signs_red_concrete",
       "material": "RED_CONCRETE",
-      "cmd": 6167,
+      "cmd": 6166,
       "model": "alkatraz:item/research_node_red_concrete",
       "texture": "minecraft:item/red_concrete",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "earth_quarry_signs_iron_pickaxe",
+      "material": "IRON_PICKAXE",
+      "cmd": 6166,
+      "model": "alkatraz:item/research_node_iron_pickaxe",
+      "texture": "minecraft:item/iron_pickaxe",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "earth_quarry_signs_writable_book",
+      "material": "WRITABLE_BOOK",
+      "cmd": 6166,
+      "model": "alkatraz:item/research_node_writable_book",
+      "texture": "minecraft:item/writable_book",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -5340,15 +5331,6 @@
     },
     {
       "kind": "research_node",
-      "key": "earth_bulwark_vow_writable_book",
-      "material": "WRITABLE_BOOK",
-      "cmd": 6167,
-      "model": "alkatraz:item/research_node_writable_book",
-      "texture": "minecraft:item/writable_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "earth_bulwark_vow_red_dye",
       "material": "RED_DYE",
       "cmd": 6167,
@@ -5358,20 +5340,20 @@
     },
     {
       "kind": "research_node",
-      "key": "seismic_focus_red_concrete",
+      "key": "earth_bulwark_vow_red_concrete",
       "material": "RED_CONCRETE",
-      "cmd": 6168,
+      "cmd": 6167,
       "model": "alkatraz:item/research_node_red_concrete",
       "texture": "minecraft:item/red_concrete",
       "source": "core/src/main/resources/research.yml"
     },
     {
       "kind": "research_node",
-      "key": "seismic_focus_pointed_dripstone",
-      "material": "POINTED_DRIPSTONE",
-      "cmd": 6168,
-      "model": "alkatraz:item/research_node_pointed_dripstone",
-      "texture": "minecraft:item/pointed_dripstone",
+      "key": "earth_bulwark_vow_writable_book",
+      "material": "WRITABLE_BOOK",
+      "cmd": 6167,
+      "model": "alkatraz:item/research_node_writable_book",
+      "texture": "minecraft:item/writable_book",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -5385,15 +5367,6 @@
     },
     {
       "kind": "research_node",
-      "key": "seismic_focus_writable_book",
-      "material": "WRITABLE_BOOK",
-      "cmd": 6168,
-      "model": "alkatraz:item/research_node_writable_book",
-      "texture": "minecraft:item/writable_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "seismic_focus_red_dye",
       "material": "RED_DYE",
       "cmd": 6168,
@@ -5403,20 +5376,29 @@
     },
     {
       "kind": "research_node",
-      "key": "earthen_fortress_deepslate_bricks",
-      "material": "DEEPSLATE_BRICKS",
-      "cmd": 6169,
-      "model": "alkatraz:item/research_node_deepslate_bricks",
-      "texture": "minecraft:item/deepslate_bricks",
+      "key": "seismic_focus_pointed_dripstone",
+      "material": "POINTED_DRIPSTONE",
+      "cmd": 6168,
+      "model": "alkatraz:item/research_node_pointed_dripstone",
+      "texture": "minecraft:item/pointed_dripstone",
       "source": "core/src/main/resources/research.yml"
     },
     {
       "kind": "research_node",
-      "key": "earthen_fortress_red_concrete",
+      "key": "seismic_focus_red_concrete",
       "material": "RED_CONCRETE",
-      "cmd": 6169,
+      "cmd": 6168,
       "model": "alkatraz:item/research_node_red_concrete",
       "texture": "minecraft:item/red_concrete",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "seismic_focus_writable_book",
+      "material": "WRITABLE_BOOK",
+      "cmd": 6168,
+      "model": "alkatraz:item/research_node_writable_book",
+      "texture": "minecraft:item/writable_book",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -5430,11 +5412,11 @@
     },
     {
       "kind": "research_node",
-      "key": "earthen_fortress_writable_book",
-      "material": "WRITABLE_BOOK",
+      "key": "earthen_fortress_deepslate_bricks",
+      "material": "DEEPSLATE_BRICKS",
       "cmd": 6169,
-      "model": "alkatraz:item/research_node_writable_book",
-      "texture": "minecraft:item/writable_book",
+      "model": "alkatraz:item/research_node_deepslate_bricks",
+      "texture": "minecraft:item/deepslate_bricks",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -5448,20 +5430,20 @@
     },
     {
       "kind": "research_node",
-      "key": "crystal_resonance_red_concrete",
+      "key": "earthen_fortress_red_concrete",
       "material": "RED_CONCRETE",
-      "cmd": 6170,
+      "cmd": 6169,
       "model": "alkatraz:item/research_node_red_concrete",
       "texture": "minecraft:item/red_concrete",
       "source": "core/src/main/resources/research.yml"
     },
     {
       "kind": "research_node",
-      "key": "crystal_resonance_amethyst_block",
-      "material": "AMETHYST_BLOCK",
-      "cmd": 6170,
-      "model": "alkatraz:item/research_node_amethyst_block",
-      "texture": "minecraft:item/amethyst_block",
+      "key": "earthen_fortress_writable_book",
+      "material": "WRITABLE_BOOK",
+      "cmd": 6169,
+      "model": "alkatraz:item/research_node_writable_book",
+      "texture": "minecraft:item/writable_book",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -5475,15 +5457,6 @@
     },
     {
       "kind": "research_node",
-      "key": "crystal_resonance_writable_book",
-      "material": "WRITABLE_BOOK",
-      "cmd": 6170,
-      "model": "alkatraz:item/research_node_writable_book",
-      "texture": "minecraft:item/writable_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "crystal_resonance_red_dye",
       "material": "RED_DYE",
       "cmd": 6170,
@@ -5493,20 +5466,29 @@
     },
     {
       "kind": "research_node",
-      "key": "titan_bastion_crafting_table",
-      "material": "CRAFTING_TABLE",
-      "cmd": 6171,
-      "model": "alkatraz:item/research_node_crafting_table",
-      "texture": "minecraft:item/crafting_table",
+      "key": "crystal_resonance_amethyst_block",
+      "material": "AMETHYST_BLOCK",
+      "cmd": 6170,
+      "model": "alkatraz:item/research_node_amethyst_block",
+      "texture": "minecraft:item/amethyst_block",
       "source": "core/src/main/resources/research.yml"
     },
     {
       "kind": "research_node",
-      "key": "titan_bastion_red_concrete",
+      "key": "crystal_resonance_red_concrete",
       "material": "RED_CONCRETE",
-      "cmd": 6171,
+      "cmd": 6170,
       "model": "alkatraz:item/research_node_red_concrete",
       "texture": "minecraft:item/red_concrete",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "crystal_resonance_writable_book",
+      "material": "WRITABLE_BOOK",
+      "cmd": 6170,
+      "model": "alkatraz:item/research_node_writable_book",
+      "texture": "minecraft:item/writable_book",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -5520,15 +5502,6 @@
     },
     {
       "kind": "research_node",
-      "key": "titan_bastion_writable_book",
-      "material": "WRITABLE_BOOK",
-      "cmd": 6171,
-      "model": "alkatraz:item/research_node_writable_book",
-      "texture": "minecraft:item/writable_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "titan_bastion_red_dye",
       "material": "RED_DYE",
       "cmd": 6171,
@@ -5538,20 +5511,29 @@
     },
     {
       "kind": "research_node",
-      "key": "earth_sovereign_red_concrete",
+      "key": "titan_bastion_red_concrete",
       "material": "RED_CONCRETE",
-      "cmd": 6172,
+      "cmd": 6171,
       "model": "alkatraz:item/research_node_red_concrete",
       "texture": "minecraft:item/red_concrete",
       "source": "core/src/main/resources/research.yml"
     },
     {
       "kind": "research_node",
-      "key": "earth_sovereign_netherite_block",
-      "material": "NETHERITE_BLOCK",
-      "cmd": 6172,
-      "model": "alkatraz:item/research_node_netherite_block",
-      "texture": "minecraft:item/netherite_block",
+      "key": "titan_bastion_crafting_table",
+      "material": "CRAFTING_TABLE",
+      "cmd": 6171,
+      "model": "alkatraz:item/research_node_crafting_table",
+      "texture": "minecraft:item/crafting_table",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "titan_bastion_writable_book",
+      "material": "WRITABLE_BOOK",
+      "cmd": 6171,
+      "model": "alkatraz:item/research_node_writable_book",
+      "texture": "minecraft:item/writable_book",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -5565,6 +5547,33 @@
     },
     {
       "kind": "research_node",
+      "key": "earth_sovereign_red_dye",
+      "material": "RED_DYE",
+      "cmd": 6172,
+      "model": "alkatraz:item/research_node_red_dye",
+      "texture": "minecraft:item/red_dye",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "earth_sovereign_netherite_block",
+      "material": "NETHERITE_BLOCK",
+      "cmd": 6172,
+      "model": "alkatraz:item/research_node_netherite_block",
+      "texture": "minecraft:item/netherite_block",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "earth_sovereign_red_concrete",
+      "material": "RED_CONCRETE",
+      "cmd": 6172,
+      "model": "alkatraz:item/research_node_red_concrete",
+      "texture": "minecraft:item/red_concrete",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
       "key": "earth_sovereign_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6172,
@@ -5574,9 +5583,18 @@
     },
     {
       "kind": "research_node",
-      "key": "earth_sovereign_red_dye",
+      "key": "mountain_wraith_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6173,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "mountain_wraith_red_dye",
       "material": "RED_DYE",
-      "cmd": 6172,
+      "cmd": 6173,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -5601,38 +5619,11 @@
     },
     {
       "kind": "research_node",
-      "key": "mountain_wraith_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6173,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "mountain_wraith_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6173,
       "model": "alkatraz:item/research_node_writable_book",
       "texture": "minecraft:item/writable_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "mountain_wraith_red_dye",
-      "material": "RED_DYE",
-      "cmd": 6173,
-      "model": "alkatraz:item/research_node_red_dye",
-      "texture": "minecraft:item/red_dye",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "air_kinetic_step_red_concrete",
-      "material": "RED_CONCRETE",
-      "cmd": 6174,
-      "model": "alkatraz:item/research_node_red_concrete",
-      "texture": "minecraft:item/red_concrete",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -5655,6 +5646,24 @@
     },
     {
       "kind": "research_node",
+      "key": "air_kinetic_step_red_dye",
+      "material": "RED_DYE",
+      "cmd": 6174,
+      "model": "alkatraz:item/research_node_red_dye",
+      "texture": "minecraft:item/red_dye",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "air_kinetic_step_red_concrete",
+      "material": "RED_CONCRETE",
+      "cmd": 6174,
+      "model": "alkatraz:item/research_node_red_concrete",
+      "texture": "minecraft:item/red_concrete",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
       "key": "air_kinetic_step_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6174,
@@ -5664,9 +5673,18 @@
     },
     {
       "kind": "research_node",
-      "key": "air_kinetic_step_red_dye",
+      "key": "air_storm_eye_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6175,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "air_storm_eye_red_dye",
       "material": "RED_DYE",
-      "cmd": 6174,
+      "cmd": 6175,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -5691,38 +5709,11 @@
     },
     {
       "kind": "research_node",
-      "key": "air_storm_eye_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6175,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "air_storm_eye_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6175,
       "model": "alkatraz:item/research_node_writable_book",
       "texture": "minecraft:item/writable_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "air_storm_eye_red_dye",
-      "material": "RED_DYE",
-      "cmd": 6175,
-      "model": "alkatraz:item/research_node_red_dye",
-      "texture": "minecraft:item/red_dye",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "tempest_focus_red_concrete",
-      "material": "RED_CONCRETE",
-      "cmd": 6176,
-      "model": "alkatraz:item/research_node_red_concrete",
-      "texture": "minecraft:item/red_concrete",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -5736,24 +5727,6 @@
     },
     {
       "kind": "research_node",
-      "key": "tempest_focus_iron_sword",
-      "material": "IRON_SWORD",
-      "cmd": 6176,
-      "model": "alkatraz:item/research_node_iron_sword",
-      "texture": "minecraft:item/iron_sword",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "tempest_focus_writable_book",
-      "material": "WRITABLE_BOOK",
-      "cmd": 6176,
-      "model": "alkatraz:item/research_node_writable_book",
-      "texture": "minecraft:item/writable_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "tempest_focus_red_dye",
       "material": "RED_DYE",
       "cmd": 6176,
@@ -5763,11 +5736,29 @@
     },
     {
       "kind": "research_node",
-      "key": "cyclone_ward_red_concrete",
+      "key": "tempest_focus_iron_sword",
+      "material": "IRON_SWORD",
+      "cmd": 6176,
+      "model": "alkatraz:item/research_node_iron_sword",
+      "texture": "minecraft:item/iron_sword",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "tempest_focus_red_concrete",
       "material": "RED_CONCRETE",
-      "cmd": 6177,
+      "cmd": 6176,
       "model": "alkatraz:item/research_node_red_concrete",
       "texture": "minecraft:item/red_concrete",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "tempest_focus_writable_book",
+      "material": "WRITABLE_BOOK",
+      "cmd": 6176,
+      "model": "alkatraz:item/research_node_writable_book",
+      "texture": "minecraft:item/writable_book",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -5790,15 +5781,6 @@
     },
     {
       "kind": "research_node",
-      "key": "cyclone_ward_writable_book",
-      "material": "WRITABLE_BOOK",
-      "cmd": 6177,
-      "model": "alkatraz:item/research_node_writable_book",
-      "texture": "minecraft:item/writable_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "cyclone_ward_red_dye",
       "material": "RED_DYE",
       "cmd": 6177,
@@ -5808,11 +5790,20 @@
     },
     {
       "kind": "research_node",
-      "key": "skyward_barrier_red_concrete",
+      "key": "cyclone_ward_red_concrete",
       "material": "RED_CONCRETE",
-      "cmd": 6178,
+      "cmd": 6177,
       "model": "alkatraz:item/research_node_red_concrete",
       "texture": "minecraft:item/red_concrete",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "cyclone_ward_writable_book",
+      "material": "WRITABLE_BOOK",
+      "cmd": 6177,
+      "model": "alkatraz:item/research_node_writable_book",
+      "texture": "minecraft:item/writable_book",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -5835,6 +5826,24 @@
     },
     {
       "kind": "research_node",
+      "key": "skyward_barrier_red_dye",
+      "material": "RED_DYE",
+      "cmd": 6178,
+      "model": "alkatraz:item/research_node_red_dye",
+      "texture": "minecraft:item/red_dye",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "skyward_barrier_red_concrete",
+      "material": "RED_CONCRETE",
+      "cmd": 6178,
+      "model": "alkatraz:item/research_node_red_concrete",
+      "texture": "minecraft:item/red_concrete",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
       "key": "skyward_barrier_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6178,
@@ -5844,9 +5853,18 @@
     },
     {
       "kind": "research_node",
-      "key": "skyward_barrier_red_dye",
+      "key": "storm_theory_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6179,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "storm_theory_red_dye",
       "material": "RED_DYE",
-      "cmd": 6178,
+      "cmd": 6179,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -5871,20 +5889,20 @@
     },
     {
       "kind": "research_node",
-      "key": "storm_theory_red_dye",
-      "material": "RED_DYE",
-      "cmd": 6179,
-      "model": "alkatraz:item/research_node_red_dye",
-      "texture": "minecraft:item/red_dye",
+      "key": "wind_sovereign_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6180,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
       "source": "core/src/main/resources/research.yml"
     },
     {
       "kind": "research_node",
-      "key": "storm_theory_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6179,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
+      "key": "wind_sovereign_red_dye",
+      "material": "RED_DYE",
+      "cmd": 6180,
+      "model": "alkatraz:item/research_node_red_dye",
+      "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -5907,15 +5925,6 @@
     },
     {
       "kind": "research_node",
-      "key": "wind_sovereign_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6180,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "wind_sovereign_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6180,
@@ -5925,9 +5934,18 @@
     },
     {
       "kind": "research_node",
-      "key": "wind_sovereign_red_dye",
+      "key": "skyward_phantom_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6181,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "skyward_phantom_red_dye",
       "material": "RED_DYE",
-      "cmd": 6180,
+      "cmd": 6181,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -5952,15 +5970,6 @@
     },
     {
       "kind": "research_node",
-      "key": "skyward_phantom_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6181,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "skyward_phantom_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6181,
@@ -5970,9 +5979,18 @@
     },
     {
       "kind": "research_node",
-      "key": "skyward_phantom_red_dye",
+      "key": "light_mending_script_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6182,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "light_mending_script_red_dye",
       "material": "RED_DYE",
-      "cmd": 6181,
+      "cmd": 6182,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -5997,15 +6015,6 @@
     },
     {
       "kind": "research_node",
-      "key": "light_mending_script_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6182,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "light_mending_script_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6182,
@@ -6015,38 +6024,11 @@
     },
     {
       "kind": "research_node",
-      "key": "light_mending_script_red_dye",
-      "material": "RED_DYE",
-      "cmd": 6182,
-      "model": "alkatraz:item/research_node_red_dye",
-      "texture": "minecraft:item/red_dye",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "light_radiant_oath_red_concrete",
-      "material": "RED_CONCRETE",
-      "cmd": 6183,
-      "model": "alkatraz:item/research_node_red_concrete",
-      "texture": "minecraft:item/red_concrete",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "light_radiant_oath_enchanted_book",
       "material": "ENCHANTED_BOOK",
       "cmd": 6183,
       "model": "alkatraz:item/research_node_enchanted_book",
       "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "light_radiant_oath_writable_book",
-      "material": "WRITABLE_BOOK",
-      "cmd": 6183,
-      "model": "alkatraz:item/research_node_writable_book",
-      "texture": "minecraft:item/writable_book",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -6069,20 +6051,20 @@
     },
     {
       "kind": "research_node",
-      "key": "solar_focus_red_concrete",
+      "key": "light_radiant_oath_red_concrete",
       "material": "RED_CONCRETE",
-      "cmd": 6184,
+      "cmd": 6183,
       "model": "alkatraz:item/research_node_red_concrete",
       "texture": "minecraft:item/red_concrete",
       "source": "core/src/main/resources/research.yml"
     },
     {
       "kind": "research_node",
-      "key": "solar_focus_firework_star",
-      "material": "FIREWORK_STAR",
-      "cmd": 6184,
-      "model": "alkatraz:item/research_node_firework_star",
-      "texture": "minecraft:item/firework_star",
+      "key": "light_radiant_oath_writable_book",
+      "material": "WRITABLE_BOOK",
+      "cmd": 6183,
+      "model": "alkatraz:item/research_node_writable_book",
+      "texture": "minecraft:item/writable_book",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -6096,6 +6078,33 @@
     },
     {
       "kind": "research_node",
+      "key": "solar_focus_red_dye",
+      "material": "RED_DYE",
+      "cmd": 6184,
+      "model": "alkatraz:item/research_node_red_dye",
+      "texture": "minecraft:item/red_dye",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "solar_focus_firework_star",
+      "material": "FIREWORK_STAR",
+      "cmd": 6184,
+      "model": "alkatraz:item/research_node_firework_star",
+      "texture": "minecraft:item/firework_star",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "solar_focus_red_concrete",
+      "material": "RED_CONCRETE",
+      "cmd": 6184,
+      "model": "alkatraz:item/research_node_red_concrete",
+      "texture": "minecraft:item/red_concrete",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
       "key": "solar_focus_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6184,
@@ -6105,9 +6114,18 @@
     },
     {
       "kind": "research_node",
-      "key": "solar_focus_red_dye",
+      "key": "bulwark_light_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6185,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "bulwark_light_red_dye",
       "material": "RED_DYE",
-      "cmd": 6184,
+      "cmd": 6185,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -6119,15 +6137,6 @@
       "cmd": 6185,
       "model": "alkatraz:item/research_node_red_concrete",
       "texture": "minecraft:item/red_concrete",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "bulwark_light_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6185,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -6150,9 +6159,27 @@
     },
     {
       "kind": "research_node",
-      "key": "bulwark_light_red_dye",
+      "key": "restoration_ward_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6186,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "restoration_ward_beacon",
+      "material": "BEACON",
+      "cmd": 6186,
+      "model": "alkatraz:item/research_node_beacon",
+      "texture": "minecraft:item/beacon",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "restoration_ward_red_dye",
       "material": "RED_DYE",
-      "cmd": 6185,
+      "cmd": 6186,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -6168,24 +6195,6 @@
     },
     {
       "kind": "research_node",
-      "key": "restoration_ward_beacon",
-      "material": "BEACON",
-      "cmd": 6186,
-      "model": "alkatraz:item/research_node_beacon",
-      "texture": "minecraft:item/beacon",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "restoration_ward_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6186,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "restoration_ward_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6186,
@@ -6195,9 +6204,18 @@
     },
     {
       "kind": "research_node",
-      "key": "restoration_ward_red_dye",
+      "key": "sanctum_theory_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6187,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "sanctum_theory_red_dye",
       "material": "RED_DYE",
-      "cmd": 6186,
+      "cmd": 6187,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -6222,20 +6240,20 @@
     },
     {
       "kind": "research_node",
-      "key": "sanctum_theory_red_dye",
-      "material": "RED_DYE",
-      "cmd": 6187,
-      "model": "alkatraz:item/research_node_red_dye",
-      "texture": "minecraft:item/red_dye",
+      "key": "light_sovereign_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6188,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
       "source": "core/src/main/resources/research.yml"
     },
     {
       "kind": "research_node",
-      "key": "sanctum_theory_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6187,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
+      "key": "light_sovereign_red_dye",
+      "material": "RED_DYE",
+      "cmd": 6188,
+      "model": "alkatraz:item/research_node_red_dye",
+      "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -6258,15 +6276,6 @@
     },
     {
       "kind": "research_node",
-      "key": "light_sovereign_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6188,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "light_sovereign_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6188,
@@ -6276,9 +6285,18 @@
     },
     {
       "kind": "research_node",
-      "key": "light_sovereign_red_dye",
+      "key": "celestial_phantom_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6189,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "celestial_phantom_red_dye",
       "material": "RED_DYE",
-      "cmd": 6188,
+      "cmd": 6189,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -6303,15 +6321,6 @@
     },
     {
       "kind": "research_node",
-      "key": "celestial_phantom_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6189,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "celestial_phantom_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6189,
@@ -6321,9 +6330,18 @@
     },
     {
       "kind": "research_node",
-      "key": "celestial_phantom_red_dye",
+      "key": "dark_tethered_whisper_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6190,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "dark_tethered_whisper_red_dye",
       "material": "RED_DYE",
-      "cmd": 6189,
+      "cmd": 6190,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -6339,11 +6357,11 @@
     },
     {
       "kind": "research_node",
-      "key": "dark_tethered_whisper_enchanted_book",
-      "material": "ENCHANTED_BOOK",
+      "key": "dark_tethered_whisper_sculk",
+      "material": "SCULK",
       "cmd": 6190,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
+      "model": "alkatraz:item/research_node_sculk",
+      "texture": "minecraft:item/sculk",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -6357,56 +6375,11 @@
     },
     {
       "kind": "research_node",
-      "key": "dark_tethered_whisper_red_dye",
-      "material": "RED_DYE",
-      "cmd": 6190,
-      "model": "alkatraz:item/research_node_red_dye",
-      "texture": "minecraft:item/red_dye",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "dark_tethered_whisper_sculk",
-      "material": "SCULK",
-      "cmd": 6190,
-      "model": "alkatraz:item/research_node_sculk",
-      "texture": "minecraft:item/sculk",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "dark_eclipse_compact_red_concrete",
-      "material": "RED_CONCRETE",
-      "cmd": 6191,
-      "model": "alkatraz:item/research_node_red_concrete",
-      "texture": "minecraft:item/red_concrete",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "dark_eclipse_compact_enchanted_book",
       "material": "ENCHANTED_BOOK",
       "cmd": 6191,
       "model": "alkatraz:item/research_node_enchanted_book",
       "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "dark_eclipse_compact_black_candle",
-      "material": "BLACK_CANDLE",
-      "cmd": 6191,
-      "model": "alkatraz:item/research_node_black_candle",
-      "texture": "minecraft:item/black_candle",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "dark_eclipse_compact_writable_book",
-      "material": "WRITABLE_BOOK",
-      "cmd": 6191,
-      "model": "alkatraz:item/research_node_writable_book",
-      "texture": "minecraft:item/writable_book",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -6420,11 +6393,29 @@
     },
     {
       "kind": "research_node",
-      "key": "shadow_focus_red_concrete",
+      "key": "dark_eclipse_compact_black_candle",
+      "material": "BLACK_CANDLE",
+      "cmd": 6191,
+      "model": "alkatraz:item/research_node_black_candle",
+      "texture": "minecraft:item/black_candle",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "dark_eclipse_compact_red_concrete",
       "material": "RED_CONCRETE",
-      "cmd": 6192,
+      "cmd": 6191,
       "model": "alkatraz:item/research_node_red_concrete",
       "texture": "minecraft:item/red_concrete",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "dark_eclipse_compact_writable_book",
+      "material": "WRITABLE_BOOK",
+      "cmd": 6191,
+      "model": "alkatraz:item/research_node_writable_book",
+      "texture": "minecraft:item/writable_book",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -6434,6 +6425,24 @@
       "cmd": 6192,
       "model": "alkatraz:item/research_node_enchanted_book",
       "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "shadow_focus_red_dye",
+      "material": "RED_DYE",
+      "cmd": 6192,
+      "model": "alkatraz:item/research_node_red_dye",
+      "texture": "minecraft:item/red_dye",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "shadow_focus_red_concrete",
+      "material": "RED_CONCRETE",
+      "cmd": 6192,
+      "model": "alkatraz:item/research_node_red_concrete",
+      "texture": "minecraft:item/red_concrete",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -6456,9 +6465,18 @@
     },
     {
       "kind": "research_node",
-      "key": "shadow_focus_red_dye",
+      "key": "void_lash_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6193,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "void_lash_red_dye",
       "material": "RED_DYE",
-      "cmd": 6192,
+      "cmd": 6193,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -6483,15 +6501,6 @@
     },
     {
       "kind": "research_node",
-      "key": "void_lash_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6193,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "void_lash_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6193,
@@ -6501,9 +6510,18 @@
     },
     {
       "kind": "research_node",
-      "key": "void_lash_red_dye",
+      "key": "abyssal_ward_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6194,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "abyssal_ward_red_dye",
       "material": "RED_DYE",
-      "cmd": 6193,
+      "cmd": 6194,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -6528,47 +6546,11 @@
     },
     {
       "kind": "research_node",
-      "key": "abyssal_ward_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6194,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "abyssal_ward_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6194,
       "model": "alkatraz:item/research_node_writable_book",
       "texture": "minecraft:item/writable_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "abyssal_ward_red_dye",
-      "material": "RED_DYE",
-      "cmd": 6194,
-      "model": "alkatraz:item/research_node_red_dye",
-      "texture": "minecraft:item/red_dye",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "oblivion_theory_wither_skeleton_skull",
-      "material": "WITHER_SKELETON_SKULL",
-      "cmd": 6195,
-      "model": "alkatraz:item/research_node_wither_skeleton_skull",
-      "texture": "minecraft:item/wither_skeleton_skull",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "oblivion_theory_red_concrete",
-      "material": "RED_CONCRETE",
-      "cmd": 6195,
-      "model": "alkatraz:item/research_node_red_concrete",
-      "texture": "minecraft:item/red_concrete",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -6582,6 +6564,33 @@
     },
     {
       "kind": "research_node",
+      "key": "oblivion_theory_wither_skeleton_skull",
+      "material": "WITHER_SKELETON_SKULL",
+      "cmd": 6195,
+      "model": "alkatraz:item/research_node_wither_skeleton_skull",
+      "texture": "minecraft:item/wither_skeleton_skull",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "oblivion_theory_red_dye",
+      "material": "RED_DYE",
+      "cmd": 6195,
+      "model": "alkatraz:item/research_node_red_dye",
+      "texture": "minecraft:item/red_dye",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "oblivion_theory_red_concrete",
+      "material": "RED_CONCRETE",
+      "cmd": 6195,
+      "model": "alkatraz:item/research_node_red_concrete",
+      "texture": "minecraft:item/red_concrete",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
       "key": "oblivion_theory_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6195,
@@ -6591,9 +6600,18 @@
     },
     {
       "kind": "research_node",
-      "key": "oblivion_theory_red_dye",
+      "key": "dark_sovereign_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6196,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "dark_sovereign_red_dye",
       "material": "RED_DYE",
-      "cmd": 6195,
+      "cmd": 6196,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -6618,15 +6636,6 @@
     },
     {
       "kind": "research_node",
-      "key": "dark_sovereign_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6196,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "dark_sovereign_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6196,
@@ -6636,9 +6645,18 @@
     },
     {
       "kind": "research_node",
-      "key": "dark_sovereign_red_dye",
+      "key": "eclipse_phantom_enchanted_book",
+      "material": "ENCHANTED_BOOK",
+      "cmd": 6197,
+      "model": "alkatraz:item/research_node_enchanted_book",
+      "texture": "minecraft:item/enchanted_book",
+      "source": "core/src/main/resources/research.yml"
+    },
+    {
+      "kind": "research_node",
+      "key": "eclipse_phantom_red_dye",
       "material": "RED_DYE",
-      "cmd": 6196,
+      "cmd": 6197,
       "model": "alkatraz:item/research_node_red_dye",
       "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
@@ -6663,29 +6681,11 @@
     },
     {
       "kind": "research_node",
-      "key": "eclipse_phantom_enchanted_book",
-      "material": "ENCHANTED_BOOK",
-      "cmd": 6197,
-      "model": "alkatraz:item/research_node_enchanted_book",
-      "texture": "minecraft:item/enchanted_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
       "key": "eclipse_phantom_writable_book",
       "material": "WRITABLE_BOOK",
       "cmd": 6197,
       "model": "alkatraz:item/research_node_writable_book",
       "texture": "minecraft:item/writable_book",
-      "source": "core/src/main/resources/research.yml"
-    },
-    {
-      "kind": "research_node",
-      "key": "eclipse_phantom_red_dye",
-      "material": "RED_DYE",
-      "cmd": 6197,
-      "model": "alkatraz:item/research_node_red_dye",
-      "texture": "minecraft:item/red_dye",
       "source": "core/src/main/resources/research.yml"
     },
     {
@@ -6758,24 +6758,6 @@
       "cmd": 6208,
       "model": "alkatraz:item/research_pan_arrow_down_right",
       "texture": "assets/alkatraz/textures/item/research_pan_arrow_down_right.png",
-      "source": "core/src/main/resources/texturepack.yml"
-    },
-    {
-      "kind": "gui",
-      "key": "hotbar_config_button",
-      "material": "COMPARATOR",
-      "cmd": 4015,
-      "model": "alkatraz:item/gui_hotbar_button",
-      "texture": "assets/alkatraz/textures/item/gui_hotbar_button.png",
-      "source": "core/src/main/resources/texturepack.yml"
-    },
-    {
-      "kind": "gui",
-      "key": "locked_spell",
-      "material": "RED_DYE",
-      "cmd": 4016,
-      "model": "alkatraz:item/spell_locked",
-      "texture": "assets/alkatraz/textures/item/spell_locked.png",
       "source": "core/src/main/resources/texturepack.yml"
     }
   ]

@@ -22,6 +22,13 @@
         }
       },
       {
+        "threshold": 4401,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/ui/stat_circle_level"
+        }
+      },
+      {
         "threshold": 6186,
         "model": {
           "type": "minecraft:model",

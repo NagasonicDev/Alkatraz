@@ -4,7 +4,7 @@
     "property": "minecraft:custom_model_data",
     "fallback": {
       "type": "minecraft:model",
-      "model": "minecraft:block/pink_stained_glass_pane"
+      "model": "minecraft:item/pink_stained_glass_pane"
     },
     "entries": [
       {

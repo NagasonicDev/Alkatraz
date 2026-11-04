@@ -10,29 +10,81 @@
       {
         "threshold": 2798,
         "model": {
-          "type": "minecraft:model",
-          "model": "alkatraz:item/apprentice_robe"
+          "type": "minecraft:select",
+          "property": "minecraft:display_context",
+          "cases": [
+            {
+              "when": "gui",
+              "model": {
+                "type": "minecraft:model",
+                "model": "alkatraz:item/apprentice_robe"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "alkatraz:item/apprentice_robe_3d"
+          }
         }
       },
       {
         "threshold": 2802,
         "model": {
-          "type": "minecraft:model",
-          "model": "alkatraz:item/scholar_robe"
+          "type": "minecraft:select",
+          "property": "minecraft:display_context",
+          "cases": [
+            {
+              "when": "gui",
+              "model": {
+                "type": "minecraft:model",
+                "model": "alkatraz:item/scholar_robe"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "alkatraz:item/scholar_robe_3d"
+          }
         }
       },
       {
         "threshold": 2806,
         "model": {
-          "type": "minecraft:model",
-          "model": "alkatraz:item/enchanter_robe"
+          "type": "minecraft:select",
+          "property": "minecraft:display_context",
+          "cases": [
+            {
+              "when": "gui",
+              "model": {
+                "type": "minecraft:model",
+                "model": "alkatraz:item/enchanter_robe"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "alkatraz:item/enchanter_robe_3d"
+          }
         }
       },
       {
         "threshold": 2810,
         "model": {
-          "type": "minecraft:model",
-          "model": "alkatraz:item/archmage_robe"
+          "type": "minecraft:select",
+          "property": "minecraft:display_context",
+          "cases": [
+            {
+              "when": "gui",
+              "model": {
+                "type": "minecraft:model",
+                "model": "alkatraz:item/archmage_robe"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "alkatraz:item/archmage_robe_3d"
+          }
         }
       }
     ]
