@@ -7,15 +7,14 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ConfigManager {
 
-    private static final Map<String, Config> configs = new HashMap<>();
-    private static final Map<String, YamlConfiguration> defaultConfigs = new HashMap<>();
+    private static final Map<String, Config> configs = new ConcurrentHashMap<>();
+    private static final Map<String, YamlConfiguration> defaultConfigs = new ConcurrentHashMap<>();
 
     public static Map<String, Config> getConfigs() {
         return configs;
@@ -38,7 +37,7 @@ public class ConfigManager {
         return configs.get(name);
     }
 
-    private static final Collection<String> fetchedConfigs = new HashSet<>();
+    private static final Set<String> fetchedConfigs = ConcurrentHashMap.newKeySet();
     public static YamlConfiguration getDefault(String name) {
         if (!Config.isValidName(name)) {
             throw new IllegalArgumentException("Invalid config name: " + name);
