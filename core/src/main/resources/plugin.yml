@@ -64,3 +64,15 @@ permissions:
   alkatraz.recipes.create:
     description: Create and duplicate recipes in the Recipe Manager
     default: op
+  alkatraz.command.modifier:
+    description: Use the /alkatraz modifier command
+    default: op
+  alkatraz.command.booster:
+    description: Use the /alkatraz booster command
+    default: op
+  alkatraz.command.config:
+    description: Use the /alkatraz config command
+    default: op
+  alkatraz.command.diagnose:
+    description: Use the /alkatraz diagnostics command
+    default: op

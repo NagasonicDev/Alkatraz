@@ -8,6 +8,7 @@ triggers:
   - on_damage_taken
 item:
   material: SHIELD
+  custom_model_data: 3014
   display_name: '&7Fortification Rune'
   lore:
     - '&7&oA sturdy rune that hardens the wearer''s defences.'

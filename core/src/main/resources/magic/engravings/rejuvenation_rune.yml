@@ -7,6 +7,7 @@ triggers:
   - on_low_health
 item:
   material: POPPY
+  custom_model_data: 3020
   display_name: '&dRejuvenation Rune'
   lore:
     - '&7&oA vibrant rune blooming with life energy.'

@@ -8,6 +8,7 @@ triggers:
   - on_kill
 item:
   material: GUNPOWDER
+  custom_model_data: 3003
   display_name: '&eThunder Rune'
   lore:
     - '&7&oCrackling with raw electric energy.'

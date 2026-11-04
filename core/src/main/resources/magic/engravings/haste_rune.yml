@@ -8,6 +8,7 @@ triggers:
   - on_item_held
 item:
   material: SUGAR
+  custom_model_data: 3025
   display_name: '&eHaste Rune'
   lore:
     - '&7&oA swift rune that accelerates the user.'

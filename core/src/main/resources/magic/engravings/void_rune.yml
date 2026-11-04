@@ -5,6 +5,7 @@ triggers:
   - on_spell_hit
 item:
   material: OBSIDIAN
+  custom_model_data: 3006
   display_name: '&5Void Rune'
   lore:
     - '&7&oA rune darker than the void itself.'

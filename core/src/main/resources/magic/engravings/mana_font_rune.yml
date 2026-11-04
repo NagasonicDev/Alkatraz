@@ -6,6 +6,7 @@ allowed_item_types:
 triggers: []
 item:
   material: DRAGON_BREATH
+  custom_model_data: 3018
   display_name: '&dMana Font Rune'
   lore:
     - '&7&oA rune that channels an endless well of mana.'

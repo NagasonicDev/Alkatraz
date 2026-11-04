@@ -7,6 +7,7 @@ triggers:
   - on_item_held
 item:
   material: BOOK
+  custom_model_data: 3007
   display_name: '&dArcane Power Rune'
   lore:
     - '&7&oA rune pulsing with focused arcane power.'

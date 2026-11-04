@@ -6,6 +6,7 @@ allowed_item_types:
 triggers: []
 item:
   material: LAPIS_LAZULI
+  custom_model_data: 3008
   display_name: '&9Mana Well Rune'
   lore:
     - '&7&oA crystalline rune that deepens one''s mana reserves.'

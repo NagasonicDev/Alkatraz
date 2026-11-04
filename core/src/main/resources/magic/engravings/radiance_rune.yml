@@ -6,6 +6,7 @@ triggers:
   - on_item_held
 item:
   material: GLOWSTONE_DUST
+  custom_model_data: 3005
   display_name: '&eRadiance Rune'
   lore:
     - '&7&oA brilliant rune shimmering with holy light.'

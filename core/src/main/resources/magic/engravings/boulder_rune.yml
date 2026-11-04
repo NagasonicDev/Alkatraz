@@ -8,6 +8,7 @@ triggers:
   - on_kill
 item:
   material: STONE
+  custom_model_data: 3004
   display_name: '&7Boulder Rune'
   lore:
     - '&7&oA dense rune pulsing with earthen might.'

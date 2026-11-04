@@ -8,6 +8,7 @@ triggers:
   - on_kill
 item:
   material: FIRE_CHARGE
+  custom_model_data: 3001
   display_name: '&cFire Rune'
   lore:
     - '&7&oA blazing rune imbued with fire magic.'

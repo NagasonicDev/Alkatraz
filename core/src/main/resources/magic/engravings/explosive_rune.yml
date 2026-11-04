@@ -7,6 +7,7 @@ triggers:
   - on_damage_dealt
 item:
   material: TNT
+  custom_model_data: 3023
   display_name: '&cExplosive Rune'
   lore:
     - '&7&oA volatile rune packed with blast energy.'

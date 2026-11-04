@@ -6,6 +6,7 @@ triggers:
   - on_sneak
 item:
   material: ENDER_PEARL
+  custom_model_data: 3009
   display_name: '&5Ender Rune'
   lore:
     - '&7&oA warped rune that bends space itself.'

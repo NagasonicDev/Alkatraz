@@ -4,6 +4,7 @@ allowed_item_types:
 triggers: []
 item:
   material: FEATHER
+  custom_model_data: 3026
   display_name: '&fFeather Fall Rune'
   lore:
     - '&7&oA weightless rune that softens falls.'

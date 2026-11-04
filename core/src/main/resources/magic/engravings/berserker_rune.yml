@@ -7,6 +7,7 @@ triggers:
   - on_kill
 item:
   material: REDSTONE_BLOCK
+  custom_model_data: 3010
   display_name: '&cBerserker Rune'
   lore:
     - '&7&oA furious rune that feeds on kills.'

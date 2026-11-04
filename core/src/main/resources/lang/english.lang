@@ -488,6 +488,8 @@ spells.cast.blessed_by = &eYou have been blessed by %spell%!
 spells.cast.not_enough_focus = &cNot enough focus to cast this spell.
 spells.cast.focus_lost = &cYou lost your focus and the spell was cancelled!
 spells.cast.interrupted = &cYour wind-up was interrupted!
+spells.sustain.out_of_mana = &cYour mana runs dry - the spell lets go.
+spells.sustain.blocked = &cAnother of your sustains is already running.
 
 # --- Focus System ---
 focus.bar.title = &dFocus %focus%/%max%
@@ -504,6 +506,9 @@ spellbook.effects_header = &aEffects:
 spellbook.display_name = &6Spellbook: %spell%
 spellbook.unknown_name = &6Unknown Spellbook
 spellbook.element_info = &eCircle %circle% &7| &b%element%
+spellbook.cast_cost = &bMana cost: %mana%
+spellbook.cooldown = &bCooldown: %seconds%s
+spellbook.cast_time = &bCast time: %seconds%s
 spellbook.right_click_discover = &7Right-click to discover this spell!
 spellbook.empty = &cThis spellbook appears to be empty!
 spellbook.selection_failed = &cFailed to select a spell!
@@ -742,13 +747,13 @@ spells.geyser.description = &7Summons a column of water that erupts\n&7in front 
 spells.heal.book_name = &eAsclepius' Pharmacopoeia &o2nd Edition
 spells.heal.lore1 = &8The knowledge of the god of medicine.
 spells.heal.name = &eHeal
-spells.heal.description = &7Heal yourself (&8Shift&7) or any\n&7target.
+spells.heal.description = &7Restore up to 9 HP to yourself while\n&7sneaking or to the player you target.
 
 # --- LesserHeal ---
 spells.lesserheal.book_name = &eAsclepius' Pharmacopoeia &o1st Edition
 spells.lesserheal.lore1 = &8The knowledge of the god of medicine.
 spells.lesserheal.name = &eLesser Heal
-spells.lesserheal.description = &7Heal yourself (&8Shift&7) or any\n&7target player.
+spells.lesserheal.description = &7Restore up to 5 HP to yourself while\n&7sneaking or to the player you target.
 
 # --- LightBuff ---
 spells.lightbuff.book_name = &eCodex of Celestial Radiance
@@ -887,12 +892,12 @@ spells.sunfirebarrage.description = &7Hold still and the sun finds five things t
 
 # --- InfernoRite (circle 9, FIRE) ---
 spells.infernorite.book_name = &6Grimoire of the Ninth Pyre
-spells.infernorite.lore1 = &8Wherever your fire has already taken hold, the rite
-spells.infernorite.lore2 = &8carries it onward - and the rest of it all goes at once.
-spells.infernorite.opened = &6The rite opens. Three charges, and no more.
+spells.infernorite.lore1 = &8The rite does not wait for fire - it lights its own,
+spells.infernorite.lore2 = &8and the burning goes on taking each other after it.
+spells.infernorite.opened = &6The rite opens - twelve seconds of spreading.
 spells.infernorite.expired = &7The rite closes.
 spells.infernorite.name = &6Inferno Rite
-spells.infernorite.description = &7For eight seconds, your fire detonates whatever\n&7else is already burning. Three times, and no more.
+spells.infernorite.description = &7Ignite foes in a wide arc. Three paced blasts\n&7spread the fire across the fight over\n&7twelve seconds.
 
 # --- Undertow (circle 6, WATER) ---
 spells.undertow.book_name = &9Tome of the Riptide
@@ -917,10 +922,10 @@ spells.thousandwaves.description = &7Hold to gather the sea, then\n&7release eig
 
 # --- TideOfTheDeep (circle 9, WATER) ---
 spells.tideofthedeep.book_name = &9Testament of the Rising Tide
-spells.tideofthedeep.lore1 = &8Stand in the flood and it will
+spells.tideofthedeep.lore1 = &8You need not stand in the flood. Still, it will
 spells.tideofthedeep.lore2 = &8carry you. Everything else drowns.
 spells.tideofthedeep.name = &9Tide of the Deep
-spells.tideofthedeep.description = &7Raises a tide that mends you\n&7alone and drowns all within -\n&7and the deeper it runs, the\n&7harder it comes.
+spells.tideofthedeep.description = &7Waves drag the hostile into a clump and\n&7bleed them there. You mend from all of it -\n&7whether or not you stand in the flood.
 
 # --- TectonicStrike (circle 6, EARTH) ---
 spells.tectonicstrike.book_name = &6Tome of the Shattered Strata
@@ -948,7 +953,7 @@ spells.worldbreaker.book_name = &5Last Codex of the Broken World
 spells.worldbreaker.lore1 = &8&oThe world was whole, once.
 spells.worldbreaker.lore2 = &8two faults, one slab, and everything caught between.
 spells.worldbreaker.name = &5Worldbreaker
-spells.worldbreaker.description = &7Tears the arena apart along two faults and levers\n&7the slab between them into the air.
+spells.worldbreaker.description = &7Split the ground with twin rifts and raise\n&7the earth between them. After a brief hold,\n&7the slab falls and the rifts collapse inward.
 
 # --- Updraft (circle 3, AIR) ---
 spells.updraft.book_name = &fTome of Wind &oVol. 3
@@ -972,19 +977,18 @@ spells.cyclonenest.name = &fCyclone Nest
 spells.cyclonenest.description = &7Set three small tornadoes into the\n&7ground and leave them feeding.
 
 # --- Stormcaller (circle 8, AIR) ---
-spells.stormcaller.book_name = &fThe Wandering Tempest
-spells.stormcaller.lore1 = &8Call the storm, and hold it to you.
-spells.stormcaller.lore2 = &8a storm that follows.
+spells.stormcaller.book_name = &fThe Windborne Path
+spells.stormcaller.lore1 = &8Call the winds to lift you skyward.
+spells.stormcaller.lore2 = &8A brief passage above the ground.
 spells.stormcaller.name = &fStormcaller
-spells.stormcaller.description = &7Hold still and raise a storm that\n&7follows you, striking what comes close.
+spells.stormcaller.description = &7Channel the storm to lift you into\n&7flight for a short time.
 
 # --- Skywrath (circle 9, AIR) ---
 spells.skywrath.book_name = &fThe Wrath of Open Sky
 spells.skywrath.lore1 = &8The last lesson: take the sky itself.
-spells.skywrath.lore2 = &8flight, and a storm to justify it.
-spells.skywrath.ending = &7The sky closes. You are grounded again.
+spells.skywrath.lore2 = &8The open sky answers with thunder.
 spells.skywrath.name = &fSkywrath
-spells.skywrath.description = &7Take the sky itself. A storm follows you\n&7for fifteen seconds, and you fly with it.
+spells.skywrath.description = &7Call down a violent storm that follows\n&7you and strikes nearby enemies for 24 seconds.
 
 # --- LightBolt (circle 1, LIGHT) ---
 spells.lightbolt.book_name = &eScroll of the First Ray
@@ -1024,11 +1028,11 @@ spells.apotheosis.description = &7Stand still while the light climbs,\n&7and it 
 
 # --- CrownOfDawn (circle 9, LIGHT) ---
 spells.crownofdawn.book_name = &fCrown of the Breaking Dawn
-spells.crownofdawn.lore1 = &8A wall of morning stands where
-spells.crownofdawn.lore2 = &8you tell it to, and nothing crosses.
-spells.crownofdawn.broken = &cThe crown of dawn is broken!
+spells.crownofdawn.lore1 = &8Morning takes you off the ground and
+spells.crownofdawn.lore2 = &8holds you there, and nothing thrown comes near.
+spells.crownofdawn.boss_bar = &fCrown of Dawn &8| &7%seconds%s left
 spells.crownofdawn.name = &fCrown of Dawn
-spells.crownofdawn.description = &7A wall of morning stands where\n&7you tell it to. Nothing crosses,\n&7and the weakened do not leave it.
+spells.crownofdawn.description = &7The crown lifts you and holds you there,\n&7searing what stands close and stripping its\n&7armour. The light around you turns arrows.
 
 # --- UmbralVolley (circle 7, DARK) ---
 spells.umbralvolley.book_name = &5Umbral Volley &oChapter III
@@ -1047,11 +1051,11 @@ spells.voidanchor.description = &7Tear a bound horror from the ground\n&7and set
 
 # --- Oblivion (circle 9, DARK) ---
 spells.oblivion.book_name = &5Necronomicon Finis
-spells.oblivion.lore1 = &8&oWhat is already dying is easiest to erase;
-spells.oblivion.lore2 = &8a soul at its last leaves the least behind.
-spells.oblivion.no_target = &cNothing stands close enough to be forgotten.
+spells.oblivion.lore1 = &8&oThe hole does not wait for a wound. It opens on
+spells.oblivion.lore2 = &8the whole of you, and it does not stop drinking.
+spells.oblivion.sustain = &5Oblivion &8| &7%seconds%s left &8| &7-%upkeep%/s
 spells.oblivion.name = &5Oblivion
-spells.oblivion.description = &7Erase one soul. The closer it\n&7already is to the dark, the\n&7less of it there is to remove.
+spells.oblivion.description = &7A hole opens and follows you. It drags\n&7the hostile inward, bleeds them dry, and\n&7hands you a quarter of all it takes.
 
 # --- ArcaneWard (circle 5, NONE) ---
 spells.arcaneward.book_name = &5Aegis Codex &oPart II
@@ -1083,14 +1087,13 @@ spells.echocast.description = &7Takes the last three things you cast\n&7and make
 # --- ArcaneResonance (circle 9, NONE) ---
 spells.arcaneresonance.book_name = &5Tome of the Standing Wave
 spells.arcaneresonance.lore1 = &8&oHold the note. The spell answers twice.
-spells.arcaneresonance.lore2 = &8the next three casts sound at a fifth more.
-spells.arcaneresonance.armed = &dResonance armed - &f%count% &dcasts amplified.
-spells.arcaneresonance.charges = &dResonance - &f%count% &dcast(s) remain.
-spells.arcaneresonance.spent = &7Your resonance has spent itself.
-spells.arcaneresonance.expired = &7Your resonance faded unused.
-spells.arcaneresonance.already_active = &cYou are already resonating!
+spells.arcaneresonance.lore2 = &8every cast you make sounds a fifth more.
+spells.arcaneresonance.armed = &dThe note holds - every cast sounds twice.
+spells.arcaneresonance.charges = &dThe note answers - twice, and a fifth truer.
+spells.arcaneresonance.expired = &7Your resonance lets the note go.
+spells.arcaneresonance.sustain = &dArcane Resonance &8| &7%seconds%s left &8| &7-%upkeep%/s
 spells.arcaneresonance.name = &dArcane Resonance
-spells.arcaneresonance.description = &7Sets your next three casts ringing\n&7true - each one sounds twice,\n&7at a fifth more than it should.
+spells.arcaneresonance.description = &7For forty-two seconds, your spells hit harder\n&7and echo a moment later. Cast again to end\n&7the resonance early.
 
 # --- Dispel (circle 3, LIGHT, UTILITY) ---
 spells.dispel.book_name = &eScroll of the Unwritten Word
@@ -1162,3 +1165,21 @@ progression.requirement_spell_mastery = Spell Mastery (%spell%%metColor%): %curr
 # override.research.nodes.<id>.name = &aCustom Name
 # override.research.nodes.<id>.description = &7Custom description line 1\nCustom description line 2
 # override.research.categories.<id>.name = &aCustom Category Name
+commands.modifier_usage = &cUsage: /alkatraz modifier grant|revoke|list|inspect [player]
+commands.modifier_revoked = &aRevoked modifier.
+commands.modifier_not_found = &cModifier not found.
+commands.modifier_list_empty = &7No active modifiers.
+commands.effect_list_empty = &7No active effects.
+commands.booster_usage = &cUsage: /alkatraz booster start|stop|list [world|group] [target] [multiplier]
+commands.booster_started = &aStarted booster for %scope% %target% (x%multiplier%).
+commands.booster_failed = &cFailed to start booster for %scope% %target%.
+commands.booster_stopped = &aStopped booster for %scope% %target%.
+commands.booster_not_found = &cNo active booster for %scope% %target%.
+commands.booster_list_empty = &7No active boosters.# Booster announcements
+boosters.announce_start = &a[Booster] &f%name% &7started (%multiplier%x for %duration%).
+boosters.announce_stop = &c[Booster] &f%name% &7has ended.
+boosters.title_start = %name%
+boosters.subtitle_start = &7%multiplier%x for %duration%
+boosters.countdown_title = &e%seconds%s
+boosters.countdown_subtitle = &7%name% ending
+boosters.chat_format = &6[Booster] &f%name% &7- &e%multiplier%x &8(%source%)

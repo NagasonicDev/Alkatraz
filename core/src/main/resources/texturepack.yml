@@ -19,11 +19,39 @@ ascii_codes:
     recipes: "\uF808\uF004"
     stats: "\uF808\uF005"
     grimoire: "\uF808\uF006"
-  icons:
-    back: "\uF808\u1001"
-    confirm: "\uF808\u1002"
-    cancel: "\uF808\u1003"
-    info: "\uF808\u1004"
+    arcane_choice: "\uF808\uF010"
+    arcane_hub: "\uF808\uF011"
+    progression: "\uF808\uF012"
+    circle_confirm: "\uF808\uF013"
+    warp_points: "\uF808\uF014"
+    warp_destination: "\uF808\uF015"
+    engraving_table: "\uF808\uF016"
+    confirm_engraving: "\uF808\uF017"
+    recipe_create: "\uF808\uF018"
+    recipe_delete: "\uF808\uF019"
+    recipe_shape: "\uF808\uF01A"
+    recipe_shapeless: "\uF808\uF01B"
+    recipe_requirements: "\uF808\uF01C"
+    recipe_permissions: "\uF808\uF01D"
+    item_detail: "\uF808\uF01E"
+    lore: "\uF808\uF01F"
+    components: "\uF808\uF020"
+    attributes: "\uF808\uF021"
+    recipe_sub: "\uF808\uF022"
+    requirements_editor: "\uF808\uF023"
+    hotbar_config: "\uF808\uF024"
+    spell_options: "\uF808\uF025"
+    spell_option_values: "\uF808\uF026"
+    grimoire_select: "\uF808\uF027"
+    item_editor: "\uF808\uF028"
+    pooled_3: "\uF808\uF029"
+    pooled_2: "\uF808\uF02A"
+    trigger_select: "\uF808\uF02B"
+    research_entry: "\uF808\uF02C"
+    disguise: "\uF808\uF02D"
+    recipe_list: "\uF808\uF02E"
+    recipe_detail: "\uF808\uF02F"
+    recipe_edit: "\uF808\uF030"
 
 # Custom model data for items
 custom_model_data:
@@ -38,6 +66,7 @@ custom_model_data:
     storm_wand: 1007
     luminous_wand: 1008
     void_wand: 1009
+    astral_wand: 1010
     
     # Scrolls (1101-1199)
     magic_missile_scroll: 1101
@@ -143,8 +172,42 @@ custom_model_data:
     ethereal_necklace: 1282
     ethereal_bracelet: 1283
     ethereal_pendant: 1284
+
+    # Newer high-tier jewelry families (1285-1312)
+    phoenix_ring: 1285
+    phoenix_necklace: 1286
+    phoenix_bracelet: 1287
+    phoenix_pendant: 1288
+    leviathan_ring: 1289
+    leviathan_necklace: 1290
+    leviathan_bracelet: 1291
+    leviathan_pendant: 1292
+    cyclone_ring: 1293
+    cyclone_necklace: 1294
+    cyclone_bracelet: 1295
+    cyclone_pendant: 1296
+    colossus_ring: 1297
+    colossus_necklace: 1298
+    colossus_bracelet: 1299
+    colossus_pendant: 1300
+    seraphic_ring: 1301
+    seraphic_necklace: 1302
+    seraphic_bracelet: 1303
+    seraphic_pendant: 1304
+    oblivion_ring: 1305
+    oblivion_necklace: 1306
+    oblivion_bracelet: 1307
+    oblivion_pendant: 1308
+    primordial_ring: 1309
+    primordial_necklace: 1310
+    primordial_bracelet: 1311
+    primordial_pendant: 1312
     
-    # Equipment (2801-2899)
+    # Equipment (2797-2899)
+    apprentice_hat: 2797
+    apprentice_robe: 2798
+    apprentice_leggings: 2799
+    apprentice_boots: 2800
     scholar_hat: 2801
     scholar_robe: 2802
     scholar_leggings: 2803
@@ -185,6 +248,91 @@ custom_model_data:
     sort_button: 4012
     create_button: 4013
     duplicate_button: 4014
+    hotbar_button: 4015
+    locked_spell: 4016
+    
+    # Circle progression (4301-4303)
+    circle_completed: 4301
+    circle_next: 4302
+    circle_locked: 4303
+    
+    # Stat icons (4401-4416)
+    stat_circle_level: 4401
+    stat_knowledge: 4402
+    stat_research_points: 4403
+    stat_points: 4404
+    stat_mana: 4405
+    stat_mana_regen: 4406
+    stat_fire: 4411
+    stat_water: 4412
+    stat_earth: 4413
+    stat_air: 4414
+    stat_light: 4415
+    stat_dark: 4416
+    
+    # Element investment icons (4421-4426)
+    invest_fire: 4421
+    invest_water: 4422
+    invest_earth: 4423
+    invest_air: 4424
+    invest_light: 4425
+    invest_dark: 4426
+    
+    # Reset warning (4431)
+    reset_warning: 4431
+    
+    # Warp destinations (4441-4447)
+    warp_empty: 4441
+    warp_dest_empty: 4442
+    warp_foreign: 4443
+    warp_set: 4444
+    warp_far: 4445
+    locked_slot: 4446
+    unknown_value: 4447
+    
+    # Engraving trigger (4451) and results (4461, 4471-4473)
+    trigger: 4451
+    engrave_installed: 4461
+    engrave_mana: 4471
+    engrave_success: 4472
+    engrave_failure: 4473
+
+    # Item editor icons (4601-4629)
+    editor_display_name: 4601
+    editor_lore: 4602
+    editor_material: 4603
+    editor_dye_color: 4604
+    editor_custom_model_data: 4605
+    editor_components: 4606
+    editor_attributes: 4607
+    editor_vanilla_attributes: 4608
+    editor_max_engravings: 4609
+    editor_spell_id: 4610
+    editor_triggers: 4611
+    editor_recipe_shape: 4612
+    editor_recipe_ingredients: 4613
+    editor_recipe_requirements: 4614
+    editor_unbreakable: 4615
+    editor_hide_attributes: 4616
+    editor_reload: 4617
+    editor_get_item: 4618
+    editor_save: 4619
+    editor_item_list: 4620
+    editor_add: 4621
+    editor_toggle_on: 4622
+    editor_toggle_off: 4623
+    editor_entry_attribute: 4624
+    editor_entry_requirement: 4625
+    editor_entry_lore: 4626
+    editor_entry_recipe_key: 4627
+
+    # Research entry icons (4630-4635)
+    research_start: 4630
+    research_spend: 4631
+    research_complete: 4632
+    research_locked: 4633
+    research_overview: 4634
+    research_node_done: 4635
     
     # Spell GUI items (4100-4199)
     spell_magic_missile: 4101
@@ -225,18 +373,9 @@ custom_model_data:
     spell_lesser_heal: 4136
 
     # --- Circle 5-9 additions (4137-4168) ---
-    # DEAD CONFIG, KEPT DELIBERATELY. TexturePackManager.loadItemCMDs()
-    # reads exactly six hardcoded custom_model_data.gui.* keys
-    # (next_page, prev_page, back_button, blank_pane, border_pane,
-    # header_pane) and NEVER loops this section - unlike
-    # custom_model_data.items and connector_textures, which it does loop.
-    # Nothing in the plugin reads any spell_* key.
-    #
-    # The load-bearing value is gui_custom_model_data in each spell's OWN yml,
-    # read at Spell.java:285 and applied at SpellsMenu.java:119. Do not delete
-    # this block thinking it drives the menu - it does not - and do not delete
-    # it because it is unused: the resource-pack author works from this file and
-    # needs the ids to draw the models.
+    # spell_* GUI keys are skipped by TexturePackManager.loadItemCMDs(); menus
+    # use gui_custom_model_data from each spell's own yml. Keep this block so
+    # the resource-pack author has a single id list.
     spell_flame_lance: 4137
     spell_inferno_pilgrimage: 4138
     spell_sunfire_barrage: 4139
@@ -296,6 +435,117 @@ gui_items:
     sort: "HOPPER"
     create: "EMERALD"
     duplicate: "ENDER_PEARL"
+
+# Per-node model IDs for explicit Alkatraz-Modern research icons (6101-6197).
+research_node_textures:
+  awakened_focus: 6101
+  mana_conservation: 6102
+  ritual_geometry: 6103
+  spellcraft_field_notes: 6104
+  disciplined_channel: 6105
+  focus_discipline: 6106
+  ward_craft: 6107
+  mana_reservoir: 6108
+  spell_resonance: 6109
+  combat_casting: 6110
+  mana_conduit: 6111
+  barrier_weave: 6112
+  arcane_theory: 6113
+  mana_sovereignty: 6114
+  spell_synthesis: 6115
+  battle_mage: 6116
+  arcane_nexus: 6117
+  grand_ward: 6118
+  archmage: 6119
+  fire_spark: 6120
+  flame_study: 6121
+  heat_siphon: 6122
+  smoke_shroud: 6123
+  cinder_sigil: 6124
+  water_first_tide: 6125
+  tidal_studies: 6126
+  current_sense: 6127
+  frost_ward: 6128
+  depth_mark: 6129
+  earth_stone_memory: 6130
+  tectonic_sense: 6131
+  stonebond_will: 6132
+  bedrock_ward: 6133
+  geode_lore: 6134
+  air_open_breath: 6135
+  gale_wisps: 6136
+  static_cast: 6137
+  squall_ward: 6138
+  wind_theory: 6139
+  light_first_lantern: 6140
+  radiant_study: 6141
+  blessed_will: 6142
+  aegis_light: 6143
+  luminarch_theory: 6144
+  dark_quiet_shadow: 6145
+  shadow_insight: 6146
+  night_harvest: 6147
+  void_ward: 6148
+  entropy_theory: 6149
+  fire_ember_control: 6150
+  fire_inferno_rite: 6151
+  pyroclasm: 6152
+  immolation_aura: 6153
+  cinder_ward: 6154
+  ashen_theory: 6155
+  inferno_mastery: 6156
+  hellfire_sovereign: 6157
+  water_restorative_current: 6158
+  water_depth_oath: 6159
+  pressure_surge: 6160
+  healing_current: 6161
+  glacial_barrier: 6162
+  oceanic_theory: 6163
+  abyssal_mastery: 6164
+  tidal_sovereign: 6165
+  earth_quarry_signs: 6166
+  earth_bulwark_vow: 6167
+  seismic_focus: 6168
+  earthen_fortress: 6169
+  crystal_resonance: 6170
+  titan_bastion: 6171
+  earth_sovereign: 6172
+  mountain_wraith: 6173
+  air_kinetic_step: 6174
+  air_storm_eye: 6175
+  tempest_focus: 6176
+  cyclone_ward: 6177
+  skyward_barrier: 6178
+  storm_theory: 6179
+  wind_sovereign: 6180
+  skyward_phantom: 6181
+  light_mending_script: 6182
+  light_radiant_oath: 6183
+  solar_focus: 6184
+  bulwark_light: 6185
+  restoration_ward: 6186
+  sanctum_theory: 6187
+  light_sovereign: 6188
+  celestial_phantom: 6189
+  dark_tethered_whisper: 6190
+  dark_eclipse_compact: 6191
+  shadow_focus: 6192
+  void_lash: 6193
+  abyssal_ward: 6194
+  oblivion_theory: 6195
+  dark_sovereign: 6196
+  eclipse_phantom: 6197
+
+# Directional icons for the research graph pan controls (6201-6208).
+research_pan_arrows:
+  up_left: 6201
+  up: 6202
+  up_right: 6203
+  left: 6204
+  right: 6205
+  down_left: 6206
+  down: 6207
+  down_right: 6208
 
 # Connector textures for research graph edges (6001-6030)
 # Piece types: straight_h, straight_v, corner_ne, corner_se, corner_sw, corner_nw

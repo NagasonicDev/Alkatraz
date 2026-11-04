@@ -8,6 +8,7 @@ triggers:
   - on_kill
 item:
   material: ICE
+  custom_model_data: 3002
   display_name: '&bFrost Rune'
   lore:
     - '&7&oA shard of eternal ice, humming with cold.'

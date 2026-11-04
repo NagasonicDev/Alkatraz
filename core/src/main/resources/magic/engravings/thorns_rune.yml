@@ -6,6 +6,7 @@ triggers:
   - on_damage_taken
 item:
   material: CACTUS
+  custom_model_data: 3015
   display_name: '&aThorns Rune'
   lore:
     - '&7&oA prickly rune that retaliates against attackers.'

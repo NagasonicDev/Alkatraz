@@ -190,3 +190,9 @@ circle:
         - type: research
           research: dark_eclipse_compact
           description: "Requires Eclipse Compact research"
+
+# World/group progression multipliers. Defaults preserve global behavior (1.0).
+multipliers:
+  global: 1.0
+  worlds: {}
+  groups: {}

@@ -8,6 +8,7 @@ triggers:
   - on_join
 item:
   material: MAGMA_CREAM
+  custom_model_data: 3017
   display_name: '&cPhoenix Rune'
   lore:
     - '&7&oA smouldering rune wreathed in rebirth flame.'

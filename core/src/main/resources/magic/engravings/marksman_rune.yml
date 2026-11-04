@@ -6,6 +6,7 @@ triggers:
   - on_projectile_hit
 item:
   material: ARROW
+  custom_model_data: 3021
   display_name: '&aMarksman Rune'
   lore:
     - '&7&oA precision rune that guides projectiles true.'

@@ -3,6 +3,7 @@ allowed_item_types: [helmet, chestplate, leggings, boots]
 triggers: [on_sneak]
 item:
   material: GLASS_BOTTLE
+  custom_model_data: 3027
   display_name: '&eGlass Ward Rune'
   lore:
     - '&7Hold &fShift&7 to summon a wall of'

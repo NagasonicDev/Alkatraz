@@ -6,6 +6,7 @@ triggers:
   - on_damage_dealt
 item:
   material: SNOWBALL
+  custom_model_data: 3022
   display_name: '&bFrost Shot Rune'
   lore:
     - '&7&oA frigid rune that chills arrows mid-flight.'

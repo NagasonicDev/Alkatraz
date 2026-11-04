@@ -11,6 +11,7 @@ triggers:
   - on_low_health
 item:
   material: GOLDEN_APPLE
+  custom_model_data: 3016
   display_name: '&6Vitality Rune'
   lore:
     - '&7&oA life-giving rune that mends wounds.'

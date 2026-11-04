@@ -8,6 +8,7 @@ triggers:
   - on_join
 item:
   material: BOOK
+  custom_model_data: 3007
   display_name: '&5Sage Rune'
   lore:
     - '&7&oA rune inscribed with ancient cosmic wisdom.'

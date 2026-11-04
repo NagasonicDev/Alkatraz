@@ -7,6 +7,7 @@ triggers:
   - on_kill
 item:
   material: BLAZE_ROD
+  custom_model_data: 3013
   display_name: '&6Blazing Blade Rune'
   lore:
     - '&7&oA searing rune that sets the battlefield ablaze.'

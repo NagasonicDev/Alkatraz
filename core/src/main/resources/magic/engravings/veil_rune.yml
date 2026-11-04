@@ -8,6 +8,7 @@ triggers:
   - on_sneak
 item:
   material: PHANTOM_MEMBRANE
+  custom_model_data: 3024
   display_name: '&7Veil Rune'
   lore:
     - '&7&oA ghostly rune that shrouds the wearer in shadow.'
