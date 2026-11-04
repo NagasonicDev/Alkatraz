@@ -1,7 +1,11 @@
 package me.nagasonic.alkatraz.spells.modifier;
 
+import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.spells.Spell;
+import me.nagasonic.alkatraz.spells.SpellRegistry;
 import me.nagasonic.alkatraz.spells.effect.ActiveEffect;
+import me.nagasonic.alkatraz.spells.modifier.AppliedModifier;
+import org.bukkit.Bukkit;
 import me.nagasonic.alkatraz.spells.effect.EffectKind;
 import me.nagasonic.alkatraz.spells.effect.EffectRegistry;
 import org.bukkit.entity.LivingEntity;
@@ -49,6 +53,22 @@ public final class ModifierManager {
 
     private static void pruneBucket(List<ModifierInstance> list, long nowMillis) {
         if (list == null) return;
+        for (ModifierInstance instance : new ArrayList<>(list)) {
+            if (!instance.isExpiredAt(nowMillis)) continue;
+            AppliedModifier applied = instance.getAppliedModifier();
+            if (applied != null && instance.scope() == ModifierInstance.Scope.PLAYER
+                    && Bukkit.getServer() != null) {
+                try {
+                    UUID uid = UUID.fromString(instance.scopeKey());
+                    LivingEntity entity = (LivingEntity) Bukkit.getEntity(uid);
+                    Spell source = instance.source() == null ? null : SpellRegistry.getSpell(instance.source());
+                    if (entity != null) {
+                        applied.remove(entity, source);
+                    }
+                } catch (Exception ignored) {
+                }
+            }
+        }
         list.removeIf(instance -> instance.isExpiredAt(nowMillis));
         // Trim empty buckets lazily in pruneAll().
     }
@@ -114,18 +134,29 @@ public final class ModifierManager {
 
     public static ModifierInstance grant(LivingEntity target, ModifierInstance instance, Spell source, int durationTicks) {
         if (instance == null) return null;
+        // Track whether an entry with this id already existed, so an IGNORE policy can
+        // avoid re-applying while a genuinely new grant still applies.
+        boolean existedBefore = false;
         ModifierInstance granted;
         if (target instanceof Player player) {
+            if (instance.id() != null) {
+                existedBefore = findById(player.getUniqueId(), instance.id()) != null;
+            }
             granted = grant(player.getUniqueId(), instance);
         } else {
+            if (instance.id() != null) {
+                for (ModifierInstance m : list(instance.scope(), instance.scopeKey())) {
+                    if (instance.id().equals(m.id())) { existedBefore = true; break; }
+                }
+            }
             granted = grant(instance);
         }
 
         // Idempotent: an IGNORE that returned the existing entry must not re-apply.
-        // STACK mints a fresh id, so identity alone fails to detect a newly granted
-        // entry; a stacked grant still has to run its side-effect.
-        boolean appliedAgain = (granted == instance)
-                || (granted != null && granted.stackPolicy() == ModifierInstance.StackPolicy.STACK);
+        // REPLACE/REFRESH/STRONGEST always apply the new value; STACK always applies.
+        boolean appliedAgain = (target != null && granted != null && granted.appliedModifier() != null)
+                && (instance.stackPolicy() != ModifierInstance.StackPolicy.IGNORE
+                    || !existedBefore);
         if (target != null && granted != null && granted.appliedModifier() != null && appliedAgain) {
             granted.appliedModifier().apply(target, source);
         }
@@ -143,7 +174,7 @@ public final class ModifierManager {
                     0,
                     now,
                     expires,
-                    granted));
+                    granted.getAppliedModifier()));
         }
         return granted;
     }
@@ -175,7 +206,7 @@ public final class ModifierManager {
     public static boolean revoke(LivingEntity target, ModifierInstance instance, Spell source) {
         if (instance == null) return false;
         boolean removed = revoke(instance);
-        if (target != null && instance.appliedModifier() != null) {
+        if (removed && target != null && instance.appliedModifier() != null) {
             instance.appliedModifier().remove(target, source);
         }
         return removed;
@@ -238,7 +269,74 @@ public final class ModifierManager {
     }
 
     public static void clear() {
+        // Revoke applied handles before dropping the buckets.
+        if (Bukkit.getServer() != null && isPrimaryThreadSafe()) {
+            for (java.util.Map.Entry<String, List<ModifierInstance>> entry : new java.util.ArrayList<>(BY_BUCKET.entrySet())) {
+                for (ModifierInstance instance : java.util.List.copyOf(entry.getValue())) {
+                    AppliedModifier applied = instance.getAppliedModifier();
+                    if (applied == null) continue;
+                    LivingEntity entity = null;
+                    if (instance.scope() == ModifierInstance.Scope.PLAYER) {
+                        try { entity = (LivingEntity) Bukkit.getEntity(UUID.fromString(instance.scopeKey())); } catch (Exception ignored) { }
+                    }
+                    Spell source = instance.source() == null ? null : SpellRegistry.getSpell(instance.source());
+                    if (entity != null) {
+                        try { applied.remove(entity, source); } catch (Exception e) { Alkatraz.logDebug("Failed to revoke modifier on clear: " + e.getMessage()); }
+                    }
+                }
+            }
+        }
         BY_BUCKET.clear();
+    }
+
+    public static void clearAll() { clear(); }
+
+    public static void onPlayerQuit(UUID playerId) { clearPlayer(playerId); }
+    public static void onPlayerQuit(Player player) { clearPlayer(player); }
+    public static void onQuit(UUID playerId) { clearPlayer(playerId); }
+    public static void onQuit(Player player) { clearPlayer(player); }
+    public static void clearPlayer(LivingEntity entity) {
+        clearPlayer(entity == null ? null : entity.getUniqueId(), entity);
+    }
+    public static void clearPlayer(UUID playerId) { clearPlayer(playerId, null); }
+    public static void clearPlayer(UUID playerId, LivingEntity entity) {
+        if (playerId == null) return;
+        String bucketKey = ModifierInstance.Scope.PLAYER.name() + ":" + playerId;
+        if (Bukkit.getServer() != null && isPrimaryThreadSafe()) {
+            List<ModifierInstance> instances = BY_BUCKET.get(bucketKey);
+            if (instances != null) {
+                LivingEntity target = entity;
+                if (target == null) {
+                    try { target = (LivingEntity) Bukkit.getEntity(playerId); } catch (Exception ignored) { }
+                }
+                // Fall back to nothing rather than dropping the handle silently: if we
+                // cannot resolve the entity, leave applied data untouched (no bucket drop
+                // masquerading as a revoke).
+                if (target != null) {
+                    for (ModifierInstance instance : List.copyOf(instances)) {
+                        AppliedModifier applied = instance.getAppliedModifier();
+                        if (applied == null) continue;
+                        Spell source = instance.source() == null ? null : SpellRegistry.getSpell(instance.source());
+                        try { applied.remove(target, source); } catch (Exception e) {
+                            Alkatraz.logDebug("Failed to revoke modifier on clearPlayer: " + e.getMessage());
+                        }
+                    }
+                }
+            }
+        }
+        BY_BUCKET.remove(bucketKey);
+    }
+    public static void clearBucket(String bucketKey) {
+        if (bucketKey == null) return;
+        BY_BUCKET.remove(bucketKey);
+    }
+
+    private static boolean isPrimaryThreadSafe() {
+        try {
+            return Bukkit.isPrimaryThread();
+        } catch (RuntimeException e) {
+            return true;
+        }
     }
 
     // ---- query helpers ----

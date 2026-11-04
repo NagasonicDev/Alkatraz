@@ -380,6 +380,23 @@ public abstract class Spell {
         return true;
     }
 
+    /**
+     * Releases any long-lived tasks/resources owned by this spell instance.
+     * Default no-op; overridden by spells that schedule repeating tasks (e.g.
+     * Stealth). Invoked from {@link me.nagasonic.alkatraz.spells.SpellRegistry#reload()}
+     * before the registry swap so old instances stop touching worlds/players.
+     */
+    public void cancelTasks() {
+        // no-op by default
+    }
+
+    /**
+     * Alias for {@link #cancelTasks()} for callers using the reload hook name.
+     */
+    public void stopAll() {
+        cancelTasks();
+    }
+
     // ============================================
     // Spell Options Management
     // ============================================

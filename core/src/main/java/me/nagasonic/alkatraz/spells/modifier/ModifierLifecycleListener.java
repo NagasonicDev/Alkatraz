@@ -2,10 +2,10 @@ package me.nagasonic.alkatraz.spells.modifier;
 
 import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
+import me.nagasonic.alkatraz.spells.effect.ActiveEffect;
 import me.nagasonic.alkatraz.spells.effect.EffectRegistry;
 import me.nagasonic.alkatraz.spells.implementation.Buff;
 import me.nagasonic.alkatraz.spells.implementation.Debuff;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -22,6 +22,21 @@ public final class ModifierLifecycleListener implements Listener {
         if (player == null) return;
         clearPooledModifiers(player);
         UUID id = player.getUniqueId();
+        revokePooledHandles(player, id);
+        // Drop any lingering modifier buckets for this player, revoking with the live entity.
+        ModifierManager.clearPlayer(player);
+    }
+
+    private void revokePooledHandles(Player player, UUID id) {
+        for (ActiveEffect effect : EffectRegistry.effectsOn(id)) {
+            if (!"buff".equals(effect.sourceSpellId()) && !"debuff".equals(effect.sourceSpellId())) continue;
+            if (effect.handle() instanceof AppliedModifier applied) {
+                Spell source = effect.sourceSpellId() == null ? null : SpellRegistry.getSpell(effect.sourceSpellId());
+                try { applied.remove(player, source); } catch (Exception e) {
+                    me.nagasonic.alkatraz.Alkatraz.logDebug("Failed to revoke pooled modifier on cleanup: " + e.getMessage());
+                }
+            }
+        }
         EffectRegistry.effectsOn(id).stream()
                 .filter(e -> "buff".equals(e.sourceSpellId()) || "debuff".equals(e.sourceSpellId()))
                 .forEach(EffectRegistry::remove);
@@ -52,12 +67,21 @@ public final class ModifierLifecycleListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onWorldChanged(PlayerChangedWorldEvent event) {
+        Player player = event.getPlayer();
         // World change must not keep pooled spell modifiers alive until expiry.
-        clearPooledModifiers(event.getPlayer());
-        UUID id = event.getPlayer().getUniqueId();
-        // Drop the effect-registry entries tied to pooled modifiers only, rather
-        // than clearing every effect. Wipe anything still carrying the buff/debuff
-        // source so dispel does not resurrect stale state.
+        clearPooledModifiers(player);
+        UUID id = player.getUniqueId();
+        // Revoke each buff/debuff handle before dropping its registry entry, so
+        // the real stat/attribute change does not survive the world change.
+        for (ActiveEffect effect : EffectRegistry.effectsOn(id)) {
+            if (!"buff".equals(effect.sourceSpellId()) && !"debuff".equals(effect.sourceSpellId())) continue;
+            if (effect.handle() instanceof AppliedModifier applied) {
+                Spell source = effect.sourceSpellId() == null ? null : SpellRegistry.getSpell(effect.sourceSpellId());
+                try { applied.remove(player, source); } catch (Exception e) {
+                    me.nagasonic.alkatraz.Alkatraz.logDebug("Failed to revoke pooled modifier on world change: " + e.getMessage());
+                }
+            }
+        }
         EffectRegistry.effectsOn(id).stream()
                 .filter(e -> "buff".equals(e.sourceSpellId()) || "debuff".equals(e.sourceSpellId()))
                 .forEach(EffectRegistry::remove);

@@ -18,6 +18,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * A spellbook that randomly selects a spell from a weighted list
@@ -315,8 +316,8 @@ public class RandomSpellbook {
         }
         if (totalWeight <= 0) return null;
 
-        Random random = new Random();
-        double randomValue = random.nextDouble() * totalWeight;
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        double randomValue = random.nextDouble(totalWeight);
 
         double currentWeight = 0;
         for (Map.Entry<String, Double> entry : weightedSpells.entrySet()) {

@@ -32,6 +32,18 @@ public final class PooledModifierSpellSupport {
 
     private static final Map<UUID, BukkitTask> expiryTasks = new java.util.concurrent.ConcurrentHashMap<>();
 
+    /**
+     * Cancels every pooled-modifier expiry task still pending. Intended for
+     * {@code /alkatraz reload}, so old Buff/Debuff definitions do not fire
+     * later against rebuilt state.
+     */
+    public static void clearAllExpiryTasks() {
+        for (BukkitTask task : new java.util.ArrayList<>(expiryTasks.values())) {
+            try { if (task != null) task.cancel(); } catch (Exception ignored) { }
+        }
+        expiryTasks.clear();
+    }
+
     private PooledModifierSpellSupport() {}
 
     private static LangManager lang() {

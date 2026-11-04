@@ -81,6 +81,13 @@ public final class ChannelRegistry implements Listener {
      */
     public static void register(UUID caster, WindUp windUp, Runnable canceller) {
         if (caster == null || windUp == null) return;
+        // Replacing a channel on the same caster must stop the previous wind-up task.
+        Runnable previousCanceller = CANCELLERS.get(caster);
+        if (previousCanceller != null && previousCanceller != canceller) {
+            try { previousCanceller.run(); } catch (RuntimeException ex) {
+                Alkatraz.logWarning("Channel canceller failed: " + ex.getMessage());
+            }
+        }
         CHANNELS.put(caster, windUp);
         if (canceller != null) {
             CANCELLERS.put(caster, canceller);
@@ -122,7 +129,7 @@ public final class ChannelRegistry implements Listener {
      * and safe to call when nothing is registered.
      */
     public static void cancelAll(String langKey) {
-        for (UUID caster : CHANNELS.keySet()) {
+        for (UUID caster : new java.util.ArrayList<>(CHANNELS.keySet())) {
             WindUp windUp = CHANNELS.remove(caster);
             Runnable canceller = CANCELLERS.remove(caster);
             if (canceller != null) {

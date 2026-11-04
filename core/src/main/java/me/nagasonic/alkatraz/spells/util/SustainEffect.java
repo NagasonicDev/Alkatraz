@@ -13,9 +13,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginDisableEvent;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The toggle lifecycle shared by the five circle-9 sustains.
@@ -81,8 +81,9 @@ public final class SustainEffect {
         }
     }
 
-    private static final Map<UUID, Active> ACTIVE = new HashMap<>();
+    private static final Map<UUID, Active> ACTIVE = new ConcurrentHashMap<>();
     private static boolean installed;
+    private static org.bukkit.event.Listener installedListener;
 
     private SustainEffect() {
     }
@@ -91,13 +92,15 @@ public final class SustainEffect {
     public static void install() {
         if (installed) return;
         installed = true;
-        Bukkit.getPluginManager().registerEvents(new Listener() {
+        org.bukkit.event.Listener listener = new org.bukkit.event.Listener() {
             @EventHandler
             public void onPluginDisable(PluginDisableEvent event) {
                 if (event.getPlugin() != Alkatraz.getInstance()) return;
                 shutdown();
             }
-        }, Alkatraz.getInstance());
+        };
+        installedListener = listener;
+        Bukkit.getPluginManager().registerEvents(listener, Alkatraz.getInstance());
     }
 
     public static boolean isActive(UUID id) {
@@ -154,6 +157,10 @@ public final class SustainEffect {
         }
         // The listener is dead once this plugin is disabled, so a re-enable in the same
         // classloader must be able to install it again.
+        if (installedListener != null) {
+            org.bukkit.event.HandlerList.unregisterAll(installedListener);
+            installedListener = null;
+        }
         installed = false;
     }
 

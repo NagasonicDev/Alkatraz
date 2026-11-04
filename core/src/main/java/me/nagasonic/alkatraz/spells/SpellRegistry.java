@@ -17,10 +17,27 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Supplier;
 
 public class SpellRegistry {
-    private static volatile Map<Class<?>, Spell> allSpells = Collections.unmodifiableMap(new HashMap<>());
-    private static volatile Map<String, Spell> allSpellsByID = Collections.unmodifiableMap(new HashMap<>());
-    private static volatile Map<String, Spell> allSpellsByIdFull = Collections.unmodifiableMap(new HashMap<>());
-    private static volatile Map<String, Spell> allSpellsByCode = Collections.unmodifiableMap(new HashMap<>());
+    /** Immutable snapshot of all four spell maps, published with a single volatile write. */
+    private static final class SpellMaps {
+        final Map<Class<?>, Spell> allSpells;
+        final Map<String, Spell> allSpellsByID;
+        final Map<String, Spell> allSpellsByIdFull;
+        final Map<String, Spell> allSpellsByCode;
+
+        SpellMaps(Map<Class<?>, Spell> allSpells, Map<String, Spell> allSpellsByID,
+                  Map<String, Spell> allSpellsByIdFull, Map<String, Spell> allSpellsByCode) {
+            this.allSpells = allSpells;
+            this.allSpellsByID = allSpellsByID;
+            this.allSpellsByIdFull = allSpellsByIdFull;
+            this.allSpellsByCode = allSpellsByCode;
+        }
+    }
+
+    private static volatile SpellMaps maps = new SpellMaps(
+            Collections.unmodifiableMap(new HashMap<>()),
+            Collections.unmodifiableMap(new HashMap<>()),
+            Collections.unmodifiableMap(new HashMap<>()),
+            Collections.unmodifiableMap(new HashMap<>()));
 
     private static final java.util.concurrent.atomic.AtomicInteger registeredCount = new java.util.concurrent.atomic.AtomicInteger(0);
 private static final List<me.nagasonic.alkatraz.api.spells.Spell> REGISTERED_API_SPELLS = new CopyOnWriteArrayList<>();
@@ -164,30 +181,31 @@ private static final List<me.nagasonic.alkatraz.api.spells.Spell> REGISTERED_API
     }
 
     public static Map<Class<?>, Spell> getAllSpells() {
-        return allSpells;
+        return maps.allSpells;
     }
 
     public static Map<String, Spell> getAllSpellsByID() {
-        return allSpellsByID;
+        return maps.allSpellsByID;
     }
 
     public static <T extends Spell> Spell getSpell(Class<T> spell){
-        if (!allSpells.containsKey(spell)) throw new IllegalArgumentException("Spell " + spell.getSimpleName() + " was not registered for usage");
-        return allSpells.get(spell);
+        Map<Class<?>, Spell> all = maps.allSpells;
+        if (!all.containsKey(spell)) throw new IllegalArgumentException("Spell " + spell.getSimpleName() + " was not registered for usage");
+        return all.get(spell);
     }
 
     public static Spell getSpellByCode(String code){
         if (code == null || code.trim().isEmpty()) return null;
-        return allSpellsByCode.get(code.trim().toUpperCase(java.util.Locale.ROOT));
+        return maps.allSpellsByCode.get(code.trim().toUpperCase(java.util.Locale.ROOT));
     }
 
     public static Spell getSpell(String id){
         if (id == null || id.isEmpty()) return null;
-        return allSpellsByID.get(id.toLowerCase(java.util.Locale.ROOT));
+        return maps.allSpellsByID.get(id.toLowerCase(java.util.Locale.ROOT));
     }
 
     public static Spell getSpellFromName(String name) {
-        for (Spell spell : allSpells.values()){
+        for (Spell spell : maps.allSpells.values()){
             if (Objects.equals(spell.getId(), name)){
                 return spell;
             }
@@ -198,29 +216,29 @@ private static final List<me.nagasonic.alkatraz.api.spells.Spell> REGISTERED_API
     public static void registerSpell(Spell spell){
         long start = System.nanoTime();
         spell.loadConfiguration();
-        if (!validateSpellCode(spell)) {
+        if (!validateSpellCode(spell, maps.allSpellsByIdFull.values())) {
             return;
         }
-        Map<Class<?>, Spell> spells = new HashMap<>(allSpells);
+        // Build the replacement set first, then swap all four maps in one pass so
+        // concurrent readers cannot observe a spell present in some maps but not others.
+        Map<Class<?>, Spell> spells = new HashMap<>(maps.allSpells);
         spells.put(spell.getClass(), spell);
-        allSpells = Collections.unmodifiableMap(spells);
-        Map<String, Spell> spellsById = new HashMap<>(allSpellsByID);
-        spellsById.put(spell.getId().toLowerCase(java.util.Locale.ROOT), spell);
-        allSpellsByID = Collections.unmodifiableMap(spellsById);
-        Map<String, Spell> combined = new HashMap<>(allSpellsByIdFull);
-        combined.put(spell.getId().toLowerCase(java.util.Locale.ROOT), spell);
-        allSpellsByIdFull = Collections.unmodifiableMap(combined);
+        Map<String, Spell> byId = new HashMap<>(maps.allSpellsByID);
+        byId.put(spell.getId().toLowerCase(java.util.Locale.ROOT), spell);
+        Map<String, Spell> byIdFull = new HashMap<>(maps.allSpellsByIdFull);
+        byIdFull.put(spell.getId().toLowerCase(java.util.Locale.ROOT), spell);
+        Map<String, Spell> byCode = new HashMap<>(maps.allSpellsByCode);
         if (spell.getCode() != null && !spell.getCode().trim().isEmpty()) {
-            Map<String, Spell> byCode = new HashMap<>(allSpellsByCode);
             byCode.put(spell.getCode().trim().toUpperCase(java.util.Locale.ROOT), spell);
-            allSpellsByCode = Collections.unmodifiableMap(byCode);
         }
+        maps = new SpellMaps(Collections.unmodifiableMap(spells), Collections.unmodifiableMap(byId),
+                Collections.unmodifiableMap(byIdFull), Collections.unmodifiableMap(byCode));
         Alkatraz.logHigh("Registered spell: " + spell.getId() + " (" + spell.getElement() + ") in "
                 + (System.nanoTime() - start) / 1_000_000 + "ms");
     }
 
     public static boolean isRegistered(Class<? extends Spell> spell){
-        return allSpells.containsKey(spell);
+        return maps.allSpells.containsKey(spell);
     }
 
     public static void registerApiSpell(me.nagasonic.alkatraz.api.spells.Spell apiSpell) {
@@ -230,31 +248,32 @@ private static final List<me.nagasonic.alkatraz.api.spells.Spell> REGISTERED_API
         }
         ApiSpellAdapter adapter = new ApiSpellAdapter(apiSpell);
         adapter.loadConfiguration();
-        if (!validateSpellCode(adapter)) {
+        if (!validateSpellCode(adapter, maps.allSpellsByIdFull.values())) {
             return;
         }
         String id = adapter.getId().toLowerCase(java.util.Locale.ROOT);
-        Map<String, Spell> combinedFull = new HashMap<>(allSpellsByIdFull);
+        // Build all affected maps first, then swap them together so concurrent readers
+        // cannot observe the spell in one lookup map but not another.
+        Map<String, Spell> combinedFull = new HashMap<>(maps.allSpellsByIdFull);
         combinedFull.put(id, adapter);
-        allSpellsByIdFull = Collections.unmodifiableMap(combinedFull);
-        Map<String, Spell> byId = new HashMap<>(allSpellsByID);
+        Map<String, Spell> byId = new HashMap<>(maps.allSpellsByID);
         byId.put(id, adapter);
-        allSpellsByID = Collections.unmodifiableMap(byId);
+        Map<String, Spell> byCode = new HashMap<>(maps.allSpellsByCode);
         if (adapter.getCode() != null && !adapter.getCode().trim().isEmpty()) {
-            Map<String, Spell> byCode = new HashMap<>(allSpellsByCode);
             byCode.put(adapter.getCode().trim().toUpperCase(java.util.Locale.ROOT), adapter);
-            allSpellsByCode = Collections.unmodifiableMap(byCode);
         }
+        maps = new SpellMaps(maps.allSpells, Collections.unmodifiableMap(byId),
+                Collections.unmodifiableMap(combinedFull), Collections.unmodifiableMap(byCode));
         REGISTERED_API_SPELLS.add(apiSpell);
         Alkatraz.logHigh("Registered API spell: " + adapter.getId());
     }
 
 
     public static Map<String, Spell> getAllSpellsByIdFull() {
-        return allSpellsByIdFull;
+        return maps.allSpellsByIdFull;
     }
 
-    private static boolean validateSpellCode(Spell spell) {
+    private static boolean validateSpellCode(Spell spell, java.util.Collection<Spell> existingSpells) {
         String code = spell.getCode();
         if (code == null || code.trim().isEmpty()) return true;
         String normalized = code.trim().toUpperCase(java.util.Locale.ROOT);
@@ -263,7 +282,7 @@ private static final List<me.nagasonic.alkatraz.api.spells.Spell> REGISTERED_API
             return false;
         }
         boolean collision = false;
-        for (Spell existing : allSpellsByIdFull.values()) {
+        for (Spell existing : existingSpells) {
             if (existing == spell) continue;
             String other = existing.getCode();
             if (other == null || other.trim().isEmpty()) continue;
@@ -280,21 +299,60 @@ private static final List<me.nagasonic.alkatraz.api.spells.Spell> REGISTERED_API
         }
         return !collision;
     }
+    /**
+     * Adds a single spell to the supplied accumulator maps (used by reload() to
+     * build a complete replacement set before swapping the volatile fields).
+     */
+    private static boolean registerSpell(Spell spell,
+            Map<Class<?>, Spell> spells,
+            Map<String, Spell> byId,
+            Map<String, Spell> byIdFull,
+            Map<String, Spell> byCode) {
+        spell.loadConfiguration();
+        if (!validateSpellCode(spell, byIdFull.values())) return false;
+        spells.put(spell.getClass(), spell);
+        byId.put(spell.getId().toLowerCase(java.util.Locale.ROOT), spell);
+        byIdFull.put(spell.getId().toLowerCase(java.util.Locale.ROOT), spell);
+        if (spell.getCode() != null && !spell.getCode().trim().isEmpty()) {
+            byCode.put(spell.getCode().trim().toUpperCase(java.util.Locale.ROOT), spell);
+        }
+        return true;
+    }
+
+    /**
+     * Registers an API spell into the supplied accumulator maps (reload variant).
+     */
+    private static void registerApiSpell(me.nagasonic.alkatraz.api.spells.Spell apiSpell,
+            Map<Class<?>, Spell> spells,
+            Map<String, Spell> byId,
+            Map<String, Spell> byIdFull,
+            Map<String, Spell> byCode) {
+        ApiSpellAdapter adapter = new ApiSpellAdapter(apiSpell);
+        adapter.loadConfiguration();
+        if (!validateSpellCode(adapter, byIdFull.values())) return;
+        String id = adapter.getId().toLowerCase(java.util.Locale.ROOT);
+        byIdFull.put(id, adapter);
+        byId.put(id, adapter);
+        if (adapter.getCode() != null && !adapter.getCode().trim().isEmpty()) {
+            byCode.put(adapter.getCode().trim().toUpperCase(java.util.Locale.ROOT), adapter);
+        }
+        REGISTERED_API_SPELLS.add(apiSpell);
+        Alkatraz.logHigh("Registered API spell: " + adapter.getId());
+    }
+
     public static void reload() {
-        // Unregister any Bukkit listeners registered by the previous spell instances so
-        // repeated /alkatraz reload does not stack duplicate handlers.
-        for (Spell old : new java.util.ArrayList<>(allSpellsByIdFull.values())) {
+        // Stop any long-lived tasks owned by the outgoing spell instances before
+        // they are replaced, so detached upkeep loops (Stealth, ...) cannot keep
+        // charging mana/altering players across reloads.
+        for (Spell old : new java.util.ArrayList<>(maps.allSpellsByIdFull.values())) {
+            try { old.cancelTasks(); } catch (Exception ignored) { }
             if (old instanceof Listener) {
                 HandlerList.unregisterAll((Listener) old);
             }
         }
         java.util.List<me.nagasonic.alkatraz.api.spells.Spell> apiSpells =
                 new java.util.ArrayList<>(REGISTERED_API_SPELLS);
-        REGISTERED_API_SPELLS.clear();
-        allSpells = Collections.unmodifiableMap(new HashMap<>());
-        allSpellsByID = Collections.unmodifiableMap(new HashMap<>());
-        allSpellsByIdFull = Collections.unmodifiableMap(new HashMap<>());
-        allSpellsByCode = Collections.unmodifiableMap(new HashMap<>());
+
         // Drop stale mastery boss bars before replacing spell instances so the
         // old bars (and their cancel tasks) cannot outlive the spells that
         // created them.
@@ -312,9 +370,39 @@ private static final List<me.nagasonic.alkatraz.api.spells.Spell> REGISTERED_API
             mp.getMasteryBarTaskIds().clear();
             mp.clearAllSpellModifiers();
         }
-        registerSpells();
-        for (me.nagasonic.alkatraz.api.spells.Spell apiSpell : apiSpells) {
-            registerApiSpell(apiSpell);
+
+        // Build the complete replacement maps first, so readers never observe a
+        // half-populated registry during reload. Swap all four in one pass.
+        Map<Class<?>, Spell> newAllSpells = new HashMap<>();
+        Map<String, Spell> newById = new HashMap<>();
+        Map<String, Spell> newByIdFull = new HashMap<>();
+        Map<String, Spell> newByCode = new HashMap<>();
+
+        REGISTERED_API_SPELLS.clear();
+        registeredCount.set(0);
+        for (String id : SPELL_IDS) {
+            java.util.function.Supplier<Spell> factory = SPELL_FACTORY.get(id);
+            if (factory == null) {
+                Alkatraz.logWarning("SpellRegistry: '" + id
+                        + "' is in SPELL_IDS with no factory entry and was not registered.");
+                continue;
+            }
+            org.bukkit.configuration.file.YamlConfiguration spellConfig =
+                    me.nagasonic.alkatraz.config.ConfigManager.getConfig("spells/" + id + ".yml").get();
+            if (!spellConfig.getBoolean("enabled")) continue;
+            Spell spell = factory.get();
+            if (registerSpell(spell, newAllSpells, newById, newByIdFull, newByCode)) {
+                registeredCount.incrementAndGet();
+            }
         }
+        for (me.nagasonic.alkatraz.api.spells.Spell apiSpell : apiSpells) {
+            registerApiSpell(apiSpell, newAllSpells, newById, newByIdFull, newByCode);
+        }
+
+        maps = new SpellMaps(Collections.unmodifiableMap(newAllSpells),
+                Collections.unmodifiableMap(newById),
+                Collections.unmodifiableMap(newByIdFull),
+                Collections.unmodifiableMap(newByCode));
+        Alkatraz.logInfo("Registered " + registeredCount.get() + " spells.");
     }
 }

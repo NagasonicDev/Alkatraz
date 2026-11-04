@@ -1,5 +1,13 @@
 package me.nagasonic.alkatraz.spells.effect;
 
+import me.nagasonic.alkatraz.Alkatraz;
+import me.nagasonic.alkatraz.spells.Spell;
+import me.nagasonic.alkatraz.spells.SpellRegistry;
+import me.nagasonic.alkatraz.spells.modifier.AppliedModifier;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.LivingEntity;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -78,7 +86,22 @@ public final class EffectRegistry {
         if (targetId == null) return List.of();
         List<ActiveEffect> effects = BY_TARGET.get(targetId);
         if (effects == null) return List.of();
-        effects.removeIf(effect -> effect.isExpiredAt(nowMillis));
+        List<ActiveEffect> expired = new ArrayList<>();
+        effects.removeIf(effect -> {
+            if (effect.isExpiredAt(nowMillis)) { expired.add(effect); return true; }
+            return false;
+        });
+        if (Bukkit.getServer() != null && isPrimaryThreadSafe()) {
+            for (ActiveEffect effect : expired) {
+                if (effect.handle() instanceof AppliedModifier applied) {
+                    LivingEntity entity = (LivingEntity) Bukkit.getEntity(targetId);
+                    Spell source = effect.sourceSpellId() == null ? null : SpellRegistry.getSpell(effect.sourceSpellId());
+                    if (entity != null) {
+                        try { applied.remove(entity, source); } catch (Exception e) { Alkatraz.logDebug("Failed to revoke expired modifier: " + e.getMessage()); }
+                    }
+                }
+            }
+        }
         if (effects.isEmpty()) BY_TARGET.remove(targetId, effects);
         return List.copyOf(effects);
     }
@@ -105,7 +128,45 @@ public final class EffectRegistry {
      */
     public static void clear(UUID targetId) {
         if (targetId == null) return;
+        // Revoke applied modifier handles on clear so a quit/death/world change
+        // does not leave stale stat/attribute changes on a surviving target.
+        if (Bukkit.getServer() != null && isPrimaryThreadSafe()) {
+            List<ActiveEffect> effects = BY_TARGET.get(targetId);
+            if (effects != null) {
+                LivingEntity entity = (LivingEntity) Bukkit.getEntity(targetId);
+                Spell source = null;
+                for (ActiveEffect effect : List.copyOf(effects)) {
+                    if (!(effect.handle() instanceof AppliedModifier applied)) continue;
+                    source = effect.sourceSpellId() == null ? null : SpellRegistry.getSpell(effect.sourceSpellId());
+                    if (entity != null) {
+                        try { applied.remove(entity, source); } catch (Exception e) { Alkatraz.logDebug("Failed to revoke modifier on clear: " + e.getMessage()); }
+                    }
+                }
+            }
+        }
         BY_TARGET.remove(targetId);
+    }
+
+    /**
+     * Drops every entry for every target, including still-live ones. Used on
+     * plugin disable/reload so stale effect references cannot outlive the reload.
+     */
+    public static void clearAll() {
+        // Revoke any applied modifier handles before dropping the entries, so
+        // reload/disable does not leave stale stat/attribute changes in place.
+        if (Bukkit.getServer() != null && isPrimaryThreadSafe()) {
+            for (java.util.Map.Entry<UUID, List<ActiveEffect>> entry : new java.util.ArrayList<>(BY_TARGET.entrySet())) {
+                for (ActiveEffect effect : java.util.List.copyOf(entry.getValue())) {
+                    if (!(effect.handle() instanceof AppliedModifier applied)) continue;
+                    LivingEntity entity = (LivingEntity) Bukkit.getEntity(entry.getKey());
+                    Spell source = effect.sourceSpellId() == null ? null : SpellRegistry.getSpell(effect.sourceSpellId());
+                    if (entity != null) {
+                        try { applied.remove(entity, source); } catch (Exception e) { Alkatraz.logDebug("Failed to revoke modifier on clearAll: " + e.getMessage()); }
+                    }
+                }
+            }
+        }
+        BY_TARGET.clear();
     }
 
     /**
@@ -115,12 +176,36 @@ public final class EffectRegistry {
      * It exists so a maintenance command or a test can sweep the whole registry
      * in one pass without reading every target id first.
      */
-    static void pruneAll() {
+    public static void pruneAll() {
         long now = System.currentTimeMillis();
+        boolean primary = Bukkit.getServer() != null && isPrimaryThreadSafe();
+        List<ActiveEffect> expired = new ArrayList<>();
         for (Map.Entry<UUID, List<ActiveEffect>> entry : BY_TARGET.entrySet()) {
             List<ActiveEffect> effects = entry.getValue();
+            for (ActiveEffect effect : List.copyOf(effects)) {
+                if (effect.isExpiredAt(now)) expired.add(effect);
+            }
             effects.removeIf(effect -> effect.isExpiredAt(now));
             if (effects.isEmpty()) BY_TARGET.remove(entry.getKey(), effects);
+        }
+        if (primary) {
+            for (ActiveEffect effect : expired) {
+                if (effect.handle() instanceof AppliedModifier applied) {
+                    LivingEntity entity = effect.targetId() == null ? null : (LivingEntity) Bukkit.getEntity(effect.targetId());
+                    Spell source = effect.sourceSpellId() == null ? null : SpellRegistry.getSpell(effect.sourceSpellId());
+                    if (entity != null) {
+                        try { applied.remove(entity, source); } catch (Exception e) { Alkatraz.logDebug("Failed to revoke expired modifier: " + e.getMessage()); }
+                    }
+                }
+            }
+        }
+    }
+
+    private static boolean isPrimaryThreadSafe() {
+        try {
+            return Bukkit.isPrimaryThread();
+        } catch (RuntimeException e) {
+            return true;
         }
     }
 }
