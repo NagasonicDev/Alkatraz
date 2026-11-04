@@ -96,9 +96,12 @@ public class Stealth extends Spell implements Listener {
             }else{
                 data.setStealth(true);
                 boolean armorInvis = (boolean) getOption("armor_invis").getSelectedValue(p).getValue();
+                // Cache viewer profiles for this cast so an online loop costs one
+                // lookup per viewer rather than repeated ProfileManager calls.
+                java.util.Map<UUID, MagicProfile> viewerProfiles = new java.util.HashMap<>();
                 for (Player player : Bukkit.getOnlinePlayers()){
                     if (player != p){
-                        MagicProfile td = ProfileManager.getProfile(player.getUniqueId(), MagicProfile.class);
+                        MagicProfile td = viewerProfiles.computeIfAbsent(player.getUniqueId(), id -> ProfileManager.getProfile(id, MagicProfile.class));
                         if (td == null) continue;
                         if (td.getCircleLevel() < data.getCircleLevel()){
                             Alkatraz.getNms().setInvisible(p, true);
@@ -216,6 +219,23 @@ public class Stealth extends Spell implements Listener {
         lastTrailTick.remove(caster.getUniqueId());
     }
 
+    @Override
+    public void cancelTasks() {
+        // Tear down every active stealth so detached upkeep tasks cannot keep
+        // charging mana or toggling visibility after a reload.
+        for (UUID casterId : new java.util.ArrayList<>(stealthTasks.keySet())) {
+            Player p = Bukkit.getPlayer(casterId);
+            if (p != null) {
+                dispel(p);
+            } else {
+                stealthTasks.remove(casterId);
+                lastTrailTick.remove(casterId);
+            }
+        }
+        stealthTasks.clear();
+        lastTrailTick.clear();
+    }
+
     /**
      * Test seam for {@link #dispel(Player)}.
      *
@@ -293,11 +313,25 @@ public class Stealth extends Spell implements Listener {
         }
     }
 
+    /** Radius (squared) within which an observer may see the ash trail. */
+    private static final double SPAWN_TRAIL_RANGE_SQ = 32.0 * 32.0;
+
     private void spawnTrail(Player p, MagicProfile data) {
         World world = p.getWorld();
+        Location base = p.getLocation();
+        double bx = base.getX();
+        double by = base.getY();
+        double bz = base.getZ();
+        // Cache target profiles once for this upkeep tick's nearby viewers.
+        java.util.Map<UUID, MagicProfile> profileCache = new java.util.HashMap<>();
         for (Player player : world.getPlayers()) {
             if (player == p) continue;
-            MagicProfile td = ProfileManager.getProfile(player.getUniqueId(), MagicProfile.class);
+            Location pLoc = player.getLocation();
+            double dx = pLoc.getX() - bx;
+            double dy = pLoc.getY() - by;
+            double dz = pLoc.getZ() - bz;
+            if (dx * dx + dy * dy + dz * dz > SPAWN_TRAIL_RANGE_SQ) continue;
+            MagicProfile td = profileCache.computeIfAbsent(player.getUniqueId(), id -> ProfileManager.getProfile(id, MagicProfile.class));
             if (td == null) continue;
             if (td.getCircleLevel() <= data.getCircleLevel()) {
                 ParticleCaster.spawnForPlayer(player, world, Utils.ASH, p.getLocation(), td.getCircleLevel() - data.getCircleLevel() + 11);
@@ -323,7 +357,14 @@ public class Stealth extends Spell implements Listener {
     @EventHandler
     private void onJoin(PlayerJoinEvent e){
         Player p = e.getPlayer();
-        for (Player caster : Bukkit.getOnlinePlayers()) {
+        // Only re-apply state for currently-stealthed casters instead of scanning
+        // every online player on each join.
+        java.util.List<Player> casters = new java.util.ArrayList<>();
+        for (java.util.UUID cid : stealthTasks.keySet()) {
+            Player cp = Bukkit.getPlayer(cid);
+            if (cp != null) casters.add(cp);
+        }
+        for (Player caster : casters) {
             if (caster != null){
                 MagicProfile td = ProfileManager.getProfile(caster.getUniqueId(), MagicProfile.class);
                 if (td == null) continue;

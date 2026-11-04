@@ -262,26 +262,30 @@ public class Disguise extends Spell implements Listener {
                 return;
             }
 
-            // Skin first, profile second, exactly as dispel() does it. Skin.fromURL
-            // performs a blocking HTTP call and throws RuntimeException on failure
-            // (Skin.java:76-80); it used to sit OUTSIDE the try, so it threw after
-            // setDisguise and setDisplayName had already committed, and
-            // onInventoryClose then refunded the mana as if nothing had happened.
-            Skin skin;
-            try {
-                skin = Skin.fromURL(
-                        "https://sessionserver.mojang.com/session/minecraft/profile/"
-                                + target.getUniqueId() + "?unsigned=false");
-                Alkatraz.getNms().changeSkin(clicker, List.copyOf(Bukkit.getOnlinePlayers()), skin);
-                data.setDisguise(target.getUniqueId().toString());
-                clicker.setDisplayName(target.getName());
-                EffectApplicator.applyConcealment(clicker, this, EffectApplicator.disguiseHandle());
-                props.selected = true;
-            } catch (RuntimeException ex) {
+            // Resolve and apply the target skin off the main thread so a Mojang
+            // stall no longer freezes the server thread; the GUI stays open until
+            // the fetch completes and closes on success/failure.
+            String skinUrl = "https://sessionserver.mojang.com/session/minecraft/profile/"
+                    + target.getUniqueId() + "?unsigned=false";
+            Skin.fetchAsync(skinUrl, skin -> {
+                if (!clicker.isOnline()) {
+                    props.selected = false;
+                    return;
+                }
+                try {
+                    Alkatraz.getNms().changeSkin(clicker, List.copyOf(Bukkit.getOnlinePlayers()), skin);
+                    data.setDisguise(target.getUniqueId().toString());
+                    clicker.setDisplayName(target.getName());
+                    EffectApplicator.applyConcealment(clicker, this, EffectApplicator.disguiseHandle());
+                    props.selected = true;
+                } catch (RuntimeException ex) {
+                    props.selected = false;
+                }
+                clicker.closeInventory();
+            }, ex -> {
                 props.selected = false;
-            }
-
-            clicker.closeInventory();
+                if (clicker.isOnline()) clicker.closeInventory();
+            });
         }
     }
 
@@ -308,10 +312,12 @@ public class Disguise extends Spell implements Listener {
 
         List<Player> joinedOnly = List.of(joined);
 
+        // Cache target profiles once for this join-event pass.
+        java.util.Map<UUID, MagicProfile> profileCache = new java.util.HashMap<>();
         for (Player other : online) {
             if (other == joined) continue;
 
-            MagicProfile odata = ProfileManager.getProfile(other.getUniqueId(), MagicProfile.class);
+            MagicProfile odata = profileCache.computeIfAbsent(other.getUniqueId(), id -> ProfileManager.getProfile(id, MagicProfile.class));
 
             // Bug 1: this used to be `odata.getDisguise() != null`, but
             // Profile.stringStat registers a "" default, and Profile.setString
@@ -332,14 +338,13 @@ public class Disguise extends Spell implements Listener {
             try {
                 UUID disguisedAs = UUID.fromString(stored);
                 if (Bukkit.getPlayer(disguisedAs) != null) {
-                    Alkatraz.getNms().changeSkinElse(
-                            other,
-                            joinedOnly,
-                            Skin.fromURL("https://sessionserver.mojang.com/session/minecraft/profile/"
-                                    + disguisedAs + "?unsigned=false"));
-                    // Disguise survives a restart (it lives on the profile), so it
-                    // re-stamps on join or a dispel cannot see it.
-                    EffectApplicator.applyConcealment(other, this, EffectApplicator.disguiseHandle());
+                    String skinUrl = "https://sessionserver.mojang.com/session/minecraft/profile/"
+                            + disguisedAs + "?unsigned=false";
+                    Skin.fetchAsync(skinUrl, skin -> {
+                        if (!other.isOnline() || !joined.isOnline()) return;
+                        Alkatraz.getNms().changeSkinElse(other, joinedOnly, skin);
+                        EffectApplicator.applyConcealment(other, this, EffectApplicator.disguiseHandle());
+                    }, ex -> { });
                 }
             } catch (RuntimeException ignored) {
                 // A malformed stored id or a Mojang outage must not escape
@@ -405,6 +410,14 @@ public class Disguise extends Spell implements Listener {
      */
     public void cancelCast(UUID caster) {
         activeCasts.remove(caster);
+    }
+
+    @Override
+    public void cancelTasks() {
+        // Drop any in-flight GUI casts so reload cannot leave orphaned entries.
+        for (UUID caster : new java.util.ArrayList<>(activeCasts.keySet())) {
+            activeCasts.remove(caster);
+        }
     }
 
     /**
