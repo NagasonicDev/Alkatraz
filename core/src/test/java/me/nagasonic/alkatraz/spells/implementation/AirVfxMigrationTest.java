@@ -27,11 +27,11 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Pins the AIR wave's migration onto the shared VFX library for the four spells it owns:
- * {@code swift}, {@code tornado}, {@code wind_vortex} and {@code wind_barrier}.
+ * Pins the AIR wave's migration onto the shared VFX library for the three spells it owns:
+ * {@code swift}, {@code wind_vortex} and {@code wind_barrier}.
  *
  * <h2>Why most of this asserts on source text rather than on behaviour</h2>
- * Almost none of the four spells' new VFX is reachable without a live server: the cast circle
+ * Almost none of the three spells' new VFX is reachable without a live server: the cast circle
  * needs a scheduler and an entity's eye location, and {@code SpellVfx}'s draw methods touch
  * {@code Utils}, whose static initialiser reaches {@code MinecraftVersion} and calls
  * {@code Alkatraz.getInstance().getServer()} - it NPEs in a unit test. So the assertions that
@@ -41,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *
  * <p>The one part that <em>is</em> runtime-assertable is {@code SpellVfx}'s geometry half. Each
  * builder has a package-private twin that touches nothing Bukkit-static, so this calls those
- * reflectively and checks the shapes the four spells now depend on.
+ * reflectively and checks the shapes these spells now depend on.
  *
  * <h2>What would silently pass if it broke</h2>
  * A spell could delete its {@code circleAction} body entirely, leave the yml untouched, and pass
@@ -51,14 +51,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class AirVfxMigrationTest {
 
     /**
-     * The four spells this wave owns, paired with the magic circle each one requires. The circle
+     * The three spells this wave owns, paired with the magic circle each one requires. The circle
      * is what {@code SpellBudgets.castTimeRange} is indexed by, so it is asserted from the yml
      * rather than hardcoded twice.
      */
-    private static final String[] AIR_SPELLS = {"swift", "wind_vortex", "tornado", "wind_barrier"};
+    private static final String[] AIR_SPELLS = {"swift", "wind_vortex", "wind_barrier"};
 
     /** The Java sources this wave migrated, read from disk for the structural assertions. */
-    private static final String[] AIR_SOURCES = {"Swift.java", "WindVortex.java", "Tornado.java", "WindBarrier.java"};
+    private static final String[] AIR_SOURCES = {"Swift.java", "WindVortex.java", "WindBarrier.java"};
 
     // ==================================================================
     // YML assertions - no Bukkit mock needed
@@ -128,12 +128,10 @@ class AirVfxMigrationTest {
     /**
      * The cast circle keeps the size it had before the migration. Sizes were deliberately not
      * normalised: a circle that quietly resizes is a visual regression nobody would notice in
-     * a diff. Tornado and wind_barrier drew at 3, swift and wind_vortex at 2.
+     * a diff. wind_barrier drew at 3; swift and wind_vortex at 2.
      */
     @Test
     void everyAirSpellKeepsItsPreMigrationCircleSize() {
-        assertTrue(readSource("Tornado.java").contains("CastCircle.start(this, caster, e, 3.0, 0)"),
-                "tornado drew its circle at size 3 before the migration");
         assertTrue(readSource("WindBarrier.java").contains("CastCircle.start(this, caster, e, 3.0, 0)"),
                 "wind_barrier drew its circle at size 3 before the migration");
         assertTrue(readSource("Swift.java").contains("CastCircle.start(this, caster, e, 2.0, 0)"),
@@ -163,7 +161,7 @@ class AirVfxMigrationTest {
     /**
      * No migrated spell constructs a colour by hand beyond its single declared colour.
      *
-     * <p>This is the assertion that actually pins the migration. Before it, {@code Tornado} held
+     * <p>This is the assertion that actually pins the migration. Before it, spells held
      * a {@code CORE_DUST} plus two {@code DustOptions[]} gradient arrays - eighteen
      * {@code new Particle.DustOptions} built at class-init from literal RGB - and every spell
      * built one more inside its cast circle lambda, every tick, for every casting player.
@@ -223,8 +221,6 @@ class AirVfxMigrationTest {
     void everyAirSpellDrawsThroughTheSharedVfxLibrary() {
         assertTrue(readSource("Swift.java").contains("SpellVfx.beam("),
                 "swift's dash trail is a SpellVfx beam from the previous position to the current one");
-        assertTrue(readSource("Tornado.java").contains("SpellVfx.column("),
-                "tornado's funnel is a SpellVfx column");
         assertTrue(readSource("WindVortex.java").contains("SpellVfx.orbit("),
                 "wind_vortex's descending rings are SpellVfx orbit bands");
         assertTrue(readSource("WindBarrier.java").contains("SpellVfx.nova("),
@@ -342,8 +338,8 @@ class AirVfxMigrationTest {
 
     /**
      * {@code columnGeometry} stacks layers bottom-up at evenly spaced heights, each rotated
-     * against the one below. tornado's funnel is built from it, so the ordering is what makes
-     * {@code SpellVfx.column} shade the top slice as the leading edge.
+     * against the one below. The shared column spells are built from it, so the ordering is what
+     * makes {@code SpellVfx.column} shade the top slice as the leading edge.
      */
     @Test
     void columnGeometryStacksLayersBottomUpAtEvenlySpacedHeights() {
@@ -366,8 +362,8 @@ class AirVfxMigrationTest {
     }
 
     /**
-     * A zero-layer column draws nothing at all, rather than one degenerate layer. tornado's
-     * funnel is revealed during a wind-up, so "not yet revealed" has to be expressible.
+     * A zero-layer column draws nothing at all, rather than one degenerate layer. A column is
+     * revealed during a wind-up, so "not yet revealed" has to be expressible.
      */
     @Test
     void columnGeometryDrawsNothingForZeroLayers() {

@@ -261,8 +261,7 @@ public class FlamingVolley extends AttackSpell implements Listener {
                     if (props.hasHit(target)) continue;
                     props.hit(target);
 
-                    double damage = getPower(caster, target, props.getRemainingPower());
-                    SpellDamageUtil.damageWithSpell(target, damage, caster, wand, FlamingVolley.this);
+                    damageArea(caster, target, props.getRemainingPower(), DEFAULT_PVP_CAP, wand);
                     if (Protection.ignite(caster, target.getLocation())) {
                         target.setFireTicks(100);
                     }

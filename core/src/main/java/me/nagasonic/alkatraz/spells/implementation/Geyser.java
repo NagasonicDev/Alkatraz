@@ -301,8 +301,7 @@ if (spiralWorld == null) return;
                     if (props.hasHit(target)) continue;
                     props.hit(target);
 
-                    double dmg = getPower(caster, target, props.getRemainingPower());
-                    SpellDamageUtil.damageWithSpell(target, dmg, caster, wand, Geyser.this);
+                    damageArea(caster, target, props.getRemainingPower(), DEFAULT_PVP_CAP, wand);
 
                     // Launch straight up — launchPower scales with the height option
                     // so a taller geyser actually carries enemies higher

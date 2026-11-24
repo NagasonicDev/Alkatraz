@@ -16,6 +16,7 @@ import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.SpellAttackContext;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
+import me.nagasonic.alkatraz.spells.util.SpellTargeting;
 import me.nagasonic.alkatraz.api.Element;
 import me.nagasonic.alkatraz.spells.vfx.CastCircle;
 import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
@@ -240,11 +241,16 @@ public class LightBolt extends AttackSpell {
                     if (!(entity instanceof LivingEntity target)) continue;
                     if (entity.equals(caster)) continue;
                     if (target.isDead() || !target.isValid()) continue;
+                    if (SpellTargeting.isAlly(caster, target)) continue;
                     // Rule 2: hasHit is per-cast and never cleared. A false here must continue the
                     // scan, never damage again.
                     if (!context.hit(target)) continue;
 
-                    SpellDamageUtil.damageWithSpell(target, context.power(target), caster, wand, LightBolt.this);
+                    // context.power already applied getPower; cap that result once.
+                    double damage = context.power(target);
+                    SpellDamageUtil.damageWithSpell(target,
+                            target instanceof Player ? Math.min(damage, DEFAULT_PVP_CAP) : damage,
+                            caster, wand, LightBolt.this);
                     burst(caster, position, 1.0F);
                     world.playSound(position, Sound.ENTITY_FIREWORK_ROCKET_BLAST, 0.8f, 1.4f);
                     cancel();

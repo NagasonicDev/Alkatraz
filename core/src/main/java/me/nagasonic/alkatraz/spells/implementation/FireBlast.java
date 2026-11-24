@@ -15,6 +15,7 @@ import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
+import me.nagasonic.alkatraz.spells.util.SpellTargeting;
 import me.nagasonic.alkatraz.spells.vfx.CastCircle;
 import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.util.ParticleCaster;
@@ -197,9 +198,14 @@ public class FireBlast extends AttackSpell implements Listener {
         if (!(ecomp.getProperties() instanceof AttackProperties props)) return;
         // One AttackProperties per cast: guard so a target hit by both the impact
         // and the explosion's spread takes the scaled damage exactly once.
+        LivingEntity caster = comp.getCaster();
+        if (le instanceof Player player && SpellTargeting.isAlly(caster, player)) {
+            e.setCancelled(true);
+            return;
+        }
         if (props.hasHit(le)) return;
         props.hit(le);
-        e.setDamage(getPower(comp.getCaster(), le, props.getRemainingPower()));
+        e.setDamage(damageForCap(caster, le, props.getRemainingPower(), DEFAULT_PVP_CAP));
     }
 
     @EventHandler

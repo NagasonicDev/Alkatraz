@@ -87,7 +87,7 @@ public class Stealth extends Spell implements Listener {
             if (data.isStealth()){
                 data.setStealth(false);
                 StatUtils.addMana(p, getCost()); //Give cost to reverse canceling
-                for (Player player : Bukkit.getOnlinePlayers()){
+                for (Player player : p.getWorld().getPlayers()){
                     Alkatraz.getNms().setInvisible(p, false);
                     Alkatraz.getNms().fakeArmor(p, player, p.getInventory().getHelmet(), p.getInventory().getChestplate(), p.getInventory().getLeggings(), p.getInventory().getBoots());
                     Alkatraz.getNms().setTransparent(p, player, false);
@@ -99,7 +99,7 @@ public class Stealth extends Spell implements Listener {
                 // Cache viewer profiles for this cast so an online loop costs one
                 // lookup per viewer rather than repeated ProfileManager calls.
                 java.util.Map<UUID, MagicProfile> viewerProfiles = new java.util.HashMap<>();
-                for (Player player : Bukkit.getOnlinePlayers()){
+                for (Player player : p.getWorld().getPlayers()){
                     if (player != p){
                         MagicProfile td = viewerProfiles.computeIfAbsent(player.getUniqueId(), id -> ProfileManager.getProfile(id, MagicProfile.class));
                         if (td == null) continue;
@@ -133,13 +133,13 @@ public class Stealth extends Spell implements Listener {
                         return;
                     }
                     if (!p.isDead()){
-                        double cost = costs.get(data.getCircleLevel());
+                        double cost = costs.getOrDefault(data.getCircleLevel(), costs.getOrDefault(9, 0.0));
                         if (data.getMana() >= cost){
                             StatUtils.subMana(p, cost);
                             spawnTrail(p, data);
                         }else{
                             data.setStealth(false);
-                            for (Player player : Bukkit.getOnlinePlayers()){
+                            for (Player player : p.getWorld().getPlayers()){
                                 Alkatraz.getNms().setInvisible(p, false);
                                 Alkatraz.getNms().fakeArmor(p, player, p.getInventory().getHelmet(), p.getInventory().getChestplate(), p.getInventory().getLeggings(), p.getInventory().getBoots());
                                 Alkatraz.getNms().setTransparent(p, player, false);
@@ -149,7 +149,7 @@ public class Stealth extends Spell implements Listener {
                         }
                     }else {
                         data.setStealth(false);
-                        for (Player player : Bukkit.getOnlinePlayers()){
+                        for (Player player : p.getWorld().getPlayers()){
                             Alkatraz.getNms().setInvisible(p, false);
                             Alkatraz.getNms().fakeArmor(p, player, p.getInventory().getHelmet(), p.getInventory().getChestplate(), p.getInventory().getLeggings(), p.getInventory().getBoots());
                             Alkatraz.getNms().setTransparent(p, player, false);
@@ -341,12 +341,12 @@ public class Stealth extends Spell implements Listener {
 
     @EventHandler
     private void onInventoryClick(InventoryClickEvent e){
-        Player p = (Player) e.getWhoClicked();
+        if (!(e.getWhoClicked() instanceof Player p)) return;
         MagicProfile data = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
         if (data == null) return;
         if (data.isStealth()){
             boolean armorInvis = (boolean) getOption("armor_invis").getSelectedValue(p).getValue();
-            for (Player player : Bukkit.getOnlinePlayers()){
+            for (Player player : p.getWorld().getPlayers()){
                 if (armorInvis){
                     Alkatraz.getNms().fakeArmor(p, player, null, null, null, null);
                 }else Alkatraz.getNms().fakeArmor(p, player, p.getInventory().getHelmet(), p.getInventory().getChestplate(), p.getInventory().getLeggings(), p.getInventory().getBoots());
@@ -420,6 +420,7 @@ public class Stealth extends Spell implements Listener {
         if (data == null || !data.isStealth()) return;
 
         Location to = e.getTo();
+        if (to == null) return;
         Location from = e.getFrom();
         boolean crossed = to.getBlockX() != from.getBlockX()
                 || to.getBlockY() != from.getBlockY()

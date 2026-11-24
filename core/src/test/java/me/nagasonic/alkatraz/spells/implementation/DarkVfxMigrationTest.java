@@ -28,27 +28,26 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Wave-C migration guard for the three DARK spells: {@code SkeletalKnights},
- * {@code SummonZombies} and {@code Debuff}.
+ * Wave-C migration guard for the two surviving DARK spells: {@code SummonZombies} and
+ * {@code Debuff}.
  *
  * <p>What this pins, and why each one is a real defect rather than a style rule:
  * <ul>
  *   <li><b>Cast times stay inside their circle's range.</b> The yml is the budget; the Java
  *       never overrides it, so the yml is what has to be asserted.</li>
- *   <li><b>No spell owns a colour any more.</b> Every one of these three classes used to
- *       declare its own {@code Color} - aqua on {@code skeletal_knights}, green on
- *       {@code summon_zombies}, an independent purple on {@code debuff} - and two of the three
- *       contradicted {@code element: DARK} outright. The guard is that they now hold a
- *       {@code PALETTE} and nothing else.</li>
+ *   <li><b>No spell owns a colour any more.</b> Both of these classes used to declare its own
+ *       {@code Color} - green on {@code summon_zombies}, an independent purple on
+ *       {@code debuff} - and the green contradicted {@code element: DARK} outright. The guard
+ *       is that they now hold a {@code PALETTE} and nothing else.</li>
  *   <li><b>No per-tick colour allocation.</b> A {@code new Particle.DustOptions} inside a
  *       cast-circle lambda rebuilds a {@code Color} plus a dust record every tick for every
  *       casting player. The palette pre-builds all three.</li>
  *   <li><b>No raw {@code Particle.*}.</b> Minecraft 1.20.5 renamed a large batch of them and
  *       the plugin supports 1.19 through 1.26, so a bare constant can throw at
  *       class-initialisation time on the old end of the range.</li>
- *   <li><b>The bespoke channel is gone.</b> {@code SkeletalKnights} carried a private
- *       {@code channels} map and its own move/damage/quit handler triple; interruption is now
- *       the shared {@code ChannelRegistry}'s job.</li>
+ *   <li><b>The bespoke channel is gone.</b> The channel glyph and floor-ring layout lives in
+ *       {@code SpellVfx} as one shared builder; the guards below pin that builder's pure
+ *       geometry instead of any spell's private copy of it.</li>
  * </ul>
  *
  * <p><b>No Bukkit mock is needed.</b> The yml assertions go through
@@ -65,12 +64,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 class DarkVfxMigrationTest {
 
-    /** Spell id to source file name, for the three migrated classes. */
-    private static final String[] SPELL_IDS = {"skeletal_knights", "summon_zombies", "debuff"};
+    /** Spell id to source file name, for the two migrated classes. */
+    private static final String[] SPELL_IDS = {"summon_zombies", "debuff"};
 
     /** Their own Java sources, relative to the {@code core} module directory. */
     private static final String[] SOURCE_FILES = {
-            "src/main/java/me/nagasonic/alkatraz/spells/implementation/SkeletalKnights.java",
             "src/main/java/me/nagasonic/alkatraz/spells/implementation/SummonZombies.java",
             "src/main/java/me/nagasonic/alkatraz/spells/implementation/Debuff.java"
     };
@@ -84,19 +82,6 @@ class DarkVfxMigrationTest {
             assertNotNull(in, "missing bundled resource /spells/" + id + ".yml");
             return YamlConfiguration.loadConfiguration(new InputStreamReader(in, StandardCharsets.UTF_8));
         }
-    }
-
-    @Test
-    void skeletalKnightsCastTimeSitsInsideTheCircleSixRange() throws IOException {
-        YamlConfiguration yml = load("skeletal_knights");
-        int circle = yml.getInt("level");
-        assertEquals(6, circle, "skeletal_knights is a circle-6 spell");
-        SpellBudgets.CastTimeRange range = SpellBudgets.castTimeRange(circle);
-        int ticks = (int) Math.round(yml.getDouble("cast_time") * 20);
-        assertTrue(range.contains(ticks),
-                "cast_time " + yml.getDouble("cast_time") + "s is " + ticks
-                        + " ticks, outside the circle-6 window of " + range.minTicks() + ".."
-                        + range.maxTicks());
     }
 
     @Test
@@ -126,24 +111,10 @@ class DarkVfxMigrationTest {
     }
 
     @Test
-    void skeletalKnightsKeepsItsSixSecondDeclaredPaidOverChannel() throws IOException {
-        YamlConfiguration yml = load("skeletal_knights");
-        int circle = yml.getInt("level");
-        int declaredTicks = (int) Math.round(yml.getDouble("wind_up_duration") * 20);
-
-        assertEquals(120, declaredTicks,
-                "the 6-second channel is the reason waystone_recall exists; it must not be shortened");
-        assertTrue(SpellBudgets.isPaidOverWindUp(circle, declaredTicks),
-                "a " + declaredTicks + "-tick circle-6 channel is a declared paid-over "
-                        + "(circle-6 wind-up contract is " + SpellBudgets.windUpTicks(circle)
-                        + " ticks); if this ever fails, the channel was quietly shortened");
-    }
-
-    @Test
     void theSubSixDarkSpellsOweNoWindUp() throws IOException {
         // SummonZombies (circle 4) and Debuff (circle 2) are below the wind-up contract, so a
         // WindUp in either source would be unearned complexity rather than a feature.
-        for (String relative : new String[]{SOURCE_FILES[1], SOURCE_FILES[2]}) {
+        for (String relative : SOURCE_FILES) {
             String code = readCode(relative);
             assertFalse(code.contains("WindUp"),
                     relative + " is below circle 6 and must not introduce a wind-up");
@@ -174,7 +145,7 @@ class DarkVfxMigrationTest {
             assertEquals(1, countRgbLiterals(code),
                     relative + " must name exactly one colour, its CAST_COLOR, and take every other "
                             + "colour from the DARK palette; a second literal is how "
-                            + "skeletal_knights ended up aqua");
+                            + "summon_zombies ended up green");
             assertFalse(code.contains("new Particle.DustOptions"),
                     relative + " still constructs DustOptions; the palette pre-builds core, accent "
                             + "and deep, and a per-tick construction is pure garbage");
@@ -205,18 +176,11 @@ class DarkVfxMigrationTest {
     }
 
     @Test
-    void skeletalKnightsUsesThePortalAliasRatherThanTheRawConstant() {
-        String code = readCode(SOURCE_FILES[0]);
-        assertTrue(code.contains("Utils.PORTAL"),
-                "the summon burst must use the Utils.PORTAL alias, not Particle.PORTAL");
-    }
-
-    @Test
     void theDarkPaletteShadesAreNeitherGreenNorAquaDominantAndAreOrdered() {
         // What is worth pinning is not "DARK looks purple" - it is that the shades are the
         // palette's, and specifically that they are none of the two colours these spells used to
         // declare while claiming {@code element: DARK}: green (50,100,50) on summon_zombies and
-        // aqua (0,210,255) / (150,210,255) on skeletal_knights.
+        // aqua (0,210,255) / (150,210,255) on a retired summon spell.
         //
         // Note what is deliberately NOT asserted: that every shade is red-dominant. The shipped
         // DARK accent is (177,76,224) - blue above red - and pretending otherwise would make this
@@ -228,7 +192,7 @@ class DarkVfxMigrationTest {
             assertTrue(shade.getGreen() < shade.getRed() && shade.getGreen() < shade.getBlue(),
                     "a DARK shade may not be the green (50,100,50) summon_zombies used: got " + shade);
             assertFalse(shade.getGreen() >= 150 && shade.getBlue() >= 150,
-                    "a DARK shade may not be in the aqua band skeletal_knights used "
+                    "a DARK shade may not be in the aqua band a retired summon spell used "
                             + "((0,210,255) and (150,210,255)): got " + shade);
         }
 
@@ -268,49 +232,12 @@ class DarkVfxMigrationTest {
     }
 
     // ================================================================
-    // Source guards - the bespoke channel is gone
+    // Source guards - the shared cast circle
     // ================================================================
 
     @Test
-    void skeletalKnightsNoLongerKeepsAPrivateChannelMap() {
-        String code = readCode(SOURCE_FILES[0]);
-        assertFalse(code.contains("ChannelData"),
-                "the private ChannelData record existed only to back the private channels map");
-        assertFalse(code.contains("channels.put("),
-                "the private channels map is replaced by ChannelRegistry.register");
-        assertFalse(code.contains("abortChannel("),
-                "abortChannel was the hand-rolled interrupt; ChannelRegistry owns interruption now");
-    }
-
-    @Test
-    void skeletalKnightsRegistersItsWindUpWithTheSharedRegistry() {
-        String code = readCode(SOURCE_FILES[0]);
-        assertTrue(code.contains("ChannelRegistry.isChanneling("),
-                "the one-wind-up-per-caster guard must read the shared registry");
-        assertTrue(code.contains("ChannelRegistry.register("),
-                "the wind-up must be registered so move, damage, quit and shutdown all interrupt it");
-        assertTrue(code.contains("ChannelRegistry.unregister("),
-                "a wind-up that finishes on its own must be unregistered without running the canceller");
-        assertTrue(code.contains("WindUp.begin("),
-                "the bespoke BukkitRunnable wind-up is replaced by the shared WindUp");
-        assertTrue(code.contains("windUp.tick()"),
-                "the shared WindUp advances by tick(); the spell still owns its own draw step");
-    }
-
-    @Test
-    void skeletalKnightsNoLongerHandlesTheInterruptionTripleItself() {
-        String code = readCode(SOURCE_FILES[0]);
-        for (String handler : new String[]{"PlayerMoveEvent", "EntityDamageEvent", "PlayerQuitEvent"}) {
-            assertFalse(code.contains(handler),
-                    handler + " handling belongs to ChannelRegistry, which is registered once in "
-                            + "onEnable; a second copy means a double interrupt and a listener that "
-                            + "is never unregistered on reload");
-        }
-    }
-
-    @Test
     void theTwoSubSixDarkSpellsUseTheSharedCastCircle() {
-        for (String relative : new String[]{SOURCE_FILES[1], SOURCE_FILES[2]}) {
+        for (String relative : SOURCE_FILES) {
             String code = readCode(relative);
             assertTrue(code.contains("CastCircle.start(this, caster, e, 3.0, 0)"),
                     relative + " must draw the shared cast circle at its old size of 3");
@@ -323,17 +250,17 @@ class DarkVfxMigrationTest {
     }
 
     // ================================================================
-    // Geometry - the pure twins the three spells actually call
+    // Geometry - the pure twins the two spells actually call
     // ================================================================
 
     @Test
-    void skeletalKnightsChannelGlyphsKeepTheirHexLayout() {
+    void channelGlyphGeometryKeepsItsHexLayout() {
         // SpellVfx.channelGlyphGeometry is what channelGlyphs draws its glyph markers from.
         List<Location> glyphs = geometry("channelGlyphGeometry",
                 new Class<?>[]{Location.class, double.class, int.class, double.class},
                 new Location(null, 0.0, 64.0, 0.0), 2.0, 6, 0.0);
 
-        assertEquals(6, glyphs.size(), "six glyph markers is the hex both original spells drew");
+        assertEquals(6, glyphs.size(), "six glyph markers is the hex the original channel spells drew");
         for (Location glyph : glyphs) {
             double reach = Math.hypot(glyph.getX(), glyph.getZ());
             assertEquals(1.7, reach, 1e-9, "glyphs sit at 0.85 of the outer radius");
@@ -342,7 +269,7 @@ class DarkVfxMigrationTest {
     }
 
     @Test
-    void skeletalKnightsFloorRingsAreCounterRotatingAndTheInnerIsSmaller() {
+    void ringGeometryIsCounterRotatingAndTheInnerIsSmaller() {
         // The outer ring is channelGlyphs' first pass and the 0.7 inner ring its second; this is
         // the layout the hand-rolled spawnFloorCircle used to produce.
         List<Location> outer = geometry("ringGeometry",

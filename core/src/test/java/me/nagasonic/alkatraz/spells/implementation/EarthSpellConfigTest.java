@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class EarthSpellConfigTest {
 
     private static final String[] EARTH_SPELLS =
-            {"earth_throw", "earth_spike", "tremor", "earthen_wall", "earthsplitter"};
+            {"earth_throw", "earth_spike", "tremor", "earthen_wall"};
 
     private static YamlConfiguration load(String id) throws IOException {
         try (InputStream in = EarthSpellConfigTest.class.getResourceAsStream("/spells/" + id + ".yml")) {
@@ -137,23 +137,9 @@ class EarthSpellConfigTest {
     }
 
     @Test
-    void earthsplitterRetiresItsPowerKeyAndCapsTerrain() throws IOException {
-        YamlConfiguration yml = load("earthsplitter");
-        assertFalse(yml.isSet("power"),
-                "spec section 7 retires the power key - a power key that never reaches damage "
-                        + "is dead config, and this is a TERRAIN spell judged on blocks");
-        assertEquals(SpellRole.TERRAIN, SpellRole.parse(yml.getString("role")), "earthsplitter is TERRAIN");
-        assertEquals(SpellBudgets.terrainBudget(5), yml.getInt("terrain_budget"),
-                "346 destroyed blocks with no cap becomes the circle-5 budget of "
-                        + SpellBudgets.terrainBudget(5));
-    }
-
-    @Test
-    void earthsplitterSeededDamageIsTheCircleFiveBurstCeiling() {
-        // With `power` retired, Fissure seeds AttackProperties from burstBudget(5)
-        // rather than a config value. This pins the number the code must use.
+    void theCircleFiveBurstBudgetStaysBelowTheTerrainCeiling() {
         assertEquals(22.1, SpellBudgets.burstBudget(5), 1e-9,
-                "the circle-5 BURST budget earthsplitter's incidental damage is held to");
+                "the circle-5 BURST budget a TERRAIN spell's incidental damage is held to");
         assertTrue(SpellBudgets.burstBudget(5) <= SpellBudgets.terrainBudget(5),
                 "a TERRAIN spell's incidental damage ceiling sits far below its block allowance");
     }
@@ -164,8 +150,6 @@ class EarthSpellConfigTest {
         assertEquals(24, load("earth_spike").getInt("mana_cost"), "circle-2 mana");
         assertEquals(48, load("tremor").getInt("mana_cost"), "circle-3 mana");
         assertEquals(75, load("earthen_wall").getInt("mana_cost"), "circle-4 mana");
-        assertEquals(120, load("earthsplitter").getInt("mana_cost"), "circle-5 mana");
-        assertEquals(115, load("earthsplitter").getInt("required_focus"), "circle-5 focus");
     }
 
     @Test
@@ -174,7 +158,6 @@ class EarthSpellConfigTest {
         assertEquals(5, load("earth_spike").getInt("cooldown"), "circle-2 cooldown");
         assertEquals(6, load("tremor").getInt("cooldown"), "circle-3 cooldown");
         assertEquals(7, load("earthen_wall").getInt("cooldown"), "circle-4 cooldown");
-        assertEquals(9, load("earthsplitter").getInt("cooldown"), "circle-5 cooldown");
         assertEquals(20, load("earth_throw").getInt("required_focus"), "circle-1 focus");
         assertEquals(40, load("earth_spike").getInt("required_focus"), "circle-2 focus");
         assertEquals(65, load("tremor").getInt("required_focus"), "circle-3 focus");
@@ -187,7 +170,6 @@ class EarthSpellConfigTest {
         assertEquals(0.75, load("earth_spike").getDouble("cast_time"), 1e-9, "circle-2 cast time");
         assertEquals(1.0, load("tremor").getDouble("cast_time"), 1e-9, "circle-3 cast time");
         assertEquals(1.25, load("earthen_wall").getDouble("cast_time"), 1e-9, "circle-4 cast time");
-        assertEquals(1.5, load("earthsplitter").getDouble("cast_time"), 1e-9, "circle-5 cast time");
     }
 
     @Test

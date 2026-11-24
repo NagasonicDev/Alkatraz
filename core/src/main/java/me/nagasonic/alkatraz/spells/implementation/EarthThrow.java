@@ -126,23 +126,24 @@ public class EarthThrow extends AttackSpell implements Listener {
                         if (!Protection.blockEdit(p, block.getLocation())) return;
                         Map<Location, Material> originals = new java.util.HashMap<>();
                         originals.put(block.getLocation(), block.getType());
+                        block.setType(Material.AIR, false);
                         FallingBlock b = loc.getWorld().spawnFallingBlock(loc, data);
                         registerRecoverData(b.getUniqueId(), originals);
                         b.setHurtEntities(false);
                         b.setVelocity(direction.multiply((Double) getOption("throw_force").getSelectedValue(p).getValue()).setY(0.3));
-                    SpellEntityComponent comp = new SpellEntityComponent(
-                            this,
-                            props,
-                            p,
-                            wand,
-                            SpellComponentType.OFFENSE,
-                            b
-                    );
-                    SpellComponentHandler.register(comp);
-                    NBT.modifyPersistentData(b, nbt -> {
-                        nbt.setString("componentID", comp.getComponentID().toString());
-                    });
-                    trailLump(b, p, direction);
+                        SpellEntityComponent comp = new SpellEntityComponent(
+                                this,
+                                props,
+                                p,
+                                wand,
+                                SpellComponentType.OFFENSE,
+                                b
+                        );
+                        SpellComponentHandler.register(comp);
+                        NBT.modifyPersistentData(b, nbt -> {
+                            nbt.setString("componentID", comp.getComponentID().toString());
+                        });
+                        trailLump(b, p, direction);
                     }
                 }
             }
@@ -168,23 +169,24 @@ public class EarthThrow extends AttackSpell implements Listener {
                         if (!Protection.blockEdit(caster, block.getLocation())) return;
                         Map<Location, Material> originals = new java.util.HashMap<>();
                         originals.put(block.getLocation(), block.getType());
-                    FallingBlock b = loc.getWorld().spawnFallingBlock(loc, data);
-                    registerRecoverData(b.getUniqueId(), originals);
-                    b.setHurtEntities(false);
-                    b.setVelocity(direction.multiply(1).setY(0.3));
-                    SpellEntityComponent comp = new SpellEntityComponent(
-                            this,
-                            props,
-                            caster,
-                            wand,
-                            SpellComponentType.OFFENSE,
-                            b
-                    );
-                    SpellComponentHandler.register(comp);
-                    NBT.modifyPersistentData(b, nbt -> {
-                        nbt.setString("componentID", comp.getComponentID().toString());
-                    });
-                    trailLump(b, caster, direction);
+                        block.setType(Material.AIR, false);
+                        FallingBlock b = loc.getWorld().spawnFallingBlock(loc, data);
+                        registerRecoverData(b.getUniqueId(), originals);
+                        b.setHurtEntities(false);
+                        b.setVelocity(direction.multiply(1).setY(0.3));
+                        SpellEntityComponent comp = new SpellEntityComponent(
+                                this,
+                                props,
+                                caster,
+                                wand,
+                                SpellComponentType.OFFENSE,
+                                b
+                        );
+                        SpellComponentHandler.register(comp);
+                        NBT.modifyPersistentData(b, nbt -> {
+                            nbt.setString("componentID", comp.getComponentID().toString());
+                        });
+                        trailLump(b, caster, direction);
                     }
                 }
             }
@@ -229,6 +231,14 @@ public class EarthThrow extends AttackSpell implements Listener {
     @Override
     public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
         return CastCircle.start(this, caster, e);
+    }
+
+    @Override
+    public void cancelTasks() {
+        for (Map<Location, Material> originals : recoverData.values()) {
+            TerrainEditor.restoreAll(null, new TerrainEditor.RestoreTicket(originals));
+        }
+        recoverData.clear();
     }
 
     @Override
@@ -289,8 +299,7 @@ public class EarthThrow extends AttackSpell implements Listener {
                 // affinity/resistance were all inert.
                 if (props.hasHit(le)) continue;
                 props.hit(le);
-                SpellDamageUtil.damageWithSpell(le, getPower(comp.getCaster(), le, props.getRemainingPower()),
-                        comp.getCaster(), comp.getWand(), EarthThrow.this);
+                damageArea(comp.getCaster(), le, props.getRemainingPower(), DEFAULT_PVP_CAP, comp.getWand());
                 Vector direction = le.getLocation().toVector().subtract(loc.toVector());
                 direction = Utils.safeNormalize(direction);
                 direction.setY(1.25);
@@ -345,8 +354,7 @@ public class EarthThrow extends AttackSpell implements Listener {
                         // affinity/resistance were all inert.
                         if (props.hasHit(le)) continue;
                         props.hit(le);
-                        SpellDamageUtil.damageWithSpell(le, getPower(comp.getCaster(), le, props.getRemainingPower()),
-                                comp.getCaster(), comp.getWand(), EarthThrow.this);
+                        damageArea(comp.getCaster(), le, props.getRemainingPower(), DEFAULT_PVP_CAP, comp.getWand());
                         Vector direction = le.getLocation().toVector().subtract(loc.toVector());
                         direction = Utils.safeNormalize(direction);
                         direction.setY(1.25);

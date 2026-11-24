@@ -20,7 +20,6 @@ import me.nagasonic.alkatraz.spells.vfx.CastCircle;
 import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
 import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.util.ParticleCaster;
-import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.Color;
 import org.bukkit.*;
@@ -289,8 +288,7 @@ public class AirBlades extends AttackSpell implements Listener {
                     if (props.hasHit(target)) continue;
                     props.hit(target);
 
-                    double damage = getPower(caster, target, props.getRemainingPower());
-                    SpellDamageUtil.damageWithSpell(target, damage, caster, wand, AirBlades.this);
+                    damageArea(caster, target, props.getRemainingPower(), DEFAULT_PVP_CAP, wand);
 
                     // Hit sound & particles
                     ParticleCaster.spawn(caster, position.getWorld(), Utils.SWEEP_ATTACK, position, 3, 0.2, 0.2, 0.2, 0);

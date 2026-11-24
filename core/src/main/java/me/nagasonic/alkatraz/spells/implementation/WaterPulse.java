@@ -130,9 +130,7 @@ public class WaterPulse extends AttackSpell implements Listener {
                     // water_pulse was knockback-only. It is a BURST now.
                     if (!props.hasHit(target)) {
                         props.hit(target);
-                        SpellDamageUtil.damageWithSpell(target,
-                                getPower(p, target, props.getRemainingPower()),
-                                p, wand, WaterPulse.this);
+                        damageArea(p, target, props.getRemainingPower(), DEFAULT_PVP_CAP, wand);
                     }
 
                     Vector direction = Utils.safeNormalize(target.getLocation().toVector().subtract(centre.toVector()));
@@ -197,9 +195,7 @@ public class WaterPulse extends AttackSpell implements Listener {
                     // water_pulse was knockback-only. It is a BURST now.
                     if (!props.hasHit(target)) {
                         props.hit(target);
-                        SpellDamageUtil.damageWithSpell(target,
-                                getPower(caster, target, props.getRemainingPower()),
-                                caster, wand, WaterPulse.this);
+                        damageArea(caster, target, props.getRemainingPower(), DEFAULT_PVP_CAP, wand);
                     }
 
                     Vector direction = Utils.safeNormalize(target.getLocation().toVector().subtract(centre.toVector()));

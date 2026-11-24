@@ -20,7 +20,7 @@ import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
-import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
+import me.nagasonic.alkatraz.spells.util.SpellTargeting;
 import me.nagasonic.alkatraz.spells.vfx.CastCircle;
 import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.util.ParticleCaster;
@@ -207,8 +207,13 @@ public class Fireball extends AttackSpell implements Listener {
         // hit and the explosion share one AttackProperties, so the guard also stops
         // a target being hit by both in the same explosion.
         if (props.hasHit(le)) return;
+        LivingEntity caster = comp.getCaster();
+        if (le instanceof Player player && SpellTargeting.isAlly(caster, player)) {
+            e.setCancelled(true);
+            return;
+        }
         props.hit(le);
-        e.setDamage(getPower(comp.getCaster(), le, props.getRemainingPower()));
+        e.setDamage(damageForCap(caster, le, props.getRemainingPower(), DEFAULT_PVP_CAP));
     }
 
     @EventHandler
@@ -247,9 +252,7 @@ public class Fireball extends AttackSpell implements Listener {
             if (entity.equals(caster)) continue;
             if (props.hasHit(entity)) continue;
             props.hit(entity);
-            SpellDamageUtil.damageWithSpell(entity,
-                    getPower(caster, entity, props.getRemainingPower()),
-                    caster, comp.getWand(), Fireball.this);
+            damageArea(caster, entity, props.getRemainingPower(), DEFAULT_PVP_CAP, comp.getWand());
         }
     }
 }

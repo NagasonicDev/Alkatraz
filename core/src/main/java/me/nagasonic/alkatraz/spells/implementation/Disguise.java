@@ -128,8 +128,8 @@ public class Disguise extends Spell implements Listener {
 
             // Range filter (negative range = infinite).
             if (targetRange >= 0
-                    && candidate.getWorld().equals(player.getWorld())
-                    && candidate.getLocation().distance(player.getLocation()) > targetRange) {
+                    && (!candidate.getWorld().equals(player.getWorld())
+                    || candidate.getLocation().distance(player.getLocation()) > targetRange)) {
                 continue;
             }
 
@@ -199,7 +199,9 @@ public class Disguise extends Spell implements Listener {
         int s = 0;
         for (int i = 9; i < 45 && s < players.size(); i++, s++) {
             Player target = players.get(s);
-            ItemStack item = ItemUtils.headFromUuid(target.getUniqueId().toString());
+            // Cached-only: a cache miss shows a plain head now and prefetches the skin for next time.
+            ItemStack item = ItemUtils.headFromUuidCached(target.getUniqueId().toString());
+            if (item == null) item = new ItemStack(Material.PLAYER_HEAD);
             ItemMeta  meta = item.getItemMeta();
             meta.setDisplayName(target.getName());
             meta.setLore(List.of(format(lang().get("spells.disguise.click_disguise", "target", target.getName()))));
@@ -236,7 +238,12 @@ public class Disguise extends Spell implements Listener {
 
         if (displayName.equals(format(lang().get("spells.disguise.next_page"))) || displayName.equals(format(lang().get("spells.disguise.previous_page")))) {
             int  newPage    = NBT.get(item, nbt -> (Integer) nbt.getInteger("page"));
-            UUID ownerUuid  = UUID.fromString(NBT.get(item, nbt -> (String) nbt.getString("player")));
+            UUID ownerUuid;
+            try {
+                ownerUuid = UUID.fromString(NBT.get(item, nbt -> (String) nbt.getString("player")));
+            } catch (IllegalArgumentException ex) {
+                return;
+            }
             int  totalPages = NBT.get(item, nbt -> (Integer) nbt.getInteger("total_pages"));
 
             // The arrow always encodes the caster who originally opened the GUI.
@@ -249,7 +256,7 @@ public class Disguise extends Spell implements Listener {
             }
 
         } else if (item.getType().equals(Material.PLAYER_HEAD)) {
-            Player target = Bukkit.getPlayer(displayName);
+            Player target = Bukkit.getPlayerExact(displayName);
             MagicProfile data = ProfileManager.getProfile(clicker.getUniqueId(), MagicProfile.class);
 
             if (target == null) {
@@ -315,9 +322,8 @@ public class Disguise extends Spell implements Listener {
         // Cache target profiles once for this join-event pass.
         java.util.Map<UUID, MagicProfile> profileCache = new java.util.HashMap<>();
         for (Player other : online) {
-            if (other == joined) continue;
-
             MagicProfile odata = profileCache.computeIfAbsent(other.getUniqueId(), id -> ProfileManager.getProfile(id, MagicProfile.class));
+            if (odata == null) continue;
 
             // Bug 1: this used to be `odata.getDisguise() != null`, but
             // Profile.stringStat registers a "" default, and Profile.setString
@@ -338,11 +344,15 @@ public class Disguise extends Spell implements Listener {
             try {
                 UUID disguisedAs = UUID.fromString(stored);
                 if (Bukkit.getPlayer(disguisedAs) != null) {
+                    List<Player> viewers = other.equals(joined)
+                            ? online.stream().filter(p -> !p.equals(joined)).toList()
+                            : joinedOnly;
+                    if (viewers.isEmpty()) continue;
                     String skinUrl = "https://sessionserver.mojang.com/session/minecraft/profile/"
                             + disguisedAs + "?unsigned=false";
                     Skin.fetchAsync(skinUrl, skin -> {
                         if (!other.isOnline() || !joined.isOnline()) return;
-                        Alkatraz.getNms().changeSkinElse(other, joinedOnly, skin);
+                        Alkatraz.getNms().changeSkinElse(other, viewers, skin);
                         EffectApplicator.applyConcealment(other, this, EffectApplicator.disguiseHandle());
                     }, ex -> { });
                 }
@@ -457,11 +467,13 @@ public class Disguise extends Spell implements Listener {
             return false;
         }
 
-        Skin ownSkin;
-        try {
-            ownSkin = Skin.fromURL("https://sessionserver.mojang.com/session/minecraft/profile/"
-                    + victim.getUniqueId() + "?unsigned=false");
-        } catch (RuntimeException ex) {
+        // Cached-only: never block the main thread on a Mojang fetch. A miss
+        // resists (as a failed fetch already did) and prefetches for next time.
+        String skinUrl = "https://sessionserver.mojang.com/session/minecraft/profile/"
+                + victim.getUniqueId() + "?unsigned=false";
+        Skin ownSkin = Skin.getCached(skinUrl);
+        if (ownSkin == null) {
+            Skin.fetchAsync(skinUrl, ignored -> { }, ignored -> { });
             return false;
         }
 

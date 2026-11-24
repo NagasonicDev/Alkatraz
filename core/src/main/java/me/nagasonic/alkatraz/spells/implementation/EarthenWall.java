@@ -20,6 +20,7 @@ import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
 import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.ParticleUtils;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
+import me.nagasonic.alkatraz.spells.util.SpellTargeting;
 import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.Color;
@@ -231,6 +232,7 @@ public class EarthenWall extends AttackSpell implements Listener {
                                 if (!(entity instanceof LivingEntity)) continue;
                                 if (entity.equals(player)) continue;
                                 LivingEntity target = (LivingEntity) entity;
+                                if (target instanceof Player && SpellTargeting.isAlly(player, target)) continue;
 
                                 // THE GATE IS THE PER-TARGET ACCUMULATOR, NOT hasHit.
                                 // This is the 15-45 defect: `EarthenWall` has no
@@ -264,7 +266,7 @@ public class EarthenWall extends AttackSpell implements Listener {
                                 // DISTINCT damage instance, so section 4 rule 1 - one
                                 // getPower per damage instance - still holds. Do not
                                 // "fix" this into `context.power(target)`.
-                                double damage = Math.min(getPower(player, target, props.getRemainingPower()), room);
+                                double damage = Math.min(damageForCap(player, target, props.getRemainingPower(), DEFAULT_PVP_CAP), room);
                                 dealt.put(target.getUniqueId(), already + damage);
                                 props.hit(target);
                                 SpellDamageUtil.damageWithSpell(target, damage, player, wand, EarthenWall.this);
@@ -467,6 +469,7 @@ public class EarthenWall extends AttackSpell implements Listener {
                                 if (!(entity instanceof LivingEntity)) continue;
                                 if (entity.equals(caster)) continue;
                                 LivingEntity target = (LivingEntity) entity;
+                                if (target instanceof Player && SpellTargeting.isAlly(caster, target)) continue;
 
                                 // The per-target accumulator is the gate - see the
                                 // player path for the full reasoning. Deliberately NOT
@@ -478,7 +481,7 @@ public class EarthenWall extends AttackSpell implements Listener {
                                 double room = cap - already;
                                 if (room <= 0) continue;
 
-                                double damage = Math.min(getPower(caster, target, props.getRemainingPower()), room);
+                                double damage = Math.min(damageForCap(caster, target, props.getRemainingPower(), DEFAULT_PVP_CAP), room);
                                 dealt.put(target.getUniqueId(), already + damage);
                                 props.hit(target);
                                 SpellDamageUtil.damageWithSpell(target, damage, caster, wand, EarthenWall.this);

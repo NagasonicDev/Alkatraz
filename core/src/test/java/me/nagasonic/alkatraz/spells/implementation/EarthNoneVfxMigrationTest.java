@@ -25,9 +25,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Wave-C migration guard for the one EARTH and three NONE spells moved onto the
- * shared VFX library: {@code earthsplitter} (Fissure), {@code warp}, {@code disguise}
- * and {@code blink}.
+ * Wave-C migration guard for the two NONE spells moved onto the shared VFX library:
+ * {@code disguise} and {@code blink}.
  *
  * <h2>Why most of this reads source text</h2>
  * Loading any of these four classes initialises its superclass chain, and
@@ -48,10 +47,10 @@ class EarthNoneVfxMigrationTest {
 
     /** Spell id to the Java class that implements it. */
     private static final String[] EARTH_NONE_SPELLS =
-            {"earthsplitter", "warp", "disguise", "blink"};
+            {"disguise", "blink"};
 
     private static final String[] EARTH_NONE_CLASSES =
-            {"Fissure", "Warp", "Disguise", "Blink"};
+            {"Disguise", "Blink"};
 
     /**
      * Every {@code Particle} constant this plugin must reach through a {@code Utils}
@@ -84,18 +83,6 @@ class EarthNoneVfxMigrationTest {
      */
     @Test
     void migrationLeftEverySpellsIdentityKeysAlone() throws IOException {
-        YamlConfiguration fissure = load("earthsplitter");
-        assertEquals("EARTH", fissure.getString("element"), "earthsplitter must stay EARTH");
-        assertEquals(5, fissure.getInt("level"), "earthsplitter must stay circle 5");
-        assertEquals(380, fissure.getInt("terrain_budget"),
-                "earthsplitter's circle-5 terrain budget cap must survive the VFX migration");
-
-        YamlConfiguration warp = load("warp");
-        assertEquals("NONE", warp.getString("element"), "warp must stay NONE");
-        assertEquals(6, warp.getInt("level"), "warp must stay circle 6");
-        assertEquals(4166, warp.getInt("gui_custom_model_data"),
-                "warp's wave-3 gui_custom_model_data collision repair must not be reverted");
-
         assertEquals("NONE", load("disguise").getString("element"), "disguise must stay NONE");
         assertEquals(3, load("disguise").getInt("level"), "disguise must stay circle 3");
         assertEquals("NONE", load("blink").getString("element"), "blink must stay NONE");
@@ -103,34 +90,11 @@ class EarthNoneVfxMigrationTest {
     }
 
     /**
-     * Warp's 6-second channel is a <b>declared paid-over</b>, not an oversight: at circle
-     * 6 the standard wind-up contract is 20 ticks, and {@code waystone_recall} exists
-     * precisely so nobody has to sit through it. A migration that quietly shortened
-     * the channel to the circle-6 standard would remove the reason warp exists.
-     */
-    @Test
-    void warpsSixSecondChannelRemainsADeclaredPaidOver() throws IOException {
-        YamlConfiguration warp = load("warp");
-        int seconds = warp.getInt("wind_up_duration");
-        assertEquals(6, seconds, "warp must keep its declared six-second channel");
-        int ticks = seconds * 20;
-        assertTrue(SpellBudgets.isPaidOverWindUp(6, ticks),
-                "warp's " + ticks + "-tick channel is no longer a paid-over at circle 6");
-
-        assertTrue(WindUp.requiresWindUp("warp", 6),
-                "warp is not on the wind-up exemption list, so it must still owe a wind-up");
-        assertFalse(WindUp.requiresWindUp("warp", 5),
-                "wind-up policy is circle-gated; below 6 there is no contract to owe");
-    }
-
-    /**
-     * The other three sit below circle 6 and must not have acquired a wind-up as part of
-     * a VFX migration.
+     * Both sit below circle 6 and must not have acquired a wind-up as part of a VFX
+     * migration.
      */
     @Test
     void subCircleSixMigratedSpellsOweNoWindUp() {
-        assertFalse(WindUp.requiresWindUp("earthsplitter", 5),
-                "earthsplitter is circle 5 and must never owe a wind-up");
         assertFalse(WindUp.requiresWindUp("disguise", 3),
                 "disguise is circle 3 and must never owe a wind-up");
         assertFalse(WindUp.requiresWindUp("blink", 4),
@@ -167,22 +131,6 @@ class EarthNoneVfxMigrationTest {
         }
     }
 
-    /**
-     * Fissure used to draw its trench lip and its cast circle in the <i>same</i> colour
-     * {@code (139, 90, 43)}, at two different dust sizes, so the circle and the spell
-     * effect read as the same shade. They must now be different palette shades.
-     */
-    @Test
-    void fissuresEdgeAndCircleDustAreNoLongerTheSameShade() throws IOException {
-        String source = sourceOf("Fissure");
-        assertTrue(source.contains("EDGE_DUST = PALETTE.coreDust()"),
-                "the trench's leading lip is the information and wants the core shade");
-        assertTrue(source.contains("CIRCLE_DUST = PALETTE.accentDust()"),
-                "the interior dust must be a different shade from the lip, not the same brown");
-        assertFalse(source.contains("EDGE_DUST = PALETTE.accentDust()"),
-                "if edge and circle share a shade the fissure is one flat colour again");
-    }
-
     @Test
     void noMigratedClassKeepsARawParticleConstant() throws IOException {
         for (String simple : EARTH_NONE_CLASSES) {
@@ -195,7 +143,7 @@ class EarthNoneVfxMigrationTest {
 
     @Test
     void subCircleSixSpellsDelegateTheirCastCircleToTheSharedBuilder() throws IOException {
-        for (String simple : new String[]{"Fissure", "Disguise", "Blink"}) {
+        for (String simple : new String[]{"Disguise", "Blink"}) {
             String source = sourceOf(simple);
             assertTrue(source.contains("CastCircle.start(this, caster, e"),
                     simple + " must build its cast circle with CastCircle.start");
@@ -204,26 +152,6 @@ class EarthNoneVfxMigrationTest {
                             + "CastCircle's and the two are asserted offset-for-offset equivalent");
             assertFalse(source.contains("scheduleSyncRepeatingTask"),
                     simple + " still schedules its own repeating task; CastCircle owns the lifecycle");
-        }
-    }
-
-    /**
-     * Warp is the cross-element half of the clone pair: its channel ritual now goes
-     * through the same builder {@code skeletal_knights} uses, in its own element colour.
-     */
-    @Test
-    void warpDrawsItsChannelRitualWithTheSharedGlyphBuilder() throws IOException {
-        String source = sourceOf("Warp");
-        assertTrue(source.contains("SpellVfx.channelGlyphs("),
-                "warp must draw its ritual with SpellVfx.channelGlyphs, the builder that exists "
-                        + "for the warp/skeletal_knights pair");
-        assertEquals(1, countRgbLiterals(source),
-                "warp's eleven hand-picked aqua constants, byte-identical to skeletal_knights', "
-                        + "must be gone; the one colour it keeps is its CAST_COLOR declaration");
-        for (String cloned : new String[]{"PHASE_AQUA", "PHASE_LIGHT", "PHASE_DEEP", "FLOOR_LIGHT",
-                "FLOOR_AQUA", "CIRCLE_LIGHT", "CIRCLE_AQUA", "BURST_AQUA"}) {
-            assertFalse(source.contains(cloned),
-                    "warp's cloned constant " + cloned + " must be replaced by a palette shade");
         }
     }
 
@@ -239,70 +167,12 @@ class EarthNoneVfxMigrationTest {
         return found;
     }
 
-    @Test
-    void warpHasNoPrivateChannelMapAndRegistersWithTheSharedRegistry() throws IOException {
-        String source = sourceOf("Warp");
-        assertFalse(source.contains("private static final Map<UUID, WarpData> channels"),
-                "warp's private channel map must be replaced by ChannelRegistry");
-        assertFalse(source.contains("WarpData"),
-                "warp's per-channel record must be replaced by ChannelRegistry + WindUp");
-        assertFalse(source.contains("abortChannel("),
-                "the interruption path is ChannelRegistry's; warp must not keep a private copy");
-        assertFalse(source.contains("@EventHandler"),
-                "warp must no longer implement Listener; ChannelRegistry owns move/damage/quit");
-        assertTrue(source.contains("ChannelRegistry.INSTANCE.register("),
-                "warp must register its in-flight wind-up with the shared ChannelRegistry");
-        assertTrue(source.contains("ChannelRegistry.isChanneling("),
-                "warp's one-channel-per-caster guard must read the shared registry");
-        assertTrue(source.contains("WindUp.begin(this, caster,"),
-                "warp's bespoke channel animation must be the shared WindUp");
-    }
-
-    /**
-     * The deferred cast is load-bearing: {@code castAction} cancels the cast and opens
-     * the destination menu, and the wind-up must only begin once a destination has
-     * actually been picked. A migration that started the wind-up in {@code castAction}
-     * would charge six seconds of channel before the player had chosen anything.
-     */
-    @Test
-    void warpsCastIsStillDeferredUntilADestinationIsPicked() throws IOException {
-        String source = sourceOf("Warp");
-        String castAction = between(source, "public void castAction(", "public void mobCastAction(");
-        assertTrue(castAction.contains("cancelCast(caster)"),
-                "warp must still cancel the framework cast before opening the picker");
-        assertTrue(castAction.contains("new WarpDestinationMenu(caster, this).open()"),
-                "warp's castAction must still only open the destination picker");
-        assertFalse(castAction.contains("WindUp.begin"),
-                "the wind-up must not start until beginChannel, i.e. until a destination is picked");
-
-        String beginChannel = between(source, "public void beginChannel(", "private void completeTeleport(");
-        assertTrue(beginChannel.contains("WindUp.begin(this, caster,"),
-                "the wind-up belongs in beginChannel, the destination-picked path");
-        assertTrue(beginChannel.contains("StatUtils.subMana("),
-                "mana must still be spent when the destination is committed to");
-        assertTrue(beginChannel.contains("config.windUpTicks("),
-                "warp must keep its own declared 6-second duration rather than the circle standard");
-    }
-
-    /**
-     * The wind-up's marker is the destination, not the caster. Without the marker the
-     * charge is a glow around the player's head and the six-second pause has no visible
-     * consequence - the player cannot tell where they are about to end up.
-     */
-    @Test
-    void warpsWindUpIsAnchoredToTheDestination() throws IOException {
-        String source = sourceOf("Warp");
-        String beginChannel = between(source, "public void beginChannel(", "private void completeTeleport(");
-        assertTrue(beginChannel.contains("windUpTicks, destination"),
-                "the wind-up marker must be the destination so the landing spot is telegraphed");
-    }
-
     // ================================================================
     // Geometry - the pure twins, no Bukkit statics
     // ================================================================
 
     /**
-     * {@code SpellVfx.groundGeometry} is what Fissure's wind-up crack is drawn from.
+     * {@code SpellVfx.groundGeometry} is what a terrain spell's wind-up crack is drawn from.
      * A worldless centre is legitimate here (a unit test cannot build a world), and the
      * points must lie inside the declared length and half-width, in draw order, so a
      * prefix is the revealed portion.

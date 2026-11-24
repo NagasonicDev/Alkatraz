@@ -235,14 +235,13 @@ public class WaterSphere extends AttackSpell {
                     }
                     if (entity.equals(caster)) continue;
                     if (!(entity instanceof LivingEntity le)) continue;
-                    // Protection gate before damage.
+                    // Protection gate before damage/effects.
                     if (!Protection.damage(le, caster, le.getLocation())) continue;
                     // One getPower per damage instance, deduped for the whole cast.
                     if (props.hasHit(le)) continue;
                     props.hit(le);
 
-                    SpellDamageUtil.damageWithSpell(le, getPower(caster, le, props.getRemainingPower()),
-                            caster, wand, WaterSphere.this);
+                    damageArea(caster, le, props.getRemainingPower(), DEFAULT_PVP_CAP, wand);
 
                     Vector push = Utils.safeNormalize(le.getLocation().toVector()
                             .subtract(center.toVector()));

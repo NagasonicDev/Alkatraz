@@ -176,8 +176,7 @@ public class Whirlpool extends AttackSpell {
                             nextStrikeTick.put(le.getUniqueId(), ticks + SpellAttackContext.DAMAGE_INTERVAL_TICKS);
                             // Still called, so one counter kills the whole field.
                             props.hit(le);
-                            SpellDamageUtil.damageWithSpell(le, getPower(caster, le, props.getRemainingPower()),
-                                    caster, wand, Whirlpool.this);
+                            damageArea(caster, le, props.getRemainingPower(), DEFAULT_PVP_CAP, wand);
                             if (Math.random() < 0.3) {
                                 ParticleCaster.spawn(caster, le.getWorld(), Utils.SPLASH, le.getLocation().add(0, 1, 0), 5, 0.3, 0.3, 0.3, 0);
                             }
@@ -245,8 +244,7 @@ public class Whirlpool extends AttackSpell {
                         if (nextStrike == null || nextStrike <= ticks) {
                             nextStrikeTick.put(le.getUniqueId(), ticks + SpellAttackContext.DAMAGE_INTERVAL_TICKS);
                             props.hit(le);
-                            SpellDamageUtil.damageWithSpell(le, getPower(caster, le, props.getRemainingPower()),
-                                    caster, wand, Whirlpool.this);
+                            damageArea(caster, le, props.getRemainingPower(), DEFAULT_PVP_CAP, wand);
                         }
                     }
                 }

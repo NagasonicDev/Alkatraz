@@ -20,6 +20,7 @@ import me.nagasonic.alkatraz.spells.types.SpellAttackContext;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.BarrierProperties;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
+import me.nagasonic.alkatraz.spells.util.SpellTargeting;
 import me.nagasonic.alkatraz.spells.util.TerrainEditor;
 import me.nagasonic.alkatraz.hooks.Protection;
 import me.nagasonic.alkatraz.util.ParticleCaster;
@@ -281,6 +282,7 @@ public class FireWall extends AttackSpell implements Listener, DamageableBarrier
                             push = Utils.safeNormalize(push).multiply(pushStrength);
                             target.setVelocity(target.getVelocity().add(push));
                         }
+                        if (SpellTargeting.isAlly(player, target)) continue;
 
                         // ONE IGNITION BURST PER ENTRY, then nothing until they leave
                         // and re-enter. This is DENIAL, not SUSTAIN, and the DENIAL
@@ -303,7 +305,10 @@ public class FireWall extends AttackSpell implements Listener, DamageableBarrier
                         if (!insideWall.add(target.getUniqueId())) continue;
                         props.hit(target);
 
-                        SpellDamageUtil.damageWithSpell(target, context.power(target),
+                        // context.power already applied getPower; cap that result once.
+                        double damage = context.power(target);
+                        SpellDamageUtil.damageWithSpell(target,
+                                target instanceof Player ? Math.min(damage, DEFAULT_PVP_CAP) : damage,
                                 player, wand, FireWall.this);
                         if (Protection.ignite(player, target.getLocation())) {
                             target.setFireTicks(igniteTicks);
@@ -492,6 +497,7 @@ public class FireWall extends AttackSpell implements Listener, DamageableBarrier
                             push = Utils.safeNormalize(push).multiply(pushStrength);
                             target.setVelocity(target.getVelocity().add(push));
                         }
+                        if (SpellTargeting.isAlly(caster, target)) continue;
 
                         // ONE IGNITION BURST PER ENTRY, then nothing until they leave
                         // and re-enter. DENIAL, not SUSTAIN: spec section 8.1's allowance
@@ -501,7 +507,10 @@ public class FireWall extends AttackSpell implements Listener, DamageableBarrier
                         if (!insideWall.add(target.getUniqueId())) continue;
                         props.hit(target);
 
-                        SpellDamageUtil.damageWithSpell(target, context.power(target),
+                        // context.power already applied getPower; cap that result once.
+                        double damage = context.power(target);
+                        SpellDamageUtil.damageWithSpell(target,
+                                target instanceof Player ? Math.min(damage, DEFAULT_PVP_CAP) : damage,
                                 caster, wand, FireWall.this);
                         if (Protection.ignite(caster, target.getLocation())) {
                             target.setFireTicks(igniteTicks);

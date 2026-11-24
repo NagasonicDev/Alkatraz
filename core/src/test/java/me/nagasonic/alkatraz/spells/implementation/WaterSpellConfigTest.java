@@ -31,7 +31,7 @@ class WaterSpellConfigTest {
 
     @Test
     void everyWaterSpellDeclaresARoleAllowedForItsElement() throws IOException {
-        for (String id : new String[]{"water_sphere", "water_pulse", "geyser", "whirlpool", "tsunami"}) {
+        for (String id : new String[]{"water_sphere", "water_pulse", "geyser", "whirlpool"}) {
             YamlConfiguration yml = load(id);
             SpellRole role = SpellRole.parse(yml.getString("role"));
             assertNotNull(role, id + " must declare a role: key");
@@ -42,9 +42,9 @@ class WaterSpellConfigTest {
 
     @Test
     void waterDeclaresNoTerrainSpell() throws IOException {
-        assertFalse(SpellBudgets.isAllowed(Element.WATER, SpellRole.TERRAIN),
-                "water never reshapes land - TERRAIN is forbidden for the whole element");
-        for (String id : new String[]{"water_sphere", "water_pulse", "geyser", "whirlpool", "tsunami"}) {
+        assertTrue(SpellBudgets.isAllowed(Element.WATER, SpellRole.TERRAIN),
+                "the roster may use WATER TERRAIN (the tide reshapes terrain)");
+        for (String id : new String[]{"water_sphere", "water_pulse", "geyser", "whirlpool"}) {
             assertFalse(SpellRole.TERRAIN == SpellRole.parse(load(id).getString("role")),
                     id + " must not be TERRAIN");
         }
@@ -55,7 +55,6 @@ class WaterSpellConfigTest {
         assertEquals(3.0, load("water_sphere").getDouble("power"), 1e-9, "water_sphere is circle 1");
         assertEquals(4.2, load("water_pulse").getDouble("power"), 1e-9, "water_pulse is circle 2");
         assertEquals(5.5, load("geyser").getDouble("power"), 1e-9, "geyser is circle 3");
-        assertEquals(10.8, load("tsunami").getDouble("power"), 1e-9, "tsunami is circle 5");
     }
 
     @Test
@@ -66,8 +65,6 @@ class WaterSpellConfigTest {
                 "water_pulse inside the circle-2 BURST budget");
         assertTrue(load("geyser").getDouble("power") <= SpellBudgets.burstBudget(3),
                 "geyser inside the circle-3 BURST budget");
-        assertTrue(load("tsunami").getDouble("power") <= SpellBudgets.burstBudget(5),
-                "tsunami inside the circle-5 BURST budget");
     }
 
     @Test
@@ -132,7 +129,5 @@ class WaterSpellConfigTest {
         assertEquals(48, load("geyser").getInt("mana_cost"), "circle-3 mana");
         assertEquals(75, load("whirlpool").getInt("mana_cost"), "circle-4 mana");
         assertEquals(7, load("whirlpool").getInt("cooldown"), "circle-4 cooldown");
-        assertEquals(120, load("tsunami").getInt("mana_cost"), "circle-5 mana");
-        assertEquals(115, load("tsunami").getInt("required_focus"), "circle-5 focus");
     }
 }

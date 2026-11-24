@@ -194,8 +194,8 @@ public class SummonZombies extends AttackSpell implements Listener {
         ParticleCaster.spawn(caster, loc.getWorld(), Utils.WITCH, loc, 20, 0.5, 0.5, 0.5, 0);
         // The ground ring is what makes a summoned zombie read as rising out of the earth rather
         // than simply appearing. Its colours come from the element palette via SpellVfx.ring, and
-        // the cluster inside it is the palette's own core shade - the same two-part burst
-        // SkeletalKnights draws, so the two summon spells read as one family.
+        // the cluster inside it is the palette's own core shade - the same two-part burst the
+        // summon family draws, so every summon spell reads as one family.
         ParticleCaster.spawn(caster, loc.getWorld(), Utils.DUST, loc, 20, 0.3, 0.3, 0.3, 0,
                 PALETTE.coreDust());
         SpellVfx.ring(CAST_COLOR, caster, loc, SUMMON_RING_RADIUS, SUMMON_RING_POINTS, 0.0,

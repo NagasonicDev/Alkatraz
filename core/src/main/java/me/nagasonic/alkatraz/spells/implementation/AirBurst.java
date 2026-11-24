@@ -198,9 +198,7 @@ public class AirBurst extends AttackSpell {
                     if (properties.hasHit(le)) continue;
                     properties.hit(le);
 
-                    SpellDamageUtil.damageWithSpell(le,
-                            getPower(caster, le, properties.getRemainingPower()),
-                            caster, wand, AirBurst.this);
+                    damageArea(caster, le, properties.getRemainingPower(), DEFAULT_PVP_CAP, wand);
 
                     // The shove is a FIXED push, not a damage-scaled one, so a damage
                     // buff no longer throws the target twice as far. The old code
@@ -276,9 +274,7 @@ public class AirBurst extends AttackSpell {
                     if (properties.hasHit(le)) continue;
                     properties.hit(le);
 
-                    SpellDamageUtil.damageWithSpell(le,
-                            getPower(caster, le, properties.getRemainingPower()),
-                            caster, wand, AirBurst.this);
+                    damageArea(caster, le, properties.getRemainingPower(), DEFAULT_PVP_CAP, wand);
 
                     // Flat constant, not getPower - see the player branch.
                     le.setVelocity(caster.getEyeLocation().getDirection().multiply(BLAST_PUSH));

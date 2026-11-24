@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class AirSpellConfigTest {
 
     private static final String[] AIR_SPELLS = {
-            "air_burst", "air_blades", "wind_vortex", "swift", "tornado", "wind_barrier"
+            "air_burst", "air_blades", "wind_vortex", "swift", "updraft", "wind_barrier"
     };
 
     private static YamlConfiguration load(String id) throws IOException {
@@ -110,39 +110,6 @@ class AirSpellConfigTest {
     }
 
     @Test
-    void tornadoSustainTotalLandsExactlyOnTheBudget() throws IOException {
-        double perHit = load("tornado").getDouble("power");
-        double durationSeconds = load("tornado").getDouble("duration");
-        long ticks = (long) (durationSeconds * 20);
-        long hits = ticks / 20L;
-        assertEquals(7.2, perHit, 1e-9, "tornado is 7.2 per hit");
-        assertEquals(5, hits, "5 seconds at one hit per 20 ticks is 5 hits");
-        assertEquals(36.0, perHit * hits, 1e-9, "5 x 7.2 = 36");
-        assertEquals(SpellBudgets.sustainBudget(5), perHit * hits, 1e-9,
-                "the tornado total is exactly the circle-5 SUSTAIN budget of "
-                        + SpellBudgets.sustainBudget(5));
-    }
-
-    @Test
-    void tornadoNoLongerCarriesADamagePerTickKey() throws IOException {
-        assertFalse(load("tornado").isSet("damage_per_tick"),
-                "damage_per_tick was the only thing actually dealing damage while the whole "
-                        + "option system was inert on a bare Spell; power now drives it");
-        assertTrue(load("tornado").isSet("power"),
-                "tornado gains the power key it needs now that it extends AttackSpell");
-    }
-
-    @Test
-    void oldPerTickTornadoDamageWasTwentyTimesTheBudget() {
-        double oldPerTick = 2.0;
-        double oldTicks = 100;
-        double oldTotal = oldPerTick * oldTicks;
-        assertEquals(200.0, oldTotal, 1e-9, "the old flat damage was 200 over the field's life");
-        assertTrue(oldTotal > SpellBudgets.sustainBudget(5),
-                "200 is over 5.5x the circle-5 SUSTAIN budget of " + SpellBudgets.sustainBudget(5));
-    }
-
-    @Test
     void windVortexTotalLandsInsideTheSmallestSustainBudget() throws IOException {
         double perHit = load("wind_vortex").getDouble("power");
         int durationSeconds = load("wind_vortex").getInt("vortex_duration");
@@ -169,8 +136,8 @@ class AirSpellConfigTest {
         assertEquals(24, load("air_blades").getInt("mana_cost"), "circle-2 mana");
         assertEquals(24, load("wind_vortex").getInt("mana_cost"), "circle-2 mana");
         assertEquals(24, load("swift").getInt("mana_cost"), "circle-2 mana");
-        assertEquals(120, load("tornado").getInt("mana_cost"), "circle-5 mana");
-        assertEquals(115, load("tornado").getInt("required_focus"), "circle-5 focus");
-        assertEquals(9, load("tornado").getInt("cooldown"), "circle-5 cooldown");
+        assertEquals(48, load("updraft").getInt("mana_cost"), "circle-3 mana");
+        assertEquals(65, load("updraft").getInt("required_focus"), "circle-3 focus");
+        assertEquals(6, load("updraft").getInt("cooldown"), "circle-3 cooldown");
     }
 }

@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class NoneSpellConfigTest {
 
     private static final String[] NONE_SPELLS =
-            {"magic_missile", "detect", "stealth", "barrier", "disguise", "blink", "warp"};
+            {"magic_missile", "detect", "stealth", "barrier", "disguise", "blink"};
 
     private static YamlConfiguration load(String id) throws IOException {
         try (InputStream in = NoneSpellConfigTest.class.getResourceAsStream("/spells/" + id + ".yml")) {
@@ -88,8 +88,8 @@ class NoneSpellConfigTest {
     }
 
     @Test
-    void theOtherFiveNoneSpellsAreUtilityWithNoPowerKey() throws IOException {
-        for (String id : new String[]{"detect", "stealth", "disguise", "blink", "warp"}) {
+    void theOtherFourNoneSpellsAreUtilityWithNoPowerKey() throws IOException {
+        for (String id : new String[]{"detect", "stealth", "disguise", "blink"}) {
             YamlConfiguration yml = load(id);
             assertEquals(SpellRole.UTILITY, SpellRole.parse(yml.getString("role")),
                     id + " manipulates the caster, not the target");
@@ -98,24 +98,6 @@ class NoneSpellConfigTest {
             assertEquals(Element.NONE, Element.valueOf(yml.getString("element")),
                     id + " stays on element NONE");
         }
-    }
-
-    /**
-     * warp shipped 4118, the same gui_custom_model_data as dark_tendrils. The
-     * values of the two neighbouring spells are read at runtime and compared
-     * rather than asserted as literals: both belong to DARK and are owned by T13,
-     * which is editing them in the same wave, so pinning their numbers here would
-     * make this class fail or pass on the other agent's timing rather than on
-     * anything it owns. Inequality is the property that actually matters here.
-     */
-    @Test
-    void warpCustomModelDataNoLongerCollidesWithDarkTendrils() throws IOException {
-        int warp = load("warp").getInt("gui_custom_model_data");
-        int darkTendrils = load("dark_tendrils").getInt("gui_custom_model_data");
-        int skeletalKnights = load("skeletal_knights").getInt("gui_custom_model_data");
-        assertEquals(4166, warp, "warp was 4118, the same value as dark_tendrils; spec 10.2 assigns 4166");
-        assertTrue(warp != darkTendrils, "the warp / dark_tendrils collision is repaired");
-        assertTrue(warp != skeletalKnights, "and warp does not collide with skeletal_knights either");
     }
 
     @Test
@@ -134,9 +116,6 @@ class NoneSpellConfigTest {
         assertEquals(75, load("blink").getInt("mana_cost"), "circle-4 mana");
         assertEquals(7, load("blink").getInt("cooldown"), "circle-4 cooldown");
         assertEquals(90, load("blink").getInt("required_focus"), "circle-4 focus");
-        assertEquals(165, load("warp").getInt("mana_cost"), "circle-6 mana");
-        assertEquals(11, load("warp").getInt("cooldown"), "circle-6 cooldown");
-        assertEquals(135, load("warp").getInt("required_focus"), "circle-6 focus");
     }
 
     @Test

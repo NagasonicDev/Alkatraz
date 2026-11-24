@@ -146,9 +146,7 @@ public class MagicMissile extends AttackSpell {
                         if (props.isCancelled() || props.isCountered()) return;
                         if (props.hasHit(le)) continue;
                         props.hit(le);
-                        SpellDamageUtil.damageWithSpell(le,
-                                getPower(p, le, props.getRemainingPower()),
-                                p, wand, MagicMissile.this);
+                        damageArea(p, le, props.getRemainingPower(), DEFAULT_PVP_CAP, wand);
 
                         Vector unitVector = entity.getLocation()
                                 .toVector()
@@ -230,9 +228,7 @@ public class MagicMissile extends AttackSpell {
                         if (props.hasHit(le)) continue;
                         props.hit(le);
 
-                        SpellDamageUtil.damageWithSpell(le,
-                                getPower(caster, le, props.getRemainingPower()),
-                                caster, wand, MagicMissile.this);
+                        damageArea(caster, le, props.getRemainingPower(), DEFAULT_PVP_CAP, wand);
 
                         Vector unitVector = entity.getLocation()
                                 .toVector()

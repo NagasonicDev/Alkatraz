@@ -93,6 +93,7 @@ public class Debuff extends Spell {
 
         if (target == null) {
             Utils.sendActionBar(caster, lang().get("spells.debuff.no_target"));
+            cancelCast(caster);
             return;
         }
 

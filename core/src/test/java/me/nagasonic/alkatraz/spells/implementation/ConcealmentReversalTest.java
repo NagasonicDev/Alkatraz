@@ -171,7 +171,7 @@ class ConcealmentReversalTest {
     void disguiseDispelResetsTheSkinBeforeItTouchesTheProfile() {
         when(victimProfile.getDisguise()).thenReturn(IMPOSTER_ID.toString());
         Skin ownSkin = mock(Skin.class);
-        skins.when(() -> Skin.fromURL(anyString())).thenReturn(ownSkin);
+        skins.when(() -> Skin.getCached(anyString())).thenReturn(ownSkin);
 
         Disguise disguise = new Disguise("DISGUISE");
         assertTrue(disguise.dispel(victim), "a successful skin reset must report cleared");

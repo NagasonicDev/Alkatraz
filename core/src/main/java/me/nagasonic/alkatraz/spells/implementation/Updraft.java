@@ -210,9 +210,7 @@ public class Updraft extends AttackSpell {
                     // DAMAGE - exactly once per target per cast.
                     if (props.hasHit(le)) continue;
                     props.hit(le);
-                    SpellDamageUtil.damageWithSpell(le,
-                            getPower(caster, le, props.getRemainingPower()),
-                            caster, wand, Updraft.this);
+                    damageArea(caster, le, props.getRemainingPower(), DEFAULT_PVP_CAP, wand);
                 }
                 t++;
             }

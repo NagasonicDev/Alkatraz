@@ -21,6 +21,7 @@ import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.SpellAttackContext;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
 import me.nagasonic.alkatraz.spells.util.SpellDamageUtil;
+import me.nagasonic.alkatraz.spells.util.SpellTargeting;
 import me.nagasonic.alkatraz.spells.vfx.CastCircle;
 import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
 import me.nagasonic.alkatraz.spells.vfx.SpellVfx;
@@ -413,8 +414,13 @@ public class WindVortex extends AttackSpell implements Listener {
                 if (nextStrike == null || nextStrike <= ticksElapsed) {
                     nextStrikeTick.put(living.getUniqueId(), ticksElapsed + SpellAttackContext.DAMAGE_INTERVAL_TICKS);
                     props.hit(living);
-                    SpellDamageUtil.damageWithSpell(living, context.power(living),
-                            caster, wand, WindVortex.this);
+                    if (!SpellTargeting.isAlly(caster, living)) {
+                        // context.power already applied getPower; cap that result once.
+                        double damage = context.power(living);
+                        SpellDamageUtil.damageWithSpell(living,
+                                living instanceof Player ? Math.min(damage, DEFAULT_PVP_CAP) : damage,
+                                caster, wand, WindVortex.this);
+                    }
                 }
 
                 // Apply slight levitation to lift them off ground

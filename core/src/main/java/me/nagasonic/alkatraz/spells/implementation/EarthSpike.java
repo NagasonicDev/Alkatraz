@@ -200,9 +200,7 @@ public class EarthSpike extends AttackSpell implements Listener {
                             // on the spike_height option.
                             if (props.hasHit(le)) continue;
                             props.hit(le);
-                            SpellDamageUtil.damageWithSpell(le,
-                                    getPower(player, le, props.getRemainingPower()),
-                                    player, wand, EarthSpike.this);
+                            damageArea(player, le, props.getRemainingPower(), DEFAULT_PVP_CAP, wand);
                             le.setVelocity(new Vector(0, 1, 0));
                         }
                     }
@@ -348,9 +346,7 @@ public class EarthSpike extends AttackSpell implements Listener {
                             // on the spike_height option.
                             if (props.hasHit(le)) continue;
                             props.hit(le);
-                            SpellDamageUtil.damageWithSpell(le,
-                                    getPower(caster, le, props.getRemainingPower()),
-                                    caster, wand, EarthSpike.this);
+                            damageArea(caster, le, props.getRemainingPower(), DEFAULT_PVP_CAP, wand);
                             le.setVelocity(new Vector(0, 1, 0));
                         }
                     }

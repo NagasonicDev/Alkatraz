@@ -65,6 +65,7 @@ public class Detect extends Spell {
     }
     private Map<Integer, Double> ranges = new HashMap<>();
     private final Map<UUID, List<LivingEntity>> entitiesByCaster = new ConcurrentHashMap<>();
+    private final Map<UUID, org.bukkit.scheduler.BukkitTask> scanTasks = new ConcurrentHashMap<>();
     private long duration;
 
     @Override
@@ -87,13 +88,14 @@ public class Detect extends Spell {
             AtomicDouble l = new AtomicDouble(1);
             Location a = p.getLocation();
             MagicProfile data = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
-            double range = ranges.get(data.getCircleLevel()) * (Double) getOption("scan_range").getSelectedValue(p).getValue();
+            if (data == null) return;
+            double range = ranges.getOrDefault(data.getCircleLevel(), ranges.getOrDefault(9, 0.0)) * (Double) getOption("scan_range").getSelectedValue(p).getValue();
             long activeDuration = Math.round((Double) getOption("glow_duration").getSelectedValue(p).getValue());
             int r = SCAN_MAX_RADIUS;
             final List<LivingEntity> revealed = new ArrayList<>();
             final Set<UUID> seen = new HashSet<>();
             entitiesByCaster.put(p.getUniqueId(), revealed);
-            new BukkitRunnable() {
+            org.bukkit.scheduler.BukkitTask scanTask = new BukkitRunnable() {
                 @Override
                 public void run() {
                     if (!p.isOnline() || p.isDead()) {
@@ -142,8 +144,10 @@ public class Detect extends Spell {
                     }else { cancel();}
                 }
             }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
+            scanTasks.put(p.getUniqueId(), scanTask);
             Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(Alkatraz.getInstance(), () -> {
                 entitiesByCaster.remove(p.getUniqueId(), revealed);
+                if (!p.isOnline()) return;
                 for (LivingEntity le : revealed){
                     Alkatraz.getNms().unsetGlowing(le, p);
                 }
@@ -173,6 +177,22 @@ public class Detect extends Spell {
                 }
             }
         }.runTaskTimer(Alkatraz.getInstance(), 0L, 1L);
+    }
+
+    @Override
+    public void cancelTasks() {
+        for (org.bukkit.scheduler.BukkitTask t : new ArrayList<>(scanTasks.values())) {
+            try { if (t != null) t.cancel(); } catch (Exception ignored) { }
+        }
+        scanTasks.clear();
+        for (Map.Entry<UUID, List<LivingEntity>> e : new ArrayList<>(entitiesByCaster.entrySet())) {
+            Player viewer = Bukkit.getPlayer(e.getKey());
+            if (viewer == null || !viewer.isOnline()) continue;
+            for (LivingEntity le : e.getValue()) {
+                try { Alkatraz.getNms().unsetGlowing(le, viewer); } catch (Exception ignored) { }
+            }
+        }
+        entitiesByCaster.clear();
     }
 
     @Override

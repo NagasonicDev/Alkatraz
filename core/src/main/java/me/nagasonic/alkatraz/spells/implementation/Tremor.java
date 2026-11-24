@@ -174,6 +174,7 @@ public class Tremor extends AttackSpell implements Listener {
                                 originals.put(loc, loc.getBlock().getType());
                                 BlockData data = Bukkit.createBlockData(loc.getBlock().getType());
                                 if (Protection.blockEdit(p, loc)) {
+                                    loc.getBlock().setType(Material.AIR, false);
                                     FallingBlock b = loc.getWorld().spawnFallingBlock(loc.add(0, 0.5, 0), data);
                                     registerRecoverData(b.getUniqueId(), originals, p);
                                     b.setHurtEntities(false);
@@ -198,7 +199,7 @@ public class Tremor extends AttackSpell implements Listener {
                     for (LivingEntity entity : me.nagasonic.alkatraz.util.Utils.getNearbyLivingEntities(base, reach, 20, reach)) {
                         if (entity != p && !props.hasHit(entity) && nearAnyLane(entity, toAdd)) {
                             entity.setVelocity(new Vector(0, 1, 0));
-                            SpellDamageUtil.damageWithSpell(entity, getPower(p, entity, props.getRemainingPower()), p, wand, Tremor.this);
+                            damageArea(p, entity, props.getRemainingPower(), DEFAULT_PVP_CAP, wand);
                             props.hit(entity);
                         }
                     }
@@ -274,6 +275,7 @@ public class Tremor extends AttackSpell implements Listener {
                                 originals.put(loc, loc.getBlock().getType());
                                 BlockData data = Bukkit.createBlockData(loc.getBlock().getType());
                                 if (Protection.blockEdit(caster, loc)) {
+                                    loc.getBlock().setType(Material.AIR, false);
                                     FallingBlock b = loc.getWorld().spawnFallingBlock(loc.add(0, 0.5, 0), data);
                                     registerRecoverData(b.getUniqueId(), originals, caster);
                                     b.setHurtEntities(false);
@@ -298,7 +300,7 @@ public class Tremor extends AttackSpell implements Listener {
                     for (LivingEntity entity : me.nagasonic.alkatraz.util.Utils.getNearbyLivingEntities(base, reach, 20, reach)) {
                         if (entity != caster && !props.hasHit(entity) && nearAnyLane(entity, toAdd)) {
                             entity.setVelocity(new Vector(0, 1, 0));
-                            SpellDamageUtil.damageWithSpell(entity, getPower(caster, entity, props.getRemainingPower()), caster, wand, Tremor.this);
+                            damageArea(caster, entity, props.getRemainingPower(), DEFAULT_PVP_CAP, wand);
                             props.hit(entity);
                         }
                     }
@@ -371,6 +373,16 @@ public class Tremor extends AttackSpell implements Listener {
     @EventHandler
     private void onPluginDisable(PluginDisableEvent e) {
         if (e.getPlugin() != Alkatraz.getInstance()) return;
+        recoverData.clear();
+        recoverCasters.clear();
+    }
+
+    @Override
+    public void cancelTasks() {
+        for (Map.Entry<UUID, Map<Location, Material>> entry : recoverData.entrySet()) {
+            TerrainEditor.restoreAll(recoverCasters.get(entry.getKey()),
+                    new TerrainEditor.RestoreTicket(entry.getValue()));
+        }
         recoverData.clear();
         recoverCasters.clear();
     }

@@ -107,6 +107,7 @@ public class Buff extends Spell {
 
         if (target == null) {
             Utils.sendActionBar(caster, lang().get("spells.buff.no_target"));
+            cancelCast(caster);
             return;
         }
 

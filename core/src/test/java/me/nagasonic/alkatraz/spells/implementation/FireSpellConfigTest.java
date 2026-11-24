@@ -31,23 +31,9 @@ class FireSpellConfigTest {
         }
     }
 
-    /** Mirrors TerrainEditor.destroySphere's candidate enumeration. */
-    private static int sphereBlockCount(double radius) {
-        int r = (int) Math.ceil(radius);
-        int count = 0;
-        for (int dx = -r; dx <= r; dx++) {
-            for (int dy = -r; dy <= r; dy++) {
-                for (int dz = -r; dz <= r; dz++) {
-                    if (dx * dx + dy * dy + dz * dz <= radius * radius) count++;
-                }
-            }
-        }
-        return count;
-    }
-
     @Test
     void everyFireSpellDeclaresARoleAllowedForItsElement() throws IOException {
-        for (String id : new String[]{"fireball", "fire_blast", "fire_wall", "flaming_volley", "meteor_shower"}) {
+        for (String id : new String[]{"fireball", "fire_blast", "fire_wall", "flaming_volley"}) {
             YamlConfiguration yml = load(id);
             SpellRole role = SpellRole.parse(yml.getString("role"));
             assertNotNull(role, id + " must declare a role: key");
@@ -115,64 +101,9 @@ class FireSpellConfigTest {
     }
 
     @Test
-    void meteorShowerIsPromotedToCircleSix() throws IOException {
-        YamlConfiguration yml = load("meteor_shower");
-        assertEquals(6, yml.getInt("level"), "meteor_shower is the roster's only promotion, 5 -> 6");
-        assertEquals(165, yml.getInt("mana_cost"), "circle-6 mana");
-        assertEquals(11, yml.getInt("cooldown"), "circle-6 cooldown");
-        assertEquals(135, yml.getInt("required_focus"), "circle-6 focus");
-        // progression.yml ships max_focus 160 at circle 6, so the 85% ceiling is
-        // 136. 135 <= 136 clears it by one point.
-        assertTrue(yml.getInt("required_focus") <= 0.85 * 160.0,
-                "circle-6 focus must be at or below 85% of the 160 maxFocus");
-    }
-
-    @Test
-    void craterBudgetIsCappedNotTrusted() throws IOException {
-        int totalMeteors = 6;
-        int budget = load("meteor_shower").getInt("terrain_budget");
-        assertEquals(SpellBudgets.terrainBudget(6), budget, "the cast budget is the circle-6 TERRAIN budget");
-
-        int naturalNormal = sphereBlockCount(3) * totalMeteors;
-        assertEquals(123, sphereBlockCount(3), "a radius-3 sphere is 123 blocks");
-        assertEquals(738, naturalNormal, "6 meteors at radius 3 would naturally clear 738 blocks");
-        assertEquals(budget, Math.min(naturalNormal, budget),
-                "the maxBlocks cap truncates at the budget rather than overshooting it");
-        assertTrue(Math.min(naturalNormal, budget) <= SpellBudgets.terrainBudget(6),
-                "the DEFAULT option must not exceed the circle-6 terrain budget of "
-                        + SpellBudgets.terrainBudget(6));
-
-        int naturalWide = sphereBlockCount(4) * totalMeteors;
-        assertEquals(257, sphereBlockCount(4), "a radius-4 sphere is 257 blocks");
-        assertEquals(1542, naturalWide, "6 meteors at radius 4 would naturally clear 1542 blocks");
-        int wideCap = (int) (SpellBudgets.terrainBudget(6) * 2.0);
-        assertTrue(Math.min(naturalWide, wideCap) <= wideCap,
-                "'wide' is the paid-over option and may reach x2.0 of the budget, capped at " + wideCap);
-    }
-
-    @Test
-    void wideMeteorOptionCostsExtraMana() throws IOException {
-        try (InputStream in = FireSpellConfigTest.class.getResourceAsStream("/spells/meteor_shower_options.yml")) {
-            assertNotNull(in, "missing bundled resource /spells/meteor_shower_options.yml");
-            YamlConfiguration opts = YamlConfiguration.loadConfiguration(
-                    new InputStreamReader(in, StandardCharsets.UTF_8));
-            int index = opts.getInt("options.radius.default_index");
-            assertEquals(1, index, "the default radius option is 'normal' at radius 3");
-
-            var values = opts.getConfigurationSection("options.radius.values");
-            assertNotNull(values, "the radius option must declare its values");
-            assertEquals(2.0, values.getDouble("tight.value"), 1e-9, "tight is re-scaled 4 -> 2");
-            assertEquals(3.0, values.getDouble("normal.value"), 1e-9, "normal is re-scaled 6 -> 3");
-            assertEquals(4.0, values.getDouble("wide.value"), 1e-9, "wide is re-scaled 8 -> 4");
-            assertTrue(values.contains("wide.impacts"),
-                    "wide must carry a mana_cost impact or it is not a legal paid-over");
-        }
-    }
-
-    @Test
     void bedrockIsProtectedByIdentityNotSubstring() {
         assertTrue(TerrainEditor.isProtected(Material.BEDROCK),
-                "the MeteorShower substring check is replaced by an identity comparison");
+                "bedrock is protected by an identity comparison, not a name substring");
         assertTrue(TerrainEditor.isProtected(Material.CHEST),
                 "containers were never in the substring policy and must now be protected");
         assertFalse(TerrainEditor.isProtected(Material.STONE), "ordinary stone is fair game");

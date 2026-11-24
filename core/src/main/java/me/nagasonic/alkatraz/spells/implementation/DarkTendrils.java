@@ -17,6 +17,7 @@ import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.spells.types.AttackType;
 import me.nagasonic.alkatraz.spells.types.BarrierSpell;
 import me.nagasonic.alkatraz.spells.types.properties.implementation.AttackProperties;
+import me.nagasonic.alkatraz.spells.util.SpellTargeting;
 import me.nagasonic.alkatraz.util.ParticleCaster;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.Color;
@@ -267,6 +268,12 @@ public class DarkTendrils extends AttackSpell implements Listener {
 
         if (!(e.getEntity() instanceof LivingEntity target)) return;
 
+        LivingEntity caster = comp.getCaster();
+        if (target instanceof Player player && SpellTargeting.isAlly(caster, player)) {
+            e.setCancelled(true);
+            return;
+        }
+
         // Dedup per target per cast. Every tendril of a volley shares one
         // AttackProperties, and a single damage event can fire more than once
         // while the tendril is being removed - without this guard the target is
@@ -275,7 +282,7 @@ public class DarkTendrils extends AttackSpell implements Listener {
         props.hit(target);
 
         // Calculate final damage - the ONE getPower application for this impact.
-        double finalDamage = getPower(comp.getCaster(), target, props.getRemainingPower());
+        double finalDamage = damageForCap(caster, target, props.getRemainingPower(), DEFAULT_PVP_CAP);
         e.setDamage(finalDamage);
 
         applyDebuffs(target, comp.getCaster());
