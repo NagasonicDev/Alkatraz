@@ -27,6 +27,9 @@ out/
 !scripts/build_alkatraz_modern_pack.py
 !scripts/redesign_modern_textures.py
 !scripts/build_individual_spell_textures.py
+!scripts/fix_armor_uv_scale.py
+!scripts/audit_armor_uv.py
+!scripts/validate_armor_assets.py
 
 # Package Files #
 *.jar
@@ -127,6 +130,7 @@ run/
 *.iml
 
 # Temporary and generated files
+graphify-out/
 wiki/
 .omo/
 .opencode/
