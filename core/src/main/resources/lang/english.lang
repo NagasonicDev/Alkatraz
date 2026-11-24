@@ -73,6 +73,7 @@ stats.mana_regen = &bMana Regen
 stats.mana_regen_lore = &7Per second: &f%current%
 stats.affinity = &eAffinity: &f%value%
 stats.resistance = &eResistance: &f%value%
+stats.affinity_cap_note = &7Affinity is descriptive; spell damage is capped at &fx%multiplier%.
 stats.element_fire = &6Fire
 stats.element_water = &3Water
 stats.element_earth = &aEarth
@@ -478,6 +479,31 @@ spells.cast.cannot_cast_now = &cYou cannot cast right now
 spells.cast.not_enough_mana = &cNot Enough Mana
 spells.cast.please_wait = &cPlease wait %time%s
 spells.cast.casted = Casted:
+spells.cast.casting = Casting:
+spells.cast.code_line = &eCode: %code%
+spells.cast.unknown_code = &cNo spell for that code.
+spells.cast.busy = &cYou are already casting.
+spells.recipient_notice_riptide = &b%player% &7swept you up with &f%default%&7.
+spells.recipient_notice_veil = &5%player% &7cast &f%default% &7on you.
+spells.worldgate.ally_ack = &7{caster} opened a World Gate for you.
+spells.wayfarerscall.ally_ack = &7{caster} called you to their side.
+spells.chronicleanchor.ally_ack = &7{caster} recalled you to their anchor.
+spells.stonebastion.restore_warning = &cThe Stone Bastion is collapsing - move clear!
+spells.titanscauseway.restore_warning = &cThe Titan's Causeway is collapsing - move clear!
+spells.atlasunbound.restore_warning = &cAtlas Unbound is collapsing - move clear!
+spells.teleport_consent.enabled = &aYou opted in to allied spell teleports.
+spells.teleport_consent.disabled = &cYou opted out of allied spell teleports.
+spells.covenantofthefirstdawn.aided_by = &e{caster} holds the dawn over you for {seconds} seconds.
+spells.beaconofaccord.aided_by = &e{caster} mended you.
+spells.dawnchorus.aided_by = &e{caster} sang you whole.
+spells.sanctuarybloom.aided_by = &e{caster} bloomed mercy over you.
+spells.skyhook.aided_by = &e{caster} lifted you.
+spells.eyeofthefirmament.aided_by = &f{caster} lifts you for {seconds} seconds.
+spells.worldtreebeacon.aided_by = &e{caster} rooted a beacon around you.
+spells.group.consent = &7Team = consent: group spells affect only you and players on your scoreboard team.
+spells.sustain.shared_slot = &7Circle 9 sustain is shared. Covenant of the First Dawn and Hollow King's Court use one slot.
+spells.empyreanpassage.ally_joined = &7{caster} has swept you into the slipstream.
+spells.leviathanstestament.ally_swept = &e{caster} has called the tide; hold fast.
 spells.cast.need_tool = &cYou need a better tool to cast this.
 spells.cast.not_discovered = &cYou have not discovered this spell.
 spells.cast.buffs_applied = &bBuffs applied to %target%!
@@ -488,6 +514,10 @@ spells.cast.blessed_by = &eYou have been blessed by %spell%!
 spells.cast.not_enough_focus = &cNot enough focus to cast this spell.
 spells.cast.focus_lost = &cYou lost your focus and the spell was cancelled!
 spells.cast.interrupted = &cYour wind-up was interrupted!
+cast.preview = &7Spell: &f%name% &8(%code%)
+cast.aborted = &cCast aborted.
+cast.buffer_cleared = &7Spell buffer cleared.
+cast.exclusive_s = &cSwap-hand clicks must be entered on their own.
 spells.sustain.out_of_mana = &cYour mana runs dry - the spell lets go.
 spells.sustain.blocked = &cAnother of your sustains is already running.
 
@@ -546,6 +576,16 @@ progression.circle_up_title = &e&lCIRCLE UP!
 progression.circle_up_subtitle = &bReached the %ordinal% circle.
 progression.circle_up_spell_rank = &bYou are now able to use spells up to the %rank% rank.
 progression.circle_up_ak = &bArcane Knowledge: %current%/%max%
+progression.circle_identity.default = &7A new rank of magic is now available.
+progression.circle_identity.1 = &7Elemental bolts and first-circle combat magic.
+progression.circle_identity.2 = &7Blades, buffs, detection, spikes, stealth and swiftness.
+progression.circle_identity.3 = &7Barriers, dark tendrils, dispel, fire walls, healing and tremors.
+progression.circle_identity.4 = &7Blink, earthen walls, volleys, summons and whirlpools.
+progression.circle_identity.5 = &7Runic surveys, stone bridges, forge-fire and soul lanterns.
+progression.circle_identity.6 = &7Foldstep travel, quarry stone, phoenix reprieve and riptide convoys.
+progression.circle_identity.7 = &7Wayfarer recall, stone bastions, dragon's wake and unseen veils.
+progression.circle_identity.8 = &7Chronicle anchors, causeways, starfall crucibles and worldtree beacons.
+progression.circle_identity.9 = &7World gates, atlas shaping, covenant wards and capstone spells.
 
 # --- MagicItemStack ---
 magic_item.element_header = Elements:
@@ -605,30 +645,6 @@ spells.blink.lore2 = &8short-range teleportation.
 spells.blink.no_valid_location = &cNo valid teleport location found!
 spells.blink.name = &5Blink
 spells.blink.description = &7Teleports you a short distance\n&7in the direction you are facing.
-
-# --- Warp ---
-spells.warp.book_name = &6Codex of the Folded Path
-spells.warp.lore1 = &8&oFold reality to cross vast distances.
-spells.warp.lore2 = &8long-range teleportation.
-spells.warp.no_points = &cYou have no warp points set! Configure them in the spell options.
-spells.warp.interrupted = &cWarp interrupted!
-spells.warp.too_far = &cThat warp point is too far away!
-spells.warp.blocked = &cYou cannot warp there!
-spells.warp.point_set = &aWarp point set!
-spells.warp.point_cleared = &7Warp point cleared.
-spells.warp.name = &5Warp
-spells.warp.description = &7Fold space to teleport across\n&7great distances in an instant.
-
-# --- Skeletal Knights ---
-spells.skeletalknights.book_name = &2Codex of the Black Steeds
-spells.skeletalknights.lore1 = &8&oRide forth, servants of bone.
-spells.skeletalknights.lore2 = &7Summon three iron-clad knights upon skeletal steeds.
-# Dead config: the class channels through the shared WindUp/ChannelRegistry, which
-# sends spells.cast.interrupted. Kept (and renamed with the block) so an existing
-# translation is not silently dropped.
-spells.skeletalknights.interrupted = &cSummoning interrupted!
-spells.skeletalknights.name = &2Skeletal Knights
-spells.skeletalknights.description = &7Summon 3 iron-clad skeleton knights\n&7mounted on skeletal steeds.
 
 # --- Buff ---
 spells.buff.book_name = &bTome of Fortification
@@ -705,15 +721,6 @@ spells.earthenwall.lore2 = &8earth barriers.
 spells.earthenwall.name = &6Earthen Wall
 spells.earthenwall.description = &7Raises a wall of earth to block\n&7and damage enemies.
 
-# --- EarthSplitter (class Fissure) ---
-spells.earthsplitter.book_name = &aTerra Fissure Tome
-spells.earthsplitter.lore1 = &8The ground itself obeys the earth mage.
-# Dead config: Fissure.getSpellBook() reads book_name and lore1 only. Kept (and
-# renamed with the block) so an existing translation is not silently dropped.
-spells.earthsplitter.lore2 = &8the ground.
-spells.earthsplitter.name = &aEarth Splitter
-spells.earthsplitter.description = &7Cracks the earth open with a widening fissure that travels forward,\n&7launching enemies into the air.
-
 # --- FireBlast ---
 spells.fireblast.book_name = &eScroll of Apollo &oII
 spells.fireblast.lore1 = &8A scroll containing the knowledge to enhance
@@ -771,24 +778,6 @@ spells.lightbuff.description = &7Blesses nearby allies with\n&7a short burst of 
 spells.magicmissile.name = &bMagic Missile
 spells.magicmissile.description = &7A short burst of mana that\n&7deals small damage to enemies.
 
-# --- MeteorShower ---
-spells.meteorshower.book_name = &6Codex of Falling Stars
-spells.meteorshower.lore1 = &8The heavens answer the caller's will.
-spells.meteorshower.name = &6Meteor Shower
-spells.meteorshower.description = &7Calls down a rain of fiery meteors\n&7from the sky, devastating a large area.
-
-# --- Radiance ---
-spells.radiance.book_name = &eGospel of the Dawn
-spells.radiance.lore1 = &8Light banishes the darkness.
-spells.radiance.name = &eRadiance
-spells.radiance.description = &7A burst of holy light that heals allies\n&7and sears undead creatures.
-
-# --- ShadowRealm ---
-spells.shadowrealm.book_name = &5Necronomicon of the Void
-spells.shadowrealm.lore1 = &8The abyss gazes back into you.
-spells.shadowrealm.name = &5Shadow Realm
-spells.shadowrealm.description = &7Envelops an area in pure darkness,\n&7corrupting all who enter.
-
 # --- Stealth ---
 spells.stealth.book_name = &8A Beginners Guide to Assassination
 spells.stealth.lore1 = &8A book written by a certain teacher
@@ -814,19 +803,6 @@ spells.tremor.lore1 = &8The 3rd lesson of the seeker of the
 spells.tremor.lore2 = &8pinnacle of Earth magic
 spells.tremor.name = #A0522DTremor
 spells.tremor.description = &7Sends out a shockwave through the ground\n&7launching enemies up and dealing damage.
-
-# --- Tornado ---
-spells.tornado.book_name = &bScroll of the Endless Gyre
-spells.tornado.lore1 = &8The winds spiral into an unstoppable force.
-spells.tornado.no_ground = &cNo valid ground found for the tornado!
-spells.tornado.name = &bTornado
-spells.tornado.description = &7Creates a violent vortex that pulls in\n&7and tears apart nearby enemies.
-
-# --- Tsunami ---
-spells.tsunami.book_name = &9Tidal Scroll of the Deep
-spells.tsunami.lore1 = &8The ocean bends to the caster's command.
-spells.tsunami.name = &9Tsunami
-spells.tsunami.description = &7Summons a massive wave that surges forward,\n&7placing water blocks and crushing everything in its path.
 
 # --- WaterPulse ---
 spells.waterpulse.book_name = &9Water Sutra &oVol. II
@@ -869,92 +845,6 @@ spells.windvortex.description = &7Create a powerful vortex of wind\n&7that pulls
 # text "spells.foo.book_name" on the item. SpellLangTest pins the convention.
 # ==============================
 
-# --- FlameLance (circle 5, FIRE) ---
-spells.flamelance.book_name = &eCodex of the Piercing Flame
-spells.flamelance.lore1 = &8Draw the breath in, hold it, and loose a lance
-spells.flamelance.lore2 = &8narrow enough to pass through an entire crowd.
-spells.flamelance.name = &6Flame Lance
-spells.flamelance.description = &7A lance of fire narrow enough to pass through a\n&7crowd, burning everything it touches exactly once.
-
-# --- InfernoPilgrimage (circle 7, FIRE) ---
-spells.infernopilgrimage.book_name = &6Rite of the Walking Pyre
-spells.infernopilgrimage.lore1 = &8The flame does not stand and wait to be struck.
-spells.infernopilgrimage.lore2 = &8It walks where you look, and takes three breaths to pass.
-spells.infernopilgrimage.name = &6Inferno Pilgrimage
-spells.infernopilgrimage.description = &7Loose a wall of flame and it walks the line you\n&7were looking down, taking three pulses as it goes.
-
-# --- SunfireBarrage (circle 8, FIRE) ---
-spells.sunfirebarrage.book_name = &eAstral Codex of Falling Light
-spells.sunfirebarrage.lore1 = &8Mark what must burn, then hold still and let the
-spells.sunfirebarrage.lore2 = &8sun come down on it in pieces.
-spells.sunfirebarrage.name = &6Sunfire Barrage
-spells.sunfirebarrage.description = &7Hold still and the sun finds five things to\n&7burn. Move, or get hit, and it finds nothing.
-
-# --- InfernoRite (circle 9, FIRE) ---
-spells.infernorite.book_name = &6Grimoire of the Ninth Pyre
-spells.infernorite.lore1 = &8The rite does not wait for fire - it lights its own,
-spells.infernorite.lore2 = &8and the burning goes on taking each other after it.
-spells.infernorite.opened = &6The rite opens - twelve seconds of spreading.
-spells.infernorite.expired = &7The rite closes.
-spells.infernorite.name = &6Inferno Rite
-spells.infernorite.description = &7Ignite foes in a wide arc. Three paced blasts\n&7spread the fire across the fight over\n&7twelve seconds.
-
-# --- Undertow (circle 6, WATER) ---
-spells.undertow.book_name = &9Tome of the Riptide
-spells.undertow.lore1 = &8The sea does not chase. It waits,
-spells.undertow.lore2 = &8and then it takes what you owe.
-spells.undertow.name = &9Undertow
-spells.undertow.description = &7Calls a riptide that hauls one\n&7enemy toward you. The further it\n&7drags them, the more they suffer.
-
-# --- Everdrain (circle 7, WATER) ---
-spells.everdrain.book_name = &9Codex of the Leeching Deep
-spells.everdrain.lore1 = &8Life is currency, and the water
-spells.everdrain.lore2 = &8always comes to collect.
-spells.everdrain.name = &9Everdrain
-spells.everdrain.description = &7Opens a pool that drinks from\n&7every living thing inside it -\n&7and hands their life to you.
-
-# --- ThousandWaves (circle 8, WATER) ---
-spells.thousandwaves.book_name = &9Atlas of a Thousand Waves
-spells.thousandwaves.lore1 = &8Call the whole sea, and it comes
-spells.thousandwaves.lore2 = &8one wave at a time, and all at once.
-spells.thousandwaves.name = &9Thousand Waves
-spells.thousandwaves.description = &7Hold to gather the sea, then\n&7release eight crests at once -\n&7each one heavier than the last.
-
-# --- TideOfTheDeep (circle 9, WATER) ---
-spells.tideofthedeep.book_name = &9Testament of the Rising Tide
-spells.tideofthedeep.lore1 = &8You need not stand in the flood. Still, it will
-spells.tideofthedeep.lore2 = &8carry you. Everything else drowns.
-spells.tideofthedeep.name = &9Tide of the Deep
-spells.tideofthedeep.description = &7Waves drag the hostile into a clump and\n&7bleed them there. You mend from all of it -\n&7whether or not you stand in the flood.
-
-# --- TectonicStrike (circle 6, EARTH) ---
-spells.tectonicstrike.book_name = &6Tome of the Shattered Strata
-spells.tectonicstrike.lore1 = &8&oBring the mountain down on one point.
-spells.tectonicstrike.lore2 = &8a focused slam that breaks the ground open.
-spells.tectonicstrike.name = &6Tectonic Strike
-spells.tectonicstrike.description = &7Slams the full weight of a mountain into one\n&7point, cracking the ground and hurling everything back.
-
-# --- FaultLine (circle 7, EARTH) ---
-spells.faultline.book_name = &4Grimoire of the Split Land
-spells.faultline.lore1 = &8&oThe crust remembers every wound.
-spells.faultline.lore2 = &8a crack that keeps opening for ten seconds.
-spells.faultline.name = &4Fault Line
-spells.faultline.description = &7Splits the ground open and keeps splitting it for ten\n&7seconds, hurling anything that falls into the crack.
-
-# --- ContinentalShift (circle 8, EARTH) ---
-spells.continentalshift.book_name = &2Atlas of the Rising Land
-spells.continentalshift.lore1 = &8&oLift a continent, and stand upon it.
-spells.continentalshift.lore2 = &8a plateau raised from the crust, and no scar left behind.
-spells.continentalshift.name = &2Continental Shift
-spells.continentalshift.description = &7Channels the crust upward into a plateau you can\n&7stand on, and drop off the edge of.
-
-# --- Worldbreaker (circle 9, EARTH) ---
-spells.worldbreaker.book_name = &5Last Codex of the Broken World
-spells.worldbreaker.lore1 = &8&oThe world was whole, once.
-spells.worldbreaker.lore2 = &8two faults, one slab, and everything caught between.
-spells.worldbreaker.name = &5Worldbreaker
-spells.worldbreaker.description = &7Split the ground with twin rifts and raise\n&7the earth between them. After a brief hold,\n&7the slab falls and the rifts collapse inward.
-
 # --- Updraft (circle 3, AIR) ---
 spells.updraft.book_name = &fTome of Wind &oVol. 3
 spells.updraft.lore1 = &8Air itself, taught to lift what it holds.
@@ -962,138 +852,12 @@ spells.updraft.lore2 = &8knock upward.
 spells.updraft.name = &fUpdraft
 spells.updraft.description = &7A column of rising air that tears\n&7enemies off their feet.
 
-# --- Thunderclap (circle 6, AIR) ---
-spells.thunderclap.book_name = &fCodex of the Split Sky
-spells.thunderclap.lore1 = &8One word of thunder, and the air answers.
-spells.thunderclap.lore2 = &8a single concussive blast.
-spells.thunderclap.name = &fThunderclap
-spells.thunderclap.description = &7A single concussive blast that shoves\n&7everything nearby outward and back.
-
-# --- CycloneNest (circle 7, AIR) ---
-spells.cyclonenest.book_name = &fCompendium of the Maelstrom
-spells.cyclonenest.lore1 = &8Three small gyres, set down and left to feed.
-spells.cyclonenest.lore2 = &8nesting tornadoes.
-spells.cyclonenest.name = &fCyclone Nest
-spells.cyclonenest.description = &7Set three small tornadoes into the\n&7ground and leave them feeding.
-
-# --- Stormcaller (circle 8, AIR) ---
-spells.stormcaller.book_name = &fThe Windborne Path
-spells.stormcaller.lore1 = &8Call the winds to lift you skyward.
-spells.stormcaller.lore2 = &8A brief passage above the ground.
-spells.stormcaller.name = &fStormcaller
-spells.stormcaller.description = &7Channel the storm to lift you into\n&7flight for a short time.
-
-# --- Skywrath (circle 9, AIR) ---
-spells.skywrath.book_name = &fThe Wrath of Open Sky
-spells.skywrath.lore1 = &8The last lesson: take the sky itself.
-spells.skywrath.lore2 = &8The open sky answers with thunder.
-spells.skywrath.name = &fSkywrath
-spells.skywrath.description = &7Call down a violent storm that follows\n&7you and strikes nearby enemies for 24 seconds.
-
 # --- LightBolt (circle 1, LIGHT) ---
 spells.lightbolt.book_name = &eScroll of the First Ray
 spells.lightbolt.lore1 = &8The opening line of the lit canticle,
 spells.lightbolt.lore2 = &8a single ray loosed at the risen dead.
 spells.lightbolt.name = &eLight Bolt
 spells.lightbolt.description = &7A pale bolt of gathered light,\n&7hurled straight down your aim.\n&7It bites the risen dead twice as hard.
-
-# --- RadiantBrand (circle 6, LIGHT) ---
-spells.radiantbrand.book_name = &6Book of the Sealed Brand
-spells.radiantbrand.lore1 = &8Mark a foe, and the light keeps
-spells.radiantbrand.lore2 = &8its own accounts.
-spells.radiantbrand.no_target = &cNo living target in sight.
-spells.radiantbrand.faded = &7The brand fades unlit.
-spells.radiantbrand.name = &6Radiant Brand
-spells.radiantbrand.description = &7Seal a mark on one foe. It deals\n&7no damage when it is set...\n&7...and everything when it goes out.
-
-# --- ChoirOfLight (circle 7, LIGHT) ---
-spells.choiroflight.book_name = &bPsalter of the Shifting Choir
-spells.choiroflight.lore1 = &8Every voice in the choir finds its
-spells.choiroflight.lore2 = &8own throat, and all of them sing at once.
-spells.choiroflight.no_target = &cNothing to sing to.
-spells.choiroflight.name = &bChoir of Light
-spells.choiroflight.description = &7Shards of light orbit you, find\n&7their own throats, and sing as\n&7one. Answer the choir and it\n&7falls silent all at once.
-
-# --- Apotheosis (circle 8, LIGHT) ---
-spells.apotheosis.book_name = &dLitany of the Ascendant
-spells.apotheosis.lore1 = &8Stand still while the light climbs,
-spells.apotheosis.lore2 = &8and it will climb through you.
-spells.apotheosis.active = &dThe ascendant holds for &f%duration%&d seconds.
-spells.apotheosis.expired = &7The light settles out of you.
-spells.apotheosis.interrupted = &cThe ascent is broken!
-spells.apotheosis.already_active = &cYou are already ascended.
-spells.apotheosis.boss_bar = &dApotheosis %duration%s
-spells.apotheosis.name = &dApotheosis
-spells.apotheosis.description = &7Stand still while the light climbs,\n&7and it will climb through you.\n&7Your own spells cost less and hit\n&7harder while it holds.
-
-# --- CrownOfDawn (circle 9, LIGHT) ---
-spells.crownofdawn.book_name = &fCrown of the Breaking Dawn
-spells.crownofdawn.lore1 = &8Morning takes you off the ground and
-spells.crownofdawn.lore2 = &8holds you there, and nothing thrown comes near.
-spells.crownofdawn.boss_bar = &fCrown of Dawn &8| &7%seconds%s left
-spells.crownofdawn.name = &fCrown of Dawn
-spells.crownofdawn.description = &7The crown lifts you and holds you there,\n&7searing what stands close and stripping its\n&7armour. The light around you turns arrows.
-
-# --- UmbralVolley (circle 7, DARK) ---
-spells.umbralvolley.book_name = &5Umbral Volley &oChapter III
-spells.umbralvolley.lore1 = &8&oThree darts of night, and the wound they
-spells.umbralvolley.lore2 = &8leave behind them does not close.
-spells.umbralvolley.name = &5Umbral Volley
-spells.umbralvolley.description = &7Loose three darts of shadow that hunt\n&7the same prey, then split apart\n&8&oand leave a wound that will not close.
-
-# --- VoidAnchor (circle 8, DARK) ---
-spells.voidanchor.book_name = &5Grimoire of the Bound &oFolio IV
-spells.voidanchor.lore1 = &8&oTear a horror from the ground and set it
-spells.voidanchor.lore2 = &8to hold what you would not hold yourself.
-spells.voidanchor.no_summon_spot = &cThe ground will not give one up here.
-spells.voidanchor.name = &5Void Anchor
-spells.voidanchor.description = &7Tear a bound horror from the ground\n&7and set it to hold what comes\n&7within its reach.
-
-# --- Oblivion (circle 9, DARK) ---
-spells.oblivion.book_name = &5Necronomicon Finis
-spells.oblivion.lore1 = &8&oThe hole does not wait for a wound. It opens on
-spells.oblivion.lore2 = &8the whole of you, and it does not stop drinking.
-spells.oblivion.sustain = &5Oblivion &8| &7%seconds%s left &8| &7-%upkeep%/s
-spells.oblivion.name = &5Oblivion
-spells.oblivion.description = &7A hole opens and follows you. It drags\n&7the hostile inward, bleeds them dry, and\n&7hands you a quarter of all it takes.
-
-# --- ArcaneWard (circle 5, NONE) ---
-spells.arcaneward.book_name = &5Aegis Codex &oPart II
-spells.arcaneward.lore1 = &8&oSet the aegis where it is needed, not where you stand.
-spells.arcaneward.lore2 = &8stationary ally-buffersing.
-spells.arcaneward.name = &5Arcane Ward
-spells.arcaneward.description = &7Weaves a screen of mana around one\n&7soul - yours or an ally's - and\n&7leaves it standing when you walk away.
-
-# --- WaystoneRecall (circle 7, NONE) ---
-spells.waystonerecall.book_name = &dCodex of the Bound Waystone
-spells.waystonerecall.lore1 = &8&oThe waystone does not ask for a moment.
-spells.waystonerecall.lore2 = &8instantaneous long-range recall.
-spells.waystonerecall.no_points = &cYou have no reachable waystones! Set some in Warp's options first.
-spells.waystonerecall.nothing_in_sight = &cNo waystone within reach of your aim.
-spells.waystonerecall.blocked = &cYou cannot recall there!
-spells.waystonerecall.name = &dWaystone Recall
-spells.waystonerecall.description = &7Names a waystone, and stands you\n&7on it before the sound has\n&7finished - no channel, no window.
-
-# --- EchoCast (circle 8, NONE) ---
-spells.echocast.book_name = &dGrimoire of the Repeated Hour
-spells.echocast.lore1 = &8&oWhat you cast, cast once more.
-spells.echocast.lore2 = &8re-casts the last three spells in order.
-spells.echocast.no_history = &cYou have not cast anything to echo yet.
-spells.echocast.not_enough_mana = &cNot enough mana to echo your last three spells.
-spells.echocast.replaying = &dEchoing &f%count% &dspell(s)...
-spells.echocast.name = &6Echo Cast
-spells.echocast.description = &7Takes the last three things you cast\n&7and makes you cast them again,\n&7in order, for sixty percent.
-
-# --- ArcaneResonance (circle 9, NONE) ---
-spells.arcaneresonance.book_name = &5Tome of the Standing Wave
-spells.arcaneresonance.lore1 = &8&oHold the note. The spell answers twice.
-spells.arcaneresonance.lore2 = &8every cast you make sounds a fifth more.
-spells.arcaneresonance.armed = &dThe note holds - every cast sounds twice.
-spells.arcaneresonance.charges = &dThe note answers - twice, and a fifth truer.
-spells.arcaneresonance.expired = &7Your resonance lets the note go.
-spells.arcaneresonance.sustain = &dArcane Resonance &8| &7%seconds%s left &8| &7-%upkeep%/s
-spells.arcaneresonance.name = &dArcane Resonance
-spells.arcaneresonance.description = &7For forty-two seconds, your spells hit harder\n&7and echo a moment later. Cast again to end\n&7the resonance early.
 
 # --- Dispel (circle 3, LIGHT, UTILITY) ---
 spells.dispel.book_name = &eScroll of the Unwritten Word
@@ -1104,6 +868,148 @@ spells.dispel.resisted = &8%resisted% &7effect(s) held firm.
 spells.dispel.nothing = &8Nothing here answers to your circle.
 spells.dispel.name = &eDispel
 spells.dispel.description = &7Strips the buffs, debuffs and illusions\n&7carrying a single target. Out-ranks each\n&7one by circle.
+
+# --- RunicSurvey (circle 5, NONE, UTILITY) ---
+spells.runicsurvey.book_name = &fCodex of the Unseen Survey
+spells.runicsurvey.lore1 = &8Nothing is hidden from a reader of the lines.
+spells.runicsurvey.lore2 = &8mark what you would have found.
+spells.runicsurvey.none = &8The survey finds nothing worth marking.
+spells.runicsurvey.mark_container = &7Container
+spells.runicsurvey.mark_spawner = &7Spawner
+spells.runicsurvey.mark_portal = &7Portal
+spells.runicsurvey.mark_ore = &7Ore
+spells.runicsurvey.name = &fRunic Survey
+spells.runicsurvey.description = &7Reads the ground around you and marks\n&7the nearest chests, spawners, portals\n&7and ores - for your eyes only.
+
+# --- Stonebridge (circle 5, EARTH, TERRAIN) ---
+spells.stonebridge.book_name = &aTablet of the Long Crossing
+spells.stonebridge.lore1 = &8The earth was never asked to be a road.
+spells.stonebridge.lore2 = &8it agrees to be one for a while.
+spells.stonebridge.name = &aStonebridge
+spells.stonebridge.description = &7Lays a stone deck along your facing\n&7at your feet, so you can walk out\n&7over the gap and not look down.
+
+# --- Emberforge (circle 5, FIRE, UTILITY) ---
+spells.emberforge.book_name = &cManual of the Patient Flame
+spells.emberforge.lore1 = &8A furnace is only heat and waiting.
+spells.emberforge.lore2 = &8the forge is most of that, already.
+spells.emberforge.nothing = &8Nothing in your pack answers to the forge.
+spells.emberforge.name = &cEmberforge
+spells.emberforge.description = &7Smelts the ore and food you carry, with\n&7no fuel and no waiting. Anything that\n&7will not fit drops at your feet.
+
+# --- SanctuaryBloom (circle 5, LIGHT, SUSTAIN) ---
+spells.sanctuarybloom.book_name = &eCodex of the Kind Hour
+spells.sanctuarybloom.lore1 = &8Mercy, it turns out, has a radius.
+spells.sanctuarybloom.lore2 = &8and lifts a curse on its way through.
+spells.sanctuarybloom.name = &eSanctuary Bloom
+spells.sanctuarybloom.description = &7A small bloom of light that heals those\n&7standing in it and strips one harmful\n&7effect from each of them.
+
+# --- SoulLantern (circle 5, DARK, UTILITY) ---
+spells.soullantern.book_name = &5Ledger of the Kindly Wisp
+spells.soullantern.lore1 = &8A little light, and a little pull.
+spells.soullantern.lore2 = &8what is yours comes back to you.
+spells.soullantern.name = &5Soul Lantern
+spells.soullantern.description = &7A wisp that follows you, keeps a lamp\n&7overhead and gathers the drops you\n&7left behind. Never another's.
+
+# --- SkyglassGlide (circle 5, AIR, UTILITY) ---
+spells.skyglassglide.book_name = &fManual of the Glass Step
+spells.skyglassglide.lore1 = &8Fall, but as if the air were a floor.
+spells.skyglassglide.lore2 = &8the ground will still be there.
+spells.skyglassglide.name = &fSkyglass Glide
+spells.skyglassglide.description = &7You drift downward instead of dropping,\n&7carry more speed through the air and\n&7take no fall damage for the duration.
+
+# --- UndertowVeil (circle 5, WATER, UTILITY) ---
+spells.undertowveil.book_name = &bCowl of the Drowned Coast
+spells.undertowveil.lore1 = &8The tide keeps its own, and it keeps them breathing.
+spells.undertowveil.lore2 = &8allies under the same water.
+spells.undertowveil.name = &bUndertow Veil
+spells.undertowveil.description = &7Draws a veil of water over you and up to two\n&7allies within eight blocks, letting you breathe\n&7and swim faster while it lasts. Snuffs any fire.
+spells.undertowveil.active = &bThe veil holds for {seconds}s.
+
+# --- Foldstep (circle 6, NONE, UTILITY) ---
+spells.foldstep.book_name = &fNotes on Folding Space
+spells.foldstep.lore1 = &8There is no distance between two points you already are.
+spells.foldstep.lore2 = &8The destination is always checked before the fold.
+spells.foldstep.name = &fFoldstep
+spells.foldstep.description = &7Folds you and up to two allies pressed within\n&7three blocks to the furthest safe point ahead,\n&7up to thirty blocks away. Refuses a blind fold.
+spells.foldstep.no_destination = &7Nowhere safe lies ahead.
+
+# --- Quarryheart (circle 6, EARTH, TERRAIN) ---
+spells.quarryheart.book_name = &aOn the Patience of Stone
+spells.quarryheart.lore1 = &8The hill parts for the one who asks in the old way.
+spells.quarryheart.lore2 = &8Ores, chests and claims are left untouched.
+spells.quarryheart.name = &aQuarryheart
+spells.quarryheart.description = &7Cracks the plain stone out of a five block\n&7volume within twenty-four blocks and hands\n&7you the real drops - up to twenty-four pieces.
+spells.quarryheart.no_target = &7Nothing solid in reach.
+spells.quarryheart.harvested = &aHarvested {count} stone blocks.
+
+# --- PhoenixReprieve (circle 6, FIRE, UTILITY) ---
+spells.phoenixreprieve.book_name = &cThe Burning Reprieve
+spells.phoenixreprieve.lore1 = &8Ash remembers the shape it used to hold.
+spells.phoenixreprieve.lore2 = &8and grants no invulnerability of its own.
+spells.phoenixreprieve.name = &cPhoenix Reprieve
+spells.phoenixreprieve.description = &7Seals one ally within twenty blocks for forty-five\n&7seconds. The next lethal blow leaves them on four\n&7health instead of killing them. Fewer in PvP.
+spells.phoenixreprieve.sealed = &cThe seal holds for {seconds}s.
+spells.phoenixreprieve.burned = &cThe seal burned out to save you.
+
+# --- BeaconOfAccord (circle 6, LIGHT, SUSTAIN) ---
+spells.beaconofaccord.book_name = &eThe Accord Beacon
+spells.beaconofaccord.lore1 = &8A light that asks nothing and mends everyone.
+spells.beaconofaccord.lore2 = &8Two curses lifted from each of them.
+spells.beaconofaccord.name = &eBeacon of Accord
+spells.beaconofaccord.description = &7Plants a beacon that restores eight health to\n&7up to eight allies within twelve blocks and\n&7burns two harmful effects off each of them.
+spells.beaconofaccord.mended = &eThe beacon mended {count}.
+
+# --- WraithboundRetinue (circle 6, DARK, UTILITY) ---
+spells.wraithboundretinue.book_name = &5The Wraithbound Retinue
+spells.wraithboundretinue.lore1 = &8Two shadows that owe you a debt and intend to pay it.
+spells.wraithboundretinue.lore2 = &8They never touch a player.
+spells.wraithboundretinue.name = &5Wraithbound Retinue
+spells.wraithboundretinue.description = &7Calls two wraith sentinels that hang at your\n&7shoulder for forty-five seconds. Each marks the\n&7nearest hostile within eight and cuts it for four\n&7health every three seconds, eight strikes each.
+
+# --- Skyhook (circle 6, AIR, UTILITY) ---
+spells.skyhook.book_name = &fTome of the Hooked Sky
+spells.skyhook.lore1 = &8&oThe wind answers a rod cast upward.
+spells.skyhook.lore2 = &8Lifts the caster and nearby allies, then holds them on a slow fall.
+spells.skyhook.name = &fSkyhook
+spells.skyhook.description = &7Launches the caster and up to three allies within twelve blocks into the air, then holds them on slow falling for twelve seconds.
+
+# --- RiptideConvoy (circle 6, WATER, BURST) ---
+spells.riptideconvoy.book_name = &bCodex of the Riding Tide
+spells.riptideconvoy.lore1 = &8&oStand on the wave, not behind it.
+spells.riptideconvoy.lore2 = &8Carries the caster and up to four allies forward on a surge.
+spells.riptideconvoy.name = &bRiptide Convoy
+spells.riptideconvoy.description = &7Rides a five-wide surge forward twenty-eight blocks, carrying the caster and up to four allies and striking everything it washes over once.
+
+# --- WayfarersCall (circle 7, NONE, UTILITY) ---
+spells.wayfarerscall.book_name = &fWayfarer's Register
+spells.wayfarerscall.lore1 = &8&oCall, and the road comes to you.
+spells.wayfarerscall.lore2 = &8Channel five seconds to gather the team to the caster.
+spells.wayfarerscall.name = &fWayfarers Call
+spells.wayfarerscall.description = &7Channels for five seconds, then pulls up to five allies within sixty-four blocks to the caster's side.\nThe call breaks on damage or movement and the mana is not refunded.
+spells.wayfarerscall.answered = &fYour call is answered.
+
+# --- StoneBastion (circle 7, EARTH, DENIAL) ---
+spells.stonebastion.book_name = &aCodex of the Standing Wall
+spells.stonebastion.lore1 = &8&oGround to stand on, walls to stand behind.
+spells.stonebastion.lore2 = &8Raises an eleven-wide refuge with two doors.
+spells.stonebastion.name = &aStone Bastion
+spells.stonebastion.description = &7Raises an eleven-by-eleven refuge with five-high walls and two doorways, standing for ninety seconds before every block settles back.
+spells.stonebastion.raised = &aThe bastion stands for {seconds} seconds.
+
+# --- DragonsWake (circle 7, FIRE, BURST) ---
+spells.dragonswake.book_name = &cTome of the Dragon's Wake
+spells.dragonswake.lore1 = &8&oTwo breaths, then ash.
+spells.dragonswake.lore2 = &8Sends two pulses of fire down a thirty-block lane.
+spells.dragonswake.name = &cDragons Wake
+spells.dragonswake.description = &7Sends two pulses of dragon fire down a thirty-block lane, striking every enemy in it twice.\nThe fire never lands on a block.
+
+# --- DawnChorus (circle 7, LIGHT, SUSTAIN) ---
+spells.dawnchorus.book_name = &eHymnal of the First Light
+spells.dawnchorus.lore1 = &8&oSing, and the wounded stand.
+spells.dawnchorus.lore2 = &8Heals the team, cleanses two curses each, then mends for six seconds.
+spells.dawnchorus.name = &eDawn Chorus
+spells.dawnchorus.description = &7Heals up to eight allies within eighteen blocks, lifts two harmful effects from each, then mends one hit point a second for six seconds.
+spells.dawnchorus.sung = &eThe chorus mends {count}.
 
 # --- Affinity curve migration notice (one-time, on login) ---
 migration.affinity_curve.header = &6Affinity recalculated
@@ -1183,3 +1089,153 @@ boosters.subtitle_start = &7%multiplier%x for %duration%
 boosters.countdown_title = &e%seconds%s
 boosters.countdown_subtitle = &7%name% ending
 boosters.chat_format = &6[Booster] &f%name% &7- &e%multiplier%x &8(%source%)
+
+spells.veiloftheunseencourt.book_name = &5Veil of the Unseen Court
+spells.veiloftheunseencourt.lore1 = &8&oThe court passes, and nothing sees it go.
+spells.veiloftheunseencourt.lore2 = &8Hostile eyes slide from those it cloaks.
+spells.veiloftheunseencourt.name = &5Veil of the Unseen Court
+spells.veiloftheunseencourt.description = &7Conceals the caster and up to four allies from\n&7hostile mobs for twenty-five seconds. The veil\n&7breaks for a bearer who attacks or casts offensively.
+spells.veiloftheunseencourt.veiled = &5The unseen court veils you for {seconds}s.
+spells.veiloftheunseencourt.broken = &5Your veil tears as you strike.
+spells.veiloftheunseencourt.ended = &5The veil of the unseen court fades.
+spells.tempestroad.book_name = &fCodex of the Tempest Road
+spells.tempestroad.lore1 = &8&oThe wind remembers the way forward.
+spells.tempestroad.lore2 = &8&oStep in and let the gale carry you.
+spells.tempestroad.name = &fTempest Road
+spells.tempestroad.description = &7Conjures a thirty-six by six wind lane\n&7for thirty seconds that carries players\n&7along it and grants slow falling on exit.
+spells.leviathanspassage.book_name = &bCodex of the Leviathan
+spells.leviathanspassage.lore1 = &8&oThe deep carries those it claims.
+spells.leviathanspassage.lore2 = &8Summons a spectral mount for the caster and consenting allies.
+spells.leviathanspassage.name = &bLeviathans Passage
+spells.leviathanspassage.description = &7Summons a spectral leviathan for forty-five seconds, carrying the caster and up to two consenting allies at 1.5x speed with Water Breathing.
+spells.leviathanspassage.summoned = &bThe leviathan rises to bear you.
+# --- ChronicleAnchor (circle 8, NONE, UTILITY) ---
+spells.chronicleanchor.book_name = &fChronicle of the Return
+spells.chronicleanchor.lore1 = &8&oA place remembered is a place you can keep.
+spells.chronicleanchor.lore2 = &8Set an anchor, then return before it fades.
+spells.chronicleanchor.name = &fChronicle Anchor
+spells.chronicleanchor.description = &7Records a safe location for 120 seconds.\n&7Recast within the window to return with up to three consenting allies.\n&7The anchor is consumed on return.
+spells.chronicleanchor.anchor_set = &fAnchor set for {seconds} seconds.
+spells.chronicleanchor.returned = &fThe chronicle returns you.
+spells.chronicleanchor.no_safe_location = &7You cannot anchor here.
+spells.chronicleanchor.destination_unsafe = &7The anchor no longer holds a safe place.
+spells.chronicleanchor.mark = &fAnchor
+# --- TitansCauseway (circle 8, EARTH, TERRAIN) ---
+spells.titanscauseway.book_name = &aTablet of the Titan's March
+spells.titanscauseway.lore1 = &8A road laid where no road should hold.
+spells.titanscauseway.lore2 = &8It spans the gap until the stone remembers to fall.
+spells.titanscauseway.name = &aTitans Causeway
+spells.titanscauseway.description = &7Raises a stone causeway at your height\n&7up to forty-eight blocks long and five wide,\n&7bridging gaps for two minutes.
+spells.titanscauseway.raised = &aThe causeway stands for {seconds} seconds.
+spells.starfallcrucible.book_name = &cTome of the Starfall Crucible
+spells.starfallcrucible.lore1 = &8&oThree falls, one after another.
+spells.starfallcrucible.lore2 = &8Calls comets into an area. Safe ascent belongs to Circle 9.
+spells.starfallcrucible.name = &cStarfall Crucible
+spells.starfallcrucible.description = &7Calls three comets to strike within a wide area over six seconds.\n&7Comets burn foes without breaking blocks or starting fires.\n&7Safe ascent belongs to Starfall Cataclysm at Circle 9.
+
+spells.worldtreebeacon.book_name = &eCodex of the Worldtree
+spells.worldtreebeacon.lore1 = &8&oRoots remember the sky they came from.
+spells.worldtreebeacon.lore2 = &8Plants a beacon that mends allies who hold its ground.
+spells.worldtreebeacon.name = &eWorldtree Beacon
+spells.worldtreebeacon.description = &7Plants a luminous worldtree for eighteen seconds.\n&7Up to eight allies within twenty blocks heal 1 HP per second\n&7and hold four absorption while they stay inside.
+spells.worldtreebeacon.planted = &eThe worldtree takes root for {seconds} seconds within {radius} blocks.
+spells.worldtreebeacon.expired = &7The worldtree's light fades.
+spells.worldtreebeacon.mark = &eWorldtree
+
+spells.soulreclamation.book_name = &5Grimoire of the Returned
+spells.soulreclamation.lore1 = &8&oWhat the veil swallowed, the veil remembers.
+spells.soulreclamation.lore2 = &8Returns you to your last death and calls your drops back.
+spells.soulreclamation.name = &5Soul Reclamation
+spells.soulreclamation.description = &7Returns you to your most recent death within 128 blocks\n&7and pulls your own dropped stacks within ten blocks\n&7into your inventory. The trail is only good for ten minutes.
+spells.soulreclamation.mark = &5Your last death
+spells.soulreclamation.reclaimed = &5The veil returns {count} of your stacks.
+spells.soulreclamation.empty = &7The veil returns you, but nothing of yours remains here.
+spells.soulreclamation.no_death = &7You have no death trail to follow.
+spells.soulreclamation.wrong_world = &7Your death trail lies in another world.
+spells.soulreclamation.too_far = &7Your death trail is beyond the reach of this spell.
+spells.soulreclamation.too_old = &7Your death trail has gone cold.
+spells.soulreclamation.chunk_unloaded = &7The place of your death is not loaded.
+
+spells.eyeofthefirmament.book_name = &fCodex of the Open Sky
+spells.eyeofthefirmament.lore1 = &8&oThe sky lends its freedom, and takes its due.
+spells.eyeofthefirmament.lore2 = &8Grants controlled flight to the caster and three allies.
+spells.eyeofthefirmament.name = &fEye of the Firmament
+spells.eyeofthefirmament.description = &7Opens an eye in the upper air and lends flight\n&7to you and up to three team allies for twenty-two seconds.\n&7Melee and offensive spells are sealed until you land.
+spells.eyeofthefirmament.granted = &fThe firmament lifts you for {seconds} seconds.
+spells.eyeofthefirmament.ended = &7The borrowed sky sets you down.
+spells.eyeofthefirmament.melee_blocked = &7The firmament forbids violence until you land.
+spells.eyeofthefirmament.spell_blocked = &7The firmament seals offensive magic until you land.
+
+spells.tidalreservoir.book_name = &9Codex of the Breaking Tide
+spells.tidalreservoir.lore1 = &8&oThe reservoir remembers the river it was.
+spells.tidalreservoir.lore2 = &8Breaks a controlled channel across the land.
+spells.tidalreservoir.name = &9Tidal Reservoir
+spells.tidalreservoir.description = &7Breaks open a water channel up to thirty-six blocks long\n&7and six wide for ninety seconds. It carries boats and swimmers,\n&7douses fire, waters farmland, and then restores the land.
+spells.tidalreservoir.raised = &9The reservoir breaks open for {seconds} seconds.
+spells.tidalreservoir.expired = &7The water recedes and the land remembers itself.
+
+spells.worldgate.book_name = &fCodex of the Unbroken Road
+spells.worldgate.lore1 = &8&oDistance is a courtesy, not a law.
+spells.worldgate.lore2 = &8Tears a paired portal through the same world.
+spells.worldgate.name = &fWorld Gate
+spells.worldgate.description = &7Records an origin, then opens a paired portal at your\n&7second cast within three minutes and 512 blocks.\n&7Both gates hold for sixty seconds and carry up to eight players.
+spells.worldgate.origin_set = &fOrigin recorded. Cast again at the destination within three minutes.
+spells.worldgate.opened = &fThe gates open. Up to {players} may pass before they close.
+spells.worldgate.closed = &7The gates collapse and the road is gone.
+spells.worldgate.no_origin = &7No origin is armed. Cast once to record one.
+spells.worldgate.expired = &7The origin has faded. Cast once to record a new one.
+spells.worldgate.wrong_world = &7A gate cannot cross between worlds.
+spells.worldgate.too_far = &7The destination is beyond the reach of this gate.
+spells.worldgate.too_close = &7The destination is too close to the origin.
+spells.worldgate.unsafe_destination = &7The gate cannot open here.
+
+spells.atlasunbound.book_name = &2Codex of the Held World
+spells.atlasunbound.lore1 = &8&oThe world was carried once; it can be lifted again.
+spells.atlasunbound.lore2 = &8Raises the land into broad stone terraces.
+spells.atlasunbound.name = &2Atlas Unbound
+spells.atlasunbound.description = &7Raises a thirty-two block square of land into four stone\n&7terraces up to twelve blocks high for three minutes.\n&7It never digs, and the land settles back when it ends.
+spells.atlasunbound.raised = &2The land rises and holds for {seconds} seconds.
+spells.atlasunbound.expired = &7The terraces settle back into the world.
+spells.atlasunbound.no_room = &7There is nowhere here for the land to rise.
+
+spells.starfallcataclysm.book_name = &cCodex of the Falling Sky
+spells.starfallcataclysm.lore1 = &8&oThe sky keeps a debt of stars.
+spells.starfallcataclysm.lore2 = &8Calls three star-fragments down on a marked radius.
+spells.starfallcataclysm.name = &cStarfall Cataclysm
+spells.starfallcataclysm.description = &7Marks a thirty-two block radius, then calls down three\n&7star-fragments. Each impact scorches everything nearby\n&7without breaking blocks or starting fires, and leaves a\n&7safe eight-second updraft for you and consenting allies.
+spells.starfallcataclysm.mark = &cThe sky is watching here
+
+spells.covenantofthefirstdawn.book_name = &eCodex of the First Dawn
+spells.covenantofthefirstdawn.lore1 = &8&oThe first light promised it would not go out.
+spells.covenantofthefirstdawn.lore2 = &8Wards up to ten allies against one lethal blow.
+spells.covenantofthefirstdawn.name = &eCovenant of the First Dawn
+spells.covenantofthefirstdawn.description = &7Heals up to ten allies within twenty-four blocks,\n&7cleanses every harmful effect, and grants a forty-five second\n&7ward that turns one lethal hit into a single point of health.
+spells.covenantofthefirstdawn.warded = &eThe dawn holds you for {seconds} seconds.
+spells.covenantofthefirstdawn.ward_spent = &eThe dawn spends itself. One breath remains.
+
+spells.hollowkingscourt.book_name = &5Codex of the Hollow Throne
+spells.hollowkingscourt.lore1 = &8&oA crown with nobody left to wear it.
+spells.hollowkingscourt.lore2 = &8Raises four spectral knights and a shadow domain.
+spells.hollowkingscourt.name = &5Hollow Kings Court
+spells.hollowkingscourt.description = &7Creates an eighteen block shadow domain for thirty\n&7seconds and raises four spectral knights. They engage foes,\n&7never hunt players, and break no ground where they strike.
+spells.hollowkingscourt.opened = &5The hollow court holds for {seconds} seconds.
+
+spells.empyreanpassage.book_name = &fCodex of the Open Road
+spells.empyreanpassage.lore1 = &8&oThe wind remembers every road it has crossed.
+spells.empyreanpassage.lore2 = &8Carries the caster and seven allies on a wind passage.
+spells.empyreanpassage.name = &fEmpyrean Passage
+spells.empyreanpassage.description = &7Opens a wind passage up to ninety-six blocks away.\n&7It carries you and up to seven allies over eight seconds,\n&7tearing through anything caught in the slipstream.
+spells.empyreanpassage.opened = &fThe wind takes {riders} of you.
+spells.empyreanpassage.arrived = &fThe passage sets you down.
+spells.empyreanpassage.attack_blocked = &7The wind will not carry a drawn blade.
+spells.empyreanpassage.spell_blocked = &7The passage seals offensive magic until you arrive.
+spells.empyreanpassage.interrupted = &7The wind loses its hold.
+spells.empyreanpassage.no_room = &7There is no room for a passage here.
+
+spells.leviathanstestament.book_name = &9Codex of the Drowned Crown
+spells.leviathanstestament.lore1 = &8&oThe sea keeps what it is owed.
+spells.leviathanstestament.lore2 = &8Sends a tidal front forward with the caster riding it.
+spells.leviathanstestament.name = &9Leviathans Testament
+spells.leviathanstestament.description = &7Sends a tidal front sixty blocks long and fourteen\n&7wide, built from real water. It batters and shoves everything\n&7in its path, allies included, then the land returns.
+spells.leviathanstestament.opened = &9The testament breaks forward.
+spells.leviathanstestament.surfaced = &9The water remains for {seconds} seconds.

@@ -51,3 +51,5 @@ options:
             stat: dash_style
             value: 1.35
             modifier: SET
+          - type: mana_cost
+            change: 15

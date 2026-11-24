@@ -4,7 +4,7 @@ shape:
   - "BUB"
   - "BMB"
 ingredients:
-  B: IRON_CHAIN
+  B: CHAIN
   M: MAGIC_STONE
   U: ember_necklace
 requirements:

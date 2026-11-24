@@ -338,12 +338,6 @@ custom_model_data:
     spell_magic_missile: 4101
     spell_fireball: 4102
     spell_heal: 4103
-    spell_tornado: 4104
-    spell_meteor_shower: 4105
-    spell_tsunami: 4106
-    spell_earthsplitter: 4107
-    spell_radiance: 4108
-    spell_shadow_realm: 4109
     spell_buff: 4110
     spell_light_buff: 4111
     spell_debuff: 4112
@@ -371,50 +365,49 @@ custom_model_data:
     spell_fire_blast: 4134
     spell_fire_wall: 4135
     spell_lesser_heal: 4136
+    spell_updraft: 4149
+    spell_light_bolt: 4154
+    spell_dispel: 4168
 
-    # --- Circle 5-9 additions (4137-4168) ---
+    # --- Circle 5-9 rework (4200-4234) ---
     # spell_* GUI keys are skipped by TexturePackManager.loadItemCMDs(); menus
     # use gui_custom_model_data from each spell's own yml. Keep this block so
     # the resource-pack author has a single id list.
-    spell_flame_lance: 4137
-    spell_inferno_pilgrimage: 4138
-    spell_sunfire_barrage: 4139
-    spell_inferno_rite: 4140
-    spell_undertow: 4141
-    spell_everdrain: 4142
-    spell_thousand_waves: 4143
-    spell_tide_of_the_deep: 4144
-    spell_tectonic_strike: 4145
-    spell_fault_line: 4146
-    spell_continental_shift: 4147
-    spell_worldbreaker: 4148
-    spell_updraft: 4149
-    spell_thunderclap: 4150
-    spell_cyclone_nest: 4151
-    spell_stormcaller: 4152
-    spell_skywrath: 4153
-    spell_light_bolt: 4154
-    spell_radiant_brand: 4155
-    spell_choir_of_light: 4156
-    spell_apotheosis: 4157
-    spell_crown_of_dawn: 4158
-    spell_umbral_volley: 4159
-    spell_void_anchor: 4160
-    spell_oblivion: 4161
-    spell_arcane_ward: 4162
-    spell_waystone_recall: 4163
-    spell_echo_cast: 4164
-    spell_arcane_resonance: 4165
-    # dispel (the 30th expansion spell, wave 9) sits above the band because 4166
-    # and 4167 belong to the two repairs below. Reserved now so the resource-pack
-    # author can draw it before the spell lands.
-    spell_dispel: 4168
-
-    # These two were absent from this file entirely even though the spells exist and
-    # have shipped since 2026-09. Their live values were ALSO colliding and were
-    # repaired in wave 3 - see CustomModelDataTest.theTwoKnownCollisionsAreRepaired.
-    spell_warp: 4166
-    spell_skeletal_knights: 4167
+    spell_runic_survey: 4200
+    spell_stonebridge: 4201
+    spell_emberforge: 4202
+    spell_sanctuary_bloom: 4203
+    spell_soul_lantern: 4204
+    spell_skyglass_glide: 4205
+    spell_undertow_veil: 4206
+    spell_foldstep: 4207
+    spell_quarryheart: 4208
+    spell_phoenix_reprieve: 4209
+    spell_beacon_of_accord: 4210
+    spell_wraithbound_retinue: 4211
+    spell_skyhook: 4212
+    spell_riptide_convoy: 4213
+    spell_wayfarers_call: 4214
+    spell_stone_bastion: 4215
+    spell_dragons_wake: 4216
+    spell_dawn_chorus: 4217
+    spell_veil_of_the_unseen_court: 4218
+    spell_tempest_road: 4219
+    spell_leviathans_passage: 4220
+    spell_chronicle_anchor: 4221
+    spell_titans_causeway: 4222
+    spell_starfall_crucible: 4223
+    spell_worldtree_beacon: 4224
+    spell_soul_reclamation: 4225
+    spell_eye_of_the_firmament: 4226
+    spell_tidal_reservoir: 4227
+    spell_world_gate: 4228
+    spell_atlas_unbound: 4229
+    spell_starfall_cataclysm: 4230
+    spell_covenant_of_the_first_dawn: 4231
+    spell_hollow_kings_court: 4232
+    spell_empyrean_passage: 4233
+    spell_leviathans_testament: 4234
 
 # GUI item materials configuration
 gui_items:
@@ -488,7 +481,6 @@ research_node_textures:
   void_ward: 6148
   entropy_theory: 6149
   fire_ember_control: 6150
-  fire_inferno_rite: 6151
   pyroclasm: 6152
   immolation_aura: 6153
   cinder_ward: 6154
@@ -532,7 +524,6 @@ research_node_textures:
   shadow_focus: 6192
   void_lash: 6193
   abyssal_ward: 6194
-  oblivion_theory: 6195
   dark_sovereign: 6196
   eclipse_phantom: 6197
 

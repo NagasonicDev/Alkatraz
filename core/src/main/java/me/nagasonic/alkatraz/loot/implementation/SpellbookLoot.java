@@ -141,7 +141,7 @@ public class SpellbookLoot {
             int sb46W = (int) (SpellbookConfig.getChestInt("nether", "spellbook_4_6_weight", 20) * m);
             int max = SpellbookConfig.getChestInt("nether", "max_items", 1);
             // Cap 6 matches this category's own (4,5,6) band. Uncapped, a nether bridge
-            // could hand over inferno_rite at 30/20130 = 0.149%.
+            // could hand over a circle-9 capstone at 30/20130 = 0.149%.
             LootInjector.Builder builder = LootInjector.builder()
                     .forLootTable("chests/nether_bridge", "chests/bastion")
                     .maxItems(max);
@@ -186,8 +186,8 @@ public class SpellbookLoot {
             int sbW = (int) (SpellbookConfig.getStructureInt("desert_pyramid", "spellbook_2_4_weight", 40) * m);
             int max = SpellbookConfig.getStructureInt("desert_pyramid", "max_items", 1);
             // Cap 4 matches the (2,3,4) band. A desert pyramid is reachable at any
-            // progression point and is not behind the progression gate that
-            // flame_lance (circle 5) and meteor_shower (circle 6) exist to enforce.
+            // progression point and is not behind the progression gate that the
+            // circle-5 and circle-6 fire spells exist to enforce.
             LootInjector.Builder builder = LootInjector.builder()
                     .forLootTable("chests/desert_pyramid")
                     .maxItems(max);
@@ -215,7 +215,7 @@ public class SpellbookLoot {
             int max = SpellbookConfig.getStructureInt("stronghold", "max_items", 1);
             // Cap 6 matches the (4,5,6) band. DARK holds no spell below circle 3, so an
             // uncapped DARK book was circles 3-9 and a stronghold library had a
-            // 30/5130 = 0.585% chance of handing out oblivion, a circle-9 capstone.
+            // 30/5130 = 0.585% chance of handing out a circle-9 capstone.
             LootInjector.Builder builder = LootInjector.builder()
                     .forLootTable("chests/stronghold_library", "chests/stronghold_corridor")
                     .maxItems(max);
@@ -336,8 +336,8 @@ public class SpellbookLoot {
             int w24 = (int) (SpellbookConfig.getMobInt("evoker", "spellbook_2_4_weight", 70) * m);
             int w46 = (int) (SpellbookConfig.getMobInt("evoker", "spellbook_4_6_weight", 50) * m);
             int dark = (int) (SpellbookConfig.getMobInt("evoker", "dark_element_weight", 30) * m);
-            // NEW. The evoker's whole identity is summoning and skeletal_knights is the
-            // circle-6 summoning spell, so it is the evoker and only the evoker.
+            // NEW. The evoker's whole identity is summoning, so its specific spell is
+            // the circle-6 summon and it belongs to the evoker and only the evoker.
             int specific = (int) (SpellbookConfig.getMobInt("evoker", "specific_spellbook_weight", 25) * m);
             // Left at 150 on purpose. ConfigUpdater propagates NEW keys but never changed
             // default values, so editing it would make new and existing installs disagree.
@@ -350,7 +350,7 @@ public class SpellbookLoot {
             addIfPresent(builder, randomBook(2, 3, 4), w24);
             addIfPresent(builder, randomBook(4, 5, 6), w46);
             addIfPresent(builder, elementBook(Element.DARK, "mob.evoker", 6), dark);
-            addIfPresent(builder, specificBook(specificId("evoker", "skeletal_knights")), specific);
+            addIfPresent(builder, specificBook(specificId("evoker", "wraithbound_retinue")), specific);
             builder.register();
         }
 
@@ -385,7 +385,7 @@ public class SpellbookLoot {
             addIfPresent(builder, elementBook(Element.EARTH, "mob.ravager", 6), earth);
             addIfPresent(builder, randomBook(3, 4), w34);
             addIfPresent(builder, randomBook(4, 5, 6), w46);
-            addIfPresent(builder, specificBook(specificId("ravager", "tectonic_strike")), specific);
+            addIfPresent(builder, specificBook(specificId("ravager", "quarryheart")), specific);
             builder.register();
         }
 
@@ -394,7 +394,7 @@ public class SpellbookLoot {
             int specific = (int) (SpellbookConfig.getMobInt("blaze", "specific_spellbook_weight", 50) * m);
             int filler = SpellbookConfig.getMobInt("blaze", "filler_weight", 350);
             // Cap 3 is the blaze's own signature circle. A blaze must not be able to
-            // hand out flame_lance (120 mana) or meteor_shower (165 mana).
+            // hand out a 120-mana circle-5 or a 165-mana circle-6 fire spell.
             MobLootInjector.Builder builder = MobLootInjector.builder()
                     .forEntity(EntityType.BLAZE)
                     .addItem(new ItemStack(Material.AIR), filler)
@@ -452,8 +452,8 @@ public class SpellbookLoot {
             // boss in the game and should sit exactly one circle below the End's bosses.
             // Sum w(5..7) = 1275, giving C5 58.82% / C6 29.41% / C7 11.76%.
             int w57 = (int) (SpellbookConfig.getMobInt("elder_guardian", "spellbook_5_7_weight", 60) * m);
-            // NEW. Undertow drags one target toward you and scales with the drag
-            // distance. An elder guardian pulls you into the monument.
+            // Leviathan's Passage summons a spectral mount that carries you and two
+            // passengers across water, and the monument is an ocean structure.
             int specific = (int) (SpellbookConfig.getMobInt("elder_guardian", "specific_spellbook_weight", 40) * m);
             // NEW ballast. This mob is farmable in an ocean biome, and with max_items 2
             // and no filler both of those rolls were guaranteed books. Against w(7)=150
@@ -468,7 +468,7 @@ public class SpellbookLoot {
                     .maxItems(max);
             addIfPresent(builder, elementBook(Element.WATER, "mob.elder_guardian", 7), water);
             addIfPresent(builder, randomBook(5, 6, 7), w57);
-            addIfPresent(builder, specificBook(specificId("elder_guardian", "undertow")), specific);
+            addIfPresent(builder, specificBook(specificId("elder_guardian", "leviathans_passage")), specific);
             builder.register();
         }
 
@@ -478,8 +478,8 @@ public class SpellbookLoot {
             // DEAD until wave 5: circles 7-9 held no spells, so this book shipped as
             // spell_count=0 and printed spellbook.empty on right-click.
             int w79 = (int) (SpellbookConfig.getMobInt("ender_dragon", "spellbook_7_9_weight", 20) * m);
-            // NEW. Skywrath is the only flight-granting spell in the roster and the only
-            // circle-9 AIR spell, and the dragon is the mob that flies.
+            // NEW. Empyrean's Passage carries the caster and seven allies through the air,
+            // and the dragon is the mob that flies.
             int specific = (int) (SpellbookConfig.getMobInt("ender_dragon", "specific_spellbook_weight", 25) * m);
             // NO filler, deliberately. The ender dragon is a once-per-world-event boss:
             // there is no farm to protect against and ballast would only reduce the
@@ -491,7 +491,7 @@ public class SpellbookLoot {
             addIfPresent(builder, elementBook(Element.AIR, "mob.ender_dragon", 9), air);
             addIfPresent(builder, randomBook(4, 5, 6), w46);
             addIfPresent(builder, randomBook(7, 8, 9), w79);
-            addIfPresent(builder, specificBook(specificId("ender_dragon", "skywrath")), specific);
+            addIfPresent(builder, specificBook(specificId("ender_dragon", "empyrean_passage")), specific);
             builder.register();
         }
 
@@ -500,8 +500,9 @@ public class SpellbookLoot {
             int w46 = (int) (SpellbookConfig.getMobInt("wither", "spellbook_4_6_weight", 80) * m);
             // DEAD until wave 5, same as the dragon's.
             int w79 = (int) (SpellbookConfig.getMobInt("wither", "spellbook_7_9_weight", 20) * m);
-            // NEW. Oblivion scales with the target's missing health, which is the
-            // wither's whole kill mechanic, and dark's circle-9 capstone has no other mob source.
+            // NEW. Hollow King's Court raises a shadow domain of spectral knights, which
+            // is the wither's whole necromantic theme, and dark's circle-9 capstone has
+            // no other mob source.
             int specific = (int) (SpellbookConfig.getMobInt("wither", "specific_spellbook_weight", 25) * m);
             // NEW ballast, for the same reason as the elder guardian: a wither fight is
             // repeatable on any end-stone platform. P(book) falls 100% -> 45.000%.
@@ -514,7 +515,7 @@ public class SpellbookLoot {
             addIfPresent(builder, elementBook(Element.DARK, "mob.wither", 9), dark);
             addIfPresent(builder, randomBook(4, 5, 6), w46);
             addIfPresent(builder, randomBook(7, 8, 9), w79);
-            addIfPresent(builder, specificBook(specificId("wither", "oblivion")), specific);
+            addIfPresent(builder, specificBook(specificId("wither", "hollow_kings_court")), specific);
             builder.register();
         }
     }

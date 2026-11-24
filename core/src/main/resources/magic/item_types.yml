@@ -81,7 +81,7 @@ types:
     - DIAMOND
   necklace:
     - STRING
-    - IRON_CHAIN
+    - CHAIN
     - GOLD_INGOT
   bracelet:
     - IRON_NUGGET
