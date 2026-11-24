@@ -18,13 +18,6 @@ public final class WandUtils {
     }
 
     /**
-     * Alias for backward compatibility with code that specifically checks both.
-     */
-    public static boolean isWandOrMagicItem(ItemStack stack) {
-        return isWand(stack);
-    }
-
-    /**
      * Checks if an ItemStack is a legacy NBT wand (has "wand" boolean tag).
      */
     public static boolean isLegacyWand(ItemStack item) {

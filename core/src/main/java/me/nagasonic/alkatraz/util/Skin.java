@@ -59,7 +59,14 @@ public class Skin {
         return new Skin(object.get("value").getAsString(), object.get("signature").getAsString());
     }
 
+    public static Skin getCached(String urlString) {
+        return CACHE.get(urlString);
+    }
+
     public static Skin fromURL(String urlString){
+        if (urlString == null || !urlString.startsWith("https://sessionserver.mojang.com/")) {
+            throw new IllegalArgumentException("Skin URLs must use https://sessionserver.mojang.com/");
+        }
         Skin cached = CACHE.get(urlString);
         if (cached != null) return cached;
         Long failedAt = FAILED.get(urlString);
@@ -88,6 +95,8 @@ public class Skin {
             CACHE.put(urlString, skin);
             return skin;
         } catch (Exception e) {
+            // Bound the negative cache like CACHE (finding: unbounded growth).
+            if (FAILED.size() >= CACHE_LIMIT) FAILED.clear();
             FAILED.put(urlString, System.currentTimeMillis());
             throw new RuntimeException(e);
         }

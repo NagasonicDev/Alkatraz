@@ -2,7 +2,6 @@ package me.nagasonic.alkatraz.util;
 
 import de.tr7zw.changeme.nbtapi.NBT;
 import me.nagasonic.alkatraz.Alkatraz;
-import me.nagasonic.alkatraz.dom.Catch;
 import me.nagasonic.alkatraz.dom.MinecraftVersion;
 import me.nagasonic.alkatraz.api.dom.Action;
 import me.nagasonic.alkatraz.items.magic.MagicItemServices;
@@ -20,7 +19,6 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.RayTraceResult;
 
-import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -116,14 +114,6 @@ public class Utils {
         return keys;
     }
 
-    public static DecimalFormat getDecimalFormat(int places) {
-        String s = "";
-        for (int i = 1; i <= places; i++) {
-            s = s + "0";
-        }
-        return new DecimalFormat("#." + s);
-    }
-
     public static Random getRandom(){
         return random;
     }
@@ -160,97 +150,6 @@ public class Utils {
         }
         
         return me.nagasonic.alkatraz.texturepack.TexturePackManager.createBlankPane();
-    }
-
-    public static boolean withinManhattanRange(Location l1, Location l2, double range){
-        return Math.abs(l1.getX() - l2.getX()) <= range &&
-                Math.abs(l1.getY() - l2.getY()) <= range &&
-                Math.abs(l1.getZ() - l2.getZ()) <= range;
-    }
-
-    public static int getManhattanDistance(Location l1, Location l2){
-        return Math.abs(l1.getBlockX() - l2.getBlockX()) +
-                Math.abs(l1.getBlockY() - l2.getBlockY()) +
-                Math.abs(l1.getBlockZ() - l2.getBlockZ());
-    }
-
-    public static int getManhattanDistance(int x1, int z1, int x2, int z2){
-        return Math.abs(x1 - x2) + Math.abs(z1 - z2);
-    }
-
-    public static Map<String, OfflinePlayer> getPlayersFromUUIDs(Collection<UUID> uuids){
-        Map<String, OfflinePlayer> players = new HashMap<>();
-        for (UUID uuid : uuids){
-            OfflinePlayer player = Alkatraz.getInstance().getServer().getOfflinePlayer(uuid);
-            players.put(player.getName(), player);
-        }
-        return players;
-    }
-
-    public static Map<String, Player> getOnlinePlayersFromUUIDs(Collection<UUID> uuids){
-        Map<String, Player> players = new HashMap<>();
-        for (UUID uuid : uuids){
-            Player player = Alkatraz.getInstance().getServer().getPlayer(uuid);
-            if (player != null) players.put(player.getName(), player);
-        }
-        return players;
-    }
-
-    public static Color hexToRgb(String colorStr) {
-        return Color.fromRGB(Integer.valueOf( colorStr.substring( 1, 3 ), 16 ),
-                Integer.valueOf( colorStr.substring( 3, 5 ), 16 ),
-                Integer.valueOf( colorStr.substring( 5, 7 ), 16 ));
-    }
-
-    public static String rgbToHex(int r, int g, int b){
-        return String.format("#%02x%02x%02x", r, g, b);
-    }
-
-    /**
-     * Returns an integer based on the chance given, but always between this chance rounded down and the chance rounded
-     * up. Example:
-     * a chance of 3.4 will always return at least 3, with a 40% chance to return 4 instead.
-     * a chance of 0.9 will have a 90% chance to return 1
-     * a chance of 7.5 will always return at least 7, with a 50% chance to return 8 instead.
-     * @param chance the average to calculate from
-     * @return an integer returning at least the average rounded down, with the remaining chance to return 1 extra
-     */
-    public static int randomAverage(double chance){
-        boolean negative = chance < 0;
-        int atLeast = (negative) ? (int) Math.ceil(chance) : (int) Math.floor(chance);
-        double remainingChance = chance - atLeast;
-        if (ThreadLocalRandom.current().nextDouble() <= Math.abs(remainingChance)) atLeast += negative ? -1 : 1;
-        return atLeast;
-    }
-
-    /**
-     * Returns a collection of players from the given selector.
-     * Returns a collection with a single player if no selector was used.
-     * @throws IllegalArgumentException if an invalid selector was used
-     * @param source the command sender that attempts the selector
-     * @param selector the selector string
-     * @return a collection of matching players, or single player if a single online player was given
-     */
-    public static Collection<Player> selectPlayers(CommandSender source, String selector) throws IllegalArgumentException{
-        Collection<Player> targets = new HashSet<>();
-        if (selector.startsWith("@")){
-            for (Entity part : Bukkit.selectEntities(source, selector)){
-                if (part instanceof Player)
-                    targets.add((Player) part);
-            }
-        } else {
-            Player target = Alkatraz.getInstance().getServer().getPlayer(selector);
-            if (target != null) targets.add(target);
-        }
-        return targets;
-    }
-
-    public static double round6Decimals(double d){
-        return (double) Math.round(d * 1000000d) / 1000000d;
-    }
-
-    public static double roundToMultiple(double number, double multiple) {
-        return multiple * Math.round(number / multiple);
     }
 
     static final Pattern hexPattern = Pattern.compile("&#([A-Fa-f0-9]{6})");
@@ -302,42 +201,6 @@ public class Utils {
         return pages;
     }
 
-    /**
-     * Sends a message to the CommandSender, but only if the message isn't null or empty
-     * @param whomst the CommandSender whomst to message
-     * @param message the message to send
-     */
-    public static void sendMessage(CommandSender whomst, String message){
-        if (!StringUtils.isEmpty(message)) {
-            if (message.startsWith("ACTIONBAR") && whomst instanceof Player p) {
-                sendActionBar(p, message.replaceFirst("ACTIONBAR", ""));
-            } else if (message.startsWith("TITLE") && whomst instanceof Player p){
-                String title = message.replaceFirst("TITLE", "");
-                String subtitle = "";
-                int titleDuration = 40;
-                int fadeDuration = 5;
-                String subString = null;
-                int titleStart = message.indexOf("TITLE(");
-                if (titleStart >= 0) {
-                    int parenEnd = message.indexOf(")", titleStart + 6);
-                    if (parenEnd >= 0) {
-                        subString = message.substring(titleStart + 6, parenEnd);
-                    }
-                }
-                if (subString != null){
-                    String[] args = subString.split(";");
-                    if (args.length > 0) title = args[0];
-                    if (args.length > 1) subtitle = args[1];
-                    if (args.length > 2) titleDuration = Catch.catchOrElse(() -> Integer.parseInt(args[2]), 100);
-                    if (args.length > 3) fadeDuration = Catch.catchOrElse(() -> Integer.parseInt(args[3]), 10);
-                }
-                sendTitle(p, title, subtitle, titleDuration, fadeDuration);
-            } else {
-                whomst.sendMessage(chat(message));
-            }
-        }
-    }
-
     public static void sendActionBar(Player whomst, String message){
         if (StringUtils.isEmpty(message)) return;
         String chat = chat(message);
@@ -346,10 +209,6 @@ public class Utils {
 
     public static void sendTitle(Player whomst, String title, String subtitle, int duration, int fade){
         if (!StringUtils.isEmpty(title)) whomst.sendTitle(chat(title), chat(subtitle), fade, duration, fade);
-    }
-
-    public static <T> T thisorDefault(T input, T def){
-        return input == null ? def : input;
     }
 
     public static <T> T random(Collection<T> coll) {
@@ -420,6 +279,12 @@ public class Utils {
 
     /**
      * Paper's Location.getNearbyLivingEntities(double) replacement.
+     *
+     * <p>This is a BOX query, not a sphere: it returns every living entity in the
+     * box {@code location ± (rangeX, rangeY, rangeZ)}. With {@code rangeX == rangeY
+     * == rangeZ == range}, corner entities up to √3·range away are included.
+     * Callers that need an exact radius should re-check
+     * {@code distanceSquared}, or use {@link #getNearbyLivingEntitiesSpherical}.
      */
     public static List<LivingEntity> getNearbyLivingEntities(Location location, double rangeX, double rangeY, double rangeZ) {
         Collection<Entity> nearby = location.getWorld().getNearbyEntities(location, rangeX, rangeY, rangeZ);
@@ -444,20 +309,17 @@ public class Utils {
         return getNearbyLivingEntities(location, range, range, range);
     }
 
-    public static double getExp(int circle){
-        return switch (circle) {
-            case 0 -> 1;
-            case 1 -> 2;
-            case 2 -> 4;
-            case 3 -> 7;
-            case 4 -> 14;
-            case 5 -> 26;
-            case 6 -> 50;
-            case 7 -> 94;
-            case 8 -> 179;
-            case 9 -> 340;
-            default -> 0;
-        };
+    /**
+     * Spherical variant of {@link #getNearbyLivingEntities(Location, double)}:
+     * same box pre-filter, then narrowed to entities within {@code range} of
+     * {@code location} so callers do not need a per-spell distance re-check.
+     * (Unlike the box overload, corner entities beyond {@code range} are excluded.)
+     */
+    public static List<LivingEntity> getNearbyLivingEntitiesSpherical(Location location, double range) {
+        List<LivingEntity> nearby = getNearbyLivingEntities(location, range);
+        double rangeSquared = range * range;
+        nearby.removeIf(entity -> entity.getLocation().distanceSquared(location) > rangeSquared);
+        return nearby;
     }
 
     public static double getEntityAffinity(Element element, LivingEntity entity){

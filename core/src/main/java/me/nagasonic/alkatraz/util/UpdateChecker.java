@@ -39,6 +39,10 @@ public class UpdateChecker implements Listener {
             connection.setRequestMethod("GET");
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
                 JsonArray jsonArray = new Gson().fromJson(reader, JsonArray.class);
+                if (jsonArray == null || jsonArray.size() == 0) {
+                    Alkatraz.logWarning("Checking for updates failed: empty version list from Modrinth");
+                    return;
+                }
                 JsonObject jsonObject = jsonArray.get(0).getAsJsonObject();
                 String tag_name = jsonObject.get("version_number").getAsString();
                 consumer.accept(tag_name);

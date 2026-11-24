@@ -1,9 +1,7 @@
 package me.nagasonic.alkatraz.util;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonPrimitive;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -11,77 +9,22 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.profile.PlayerProfile;
 import org.bukkit.profile.PlayerTextures;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.Base64;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 
 public class ItemUtils {
-    private static final int CACHE_LIMIT = 256;
-    private static final int CONNECT_TIMEOUT_MS = 3000;
-    private static final int READ_TIMEOUT_MS = 5000;
-    private static final Map<String, String> ID_CACHE = new ConcurrentHashMap<>();
 
-    @Deprecated
-    public static ItemStack headFromName(String name) {
-        ItemStack item = getPlayerSkullItem();
-
-        return headWithName(item, name);
-    }
-
-    @Deprecated
-    public static ItemStack headWithName(ItemStack item, String name) {
-        notNull(item, "item");
-        notNull(name, "name");
-        try {
-            String id = profileId(name);
-            Skin skin = Skin.fromURL("https://sessionserver.mojang.com/session/minecraft/profile/" + id + "?unsigned=false");
-            return headFromBase64(skin.getTexture());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+    /** Cached-only variant: never blocks on HTTP. Returns null on a cache miss and prefetches async. */
+    public static ItemStack headFromUuidCached(String id) {
+        String url = "https://sessionserver.mojang.com/session/minecraft/profile/" + id + "?unsigned=false";
+        Skin skin = Skin.getCached(url);
+        if (skin == null) {
+            Skin.fetchAsync(url, ignored -> { }, ignored -> { });
+            return null;
         }
-    }
-
-    private static String profileId(String name) throws IOException {
-        String cached = ID_CACHE.get(name);
-        if (cached != null) return cached;
-        URL url = new URL("https://api.mojang.com/users/profiles/minecraft/" + name);
-        URLConnection connection = url.openConnection();
-        connection.setConnectTimeout(CONNECT_TIMEOUT_MS);
-        connection.setReadTimeout(READ_TIMEOUT_MS);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-        JsonObject object = new Gson().fromJson(reader, JsonObject.class);
-        String id = object.get("id").getAsString();
-        if (ID_CACHE.size() > CACHE_LIMIT) ID_CACHE.clear();
-        ID_CACHE.put(name, id);
-        return id;
-    }
-
-    public static ItemStack headFromUuid(String id) {
-        ItemStack item = getPlayerSkullItem();
-
-        return headWithUuid(item, id);
-    }
-
-    public static ItemStack headWithUuid(ItemStack item, String id) {
-        notNull(item, "item");
-        notNull(id, "id");
-
-        Skin skin = Skin.fromURL("https://sessionserver.mojang.com/session/minecraft/profile/" + id + "?unsigned=false");
         return headFromBase64(skin.getTexture());
-    }
-
-    public static ItemStack headFromUrl(String url) {
-        ItemStack item = getPlayerSkullItem();
-
-        return headWithUrl(item, url);
     }
 
     private static PlayerProfile getProfile(String url) {
@@ -98,6 +41,7 @@ public class ItemUtils {
         profile.setTextures(textures); // Set the textures back to the profile
         return profile;
     }
+
     public static ItemStack headWithUrl(ItemStack item, String url) {
         PlayerProfile profile = getProfile(url);
 //        Skonic.info(profile.getTextures().getSkin().toString()); // ERROR : SPAM
@@ -146,41 +90,5 @@ public class ItemUtils {
         if (o == null) {
             throw new NullPointerException(name + " should not be null!");
         }
-    }
-
-    private static final Map<String, String> SKIN_VALUE_CACHE = new ConcurrentHashMap<>();
-
-    public static String getValue(ItemStack head){
-        SkullMeta meta = (SkullMeta) head.getItemMeta();
-        PlayerProfile profile = meta.getOwnerProfile();
-        URL url = profile.getTextures().getSkin();
-        if (url == null) return null;
-        String key = url.toString();
-        String cached = SKIN_VALUE_CACHE.get(key);
-        if (cached != null) return cached;
-        JsonObject data = null;
-        try {
-            data = SkinUtils.generateFromURL(url.toString(), false);
-        } catch (Exception ex) {
-            return null;
-        }
-        if (data == null) return null;
-        JsonObject texture = data.getAsJsonObject("texture");
-        if (texture == null) return null;
-        JsonPrimitive value = texture.getAsJsonPrimitive("value");
-        if (value == null) return null;
-        String result = value.getAsString();
-        if (result != null) {
-            if (SKIN_VALUE_CACHE.size() > CACHE_LIMIT) SKIN_VALUE_CACHE.clear();
-            SKIN_VALUE_CACHE.put(key, result);
-        }
-        return result;
-    }
-
-    public static URL getURL(ItemStack head){
-        SkullMeta meta = (SkullMeta) head.getItemMeta();
-        PlayerProfile profile = meta.getOwnerProfile();
-        URL url = profile.getTextures().getSkin();
-        return url;
     }
 }

@@ -33,7 +33,7 @@ import static me.nagasonic.alkatraz.util.ColorFormat.format;
 
 public class StatUtils {
     public static void addMana(Player p, double amount) {
-        if (p == null) return;
+        if (p == null || !Double.isFinite(amount) || amount < 0) return;
         MagicProfile profile = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
         if (profile == null) return;
         double maxMana = Math.max(1.0, profile.getMaxMana());
@@ -56,7 +56,7 @@ public class StatUtils {
     }
 
     public static void subMana(Player p, double amount) {
-        if (p == null) return;
+        if (p == null || !Double.isFinite(amount) || amount < 0) return;
         MagicProfile profile = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
         if (profile == null) return;
         double maxMana = Math.max(1.0, profile.getMaxMana());
@@ -111,7 +111,7 @@ public class StatUtils {
     }
 
     public static void addSpellMastery(Player p, Spell spell, int mastery){
-        if (p == null) return;
+        if (p == null || spell == null || spell.getMaxMastery() <= 0) return;
         MagicProfile profile = ProfileManager.getProfile(p.getUniqueId(), MagicProfile.class);
         if (profile == null) return;
         int current = profile.getSpellMastery(spell);
