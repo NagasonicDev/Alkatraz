@@ -15,6 +15,13 @@
         }
       },
       {
+        "threshold": 4231,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_covenant_of_the_first_dawn"
+        }
+      },
+      {
         "threshold": 6182,
         "model": {
           "type": "minecraft:model",

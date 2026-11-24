@@ -1,6 +1,3 @@
 {
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "minecraft:item/red_dye"
-  }
+  "parent": "minecraft:item/red_dye"
 }

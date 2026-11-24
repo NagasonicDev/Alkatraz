@@ -8,6 +8,13 @@
     },
     "entries": [
       {
+        "threshold": 4211,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_wraithbound_retinue"
+        }
+      },
+      {
         "threshold": 6147,
         "model": {
           "type": "minecraft:model",

@@ -22,6 +22,13 @@
         }
       },
       {
+        "threshold": 4227,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_tidal_reservoir"
+        }
+      },
+      {
         "threshold": 6125,
         "model": {
           "type": "minecraft:model",

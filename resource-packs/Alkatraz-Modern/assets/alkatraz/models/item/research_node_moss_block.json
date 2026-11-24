@@ -1,6 +1,3 @@
 {
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "minecraft:item/moss_block"
-  }
+  "parent": "minecraft:block/moss_block"
 }

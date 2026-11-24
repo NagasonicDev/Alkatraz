@@ -13,6 +13,13 @@
           "type": "minecraft:model",
           "model": "alkatraz:item/spell_skywrath"
         }
+      },
+      {
+        "threshold": 4226,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_eye_of_the_firmament"
+        }
       }
     ]
   }

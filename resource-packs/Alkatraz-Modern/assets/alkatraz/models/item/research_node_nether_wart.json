@@ -1,6 +1,3 @@
 {
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "minecraft:item/nether_wart"
-  }
+  "parent": "minecraft:item/nether_wart"
 }

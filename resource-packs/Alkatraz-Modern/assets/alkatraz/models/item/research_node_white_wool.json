@@ -1,6 +1,3 @@
 {
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "minecraft:item/white_wool"
-  }
+  "parent": "minecraft:block/white_wool"
 }

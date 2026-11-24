@@ -1,6 +1,3 @@
 {
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "minecraft:item/blaze_powder"
-  }
+  "parent": "minecraft:item/blaze_powder"
 }

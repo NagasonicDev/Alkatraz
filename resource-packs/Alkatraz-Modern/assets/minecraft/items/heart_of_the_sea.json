@@ -22,6 +22,13 @@
         }
       },
       {
+        "threshold": 4220,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_leviathans_passage"
+        }
+      },
+      {
         "threshold": 4412,
         "model": {
           "type": "minecraft:model",

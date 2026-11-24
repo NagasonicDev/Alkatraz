@@ -1,6 +1,3 @@
 {
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "minecraft:item/deepslate_bricks"
-  }
+  "parent": "minecraft:block/deepslate_bricks"
 }

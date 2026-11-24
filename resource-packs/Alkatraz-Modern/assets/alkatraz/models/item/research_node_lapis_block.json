@@ -1,6 +1,3 @@
 {
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "minecraft:item/lapis_block"
-  }
+  "parent": "minecraft:block/lapis_block"
 }

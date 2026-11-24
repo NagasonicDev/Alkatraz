@@ -1,6 +1,3 @@
 {
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "minecraft:item/fire_charge"
-  }
+  "parent": "minecraft:item/fire_charge"
 }

@@ -1,6 +1,3 @@
 {
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "minecraft:item/dragon_egg"
-  }
+  "parent": "minecraft:block/dragon_egg"
 }

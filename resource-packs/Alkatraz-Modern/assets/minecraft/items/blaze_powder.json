@@ -29,6 +29,13 @@
         }
       },
       {
+        "threshold": 4209,
+        "model": {
+          "type": "minecraft:model",
+          "model": "alkatraz:item/spell_phoenix_reprieve"
+        }
+      },
+      {
         "threshold": 6120,
         "model": {
           "type": "minecraft:model",
