@@ -1,0 +1,122 @@
+# ---------------------------------------------------------------------------
+# leviathans_testament - reach and width of the tidal front
+# ---------------------------------------------------------------------------
+
+# Total PvP damage one player may take from a single cast (one tide hit).
+pvp_damage_cap: 6.0
+
+options:
+  # -------------------------------------------------------------------------
+  # length - how far the tidal front travels
+  # -------------------------------------------------------------------------
+  length:
+    description: 'How far the tidal front travels, in blocks.'
+    icon: 'TRIDENT'
+    default_index: 1
+    values:
+      short:
+        display_name: '&9Surge'
+        description: 'Forty-eight blocks.'
+        icon: 'TRIDENT'
+        value_type: int
+        value: 48
+        impacts:
+          - type: stat_modifier
+            stat: tide_length
+            value: 48
+            modifier: SET
+      standard:
+        display_name: '&9Tidal Front'
+        description: 'Sixty blocks.'
+        icon: 'WATER_BUCKET'
+        value_type: int
+        value: 60
+        impacts:
+          - type: stat_modifier
+            stat: tide_length
+            value: 60
+            modifier: SET
+      long:
+        display_name: '&9Leviathan'
+        description: 'Seventy-two blocks.'
+        icon: 'HEART_OF_THE_SEA'
+        value_type: int
+        value: 72
+        impacts:
+          - type: stat_modifier
+            stat: tide_length
+            value: 72
+            modifier: SET
+
+  # -------------------------------------------------------------------------
+  # width - how wide the tidal front is
+  # -------------------------------------------------------------------------
+  width:
+    description: 'How wide the tidal front is, in blocks.'
+    icon: 'KELP'
+    default_index: 1
+    values:
+      narrow:
+        display_name: '&9Rill'
+        description: 'Ten blocks wide.'
+        icon: 'KELP'
+        value_type: int
+        value: 10
+        impacts:
+          - type: stat_modifier
+            stat: tide_width
+            value: 10
+            modifier: SET
+      standard:
+        display_name: '&9Flood'
+        description: 'Fourteen blocks wide.'
+        icon: 'WATER_BUCKET'
+        value_type: int
+        value: 14
+        impacts:
+          - type: stat_modifier
+            stat: tide_width
+            value: 14
+            modifier: SET
+      wide:
+        display_name: '&9Deluge'
+        description: 'Eighteen blocks wide.'
+        icon: 'HEART_OF_THE_SEA'
+        value_type: int
+        value: 18
+        impacts:
+          - type: stat_modifier
+            stat: tide_width
+            value: 18
+            modifier: SET
+
+  # -------------------------------------------------------------------------
+  # damage_blocks - whether terrain is broken ahead of the front as it advances
+  # -------------------------------------------------------------------------
+  damage_blocks:
+    description: 'Whether terrain ahead of the tidal front is destroyed as the front advances.'
+    icon: 'ANVIL'
+    default_index: 0
+    values:
+      enabled:
+        display_name: 'Breaks Terrain'
+        description: 'Terrain ahead of the front is broken.'
+        icon: 'ANVIL'
+        value_type: boolean
+        value: true
+        impacts:
+          - type: stat_modifier
+            stat: damage_blocks
+            value: true
+            modifier: SET
+      disabled:
+        display_name: 'Keeps Terrain'
+        description: 'Terrain ahead of the front is left standing.'
+        icon: 'GUNPOWDER'
+        value_type: boolean
+        value: false
+        impacts:
+          - type: stat_modifier
+            stat: damage_blocks
+            value: false
+            modifier: SET

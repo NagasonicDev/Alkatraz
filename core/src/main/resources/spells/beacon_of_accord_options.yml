@@ -1,0 +1,111 @@
+options:
+
+  # ---------------------------------------------------------------------------
+  # radius — How far the beacon reaches
+  # ---------------------------------------------------------------------------
+  radius:
+    description: "How far the beacon reaches"
+    icon: BEACON
+    default_index: 1
+
+    values:
+
+      close:
+        display_name: "Close"
+        description: "10 blocks"
+        icon: TORCH
+        value_type: int
+        value: 10
+        impacts:
+          - type: stat_modifier
+            stat: beacon_radius
+            value: 10
+            modifier: SET
+          - type: mana_cost
+            change: -15
+
+      standard:
+        display_name: "Standard"
+        description: "12 blocks"
+        icon: BEACON
+        value_type: int
+        value: 12
+        impacts:
+          - type: stat_modifier
+            stat: beacon_radius
+            value: 12
+            modifier: SET
+
+      wide:
+        display_name: "Wide"
+        description: "14 blocks"
+        icon: SEA_LANTERN
+        value_type: int
+        value: 14
+        requirements:
+          - type: number_stat
+            stat: mastery_beaconofaccord
+            minimum: 50
+            description: "Requires 50 Beacon of Accord mastery"
+        impacts:
+          - type: stat_modifier
+            stat: beacon_radius
+            value: 14
+            modifier: SET
+          - type: mana_cost
+            change: 20
+
+  # ---------------------------------------------------------------------------
+  # heal — How much health the beacon restores
+  # ---------------------------------------------------------------------------
+  heal:
+    description: "How much health the beacon restores"
+    icon: GLISTERING_MELON_SLICE
+    default_index: 1
+
+    values:
+
+      modest:
+        display_name: "Modest"
+        description: "6 health"
+        icon: WHEAT
+        value_type: double
+        value: 6.0
+        impacts:
+          - type: stat_modifier
+            stat: healing
+            value: 6.0
+            modifier: SET
+          - type: mana_cost
+            change: -10
+
+      standard:
+        display_name: "Standard"
+        description: "8 health"
+        icon: GLISTERING_MELON_SLICE
+        value_type: double
+        value: 8.0
+        impacts:
+          - type: stat_modifier
+            stat: healing
+            value: 8.0
+            modifier: SET
+
+      generous:
+        display_name: "Generous"
+        description: "10 health"
+        icon: GOLDEN_APPLE
+        value_type: double
+        value: 10.0
+        requirements:
+          - type: number_stat
+            stat: mastery_beaconofaccord
+            minimum: 50
+            description: "Requires 50 Beacon of Accord mastery"
+        impacts:
+          - type: stat_modifier
+            stat: healing
+            value: 10.0
+            modifier: SET
+          - type: mana_cost
+            change: 20

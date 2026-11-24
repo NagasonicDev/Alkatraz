@@ -1,0 +1,83 @@
+options:
+
+  # ---------------------------------------------------------------------------
+  # batch — How many items one cast smelts
+  # ---------------------------------------------------------------------------
+  batch:
+    description: "How many items one cast smelts"
+    icon: FURNACE
+    default_index: 1
+
+    values:
+
+      small:
+        display_name: "Small"
+        description: "8 items — lower mana cost"
+        icon: CAMPFIRE
+        value_type: int
+        value: 8
+        impacts:
+          - type: stat_modifier
+            stat: smelt_batch
+            value: 8
+            modifier: SET
+          - type: mana_cost
+            change: -15
+
+      standard:
+        display_name: "Standard"
+        description: "16 items"
+        icon: FURNACE
+        value_type: int
+        value: 16
+        impacts:
+          - type: stat_modifier
+            stat: smelt_batch
+            value: 16
+            modifier: SET
+
+      large:
+        display_name: "Large"
+        description: "24 items"
+        icon: BLAST_FURNACE
+        value_type: int
+        value: 24
+        requirements:
+          - type: number_stat
+            stat: mastery_emberforge
+            minimum: 50
+            description: "Requires 50 Emberforge mastery"
+        impacts:
+          - type: stat_modifier
+            stat: smelt_batch
+            value: 24
+            modifier: SET
+          - type: mana_cost
+            change: 20
+
+  # ---------------------------------------------------------------------------
+  # food — Whether food is smelted too
+  # ---------------------------------------------------------------------------
+  food:
+    description: "Whether food is smelted too"
+    icon: COOKED_BEEF
+    default_index: 0
+
+    values:
+
+      yes:
+        display_name: "Ore and food"
+        description: "Smelt everything the furnace would"
+        icon: COOKED_BEEF
+        value_type: boolean
+        value: true
+
+      ore_only:
+        display_name: "Ore only"
+        description: "Skip food — lower mana cost"
+        icon: RAW_IRON
+        value_type: boolean
+        value: false
+        impacts:
+          - type: mana_cost
+            change: -10

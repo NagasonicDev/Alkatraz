@@ -1,0 +1,124 @@
+# ---------------------------------------------------------------------------
+# empyrean_passage - reach and rider capacity of the wind passage
+# ---------------------------------------------------------------------------
+
+options:
+  # -------------------------------------------------------------------------
+  # length - how far the passage carries its riders
+  # -------------------------------------------------------------------------
+  length:
+    description: 'How far the wind passage reaches, in blocks.'
+    icon: 'FIREWORK_ROCKET'
+    default_index: 1
+    values:
+      short:
+        display_name: '&fGust'
+        description: 'Seventy-two blocks.'
+        icon: 'FEATHER'
+        value_type: int
+        value: 72
+        impacts:
+          - type: stat_modifier
+            stat: passage_length
+            value: 72
+            modifier: SET
+          - type: mana_cost
+            change: -80
+      standard:
+        display_name: '&fPassage'
+        description: 'Ninety-six blocks.'
+        icon: 'FIREWORK_ROCKET'
+        value_type: int
+        value: 96
+        impacts:
+          - type: stat_modifier
+            stat: passage_length
+            value: 96
+            modifier: SET
+          - type: mana_cost
+            change: 0
+      long:
+        display_name: '&fEmpyrean Road'
+        description: 'One hundred and twenty blocks.'
+        icon: 'ELYTRA'
+        value_type: int
+        value: 120
+        impacts:
+          - type: stat_modifier
+            stat: passage_length
+            value: 120
+            modifier: SET
+          - type: mana_cost
+            change: 80
+
+  # -------------------------------------------------------------------------
+  # allies - how many allies may ride
+  # -------------------------------------------------------------------------
+  allies:
+    description: 'How many allies may ride the passage.'
+    icon: 'PLAYER_HEAD'
+    default_index: 1
+    values:
+      five:
+        display_name: '&fFive Riders'
+        description: 'Up to five allies.'
+        icon: 'PLAYER_HEAD'
+        value_type: int
+        value: 5
+        impacts:
+          - type: stat_modifier
+            stat: passage_allies
+            value: 5
+            modifier: SET
+          - type: mana_cost
+            change: -60
+      seven:
+        display_name: '&fSeven Riders'
+        description: 'Up to seven allies.'
+        icon: 'FIREWORK_ROCKET'
+        value_type: int
+        value: 7
+        impacts:
+          - type: stat_modifier
+            stat: passage_allies
+            value: 7
+            modifier: SET
+          - type: mana_cost
+            change: 0
+      nine:
+        display_name: '&fNine Riders'
+        description: 'Up to nine allies.'
+        icon: 'ELYTRA'
+        value_type: int
+        value: 9
+        impacts:
+          - type: stat_modifier
+            stat: passage_allies
+            value: 9
+            modifier: SET
+          - type: mana_cost
+            change: 60
+
+  # -------------------------------------------------------------------------
+  # damage_blocks - whether the passage breaks terrain in its path
+  # -------------------------------------------------------------------------
+  damage_blocks:
+    description: 'Whether the passage breaks terrain in its path.'
+    icon: 'STONE_PICKAXE'
+    default_index: 0
+
+    values:
+
+      breaks_terrain:
+        display_name: '&fBreaks Terrain'
+        description: 'The passage breaks terrain in its path.'
+        icon: 'STONE_PICKAXE'
+        value_type: boolean
+        value: true
+
+      leaves_terrain:
+        display_name: '&fLeaves Terrain'
+        description: 'The passage leaves terrain in its path untouched.'
+        icon: 'BARRIER'
+        value_type: boolean
+        value: false

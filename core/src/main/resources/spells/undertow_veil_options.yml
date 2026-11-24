@@ -1,0 +1,83 @@
+options:
+
+  # ---------------------------------------------------------------------------
+  # duration — How long the veil holds
+  # ---------------------------------------------------------------------------
+  duration:
+    description: "How long the veil holds"
+    icon: TURTLE_HELMET
+    default_index: 1
+
+    values:
+
+      short:
+        display_name: "Short"
+        description: "30 seconds"
+        icon: TURTLE_SCUTE
+        value_type: int
+        value: 30
+        impacts:
+          - type: stat_modifier
+            stat: veil_duration
+            value: 30
+            modifier: SET
+          - type: mana_cost
+            change: -15
+
+      standard:
+        display_name: "Standard"
+        description: "45 seconds"
+        icon: TURTLE_HELMET
+        value_type: int
+        value: 45
+        impacts:
+          - type: stat_modifier
+            stat: veil_duration
+            value: 45
+            modifier: SET
+
+      long:
+        display_name: "Long"
+        description: "60 seconds"
+        icon: HEART_OF_THE_SEA
+        value_type: int
+        value: 60
+        requirements:
+          - type: number_stat
+            stat: mastery_undertowveil
+            minimum: 50
+            description: "Requires 50 Undertow Veil mastery"
+        impacts:
+          - type: stat_modifier
+            stat: veil_duration
+            value: 60
+            modifier: SET
+          - type: mana_cost
+            change: 20
+
+  # ---------------------------------------------------------------------------
+  # allies — How many allies the veil is spread over
+  # ---------------------------------------------------------------------------
+  allies:
+    description: "How many allies the veil is spread over"
+    icon: SEA_LANTERN
+    default_index: 1
+
+    values:
+
+      pair:
+        display_name: "A Pair"
+        description: "Two allies"
+        icon: PRISMARINE_SHARD
+        value_type: int
+        value: 2
+        impacts:
+          - type: mana_cost
+            change: -10
+
+      standard:
+        display_name: "Standard"
+        description: "Three allies"
+        icon: SEA_LANTERN
+        value_type: int
+        value: 3

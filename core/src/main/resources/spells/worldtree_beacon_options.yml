@@ -1,0 +1,88 @@
+# ---------------------------------------------------------------------------
+# worldtree_beacon - radius and duration of the worldtree aura
+# ---------------------------------------------------------------------------
+
+options:
+  # -------------------------------------------------------------------------
+  # radius - how far the healing aura reaches
+  # -------------------------------------------------------------------------
+  radius:
+    description: 'How far the healing aura reaches, in blocks.'
+    icon: 'OAK_SAPLING'
+    default_index: 1
+    values:
+      small:
+        display_name: '&eGrove'
+        description: 'Sixteen blocks.'
+        icon: 'OAK_SAPLING'
+        value_type: int
+        value: 16
+        impacts:
+          - type: stat_modifier
+            stat: beacon_radius
+            value: 16
+            modifier: SET
+      standard:
+        display_name: '&eWorldtree'
+        description: 'Twenty blocks.'
+        icon: 'SUNFLOWER'
+        value_type: int
+        value: 20
+        impacts:
+          - type: stat_modifier
+            stat: beacon_radius
+            value: 20
+            modifier: SET
+      great:
+        display_name: '&6Elder Grove'
+        description: 'Twenty-four blocks.'
+        icon: 'PEONY'
+        value_type: int
+        value: 24
+        impacts:
+          - type: stat_modifier
+            stat: beacon_radius
+            value: 24
+            modifier: SET
+
+  # -------------------------------------------------------------------------
+  # duration - how long the worldtree stands
+  # -------------------------------------------------------------------------
+  duration:
+    description: 'How long the worldtree stands, in seconds.'
+    icon: 'CLOCK'
+    default_index: 1
+    values:
+      brief:
+        display_name: '&eBrief'
+        description: 'Fourteen seconds.'
+        icon: 'OAK_LEAVES'
+        value_type: int
+        value: 14
+        impacts:
+          - type: stat_modifier
+            stat: beacon_duration
+            value: 14
+            modifier: SET
+      standard:
+        display_name: '&eStanding'
+        description: 'Eighteen seconds.'
+        icon: 'CLOCK'
+        value_type: int
+        value: 18
+        impacts:
+          - type: stat_modifier
+            stat: beacon_duration
+            value: 18
+            modifier: SET
+      lasting:
+        display_name: '&6Enduring'
+        description: 'Twenty-two seconds.'
+        icon: 'SUNFLOWER'
+        value_type: int
+        value: 22
+        impacts:
+          - type: stat_modifier
+            stat: beacon_duration
+            value: 22
+            modifier: SET

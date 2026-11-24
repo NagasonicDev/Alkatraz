@@ -1,0 +1,111 @@
+options:
+
+  # ---------------------------------------------------------------------------
+  # duration — How long the glide lasts
+  # ---------------------------------------------------------------------------
+  duration:
+    description: "How long the glide lasts"
+    icon: PHANTOM_MEMBRANE
+    default_index: 1
+
+    values:
+
+      short:
+        display_name: "Short"
+        description: "12 seconds"
+        icon: FEATHER
+        value_type: int
+        value: 12
+        impacts:
+          - type: stat_modifier
+            stat: glide_duration
+            value: 12
+            modifier: SET
+          - type: mana_cost
+            change: -15
+
+      standard:
+        display_name: "Standard"
+        description: "18 seconds"
+        icon: PHANTOM_MEMBRANE
+        value_type: int
+        value: 18
+        impacts:
+          - type: stat_modifier
+            stat: glide_duration
+            value: 18
+            modifier: SET
+
+      long:
+        display_name: "Long"
+        description: "24 seconds"
+        icon: ELYTRA
+        value_type: int
+        value: 24
+        requirements:
+          - type: number_stat
+            stat: mastery_skyglass_glide
+            minimum: 50
+            description: "Requires 50 Skyglass Glide mastery"
+        impacts:
+          - type: stat_modifier
+            stat: glide_duration
+            value: 24
+            modifier: SET
+          - type: mana_cost
+            change: 20
+
+  # ---------------------------------------------------------------------------
+  # boost — How much horizontal speed the glide adds
+  # ---------------------------------------------------------------------------
+  boost:
+    description: "How much faster you drift"
+    icon: SUGAR
+    default_index: 1
+
+    values:
+
+      gentle:
+        display_name: "Gentle"
+        description: "15% faster — lower mana cost"
+        icon: SUGAR
+        value_type: double
+        value: 1.15
+        impacts:
+          - type: stat_modifier
+            stat: glide_boost
+            value: 1.15
+            modifier: SET
+          - type: mana_cost
+            change: -10
+
+      standard:
+        display_name: "Standard"
+        description: "25% faster"
+        icon: RABBIT_FOOT
+        value_type: double
+        value: 1.25
+        impacts:
+          - type: stat_modifier
+            stat: glide_boost
+            value: 1.25
+            modifier: SET
+
+      swift:
+        display_name: "Swift"
+        description: "40% faster"
+        icon: RABBIT_HIDE
+        value_type: double
+        value: 1.40
+        requirements:
+          - type: number_stat
+            stat: mastery_skyglass_glide
+            minimum: 50
+            description: "Requires 50 Skyglass Glide mastery"
+        impacts:
+          - type: stat_modifier
+            stat: glide_boost
+            value: 1.40
+            modifier: SET
+          - type: mana_cost
+            change: 15

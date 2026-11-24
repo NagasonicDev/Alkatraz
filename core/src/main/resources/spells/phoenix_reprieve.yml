@@ -1,0 +1,44 @@
+id: 'phoenix_reprieve'
+# WHETHER THE PLUGIN SHOULD LOAD THE SPELL. DEFAULT: TRUE
+enabled: true
+
+# NONE MEANS ITS DAMAGE DOES NOT SCALE WITH ELEMENTAL DAMAGE, ONLY MAGIC DAMAGE
+element: 'FIRE'
+
+# THE CASTING CODE. 'R' FOR RIGHT CLICK, 'L' FOR LEFT CLICK, 'S' FOR HAND SWAP
+code: 'SSRLL'
+
+# THE MAGIC CIRCLE REQUIRED TO CAST
+level: 6
+required_focus: 135
+
+# COOLDOWN BEFORE CASTING AGAIN
+cooldown: 60
+
+# BASE CAST TIME (SECONDS)
+cast_time: 1.50
+
+# MANA COST
+mana_cost: 165
+
+# MAXIMUM MASTERY ACHIEVABLE. NOT RECOMMENDED TO CHANGE
+maximum_mastery: 100
+
+# HOW LONG A SEAL STAYS ON ITS TARGET, IN SECONDS
+reprieve_duration: 45
+
+# HIT POINTS THE SEAL LEAVES AFTER A LETHAL BLOW
+reprieve_health: 4
+
+# UTILITY - the seal deals no damage, so it carries no power: key.
+role: 'UTILITY'
+
+#THE COLOR OF THE SPELL MASTERY BOSSBAR. OPTIONS ARE: RED, BLUE, YELLOW, PINK, PURPLE, WHITE AND GREEN
+mastery_bar_color: 'RED'
+
+#THE ITEM THAT APPEARS IN THE /SPELLS GUI
+gui_item: 'BLAZE_POWDER'
+gui_custom_model_data: 4209
+
+cast_sound: 'ENTITY_BLAZE_SHOOT'
+cast_sound_pitch: 1.3

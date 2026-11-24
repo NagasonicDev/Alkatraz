@@ -1,0 +1,73 @@
+# ---------------------------------------------------------------------------
+# dawn_chorus - how far the song carries and how much it mends
+# ---------------------------------------------------------------------------
+
+options:
+  # -------------------------------------------------------------------------
+  # radius - how far the chorus reaches
+  # -------------------------------------------------------------------------
+  radius:
+    description: 'The radius of the chorus, in blocks.'
+    icon: 'SUNFLOWER'
+    default_index: 1
+    values:
+      close:
+        display_name: '&eClose Chorus'
+        description: 'Fourteen blocks.'
+        icon: 'SUNFLOWER'
+        value_type: int
+        value: 14
+      standard:
+        display_name: '&eDawn Chorus'
+        description: 'Eighteen blocks.'
+        icon: 'SUNFLOWER'
+        value_type: int
+        value: 18
+      wide:
+        display_name: '&6Wide Chorus'
+        description: 'Twenty-two blocks.'
+        icon: 'SUNFLOWER'
+        value_type: int
+        value: 22
+        requirements:
+          - type: number_stat
+            stat: mastery_dawn_chorus
+            minimum: 50
+            description: '&cRequires 50 dawn chorus mastery'
+
+  # -------------------------------------------------------------------------
+  # heal - hit points restored immediately
+  # -------------------------------------------------------------------------
+  heal:
+    description: 'Hit points restored to every ally when the chorus lands.'
+    icon: 'GLISTERING_MELON_SLICE'
+    default_index: 1
+    values:
+      light:
+        display_name: '&eLight Mending'
+        description: 'Six hit points.'
+        icon: 'GLISTERING_MELON_SLICE'
+        value_type: int
+        value: 6
+      standard:
+        display_name: '&eMending'
+        description: 'Eight hit points.'
+        icon: 'GLISTERING_MELON_SLICE'
+        value_type: int
+        value: 8
+        requirements:
+          - type: number_stat
+            stat: mastery_dawn_chorus
+            minimum: 25
+            description: '&cRequires 25 dawn chorus mastery'
+      deep:
+        display_name: '&6Deep Mending'
+        description: 'Ten hit points.'
+        icon: 'GLISTERING_MELON_SLICE'
+        value_type: int
+        value: 10
+        requirements:
+          - type: number_stat
+            stat: mastery_dawn_chorus
+            minimum: 50
+            description: '&cRequires 50 dawn chorus mastery'

@@ -1,0 +1,98 @@
+options:
+
+  # ---------------------------------------------------------------------------
+  # count — How many stone blocks one cast may take
+  # ---------------------------------------------------------------------------
+  count:
+    description: "How many stone blocks one cast may take"
+    icon: RAW_IRON
+    default_index: 1
+
+    values:
+
+      few:
+        display_name: "A Few"
+        description: "16 blocks"
+        icon: COBBLESTONE
+        value_type: int
+        value: 16
+        impacts:
+          - type: stat_modifier
+            stat: quarry_count
+            value: 16
+            modifier: SET
+          - type: mana_cost
+            change: -15
+
+      standard:
+        display_name: "Standard"
+        description: "24 blocks"
+        icon: RAW_IRON
+        value_type: int
+        value: 24
+        impacts:
+          - type: stat_modifier
+            stat: quarry_count
+            value: 24
+            modifier: SET
+
+      many:
+        display_name: "Many"
+        description: "32 blocks"
+        icon: RAW_IRON_BLOCK
+        value_type: int
+        value: 32
+        requirements:
+          - type: number_stat
+            stat: mastery_quarryheart
+            minimum: 50
+            description: "Requires 50 Quarryheart mastery"
+        impacts:
+          - type: stat_modifier
+            stat: quarry_count
+            value: 32
+            modifier: SET
+          - type: mana_cost
+            change: 20
+
+  # ---------------------------------------------------------------------------
+  # radius — The edge length of the volume it cracks
+  # ---------------------------------------------------------------------------
+  radius:
+    description: "The edge length of the volume it cracks"
+    icon: STONE
+    default_index: 1
+
+    values:
+
+      small:
+        display_name: "Small"
+        description: "A 4 block cube"
+        icon: COBBLESTONE
+        value_type: int
+        value: 4
+        impacts:
+          - type: mana_cost
+            change: -10
+
+      standard:
+        display_name: "Standard"
+        description: "A 5 block cube"
+        icon: STONE
+        value_type: int
+        value: 5
+
+      large:
+        display_name: "Large"
+        description: "A 6 block cube"
+        icon: STONE_BRICKS
+        value_type: int
+        value: 6
+        requirements:
+          - type: number_stat
+            stat: mastery_quarryheart
+            minimum: 50
+            description: "Requires 50 Quarryheart mastery"
+        impacts:
+          - type: mana_cost
+            change: 15

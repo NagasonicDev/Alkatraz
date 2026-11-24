@@ -1,0 +1,111 @@
+options:
+
+  # ---------------------------------------------------------------------------
+  # radius — How far the bloom reaches
+  # ---------------------------------------------------------------------------
+  radius:
+    description: "How far the bloom reaches"
+    icon: SUNFLOWER
+    default_index: 1
+
+    values:
+
+      tight:
+        display_name: "Tight"
+        description: "6 blocks"
+        icon: DANDELION
+        value_type: int
+        value: 6
+        impacts:
+          - type: stat_modifier
+            stat: bloom_radius
+            value: 6
+            modifier: SET
+          - type: mana_cost
+            change: -15
+
+      standard:
+        display_name: "Standard"
+        description: "8 blocks"
+        icon: SUNFLOWER
+        value_type: int
+        value: 8
+        impacts:
+          - type: stat_modifier
+            stat: bloom_radius
+            value: 8
+            modifier: SET
+
+      wide:
+        display_name: "Wide"
+        description: "10 blocks"
+        icon: PEONY
+        value_type: int
+        value: 10
+        requirements:
+          - type: number_stat
+            stat: mastery_sanctuarybloom
+            minimum: 50
+            description: "Requires 50 Sanctuary Bloom mastery"
+        impacts:
+          - type: stat_modifier
+            stat: bloom_radius
+            value: 10
+            modifier: SET
+          - type: mana_cost
+            change: 20
+
+  # ---------------------------------------------------------------------------
+  # heal — How much health the bloom restores
+  # ---------------------------------------------------------------------------
+  heal:
+    description: "How much health the bloom restores"
+    icon: GLISTERING_MELON_SLICE
+    default_index: 1
+
+    values:
+
+      light:
+        display_name: "Light"
+        description: "4 health"
+        icon: WHEAT
+        value_type: double
+        value: 4.0
+        impacts:
+          - type: stat_modifier
+            stat: healing
+            value: 4.0
+            modifier: SET
+          - type: mana_cost
+            change: -10
+
+      standard:
+        display_name: "Standard"
+        description: "6 health"
+        icon: GLISTERING_MELON_SLICE
+        value_type: double
+        value: 6.0
+        impacts:
+          - type: stat_modifier
+            stat: healing
+            value: 6.0
+            modifier: SET
+
+      deep:
+        display_name: "Deep"
+        description: "8 health"
+        icon: GOLDEN_APPLE
+        value_type: double
+        value: 8.0
+        requirements:
+          - type: number_stat
+            stat: mastery_sanctuarybloom
+            minimum: 50
+            description: "Requires 50 Sanctuary Bloom mastery"
+        impacts:
+          - type: stat_modifier
+            stat: healing
+            value: 8.0
+            modifier: SET
+          - type: mana_cost
+            change: 20

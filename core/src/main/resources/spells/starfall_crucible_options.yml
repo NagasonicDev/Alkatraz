@@ -1,0 +1,71 @@
+# ---------------------------------------------------------------------------
+# starfall_crucible - how wide the fall ranges and how many comets strike
+# ---------------------------------------------------------------------------
+
+# Total PvP damage one player may take from a single cast, split across comets.
+pvp_damage_cap: 9.0
+
+options:
+  # -------------------------------------------------------------------------
+  # radius - blocks from the aimed center where comets may land
+  # -------------------------------------------------------------------------
+  radius:
+    description: 'How far from the aimed point each comet may strike.'
+    icon: 'NETHER_STAR'
+    default_index: 1
+    values:
+      tight:
+        display_name: '&cTight Fall'
+        description: 'Eighteen blocks from the center.'
+        icon: 'NETHER_STAR'
+        value_type: int
+        value: 18
+      standard:
+        display_name: '&cCrucible'
+        description: 'Twenty-two blocks, the tuned radius.'
+        icon: 'NETHER_STAR'
+        value_type: int
+        value: 22
+      wide:
+        display_name: '&4Wide Fall'
+        description: 'Twenty-six blocks from the center.'
+        icon: 'NETHER_STAR'
+        value_type: int
+        value: 26
+        requirements:
+          - type: number_stat
+            stat: mastery_starfallcrucible
+            minimum: 50
+            description: '&cRequires 50 starfall crucible mastery'
+
+  # -------------------------------------------------------------------------
+  # comets - how many impacts fall over the six-second window
+  # -------------------------------------------------------------------------
+  comets:
+    description: 'How many comets strike during the cast.'
+    icon: 'FIRE_CHARGE'
+    default_index: 1
+    values:
+      pair:
+        display_name: '&cTwo Comets'
+        description: 'Two impacts over six seconds.'
+        icon: 'FIRE_CHARGE'
+        value_type: int
+        value: 2
+      standard:
+        display_name: '&cThree Comets'
+        description: 'Three impacts, the tuned count.'
+        icon: 'FIRE_CHARGE'
+        value_type: int
+        value: 3
+      storm:
+        display_name: '&4Four Comets'
+        description: 'Four impacts over six seconds.'
+        icon: 'FIRE_CHARGE'
+        value_type: int
+        value: 4
+        requirements:
+          - type: number_stat
+            stat: mastery_starfallcrucible
+            minimum: 50
+            description: '&cRequires 50 starfall crucible mastery'

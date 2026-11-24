@@ -1,0 +1,88 @@
+# ---------------------------------------------------------------------------
+# soul_reclamation - search range and age limit of the death trail
+# ---------------------------------------------------------------------------
+
+options:
+  # -------------------------------------------------------------------------
+  # range - how far the caster may be from their death site
+  # -------------------------------------------------------------------------
+  range:
+    description: 'How far from the death site the spell still reaches.'
+    icon: 'SOUL_TORCH'
+    default_index: 1
+    values:
+      close:
+        display_name: '&5Close'
+        description: 'Ninety-six blocks.'
+        icon: 'SOUL_LANTERN'
+        value_type: int
+        value: 96
+        impacts:
+          - type: stat_modifier
+            stat: reclaim_range
+            value: 96
+            modifier: SET
+      standard:
+        display_name: '&5Trail'
+        description: 'One hundred twenty-eight blocks.'
+        icon: 'SOUL_TORCH'
+        value_type: int
+        value: 128
+        impacts:
+          - type: stat_modifier
+            stat: reclaim_range
+            value: 128
+            modifier: SET
+      far:
+        display_name: '&dLong Trail'
+        description: 'One hundred sixty blocks.'
+        icon: 'SOUL_CAMPFIRE'
+        value_type: int
+        value: 160
+        impacts:
+          - type: stat_modifier
+            stat: reclaim_range
+            value: 160
+            modifier: SET
+
+  # -------------------------------------------------------------------------
+  # minutes - how old the death trail may be
+  # -------------------------------------------------------------------------
+  minutes:
+    description: 'How old the death trail may be, in minutes.'
+    icon: 'CLOCK'
+    default_index: 1
+    values:
+      fresh:
+        display_name: '&5Fresh'
+        description: 'Five minutes.'
+        icon: 'CLOCK'
+        value_type: int
+        value: 5
+        impacts:
+          - type: stat_modifier
+            stat: reclaim_minutes
+            value: 5
+            modifier: SET
+      standard:
+        display_name: '&5Remembered'
+        description: 'Ten minutes.'
+        icon: 'SOUL_TORCH'
+        value_type: int
+        value: 10
+        impacts:
+          - type: stat_modifier
+            stat: reclaim_minutes
+            value: 10
+            modifier: SET
+      old:
+        display_name: '&dCold Trail'
+        description: 'Fifteen minutes.'
+        icon: 'SOUL_CAMPFIRE'
+        value_type: int
+        value: 15
+        impacts:
+          - type: stat_modifier
+            stat: reclaim_minutes
+            value: 15
+            modifier: SET

@@ -1,0 +1,111 @@
+options:
+
+  # ---------------------------------------------------------------------------
+  # light — How high the lamp searches for a spot to burn
+  # ---------------------------------------------------------------------------
+  light:
+    description: "How high the lamp searches for a spot to burn"
+    icon: SOUL_LANTERN
+    default_index: 1
+
+    values:
+
+      low:
+        display_name: "Low"
+        description: "6 blocks"
+        icon: TORCH
+        value_type: int
+        value: 6
+        impacts:
+          - type: stat_modifier
+            stat: lantern_light
+            value: 6
+            modifier: SET
+          - type: mana_cost
+            change: -10
+
+      standard:
+        display_name: "Standard"
+        description: "10 blocks"
+        icon: SOUL_LANTERN
+        value_type: int
+        value: 10
+        impacts:
+          - type: stat_modifier
+            stat: lantern_light
+            value: 10
+            modifier: SET
+
+      high:
+        display_name: "High"
+        description: "14 blocks"
+        icon: GLOWSTONE
+        value_type: int
+        value: 14
+        requirements:
+          - type: number_stat
+            stat: mastery_soullantern
+            minimum: 50
+            description: "Requires 50 Soul Lantern mastery"
+        impacts:
+          - type: stat_modifier
+            stat: lantern_light
+            value: 14
+            modifier: SET
+          - type: mana_cost
+            change: 15
+
+  # ---------------------------------------------------------------------------
+  # pull — How far the wisp reaches for its own drops
+  # ---------------------------------------------------------------------------
+  pull:
+    description: "How far the wisp reaches for your drops"
+    icon: HOPPER
+    default_index: 1
+
+    values:
+
+      short:
+        display_name: "Short"
+        description: "6 blocks"
+        icon: HOPPER
+        value_type: int
+        value: 6
+        impacts:
+          - type: stat_modifier
+            stat: lantern_pull
+            value: 6
+            modifier: SET
+          - type: mana_cost
+            change: -10
+
+      standard:
+        display_name: "Standard"
+        description: "8 blocks"
+        icon: HOPPER
+        value_type: int
+        value: 8
+        impacts:
+          - type: stat_modifier
+            stat: lantern_pull
+            value: 8
+            modifier: SET
+
+      long:
+        display_name: "Long"
+        description: "10 blocks"
+        icon: DROPPER
+        value_type: int
+        value: 10
+        requirements:
+          - type: number_stat
+            stat: mastery_soullantern
+            minimum: 50
+            description: "Requires 50 Soul Lantern mastery"
+        impacts:
+          - type: stat_modifier
+            stat: lantern_pull
+            value: 10
+            modifier: SET
+          - type: mana_cost
+            change: 15

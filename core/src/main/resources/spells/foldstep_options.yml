@@ -1,0 +1,98 @@
+options:
+
+  # ---------------------------------------------------------------------------
+  # range — How far the fold reaches
+  # ---------------------------------------------------------------------------
+  range:
+    description: "How far the fold reaches"
+    icon: ENDER_PEARL
+    default_index: 1
+
+    values:
+
+      close:
+        display_name: "Close"
+        description: "24 blocks"
+        icon: ENDER_EYE
+        value_type: int
+        value: 24
+        impacts:
+          - type: stat_modifier
+            stat: fold_range
+            value: 24
+            modifier: SET
+          - type: mana_cost
+            change: -15
+
+      standard:
+        display_name: "Standard"
+        description: "30 blocks"
+        icon: ENDER_PEARL
+        value_type: int
+        value: 30
+        impacts:
+          - type: stat_modifier
+            stat: fold_range
+            value: 30
+            modifier: SET
+
+      far:
+        display_name: "Far"
+        description: "36 blocks"
+        icon: CHORUS_FRUIT
+        value_type: int
+        value: 36
+        requirements:
+          - type: number_stat
+            stat: mastery_foldstep
+            minimum: 50
+            description: "Requires 50 Foldstep mastery"
+        impacts:
+          - type: stat_modifier
+            stat: fold_range
+            value: 36
+            modifier: SET
+          - type: mana_cost
+            change: 20
+
+  # ---------------------------------------------------------------------------
+  # allies — How many allies ride along
+  # ---------------------------------------------------------------------------
+  allies:
+    description: "How many allies ride along"
+    icon: PLAYER_HEAD
+    default_index: 1
+
+    values:
+
+      one:
+        display_name: "One"
+        description: "One ally"
+        icon: SHIELD
+        value_type: int
+        value: 1
+        impacts:
+          - type: mana_cost
+            change: -10
+
+      pair:
+        display_name: "A Pair"
+        description: "Two allies"
+        icon: PLAYER_HEAD
+        value_type: int
+        value: 2
+
+      three:
+        display_name: "Three"
+        description: "Three allies"
+        icon: TOTEM_OF_UNDYING
+        value_type: int
+        value: 3
+        requirements:
+          - type: number_stat
+            stat: mastery_foldstep
+            minimum: 50
+            description: "Requires 50 Foldstep mastery"
+        impacts:
+          - type: mana_cost
+            change: 15

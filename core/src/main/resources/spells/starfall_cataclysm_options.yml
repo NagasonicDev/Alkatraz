@@ -1,0 +1,122 @@
+﻿# ---------------------------------------------------------------------------
+# starfall_cataclysm - reach and number of the falling fragments
+# ---------------------------------------------------------------------------
+
+# Total PvP damage one player may take from a single cast, split across hits.
+pvp_damage_cap: 12.0
+
+options:
+  # -------------------------------------------------------------------------
+  # radius - how wide the storm marks the ground
+  # -------------------------------------------------------------------------
+  radius:
+    description: 'The radius the fragments strike within, in blocks.'
+    icon: 'MAGMA_BLOCK'
+    default_index: 1
+    values:
+      close:
+        display_name: '&cEmberfall'
+        description: 'Twenty-six blocks.'
+        icon: 'MAGMA_BLOCK'
+        value_type: int
+        value: 26
+        impacts:
+          - type: stat_modifier
+            stat: cataclysm_radius
+            value: 26
+            modifier: SET
+      standard:
+        display_name: '&cStarfall'
+        description: 'Thirty-two blocks.'
+        icon: 'FIRE_CHARGE'
+        value_type: int
+        value: 32
+        impacts:
+          - type: stat_modifier
+            stat: cataclysm_radius
+            value: 32
+            modifier: SET
+      wide:
+        display_name: '&6Skyfall'
+        description: 'Thirty-eight blocks.'
+        icon: 'NETHER_STAR'
+        value_type: int
+        value: 38
+        impacts:
+          - type: stat_modifier
+            stat: cataclysm_radius
+            value: 38
+            modifier: SET
+
+  # -------------------------------------------------------------------------
+  # fragments - how many star-fragments fall
+  # -------------------------------------------------------------------------
+  fragments:
+    description: 'How many star-fragments fall.'
+    icon: 'FIRE_CHARGE'
+    default_index: 1
+    values:
+      pair:
+        display_name: '&cTwin Fall'
+        description: 'Two fragments.'
+        icon: 'FIRE_CHARGE'
+        value_type: int
+        value: 2
+        impacts:
+          - type: stat_modifier
+            stat: cataclysm_fragments
+            value: 2
+            modifier: SET
+      triad:
+        display_name: '&cTriad'
+        description: 'Three fragments.'
+        icon: 'MAGMA_BLOCK'
+        value_type: int
+        value: 3
+        impacts:
+          - type: stat_modifier
+            stat: cataclysm_fragments
+            value: 3
+            modifier: SET
+      storm:
+        display_name: '&6Star Storm'
+        description: 'Four fragments.'
+        icon: 'NETHER_STAR'
+        value_type: int
+        value: 4
+        impacts:
+          - type: stat_modifier
+            stat: cataclysm_fragments
+            value: 4
+            modifier: SET
+
+  # -------------------------------------------------------------------------
+  # damage_blocks - whether star-fragments break terrain where sensible
+  # -------------------------------------------------------------------------
+  damage_blocks:
+    description: 'Whether star-fragments break terrain where sensible.'
+    icon: 'MAGMA_BLOCK'
+    default_index: 0
+    values:
+      enabled:
+        display_name: 'Breaks Terrain'
+        description: 'Fragments break terrain as they fall.'
+        icon: 'MAGMA_BLOCK'
+        value_type: boolean
+        value: true
+        impacts:
+          - type: stat_modifier
+            stat: damage_blocks
+            value: true
+            modifier: SET
+      disabled:
+        display_name: 'No Break'
+        description: 'Fragments fall without breaking anything.'
+        icon: 'GUNPOWDER'
+        value_type: boolean
+        value: false
+        impacts:
+          - type: stat_modifier
+            stat: damage_blocks
+            value: false
+            modifier: SET

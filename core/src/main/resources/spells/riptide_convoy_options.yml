@@ -1,0 +1,71 @@
+# ---------------------------------------------------------------------------
+# riptide_convoy - how far and how wide the surge runs
+# ---------------------------------------------------------------------------
+
+# Total PvP damage one player may take from a single cast (one surge hit).
+pvp_damage_cap: 2.0
+
+options:
+  # -------------------------------------------------------------------------
+  # length - blocks the surge travels
+  # -------------------------------------------------------------------------
+  length:
+    description: 'How many blocks the convoy surges forward.'
+    icon: 'PRISMARINE_SHARD'
+    default_index: 1
+    values:
+      short:
+        display_name: '&bShort Surge'
+        description: 'Twenty blocks.'
+        icon: 'PRISMARINE_SHARD'
+        value_type: int
+        value: 20
+      standard:
+        display_name: '&bRiptide'
+        description: 'Twenty-eight blocks, the tuned length.'
+        icon: 'PRISMARINE_SHARD'
+        value_type: int
+        value: 28
+      long:
+        display_name: '&3Long Convoy'
+        description: 'Thirty-six blocks.'
+        icon: 'PRISMARINE_SHARD'
+        value_type: int
+        value: 36
+        requirements:
+          - type: number_stat
+            stat: mastery_riptideconvoy
+            minimum: 50
+            description: '&cRequires 50 riptide convoy mastery'
+
+  # -------------------------------------------------------------------------
+  # width - blocks the wash reaches sideways
+  # -------------------------------------------------------------------------
+  width:
+    description: 'How wide the wash is, in blocks.'
+    icon: 'PRISMARINE_SHARD'
+    default_index: 1
+    values:
+      narrow:
+        display_name: '&bNarrow'
+        description: 'Three blocks wide.'
+        icon: 'PRISMARINE_SHARD'
+        value_type: int
+        value: 3
+      standard:
+        display_name: '&bFive Wide'
+        description: 'Five blocks wide.'
+        icon: 'PRISMARINE_SHARD'
+        value_type: int
+        value: 5
+      wide:
+        display_name: '&3Seven Wide'
+        description: 'Seven blocks wide.'
+        icon: 'PRISMARINE_SHARD'
+        value_type: int
+        value: 7
+        requirements:
+          - type: number_stat
+            stat: mastery_riptide_convoy
+            minimum: 50
+            description: '&cRequires 50 riptide convoy mastery'

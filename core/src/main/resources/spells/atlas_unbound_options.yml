@@ -1,0 +1,92 @@
+# ---------------------------------------------------------------------------
+# atlas_unbound - size and height of the raised terraces
+# ---------------------------------------------------------------------------
+
+options:
+  # -------------------------------------------------------------------------
+  # radius - the side length of the terraced square
+  # -------------------------------------------------------------------------
+  radius:
+    description: 'The side length of the terraced square, in blocks.'
+    icon: 'GRASS_BLOCK'
+    default_index: 1
+    values:
+      small:
+        display_name: '&2Rise'
+        description: 'Twenty-four blocks across.'
+        icon: 'DIRT'
+        value_type: int
+        value: 24
+        impacts:
+          - type: stat_modifier
+            stat: terrace_radius
+            value: 24
+            modifier: SET
+      standard:
+        display_name: '&2Upland'
+        description: 'Thirty-two blocks across.'
+        icon: 'GRASS_BLOCK'
+        value_type: int
+        value: 32
+        impacts:
+          - type: stat_modifier
+            stat: terrace_radius
+            value: 32
+            modifier: SET
+      large:
+        display_name: '&aHighland'
+        description: 'Forty blocks across.'
+        icon: 'MOSS_BLOCK'
+        value_type: int
+        value: 40
+        impacts:
+          - type: stat_modifier
+            stat: terrace_radius
+            value: 40
+            modifier: SET
+          - type: mana_cost
+            change: 15
+
+  # -------------------------------------------------------------------------
+  # elevation - how far the terraces rise
+  # -------------------------------------------------------------------------
+  elevation:
+    description: 'How far the terraces rise, in blocks.'
+    icon: 'STONE'
+    default_index: 1
+    values:
+      low:
+        display_name: '&2Low Rise'
+        description: 'Eight blocks.'
+        icon: 'COBBLESTONE'
+        value_type: int
+        value: 8
+        impacts:
+          - type: stat_modifier
+            stat: terrace_elevation
+            value: 8
+            modifier: SET
+      standard:
+        display_name: '&2Ridge'
+        description: 'Twelve blocks.'
+        icon: 'STONE'
+        value_type: int
+        value: 12
+        impacts:
+          - type: stat_modifier
+            stat: terrace_elevation
+            value: 12
+            modifier: SET
+      high:
+        display_name: '&aSummit'
+        description: 'Sixteen blocks.'
+        icon: 'DEEPSLATE'
+        value_type: int
+        value: 16
+        impacts:
+          - type: stat_modifier
+            stat: terrace_elevation
+            value: 16
+            modifier: SET
+          - type: mana_cost
+            change: 15

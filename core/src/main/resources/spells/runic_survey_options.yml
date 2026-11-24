@@ -1,0 +1,107 @@
+options:
+
+  # ---------------------------------------------------------------------------
+  # radius — How far the survey reaches
+  # ---------------------------------------------------------------------------
+  radius:
+    description: "How far the survey reaches"
+    icon: SPYGLASS
+    default_index: 1
+
+    values:
+
+      near:
+        display_name: "Near"
+        description: "16 blocks — lower mana cost"
+        icon: SPYGLASS
+        value_type: int
+        value: 16
+        impacts:
+          - type: stat_modifier
+            stat: scan_radius
+            value: 16
+            modifier: SET
+          - type: mana_cost
+            change: -15
+
+      standard:
+        display_name: "Standard"
+        description: "24 blocks"
+        icon: SPYGLASS
+        value_type: int
+        value: 24
+        impacts:
+          - type: stat_modifier
+            stat: scan_radius
+            value: 24
+            modifier: SET
+
+      far:
+        display_name: "Far"
+        description: "32 blocks — needs a circle 6 mage"
+        icon: ENDER_EYE
+        value_type: int
+        value: 32
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 6
+            description: "Requires Circle Level 6"
+        impacts:
+          - type: stat_modifier
+            stat: scan_radius
+            value: 32
+            modifier: SET
+          - type: mana_cost
+            change: 20
+
+  # ---------------------------------------------------------------------------
+  # marks — How many finds are kept
+  # ---------------------------------------------------------------------------
+  marks:
+    description: "How many finds are marked"
+    icon: GLOWSTONE_DUST
+    default_index: 1
+
+    values:
+
+      few:
+        display_name: "Few"
+        description: "8 marks"
+        icon: GLOWSTONE_DUST
+        value_type: int
+        value: 8
+        impacts:
+          - type: stat_modifier
+            stat: max_marks
+            value: 8
+            modifier: SET
+
+      standard:
+        display_name: "Standard"
+        description: "12 marks"
+        icon: GLOWSTONE_DUST
+        value_type: int
+        value: 12
+        impacts:
+          - type: stat_modifier
+            stat: max_marks
+            value: 12
+            modifier: SET
+
+      many:
+        display_name: "Many"
+        description: "16 marks"
+        icon: GLOW_INK_SAC
+        value_type: int
+        value: 16
+        requirements:
+          - type: number_stat
+            stat: mastery_runicsurvey
+            minimum: 50
+            description: "Requires 50 Runic Survey mastery"
+        impacts:
+          - type: stat_modifier
+            stat: max_marks
+            value: 16
+            modifier: SET

@@ -1,0 +1,140 @@
+options:
+
+  # ---------------------------------------------------------------------------
+  # sentinels — How many wraiths answer the call
+  # ---------------------------------------------------------------------------
+  sentinels:
+    description: "How many wraiths answer the call"
+    icon: WITHER_SKELETON_SKULL
+    default_index: 1
+
+    values:
+
+      one:
+        display_name: "One"
+        description: "A single sentinel"
+        icon: SKELETON_SKULL
+        value_type: int
+        value: 1
+        impacts:
+          - type: mana_cost
+            change: -20
+
+      pair:
+        display_name: "A Pair"
+        description: "Two sentinels"
+        icon: WITHER_SKELETON_SKULL
+        value_type: int
+        value: 2
+
+      three:
+        display_name: "Three"
+        description: "Three sentinels"
+        icon: WITHER_ROSE
+        value_type: int
+        value: 3
+        requirements:
+          - type: number_stat
+            stat: mastery_wraithboundretinue
+            minimum: 50
+            description: "Requires 50 Wraithbound Retinue mastery"
+        impacts:
+          - type: mana_cost
+            change: 25
+
+  # ---------------------------------------------------------------------------
+  # duration — How long the retinue stays
+  # ---------------------------------------------------------------------------
+  duration:
+    description: "How long the retinue stays"
+    icon: SOUL_TORCH
+    default_index: 1
+
+    values:
+
+      short:
+        display_name: "Short"
+        description: "30 seconds"
+        icon: TORCH
+        value_type: int
+        value: 30
+        impacts:
+          - type: stat_modifier
+            stat: retinue_duration
+            value: 30
+            modifier: SET
+          - type: mana_cost
+            change: -15
+
+      standard:
+        display_name: "Standard"
+        description: "45 seconds"
+        icon: SOUL_TORCH
+        value_type: int
+        value: 45
+        impacts:
+          - type: stat_modifier
+            stat: retinue_duration
+            value: 45
+            modifier: SET
+
+      long:
+        display_name: "Long"
+        description: "60 seconds"
+        icon: SOUL_LANTERN
+        value_type: int
+        value: 60
+        requirements:
+          - type: number_stat
+            stat: mastery_wraithboundretinue
+            minimum: 50
+            description: "Requires 50 Wraithbound Retinue mastery"
+        impacts:
+          - type: stat_modifier
+            stat: retinue_duration
+            value: 60
+            modifier: SET
+          - type: mana_cost
+            change: 20
+
+  # ---------------------------------------------------------------------------
+  # hit_count — Strikes each sentinel lands before it stands down
+  # ---------------------------------------------------------------------------
+  hit_count:
+    description: "Strikes each sentinel lands before it stands down"
+    icon: SKELETON_SKULL
+    default_index: 1
+
+    values:
+
+      few:
+        display_name: "Few"
+        description: "Four strikes per sentinel"
+        icon: BONE
+        value_type: int
+        value: 4
+        impacts:
+          - type: mana_cost
+            change: -15
+
+      standard:
+        display_name: "Standard"
+        description: "Eight strikes per sentinel"
+        icon: SKELETON_SKULL
+        value_type: int
+        value: 8
+
+      many:
+        display_name: "Many"
+        description: "Twelve strikes per sentinel"
+        icon: WITHER_ROSE
+        value_type: int
+        value: 12
+        requirements:
+          - type: number_stat
+            stat: mastery_wraithboundretinue
+            minimum: 50
+            description: "Requires 50 Wraithbound Retinue mastery"
+        impacts:
+          - type: mana_cost
+            change: 20

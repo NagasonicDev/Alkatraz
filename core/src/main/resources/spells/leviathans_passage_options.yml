@@ -1,0 +1,74 @@
+# ---------------------------------------------------------------------------
+# leviathans_passage - how long the mount lasts and how many it carries
+# ---------------------------------------------------------------------------
+
+options:
+  # -------------------------------------------------------------------------
+  # duration - how long the spectral leviathan remains, in seconds
+  # -------------------------------------------------------------------------
+  duration:
+    description: 'How long the leviathan carries its riders, in seconds.'
+    icon: 'HEART_OF_THE_SEA'
+    default_index: 1
+    values:
+      brief:
+        display_name: '&bBrief Passage'
+        description: 'Thirty seconds.'
+        icon: 'HEART_OF_THE_SEA'
+        value_type: int
+        value: 30
+      standard:
+        display_name: '&bLeviathan''s Passage'
+        description: 'Forty-five seconds, the tuned duration.'
+        icon: 'HEART_OF_THE_SEA'
+        value_type: int
+        value: 45
+      long:
+        display_name: '&3Deep Passage'
+        description: 'Sixty seconds.'
+        icon: 'HEART_OF_THE_SEA'
+        value_type: int
+        value: 60
+        requirements:
+          - type: number_stat
+            stat: mastery_leviathans_passage
+            minimum: 50
+            description: '&cRequires 50 leviathan''s passage mastery'
+        impacts:
+          - type: mana_cost
+            change: 15
+
+  # -------------------------------------------------------------------------
+  # passengers - how many allies may ride with the caster
+  # -------------------------------------------------------------------------
+  passengers:
+    description: 'How many consenting allies may ride alongside the caster.'
+    icon: 'HEART_OF_THE_SEA'
+    default_index: 1
+    values:
+      one:
+        display_name: '&bOne Passenger'
+        description: 'Carry one ally.'
+        icon: 'HEART_OF_THE_SEA'
+        value_type: int
+        value: 1
+      two:
+        display_name: '&bTwo Passengers'
+        description: 'Carry two allies, the tuned count.'
+        icon: 'HEART_OF_THE_SEA'
+        value_type: int
+        value: 2
+      three:
+        display_name: '&3Three Passengers'
+        description: 'Carry three allies.'
+        icon: 'HEART_OF_THE_SEA'
+        value_type: int
+        value: 3
+        requirements:
+          - type: number_stat
+            stat: mastery_leviathans_passage
+            minimum: 50
+            description: '&cRequires 50 leviathan''s passage mastery'
+        impacts:
+          - type: mana_cost
+            change: 15

@@ -1,0 +1,109 @@
+# ---------------------------------------------------------------------------
+# hollow_kings_court - reach and size of the shadow court
+# ---------------------------------------------------------------------------
+
+options:
+  # -------------------------------------------------------------------------
+  # radius - how far the shadow domain reaches
+  # -------------------------------------------------------------------------
+  radius:
+    description: 'The radius of the shadow domain, in blocks.'
+    icon: 'WITHER_ROSE'
+    default_index: 1
+    values:
+      close:
+        display_name: '&5Dim Court'
+        description: 'Fourteen blocks.'
+        icon: 'WITHER_ROSE'
+        value_type: int
+        value: 14
+        impacts:
+          - type: stat_modifier
+            stat: court_radius
+            value: 14
+            modifier: SET
+      standard:
+        display_name: '&5Shadow Court'
+        description: 'Eighteen blocks.'
+        icon: 'SOUL_LANTERN'
+        value_type: int
+        value: 18
+        impacts:
+          - type: stat_modifier
+            stat: court_radius
+            value: 18
+            modifier: SET
+      wide:
+        display_name: '&5Hollow Throne'
+        description: 'Twenty-two blocks.'
+        icon: 'WITHER_SKELETON_SKULL'
+        value_type: int
+        value: 22
+        impacts:
+          - type: stat_modifier
+            stat: court_radius
+            value: 22
+            modifier: SET
+
+  # -------------------------------------------------------------------------
+  # knights - how many spectral knights rise
+  # -------------------------------------------------------------------------
+  knights:
+    description: 'How many spectral knights rise.'
+    icon: 'IRON_SWORD'
+    default_index: 1
+    values:
+      three:
+        display_name: '&5Three Knights'
+        description: 'Three spectral knights.'
+        icon: 'IRON_SWORD'
+        value_type: int
+        value: 3
+        impacts:
+          - type: stat_modifier
+            stat: court_knights
+            value: 3
+            modifier: SET
+      four:
+        display_name: '&5Four Knights'
+        description: 'Four spectral knights.'
+        icon: 'NETHERITE_SWORD'
+        value_type: int
+        value: 4
+        impacts:
+          - type: stat_modifier
+            stat: court_knights
+            value: 4
+            modifier: SET
+      five:
+        display_name: '&5Full Court'
+        description: 'Five spectral knights.'
+        icon: 'WITHER_SKELETON_SKULL'
+        value_type: int
+        value: 5
+        impacts:
+          - type: stat_modifier
+            stat: court_knights
+            value: 5
+            modifier: SET
+
+  # -------------------------------------------------------------------------
+  # damage_blocks - whether the knights smash terrain when they strike
+  # -------------------------------------------------------------------------
+  damage_blocks:
+    description: 'Whether the knights smash terrain where they strike.'
+    icon: 'IRON_SWORD'
+    default_index: 0
+    values:
+      smashing:
+        display_name: '&5Smash'
+        description: 'Knights destroy terrain where they strike.'
+        icon: 'IRON_SWORD'
+        value_type: boolean
+        value: true
+      passive:
+        display_name: '&5Passive'
+        description: 'Knights only damage mobs, never terrain.'
+        icon: 'BARRIER'
+        value_type: boolean
+        value: false

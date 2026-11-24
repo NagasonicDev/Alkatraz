@@ -1,0 +1,74 @@
+# ---------------------------------------------------------------------------
+# wayfarers_call - how many answer and from how far
+# ---------------------------------------------------------------------------
+
+options:
+  # -------------------------------------------------------------------------
+  # count - how many team members are gathered
+  # -------------------------------------------------------------------------
+  count:
+    description: 'How many allies are pulled to the caster when the call lands.'
+    icon: 'COMPASS'
+    default_index: 1
+    values:
+      three:
+        display_name: '&eThree'
+        description: 'Gather three allies.'
+        icon: 'COMPASS'
+        value_type: int
+        value: 3
+      five:
+        display_name: '&eFive'
+        description: 'Gather five allies.'
+        icon: 'COMPASS'
+        value_type: int
+        value: 5
+      seven:
+        display_name: '&6Seven'
+        description: 'Gather seven allies.'
+        icon: 'COMPASS'
+        value_type: int
+        value: 7
+        requirements:
+          - type: number_stat
+            stat: mastery_wayfarers_call
+            minimum: 50
+            description: '&cRequires 50 wayfarer''s call mastery'
+        impacts:
+          - type: mana_cost
+            change: 15
+
+  # -------------------------------------------------------------------------
+  # range - how far the call carries
+  # -------------------------------------------------------------------------
+  range:
+    description: 'The radius the call reaches, in blocks.'
+    icon: 'RECOVERY_COMPASS'
+    default_index: 1
+    values:
+      near:
+        display_name: '&eNear'
+        description: 'Forty-eight blocks.'
+        icon: 'RECOVERY_COMPASS'
+        value_type: int
+        value: 48
+      standard:
+        display_name: '&eField Call'
+        description: 'Sixty-four blocks.'
+        icon: 'RECOVERY_COMPASS'
+        value_type: int
+        value: 64
+      far:
+        display_name: '&6Battle Call'
+        description: 'Eighty blocks.'
+        icon: 'RECOVERY_COMPASS'
+        value_type: int
+        value: 80
+        requirements:
+          - type: number_stat
+            stat: mastery_wayfarers_call
+            minimum: 50
+            description: '&cRequires 50 wayfarer''s call mastery'
+        impacts:
+          - type: mana_cost
+            change: 15

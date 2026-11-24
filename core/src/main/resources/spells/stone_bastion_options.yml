@@ -1,0 +1,68 @@
+# ---------------------------------------------------------------------------
+# stone_bastion - how big the refuge is and how long it stands
+# ---------------------------------------------------------------------------
+
+options:
+  # -------------------------------------------------------------------------
+  # size - the edge length of the refuge
+  # -------------------------------------------------------------------------
+  size:
+    description: 'The edge length of the walled refuge, in blocks.'
+    icon: 'STONE_BRICK_WALL'
+    default_index: 1
+    values:
+      small:
+        display_name: '&aNook'
+        description: 'Nine blocks across.'
+        icon: 'STONE_BRICK_WALL'
+        value_type: int
+        value: 9
+      standard:
+        display_name: '&aBastion'
+        description: 'Eleven blocks across.'
+        icon: 'STONE_BRICK_WALL'
+        value_type: int
+        value: 11
+      large:
+        display_name: '&2Rampart'
+        description: 'Thirteen blocks across.'
+        icon: 'STONE_BRICK_WALL'
+        value_type: int
+        value: 13
+        requirements:
+          - type: number_stat
+            stat: mastery_stonebastion
+            minimum: 50
+            description: '&cRequires 50 stone bastion mastery'
+
+  # -------------------------------------------------------------------------
+  # duration - how long the walls stand before they settle
+  # -------------------------------------------------------------------------
+  duration:
+    description: 'How many seconds the refuge stands before it is taken down.'
+    icon: 'CLOCK'
+    default_index: 1
+    values:
+      brief:
+        display_name: '&aBrief'
+        description: 'Thirty-five seconds.'
+        icon: 'CLOCK'
+        value_type: int
+        value: 35
+      standard:
+        display_name: '&aLong Watch'
+        description: 'Fifty seconds.'
+        icon: 'CLOCK'
+        value_type: int
+        value: 50
+      siege:
+        display_name: '&2Siege'
+        description: 'Sixty-five seconds.'
+        icon: 'CLOCK'
+        value_type: int
+        value: 65
+        requirements:
+          - type: number_stat
+            stat: mastery_stone_bastion
+            minimum: 50
+            description: '&cRequires 50 stone bastion mastery'

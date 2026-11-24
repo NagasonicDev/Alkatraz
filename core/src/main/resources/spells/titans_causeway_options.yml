@@ -1,0 +1,92 @@
+# ---------------------------------------------------------------------------
+# titans_causeway - length and width of the stone causeway
+# ---------------------------------------------------------------------------
+
+options:
+  # -------------------------------------------------------------------------
+  # length - how far the causeway runs
+  # -------------------------------------------------------------------------
+  length:
+    description: 'How far the causeway runs, in blocks.'
+    icon: 'POLISHED_ANDESITE'
+    default_index: 1
+    values:
+      short:
+        display_name: '&aSpan'
+        description: 'Thirty-six blocks.'
+        icon: 'STONE'
+        value_type: int
+        value: 36
+        impacts:
+          - type: stat_modifier
+            stat: causeway_length
+            value: 36
+            modifier: SET
+      standard:
+        display_name: '&aCauseway'
+        description: 'Forty-eight blocks.'
+        icon: 'POLISHED_ANDESITE'
+        value_type: int
+        value: 48
+        impacts:
+          - type: stat_modifier
+            stat: causeway_length
+            value: 48
+            modifier: SET
+      long:
+        display_name: '&2Titan Span'
+        description: 'Sixty blocks.'
+        icon: 'STONE_BRICKS'
+        value_type: int
+        value: 60
+        impacts:
+          - type: stat_modifier
+            stat: causeway_length
+            value: 60
+            modifier: SET
+          - type: mana_cost
+            change: 15
+
+  # -------------------------------------------------------------------------
+  # width - how wide the causeway is
+  # -------------------------------------------------------------------------
+  width:
+    description: 'How wide the causeway is, in blocks.'
+    icon: 'POLISHED_ANDESITE_STAIRS'
+    default_index: 1
+    values:
+      narrow:
+        display_name: '&aNarrow'
+        description: 'Three blocks wide.'
+        icon: 'STONE_SLAB'
+        value_type: int
+        value: 3
+        impacts:
+          - type: stat_modifier
+            stat: causeway_width
+            value: 3
+            modifier: SET
+      standard:
+        display_name: '&aStandard'
+        description: 'Five blocks wide.'
+        icon: 'POLISHED_ANDESITE'
+        value_type: int
+        value: 5
+        impacts:
+          - type: stat_modifier
+            stat: causeway_width
+            value: 5
+            modifier: SET
+      wide:
+        display_name: '&2Broad'
+        description: 'Seven blocks wide.'
+        icon: 'POLISHED_ANDESITE_STAIRS'
+        value_type: int
+        value: 7
+        impacts:
+          - type: stat_modifier
+            stat: causeway_width
+            value: 7
+            modifier: SET
+          - type: mana_cost
+            change: 15

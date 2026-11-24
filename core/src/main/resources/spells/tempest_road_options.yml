@@ -1,0 +1,69 @@
+# ---------------------------------------------------------------------------
+# tempest_road - how long the lane runs and how long it lasts
+# ---------------------------------------------------------------------------
+
+options:
+  # -------------------------------------------------------------------------
+  # length - blocks the lane carries forward
+  # -------------------------------------------------------------------------
+  length:
+    description: 'How many blocks the wind lane runs forward.'
+    icon: 'FEATHER'
+    default_index: 1
+    values:
+      short:
+        display_name: '&fShort Road'
+        description: 'Twenty-eight blocks.'
+        icon: 'FEATHER'
+        value_type: int
+        value: 28
+      standard:
+        display_name: '&fTempest Road'
+        description: 'Thirty-six blocks, the tuned length.'
+        icon: 'FEATHER'
+        value_type: int
+        value: 36
+      long:
+        display_name: '&fLong Road'
+        description: 'Forty-four blocks.'
+        icon: 'FEATHER'
+        value_type: int
+        value: 44
+        requirements:
+          - type: number_stat
+            stat: mastery_tempest_road
+            minimum: 50
+            description: '&cRequires 50 tempest road mastery'
+        impacts:
+          - type: mana_cost
+            change: 15
+
+  # -------------------------------------------------------------------------
+  # duration - seconds the lane persists
+  # -------------------------------------------------------------------------
+  duration:
+    description: 'How long the wind lane remains, in seconds.'
+    icon: 'FEATHER'
+    default_index: 1
+    values:
+      brief:
+        display_name: '&fBrief'
+        description: 'Twenty seconds.'
+        icon: 'FEATHER'
+        value_type: int
+        value: 20
+      standard:
+        display_name: '&fLingering'
+        description: 'Thirty seconds.'
+        icon: 'FEATHER'
+        value_type: int
+        value: 30
+      long:
+        display_name: '&fEnduring'
+        description: 'Forty seconds.'
+        icon: 'FEATHER'
+        value_type: int
+        value: 40
+        impacts:
+          - type: mana_cost
+            change: 15

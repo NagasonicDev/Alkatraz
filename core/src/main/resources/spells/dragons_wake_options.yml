@@ -1,0 +1,66 @@
+# ---------------------------------------------------------------------------
+# dragons_wake - how long and how wide the lane of fire runs
+# ---------------------------------------------------------------------------
+
+# Total PvP damage one player may take from a single cast, split across pulses.
+pvp_damage_cap: 4.0
+
+options:
+  # -------------------------------------------------------------------------
+  # length - blocks the lane reaches
+  # -------------------------------------------------------------------------
+  length:
+    description: 'How many blocks downrange the wake reaches.'
+    icon: 'DRAGON_BREATH'
+    default_index: 1
+    values:
+      short:
+        display_name: '&cShort Wake'
+        description: 'Twenty-four blocks.'
+        icon: 'DRAGON_BREATH'
+        value_type: int
+        value: 24
+      standard:
+        display_name: '&cDragon''s Wake'
+        description: 'Thirty blocks, the tuned lane.'
+        icon: 'DRAGON_BREATH'
+        value_type: int
+        value: 30
+      long:
+        display_name: '&4Long Wake'
+        description: 'Thirty-six blocks.'
+        icon: 'DRAGON_BREATH'
+        value_type: int
+        value: 36
+        requirements:
+          - type: number_stat
+            stat: mastery_dragonswake
+            minimum: 50
+            description: '&cRequires 50 dragon''s wake mastery'
+
+  # -------------------------------------------------------------------------
+  # width - blocks the lane spans sideways
+  # -------------------------------------------------------------------------
+  width:
+    description: 'How wide the lane is, in blocks.'
+    icon: 'MAGMA_BLOCK'
+    default_index: 1
+    values:
+      narrow:
+        display_name: '&cNarrow'
+        description: 'Four blocks wide.'
+        icon: 'MAGMA_BLOCK'
+        value_type: int
+        value: 4
+      standard:
+        display_name: '&cSix Wide'
+        description: 'Six blocks wide.'
+        icon: 'MAGMA_BLOCK'
+        value_type: int
+        value: 6
+      wide:
+        display_name: '&4Eight Wide'
+        description: 'Eight blocks wide.'
+        icon: 'MAGMA_BLOCK'
+        value_type: int
+        value: 8

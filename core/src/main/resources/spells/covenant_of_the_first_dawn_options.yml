@@ -1,0 +1,88 @@
+# ---------------------------------------------------------------------------
+# covenant_of_the_first_dawn - reach and duration of the dawn ward
+# ---------------------------------------------------------------------------
+
+options:
+  # -------------------------------------------------------------------------
+  # radius - how far the covenant finds allies
+  # -------------------------------------------------------------------------
+  radius:
+    description: 'How far the covenant reaches, in blocks.'
+    icon: 'GOLDEN_APPLE'
+    default_index: 1
+    values:
+      close:
+        display_name: '&eKindled'
+        description: 'Twenty blocks.'
+        icon: 'GOLDEN_APPLE'
+        value_type: int
+        value: 20
+        impacts:
+          - type: stat_modifier
+            stat: covenant_radius
+            value: 20
+            modifier: SET
+      standard:
+        display_name: '&eDawnlit'
+        description: 'Twenty-four blocks.'
+        icon: 'GLOWSTONE'
+        value_type: int
+        value: 24
+        impacts:
+          - type: stat_modifier
+            stat: covenant_radius
+            value: 24
+            modifier: SET
+      wide:
+        display_name: '&6First Light'
+        description: 'Twenty-eight blocks.'
+        icon: 'BEACON'
+        value_type: int
+        value: 28
+        impacts:
+          - type: stat_modifier
+            stat: covenant_radius
+            value: 28
+            modifier: SET
+
+  # -------------------------------------------------------------------------
+  # ward - how long the dawn ward holds
+  # -------------------------------------------------------------------------
+  ward:
+    description: 'How long the dawn ward holds, in seconds.'
+    icon: 'CLOCK'
+    default_index: 1
+    values:
+      brief:
+        display_name: '&eEmber Ward'
+        description: 'Thirty seconds.'
+        icon: 'CLOCK'
+        value_type: int
+        value: 30
+        impacts:
+          - type: stat_modifier
+            stat: covenant_ward
+            value: 30
+            modifier: SET
+      standard:
+        display_name: '&eDawn Ward'
+        description: 'Forty-five seconds.'
+        icon: 'GOLDEN_APPLE'
+        value_type: int
+        value: 45
+        impacts:
+          - type: stat_modifier
+            stat: covenant_ward
+            value: 45
+            modifier: SET
+      lasting:
+        display_name: '&6Unbroken Dawn'
+        description: 'Sixty seconds.'
+        icon: 'BEACON'
+        value_type: int
+        value: 60
+        impacts:
+          - type: stat_modifier
+            stat: covenant_ward
+            value: 60
+            modifier: SET

@@ -1,0 +1,74 @@
+# ---------------------------------------------------------------------------
+# skyhook - how high the hook lifts the group
+# ---------------------------------------------------------------------------
+
+options:
+  # -------------------------------------------------------------------------
+  # height - blocks the launch clears
+  # -------------------------------------------------------------------------
+  height:
+    description: 'How high the group is lifted before the slow fall begins.'
+    icon: 'FISHING_ROD'
+    default_index: 1
+    values:
+      short:
+        display_name: '&eShort Lift'
+        description: 'Eight blocks. Cheap and quick.'
+        icon: 'FISHING_ROD'
+        value_type: int
+        value: 8
+      standard:
+        display_name: '&eSkyhook'
+        description: 'Twelve blocks, the height the spell was written for.'
+        icon: 'FISHING_ROD'
+        value_type: int
+        value: 12
+      tall:
+        display_name: '&6High Hook'
+        description: 'Sixteen blocks - enough to clear a tree line.'
+        icon: 'FISHING_ROD'
+        value_type: int
+        value: 16
+        requirements:
+          - type: number_stat
+            stat: mastery_skyhook
+            minimum: 50
+            description: '&cRequires 50 skyhook mastery'
+        impacts:
+          - type: mana_cost
+            change: 20
+
+  # -------------------------------------------------------------------------
+  # allies - how many team members ride up with the caster
+  # -------------------------------------------------------------------------
+  allies:
+    description: 'How many allies within twelve blocks are lifted as well.'
+    icon: 'PHANTOM_MEMBRANE'
+    default_index: 1
+    values:
+      pair:
+        display_name: '&eDuo'
+        description: 'Two allies ride along.'
+        icon: 'PHANTOM_MEMBRANE'
+        value_type: int
+        value: 2
+      squad:
+        display_name: '&eSquad'
+        description: 'Three allies ride along.'
+        icon: 'PHANTOM_MEMBRANE'
+        value_type: int
+        value: 3
+      crowd:
+        display_name: '&6Whole Party'
+        description: 'Four allies ride along, the whole hunting party.'
+        icon: 'PHANTOM_MEMBRANE'
+        value_type: int
+        value: 4
+        requirements:
+          - type: number_stat
+            stat: mastery_skyhook
+            minimum: 50
+            description: '&cRequires 50 skyhook mastery'
+        impacts:
+          - type: mana_cost
+            change: 15

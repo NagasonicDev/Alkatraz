@@ -1,0 +1,92 @@
+# ---------------------------------------------------------------------------
+# eye_of_the_firmament - duration and number of allies carried
+# ---------------------------------------------------------------------------
+
+options:
+  # -------------------------------------------------------------------------
+  # duration - how long the borrowed flight lasts
+  # -------------------------------------------------------------------------
+  duration:
+    description: 'How long the borrowed flight lasts, in seconds.'
+    icon: 'ELYTRA'
+    default_index: 1
+    values:
+      brief:
+        display_name: '&fShort Flight'
+        description: 'Sixteen seconds.'
+        icon: 'FEATHER'
+        value_type: int
+        value: 16
+        impacts:
+          - type: stat_modifier
+            stat: flight_duration
+            value: 16
+            modifier: SET
+      standard:
+        display_name: '&fFirmament'
+        description: 'Twenty-two seconds.'
+        icon: 'ELYTRA'
+        value_type: int
+        value: 22
+        impacts:
+          - type: stat_modifier
+            stat: flight_duration
+            value: 22
+            modifier: SET
+      lasting:
+        display_name: '&bLong Watch'
+        description: 'Twenty-eight seconds.'
+        icon: 'PHANTOM_MEMBRANE'
+        value_type: int
+        value: 28
+        impacts:
+          - type: stat_modifier
+            stat: flight_duration
+            value: 28
+            modifier: SET
+          - type: mana_cost
+            change: 15
+
+  # -------------------------------------------------------------------------
+  # allies - how many team allies are lifted with the caster
+  # -------------------------------------------------------------------------
+  allies:
+    description: 'How many team allies fly with the caster.'
+    icon: 'PLAYER_HEAD'
+    default_index: 1
+    values:
+      two:
+        display_name: '&fTwo'
+        description: 'Two allies.'
+        icon: 'FEATHER'
+        value_type: int
+        value: 2
+        impacts:
+          - type: stat_modifier
+            stat: flight_allies
+            value: 2
+            modifier: SET
+      three:
+        display_name: '&fThree'
+        description: 'Three allies.'
+        icon: 'PLAYER_HEAD'
+        value_type: int
+        value: 3
+        impacts:
+          - type: stat_modifier
+            stat: flight_allies
+            value: 3
+            modifier: SET
+      four:
+        display_name: '&bFour'
+        description: 'Four allies.'
+        icon: 'ELYTRA'
+        value_type: int
+        value: 4
+        impacts:
+          - type: stat_modifier
+            stat: flight_allies
+            value: 4
+            modifier: SET
+          - type: mana_cost
+            change: 15

@@ -1,0 +1,41 @@
+id: 'undertow_veil'
+# WHETHER THE PLUGIN SHOULD LOAD THE SPELL. DEFAULT: TRUE
+enabled: true
+
+# NONE MEANS ITS DAMAGE DOES NOT SCALE WITH ELEMENTAL DAMAGE, ONLY MAGIC DAMAGE
+element: 'WATER'
+
+# THE CASTING CODE. 'R' FOR RIGHT CLICK, 'L' FOR LEFT CLICK, 'S' FOR HAND SWAP
+code: 'LLRSS'
+
+# THE MAGIC CIRCLE REQUIRED TO CAST
+level: 5
+required_focus: 115
+
+# COOLDOWN BEFORE CASTING AGAIN
+cooldown: 40
+
+# BASE CAST TIME (SECONDS)
+cast_time: 1.50
+
+# MANA COST
+mana_cost: 120
+
+# MAXIMUM MASTERY ACHIEVABLE. NOT RECOMMENDED TO CHANGE
+maximum_mastery: 100
+
+# HOW LONG THE VEIL LASTS, IN SECONDS
+veil_duration: 90
+
+# UTILITY - the veil deals no damage, so it carries no power: key.
+role: 'UTILITY'
+
+#THE COLOR OF THE SPELL MASTERY BOSSBAR. OPTIONS ARE: RED, BLUE, YELLOW, PINK, PURPLE, WHITE AND GREEN
+mastery_bar_color: 'BLUE'
+
+#THE ITEM THAT APPEARS IN THE /SPELLS GUI
+gui_item: 'TURTLE_HELMET'
+gui_custom_model_data: 4206
+
+cast_sound: 'ITEM_BUCKET_EMPTY'
+cast_sound_pitch: 1.1

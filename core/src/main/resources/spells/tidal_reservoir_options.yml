@@ -1,0 +1,88 @@
+# ---------------------------------------------------------------------------
+# tidal_reservoir - length and duration of the water channel
+# ---------------------------------------------------------------------------
+
+options:
+  # -------------------------------------------------------------------------
+  # length - how far the channel runs
+  # -------------------------------------------------------------------------
+  length:
+    description: 'How far the channel runs, in blocks.'
+    icon: 'WATER_BUCKET'
+    default_index: 1
+    values:
+      short:
+        display_name: '&9Stream'
+        description: 'Twenty-eight blocks.'
+        icon: 'WATER_BUCKET'
+        value_type: int
+        value: 28
+        impacts:
+          - type: stat_modifier
+            stat: channel_length
+            value: 28
+            modifier: SET
+      standard:
+        display_name: '&9Channel'
+        description: 'Thirty-six blocks.'
+        icon: 'WATER_BUCKET'
+        value_type: int
+        value: 36
+        impacts:
+          - type: stat_modifier
+            stat: channel_length
+            value: 36
+            modifier: SET
+      long:
+        display_name: '&3Reservoir'
+        description: 'Forty-four blocks.'
+        icon: 'HEART_OF_THE_SEA'
+        value_type: int
+        value: 44
+        impacts:
+          - type: stat_modifier
+            stat: channel_length
+            value: 44
+            modifier: SET
+
+  # -------------------------------------------------------------------------
+  # duration - how long the channel flows
+  # -------------------------------------------------------------------------
+  duration:
+    description: 'How long the channel flows, in seconds.'
+    icon: 'CLOCK'
+    default_index: 1
+    values:
+      brief:
+        display_name: '&9Brief'
+        description: 'Forty seconds.'
+        icon: 'CLOCK'
+        value_type: int
+        value: 40
+        impacts:
+          - type: stat_modifier
+            stat: channel_duration
+            value: 40
+            modifier: SET
+      standard:
+        display_name: '&9Flowing'
+        description: 'Fifty-five seconds.'
+        icon: 'WATER_BUCKET'
+        value_type: int
+        value: 55
+        impacts:
+          - type: stat_modifier
+            stat: channel_duration
+            value: 55
+            modifier: SET
+      lasting:
+        display_name: '&3Enduring'
+        description: 'Seventy seconds.'
+        icon: 'HEART_OF_THE_SEA'
+        value_type: int
+        value: 70
+        impacts:
+          - type: stat_modifier
+            stat: channel_duration
+            value: 70
+            modifier: SET

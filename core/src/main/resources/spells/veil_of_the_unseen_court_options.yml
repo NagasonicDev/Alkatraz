@@ -1,0 +1,68 @@
+# ---------------------------------------------------------------------------
+# veil_of_the_unseen_court - who is hidden and for how long
+# ---------------------------------------------------------------------------
+
+options:
+  # -------------------------------------------------------------------------
+  # allies - how many allies join the veil
+  # -------------------------------------------------------------------------
+  allies:
+    description: 'How many consenting allies are hidden with the caster.'
+    icon: 'BLACK_BANNER'
+    default_index: 1
+    values:
+      few:
+        display_name: '&5Few'
+        description: 'Hide three allies.'
+        icon: 'BLACK_BANNER'
+        value_type: int
+        value: 3
+      court:
+        display_name: '&5Court'
+        description: 'Hide four allies.'
+        icon: 'BLACK_BANNER'
+        value_type: int
+        value: 4
+      host:
+        display_name: '&dHost'
+        description: 'Hide five allies.'
+        icon: 'BLACK_BANNER'
+        value_type: int
+        value: 5
+        requirements:
+          - type: number_stat
+            stat: mastery_veiloftheunseencourt
+            minimum: 50
+            description: '&cRequires 50 veil of the unseen court mastery'
+
+  # -------------------------------------------------------------------------
+  # duration - how long the veil lasts
+  # -------------------------------------------------------------------------
+  duration:
+    description: 'How long the veil hides its bearers, in seconds.'
+    icon: 'CLOCK'
+    default_index: 1
+    values:
+      brief:
+        display_name: '&5Brief'
+        description: 'Twenty seconds.'
+        icon: 'CLOCK'
+        value_type: int
+        value: 20
+      standard:
+        display_name: '&5Unseen'
+        description: 'Twenty-five seconds.'
+        icon: 'CLOCK'
+        value_type: int
+        value: 25
+      lingering:
+        display_name: '&dLingering'
+        description: 'Thirty seconds.'
+        icon: 'CLOCK'
+        value_type: int
+        value: 30
+        requirements:
+          - type: number_stat
+            stat: mastery_veiloftheunseencourt
+            minimum: 50
+            description: '&cRequires 50 veil of the unseen court mastery'

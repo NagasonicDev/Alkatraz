@@ -1,0 +1,115 @@
+# Fallback health floor when the health option is unavailable; the selected
+# health option governs the PvP floor in play.
+pvp_damage_cap: 4.0
+
+options:
+
+  # ---------------------------------------------------------------------------
+  # duration — How long a seal stays on its target
+  # ---------------------------------------------------------------------------
+  duration:
+    description: "How long a seal stays on its target"
+    icon: BLAZE_POWDER
+    default_index: 1
+
+    values:
+
+      brief:
+        display_name: "Brief"
+        description: "30 seconds"
+        icon: BLAZE_ROD
+        value_type: int
+        value: 30
+        impacts:
+          - type: stat_modifier
+            stat: reprieve_duration
+            value: 30
+            modifier: SET
+          - type: mana_cost
+            change: -15
+
+      standard:
+        display_name: "Standard"
+        description: "45 seconds"
+        icon: BLAZE_POWDER
+        value_type: int
+        value: 45
+        impacts:
+          - type: stat_modifier
+            stat: reprieve_duration
+            value: 45
+            modifier: SET
+
+      long:
+        display_name: "Long"
+        description: "60 seconds"
+        icon: FIRE_CHARGE
+        value_type: int
+        value: 60
+        requirements:
+          - type: number_stat
+            stat: mastery_phoenixreprieve
+            minimum: 50
+            description: "Requires 50 Phoenix Reprieve mastery"
+        impacts:
+          - type: stat_modifier
+            stat: reprieve_duration
+            value: 60
+            modifier: SET
+          - type: mana_cost
+            change: 20
+
+  # ---------------------------------------------------------------------------
+  # health — Hit points the seal leaves after a lethal blow
+  # ---------------------------------------------------------------------------
+  health:
+    description: "Hit points the seal leaves after a lethal blow"
+    icon: GOLDEN_APPLE
+    default_index: 1
+
+    values:
+
+      thin:
+        display_name: "Thin"
+        description: "3 health"
+        icon: APPLE
+        value_type: double
+        value: 3.0
+        impacts:
+          - type: stat_modifier
+            stat: reprieve_health
+            value: 3.0
+            modifier: SET
+          - type: mana_cost
+            change: -10
+
+      standard:
+        display_name: "Standard"
+        description: "4 health"
+        icon: GOLDEN_APPLE
+        value_type: double
+        value: 4.0
+        impacts:
+          - type: stat_modifier
+            stat: reprieve_health
+            value: 4.0
+            modifier: SET
+
+      deep:
+        display_name: "Deep"
+        description: "5 health"
+        icon: ENCHANTED_GOLDEN_APPLE
+        value_type: double
+        value: 5.0
+        requirements:
+          - type: number_stat
+            stat: mastery_phoenixreprieve
+            minimum: 50
+            description: "Requires 50 Phoenix Reprieve mastery"
+        impacts:
+          - type: stat_modifier
+            stat: reprieve_health
+            value: 5.0
+            modifier: SET
+          - type: mana_cost
+            change: 15

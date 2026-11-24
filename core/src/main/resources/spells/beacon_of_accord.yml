@@ -1,0 +1,41 @@
+id: 'beacon_of_accord'
+# WHETHER THE PLUGIN SHOULD LOAD THE SPELL. DEFAULT: TRUE
+enabled: true
+
+# NONE MEANS ITS DAMAGE DOES NOT SCALE WITH ELEMENTAL DAMAGE, ONLY MAGIC DAMAGE
+element: 'LIGHT'
+
+# THE CASTING CODE. 'R' FOR RIGHT CLICK, 'L' FOR LEFT CLICK, 'S' FOR HAND SWAP
+code: 'SRLLR'
+
+# THE MAGIC CIRCLE REQUIRED TO CAST
+level: 6
+required_focus: 135
+
+# COOLDOWN BEFORE CASTING AGAIN
+cooldown: 45
+
+# BASE CAST TIME (SECONDS)
+cast_time: 2.00
+
+# MANA COST
+mana_cost: 165
+
+# MAXIMUM MASTERY ACHIEVABLE. NOT RECOMMENDED TO CHANGE
+maximum_mastery: 100
+
+# HOW MANY ALLIES THE BEACON MENDS, THE CASTER INCLUDED
+beacon_allies: 8
+
+# SUSTAIN - healing is not a damage role, so it carries no power: key.
+role: 'SUSTAIN'
+
+#THE COLOR OF THE SPELL MASTERY BOSSBAR. OPTIONS ARE: RED, BLUE, YELLOW, PINK, PURPLE, WHITE AND GREEN
+mastery_bar_color: 'YELLOW'
+
+#THE ITEM THAT APPEARS IN THE /SPELLS GUI
+gui_item: 'BEACON'
+gui_custom_model_data: 4210
+
+cast_sound: 'BLOCK_BEACON_ACTIVATE'
+cast_sound_pitch: 1.1

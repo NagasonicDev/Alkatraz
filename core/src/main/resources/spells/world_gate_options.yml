@@ -1,0 +1,100 @@
+# ---------------------------------------------------------------------------
+# world_gate - maximum separation and how many players may pass
+# ---------------------------------------------------------------------------
+
+options:
+  # -------------------------------------------------------------------------
+  # range - how far apart the two gates may be
+  # -------------------------------------------------------------------------
+  range:
+    description: 'How far apart the two gates may be, in blocks.'
+    icon: 'ENDER_PEARL'
+    default_index: 1
+    values:
+      short:
+        display_name: '&7Short Road'
+        description: 'Three hundred eighty-four blocks.'
+        icon: 'ENDER_EYE'
+        value_type: int
+        value: 384
+        impacts:
+          - type: stat_modifier
+            stat: gate_range
+            value: 384
+            modifier: SET
+          - type: mana_cost
+            change: -120
+      standard:
+        display_name: '&fLong Road'
+        description: 'Five hundred twelve blocks.'
+        icon: 'ENDER_PEARL'
+        value_type: int
+        value: 512
+        impacts:
+          - type: stat_modifier
+            stat: gate_range
+            value: 512
+            modifier: SET
+          - type: mana_cost
+            change: -50
+      far:
+        display_name: '&7World Road'
+        description: 'Six hundred forty blocks.'
+        icon: 'END_PORTAL_FRAME'
+        value_type: int
+        value: 640
+        impacts:
+          - type: stat_modifier
+            stat: gate_range
+            value: 640
+            modifier: SET
+          - type: mana_cost
+            change: 80
+
+  # -------------------------------------------------------------------------
+  # players - how many travellers may pass before the gates close
+  # -------------------------------------------------------------------------
+  players:
+    description: 'How many travellers may pass through the gates.'
+    icon: 'PLAYER_HEAD'
+    default_index: 1
+    values:
+      six:
+        display_name: '&7Six'
+        description: 'Six travellers.'
+        icon: 'PLAYER_HEAD'
+        value_type: int
+        value: 6
+        impacts:
+          - type: stat_modifier
+            stat: gate_players
+            value: 6
+            modifier: SET
+          - type: mana_cost
+            change: -60
+      eight:
+        display_name: '&fEight'
+        description: 'Eight travellers.'
+        icon: 'PLAYER_HEAD'
+        value_type: int
+        value: 8
+        impacts:
+          - type: stat_modifier
+            stat: gate_players
+            value: 8
+            modifier: SET
+          - type: mana_cost
+            change: 0
+      ten:
+        display_name: '&7Ten'
+        description: 'Ten travellers.'
+        icon: 'END_PORTAL_FRAME'
+        value_type: int
+        value: 10
+        impacts:
+          - type: stat_modifier
+            stat: gate_players
+            value: 10
+            modifier: SET
+          - type: mana_cost
+            change: 60

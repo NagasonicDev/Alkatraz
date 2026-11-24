@@ -1,0 +1,97 @@
+options:
+
+  # ---------------------------------------------------------------------------
+  # length — How many blocks the bridge runs
+  # ---------------------------------------------------------------------------
+  length:
+    description: "How far the bridge runs"
+    icon: STONE
+    default_index: 1
+
+    values:
+
+      short:
+        display_name: "Short"
+        description: "12 blocks"
+        icon: COBBLESTONE
+        value_type: int
+        value: 12
+        impacts:
+          - type: stat_modifier
+            stat: bridge_length
+            value: 12
+            modifier: SET
+          - type: mana_cost
+            change: -15
+
+      standard:
+        display_name: "Standard"
+        description: "18 blocks"
+        icon: STONE
+        value_type: int
+        value: 18
+        impacts:
+          - type: stat_modifier
+            stat: bridge_length
+            value: 18
+            modifier: SET
+
+      long:
+        display_name: "Long"
+        description: "24 blocks"
+        icon: POLISHED_ANDESITE
+        value_type: int
+        value: 24
+        requirements:
+          - type: number_stat
+            stat: mastery_stonebridge
+            minimum: 50
+            description: "Requires 50 Stonebridge mastery"
+        impacts:
+          - type: stat_modifier
+            stat: bridge_length
+            value: 24
+            modifier: SET
+          - type: mana_cost
+            change: 20
+
+  # ---------------------------------------------------------------------------
+  # width — How wide the deck is
+  # ---------------------------------------------------------------------------
+  width:
+    description: "How wide the deck is"
+    icon: OAK_PLANKS
+    default_index: 0
+
+    values:
+
+      narrow:
+        display_name: "Narrow"
+        description: "3 blocks wide"
+        icon: OAK_PLANKS
+        value_type: int
+        value: 3
+        impacts:
+          - type: stat_modifier
+            stat: bridge_width
+            value: 3
+            modifier: SET
+
+      wide:
+        display_name: "Wide"
+        description: "5 blocks wide"
+        icon: OAK_STAIRS
+        value_type: int
+        value: 5
+        requirements:
+          - type: number_stat
+            stat: circleLevel
+            minimum: 6
+            description: "Requires Circle Level 6"
+        impacts:
+          - type: stat_modifier
+            stat: bridge_width
+            value: 5
+            modifier: SET
+          - type: mana_cost
+            change: 15

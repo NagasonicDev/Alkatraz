@@ -1,0 +1,98 @@
+options:
+
+  # ---------------------------------------------------------------------------
+  # duration — How long the anchor remains
+  # ---------------------------------------------------------------------------
+  duration:
+    description: "How long the anchor remains"
+    icon: CLOCK
+    default_index: 1
+
+    values:
+
+      brief:
+        display_name: "Brief"
+        description: "50 seconds"
+        icon: CLOCK
+        value_type: int
+        value: 50
+        impacts:
+          - type: stat_modifier
+            stat: anchor_duration
+            value: 50
+            modifier: SET
+          - type: mana_cost
+            change: -10
+
+      standard:
+        display_name: "Standard"
+        description: "70 seconds"
+        icon: WRITABLE_BOOK
+        value_type: int
+        value: 70
+        impacts:
+          - type: stat_modifier
+            stat: anchor_duration
+            value: 70
+            modifier: SET
+
+      lingering:
+        display_name: "Lingering"
+        description: "90 seconds"
+        icon: RECOVERY_COMPASS
+        value_type: int
+        value: 90
+        requirements:
+          - type: number_stat
+            stat: mastery_chronicle_anchor
+            minimum: 50
+            description: "Requires 50 Chronicle Anchor mastery"
+        impacts:
+          - type: stat_modifier
+            stat: anchor_duration
+            value: 90
+            modifier: SET
+          - type: mana_cost
+            change: 15
+
+  # ---------------------------------------------------------------------------
+  # allies — How many consenting allies return with you
+  # ---------------------------------------------------------------------------
+  allies:
+    description: "How many consenting allies return with you"
+    icon: PLAYER_HEAD
+    default_index: 1
+
+    values:
+
+      two:
+        display_name: "Two"
+        description: "Two allies"
+        icon: SHIELD
+        value_type: int
+        value: 2
+        impacts:
+          - type: mana_cost
+            change: -10
+
+      three:
+        display_name: "Three"
+        description: "Three allies"
+        icon: PLAYER_HEAD
+        value_type: int
+        value: 3
+
+      four:
+        display_name: "Four"
+        description: "Four allies"
+        icon: TOTEM_OF_UNDYING
+        value_type: int
+        value: 4
+        requirements:
+          - type: number_stat
+            stat: mastery_chronicle_anchor
+            minimum: 50
+            description: "Requires 50 Chronicle Anchor mastery"
+        impacts:
+          - type: mana_cost
+            change: 15
