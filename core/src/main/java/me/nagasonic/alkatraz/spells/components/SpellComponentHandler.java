@@ -158,9 +158,24 @@ public class SpellComponentHandler implements Listener {
     }
 
     private static void detectCollisions(int count){
+        // Broad phase: bucket by grid cell (size = 2 * max radius) so only
+        // nearby pairs are compared, instead of all pairs every tick.
+        double maxRadius = 0;
+        for (int i = 0; i < count; i++) maxRadius = Math.max(maxRadius, snapRadius[i]);
+        double cell = Math.max(1.0, 2.0 * maxRadius);
+        Map<UUID, Map<Long, Map<Long, List<Integer>>>> buckets = new HashMap<>();
+        for (int i = 0; i < count; i++) {
+            long bx = (long) Math.floor(snapX[i] / cell);
+            long bz = (long) Math.floor(snapZ[i] / cell);
+            buckets.computeIfAbsent(snapWorld[i].getUID(), u -> new HashMap<>())
+                    .computeIfAbsent(bx, k -> new HashMap<>())
+                    .computeIfAbsent(bz, k -> new ArrayList<>())
+                    .add(i);
+        }
         for (int i = 0; i < count; i++) {
             SpellComponent comp = snapComp[i];
             SpellComponentType typeI = comp.getType();
+            if (typeI != SpellComponentType.OFFENSE && typeI != SpellComponentType.DEFENSE) continue;
             Spell spellI = comp.getSpell();
             LivingEntity casterI = comp.getCaster();
             World worldI = snapWorld[i];
@@ -168,24 +183,31 @@ public class SpellComponentHandler implements Listener {
             double yi = snapY[i];
             double zi = snapZ[i];
             double ri = snapRadius[i];
+            long bx = (long) Math.floor(xi / cell);
+            long bz = (long) Math.floor(zi / cell);
+            for (long dxb = -1; dxb <= 1; dxb++) for (long dzb = -1; dzb <= 1; dzb++) {
+                List<Integer> bucket = buckets.getOrDefault(worldI.getUID(), Map.of())
+                        .getOrDefault(bx + dxb, Map.of())
+                        .get(bz + dzb);
+                if (bucket == null) continue;
+                for (int j : bucket) {
+                    if (j <= i) continue;
+                    SpellComponent other = snapComp[j];
+                    SpellComponentType typeJ = other.getType();
+                    if (!((typeI == SpellComponentType.OFFENSE && typeJ == SpellComponentType.DEFENSE)
+                            || (typeI == SpellComponentType.DEFENSE && typeJ == SpellComponentType.OFFENSE))) continue;
+                    if (spellI == other.getSpell()) continue;
+                    if (casterI == other.getCaster()) continue;
 
-            for (int j = i + 1; j < count; j++) {
-                if (snapWorld[j] != worldI) continue;
-                SpellComponent other = snapComp[j];
-                SpellComponentType typeJ = other.getType();
-                if (!((typeI == SpellComponentType.OFFENSE && typeJ == SpellComponentType.DEFENSE)
-                        || (typeI == SpellComponentType.DEFENSE && typeJ == SpellComponentType.OFFENSE))) continue;
-                if (spellI == other.getSpell()) continue;
-                if (casterI == other.getCaster()) continue;
-
-                double dx = snapX[j] - xi;
-                double dy = snapY[j] - yi;
-                double dz = snapZ[j] - zi;
-                double collisionRadius = Math.max(ri, snapRadius[j]);
-                if (dx * dx + dy * dy + dz * dz <= collisionRadius * collisionRadius) {
-                    collide(comp, other,
-                            new Location(worldI, xi, yi, zi),
-                            new Location(worldI, snapX[j], snapY[j], snapZ[j]));
+                    double dx = snapX[j] - xi;
+                    double dy = snapY[j] - yi;
+                    double dz = snapZ[j] - zi;
+                    double collisionRadius = Math.max(ri, snapRadius[j]);
+                    if (dx * dx + dy * dy + dz * dz <= collisionRadius * collisionRadius) {
+                        collide(comp, other,
+                                new Location(worldI, xi, yi, zi),
+                                new Location(worldI, snapX[j], snapY[j], snapZ[j]));
+                    }
                 }
             }
         }

@@ -81,8 +81,8 @@ public class SpellbookFactory {
      * An element book capped at {@code maxCircle}.
      *
      * <p>The cap is the whole point. A FIRE element book from a blaze used to be
-     * able to roll {@code inferno_rite} at circle 9 (600 mana) off a mob that also
-     * hands out {@code fire_blast} at circle 2.
+     * able to roll a 600-mana circle-9 capstone off a mob that also hands out
+     * {@code fire_blast} at circle 2.
      *
      * @param maxCircle highest circle permitted, clamped to 1-9. 9 means uncapped.
      * @return the book, or {@code null} if no spell of that element matched.

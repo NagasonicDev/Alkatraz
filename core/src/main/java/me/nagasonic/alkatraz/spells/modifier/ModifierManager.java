@@ -321,10 +321,10 @@ public final class ModifierManager {
                             Alkatraz.logDebug("Failed to revoke modifier on clearPlayer: " + e.getMessage());
                         }
                     }
+                    BY_BUCKET.remove(bucketKey);
                 }
             }
         }
-        BY_BUCKET.remove(bucketKey);
     }
     public static void clearBucket(String bucketKey) {
         if (bucketKey == null) return;

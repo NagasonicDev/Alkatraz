@@ -5,6 +5,7 @@ import me.nagasonic.alkatraz.events.SpellPrepareEvent;
 import me.nagasonic.alkatraz.spells.Spell;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.junit.jupiter.api.Test;
 
@@ -82,31 +83,17 @@ class WindUpPolicyTest {
     }
 
     @Test
-    void theThreeNamedExemptionsAreRejected() {
-        assertFalse(WindUp.requiresWindUp(spell("waystone_recall", 7)),
-                "waystone_recall's instantness is its identity");
-        assertFalse(WindUp.requiresWindUp(spell("echo_cast", 8)),
-                "echo_cast bypasses Spell.cast and each replayed spell carries its own wind-up");
-        assertFalse(WindUp.requiresWindUp(spell("arcane_resonance", 9)),
-                "arcane_resonance amplifies other casts rather than acting");
+    void theExemptionListIsEmpty() {
+        assertTrue(WindUp.EXEMPT_FROM_WIND_UP.isEmpty(),
+                "the 0.9.2 rework removed every wind-up exemption");
     }
 
     @Test
-    void warpAndSkeletalKnightsAreNotExempt() {
-        assertTrue(WindUp.requiresWindUp(spell("warp", 6)),
-                "warp keeps its 6-second channel as a declared paid-over");
-        assertTrue(WindUp.requiresWindUp(spell("skeletal_knights", 6)),
-                "skeletal_knights keeps its 6-second channel as a declared paid-over");
-    }
-
-    @Test
-    void anExemptionOnlyAppliesAtItsOwnCircle() {
-        assertTrue(WindUp.requiresWindUp(spell("waystone_recall", 6)),
-                "waystone_recall is exempt at circle 7 only");
-        assertTrue(WindUp.requiresWindUp(spell("echo_cast", 9)),
-                "echo_cast is exempt at circle 8 only");
-        assertTrue(WindUp.requiresWindUp(spell("arcane_resonance", 8)),
-                "arcane_resonance is exempt at circle 9 only");
+    void everyCircleSixAndAboveSpellRequiresWindUp() {
+        for (int circle = 6; circle <= 9; circle++) {
+            assertTrue(WindUp.requiresWindUp(spell("any_spell", circle)),
+                    "circle " + circle + " owes a wind-up, whatever the spell id");
+        }
     }
 
     @Test
@@ -115,10 +102,10 @@ class WindUpPolicyTest {
                 () -> WindUp.EXEMPT_FROM_WIND_UP.put("plain", 6),
                 "the exemption list must reject new entries so the contract cannot drift");
         assertThrows(UnsupportedOperationException.class,
-                () -> WindUp.EXEMPT_FROM_WIND_UP.remove("warp"),
-                "the exemption list must reject removals so warp cannot be quietly exempted");
-        assertTrue(WindUp.requiresWindUp(spell("warp", 6)),
-                "warp is still not exempt after the rejected mutation");
+                () -> WindUp.EXEMPT_FROM_WIND_UP.remove("plain"),
+                "the exemption list must reject removals so an exemption cannot be quietly added");
+        assertTrue(WindUp.requiresWindUp(spell("plain", 6)),
+                "a circle 6 spell is still not exempt after the rejected mutation");
     }
 
     @Test
@@ -225,5 +212,26 @@ class WindUpPolicyTest {
     void effectiveTicksNeverRoundsAWindUpAwayToNothing() {
         assertTrue(WindUp.effectiveTicks(1, 5, 5) >= 1,
                 "a one-tick wind-up must survive the mastery discount");
+    }
+
+    // ------------------------------------------------------------ framework
+
+    @Test
+    void frameworkWindUpSpansTheActualCastDelay() {
+        WindUp windUp = WindUp.forFrameworkCast(spell("plain", 6), mock(Player.class), 42);
+        assertEquals(42, windUp.remainingTicks(),
+                "the framework wind-up is the computed cast delay, not the ladder ceiling");
+        for (int i = 0; i < 41; i++) {
+            windUp.tick();
+            assertFalse(windUp.isComplete(), "still charging after " + (i + 1) + " ticks");
+        }
+        windUp.tick();
+        assertTrue(windUp.isComplete(), "the payload is due exactly when the delay ends");
+    }
+
+    @Test
+    void frameworkWindUpNeverHasZeroTicks() {
+        assertEquals(1, WindUp.forFrameworkCast(spell("plain", 7), mock(Player.class), 0)
+                .remainingTicks(), "a zero-delay cast still gets one wind-up tick");
     }
 }

@@ -30,13 +30,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * "spells.foo.book_name" where the title should be.
  *
  * <p>This test pins the convention instead: the lang prefix of a spell is its id with
- * underscores removed. Two prefixes broke that convention before this test existed -
- * earthsplitter used "fissure" (the class name) and skeletal_knights kept its
- * underscore - and both were unfixable by a human reviewer because nothing failed.
+ * underscores removed.
  *
  * <p>Set equality, not a per-spell loop, is the load-bearing assertion: it catches a
- * missing key and an ORPHANED key in the same check, which is what "fissure" and
- * "skeletal_knights" were.
+ * missing key and an ORPHANED key in the same check.
  *
  * <p>Zero Bukkit mocks: english.lang is parsed with the same rules LangManager uses
  * (trim, skip blank and '#', split on the first '='), and the roster comes from the
@@ -145,9 +142,7 @@ class SpellLangTest {
 
         assertTrue(orphans.isEmpty(),
                 "english.lang declares book keys for prefixes that match no bundled spell id: "
-                        + String.join(", ", orphans) + ". 'fissure' (the Fissure class name, not the "
-                        + "earthsplitter id) and 'skeletal_knights' (an un-de-underscored prefix) were "
-                        + "both caught by this assertion");
+                        + String.join(", ", orphans));
         assertTrue(missing.isEmpty(),
                 "bundled spells with no book_name/lore keys at all: " + String.join(", ", missing)
                         + " - their items render the raw lang key");
@@ -168,13 +163,5 @@ class SpellLangTest {
         assertEquals(Set.of("magic_missile"), NO_SPELLBOOK,
                 "the no-spellbook exemption list is the escape hatch that makes missing keys legal. "
                         + "It must contain only magic_missile, whose getSpellBook() returns null");
-    }
-
-    @Test
-    void theEarthSplitterPrefixFollowsItsId() {
-        assertNotNull(resolve("spells.earthsplitter.book_name"),
-                "earthsplitter's book must key off its id, not off the Fissure class name");
-        assertFalse(messages.containsKey("spells.fissure.book_name"),
-                "spells.fissure.* must be gone - it is the one prefix in the file that no spell id derives");
     }
 }

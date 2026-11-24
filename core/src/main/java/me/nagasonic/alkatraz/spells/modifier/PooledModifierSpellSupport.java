@@ -30,7 +30,11 @@ import java.util.UUID;
  */
 public final class PooledModifierSpellSupport {
 
-    private static final Map<UUID, BukkitTask> expiryTasks = new java.util.concurrent.ConcurrentHashMap<>();
+    private static final Map<String, BukkitTask> expiryTasks = new java.util.concurrent.ConcurrentHashMap<>();
+
+    private static String expiryKey(Spell spell, UUID id) {
+        return spell.getId() + ":" + id;
+    }
 
     /**
      * Cancels every pooled-modifier expiry task still pending. Intended for
@@ -122,7 +126,7 @@ public final class PooledModifierSpellSupport {
 
         ModifierExpiry expiry = new ModifierExpiry(target, spell, activeByTarget, expiredMessage);
         BukkitTask task = expiry.runTaskLater(Alkatraz.getInstance(), durationTicks);
-        expiryTasks.put(target.getUniqueId(), task);
+        expiryTasks.put(expiryKey(spell, target.getUniqueId()), task);
 
         spawnCastParticles(target, particleColor);
         float pitch = "debuff".equals(spell.getId()) ? 0.7f : 1.2f;
@@ -140,7 +144,7 @@ public final class PooledModifierSpellSupport {
     public static void clearActiveModifiers(LivingEntity target,
                                             Spell spell,
                                             Map<UUID, List<AppliedModifier>> activeByTarget) {
-        BukkitTask task = expiryTasks.remove(target.getUniqueId());
+        BukkitTask task = expiryTasks.remove(expiryKey(spell, target.getUniqueId()));
         if (task != null) task.cancel();
         List<AppliedModifier> previous = activeByTarget.remove(target.getUniqueId());
         if (previous == null) return;
@@ -205,7 +209,7 @@ public final class PooledModifierSpellSupport {
             }
 
             List<AppliedModifier> active = activeByTarget.remove(target.getUniqueId());
-            expiryTasks.remove(target.getUniqueId());
+            expiryTasks.remove(expiryKey(spell, target.getUniqueId()));
             if (active != null) {
                 for (AppliedModifier modifier : active) {
                     for (ActiveEffect effect : EffectRegistry.effectsOn(target.getUniqueId())) {

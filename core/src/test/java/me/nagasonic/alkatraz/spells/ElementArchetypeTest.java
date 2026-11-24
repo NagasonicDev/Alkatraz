@@ -41,8 +41,10 @@ class ElementArchetypeTest {
     private static final Map<Element, Set<SpellRole>> ALLOWLIST = new EnumMap<>(Element.class);
 
     static {
-        ALLOWLIST.put(Element.FIRE, EnumSet.of(SpellRole.BURST, SpellRole.DENIAL, SpellRole.TERRAIN));
-        ALLOWLIST.put(Element.WATER, EnumSet.of(SpellRole.SUSTAIN, SpellRole.DENIAL, SpellRole.BURST));
+        ALLOWLIST.put(Element.FIRE, EnumSet.of(SpellRole.BURST, SpellRole.DENIAL, SpellRole.TERRAIN,
+                SpellRole.UTILITY));
+        ALLOWLIST.put(Element.WATER, EnumSet.of(SpellRole.SUSTAIN, SpellRole.DENIAL, SpellRole.BURST,
+                SpellRole.UTILITY, SpellRole.TERRAIN));
         ALLOWLIST.put(Element.EARTH, EnumSet.of(SpellRole.TERRAIN, SpellRole.DENIAL, SpellRole.BURST));
         ALLOWLIST.put(Element.AIR, EnumSet.of(SpellRole.UTILITY, SpellRole.DENIAL, SpellRole.BURST,
                 SpellRole.SUSTAIN));
@@ -53,11 +55,11 @@ class ElementArchetypeTest {
     }
 
     /**
-     * Last id of T24's NONE batch in the master's alphabetical CMD allocation, so it
-     * cannot land before the wave-5 spells that fill circles 7-9. Used to activate the
+     * Last id of the circle 9 roster in the master's alphabetical CMD allocation, so it
+     * cannot land before the circle 7-9 spells that precede it. Used to activate the
      * full 0-9 ladder requirement only once that content exists.
      */
-    private static final String WAVE_FIVE_SENTINEL = "arcane_resonance";
+    private static final String WAVE_FIVE_SENTINEL = "leviathans_testament";
 
     private static List<String> roster;
 
@@ -97,8 +99,7 @@ class ElementArchetypeTest {
             SpellRole role = SpellRole.parse(y.getString("role"));
             assertNotNull(role, id + " must declare a role");
             assertTrue(ALLOWLIST.get(element).contains(role)
-                            || SpellBudgets.isGrandfatheredBurst(id, element, role)
-                            || SpellBudgets.isDualBudgetSpell(id, element, role),
+                            || SpellBudgets.isGrandfatheredBurst(id, element, role),
                     id + " declares " + role + ", which " + element + " may not use");
         }
     }
@@ -114,16 +115,16 @@ class ElementArchetypeTest {
     }
 
     @Test
-    void waterAirAndLightNeverReshapeLand() throws IOException {
+    void airAndLightNeverReshapeLand() throws IOException {
         Map<Element, List<String>> columns = byElement();
-        for (Element element : List.of(Element.WATER, Element.AIR, Element.LIGHT)) {
+        for (Element element : List.of(Element.AIR, Element.LIGHT)) {
             assertFalse(ALLOWLIST.get(element).contains(SpellRole.TERRAIN),
                     element + " is forbidden from TERRAIN");
             for (String id : columns.getOrDefault(element, List.of())) {
                 SpellRole role = SpellRole.parse(BundledSpellRoster.load(id).getString("role"));
                 assertNotEquals(SpellRole.TERRAIN, role,
                         id + " is a TERRAIN " + element + " spell; light never reshapes land and "
-                                + "water and air move things rather than shaping them");
+                                + "air moves things rather than shaping them");
             }
         }
     }
@@ -178,11 +179,11 @@ class ElementArchetypeTest {
      *
      * <p>Two clauses, because the roster's top circle changes twice. Always: the
      * circles that are populated must be CONTIGUOUS from 0 to the highest one present,
-     * so a ladder can never develop a hole. Then, once wave 5 has landed (detected by
-     * the {@code arcane_resonance} sentinel rather than by a flag), the full 0-9
-     * requirement activates and a missing circle 7-9 spell fails the build. Without
-     * the sentinel this clause would fail at the wave-4 gate on a roster that
-     * legitimately stops at circle 6.
+     * so a ladder can never develop a hole. Then, once the final batch has landed
+     * (detected by the {@code leviathans_testament} sentinel rather than by a flag), the
+     * full 0-9 requirement activates and a missing circle 7-9 spell fails the build.
+     * Without the sentinel this clause would fail on a roster that legitimately stops
+     * short of circle 9.
      */
     @Test
     void theRosterCoversEveryCircleFromZeroToNine() throws IOException {

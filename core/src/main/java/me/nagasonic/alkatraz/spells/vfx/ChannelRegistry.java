@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
@@ -17,15 +18,14 @@ import java.util.concurrent.ConcurrentHashMap;
  * One shared registry of in-flight wind-ups, replacing the copy-pasted
  * {@code private static final Map<UUID, ChannelData> channels} plus
  * {@code onMove}/{@code onDamage}/{@code onQuit} handler triples that were
- * duplicated across {@code Warp}, {@code SkeletalKnights} and every circle 6+
- * spell written since.
+ * duplicated across every circle 6+ spell written before this library.
  *
  * <h2>Interruption</h2>
  * A wind-up is interrupted by the established triple: the caster moving beyond
  * {@code move_cancel_threshold} blocks (default
  * {@value WindUp#DEFAULT_MOVE_CANCEL_THRESHOLD}, read from the spell's yml when it
- * declares one), the caster taking damage, or the caster quitting. Plugin
- * shutdown interrupts everything too.
+ * declares one), the caster taking damage, the caster dying, or the caster
+ * quitting. Plugin shutdown interrupts everything too.
  *
  * <h2>Mana is NOT refunded</h2>
  * <b>The rule to remember:</b> {@code Spell.cast()} deducts mana at
@@ -192,6 +192,23 @@ public final class ChannelRegistry implements Listener {
             } catch (RuntimeException ex) {
                 Alkatraz.logWarning("Channel canceller failed: " + ex.getMessage());
                 // Nothing to salvage on a quit.
+            }
+        }
+        if (windUp != null) {
+            windUp.cancel(INTERRUPTED_LANG_KEY);
+        }
+    }
+
+    @EventHandler
+    public void onDeath(PlayerDeathEvent e) {
+        UUID caster = e.getEntity().getUniqueId();
+        WindUp windUp = CHANNELS.remove(caster);
+        Runnable canceller = CANCELLERS.remove(caster);
+        if (canceller != null) {
+            try {
+                canceller.run();
+            } catch (RuntimeException ex) {
+                Alkatraz.logWarning("Channel canceller failed: " + ex.getMessage());
             }
         }
         if (windUp != null) {

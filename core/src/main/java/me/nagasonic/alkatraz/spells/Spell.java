@@ -21,6 +21,11 @@ import me.nagasonic.alkatraz.spells.configuration.SpellOption;
 import me.nagasonic.alkatraz.spells.configuration.SpellOptionLoader;
 import me.nagasonic.alkatraz.spells.configuration.impact.implementation.StatModifierImpact;
 import me.nagasonic.alkatraz.spells.types.SpellRole;
+import me.nagasonic.alkatraz.spells.vfx.CastAftermath;
+import me.nagasonic.alkatraz.spells.vfx.CastCircle;
+import me.nagasonic.alkatraz.spells.vfx.ChannelRegistry;
+import me.nagasonic.alkatraz.spells.vfx.ElementPalette;
+import me.nagasonic.alkatraz.spells.vfx.WindUp;
 import me.nagasonic.alkatraz.api.dom.Permission;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.util.ColorFormat;
@@ -111,7 +116,33 @@ public abstract class Spell {
 
     public abstract void mobCastAction(Mob caster, ItemStack wand);
 
-    public abstract int circleAction(LivingEntity caster, SpellPrepareEvent e);
+    /**
+     * Starts the cast animation. The default is the shared {@link CastCircle}, which draws the
+     * common glyph plus the circle's tier layers; a spell with a bespoke wind-up may still
+     * override this and return its own task id.
+     */
+    public int circleAction(LivingEntity caster, SpellPrepareEvent e) {
+        return CastCircle.start(this, caster, e);
+    }
+
+    /**
+     * Draws this spell's cast-phase motif on top of the shared circle and its tier layers.
+     * Default is a no-op; a spell with a distinctive shape overrides it. Called once per circle
+     * repaint, only for circles that draw a motif.
+     */
+    public void drawCastMotif(LivingEntity caster, Location origin, int frame, double scale,
+                              ElementPalette.Palette palette) {
+        // no-op by default
+    }
+
+    /**
+     * Draws this spell's post-payload spectacle on top of the shared aftermath archetype.
+     * Default is a no-op; a spell with a distinctive tail overrides it.
+     */
+    public void drawAftermath(LivingEntity caster, Location origin, int tick, int totalTicks,
+                              ElementPalette.Palette palette) {
+        // no-op by default
+    }
 
     public abstract ItemStack getSpellBook();
 
@@ -125,8 +156,7 @@ public abstract class Spell {
             Alkatraz.logHigh("Spell cast started: " + getId() + " by " + p.getName());
         }
         MagicProfile profile = ProfileManager.getProfile(p, MagicProfile.class);
-
-        // Check circle level requirement
+        if (profile == null) return;
         if (profile.getCircleLevel() < getRequiredCircleLevel()) {
             Utils.sendActionBar(p, lang().get("spells.cast.too_low_circle"));
             fireSpellFail(p, wand, "LOW_CIRCLE");
@@ -160,7 +190,7 @@ public abstract class Spell {
             long timePassed = System.currentTimeMillis() - profile.getCooldown(this);
             if (TimeUnit.MILLISECONDS.toSeconds(timePassed) < getCooldown()) {
                 Utils.sendActionBar(p, lang().get("spells.cast.please_wait",
-                        "time", TimeUnit.MILLISECONDS.toSeconds(getCooldown() * 1000 - timePassed)));
+                        "time", (getCooldown() * 1000 - timePassed + 999) / 1000));
                 fireSpellFail(p, wand, "COOLDOWN");
                 return;
             }
@@ -191,8 +221,8 @@ public abstract class Spell {
         // Add Arcane Knowledge through the configurable progression source.
         StatUtils.addArcaneKnowledge(p, "spell_cast", getRequiredCircleLevel());
 
-        // Send action bar message
-        Utils.sendActionBar(p, ColorFormat.format(lang().get("spells.cast.casted") + " " + getDisplayName()));
+        // Commitment message only: "casted" is sent when the payload actually resolves.
+        Utils.sendActionBar(p, ColorFormat.format(lang().get("spells.cast.casting") + " " + getDisplayName()));
 
         // Start circle animation
         int circleTaskId = circleAction(p, castEvent);
@@ -201,45 +231,96 @@ public abstract class Spell {
         // Play the preparation sound
         playSound(p, prepareSound, prepareSoundVolume, prepareSoundPitch);
 
-        // Calculate cast time (affected by wand and mastery)
+        // Calculate cast time (affected by wand and mastery). No floor: the wand
+        // discount is the advertised discount, input-to-effect.
         float baseCastTime  = getFullCastTime(wand, p, getCastTime());
         long  finalCastTime = calculateFinalCastTime(profile, baseCastTime);
 
-        // Schedule spell execution after cast time
-        int completionTaskId = Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(
-                Alkatraz.getInstance(), () -> {
-                    UUID uuid = p.getUniqueId();
-                    if (focusCancelledPlayers.remove(uuid)) {
-                        profile.setCasting(false);
-                        profile.setCastingSpell(null);
-                        return;
+        // Drop any focus-cancel mark left over from a previous (successfully
+        // cancelled) cast so it cannot abort this fresh cast; cancelCastByFocus
+        // adds a new mark only during this cast's window.
+        focusCancelledPlayers.remove(p.getUniqueId());
+
+        UUID uuid = p.getUniqueId();
+        Runnable resolve = () -> {
+            Bukkit.getServer().getScheduler().cancelTask(circleTaskId);
+            if (!castEvent.isCancelled()) {
+                PlayerCastEvent playerCastEvent = new PlayerCastEvent(p, Spell.this, wand);
+                Bukkit.getPluginManager().callEvent(playerCastEvent);
+                if (!playerCastEvent.isCancelled()) {
+                    playSound(p, castSound, castSoundVolume, castSoundPitch);
+                    long castEnd = System.nanoTime();
+                    if (Alkatraz.isLoggable(VerbosityLevel.VERY_HIGH)) {
+                        Alkatraz.logVeryHigh("Spell cast completed: " + getId() + " by " + p.getName() + " in " + ((castEnd - startTime) / 1_000_000) + "ms");
                     }
-                    Bukkit.getServer().getScheduler().cancelTask(circleTaskId);
-                    if (!castEvent.isCancelled()) {
-                        PlayerCastEvent playerCastEvent = new PlayerCastEvent(p, Spell.this, wand);
-                        Bukkit.getPluginManager().callEvent(playerCastEvent);
-                        if (!playerCastEvent.isCancelled()) {
-                            playSound(p, castSound, castSoundVolume, castSoundPitch);
-                            long castEnd = System.nanoTime();
-                            if (Alkatraz.isLoggable(VerbosityLevel.VERY_HIGH)) {
-                                Alkatraz.logVeryHigh("Spell cast completed: " + getId() + " by " + p.getName() + " in " + ((castEnd - startTime) / 1_000_000) + "ms");
-                            }
-                            castAction(p, wand);
-                            // Only grant cooldown/mastery if the spell didn't self-cancel
-                            if (castCancelledPlayers.remove(uuid)) {
-                                // Refund mana
-                                StatUtils.addMana(p, manaCost);
-                            } else {
-                                profile.setCooldown(this, System.currentTimeMillis());
-                                if (profile.getSpellMastery(this) < getMaxMastery()) {
-                                    StatUtils.addSpellMastery(p, this, 1);
-                                }
-                            }
+                    castAction(p, wand);
+                    // Circle 6+ get a post-payload spectacle. It is pure particle work,
+                    // never blocks or damage, so it can run beside the payload.
+                    if (getRequiredCircleLevel() >= 6) {
+                        CastAftermath.begin(Spell.this, p, p.getLocation(), (int) finalCastTime);
+                    }
+                    // Only grant cooldown/mastery if the spell didn't self-cancel
+                    if (castCancelledPlayers.remove(uuid)) {
+                        // Refund mana
+                        StatUtils.addMana(p, manaCost);
+                    } else {
+                        Utils.sendActionBar(p, ColorFormat.format(lang().get("spells.cast.casted") + " " + getDisplayName()));
+                        profile.setCooldown(this, System.currentTimeMillis());
+                        if (profile.getSpellMastery(this) < getMaxMastery()) {
+                            StatUtils.addSpellMastery(p, this, masteryGainPerCast(getRequiredCircleLevel()));
                         }
                     }
-                    profile.setCasting(false);
-                    profile.setCastingSpell(null);
-                }, finalCastTime);
+                }
+            }
+            profile.setCasting(false);
+            profile.setCastingSpell(null);
+        };
+
+        int completionTaskId;
+        if (WindUp.requiresWindUp(this)) {
+            // One framework-owned wind-up for every circle 6+ cast. Its duration is
+            // the real cast delay, and ChannelRegistry applies the same move/damage/
+            // quit interrupt rule to all of them. Implementations must not start a
+            // second wind-up inside castAction().
+            int[] taskId = {-1};
+            Runnable stop = () -> {
+                Bukkit.getServer().getScheduler().cancelTask(taskId[0]);
+                Bukkit.getServer().getScheduler().cancelTask(circleTaskId);
+                profile.setCasting(false);
+                profile.setCastingSpell(null);
+            };
+            WindUp windUp = WindUp.forFrameworkCast(this, p, finalCastTime);
+            completionTaskId = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(
+                    Alkatraz.getInstance(), () -> {
+                        if (focusCancelledPlayers.remove(uuid) || !p.isOnline() || p.isDead()) {
+                            ChannelRegistry.unregister(uuid);
+                            stop.run();
+                            return;
+                        }
+                        windUp.tick();
+                        if (windUp.isCancelled()) {
+                            stop.run();
+                            return;
+                        }
+                        if (!windUp.isComplete()) return;
+                        ChannelRegistry.unregister(uuid);
+                        Bukkit.getServer().getScheduler().cancelTask(taskId[0]);
+                        resolve.run();
+                    }, 1L, 1L);
+            taskId[0] = completionTaskId;
+            ChannelRegistry.register(uuid, windUp, stop);
+        } else {
+            // Circles 0-5 keep the plain delayed payload with no wind-up contract.
+            completionTaskId = Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(
+                    Alkatraz.getInstance(), () -> {
+                        if (focusCancelledPlayers.remove(uuid)) {
+                            profile.setCasting(false);
+                            profile.setCastingSpell(null);
+                            return;
+                        }
+                        resolve.run();
+                    }, finalCastTime);
+        }
         profile.setCompletionTaskId(completionTaskId);
     }
 
@@ -350,13 +431,35 @@ public abstract class Spell {
         MagicProfile profile = ProfileManager.getProfile(p, MagicProfile.class);
         if (profile == null) return;
         ItemStack wand = profile.getCastingWand();
-        Bukkit.getServer().getScheduler().cancelTask(profile.getCurrentCircleTaskId());
-        Bukkit.getServer().getScheduler().cancelTask(profile.getCompletionTaskId());
-        focusCancelledPlayers.remove(uuid);
-        profile.setCasting(false);
-        profile.setCastingSpell(null);
+        stopCastTasks(p, profile);
         Utils.sendActionBar(p, lang().get("spells.cast.focus_lost"));
         fireSpellFail(p, wand, "FOCUS_LOST");
+        focusCancelledPlayers.remove(uuid);
+    }
+
+    /**
+     * Voluntary abort (sneak + right-click on a wand). Reuses the immediate
+     * cancel path above: no payload, no cooldown, no mastery. Circle 0-5 casts
+     * previously had no way to stop short of taking damage.
+     */
+    public final void cancelCastByPlayer(Player p) {
+        MagicProfile profile = ProfileManager.getProfile(p, MagicProfile.class);
+        if (profile == null || !profile.isCasting()) return;
+        ItemStack wand = profile.getCastingWand();
+        stopCastTasks(p, profile);
+        String fallback = "Cast aborted.";
+        String notice = lang().get("cast.aborted", "default", fallback);
+        Utils.sendActionBar(p, "cast.aborted".equals(notice) ? fallback : notice);
+        fireSpellFail(p, wand, "ABORTED");
+    }
+
+    /** Stops the circle, payload timer and wind-up channel for an in-flight cast. */
+    private void stopCastTasks(Player p, MagicProfile profile) {
+        Bukkit.getServer().getScheduler().cancelTask(profile.getCurrentCircleTaskId());
+        Bukkit.getServer().getScheduler().cancelTask(profile.getCompletionTaskId());
+        ChannelRegistry.unregister(p.getUniqueId());
+        profile.setCasting(false);
+        profile.setCastingSpell(null);
     }
 
     /**
@@ -498,10 +601,19 @@ public abstract class Spell {
 
     public long calculateFinalCastTime(MagicProfile profile, float baseCastTime) {
         float castTimeInTicks = baseCastTime * 20;
-        if (profile.getSpellMastery(this) >= getMaxMastery()) {
+        // A spell with no mastery track must not get the 25% discount for free.
+        if (getMaxMastery() > 0 && profile.getSpellMastery(this) >= getMaxMastery()) {
             castTimeInTicks *= 0.75f;
         }
+        // No floor: a fast wand or max mastery shortens the delay by exactly what
+        // was advertised. CastCircle is cancelled at payload time, so it cannot
+        // outlive the shortened cast.
         return (long) castTimeInTicks;
+    }
+
+    /** Mastery earned by one successful cast: at least a point, scaled by circle. */
+    static int masteryGainPerCast(int circle) {
+        return Math.max(1, circle);
     }
 
     public float getFullCastTime(ItemStack wand, double spellCastTime) {
@@ -514,6 +626,8 @@ public abstract class Spell {
             } else {
                 wandCastTime = NBT.get(wand, nbt -> (Double) nbt.getDouble("cast_time_multiplier"));
                 if (wandCastTime == 0.0) wandCastTime = 1.0;
+                // Legacy NBT is attacker-controlled; keep it in a sane range.
+                wandCastTime = Math.max(0.1, Math.min(wandCastTime, 10.0));
             }
         }else{
             wandCastTime = 1.0;
@@ -531,21 +645,6 @@ public abstract class Spell {
             }
         }
         return getFullCastTime(wand, spellCastTime);
-    }
-
-    public double calcPower(double base, LivingEntity target, Player caster) {
-        MagicProfile casterProfile = ProfileManager.getProfile(caster, MagicProfile.class);
-        double casterAffinity = casterProfile.getAffinity(getElement());
-
-        double targetResistance;
-        if (target instanceof Player t) {
-            MagicProfile targetProfile = ProfileManager.getProfile(t, MagicProfile.class);
-            targetResistance = targetProfile.getResistance(getElement());
-        } else {
-            targetResistance = Utils.getEntityResistance(getElement(), target);
-        }
-
-        return base * (1 + ((casterAffinity - targetResistance) / 100));
     }
 
     // ============================================
@@ -600,6 +699,8 @@ public abstract class Spell {
                 if (nbt.hasTag("magic_power")) return nbt.getDouble("magic_power");
                 return 0.0;
             });
+            // Legacy NBT is attacker-controlled; keep it in a sane range.
+            raw = Math.max(-100.0, Math.min(raw, 1000.0));
         }
         return 1.0 + raw / 100.0;
     }

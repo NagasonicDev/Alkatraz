@@ -79,13 +79,13 @@ import java.util.List;
  *       slice by slice upward. {@code heal} passes a taller, faster, {@code core}-led column,
  *       {@code lesser_heal} a shorter, slower one; the two are now visibly the same family at
  *       different strengths rather than the same picture twice.</li>
- *   <li><b>{@code warp} (NONE) / {@code skeletal_knights} (DARK)</b> - the worst pair in the
+ *   <li><b>the teleport / summon pair</b> - the worst pair in the
  *       plugin. Both spell classes carried byte-identical {@code ellipsePoint},
  *       {@code spawnFloorCircle} and {@code spawnHexGlyphs} methods <i>and</i> eleven identical
  *       colour constants, so a teleportation and a skeleton summoning were pixel-for-pixel the
  *       same aqua ritual. Generalised as {@link #channelGlyphs}: counter-rotating floor rings
- *       plus a ring of glyph markers, with the element supplying the colour. {@code warp} now
- *       reads in neutral grey and {@code skeletal_knights} in DARK purple, which is the single
+ *       plus a ring of glyph markers, with the element supplying the colour, so a teleport reads
+ *       in neutral grey and a summon in DARK purple - the single
  *       most useful thing in this file.</li>
  *   <li><b>{@code barrier} (NONE) / {@code wind_barrier} (AIR)</b> - identical 200-point sphere
  *       shell and identical outward push loop, differing only in tint. Generalised as
@@ -97,11 +97,11 @@ import java.util.List;
  *       {@link #column} along a caller-supplied path: the wall builder asks for a column at
  *       each segment's base, and each wall passes its own colour, so EARTH rises in brown
  *       and FIRE in orange without either spell naming a colour.</li>
- *   <li><b>{@code radiance} / {@code tornado} / {@code meteor_shower}</b> - the same two-phase
+ *   <li><b>the three rotating-ring wind-ups</b> - the same two-phase
  *       0.5 / 0.67 rotating-ring wind-up skeleton, copy-pasted three times. Wave A's
  *       {@link WindUp} already owns the shared skeleton. <b>Residual divergence, deliberately
- *       not unified here:</b> {@code radiance} anchors on the caster and grows rings outward,
- *       {@code tornado} anchors on a ground point and descends, and {@code meteor_shower}
+ *       not unified here:</b> one anchors on the caster and grows rings outward,
+ *       another anchors on a ground point and descends, and the third
  *       draws its rings at the <i>impact</i> points rather than the caster. Those are three
  *       genuinely different tells, not clones, so they keep distinct parameters through
  *       {@link WindUp} and only the charging shell is shared.</li>
@@ -1125,18 +1125,18 @@ public final class SpellVfx {
     }
 
     // ================================================================
-    // CHANNEL GLYPHS  (the warp / skeletal_knights pair)
+    // CHANNEL GLYPHS  (the teleport / summon ritual floor)
     // ================================================================
 
     /**
      * The channel ritual floor: a counter-rotating pair of rings plus a ring of glyph markers.
      *
-     * <p>This is the builder that breaks the plugin's worst clone pair. {@code warp} and
-     * {@code skeletal_knights} each carried their own copy of {@code spawnFloorCircle},
+     * <p>This is the builder that breaks the plugin's worst clone pair. The two spells each
+     * carried their own copy of {@code spawnFloorCircle},
      * {@code spawnHexGlyphs} and {@code ellipsePoint}, and their eleven colour constants were
      * byte-identical - so a neutral teleportation and a DARK skeleton summoning were the same
      * aqua picture. Everything coloured here comes from the colour the calling spell passed, which
-     * is the entire point: {@code warp} passes its own neutral grey, {@code skeletal_knights} passes
+     * is the entire point: a teleport passes its own neutral grey, a summon passes
      * purple, off one code path.
      *
      * <p><b>Shades.</b> The outer ring is {@code core} and the inner one {@code accent}, turning

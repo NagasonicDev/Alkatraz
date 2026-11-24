@@ -164,6 +164,7 @@ public final class CastCircle {
         int spellPhase = spell == null || spell.getId() == null ? 0 : spell.getId().hashCode();
         double visualScale = 1.0 + circle * 0.075;
         int satellites = 2 + circle;
+        long castTicks = spell == null ? 0L : (long) Math.round(spell.getCastTime() * 20.0);
         int[] frame = {0};
 
         return new BukkitRunnable() {
@@ -173,16 +174,18 @@ public final class CastCircle {
                     cancel();
                     return;
                 }
-                draw(caster, geometry, rotationStep, bodyDust, accentDust,
-                        visualScale, satellites, spellPhase, frame[0]++, spell, size);
+                draw(caster, geometry, rotationStep, bodyDust, accentDust, palette,
+                        visualScale, satellites, spellPhase, frame[0]++, spell, size,
+                        circle, period, castTicks);
             }
         }.runTaskTimer(Alkatraz.getInstance(), 0L, period).getTaskId();
     }
 
     private static void draw(LivingEntity caster, RingGeometry geometry, int rotationStep,
                              Particle.DustOptions bodyDust, Particle.DustOptions accentDust,
+                             ElementPalette.Palette palette,
                              double visualScale, int satellites, int spellPhase, int frame,
-                             Spell spell, double size) {
+                             Spell spell, double size, int circle, long period, long castTicks) {
         Location eye = caster.getEyeLocation();
         World world = eye.getWorld();
         if (world == null) return;
@@ -229,8 +232,253 @@ public final class CastCircle {
             }
         }
         if (spell != null && spell.getRequiredCircleLevel() >= 6) {
-            SpellCastSignature.draw(spell.getId(), caster, origin, frame,
-                    size * visualScale, bodyDust, accentDust);
+            double progress = castTicks <= 0L ? 1.0
+                    : Math.min(1.0, (double) (frame * period) / castTicks);
+            drawTierLayers(caster, world, scratch, origin, palette, circle, progress, frame, size, visualScale);
+            spell.drawCastMotif(caster, origin, frame, size * visualScale, palette);
+        }
+    }
+
+    /**
+     * The escalating cast layers, one tier per two circles. Cumulative: a tier-5 circle draws every
+     * layer below it too. Point counts are drawn against {@link CastTimeline#particleBudget(int)},
+     * so a tier can never emit more than the circle's budget.
+     */
+    private static void drawTierLayers(LivingEntity caster, World world, Location scratch, Location origin,
+                                       ElementPalette.Palette palette, int circle, double progress,
+                                       int frame, double size, double visualScale) {
+        int tier = CastTimeline.tier(circle);
+        double phase = frame * 0.10;
+        double base = size * visualScale;
+        Budget budget = new Budget(CastTimeline.particleBudget(circle));
+
+        // T0: one accent ring, six orbiting motes, and a pulse near the end of the cast.
+        ringDust(caster, world, scratch, origin, base * 0.9, 14, palette.accentDust(), budget);
+        motes(caster, world, scratch, origin, base * 1.1, 6, phase, palette, budget);
+        if (progress >= 0.6 && progress < 0.72) {
+            ringDust(caster, world, scratch, origin, base * 1.25, 18, palette.coreDust(), budget);
+        }
+        if (tier < 1) return;
+
+        // T1: a counter-rotating ring, a second mote group and a rotating sigil.
+        ringDust(caster, world, scratch, origin, base * 1.15, 18, palette.deepDust(), budget);
+        motes(caster, world, scratch, origin, base * 1.3, 6, -phase, palette, budget);
+        sigil(caster, world, scratch, origin, base * 0.55, 5, phase * 1.4, palette.coreDust(), budget);
+        if (tier < 2) return;
+
+        // T2: a third ring with rune ticks, rising sparks and a ground echo ring.
+        ringDust(caster, world, scratch, origin, base * 1.45, 22, palette.accentDust(), budget);
+        runeTicks(caster, world, scratch, origin, base * 1.45, 8, phase, palette.coreDust(), budget);
+        sparks(caster, world, scratch, origin, base, 8, progress, palette.coreDust(), budget);
+        ringDust(caster, world, scratch, origin.clone().add(0.0, -1.4, 0.0), base * 1.6, 20,
+                palette.deepDust(), budget);
+        if (tier < 3) return;
+
+        // T3: a closing shell, radial spokes, a 3D helix and a pre-impact flash.
+        ringDust(caster, world, scratch, origin, Math.max(1.0, 12.0 - 10.0 * progress), 20,
+                palette.deepDust(), budget);
+        spokes(caster, world, scratch, origin, base * 1.2, 6, phase, palette.accentDust(), budget);
+        helix(caster, world, scratch, origin, base * 0.8, 16, phase, palette, budget);
+        if (progress > 0.86) {
+            ringDust(caster, world, scratch, origin, base * 0.6, 24, palette.coreDust(), budget);
+        }
+        if (tier < 4) return;
+
+        // T4: a vertical column, horizon arcs, a growing core sphere and a floor mandala.
+        column(caster, world, scratch, origin, 6.0, 1.2, 8, phase, palette, budget);
+        horizonArcs(caster, world, scratch, origin, base * 1.7, phase, palette.accentDust(), budget);
+        sphere(caster, world, scratch, origin, 0.4 + progress * 1.2, 16, palette.coreDust(), budget);
+        mandala(caster, world, scratch, origin.clone().add(0.0, -1.4, 0.0), base * 1.9, 2, 8,
+                palette.accentDust(), budget);
+        shockRings(caster, world, scratch, origin, 4, progress, palette.deepDust(), budget);
+        if (tier < 5) return;
+
+        // T5: a sky beam, a constellation, more shock rings, a wider mandala and a second sigil.
+        beam(caster, world, scratch, origin, 30.0, palette.coreDust(), budget);
+        constellation(caster, world, scratch, origin.clone().add(0.0, 6.0, 0.0), base, phase,
+                palette.coreDust(), budget);
+        shockRings(caster, world, scratch, origin, 8, progress, palette.accentDust(), budget);
+        mandala(caster, world, scratch, origin.clone().add(0.0, -1.4, 0.0), base * 2.3, 3, 12,
+                palette.coreDust(), budget);
+        sigil(caster, world, scratch, origin.clone().add(0.0, 1.5, 0.0), base * 0.75, 7, -phase * 1.6,
+                palette.accentDust(), budget);
+    }
+
+    /** Per-tick emission ceiling; every tier point spends one and a spent budget silently drops points. */
+    private static final class Budget {
+        private int remaining;
+
+        Budget(int total) {
+            this.remaining = Math.max(0, total);
+        }
+
+        boolean take() {
+            if (remaining <= 0) return false;
+            remaining--;
+            return true;
+        }
+    }
+
+    private static void dust(LivingEntity caster, World world, Location scratch,
+                             double x, double y, double z, Particle.DustOptions dust, Budget budget) {
+        if (!budget.take()) return;
+        scratch.setX(x);
+        scratch.setY(y);
+        scratch.setZ(z);
+        ParticleCaster.spawn(caster, world, Utils.DUST, scratch, 0, dust);
+    }
+
+    private static void ringDust(LivingEntity caster, World world, Location scratch, Location center,
+                                 double radius, int points, Particle.DustOptions dust, Budget budget) {
+        double r = Math.max(0.0, radius);
+        int count = Math.max(3, points);
+        for (int i = 0; i < count; i++) {
+            double angle = Math.PI * 2.0 * i / count;
+            dust(caster, world, scratch, center.getX() + Math.cos(angle) * r, center.getY(),
+                    center.getZ() + Math.sin(angle) * r, dust, budget);
+        }
+    }
+
+    private static void motes(LivingEntity caster, World world, Location scratch, Location center,
+                              double radius, int count, double phase, ElementPalette.Palette palette,
+                              Budget budget) {
+        for (int i = 0; i < count; i++) {
+            double angle = phase + Math.PI * 2.0 * i / count;
+            double x = Math.cos(angle) * radius;
+            double y = Math.sin(angle) * radius * 0.72;
+            dust(caster, world, scratch, center.getX() + x, center.getY() + y, center.getZ(),
+                    (i % 2 == 0) ? palette.coreDust() : palette.accentDust(), budget);
+        }
+    }
+
+    private static void sigil(LivingEntity caster, World world, Location scratch, Location center,
+                              double radius, int sides, double phase, Particle.DustOptions dust, Budget budget) {
+        for (int i = 0; i < sides; i++) {
+            double angle = phase + Math.PI * 2.0 * i / sides;
+            dust(caster, world, scratch, center.getX() + Math.cos(angle) * radius, center.getY(),
+                    center.getZ() + Math.sin(angle) * radius, dust, budget);
+        }
+    }
+
+    private static void runeTicks(LivingEntity caster, World world, Location scratch, Location center,
+                                  double radius, int count, double phase, Particle.DustOptions dust, Budget budget) {
+        for (int i = 0; i < count; i++) {
+            double angle = phase + Math.PI * 2.0 * i / count;
+            for (int tick = 1; tick <= 2; tick++) {
+                double r = radius - tick * 0.18;
+                dust(caster, world, scratch, center.getX() + Math.cos(angle) * r, center.getY(),
+                        center.getZ() + Math.sin(angle) * r, dust, budget);
+            }
+        }
+    }
+
+    private static void sparks(LivingEntity caster, World world, Location scratch, Location center,
+                               double radius, int count, double progress, Particle.DustOptions dust, Budget budget) {
+        for (int i = 0; i < count; i++) {
+            double angle = Math.PI * 2.0 * i / count + progress * 6.0;
+            double r = radius * (0.4 + 0.6 * ((i % 4) / 3.0));
+            double y = -1.4 + progress * 2.8;
+            dust(caster, world, scratch, center.getX() + Math.cos(angle) * r, center.getY() + y,
+                    center.getZ() + Math.sin(angle) * r, dust, budget);
+        }
+    }
+
+    private static void spokes(LivingEntity caster, World world, Location scratch, Location center,
+                               double radius, int count, double phase, Particle.DustOptions dust, Budget budget) {
+        for (int i = 0; i < count; i++) {
+            double angle = phase + Math.PI * 2.0 * i / count;
+            for (int step = 1; step <= 2; step++) {
+                double r = radius * step / 2.0;
+                dust(caster, world, scratch, center.getX() + Math.cos(angle) * r, center.getY(),
+                        center.getZ() + Math.sin(angle) * r, dust, budget);
+            }
+        }
+    }
+
+    private static void helix(LivingEntity caster, World world, Location scratch, Location center,
+                              double radius, int count, double phase, ElementPalette.Palette palette, Budget budget) {
+        for (int i = 0; i < count; i++) {
+            double u = (double) i / count;
+            double angle = phase + u * Math.PI * 4.0;
+            dust(caster, world, scratch, center.getX() + Math.cos(angle) * radius * u,
+                    center.getY() + (u - 0.5) * 2.4, center.getZ() + Math.sin(angle) * radius * u,
+                    (i % 3 == 0) ? palette.accentDust() : palette.coreDust(), budget);
+        }
+    }
+
+    private static void column(LivingEntity caster, World world, Location scratch, Location center,
+                               double height, double radius, int count, double phase,
+                               ElementPalette.Palette palette, Budget budget) {
+        for (int i = 0; i < count; i++) {
+            double u = (double) i / count;
+            double angle = phase + u * Math.PI * 2.0;
+            dust(caster, world, scratch, center.getX() + Math.cos(angle) * radius,
+                    center.getY() + u * height, center.getZ() + Math.sin(angle) * radius,
+                    (u < 0.4) ? palette.deepDust() : palette.coreDust(), budget);
+        }
+    }
+
+    private static void horizonArcs(LivingEntity caster, World world, Location scratch, Location center,
+                                    double radius, double phase, Particle.DustOptions dust, Budget budget) {
+        for (int arc = 0; arc < 2; arc++) {
+            double sign = arc == 0 ? 1.0 : -1.0;
+            for (int i = 0; i < 8; i++) {
+                double angle = phase * sign + Math.PI * i / 8.0;
+                dust(caster, world, scratch, center.getX() + Math.cos(angle) * radius,
+                        center.getY() + Math.sin(angle) * radius * 0.3 * sign,
+                        center.getZ() + Math.sin(angle) * radius, dust, budget);
+            }
+        }
+    }
+
+    private static void sphere(LivingEntity caster, World world, Location scratch, Location center,
+                               double radius, int count, Particle.DustOptions dust, Budget budget) {
+        double phi = Math.PI * (3 - Math.sqrt(5));
+        for (int i = 0; i < count; i++) {
+            double y = 1 - (i / (double) Math.max(1, count - 1)) * 2;
+            double ring = Math.sqrt(Math.max(0.0, 1 - y * y));
+            double theta = phi * i;
+            dust(caster, world, scratch, center.getX() + Math.cos(theta) * ring * radius,
+                    center.getY() + y * radius, center.getZ() + Math.sin(theta) * ring * radius, dust, budget);
+        }
+    }
+
+    private static void mandala(LivingEntity caster, World world, Location scratch, Location center,
+                                double radius, int rings, int sides, Particle.DustOptions dust, Budget budget) {
+        for (int ring = 0; ring < rings; ring++) {
+            double r = radius * (1.0 - ring * 0.25);
+            for (int i = 0; i < sides; i++) {
+                double angle = Math.PI * 2.0 * i / sides + ring * 0.3;
+                dust(caster, world, scratch, center.getX() + Math.cos(angle) * r, center.getY(),
+                        center.getZ() + Math.sin(angle) * r, dust, budget);
+            }
+        }
+    }
+
+    private static void shockRings(LivingEntity caster, World world, Location scratch, Location center,
+                                   int count, double progress, Particle.DustOptions dust, Budget budget) {
+        for (int ring = 0; ring < count; ring++) {
+            double t = Math.min(1.0, Math.max(0.0, progress - ring * 0.1));
+            double r = 0.5 + t * (3.0 + ring);
+            ringDust(caster, world, scratch, center, r, 8, dust, budget);
+        }
+    }
+
+    private static void beam(LivingEntity caster, World world, Location scratch, Location center,
+                             double height, Particle.DustOptions dust, Budget budget) {
+        for (int i = 0; i < 24; i++) {
+            double u = (double) i / 24;
+            dust(caster, world, scratch, center.getX(), center.getY() + u * height, center.getZ(), dust, budget);
+        }
+    }
+
+    private static void constellation(LivingEntity caster, World world, Location scratch, Location center,
+                                      double radius, double phase, Particle.DustOptions dust, Budget budget) {
+        for (int i = 0; i < 7; i++) {
+            double angle = phase + Math.PI * 2.0 * i / 7.0;
+            dust(caster, world, scratch, center.getX() + Math.cos(angle) * radius,
+                    center.getY() + Math.sin(angle * 2.0) * radius * 0.35,
+                    center.getZ() + Math.sin(angle) * radius, dust, budget);
         }
     }
 

@@ -4,20 +4,13 @@ import me.nagasonic.alkatraz.spells.util.SpellBudgets;
 import me.nagasonic.alkatraz.spells.util.TerrainEditor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -44,12 +37,10 @@ class TerrainEditorTest {
     /**
      * Spec section 8.2 and the maxBlocks cap.
      *
-     * <p>This test previously asserted {@code 123 * 6 <= 620}, which is arithmetically
-     * false - 6 meteors at radius 3 naturally cover 738 blocks, not 620. What the spell
-     * actually does is pass the cast's remaining allowance as maxBlocks, so the
-     * enumeration truncates AT the budget rather than overshooting it. That cap is the
-     * behaviour worth pinning; the unscaled enumeration was never a property the spell
-     * had.
+     * <p>A radius-3 sphere covers 123 blocks, so a six-cast volley would naturally
+     * cover 738 - over the circle-6 TERRAIN budget. What a terrain spell actually does
+     * is pass the cast's remaining allowance as maxBlocks, so the enumeration truncates
+     * AT the budget rather than overshooting it. That cap is the behaviour worth pinning.
      */
     @Test
     void radiusThreeSphereIsTruncatedAtTheCircleSixTerrainBudget() {
@@ -120,13 +111,13 @@ class TerrainEditorTest {
         assertTrue(TerrainEditor.isProtected(Material.SPAWNER), "spawners are never destroyed");
         assertFalse(TerrainEditor.isProtected(Material.STONE), "ordinary stone is fair game");
         assertFalse(TerrainEditor.isProtected(Material.DIRT), "ordinary dirt is fair game");
-        assertFalse(TerrainEditor.isProtected(Material.DIAMOND_ORE), "ores break - Fissure already mines them via Ground.isGround");
+        assertFalse(TerrainEditor.isProtected(Material.DIAMOND_ORE), "ores break - terrain spells mine them via Ground.isGround");
     }
 
     @Test
     void bedrockSubstringCheckIsGone() {
-        // MeteorShower:304 used toString().contains("BEDROCK"), which would falsely
-        // match any future material with BEDROCK in its name. Assert on identity now.
+        // A toString().contains("BEDROCK") check would falsely match any future
+        // material with BEDROCK in its name. Assert on identity now.
         assertTrue(TerrainEditor.isProtected(Material.BEDROCK), "bedrock is protected by identity comparison");
         assertFalse(TerrainEditor.isProtected(null), "a null material is never a protected block");
     }
@@ -140,48 +131,5 @@ class TerrainEditorTest {
         assertEquals(2, ticket.originals().size(), "the ticket is a plain location-to-original map");
         assertEquals(Material.STONE, ticket.originals().values().iterator().next(),
                 "originals are preserved verbatim for restore");
-    }
-
-    /**
-     * Spec section 4.3: an option that exceeds the default budget is legal ONLY if it
-     * costs extra mana. This asserts the yml actually says so, rather than trusting
-     * the budget arithmetic in the two tests above.
-     *
-     * <p>The mana impact is located by its {@code type} rather than by its index: the
-     * shipped {@code meteor_shower_options.yml} lists the radius {@code stat_modifier}
-     * at {@code impacts[0]} and the {@code mana_cost} at {@code impacts[1]}, so an
-     * index-pinned lookup would miss the very thing this test exists to police.
-     */
-    @Test
-    void thePaidOverOptionCostsExtraMana() throws IOException {
-        try (InputStream in = TerrainEditorTest.class
-                .getResourceAsStream("/spells/meteor_shower_options.yml")) {
-            assertNotNull(in, "missing bundled resource /spells/meteor_shower_options.yml");
-            YamlConfiguration opts = YamlConfiguration.loadConfiguration(
-                    new InputStreamReader(in, StandardCharsets.UTF_8));
-            assertEquals(1, opts.getInt("options.radius.default_index"),
-                    "the default radius option is 'normal' at radius 3 - the budget-exact one");
-
-            ConfigurationSection values = opts.getConfigurationSection("options.radius.values");
-            assertNotNull(values, "the radius option must declare its values");
-            assertEquals(2.0, values.getDouble("tight.value"), 1e-9, "tight is re-scaled 4 -> 2");
-            assertEquals(3.0, values.getDouble("normal.value"), 1e-9, "normal is re-scaled 6 -> 3");
-            assertEquals(4.0, values.getDouble("wide.value"), 1e-9, "wide is re-scaled 8 -> 4");
-
-            // Spec section 4.3: an over-budget option is legal ONLY if it costs extra
-            // mana. +25% of the circle-6 cost of 165 is 41.
-            Map<?, ?> manaImpact = null;
-            for (Map<?, ?> impact : values.getMapList("wide.impacts")) {
-                if ("mana_cost".equals(impact.get("type"))) {
-                    manaImpact = impact;
-                }
-            }
-            assertNotNull(manaImpact, "the 'wide' option must declare a mana_cost impact - without one it "
-                    + "clears 1542 blocks against a 620 budget for free, which spec section 4.3 forbids");
-            assertEquals(41.0, ((Number) manaImpact.get("change")).doubleValue(), 1e-9,
-                    "wide carries a mana_cost impact of +41, which is +25% of 165");
-            assertEquals("mana_cost", manaImpact.get("type"),
-                    "and the impact is a mana_cost change, not a free stat tweak");
-        }
     }
 }

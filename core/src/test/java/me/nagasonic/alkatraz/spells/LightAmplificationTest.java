@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
 
 /**
  * The amplification arithmetic and its cap are pinned here, together with the
- * roster that Radiance and every light spell share. The target is a mocked
+ * shared undead roster that light spells amplify against. The target is a mocked
  * {@link Player} so the affinity lookup goes through a mocked
  * {@link MagicProfile} - a real mob target would hit NBT persistent data, which
  * needs a live server.
@@ -56,16 +56,16 @@ class LightAmplificationTest {
     }
 
     @Test
-    void undeadRosterMatchesRadianceExactly() {
-        assertEquals(13, UndeadTypes.all().size(), "the promoted roster must keep all 13 Radiance entries");
+    void undeadRosterIsTheSharedThirteen() {
+        assertEquals(13, UndeadTypes.all().size(), "the promoted roster must keep all 13 undead entries");
         // The three that are easy to lose when the set is retyped by hand.
-        assertTrue(UndeadTypes.contains(EntityType.ZOGLIN), "zoglin is on the Radiance roster");
-        assertTrue(UndeadTypes.contains(EntityType.SKELETON_HORSE), "skeleton horse is on the Radiance roster");
-        assertTrue(UndeadTypes.contains(EntityType.ZOMBIE_HORSE), "zombie horse is on the Radiance roster");
+        assertTrue(UndeadTypes.contains(EntityType.ZOGLIN), "zoglin is on the undead roster");
+        assertTrue(UndeadTypes.contains(EntityType.SKELETON_HORSE), "skeleton horse is on the undead roster");
+        assertTrue(UndeadTypes.contains(EntityType.ZOMBIE_HORSE), "zombie horse is on the undead roster");
         // The three that are NOT undead anywhere in the shipped source.
-        assertFalse(UndeadTypes.contains(EntityType.ENDERMAN), "enderman is not on the Radiance roster");
-        assertFalse(UndeadTypes.contains(EntityType.SILVERFISH), "silverfish is not on the Radiance roster");
-        assertFalse(UndeadTypes.contains(EntityType.GHAST), "ghast is not on the Radiance roster");
+        assertFalse(UndeadTypes.contains(EntityType.ENDERMAN), "enderman is not on the undead roster");
+        assertFalse(UndeadTypes.contains(EntityType.SILVERFISH), "silverfish is not on the undead roster");
+        assertFalse(UndeadTypes.contains(EntityType.GHAST), "ghast is not on the undead roster");
         assertTrue(UndeadTypes.contains(EntityType.ZOMBIE), "zombie is undead");
         assertTrue(UndeadTypes.contains(EntityType.WITHER), "wither is on the roster");
         assertFalse(UndeadTypes.contains(EntityType.PLAYER), "players are not undead");

@@ -17,7 +17,9 @@ import java.util.concurrent.atomic.AtomicLong;
 /** Client-only water blocks used to give water spells a visible shape without particles. */
 public final class FakeWaterVfx {
     private static final AtomicLong GENERATION = new AtomicLong();
-    private static final Map<Location, Long> LAST = new ConcurrentHashMap<>();
+    /** Immutable block identity; {@code Location} is mutable, so it cannot be a safe map key. */
+    private record BlockPos(String world, int x, int y, int z) {}
+    private static final Map<BlockPos, Long> LAST = new ConcurrentHashMap<>();
 
     private FakeWaterVfx() {}
 
@@ -28,17 +30,18 @@ public final class FakeWaterVfx {
         Block block = world.getBlockAt(location);
         if (!block.isEmpty()) return;
         Location blockLocation = block.getLocation();
+        BlockPos key = new BlockPos(world.getName(), blockLocation.getBlockX(), blockLocation.getBlockY(), blockLocation.getBlockZ());
         long generation = GENERATION.incrementAndGet();
-        LAST.put(blockLocation, generation);
+        LAST.put(key, generation);
         for (Player player : world.getPlayers()) {
             if (player.getLocation().distanceSquared(blockLocation) <= 64 * 64) {
                 player.sendBlockChange(blockLocation, Material.WATER.createBlockData());
             }
         }
         Bukkit.getScheduler().runTaskLater(Alkatraz.getInstance(), () -> {
-            Long current = LAST.get(blockLocation);
+            Long current = LAST.get(key);
             if (current == null || current.longValue() != generation) return;
-            LAST.remove(blockLocation);
+            LAST.remove(key);
             BlockData data = world.getBlockAt(blockLocation).getBlockData();
             for (Player player : world.getPlayers()) {
                 if (player.getLocation().distanceSquared(blockLocation) <= 64 * 64) {
@@ -50,19 +53,20 @@ public final class FakeWaterVfx {
 
     /** Revert any in-flight client-side water blocks, e.g. on plugin disable. */
     public static void shutdown() {
-        for (Location blockLocation : new ArrayList<>(LAST.keySet())) {
-            World world = blockLocation.getWorld();
+        for (BlockPos key : new ArrayList<>(LAST.keySet())) {
+            World world = Bukkit.getWorld(key.world());
             if (world == null) {
-                LAST.remove(blockLocation);
+                LAST.remove(key);
                 continue;
             }
+            Location blockLocation = new Location(world, key.x(), key.y(), key.z());
             BlockData data = world.getBlockAt(blockLocation).getBlockData();
             for (Player player : world.getPlayers()) {
                 if (player.getLocation().distanceSquared(blockLocation) <= 64 * 64) {
                     player.sendBlockChange(blockLocation, data);
                 }
             }
-            LAST.remove(blockLocation);
+            LAST.remove(key);
         }
     }
 }

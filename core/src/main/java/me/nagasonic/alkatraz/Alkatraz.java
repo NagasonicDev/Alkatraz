@@ -69,7 +69,11 @@ import me.nagasonic.alkatraz.spells.spellbooks.SpellbookListener;
 import me.nagasonic.alkatraz.spells.modifier.ModifierManager;
 import me.nagasonic.alkatraz.spells.spellbooks.SpellbookVillagerListener;
 import me.nagasonic.alkatraz.spells.util.SustainEffect;
+import me.nagasonic.alkatraz.spells.vfx.CastAftermath;
 import me.nagasonic.alkatraz.spells.vfx.ChannelRegistry;
+import me.nagasonic.alkatraz.spells.util.SpellGroups;
+import me.nagasonic.alkatraz.spells.util.SpellMarks;
+import me.nagasonic.alkatraz.spells.util.SummonLimits;
 import me.nagasonic.alkatraz.texturepack.ResourcePackListener;
 import me.nagasonic.alkatraz.tutorial.FirstJoinTutorial;
 import me.nagasonic.alkatraz.api.SpellAPI;
@@ -77,7 +81,6 @@ import me.nagasonic.alkatraz.api.mobs.MagicAiService;
 import me.nagasonic.alkatraz.api.mobs.MagicBrainService;
 import me.nagasonic.alkatraz.api.mobs.MagicEntityType;
 import me.nagasonic.alkatraz.mobs.MagicBrains;
-import me.nagasonic.alkatraz.util.SkinUtils;
 import me.nagasonic.alkatraz.util.UpdateChecker;
 import me.nagasonic.alkatraz.util.Utils;
 import org.bukkit.Bukkit;
@@ -247,6 +250,9 @@ registerListener(new ModifierLifecycleListener());
         registerListener(new ImbueAnvilListener());
         registerListener(new ResourcePackListener());
         registerListener(ChannelRegistry.INSTANCE);
+        registerListener(CastAftermath.INSTANCE);
+        registerListener(SummonLimits.INSTANCE);
+        registerListener(SpellGroups.INSTANCE);
         Bukkit.getPluginManager().registerEvents(new MenuListener(), this);
         logInfo("NMS version " + nms.getClass().getSimpleName() + " registered!");
         getCommand("spells").setExecutor(new SpellsCommand());
@@ -272,14 +278,10 @@ registerListener(new ModifierLifecycleListener());
 
     @Override
     public void onDisable() {
-        try { Bukkit.getScheduler().cancelTasks(this); } catch (Exception ignored) { }
-        if (metrics != null) {
-            metrics.shutdown();
-            metrics = null;
-        }
-        TaskBrainTicker.shutdown();
-        SpellComponentHandler.shutdown();
-        // Drop stale mastery boss bars before profiles are unloaded.
+        // Drop stale mastery boss bars before cancelling tasks so their delayed
+        // removal tasks are still alive when cancelled, and so players who quit
+        // during this same tick are still cleaned up. ProfileManager.shutdown()
+        // saves and clears the cache but does not clear these bars.
         for (org.bukkit.entity.Player p : Bukkit.getOnlinePlayers()) {
             me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile mp =
                     me.nagasonic.alkatraz.playerdata.profiles.ProfileManager.getProfile(p, me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile.class);
@@ -293,7 +295,15 @@ registerListener(new ModifierLifecycleListener());
             mp.getMasteryBars().clear();
             mp.getMasteryBarTaskIds().clear();
         }
+        try { Bukkit.getScheduler().cancelTasks(this); } catch (Exception ignored) { }
+        if (metrics != null) {
+            metrics.shutdown();
+            metrics = null;
+        }
+        TaskBrainTicker.shutdown();
+        SpellComponentHandler.shutdown();
         me.nagasonic.alkatraz.gui.implementation.editor.EditorChatHandler.shutdown();
+        try { SpellHotbarManager.exitAll(); } catch (Exception ignored) { }
         ProfileManager.shutdown();
         BarrierManager.disposeAll();
         if (focusManager != null) {
@@ -302,17 +312,18 @@ registerListener(new ModifierLifecycleListener());
         PeriodicTriggerListener.stop();
         EquipmentReconcileTask.stop();
         ChannelRegistry.shutdown();
+        CastAftermath.shutdown();
+        SummonLimits.shutdown();
+        SpellGroups.shutdown();
+        SpellMarks.shutdown();
 me.nagasonic.alkatraz.spells.effect.EffectRegistry.clearAll();
-        BoosterManager.stopExpiryTask();
-        BoosterManager.clear();
+        BoosterManager.shutdown();
         ModifierManager.clear();
-        SkinUtils.shutdown();
         UnlockSweep.stop();
          UpdateChecker.shutdown();
          LootInjector.resetRegistration();
          MobLootInjector.resetRegistration();
-        SpellHotbarManager.exitAll();
-        me.nagasonic.alkatraz.items.magic.adapter.MagicDamageListener.clearAll();
+         me.nagasonic.alkatraz.items.magic.adapter.MagicDamageListener.clearAll();
         me.nagasonic.alkatraz.spells.vfx.FakeWaterVfx.shutdown();
         for (Player p : Bukkit.getOnlinePlayers()){
             try {
@@ -529,11 +540,10 @@ me.nagasonic.alkatraz.spells.effect.EffectRegistry.clearAll();
      * SpellRegistry.SPELL_IDS.
      *
      * <p>{@code debuff_options.yml} is the only {@code *_options.yml} in this list.
-     * The other 36 (and the 29 wave-5 ones) are saved by each spell's own
-     * loadConfiguration(), which is why they are absent here - see
-     * spec section 10.3. Do NOT add them: a second saveConfig for a file the spell
-     * already saves is harmless but pointless, and it widens the list that
-     * SpellRegistryParityTest.savedSpellConfigIds() scans.
+     * The other options files are saved by each spell's own loadConfiguration(),
+     * which is why they are absent here - see spec section 10.3. Do NOT add them: a
+     * second saveConfig for a file the spell already saves is harmless but pointless,
+     * and it widens the list that SpellRegistryParityTest.savedSpellConfigIds() scans.
      *
      * <p>The literals stay as literals deliberately. Wave 4's
      * SpellRegistryParityTest reads this file as text with the pattern
@@ -545,73 +555,73 @@ me.nagasonic.alkatraz.spells.effect.EffectRegistry.clearAll();
         return new LinkedHashSet<>(List.of(
                 "spells/air_blades.yml",
                 "spells/air_burst.yml",
+                "spells/atlas_unbound.yml",
                 "spells/barrier.yml",
+                "spells/beacon_of_accord.yml",
                 "spells/blink.yml",
                 "spells/buff.yml",
+                "spells/chronicle_anchor.yml",
+                "spells/covenant_of_the_first_dawn.yml",
                 "spells/debuff.yml",
                 "spells/debuff_options.yml",
                 "spells/dark_tendrils.yml",
+                "spells/dawn_chorus.yml",
                 "spells/detect.yml",
                 "spells/disguise.yml",
                 "spells/dispel.yml",
+                "spells/dragons_wake.yml",
                 "spells/earthen_wall.yml",
                 "spells/earth_spike.yml",
                 "spells/earth_throw.yml",
-                "spells/earthsplitter.yml",
+                "spells/emberforge.yml",
+                "spells/empyrean_passage.yml",
+                "spells/eye_of_the_firmament.yml",
                 "spells/fireball.yml",
                 "spells/fire_blast.yml",
                 "spells/fire_wall.yml",
                 "spells/flaming_volley.yml",
+                "spells/foldstep.yml",
                 "spells/geyser.yml",
                 "spells/heal.yml",
+                "spells/hollow_kings_court.yml",
                 "spells/lesser_heal.yml",
+                "spells/leviathans_passage.yml",
+                "spells/leviathans_testament.yml",
                 "spells/light_buff.yml",
                 "spells/magic_missile.yml",
-                "spells/meteor_shower.yml",
-                "spells/radiance.yml",
-                "spells/shadow_realm.yml",
-                "spells/skeletal_knights.yml",
+                "spells/phoenix_reprieve.yml",
+                "spells/quarryheart.yml",
+                "spells/riptide_convoy.yml",
+                "spells/runic_survey.yml",
+                "spells/sanctuary_bloom.yml",
+                "spells/skyglass_glide.yml",
+                "spells/skyhook.yml",
+                "spells/soul_lantern.yml",
+                "spells/soul_reclamation.yml",
+                "spells/starfall_cataclysm.yml",
+                "spells/starfall_crucible.yml",
+                "spells/stone_bastion.yml",
+                "spells/stonebridge.yml",
                 "spells/stealth.yml",
                 "spells/summon_zombies.yml",
                 "spells/swift.yml",
-                "spells/tornado.yml",
-                "spells/tsunami.yml",
+                "spells/tempest_road.yml",
+                "spells/tidal_reservoir.yml",
+                "spells/titans_causeway.yml",
                 "spells/tremor.yml",
-                "spells/warp.yml",
+                "spells/undertow_veil.yml",
+                "spells/veil_of_the_unseen_court.yml",
                 "spells/water_pulse.yml",
                 "spells/water_sphere.yml",
+                "spells/wayfarers_call.yml",
                 "spells/whirlpool.yml",
                 "spells/wind_barrier.yml",
                 "spells/wind_vortex.yml",
-                "spells/flame_lance.yml",
-                "spells/inferno_pilgrimage.yml",
-                "spells/sunfire_barrage.yml",
-                "spells/inferno_rite.yml",
-                "spells/undertow.yml",
-                "spells/everdrain.yml",
-                "spells/thousand_waves.yml",
-                "spells/tide_of_the_deep.yml",
-                "spells/tectonic_strike.yml",
-                "spells/fault_line.yml",
-                "spells/continental_shift.yml",
-                "spells/worldbreaker.yml",
+                "spells/world_gate.yml",
+                "spells/worldtree_beacon.yml",
+                "spells/wraithbound_retinue.yml",
                 "spells/updraft.yml",
-                "spells/thunderclap.yml",
-                "spells/cyclone_nest.yml",
-                "spells/stormcaller.yml",
-                "spells/skywrath.yml",
-                "spells/light_bolt.yml",
-                "spells/radiant_brand.yml",
-                "spells/choir_of_light.yml",
-                "spells/apotheosis.yml",
-                "spells/crown_of_dawn.yml",
-                "spells/umbral_volley.yml",
-                "spells/void_anchor.yml",
-                "spells/oblivion.yml",
-                "spells/arcane_ward.yml",
-                "spells/waystone_recall.yml",
-                "spells/echo_cast.yml",
-                "spells/arcane_resonance.yml"
+                "spells/light_bolt.yml"
         ));
     }
 

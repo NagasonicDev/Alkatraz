@@ -201,9 +201,8 @@ class SpellAttackContextTest {
     @Test
     void fiveArgOverloadWrapsThePropertiesTheSpellAlreadySeeded() {
         Probe spell = new Probe(4.0);
-        // radiance and shadow_realm carry no power: key at all, so they seed their
-        // own value from their own config and hand it in - see wave 3 T12 Step 4
-        // and T13 Step 4.
+        // heal and light_buff carry no power: key at all, so they seed their own
+        // value from their own config and hand it in.
         AttackProperties own = new AttackProperties(caster, new Location(null, 0.0, 0.0, 0.0), 12.5, AttackType.MAGIC);
         SpellAttackContext context = SpellAttackContext.of(spell, own, caster, null);
 
@@ -269,8 +268,8 @@ class SpellAttackContextTest {
         SpellAttackContext context = seeded(spell, 7.2);
 
         // This is what makes a SUSTAIN field work: same target, new damage tick,
-        // no throw. tornado, whirlpool, wind_vortex, radiance and shadow_realm
-        // all depend on this - if it ever throws, every field lands zero ticks.
+        // no throw. whirlpool, wind_vortex and geyser all depend on this - if it
+        // ever throws, every field lands zero ticks.
         for (int tick = 0; tick < 5; tick++) {
             context.tick();
             assertEquals(tick + 1L, context.currentTick(), "tick() is the damage-tick boundary");

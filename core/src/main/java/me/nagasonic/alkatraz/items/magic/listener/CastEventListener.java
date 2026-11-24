@@ -29,7 +29,6 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -87,7 +86,7 @@ public class CastEventListener implements Listener {
         ItemStack wand = e.getPlayer().getInventory().getItem(e.getPreviousSlot());
         if (wand != null){
             if (wand.getType() != Material.AIR && wand.getAmount() != 0) {
-                if (isWandCached(e, wand)) {
+                if (WandUtils.isWand(wand)) {
                     WandComponentHandler.resetCastCode(e.getPlayer().getUniqueId());
                 }
             }
@@ -102,14 +101,14 @@ public class CastEventListener implements Listener {
         ItemStack curr = p.getInventory().getItem(e.getNewSlot());
         if (prev != null) {
             if (prev.getType() != Material.AIR && prev.getAmount() != 0){
-                if (isManaDisplayItemCached(e, prev)) {
+                if (isManaDisplayItem(prev)) {
                     switchFrom(p);
                 }
             }
         }
         if (curr != null){
             if (curr.getType() != Material.AIR && curr.getAmount() != 0){
-                if (isManaDisplayItemCached(e, curr)) {
+                if (isManaDisplayItem(curr)) {
                     switchTo(p, curr);
                 }
             }
@@ -118,9 +117,9 @@ public class CastEventListener implements Listener {
 
     @EventHandler
     private void onInventoryClick(InventoryClickEvent e) throws InterruptedException {
-        if (SpellHotbarManager.isActive((Player) e.getWhoClicked())) return;
+        if (!(e.getWhoClicked() instanceof Player p)) return;
+        if (SpellHotbarManager.isActive(p)) return;
         if (e.getClickedInventory() == e.getWhoClicked().getInventory()){
-            Player p = (Player) e.getWhoClicked();
             if (e.getAction() == InventoryAction.SWAP_WITH_CURSOR){
                 if (e.getSlot() == p.getInventory().getHeldItemSlot()){
                     ItemStack cursor = e.getCursor();
@@ -261,6 +260,8 @@ public class CastEventListener implements Listener {
         }
         MagicProfile data = ProfileManager.getProfile(e.getPlayer().getUniqueId(), MagicProfile.class);
         if (data != null) {
+            Bukkit.getScheduler().cancelTask(data.getCurrentCircleTaskId());
+            Bukkit.getScheduler().cancelTask(data.getCompletionTaskId());
             if (data.isCasting()){ data.setCasting(false); }
             data.setCastingSpell(null);
         }
@@ -274,6 +275,13 @@ public class CastEventListener implements Listener {
 
     @EventHandler
     private void onDeath(PlayerDeathEvent e) {
+        MagicProfile data = ProfileManager.getProfile(e.getEntity().getUniqueId(), MagicProfile.class);
+        if (data != null) {
+            Bukkit.getScheduler().cancelTask(data.getCurrentCircleTaskId());
+            Bukkit.getScheduler().cancelTask(data.getCompletionTaskId());
+            data.setCasting(false);
+            data.setCastingSpell(null);
+        }
         WandComponentHandler.resetCastCode(e.getEntity().getUniqueId());
     }
 
@@ -429,6 +437,7 @@ public class CastEventListener implements Listener {
         ItemStack[] savedStorage = SpellHotbarManager.peekSavedContents(uuid);
         ItemStack savedOffhand = SpellHotbarManager.peekSavedOffhand(uuid);
         Integer savedHeldSlot = SpellHotbarManager.peekSavedHeldSlot(uuid);
+        ItemStack hotbarWand = SpellHotbarManager.getWand(p);
 
         SpellHotbarManager.cleanupForDeath(p);
 
@@ -451,6 +460,21 @@ public class CastEventListener implements Listener {
         if (savedOffhand != null && savedOffhand.getType() != Material.AIR) {
             e.getDrops().add(savedOffhand.clone());
         }
+        // The entry snapshot normally already contains the wand, but if it does not
+        // (or holds a different wand) the hotbar wand would otherwise be destroyed
+        // with the swap.
+        if (hotbarWand != null && hotbarWand.getType() != Material.AIR && !dropsContain(savedStorage, savedOffhand, hotbarWand)) {
+            e.getDrops().add(hotbarWand.clone());
+        }
+    }
+
+    private static boolean dropsContain(ItemStack[] savedStorage, ItemStack savedOffhand, ItemStack wand) {
+        if (savedStorage != null) {
+            for (ItemStack item : savedStorage) {
+                if (wand.isSimilar(item)) return true;
+            }
+        }
+        return savedOffhand != null && wand.isSimilar(savedOffhand);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -473,56 +497,6 @@ public class CastEventListener implements Listener {
 
     private static boolean isManaDisplayItem(ItemStack item) {
         return WandUtils.isWand(item) || WandUtils.isGrimoire(item);
-    }
-
-    /**
-     * Per-dispatch memo for the {@link WandUtils} wand/grimoire probes.
-     *
-     * <p>{@code onHandSwitch} and {@code onWandMana} are separate handlers on the same
-     * {@code PlayerItemHeldEvent} and both test the previous slot, while {@code onWandMana}
-     * additionally tests the new slot; each probe costs a legacy NBT read plus three
-     * {@code MagicItemStack} stack reads. The memo is keyed on the event instance and reset
-     * whenever a different event arrives, so an entry can never outlive a single event
-     * dispatch and a stack is probed at most once per predicate per event. The two
-     * predicates are memoised separately so {@code onHandSwitch} keeps its
-     * wand-only semantics. Main-thread confined, since every reader is a synchronous
-     * Bukkit event handler.
-     */
-    private static PlayerItemHeldEvent handSwitchMemoEvent;
-    private static final Map<ItemStack, boolean[]> HAND_SWITCH_MEMO = new IdentityHashMap<>();
-    // shortcut: the memo is keyed on PlayerItemHeldEvent identity; safe only because memoSlot clears it when a new event arrives. Do not read outside event dispatch.
-
-    private static boolean[] memoSlot(PlayerItemHeldEvent event, ItemStack item) {
-        if (handSwitchMemoEvent != event) {
-            handSwitchMemoEvent = event;
-            HAND_SWITCH_MEMO.clear();
-        }
-        return HAND_SWITCH_MEMO.computeIfAbsent(item, ignored -> new boolean[2]);
-    }
-
-    private static boolean isWandCached(PlayerItemHeldEvent event, ItemStack item) {
-        if (item == null) {
-            return false;
-        }
-        boolean[] slot = memoSlot(event, item);
-        if (!slot[0]) {
-            slot[0] = WandUtils.isWand(item);
-        }
-        return slot[0];
-    }
-
-    private static boolean isManaDisplayItemCached(PlayerItemHeldEvent event, ItemStack item) {
-        if (item == null) {
-            return false;
-        }
-        if (isWandCached(event, item)) {
-            return true;
-        }
-        boolean[] slot = memoSlot(event, item);
-        if (!slot[1]) {
-            slot[1] = WandUtils.isGrimoire(item);
-        }
-        return slot[1];
     }
 
     /**

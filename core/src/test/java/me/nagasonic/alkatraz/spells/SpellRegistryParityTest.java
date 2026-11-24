@@ -26,15 +26,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * the more honest test: the subject is that two handwritten lists agree.
  *
  * <p>Direction matters. Registry -&gt; resource and saveConfig -&gt; resource hold from the
- * moment a spell yml lands. Resource -&gt; registry only holds once T27 has registered
- * the 30 new spells, so that one direction self-activates off the sentinel id
- * {@code arcane_resonance} - the last of the 29 banded additions in the master's alphabetical custom
- * model data allocation, so it cannot be registered before the rest.
+ * moment a spell yml lands. Resource -&gt; registry only holds once the final batch has
+ * registered the last of the 35 new spells, so that one direction self-activates off
+ * the sentinel id {@code leviathans_testament} - the last of the 35 banded additions in
+ * the custom model data allocation, so it cannot be registered before the rest.
  */
 class SpellRegistryParityTest {
 
-    /** Added by wave 7's T27; see the class javadoc for why this is the sentinel. */
-    private static final String REGISTRATION_COMPLETE_SENTINEL = "arcane_resonance";
+    /** Added by the final batch; see the class javadoc for why this is the sentinel. */
+    private static final String REGISTRATION_COMPLETE_SENTINEL = "leviathans_testament";
 
     private static List<String> bundled;
     private static List<String> registered;
@@ -77,10 +77,10 @@ class SpellRegistryParityTest {
     }
 
     @Test
-    void everyBundledSpellIsRegisteredOnceWaveSevenLands() {
+    void everyBundledSpellIsRegisteredOnceTheFinalBatchLands() {
         Assumptions.assumeTrue(registered.contains(REGISTRATION_COMPLETE_SENTINEL),
-                REGISTRATION_COMPLETE_SENTINEL + " is not registered yet - T27 owns SpellRegistry.java, "
-                        + "so the resource -> registry direction is asserted from wave 7 onward");
+                REGISTRATION_COMPLETE_SENTINEL + " is not registered yet - the final batch owns "
+                        + "SpellRegistry.java, so the resource -> registry direction is asserted once it lands");
         for (String id : bundled) {
             assertTrue(registered.contains(id),
                     "spells/" + id + ".yml is bundled but registerSpells() never registers it, so it "
@@ -89,9 +89,9 @@ class SpellRegistryParityTest {
     }
 
     @Test
-    void everyBundledSpellIsSavedOnceWaveSevenLands() {
+    void everyBundledSpellIsSavedOnceTheFinalBatchLands() {
         Assumptions.assumeTrue(registered.contains(REGISTRATION_COMPLETE_SENTINEL),
-                REGISTRATION_COMPLETE_SENTINEL + " is not registered yet - T27 owns Alkatraz.java");
+                REGISTRATION_COMPLETE_SENTINEL + " is not registered yet - the final batch owns Alkatraz.java");
         for (String id : bundled) {
             assertTrue(saved.contains(id),
                     "spells/" + id + ".yml is bundled but Alkatraz has no saveConfig literal for it");
@@ -101,19 +101,18 @@ class SpellRegistryParityTest {
     @Test
     void theThreeListsHaveTheSameSize() {
         Assumptions.assumeTrue(registered.contains(REGISTRATION_COMPLETE_SENTINEL),
-                REGISTRATION_COMPLETE_SENTINEL + " is not registered yet - sizes only coincide from wave 7");
+                REGISTRATION_COMPLETE_SENTINEL + " is not registered yet - sizes only coincide once registration is complete");
         assertEquals(bundled.size(), registered.size(),
                 "the bundled resource count and the registry count must match once registration is complete");
         assertEquals(bundled.size(), saved.size(),
                 "the bundled resource count and the saveConfig literal count must match");
-        // Spec section 9 adds 30 spells, but the plan lands 29 of them in waves 5-7 and
-        // holds dispel back for wave 9 (T31). Keying the expectation off whether the
-        // last one is bundled makes this self-activating: 29 now, 30 from wave 9, with
-        // no second edit. Both size asserts above stay live either way.
-        int expectedNewSpells = BundledSpellRoster.has("dispel") ? 30 : 29;
+        // The rework leaves 33 survivors and adds 35 new spells, so the shipped roster is
+        // 68 - which is 38 minus the 35 deletions plus the 35 additions, and therefore
+        // also 38 + 30. The expectation is expressed as the delta from the 38 pre-rework
+        // spells because that is the number the roster arithmetic actually produces.
+        int expectedNewSpells = 30;
         assertEquals(expectedNewSpells, bundled.size() - 38,
-                "the roster grew from the 38 pre-expansion spells by exactly " + expectedNewSpells
-                        + " (spec section 9 adds 30; dispel is the last of them, in wave 9)");
+                "the roster must settle at 68 spells (33 survivors + 35 new)");
     }
 
     /**
@@ -125,7 +124,7 @@ class SpellRegistryParityTest {
      * block that populates the factory map ever moves below the {@code SPELL_IDS}
      * declaration, {@code SPELL_IDS} freezes an empty list at class-load time.
      * {@code registerSpells()} then loops zero times and the plugin logs
-     * "Registered 0 spells." with all 67 spells silently dead - no exception, no
+     * "Registered 0 spells." with every spell silently dead - no exception, no
      * warning, no menu entry, no error in the console beyond the count.
      *
      * <p>Every other test in this class reads the source as TEXT and never executes

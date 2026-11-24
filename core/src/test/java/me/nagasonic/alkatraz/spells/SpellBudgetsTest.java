@@ -27,24 +27,25 @@ class SpellBudgetsTest {
      * companions. Listed explicitly so a new spell cannot silently escape the
      * cast-time guard by never being named here.
      *
-     * <p>The 29 circle 1-9 spells added by the 2026-10-03 expansion are named too: they
-     * are in {@code /spells} and the guard is only meaningful while it covers them.
-     * {@code dispel} is absent on purpose - it is wave 9's T31 and its yml does not
-     * exist yet.
+     * <p>This is the full 0.9.2 roster: the 33 circle 0-4 survivors plus the 35
+     * additions, 68 in all. It is only ever extended, never shrunk, so the guard
+     * cannot be loosened by deleting a name.
      */
     private static final String[] SHIPPED_SPELL_FILES = {
-            "air_blades", "air_burst", "apotheosis", "arcane_resonance", "arcane_ward", "barrier",
-            "blink", "buff", "choir_of_light", "continental_shift", "crown_of_dawn", "cyclone_nest", "dark_tendrils",
-            "debuff", "detect", "disguise", "echo_cast", "earthen_wall", "earthsplitter",
-            "earth_spike", "earth_throw", "everdrain", "fault_line", "fireball", "fire_blast",
-            "fire_wall", "flame_lance", "flaming_volley", "geyser", "heal", "inferno_pilgrimage",
-            "inferno_rite", "lesser_heal", "light_bolt", "light_buff", "magic_missile",
-            "meteor_shower", "oblivion", "radiance", "radiant_brand", "shadow_realm",
-            "skeletal_knights", "skywrath", "stealth", "stormcaller", "summon_zombies",
-            "sunfire_barrage", "swift", "tectonic_strike", "thousand_waves", "thunderclap",
-            "tide_of_the_deep", "tornado", "tremor", "tsunami", "umbral_volley", "undertow",
-            "updraft", "void_anchor", "warp", "water_pulse", "water_sphere", "waystone_recall",
-            "whirlpool", "wind_barrier", "wind_vortex", "worldbreaker"
+            "air_blades", "air_burst", "atlas_unbound", "barrier", "beacon_of_accord",
+            "blink", "buff", "chronicle_anchor", "covenant_of_the_first_dawn", "dark_tendrils",
+            "dawn_chorus", "debuff", "detect", "disguise", "dispel",
+            "dragons_wake", "earth_spike", "earth_throw", "earthen_wall", "emberforge",
+            "empyrean_passage", "eye_of_the_firmament", "fire_blast", "fire_wall", "fireball",
+            "flaming_volley", "foldstep", "geyser", "heal", "hollow_kings_court",
+            "lesser_heal", "leviathans_passage", "leviathans_testament", "light_bolt", "light_buff",
+            "magic_missile", "phoenix_reprieve", "quarryheart", "riptide_convoy", "runic_survey",
+            "sanctuary_bloom", "skyglass_glide", "skyhook", "soul_lantern", "soul_reclamation",
+            "starfall_cataclysm", "starfall_crucible", "stealth", "stone_bastion", "stonebridge",
+            "summon_zombies", "swift", "tempest_road", "tidal_reservoir", "titans_causeway",
+            "tremor", "undertow_veil", "updraft", "veil_of_the_unseen_court", "water_pulse",
+            "water_sphere", "wayfarers_call", "whirlpool", "wind_barrier", "wind_vortex",
+            "world_gate", "worldtree_beacon", "wraithbound_retinue"
     };
 
     @Test
@@ -99,7 +100,7 @@ class SpellBudgetsTest {
     @Test
     void manaCooldownAndFocusMatchTheSpecLadder() {
         int[] mana = {5, 15, 24, 48, 75, 120, 165, 240, 450, 600};
-        int[] cooldown = {2, 4, 5, 6, 7, 9, 11, 13, 16, 20};
+        int[] cooldown = {2, 4, 5, 6, 7, 30, 45, 60, 90, 165};
         int[] focus = {0, 20, 40, 65, 90, 115, 135, 144, 153, 161};
         for (int circle = 0; circle <= 9; circle++) {
             assertEquals(mana[circle], SpellBudgets.manaFor(circle),
@@ -113,8 +114,8 @@ class SpellBudgetsTest {
 
     @Test
     void castTimeRangeMatchesThePerCircleTable() {
-        int[] minTicks = {5, 5, 5, 5, 5, 5, 20, 25, 30, 40};
-        int[] maxTicks = {5, 15, 30, 50, 50, 40, 20, 25, 30, 40};
+        int[] minTicks = {5, 5, 5, 5, 5, 25, 30, 45, 50, 70};
+        int[] maxTicks = {5, 15, 30, 50, 50, 40, 45, 50, 60, 70};
         for (int circle = 0; circle <= 9; circle++) {
             CastTimeRange range = SpellBudgets.castTimeRange(circle);
             assertNotNull(range, "circle " + circle + " has a cast time range");
@@ -130,11 +131,13 @@ class SpellBudgetsTest {
     }
 
     @Test
-    void castTimeFloorIsFiveTicksAtEveryCircleBelowSix() {
-        for (int circle = 0; circle <= 5; circle++) {
+    void castTimeFloorIsFiveTicksThroughCircleFour() {
+        for (int circle = 0; circle <= 4; circle++) {
             assertEquals(5, SpellBudgets.castTimeRange(circle).minTicks(),
                     "circle " + circle + " keeps instant casts legal");
         }
+        assertTrue(SpellBudgets.castTimeRange(5).minTicks() > 5,
+                "from circle 5 the floor climbs with the ceiling, so instant is no longer legal");
     }
 
     @Test
@@ -150,11 +153,14 @@ class SpellBudgetsTest {
     }
 
     @Test
-    void circlesSixThroughNineCollapseToOneFixedValue() {
-        for (int circle = 6; circle <= 9; circle++) {
+    void onlyCircleNineIsAFixedCastTime() {
+        CastTimeRange nine = SpellBudgets.castTimeRange(9);
+        assertEquals(nine.maxTicks(), nine.minTicks(),
+                "circle 9 is the fixed 70-tick capstone cast whose duration is its wind-up");
+        for (int circle = 6; circle <= 8; circle++) {
             CastTimeRange range = SpellBudgets.castTimeRange(circle);
-            assertEquals(range.maxTicks(), range.minTicks(),
-                    "circle " + circle + " has a fixed cast time, not a range");
+            assertTrue(range.minTicks() < range.maxTicks(),
+                    "circle " + circle + " is a window, not a fixed value");
         }
     }
 
@@ -191,8 +197,8 @@ class SpellBudgetsTest {
     }
 
     @Test
-    void windUpTicksIsTheFixedValueFromCircleSix() {
-        int[] expected = {20, 25, 30, 40};
+    void windUpTicksIsTheRangeCeilingFromCircleSix() {
+        int[] expected = {45, 50, 60, 70};
         for (int circle = 6; circle <= 9; circle++) {
             assertEquals(expected[circle - 6], SpellBudgets.windUpTicks(circle),
                     "circle " + circle + " wind-up ticks");
@@ -230,10 +236,10 @@ class SpellBudgetsTest {
 
     @Test
     void circleAgnosticWindUpCheckBeatsEveryHighCircleContract() {
-        assertFalse(SpellBudgets.isPaidOverWindUp(40),
-                "40 ticks is exactly twice the circle 6 standard, not paid over");
-        assertTrue(SpellBudgets.isPaidOverWindUp(41),
-                "41 ticks beats every high circle's wind-up contract");
+        assertFalse(SpellBudgets.isPaidOverWindUp(90),
+                "90 ticks is exactly twice the circle 6 standard of 45, not paid over");
+        assertTrue(SpellBudgets.isPaidOverWindUp(91),
+                "91 ticks beats every high circle's wind-up contract");
     }
 
     @Test
@@ -315,8 +321,9 @@ class SpellBudgetsTest {
     }
 
     @Test
-    void waterAirAndLightCannotReshapeLand() {
-        assertFalse(SpellBudgets.isAllowed(Element.WATER, SpellRole.TERRAIN), "water never reshapes land");
+    void waterOwnsTerrainButAirAndLightDoNot() {
+        assertTrue(SpellBudgets.isAllowed(Element.WATER, SpellRole.TERRAIN),
+                "water reshapes land through its tide spells");
         assertFalse(SpellBudgets.isAllowed(Element.AIR, SpellRole.TERRAIN), "air never reshapes land");
         assertFalse(SpellBudgets.isAllowed(Element.LIGHT, SpellRole.TERRAIN), "light never reshapes land");
     }
@@ -341,7 +348,7 @@ class SpellBudgetsTest {
         assertFalse(SpellBudgets.isAllowed(Element.NONE, SpellRole.SUSTAIN), "NONE is forbidden from SUSTAIN");
         assertTrue(SpellBudgets.isGrandfatheredBurst("magic_missile", Element.NONE, SpellRole.BURST),
                 "magic_missile is the sole grandfathered NONE burst");
-        assertFalse(SpellBudgets.isGrandfatheredBurst("warp", Element.NONE, SpellRole.BURST),
+        assertFalse(SpellBudgets.isGrandfatheredBurst("blink", Element.NONE, SpellRole.BURST),
                 "no other NONE spell is grandfathered");
     }
 

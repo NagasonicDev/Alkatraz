@@ -16,8 +16,8 @@ import java.util.Set;
 
 /**
  * The one place terrain is written. No such utility existed: there was no
- * BlockUtils and no explosion helper, and MeteorShower hand-rolled a triple loop
- * identical to Utils.blocksInRadius. Eleven restore sites wrote
+ * BlockUtils and no explosion helper, and the old terrain spells hand-rolled a
+ * triple loop identical to Utils.blocksInRadius. Eleven restore sites wrote
  * setType(original, false) with no Protection re-check, so a region entered after
  * the cast but before recover_time elapsed was rewritten anyway.
  *
@@ -49,12 +49,40 @@ public final class TerrainEditor {
     private TerrainEditor() {
     }
 
-    /** One location-to-original-material map, handed to {@link #restoreAll} on teardown. */
-    public record RestoreTicket(Map<Location, Material> originals) {
+    /** Immutable block identity; {@code Location} is mutable (yaw/pitch included), so it cannot be a safe map key. */
+    private record BlockPos(String world, int x, int y, int z) {}
+
+    private static BlockPos of(Location loc) {
+        return new BlockPos(loc.getWorld() == null ? null : loc.getWorld().getName(),
+                loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
+    }
+
+    private static Location aligned(BlockPos pos, Location source) {
+        return new Location(source.getWorld(), pos.x(), pos.y(), pos.z());
     }
 
     /**
-     * Blocks a spell may never destroy. Compared by identity - MeteorShower:304
+     * One block-to-original-material map, handed to {@link #restoreAll} on teardown.
+     * Keys are block-aligned clones (no yaw/pitch), so two fresh {@code Location}s
+     * for the same block dedupe instead of double-restoring.
+     */
+    public record RestoreTicket(Map<Location, Material> originals) {
+        public RestoreTicket {
+            if (originals != null) {
+                Map<Location, Material> normalized = new LinkedHashMap<>();
+                for (Map.Entry<Location, Material> e : originals.entrySet()) {
+                    Location loc = e.getKey();
+                    if (loc == null || e.getValue() == null) continue;
+                    BlockPos pos = of(loc);
+                    normalized.putIfAbsent(aligned(pos, loc), e.getValue());
+                }
+                originals = normalized;
+            }
+        }
+    }
+
+    /**
+     * Blocks a spell may never destroy. Compared by identity - an earlier spell
      * used toString().contains("BEDROCK"), which would falsely match any future
      * material with BEDROCK in its name.
      */
@@ -67,7 +95,7 @@ public final class TerrainEditor {
      * capped at {@code maxBlocks}.
      *
      * @param dropItems true to use breakNaturally so drops are honoured. The old
-     *                  MeteorShower used breakNaturally 30% of the time and
+     *                  terrain spells used breakNaturally 30% of the time and
      *                  setType(AIR) the other 70%, silently deleting blocks with
      *                  no drops at all - that is an item-loss bug, not a feature.
      * @return the number of blocks actually destroyed, after Protection and the cap.
@@ -121,15 +149,17 @@ public final class TerrainEditor {
     public static RestoreTicket record(Location loc, Material original) {
         Map<Location, Material> originals = new LinkedHashMap<>();
         if (loc != null && original != null) {
-            originals.put(loc, original);
+            Location key = aligned(of(loc), loc);
+            originals.put(key, original);
         }
         return new RestoreTicket(originals);
     }
 
     /** Convenience for accumulating a ticket as a spell builds. */
     public static RestoreTicket recordInto(Map<Location, Material> originals, Location loc, Material original) {
-        if (loc != null && original != null) {
-            originals.putIfAbsent(loc, original);
+        if (originals != null && loc != null && original != null) {
+            Location key = aligned(of(loc), loc);
+            originals.putIfAbsent(key, original);
         }
         return new RestoreTicket(originals);
     }

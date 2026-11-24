@@ -23,6 +23,12 @@ import java.util.Set;
  * what {@code AffinityCurveTest} exercises - stays the single place the curve is
  * implemented.
  *
+ * <p>Runtime status: only {@link #affinityFor(int)}, {@link #powerFor(int)} and
+ * {@link #windUpTicks(int)} have production callers. The other ladders are
+ * descriptive spec transcriptions asserted by {@code SpellBudgetTest} and the
+ * per-element config tests; they are not budgets a cast consults at runtime.
+ * A failing assertion there means design drift, not a live cap the player hit.
+ *
  * <p>Circles outside 0-9 clamp: {@code burstBudget} treats anything below 0 as
  * circle 0 and anything above 9 as circle 9, so a typo cannot produce a null.
  */
@@ -52,17 +58,20 @@ public final class SpellBudgets {
      * the spec section 6 originally carried is withdrawn: a circle does not buy a fixed
      * cast time, it buys permission to spend anywhere between these two ticks.
      *
-     * <p>The floor is 5 ticks (0.25s) at every circle 0-5 because instant is always
-     * legal - {@code swift} is a dash, {@code dispel} must be snappy,
-     * {@code waystone_recall} is instant by design. Only the ceiling curves: 15 at
-     * circle 1, 30 at 2, 50 at 3 and 4, easing back to 40 at 5.
-     *
-     * <p>Circles 6-9 collapse to one fixed value because every high-circle cast is a
-     * committed, telegraphed action whose duration <em>is</em> its wind-up.
+     * <p>Circles 0-4 keep a 5-tick floor because instant is always legal there:
+     * {@code swift} is a dash, {@code dispel} must be snappy. From circle 5 the floor
+     * climbs with the ceiling - 25-40 at 5, 30-45 at 6, 45-50 at 7, 50-60 at 8 - and
+     * circle 9 is the fixed 70-tick capstone cast whose duration <em>is</em> its
+     * wind-up.
      */
-    private static final int[] CAST_MIN_TICKS = {5, 5, 5, 5, 5, 5, 20, 25, 30, 40};
-    private static final int[] CAST_MAX_TICKS = {5, 15, 30, 50, 50, 40, 20, 25, 30, 40};
-    private static final double[] COOLDOWN = {2, 4, 5, 6, 7, 9, 11, 13, 16, 20};
+    private static final int[] CAST_MIN_TICKS = {5, 5, 5, 5, 5, 25, 30, 45, 50, 70};
+    private static final int[] CAST_MAX_TICKS = {5, 15, 30, 50, 50, 40, 45, 50, 60, 70};
+    /**
+     * Circles 5-9 follow the shipped spell YAML cooldown medians (30/45/60/90/165),
+     * which is what Spell.java charges at runtime. The old 9-20 tail was only
+     * asserted here and never reached a player.
+     */
+    private static final double[] COOLDOWN = {2, 4, 5, 6, 7, 30, 45, 60, 90, 165};
     /**
      * Circles 7 and 9 are 144 and 161, not 145 and 162. Spec 6.2 caps
      * required_focus at 0.85 x maxFocus from circle 6, and against the shipped
@@ -82,8 +91,8 @@ public final class SpellBudgets {
     private static final Map<Element, Set<SpellRole>> ALLOWED = new EnumMap<>(Element.class);
 
     static {
-        ALLOWED.put(Element.FIRE, EnumSet.of(SpellRole.BURST, SpellRole.DENIAL, SpellRole.TERRAIN));
-        ALLOWED.put(Element.WATER, EnumSet.of(SpellRole.SUSTAIN, SpellRole.DENIAL, SpellRole.BURST));
+        ALLOWED.put(Element.FIRE, EnumSet.of(SpellRole.BURST, SpellRole.DENIAL, SpellRole.TERRAIN, SpellRole.UTILITY));
+        ALLOWED.put(Element.WATER, EnumSet.of(SpellRole.SUSTAIN, SpellRole.DENIAL, SpellRole.BURST, SpellRole.UTILITY, SpellRole.TERRAIN));
         ALLOWED.put(Element.EARTH, EnumSet.of(SpellRole.TERRAIN, SpellRole.DENIAL, SpellRole.BURST));
         ALLOWED.put(Element.AIR, EnumSet.of(SpellRole.UTILITY, SpellRole.DENIAL, SpellRole.BURST, SpellRole.SUSTAIN));
         ALLOWED.put(Element.LIGHT, EnumSet.of(SpellRole.UTILITY, SpellRole.BURST, SpellRole.SUSTAIN, SpellRole.DENIAL));
@@ -209,7 +218,7 @@ public final class SpellBudgets {
 
     /**
      * Circle-agnostic form of {@link #isPaidOverWindUp(int, int)}: true once the cast
-     * is longer than twice the <em>shortest</em> high-circle wind-up (circle 6's 20
+     * is longer than twice the <em>shortest</em> high-circle wind-up (circle 6's 45
      * ticks), i.e. once it beats every circle's contract. Use
      * {@link #isPaidOverWindUp(int, int)} when the circle is known.
      */
@@ -237,27 +246,5 @@ public final class SpellBudgets {
     /** The one NONE burst: magic_missile at circle 0, the starter every player begins with. */
     public static boolean isGrandfatheredBurst(String spellId, Element element, SpellRole role) {
         return "magic_missile".equals(spellId) && element == Element.NONE && role == SpellRole.BURST;
-    }
-
-    /**
-     * The one spell charged against two budgets at once: fault_line at circle 7 declares
-     * SUSTAIN, which EARTH's allowlist does not carry, <em>because</em> it is both a
-     * damage-over-time field and a terrain reshape.
-     *
-     * <p>Spec section 5.2 is the load-bearing invariant here - the element allowlists
-     * are enforced in CI and exist so that no element quietly drifts into another
-     * element's role. Widening {@link #ALLOWED} to admit SUSTAIN for EARTH would make
-     * every future earth spell free to tick, which is precisely what
-     * {@code ElementArchetypeTest} exists to prevent. So the exemption is per-spill,
-     * exactly as {@link #isGrandfatheredBurst} is for magic_missile, and the table stays
-     * honest.
-     *
-     * <p>The cost of being SUSTAIN rather than TERRAIN is that
-     * {@code SpellBudgetTest.terrainSpellsCarryTheCircleTerrainBudget} skips this spell,
-     * so the exemption is paired with an explicit terrain-budget assertion there. Both
-     * budgets therefore stay enforced; only the role <em>label</em> is unusual.
-     */
-    public static boolean isDualBudgetSpell(String spellId, Element element, SpellRole role) {
-        return "fault_line".equals(spellId) && element == Element.EARTH && role == SpellRole.SUSTAIN;
     }
 }

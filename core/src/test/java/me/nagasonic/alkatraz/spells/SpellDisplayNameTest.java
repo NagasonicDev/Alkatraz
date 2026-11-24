@@ -21,16 +21,14 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * mastery bar and the wand lore, while book_name is read per spell from each
  * getSpellBook().
  *
- * <p>Six spells had the book's flavour title pasted into their name, so the GUI showed
+ * <p>Some spells had the book's flavour title pasted into their name, so the GUI showed
  * "Scroll of the First Ray" where the spell is called light_bolt. Both now live in
  * english.lang, which is what makes the collision visible in one file instead of two.
  * This test pins the convention: the name is the id spelled as words, compared with
- * whitespace removed on both sides so "Earth Splitter" and "earthsplitter" agree - that
- * id is one compound word with no underscore to mark the break, and it is the only one -
- * while "Fissure" and "Scroll of the First Ray" do not.
+ * whitespace removed on both sides, so "Air Blades" and air_blades agree.
  *
  * <p>Colour codes are stripped before the comparison because the colour is free choice -
- * earth_spike carries a bare #A0522D where the other 65 carry an ampersand code - and
+ * earth_spike carries a bare #A0522D where the other spells carry an ampersand code - and
  * only the words are under test here.
  *
  * <p>Zero Bukkit mocks: the lang file is parsed with LangManager's own rules and the
@@ -52,7 +50,7 @@ class SpellDisplayNameTest {
         messages = BundledLang.parse();
     }
 
-    /** The id as one unspaced lowercase word: earth_splitter -> earthsplitter. */
+    /** The id as one unspaced lowercase word: air_blades -> airblades. */
     private static String nameOf(String id) {
         return id.replace("_", "").toLowerCase(Locale.ROOT);
     }
@@ -78,9 +76,8 @@ class SpellDisplayNameTest {
             assertEquals(nameOf(id), comparable(name),
                     key + " calls itself '" + name + "'. A spell's name is the SPELL's name and must read "
                             + "as the id; the book's own title is spells." + id.replace("_", "") + ".book_name "
-                            + "and is a different key. light_bolt, radiant_brand, choir_of_light, apotheosis "
-                            + "and crown_of_dawn all carried their book_name here, and earthsplitter carried "
-                            + "'Fissure', the Java class name");
+                            + "and is a different key. light_bolt carried its book_name here, "
+                            + "and some spells carried their Java class name");
         }
     }
 }

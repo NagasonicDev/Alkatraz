@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * at any circle, and there are 25 call sites. Adding circle-7/8/9 spells silently
  * injected them into nether bridge, bastion, desert pyramid, ocean ruins,
  * stronghold, woodland mansion, fishing, piglin bartering and eight mob types - so a
- * blaze could hand over {@code inferno_rite}, a 600-mana circle-9 capstone.
+ * blaze could hand over a 600-mana circle-9 capstone.
  *
  * <p>Everything here is arithmetic over plain data via the pure
  * {@code SpellbookFactory.bucketByCircle} / {@code circleWeightsFor} pair, so no
@@ -29,46 +29,29 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ElementSpellBookCapTest {
 
     /**
-     * WATER after wave 5: exactly one spell at every circle 1-9.
-     * {@code undertow} is the circle-6 addition and {@code tide_of_the_deep} the
-     * circle-9 capstone.
+     * WATER's surviving ladder: one spell at each of circles 1-4.
      */
     private static final Map<String, Integer> WATER = roster(
             "water_sphere", 1,
             "water_pulse", 2,
             "geyser", 3,
-            "whirlpool", 4,
-            "tsunami", 5,
-            "undertow", 6,
-            "everdrain", 7,
-            "thousand_waves", 8,
-            "tide_of_the_deep", 9);
+            "whirlpool", 4);
 
-    /** FIRE after wave 5: exactly one spell at every circle 1-9 ({@code meteor_shower} promoted 5 to 6). */
+    /** FIRE's surviving ladder: one spell at each of circles 1-4. */
     private static final Map<String, Integer> FIRE = roster(
             "fireball", 1,
             "fire_blast", 2,
             "fire_wall", 3,
-            "flaming_volley", 4,
-            "flame_lance", 5,
-            "meteor_shower", 6,
-            "inferno_pilgrimage", 7,
-            "sunfire_barrage", 8,
-            "inferno_rite", 9);
+            "flaming_volley", 4);
 
-    /** AIR after wave 5: ONE spell at circle 1 and THREE at circle 2. */
+    /** AIR: ONE spell at circle 1, THREE at circle 2, then one each at 3 and 4. */
     private static final Map<String, Integer> AIR = roster(
             "air_burst", 1,
             "air_blades", 2,
             "swift", 2,
             "wind_vortex", 2,
             "updraft", 3,
-            "wind_barrier", 4,
-            "tornado", 5,
-            "thunderclap", 6,
-            "cyclone_nest", 7,
-            "stormcaller", 8,
-            "skywrath", 9);
+            "wind_barrier", 4);
 
     private static Map<String, Integer> roster(Object... pairs) {
         Map<String, Integer> map = new LinkedHashMap<>();
@@ -98,7 +81,8 @@ class ElementSpellBookCapTest {
     @Test
     void cappedElementBookNeverContainsASpellAboveTheCap() {
         for (Map<String, Integer> column : List.of(FIRE, WATER, AIR)) {
-            for (int cap = 1; cap <= 9; cap++) {
+            int maxCircle = column.values().stream().mapToInt(Integer::intValue).max().orElse(9);
+            for (int cap = 1; cap <= maxCircle; cap++) {
                 Map<String, Double> weights = bookCappedAt(column, cap);
                 assertFalse(weights.isEmpty(),
                         "cap " + cap + " must still produce a book - a cap that empties the book is a "
@@ -116,12 +100,10 @@ class ElementSpellBookCapTest {
     }
 
     @Test
-    void capThreeRemovesTheFireCapstoneFromABlaze() {
+    void capThreeRemovesEverythingAboveCircleThreeFromABlaze() {
         Map<String, Double> book = bookCappedAt(FIRE, 3);
-        assertFalse(book.containsKey("inferno_rite"),
-                "circle 9 must be unreachable from a blaze");
-        assertFalse(book.containsKey("meteor_shower"), "circle 6 must be unreachable from a blaze");
-        assertFalse(book.containsKey("flame_lance"), "circle 5 must be unreachable from a blaze");
+        assertFalse(book.containsKey("flaming_volley"),
+                "circle 4 must be unreachable from a blaze");
 
         assertEquals(3, book.size(), "a cap-3 FIRE book holds exactly fireball, fire_blast and fire_wall");
         assertEquals(10000.0, book.get("fireball"), 1e-12, "fireball keeps the whole circle-1 weight");
@@ -133,29 +115,25 @@ class ElementSpellBookCapTest {
     }
 
     @Test
-    void capSevenOnTheGuardianReachesEverdrainButNotTheCircleNineCapstone() {
-        Map<String, Double> book = bookCappedAt(WATER, 7);
-        assertTrue(book.containsKey("everdrain"), "circle 7 is reachable at cap 7");
-        assertFalse(book.containsKey("tide_of_the_deep"), "circle 9 is not");
-        assertFalse(book.containsKey("thousand_waves"), "circle 8 is not");
+    void capThreeOnTheGuardianReachesGeyserButNotWhirlpool() {
+        Map<String, Double> book = bookCappedAt(WATER, 3);
+        assertTrue(book.containsKey("geyser"), "circle 3 is reachable at cap 3");
+        assertFalse(book.containsKey("whirlpool"), "circle 4 is not");
 
         double total = totalOf(book);
-        assertEquals(20025.0, total, 1e-9,
-                "10000+5000+2500+1250+750+375+150, one WATER spell per circle so nothing is split");
-        assertEquals(150.0 / 20025.0, book.get("everdrain") / total, 1e-12,
-                "circle 7 is 150/20025 = 0.7491% of a cap-7 WATER book");
-        assertEquals(375.0 / 20025.0, book.get("undertow") / total, 1e-12,
-                "circle 6 is 375/20025 = 1.8727%, and circle 6 is where the elder guardian's own "
-                        + "undertow specific drop sits, so the element book cannot outrank it");
+        assertEquals(17500.0, total, 1e-9,
+                "10000+5000+2500, one WATER spell per circle so nothing is split");
+        assertEquals(5000.0 / 17500.0, book.get("water_pulse") / total, 1e-12,
+                "circle 2 is 5000/17500 = 28.5714% of a cap-3 WATER book");
     }
 
     @Test
-    void uniformColumnsAreUnchangedByTheCapAtNine() {
-        Map<String, Double> book = bookCappedAt(FIRE, 9);
-        assertEquals(9, book.size(), "FIRE holds one spell at each circle 1-9 after wave 5");
-        assertEquals(30.0, book.get("inferno_rite"), 1e-12,
-                "with one spell per circle the per-spell weight IS the circle weight, so a cap-9 book "
-                        + "is bit-identical to the old behaviour");
+    void uniformColumnsAreUnchangedByTheCapAtTheRosterTop() {
+        Map<String, Double> book = bookCappedAt(FIRE, 4);
+        assertEquals(4, book.size(), "FIRE holds one spell at each of circles 1-4");
+        assertEquals(1250.0, book.get("flaming_volley"), 1e-12,
+                "with one spell per circle the per-spell weight IS the circle weight, so capping at the "
+                        + "roster's top circle is bit-identical to the old behaviour");
     }
 
     @Test
@@ -164,14 +142,14 @@ class ElementSpellBookCapTest {
         double total = totalOf(book);
         double circle2 = book.get("air_blades") + book.get("swift") + book.get("wind_vortex");
 
-        assertEquals(20130.0, total, 1e-9,
-                "10000+5000+2500+1250+750+375+150+75+30: the ladder, unchanged by AIR's busy circle 2");
-        assertEquals(5000.0 / 20130.0, circle2 / total, 1e-12,
+        assertEquals(18750.0, total, 1e-9,
+                "10000+5000+2500+1250: the ladder, unchanged by AIR's busy circle 2");
+        assertEquals(5000.0 / 18750.0, circle2 / total, 1e-12,
                 "circle 2 holds three AIR spells, so under the OLD per-spell weighting it took "
-                        + "15000 of a 30130 budget = 49.784% of an AIR book - more likely than circle 1. "
-                        + "After the fix it is 5000/20130 = 24.838%.");
-        assertEquals(10000.0 / 20130.0, book.get("air_burst") / total, 1e-12,
-                "circle 1 is 10000/20130 = 49.677%, the most common AIR circle again");
+                        + "15000 of a 28750 budget = 52.174% of an AIR book - more likely than circle 1. "
+                        + "After the fix it is 5000/18750 = 26.667%.");
+        assertEquals(10000.0 / 18750.0, book.get("air_burst") / total, 1e-12,
+                "circle 1 is 10000/18750 = 53.333%, the most common AIR circle again");
         assertEquals(5000.0 / 3.0, book.get("air_blades"), 1e-12,
                 "each of circle 2's three spells carries 5000/3 = 1666.666...");
     }

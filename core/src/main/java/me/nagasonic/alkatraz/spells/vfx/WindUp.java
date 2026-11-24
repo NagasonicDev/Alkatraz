@@ -31,9 +31,14 @@ import java.util.Map;
  *       a spell declaring its own {@code wind_up_duration:} passes it explicitly
  *       to {@link #begin} and is responsible for having satisfied
  *       {@link SpellBudgets#isPaidOverWindUp(int)}.</li>
- *   <li>{@link #isComplete()} is the caller's cue to fire the payload. A wind-up
- *       only ever draws and counts - it never fires the effect itself.</li>
+ *   <li>{@link #isComplete()} is the caller's cue to fire the payload: spells must fire
+ *       the payload <b>after</b> the wind-up completes, never while it is ticking.
+ *       A wind-up only ever draws and counts - it never fires the effect itself.</li>
  *   <li>The wind-up never fires its payload once {@link #cancel(String)} has run.</li>
+ *   <li>{@link Spell#cast} starts exactly one wind-up per circle 6+ cast through
+ *       {@link #forFrameworkCast}; a spell implementation must not start a second
+ *       inside {@code castAction}. {@link ChannelRegistry} applies one shared
+ *       move/damage/quit interrupt rule to every framework wind-up.</li>
  * </ul>
  *
  * <h2>Mana is not refunded on interruption</h2>
@@ -59,35 +64,17 @@ import java.util.Map;
 public final class WindUp {
 
     /**
-     * Spell id to circle for every spell that is <b>not</b> required to wind up,
-     * each with its reason. A circle 6+ spell whose id is not in here owes a
-     * wind-up; an id in here is exempt <i>only</i> at the circle it is listed at,
-     * so moving an exempt spell down the ladder brings it back under the rule.
+     * Spell id to circle for every spell that is <b>not</b> required to wind up. Empty since the
+     * 0.9.2 rework: every circle 6+ spell in the shipped roster owes a wind-up, and the old
+     * per-spell exemptions went with the spells they named.
      *
-     * <ul>
-     *   <li>{@code waystone_recall} (7) - instantness <i>is</i> its identity; it
-     *       exists specifically to replace {@code warp}'s 6-second channel, so
-     *       making it channel would undo its reason to exist.</li>
-     *   <li>{@code echo_cast} (8) - calls {@code castAction} directly, bypassing
-     *       {@code Spell.cast}. Each replayed spell carries its own wind-up, so a
-     *       wrapper telegraph would be a double-tell.</li>
-     *   <li>{@code arcane_resonance} (9) - amplifies other casts rather than
-     *       acting; the amplified spells are the ones that wind up.</li>
-     * </ul>
-     *
-     * <p>{@code warp} and {@code skeletal_knights} (both circle 6) are
-     * deliberately <b>not</b> exempt: they keep their 6-second channels as
-     * declared paid-overs, because {@code waystone_recall} only makes sense as a
-     * skip for something.
+     * <p>Kept as an (empty) map rather than deleted so {@link #requiresWindUp(String, int)} keeps
+     * its shape and a future exemption has one obvious place to live.
      */
     public static final Map<String, Integer> EXEMPT_FROM_WIND_UP;
 
     static {
-        Map<String, Integer> exempt = new HashMap<>();
-        exempt.put("waystone_recall", 7);
-        exempt.put("echo_cast", 8);
-        exempt.put("arcane_resonance", 9);
-        EXEMPT_FROM_WIND_UP = Collections.unmodifiableMap(exempt);
+        EXEMPT_FROM_WIND_UP = Collections.unmodifiableMap(new HashMap<>());
     }
 
     /** Blocks a caster may stray from the channel origin before it interrupts them. */
@@ -186,6 +173,16 @@ public final class WindUp {
     public static WindUp begin(Spell spell, Color color, LivingEntity caster, int windUpTicks, Location markerLocation) {
         return new WindUp(spell, caster, windUpTicks,
                 markerLocation == null ? null : markerLocation.clone(), color);
+    }
+
+    /**
+     * The framework-owned wind-up for a circle 6+ cast. Its duration is the
+     * <em>computed</em> cast delay (wand and mastery already applied), so the
+     * telegraph and the payload agree. Callers register this with
+     * {@link ChannelRegistry}; spell implementations must not add another.
+     */
+    public static WindUp forFrameworkCast(Spell spell, Player caster, long castTicks) {
+        return begin(spell, caster, (int) Math.max(1L, castTicks));
     }
 
     /**
@@ -301,13 +298,19 @@ public final class WindUp {
 
     /**
      * Visual scale for a circle, so a circle-9 wind-up is visibly larger and more
-     * intense than a circle-6 one. Circle 6 is the 1.0 baseline; the ladder climbs
-     * to 1.75 at circle 9. Sub-threshold circles clamp to the baseline, and
-     * out-of-range circles clamp at the circle-9 ceiling.
+     * intense than a circle-6 one. Circle 6 is the 1.0 baseline and the ceiling is
+     * 1.75 at circle 9. The ladder is driven by {@link CastTimeline#particleBudget(int)}
+     * so the wind-up's intensity tracks the cast layers' particle budget instead of
+     * drifting from it: sub-threshold circles clamp to the baseline, and out-of-range
+     * circles clamp at the circle-9 ceiling.
      */
     public static float intensityScale(int circle) {
-        if (circle <= 6) return 1.0f;
-        return Math.min(1.75f, 1.0f + 0.25f * (circle - 6));
+        int base = CastTimeline.particleBudget(6);
+        int top = CastTimeline.particleBudget(9);
+        int budget = CastTimeline.particleBudget(circle);
+        if (budget <= base || top <= base) return 1.0f;
+        float ratio = (float) (budget - base) / (float) (top - base);
+        return 1.0f + Math.min(1.0f, ratio) * 0.75f;
     }
 
     /**
@@ -362,6 +365,15 @@ public final class WindUp {
     }
 
     /**
+     * The per-circle charge profile: circle 6 is the legacy base look; circles 7-9
+     * carry their signature charge visuals. Read by {@link #drawCharge} and
+     * {@link #drawMarker} via {@code profile(spell.getRequiredCircleLevel())}.
+     */
+    private static ChargeProfile profile(int circle) {
+        return ChargeProfile.of(circle);
+    }
+
+    /**
      * The charge itself: a shell of {@code core} dust closing on the caster's eyes,
      * wrapped in {@code accent} rings, with {@code deep} structure that only appears
      * past the halfway point. Particle count and radius both climb with progress, so
@@ -374,33 +386,54 @@ public final class WindUp {
         if (eye == null) return;
 
         ElementPalette.Palette palette = palette();
-        float scale = intensityScale(spell == null ? 6 : spell.getRequiredCircleLevel());
+        int circle = spell == null ? 6 : spell.getRequiredCircleLevel();
+        ChargeProfile prof = profile(circle);
+        float scale = intensityScale(circle) * prof.intensity();
         double ease = progress * progress;
 
         int leadingEdge = (int) Math.round((14 + 22 * ease) * scale);
         double radius = (0.5 + 0.85 * progress) * scale;
         double sink = 0.12 + 0.5 * progress;
+        // Circle 8: the charge itself rises while spinning.
+        double rise = prof.rising() ? scale * 0.6 * progress : 0;
         Location scratch = eye.clone();
         for (int i = 0; i < leadingEdge; i++) {
             double angle = 2 * Math.PI * i / leadingEdge + elapsed * 0.35;
             double r = radius * (0.75 + 0.25 * ((i % 4) / 3.0));
             scratch.setX(eye.getX() + Math.cos(angle) * r);
-            scratch.setY(eye.getY() - sink + Math.sin(angle * 2.0) * 0.2);
+            scratch.setY(eye.getY() - sink + Math.sin(angle * 2.0) * 0.2 + rise);
             scratch.setZ(eye.getZ() + Math.sin(angle) * r);
             ParticleCaster.spawn(caster, world, Utils.DUST, scratch, 0, palette.coreDust());
         }
 
         // Trailing accent rings, spinning the other way, widening as it charges.
-        int rings = (int) Math.round(2 + 2 * progress);
+        // Circle 7 adds an extra ambient ring to the set.
+        int rings = (int) Math.round(2 + 2 * progress) + prof.rings();
         for (int ring = 0; ring < rings; ring++) {
             double ringR = (0.35 + ring * 0.32 + 0.4 * progress) * scale;
-            double spin = -elapsed * (0.12 + ring * 0.03);
+            double spin = -elapsed * (0.12 + ring * 0.03) * prof.spin();
             int points = (int) Math.round((10 + 8 * progress) * scale);
             for (int i = 0; i < points; i++) {
                 double angle = 2 * Math.PI * i / points + spin;
                 scratch.setX(eye.getX() + Math.cos(angle) * ringR);
                 scratch.setY(eye.getY() - sink * 0.6 + Math.sin(angle) * ringR * 0.35);
                 scratch.setZ(eye.getZ() + Math.sin(angle) * ringR);
+                ParticleCaster.spawn(caster, world, Utils.DUST, scratch, 0, palette.accentDust());
+            }
+        }
+
+        // Circle 7: a helix of accent strands rising out of the charge, climbing
+        // `helixHeight` by one `helixStep`-tick step as the wind-up commits.
+        if (prof.helix()) {
+            int strands = 8;
+            double climb = Math.min(prof.helixHeight(),
+                    (elapsed / (double) Math.max(1, prof.helixStep())) * 0.4);
+            for (int i = 0; i < strands; i++) {
+                double angle = 2 * Math.PI * i / strands + elapsed * 0.35;
+                double r = radius * 0.6;
+                scratch.setX(eye.getX() + Math.cos(angle) * r);
+                scratch.setY(eye.getY() - sink + climb + (i / (double) strands) * 0.35);
+                scratch.setZ(eye.getZ() + Math.sin(angle) * r);
                 ParticleCaster.spawn(caster, world, Utils.DUST, scratch, 0, palette.accentDust());
             }
         }
@@ -420,6 +453,23 @@ public final class WindUp {
             ParticleCaster.spawn(caster, world, Utils.DUST, eye, (int) Math.round(deep * 6 * scale),
                     0.15, 0.05, 0.15, palette.coreDust());
         }
+
+        // Circle 9: once the charge is past the 0.85 radius, shock rings expand
+        // outward at 0.85/0.95/1.05 of it and a bright accent core blooms at the heart.
+        if (prof.burst() && radius > 0.85 * scale) {
+            for (double f : new double[]{0.85, 0.95, 1.05}) {
+                double ringR = radius * f;
+                int ringPoints = (int) Math.round((10 + 8 * progress) * scale);
+                for (int i = 0; i < ringPoints; i++) {
+                    double angle = 2 * Math.PI * i / ringPoints + elapsed * 0.35 + f * 20;
+                    scratch.setX(eye.getX() + Math.cos(angle) * ringR);
+                    scratch.setY(eye.getY() - sink + Math.sin(angle) * ringR * 0.35);
+                    scratch.setZ(eye.getZ() + Math.sin(angle) * ringR);
+                    ParticleCaster.spawn(caster, world, Utils.DUST, scratch, 0, palette.accentDust());
+                }
+            }
+            ParticleCaster.spawn(caster, world, Utils.DUST, eye, 3, palette.accentDust());
+        }
     }
 
     /**
@@ -430,13 +480,15 @@ public final class WindUp {
         World world = marker.getWorld();
         if (world == null) return;
         ElementPalette.Palette palette = palette();
-        float scale = intensityScale(spell == null ? 6 : spell.getRequiredCircleLevel());
+        int circle = spell == null ? 6 : spell.getRequiredCircleLevel();
+        ChargeProfile prof = profile(circle);
+        float scale = intensityScale(circle) * prof.intensity();
 
         double outer = (0.9 + 2.4 * progress) * scale;
         double inner = outer * (0.55 + 0.25 * progress);
         Location scratch = marker.clone();
         int points = (int) Math.round((16 + 20 * progress) * scale);
-        double spin = elapsed * 0.05;
+        double spin = elapsed * 0.05 * prof.spin();
 
         for (int ring = 0; ring < 2; ring++) {
             double ringR = ring == 0 ? outer : inner;
@@ -456,6 +508,34 @@ public final class WindUp {
             double fill = (progress - 0.5) * 2.0;
             ParticleCaster.spawn(caster, world, Utils.DUST, marker, (int) Math.round(4 + 14 * fill * scale),
                     outer * 0.5, 0.02, outer * 0.5, palette.deepDust());
+        }
+    }
+
+    /**
+     * Per-circle charge signature: {@code spin} scales the ring spin,
+     * {@code intensity} multiplies the ladder scale, {@code rings} adds ambient
+     * rings, and {@code helix}/{@code rising}/{@code burst} enable the circle 7-9
+     * effects (helix strands and their height/step, the rising charge, the outward
+     * shock rings). Circle 6 is the legacy base look: {@code spin} 1.0, no extras.
+     * All visuals still route through {@link ElementPalette} colours.
+     */
+    private record ChargeProfile(
+            float spin,
+            float intensity,
+            int rings,
+            boolean helix,
+            double helixHeight,
+            int helixStep,
+            boolean rising,
+            boolean burst
+    ) {
+        static ChargeProfile of(int circle) {
+            switch (Math.max(6, Math.min(9, circle))) {
+                case 7: return new ChargeProfile(1.30f, 1.0f, 1, true, 1.6, 8, false, false);
+                case 8: return new ChargeProfile(1.15f, 1.0f, 0, false, 0.0, 0, true, false);
+                case 9: return new ChargeProfile(1.0f, 1.2f, 0, false, 0.0, 0, false, true);
+                default: return new ChargeProfile(1.0f, 1.0f, 0, false, 0.0, 0, false, false);
+            }
         }
     }
 }

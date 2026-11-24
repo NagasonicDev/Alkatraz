@@ -2,15 +2,23 @@ package me.nagasonic.alkatraz.spells.configuration;
 
 import me.nagasonic.alkatraz.Alkatraz;
 import me.nagasonic.alkatraz.gui.Menu;
+import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
+import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.Spell;
+import me.nagasonic.alkatraz.spells.SpellRegistry;
 import me.nagasonic.alkatraz.spells.configuration.impact.ValueImpact;
 import me.nagasonic.alkatraz.spells.configuration.impact.ValueImpactFactory;
 import me.nagasonic.alkatraz.spells.configuration.requirement.ValueRequirement;
 import me.nagasonic.alkatraz.spells.configuration.requirement.ValueRequirementFactory;
 import me.nagasonic.alkatraz.util.MaterialCompat;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 
 import java.io.File;
 import java.util.LinkedHashMap;
@@ -30,6 +38,15 @@ import java.util.logging.Level;
  */
 public class SpellOptionLoader {
 
+    private static boolean defaultImpactListenerRegistered = false;
+
+    private static final Listener DEFAULT_IMPACT_LISTENER = new Listener() {
+        @EventHandler
+        public void onJoin(PlayerJoinEvent event) {
+            applyDefaultImpacts(event.getPlayer());
+        }
+    };
+
     /**
      * Reads the options file for the given spell and registers every
      * SpellOption / OptionValue found within it onto the spell.
@@ -38,6 +55,7 @@ public class SpellOptionLoader {
      * @param spellId The spell's config ID (e.g. "dark_tendrils").
      */
     public static void loadOptions(Spell spell, String spellId) {
+        registerDefaultImpactListener();
         String relativePath = "spells/" + spellId + "_options.yml";
         File file = new File(Alkatraz.getInstance().getDataFolder(), relativePath);
 
@@ -91,6 +109,8 @@ public class SpellOptionLoader {
         }
 
         parsed.values().forEach(spell::addOption);
+
+        applyDefaultImpacts(Bukkit.getOnlinePlayers());
     }
 
     // =========================================================================
@@ -316,6 +336,40 @@ public class SpellOptionLoader {
     // =========================================================================
     // Helpers
     // =========================================================================
+
+    private static void registerDefaultImpactListener() {
+        if (defaultImpactListenerRegistered) return;
+        defaultImpactListenerRegistered = true;
+        Bukkit.getPluginManager().registerEvents(DEFAULT_IMPACT_LISTENER, Alkatraz.getInstance());
+    }
+
+    private static void applyDefaultImpacts(Iterable<? extends Player> players) {
+        for (Player player : players) {
+            applyDefaultImpacts(player);
+        }
+    }
+
+    /**
+     * Default values are only selected lazily by SpellOption, so their impacts
+     * never reach a profile until a player opens the menu. Apply them at load
+     * for players who have not made a choice; a persisted choice is left alone
+     * so reload cannot overwrite or double-apply selected impacts.
+     */
+    private static void applyDefaultImpacts(Player player) {
+        MagicProfile profile = ProfileManager.getProfile(player, MagicProfile.class);
+        if (profile == null) return;
+
+        for (Spell spell : SpellRegistry.getAllSpells().values()) {
+            for (SpellOption option : spell.getAllOptions().values()) {
+                if (option.getRole() != SpellOption.OptionRole.NORMAL
+                        || option.getOptionValues().isEmpty()) continue;
+                if (profile.getSpellOption(spell.getId() + "." + option.getId()) != null) continue;
+
+                OptionValue<?> value = option.getSelectedValue(player);
+                if (value != null) value.applyImpacts(player);
+            }
+        }
+    }
 
     /**
      * Coerces a raw YAML value to the desired Java type.

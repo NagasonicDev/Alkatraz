@@ -139,8 +139,6 @@ public class SpellOption {
         String allowed;
         if ("me.nagasonic.alkatraz.gui.implementation.options.PooledSlotSelectionMenu".equals(customMenuClass)) {
             allowed = customMenuClass;
-        } else if ("me.nagasonic.alkatraz.gui.implementation.options.WarpPointsMenu".equals(customMenuClass)) {
-            allowed = customMenuClass;
         } else {
             Alkatraz.getInstance().getLogger().log(Level.WARNING,
                     "[SpellOption] Custom menu class is not on the allow-list: " + customMenuClass);

@@ -20,18 +20,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * A spell's name and description moved out of spells/&lt;id&gt;.yml and into
- * english.lang on 2026-10-06. The move exists because six spells had their BOOK's
- * flavour title pasted into display_name - "Scroll of the First Ray" on light_bolt,
- * "Litany of the Ascendant" on apotheosis - so /spells, the mastery bar and the wand
- * lore showed the book title instead of the spell name. Nothing failed, because
- * display_name was free text in a YAML file that no test read.
+ * english.lang on 2026-10-06. The move exists because spells had their BOOK's
+ * flavour title pasted into display_name - "Scroll of the First Ray" on light_bolt -
+ * so /spells, the mastery bar and the wand lore showed the book title instead of the
+ * spell name. Nothing failed, because display_name was free text in a YAML file that
+ * no test read.
  *
  * <p>These two tests pin the invariants that make the bug unrepeatable. Every roster id
  * must resolve a non-empty name and description, and the set of prefixes declaring
  * them must EQUAL the roster's prefixes - set equality, not a per-spell loop, because
  * that catches a missing key and an orphaned key in the same assertion. That is exactly
- * how "fissure" (a Java class name) and "skeletal_knights" (an un-de-underscored
- * prefix) survived in SpellLangTest.
+ * how a stray Java-class-name prefix or an un-de-underscored prefix survived in
+ * SpellLangTest.
  *
  * <p>Zero Bukkit mocks: english.lang is parsed with the same rules LangManager uses
  * (trim, skip blank and '#', split on the first '=') and the roster comes from

@@ -198,24 +198,20 @@ class SpellbookWeightTest {
 
     @Test
     void deadCircleRangeFallsBackInsteadOfBuildingAnEmptyBook() {
-        // What ender_dragon and wither shipped before this wave:
-        // createRandomSpellBook(7,8,9) against a roster with nothing at circles 7-9.
-        Map<String, Integer> preWave5 = Map.of(
+        // A request for circles above the roster's top must still build a usable book.
+        Map<String, Integer> roster = Map.of(
                 "earth_throw", 1,
                 "fireball", 1,
-                "wave", 2,
+                "water_pulse", 2,
                 "geyser", 3,
-                "blink", 4,
-                "tsunami", 5,
-                "skeletal_knights", 6,
-                "warp", 6
+                "blink", 4
         );
 
-        int[] fallback = SpellbookFactory.fallbackCircles(preWave5, 7, 8, 9);
+        int[] fallback = SpellbookFactory.fallbackCircles(roster, 5, 6, 7);
 
         assertEquals(1, fallback.length, "the fallback collapses to a single circle");
-        assertEquals(6, fallback[0],
-                "the scan runs DOWN from the highest requested circle, so (7,8,9) degrades to circle 6 - "
+        assertEquals(4, fallback[0],
+                "the scan runs DOWN from the highest requested circle, so (5,6,7) degrades to circle 4 - "
                         + "a usable book - rather than to a spellbook_type=random, spell_count=0 item that "
                         + "prints spellbook.empty on right-click and is never consumed");
     }

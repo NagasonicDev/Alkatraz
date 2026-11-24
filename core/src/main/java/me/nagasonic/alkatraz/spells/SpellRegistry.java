@@ -49,11 +49,10 @@ private static final List<me.nagasonic.alkatraz.api.spells.Spell> REGISTERED_API
      * derived from this map's key order, so an id can never be registered without a
      * class behind it and a class can never be reachable without an id.
      *
-     * <p>Two spell ids deliberately do not follow the PascalCase-of-the-id rule:
-     * {@code earthsplitter} is served by {@link Fissure}, and {@code magic_missile}
-     * by {@link MagicMissile} whose getSpellBook() returns null (documented at
-     * english.lang). Everything else is PascalCase of the id with underscores
-     * removed, and the type token is the id uppercased.
+     * <p>One spell id deliberately does not follow the PascalCase-of-the-id rule:
+     * {@code magic_missile} is served by {@link MagicMissile} whose getSpellBook()
+     * returns null (documented at english.lang). Everything else is PascalCase of
+     * the id with underscores removed, and the type token is the id uppercased.
      */
     private static final Map<String, Supplier<Spell>> SPELL_FACTORY = new LinkedHashMap<>();
 
@@ -98,7 +97,6 @@ private static final List<me.nagasonic.alkatraz.api.spells.Spell> REGISTERED_API
         registerIfEnabled("magic_missile", () -> new MagicMissile("MAGIC_MISSILE"));
         registerIfEnabled("stealth", () -> new Stealth("STEALTH"));
         registerIfEnabled("summon_zombies", () -> new SummonZombies("SUMMON_ZOMBIES"));
-        registerIfEnabled("skeletal_knights", () -> new SkeletalKnights("SKELETAL_KNIGHTS"));
         registerIfEnabled("swift", () -> new Swift("SWIFT"));
         registerIfEnabled("tremor", () -> new Tremor("TREMOR"));
         registerIfEnabled("whirlpool", () -> new Whirlpool("WHIRLPOOL"));
@@ -106,42 +104,43 @@ private static final List<me.nagasonic.alkatraz.api.spells.Spell> REGISTERED_API
         registerIfEnabled("water_sphere", () -> new WaterSphere("WATER_SPHERE"));
         registerIfEnabled("wind_barrier", () -> new WindBarrier("WIND_BARRIER"));
         registerIfEnabled("wind_vortex", () -> new WindVortex("WIND_VORTEX"));
-        registerIfEnabled("meteor_shower", () -> new MeteorShower("METEOR_SHOWER"));
-        registerIfEnabled("tsunami", () -> new Tsunami("TSUNAMI"));
-        registerIfEnabled("earthsplitter", () -> new Fissure("EARTHSPLITTER"));
-        registerIfEnabled("tornado", () -> new Tornado("TORNADO"));
-        registerIfEnabled("radiance", () -> new Radiance("RADIANCE"));
-        registerIfEnabled("shadow_realm", () -> new ShadowRealm("SHADOW_REALM"));
-        registerIfEnabled("warp", () -> new Warp("WARP"));
-        registerIfEnabled("flame_lance", () -> new FlameLance("FLAME_LANCE"));
-        registerIfEnabled("inferno_pilgrimage", () -> new InfernoPilgrimage("INFERNO_PILGRIMAGE"));
-        registerIfEnabled("sunfire_barrage", () -> new SunfireBarrage("SUNFIRE_BARRAGE"));
-        registerIfEnabled("inferno_rite", () -> new InfernoRite("INFERNO_RITE"));
-        registerIfEnabled("undertow", () -> new Undertow("UNDERTOW"));
-        registerIfEnabled("everdrain", () -> new Everdrain("EVERDRAIN"));
-        registerIfEnabled("thousand_waves", () -> new ThousandWaves("THOUSAND_WAVES"));
-        registerIfEnabled("tide_of_the_deep", () -> new TideOfTheDeep("TIDE_OF_THE_DEEP"));
-        registerIfEnabled("tectonic_strike", () -> new TectonicStrike("TECTONIC_STRIKE"));
-        registerIfEnabled("fault_line", () -> new FaultLine("FAULT_LINE"));
-        registerIfEnabled("continental_shift", () -> new ContinentalShift("CONTINENTAL_SHIFT"));
-        registerIfEnabled("worldbreaker", () -> new Worldbreaker("WORLDBREAKER"));
         registerIfEnabled("updraft", () -> new Updraft("UPDRAFT"));
-        registerIfEnabled("thunderclap", () -> new Thunderclap("THUNDERCLAP"));
-        registerIfEnabled("cyclone_nest", () -> new CycloneNest("CYCLONE_NEST"));
-        registerIfEnabled("stormcaller", () -> new Stormcaller("STORMCALLER"));
-        registerIfEnabled("skywrath", () -> new Skywrath("SKYWRATH"));
         registerIfEnabled("light_bolt", () -> new LightBolt("LIGHT_BOLT"));
-        registerIfEnabled("radiant_brand", () -> new RadiantBrand("RADIANT_BRAND"));
-        registerIfEnabled("choir_of_light", () -> new ChoirOfLight("CHOIR_OF_LIGHT"));
-        registerIfEnabled("apotheosis", () -> new Apotheosis("APOTHEOSIS"));
-        registerIfEnabled("crown_of_dawn", () -> new CrownOfDawn("CROWN_OF_DAWN"));
-        registerIfEnabled("umbral_volley", () -> new UmbralVolley("UMBRAL_VOLLEY"));
-        registerIfEnabled("void_anchor", () -> new VoidAnchor("VOID_ANCHOR"));
-        registerIfEnabled("oblivion", () -> new Oblivion("OBLIVION"));
-        registerIfEnabled("arcane_ward", () -> new ArcaneWard("ARCANE_WARD"));
-        registerIfEnabled("waystone_recall", () -> new WaystoneRecall("WAYSTONE_RECALL"));
-        registerIfEnabled("echo_cast", () -> new EchoCast("ECHO_CAST"));
-        registerIfEnabled("arcane_resonance", () -> new ArcaneResonance("ARCANE_RESONANCE"));
+        registerIfEnabled("runic_survey", () -> new RunicSurvey("RUNIC_SURVEY"));
+        registerIfEnabled("stonebridge", () -> new Stonebridge("STONEBRIDGE"));
+        registerIfEnabled("emberforge", () -> new Emberforge("EMBERFORGE"));
+        registerIfEnabled("sanctuary_bloom", () -> new SanctuaryBloom("SANCTUARY_BLOOM"));
+        registerIfEnabled("soul_lantern", () -> new SoulLantern("SOUL_LANTERN"));
+        registerIfEnabled("skyglass_glide", () -> new SkyglassGlide("SKYGLASS_GLIDE"));
+        registerIfEnabled("undertow_veil", () -> new UndertowVeil("UNDERTOW_VEIL"));
+        registerIfEnabled("foldstep", () -> new Foldstep("FOLDSTEP"));
+        registerIfEnabled("quarryheart", () -> new Quarryheart("QUARRYHEART"));
+        registerIfEnabled("phoenix_reprieve", () -> new PhoenixReprieve("PHOENIX_REPRIEVE"));
+        registerIfEnabled("beacon_of_accord", () -> new BeaconOfAccord("BEACON_OF_ACCORD"));
+        registerIfEnabled("wraithbound_retinue", () -> new WraithboundRetinue("WRAITHBOUND_RETINUE"));
+        registerIfEnabled("skyhook", () -> new Skyhook("SKYHOOK"));
+        registerIfEnabled("riptide_convoy", () -> new RiptideConvoy("RIPTIDE_CONVOY"));
+        registerIfEnabled("wayfarers_call", () -> new WayfarersCall("WAYFARERS_CALL"));
+        registerIfEnabled("stone_bastion", () -> new StoneBastion("STONE_BASTION"));
+        registerIfEnabled("dragons_wake", () -> new DragonsWake("DRAGONS_WAKE"));
+        registerIfEnabled("dawn_chorus", () -> new DawnChorus("DAWN_CHORUS"));
+        registerIfEnabled("veil_of_the_unseen_court", () -> new VeilOfTheUnseenCourt("VEIL_OF_THE_UNSEEN_COURT"));
+        registerIfEnabled("tempest_road", () -> new TempestRoad("TEMPEST_ROAD"));
+        registerIfEnabled("leviathans_passage", () -> new LeviathansPassage("LEVIATHANS_PASSAGE"));
+        registerIfEnabled("chronicle_anchor", () -> new ChronicleAnchor("CHRONICLE_ANCHOR"));
+        registerIfEnabled("titans_causeway", () -> new TitansCauseway("TITANS_CAUSEWAY"));
+        registerIfEnabled("starfall_crucible", () -> new StarfallCrucible("STARFALL_CRUCIBLE"));
+        registerIfEnabled("worldtree_beacon", () -> new WorldtreeBeacon("WORLDTREE_BEACON"));
+        registerIfEnabled("soul_reclamation", () -> new SoulReclamation("SOUL_RECLAMATION"));
+        registerIfEnabled("eye_of_the_firmament", () -> new EyeOfTheFirmament("EYE_OF_THE_FIRMAMENT"));
+        registerIfEnabled("tidal_reservoir", () -> new TidalReservoir("TIDAL_RESERVOIR"));
+        registerIfEnabled("world_gate", () -> new WorldGate("WORLD_GATE"));
+        registerIfEnabled("atlas_unbound", () -> new AtlasUnbound("ATLAS_UNBOUND"));
+        registerIfEnabled("starfall_cataclysm", () -> new StarfallCataclysm("STARFALL_CATACLYSM"));
+        registerIfEnabled("covenant_of_the_first_dawn", () -> new CovenantOfTheFirstDawn("COVENANT_OF_THE_FIRST_DAWN"));
+        registerIfEnabled("hollow_kings_court", () -> new HollowKingsCourt("HOLLOW_KINGS_COURT"));
+        registerIfEnabled("empyrean_passage", () -> new EmpyreanPassage("EMPYREAN_PASSAGE"));
+        registerIfEnabled("leviathans_testament", () -> new LeviathansTestament("LEVIATHANS_TESTAMENT"));
     }
 
     /**
@@ -164,6 +163,10 @@ private static final List<me.nagasonic.alkatraz.api.spells.Spell> REGISTERED_API
     public static final List<String> SPELL_IDS = List.copyOf(SPELL_FACTORY.keySet());
 
     public static void registerSpells() {
+        maps = new SpellMaps(Collections.unmodifiableMap(new HashMap<>()),
+                Collections.unmodifiableMap(new HashMap<>()),
+                Collections.unmodifiableMap(new HashMap<>()),
+                Collections.unmodifiableMap(new HashMap<>()));
         registeredCount.set(0);
         for (String id : SPELL_IDS) {
             Supplier<Spell> factory = SPELL_FACTORY.get(id);
