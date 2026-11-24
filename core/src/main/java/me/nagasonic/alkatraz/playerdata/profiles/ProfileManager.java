@@ -120,8 +120,7 @@ public class ProfileManager implements Listener {
                         int saved = 0;
                         for (java.util.Map.Entry<UUID, java.util.List<Profile>> entry : snapshots.entrySet()) {
                             try {
-                                ProfilePersistence.saveAllProfiles(entry.getKey(), entry.getValue());
-                                saved++;
+                                if (ProfilePersistence.saveAllProfiles(entry.getKey(), entry.getValue())) saved++;
                             } catch (Exception e) {
                                 Alkatraz.getInstance().getLogger().log(Level.WARNING,
                                         "Periodic profile save failed for " + entry.getKey(), e);
@@ -308,6 +307,18 @@ public class ProfileManager implements Listener {
                 profile = ProfilePersistence.loadProfile(uuid, profileClass);
                 cache.cacheProfile(uuid, profile);
 
+                // Bound the cache: offline profiles loaded for admin paths are
+                // kept (so mutations persist), but evict older offline entries
+                // once the cache grows past a sane size.
+                if (cache.size() > 512) {
+                    for (UUID cached : cache.getCachedPlayers()) {
+                        if (!cached.equals(uuid) && Bukkit.getPlayer(cached) == null) {
+                            for (Profile evicted : cache.removePlayer(cached).values()) {
+                                saveProfile(evicted);
+                            }
+                        }
+                    }
+                }
                 return profile;
             }
         } finally {
@@ -444,6 +455,13 @@ public class ProfileManager implements Listener {
                 }
                 mp.getMasteryBars().clear();
                 mp.getMasteryBarTaskIds().clear();
+                // AK/exp bar + its delayed-removal task: same leak class as mastery bars.
+                try { if (mp.getArcaneKnowledgeBar() != null) mp.getArcaneKnowledgeBar().removeAll(); } catch (Exception ignored) { }
+                try { if (mp.getExpBar() != null && mp.getExpBar() != mp.getArcaneKnowledgeBar()) mp.getExpBar().removeAll(); } catch (Exception ignored) { }
+                if (mp.getArcaneKnowledgeBarTaskId() != -1) {
+                    try { org.bukkit.Bukkit.getScheduler().cancelTask(mp.getArcaneKnowledgeBarTaskId()); } catch (Exception ignored) { }
+                    mp.setArcaneKnowledgeBarTaskId(-1);
+                }
             }
 
         } finally {
@@ -511,12 +529,13 @@ public class ProfileManager implements Listener {
     public static void saveAllCachedProfiles() {
         ensureInitialized();
         
+        int saved = 0;
         for (UUID uuid : cache.getCachedPlayers()) {
             Collection<Profile> profiles = cache.getAllProfiles(uuid);
-            ProfilePersistence.saveAllProfiles(uuid, profiles);
+            if (ProfilePersistence.saveAllProfiles(uuid, profiles)) saved++;
         }
         
-        Alkatraz.getInstance().getLogger().info("Saved " + cache.size() + " player profiles");
+        Alkatraz.getInstance().getLogger().info("Saved " + saved + " player profiles");
     }
 
     /**
@@ -622,8 +641,6 @@ if (flushBlocked.contains(uuid)) return;
                     }
                     if (equipmentSnapshot != null) {
                         me.nagasonic.alkatraz.items.magic.equipment.EquipmentStorage.save(uuid, equipmentSnapshot);
-                    } else {
-                        me.nagasonic.alkatraz.items.magic.equipment.EquipmentStorage.save(uuid);
                     }
                 } catch (Exception e) {
                     Alkatraz.getInstance().getLogger().log(Level.WARNING,

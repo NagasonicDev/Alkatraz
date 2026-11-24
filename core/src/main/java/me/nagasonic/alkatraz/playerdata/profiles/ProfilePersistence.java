@@ -192,6 +192,14 @@ public class ProfilePersistence {
             }
         }
 
+        // Re-sanitize mana and focus against the loaded max (raw setDouble above bypasses the setters).
+        if (profile instanceof MagicProfile mp) {
+            mp.setMaxMana(mp.getMaxMana());
+            mp.setMana(mp.getMana());
+            mp.setMaxFocus(mp.getMaxFocus());
+            mp.setFocus(mp.getFocus());
+        }
+
         // Load all float stats
         if (config.contains("stats.floats")) {
             ConfigurationSection section = config.getConfigurationSection("stats.floats");
@@ -285,10 +293,12 @@ public class ProfilePersistence {
      * @param uuid Player UUID
      * @param profiles Collection of profiles to save
      */
-    public static void saveAllProfiles(UUID uuid, Collection<Profile> profiles) {
+    public static boolean saveAllProfiles(UUID uuid, Collection<Profile> profiles) {
+        boolean ok = true;
         for (Profile profile : profiles) {
-            saveProfile(uuid, profile);
+            ok &= saveProfile(uuid, profile);
         }
+        return ok;
     }
 
     /**

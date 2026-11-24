@@ -20,6 +20,12 @@ arcane_knowledge:
         8: 179
         9: 340
 
+# Mana recovers by this percentage of the maximum pool every second. Basing it
+# on max_mana (instead of a flat amount) keeps cast cost/recovery ratios stable
+# as pools grow across circles.
+mana:
+  regeneration_percent: 1.0
+
 research_points:
   sources:
     mastery_max:
@@ -30,7 +36,7 @@ research_points:
       amount: 3
     circle_up_bonus:
       enabled: true
-      amount: 50
+      amount: 130
 
 circle:
   auto_advance: true
@@ -39,7 +45,7 @@ circle:
       stat_points: 5
       max_mana: 200
       max_focus: 110
-      mana_regeneration: 2
+      mana_regeneration: 1
       magic_affinity: 2
       magic_resistance: 1
       requirements:
@@ -53,7 +59,7 @@ circle:
       stat_points: 5
       max_mana: 400
       max_focus: 120
-      mana_regeneration: 2.5
+      mana_regeneration: 1
       magic_affinity: 3
       magic_resistance: 2
       requirements:
@@ -67,7 +73,7 @@ circle:
       stat_points: 7
       max_mana: 800
       max_focus: 130
-      mana_regeneration: 3
+      mana_regeneration: 1
       magic_affinity: 6
       magic_resistance: 4
       requirements:
@@ -81,12 +87,12 @@ circle:
       stat_points: 10
       max_mana: 1250
       max_focus: 140
-      mana_regeneration: 5
+      mana_regeneration: 1
       magic_affinity: 9
       magic_resistance: 7
       requirements:
         - type: arcane_knowledge
-          amount: 6570
+          amount: 0
         - type: mastered_spell_count
           circle: 3
           count: 3
@@ -98,12 +104,12 @@ circle:
       stat_points: 10
       max_mana: 2000
       max_focus: 150
-      mana_regeneration: 6.25
+      mana_regeneration: 1
       magic_affinity: 13
       magic_resistance: 10
       requirements:
         - type: arcane_knowledge
-          amount: 15566
+          amount: 0
         - type: mastered_spell_count
           circle: 4
           count: 4
@@ -115,12 +121,12 @@ circle:
       stat_points: 15
       max_mana: 2750
       max_focus: 160
-      mana_regeneration: 7.5
+      mana_regeneration: 1
       magic_affinity: 18
       magic_resistance: 14
       requirements:
         - type: arcane_knowledge
-          amount: 36916
+          amount: 0
         - type: mastered_spell_count
           count: 21
           description: "Requires 21 max-mastered spells"
@@ -131,12 +137,12 @@ circle:
       stat_points: 15
       max_mana: 4000
       max_focus: 170
-      mana_regeneration: 10
+      mana_regeneration: 1
       magic_affinity: 24
       magic_resistance: 18
       requirements:
         - type: arcane_knowledge
-          amount: 86360
+          amount: 0
         - type: mastered_spell_count
           count: 28
           description: "Requires 28 max-mastered spells"
@@ -147,12 +153,12 @@ circle:
       stat_points: 20
       max_mana: 7500
       max_focus: 180
-      mana_regeneration: 12.5
+      mana_regeneration: 1
       magic_affinity: 30
       magic_resistance: 24
       requirements:
         - type: arcane_knowledge
-          amount: 202531
+          amount: 0
         - type: mastered_spell_count
           count: 35
           description: "Requires 35 max-mastered spells"
@@ -163,18 +169,15 @@ circle:
       stat_points: 25
       max_mana: 10000
       max_focus: 190
-      mana_regeneration: 15
+      mana_regeneration: 1
       magic_affinity: 37
       magic_resistance: 30
       requirements:
         - type: arcane_knowledge
-          amount: 474531
+          amount: 50000
         - type: mastered_spell_count
           count: 53
           description: "Requires 53 max-mastered spells"
-        - type: research
-          research: fire_inferno_rite
-          description: "Requires Inferno Rite research"
         - type: research
           research: water_depth_oath
           description: "Requires Depth Oath research"

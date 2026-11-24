@@ -61,7 +61,14 @@ public final class ResearchService {
         Map<String, ResearchCategory> loadedCategories = loadCategories(config);
         Map<String, ResearchNode> loadedNodes = loadNodes(config);
 
-        validateAcyclic(loadedNodes);
+        try {
+            validateAcyclic(loadedNodes);
+        } catch (IllegalStateException e) {
+            if (Alkatraz.getInstance() != null) {
+                Alkatraz.getInstance().getLogger().severe("Research graph contains a cycle; keeping previous graph: " + e.getMessage());
+            }
+            return;
+        }
 
         categories = Collections.unmodifiableMap(loadedCategories);
         nodes = Collections.unmodifiableMap(loadedNodes);
@@ -154,12 +161,122 @@ public final class ResearchService {
 
     public static void applyRewards(Player player, ResearchNode node) {
         MagicProfile profile = ProfileManager.getProfile(player, MagicProfile.class);
+        if (profile == null) return;
         boolean profileRewardsApplied = profile.hasAppliedResearchRewards(node.getId());
-        for (ResearchReward reward : node.getRewards()) {
-            applyReward(player, profile, node.getId(), reward, profileRewardsApplied);
-        }
         if (!profileRewardsApplied) {
+            for (ResearchReward reward : node.getRewards()) {
+                applyReward(player, profile, node.getId(), reward, false);
+            }
             profile.setResearchRewardsApplied(node.getId(), true);
+            profile.setResearchRewardVersion(node.getId(), rewardSignature(node));
+            return;
+        }
+        // Already applied: only re-apply the delta when the config rewards changed,
+        // so a balance patch reaches existing completers without double-adding.
+        String stored = profile.getResearchRewardVersion(node.getId());
+        String current = rewardSignature(node);
+        if (stored == null) {
+            // Legacy save predating version tracking: backfill without re-applying,
+            // so the old (unknown) amounts are never added a second time.
+            profile.setResearchRewardVersion(node.getId(), current);
+            for (ResearchReward reward : node.getRewards()) {
+                if ("vanilla_attribute".equals(reward.getType())) {
+                    applyVanillaAttribute(player, node.getId(), reward);
+                }
+            }
+            return;
+        }
+        if (stored.equals(current)) {
+            for (ResearchReward reward : node.getRewards()) {
+                if ("vanilla_attribute".equals(reward.getType())) {
+                    applyVanillaAttribute(player, node.getId(), reward);
+                }
+            }
+            return;
+        }
+        if (Alkatraz.getInstance() != null) {
+            Alkatraz.getInstance().getLogger().warning(
+                    "Research rewards changed for node '" + node.getId() + "' for player "
+                            + player.getName() + "; applying reward delta.");
+        }
+        applyRewardDelta(player, profile, node, parseSignature(stored));
+        profile.setResearchRewardVersion(node.getId(), current);
+    }
+
+    private static String rewardSignature(ResearchNode node) {
+        List<String> entries = new ArrayList<>();
+        for (ResearchReward reward : node.getRewards()) {
+            entries.add(reward.getType() + "|" + reward.getTarget() + "|"
+                    + reward.getOperation() + "|" + reward.getAmount());
+        }
+        Collections.sort(entries);
+        return String.join(";", entries);
+    }
+
+    private static Map<String, ResearchReward> parseSignature(String signature) {
+        Map<String, ResearchReward> parsed = new LinkedHashMap<>();
+        if (signature == null || signature.isBlank()) return parsed;
+        for (String entry : signature.split(";", -1)) {
+            String[] parts = entry.split("\\|", 4);
+            if (parts.length != 4) continue;
+            double amount;
+            try {
+                amount = Double.parseDouble(parts[3]);
+            } catch (NumberFormatException ignored) {
+                continue;
+            }
+            parsed.put(parts[0] + "|" + parts[1] + "|" + parts[2],
+                    new ResearchReward(parts[0], parts[1], amount, parts[2], ""));
+        }
+        return parsed;
+    }
+
+    private static void applyRewardDelta(Player player, MagicProfile profile, ResearchNode node,
+                                         Map<String, ResearchReward> oldRewards) {
+        Map<String, ResearchReward> currentRewards = new LinkedHashMap<>();
+        for (ResearchReward reward : node.getRewards()) {
+            currentRewards.put(reward.getType() + "|" + reward.getTarget() + "|" + reward.getOperation(), reward);
+        }
+        for (ResearchReward reward : node.getRewards()) {
+            ResearchReward old = oldRewards.get(
+                    reward.getType() + "|" + reward.getTarget() + "|" + reward.getOperation());
+            double oldAmount = old == null ? 0D : old.getAmount();
+            if (Double.compare(oldAmount, reward.getAmount()) == 0) {
+                if ("vanilla_attribute".equals(reward.getType())) {
+                    applyVanillaAttribute(player, node.getId(), reward);
+                }
+                continue;
+            }
+            if ("vanilla_attribute".equals(reward.getType())) {
+                replaceVanillaAttribute(player, node.getId(), reward.getTarget(), reward.getAmount());
+            } else if ("command".equals(reward.getType())) {
+                if (Alkatraz.getInstance() != null) {
+                    Alkatraz.getInstance().getLogger().warning(
+                            "Research command reward for node '" + node.getId()
+                                    + "' changed; commands cannot be re-applied and were skipped.");
+                }
+            } else if ("set".equals(reward.getOperation())) {
+                profile.addMagicStat(reward.getTarget(), reward.getAmount(), "set");
+            } else if ("multiply".equals(reward.getOperation())) {
+                if (Alkatraz.getInstance() != null) {
+                    Alkatraz.getInstance().getLogger().warning(
+                            "Research multiply reward for node '" + node.getId()
+                                    + "' changed; multiply deltas cannot be computed and were skipped.");
+                }
+            } else {
+                profile.addMagicStat(reward.getTarget(), reward.getAmount() - oldAmount, "add");
+            }
+        }
+        for (ResearchReward old : oldRewards.values()) {
+            if (currentRewards.containsKey(old.getType() + "|" + old.getTarget() + "|" + old.getOperation())) {
+                continue;
+            }
+            if ("vanilla_attribute".equals(old.getType())) {
+                removeVanillaAttribute(player, node.getId(), old.getTarget());
+            } else if (!"command".equals(old.getType()) && !"set".equals(old.getOperation())
+                    && !"multiply".equals(old.getOperation())) {
+                profile.addMagicStat(old.getTarget(), -old.getAmount(), "add");
+            }
         }
     }
 
@@ -361,24 +478,45 @@ public final class ResearchService {
     }
 
     private static void applyVanillaAttribute(Player player, String researchId, ResearchReward reward) {
+        replaceVanillaAttribute(player, researchId, reward.getTarget(), reward.getAmount());
+    }
+
+    private static void replaceVanillaAttribute(Player player, String researchId, String target, double amount) {
+        removeVanillaAttribute(player, researchId, target);
         try {
-            Attribute attribute = Attribute.valueOf(reward.getTarget().toUpperCase());
+            Attribute attribute = Attribute.valueOf(target.toUpperCase());
             AttributeInstance instance = player.getAttribute(attribute);
             if (instance == null) return;
-            UUID id = UUID.nameUUIDFromBytes(("alkatraz:research:" + researchId + ":" + reward.getTarget())
-                    .getBytes(StandardCharsets.UTF_8));
-            for (AttributeModifier modifier : instance.getModifiers()) {
-                if (modifier.getUniqueId().equals(id)) return;
-            }
+            UUID id = researchAttributeId(researchId, target);
             instance.addModifier(new AttributeModifier(
                     id,
                     "Alkatraz Research " + researchId,
-                    reward.getAmount(),
+                    amount,
                     AttributeModifier.Operation.ADD_NUMBER
             ));
         } catch (IllegalArgumentException ignored) {
             // Invalid attributes are ignored so one bad config entry does not break research completion.
         }
+    }
+
+    private static void removeVanillaAttribute(Player player, String researchId, String target) {
+        try {
+            Attribute attribute = Attribute.valueOf(target.toUpperCase());
+            AttributeInstance instance = player.getAttribute(attribute);
+            if (instance == null) return;
+            UUID id = researchAttributeId(researchId, target);
+            for (AttributeModifier modifier : new ArrayList<>(instance.getModifiers())) {
+                if (modifier.getUniqueId().equals(id)) {
+                    instance.removeModifier(modifier);
+                }
+            }
+        } catch (IllegalArgumentException ignored) {
+        }
+    }
+
+    private static UUID researchAttributeId(String researchId, String target) {
+        return UUID.nameUUIDFromBytes(("alkatraz:research:" + researchId + ":" + target)
+                .getBytes(StandardCharsets.UTF_8));
     }
 
     private static Map<String, List<ResearchNode>> indexByCategory(Map<String, ResearchNode> loadedNodes) {
@@ -424,36 +562,27 @@ public final class ResearchService {
     }
 
     private static void validateAcyclic(Map<String, ResearchNode> loadedNodes) {
+        Map<String, List<ResearchNode>> childrenByNode = indexChildren(loadedNodes);
         Set<String> visiting = new HashSet<>();
         Set<String> visited = new HashSet<>();
         for (ResearchNode node : loadedNodes.values()) {
-            visit(node.getId(), loadedNodes, visiting, visited);
+            visit(node.getId(), childrenByNode, visiting, visited);
         }
     }
 
-    private static void visit(String id, Map<String, ResearchNode> loadedNodes, Set<String> visiting, Set<String> visited) {
+    private static void visit(String id, Map<String, List<ResearchNode>> childrenByNode,
+                              Set<String> visiting, Set<String> visited) {
         if (visited.contains(id)) return;
         if (!visiting.add(id)) {
             throw new IllegalStateException("Research graph contains a cycle at '" + id + "'");
         }
 
-        ResearchNode node = loadedNodes.get(id);
-        if (node != null) {
-            for (ResearchNode child : childrenOf(id, loadedNodes)) {
-                visit(child.getId(), loadedNodes, visiting, visited);
-            }
+        for (ResearchNode child : childrenByNode.getOrDefault(id, List.of())) {
+            visit(child.getId(), childrenByNode, visiting, visited);
         }
 
         visiting.remove(id);
         visited.add(id);
-    }
-
-    private static List<ResearchNode> childrenOf(String id, Map<String, ResearchNode> loadedNodes) {
-        List<ResearchNode> children = new ArrayList<>();
-        for (ResearchNode node : loadedNodes.values()) {
-            if (node.getParents().contains(id)) children.add(node);
-        }
-        return children;
     }
 
     private static Material material(String name, Material fallback) {

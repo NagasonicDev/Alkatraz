@@ -273,7 +273,13 @@ public class BoosterScheduler {
     }
 
     public static void loadConfig() {
-        try { loadFromConfig(me.nagasonic.alkatraz.config.BoosterConfig.getConfig()); } catch (Exception e) { Alkatraz.logDebug("Failed to load booster config: " + e.getMessage()); }
+        try {
+            // BoosterConfig caches the bundled default; read the live file so reloads pick up edits.
+            YamlConfiguration config = Alkatraz.getInstance() == null
+                    ? me.nagasonic.alkatraz.config.BoosterConfig.getConfig()
+                    : me.nagasonic.alkatraz.config.ConfigManager.getConfig("boosters.yml").get();
+            loadFromConfig(config);
+        } catch (Exception e) { Alkatraz.logDebug("Failed to load booster config: " + e.getMessage()); }
     }
 
     public static void reload() { loadConfig(); }

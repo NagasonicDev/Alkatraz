@@ -1798,50 +1798,6 @@ nodes:
       fire_spark:
       - x: 3
         y: 0
-  fire_inferno_rite:
-    display_name: '&cInferno Rite'
-    category: fire
-    icon: BLAZE_ROD
-    research_points_cost: 100
-    position:
-      x: 8
-      y: 5
-    description:
-    - Call heat through motion, breath, and violent intent.
-    - Only a focused mage can make destruction useful.
-    parents:
-    - immolation_aura
-    - pyroclasm
-    objectives:
-      close_range_fire:
-        display_name: Defeat ten enemies with Fire spells within eight blocks.
-        event: kill_with_spell
-        amount: 10
-        filters:
-          element: FIRE
-          max_distance: 8
-    rewards:
-      attack_speed:
-        type: vanilla_attribute
-        target: GENERIC_ATTACK_SPEED
-        amount: 0.05
-        display: +0.05 Attack Speed.
-      fire_affinity:
-        type: magic_stat
-        target: fireAffinity
-        amount: 5
-        display: +5 Fire Affinity.
-    unlocks:
-    - Completes the Inferno Rite.
-    visibility:
-      hidden_until_available: true
-    edge_paths:
-      immolation_aura:
-      - x: 8
-        y: 3
-      pyroclasm:
-      - x: 8
-        y: -3
   pyroclasm:
     display_name: '&cPyroclasm'
     category: fire
@@ -3361,7 +3317,7 @@ nodes:
       x: 0
       y: -9
     description:
-    - Command every frequency of light from the faintest glow to the blinding radiance.
+    - Command every frequency of light from the faintest glow to the blinding flare.
     - The sovereign does not merely heal; they redefine what it means to be whole.
     parents:
     - solar_focus
@@ -3409,7 +3365,7 @@ nodes:
       y: 5
     description:
     - Move between the spaces where light pools and lingers.
-    - Phantoms of radiance protect what mortals cannot see.
+    - Phantoms of the dawn protect what mortals cannot see.
     parents:
     - restoration_ward
     - bulwark_light
@@ -3647,49 +3603,6 @@ nodes:
       night_harvest:
       - x: -5
         y: 2
-  oblivion_theory:
-    display_name: '&5Oblivion Theory'
-    category: dark
-    icon: WITHER_SKELETON_SKULL
-    research_points_cost: 60
-    position:
-      x: -5
-      y: -3
-    description:
-    - Map the complete lifecycle of shadow from birth to consumption.
-    - Theory turns raw destruction into repeatable annihilation.
-    parents:
-    - entropy_theory
-    - void_ward
-    objectives:
-      cast_dark:
-        display_name: Cast twenty Dark spells.
-        event: spell_cast
-        amount: 20
-        filters:
-          element: DARK
-    rewards:
-      arcane_knowledge:
-        type: magic_stat
-        target: arcaneKnowledge
-        amount: 10
-        display: +10 Arcane Knowledge.
-      stat_point:
-        type: magic_stat
-        target: statPoints
-        amount: 1
-        display: +1 Stat Point.
-    unlocks:
-    - Unlocks advanced entropic theory.
-    visibility:
-      hidden_until_available: false
-    edge_paths:
-      entropy_theory:
-      - x: -5
-        y: -1
-      void_ward:
-      - x: -5
-        y: 2
   dark_sovereign:
     display_name: '&5Dark Sovereign'
     category: dark
@@ -3703,7 +3616,6 @@ nodes:
     - The sovereign does not merely destroy; they redefine what it means to end.
     parents:
     - shadow_focus
-    - oblivion_theory
     objectives:
       cast_dark:
         display_name: Cast fifty Dark spells.
@@ -3731,11 +3643,6 @@ nodes:
       - x: 1
         y: -9
       - x: 1
-        y: -3
-      oblivion_theory:
-      - x: -1
-        y: -9
-      - x: -1
         y: -3
   eclipse_phantom:
     display_name: '&5Eclipse Phantom'

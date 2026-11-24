@@ -175,7 +175,9 @@ public final class ProgressionService {
         player.sendMessage(
                 lang().get("progression.circle_up_title"),
                 lang().get("progression.circle_up_subtitle", "ordinal", StringUtils.toOrdinal(target)),
-                lang().get("progression.circle_up_spell_rank", "rank", StringUtils.toOrdinal(target))
+                lang().get("progression.circle_up_spell_rank", "rank", StringUtils.toOrdinal(target)),
+                lang().get("progression.circle_identity." + target, "default",
+                        lang().get("progression.circle_identity.default"))
         );
         return true;
     }

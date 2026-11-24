@@ -9,7 +9,6 @@ import org.bukkit.scheduler.BukkitTask;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -34,17 +33,7 @@ public class BoosterManager {
         }
 
         public long startTime() { return startedAt; }
-        public long startAtMillis() { return startedAt; }
-        public long getStartedAt() { return startedAt; }
-        public long getStartAtMillis() { return startedAt; }
-
         public long expiryTime() { return expiresAt; }
-        public long expiryTimeMillis() { return expiresAt; }
-        public long expiresAtMillis() { return expiresAt; }
-        public long getExpiresAt() { return expiresAt; }
-        public long getExpiryTime() { return expiresAt; }
-        public long getExpiryTimeMillis() { return expiresAt; }
-        public long getExpiresAtMillis() { return expiresAt; }
 
         public long durationMillis() {
             if (expiresAt == Long.MAX_VALUE) return Long.MAX_VALUE;
@@ -121,45 +110,6 @@ public class BoosterManager {
         }
     }
 
-    public static boolean start(String target, double multiplier) {
-        return start("world", target, multiplier);
-    }
-
-    public static boolean start(String target) {
-        return start("world", target, 2.0);
-    }
-
-    public static boolean startWorld(String target, double multiplier) {
-        return start("world", target, multiplier);
-    }
-
-    public static boolean startGroup(String target, double multiplier) {
-        return start("group", target, multiplier);
-    }
-
-    public static boolean startGlobal(String target, double multiplier) {
-        return start("global", target == null ? "" : target, multiplier);
-    }
-
-    public static boolean activate(String scope, String target, double multiplier) {
-        return start(scope, target, multiplier);
-    }
-
-    public static boolean activate(String scope, String target, double multiplier, long durationMillis) {
-        return start(scope, target, multiplier, durationMillis);
-    }
-
-    // Convenience activator aliases hidden tests may probe.
-    public static Booster activateBooster(String scope, String target, double multiplier) {
-        if (!start(scope, target, multiplier)) return null;
-        return get(scope, target);
-    }
-
-    public static Booster grant(String scope, String target, double multiplier, long durationMillis) {
-        if (!start(scope, target, multiplier, durationMillis)) return null;
-        return get(scope, target);
-    }
-
     public static boolean stop(String scope, String target) {
         String sc = normalizeScope(scope);
         boolean global = sc.equals("global") || sc.equals("server");
@@ -178,26 +128,12 @@ public class BoosterManager {
         return stop("world", target);
     }
 
-    public static boolean stopWorld(String target) { return stop("world", target); }
-    public static boolean stopGroup(String target) { return stop("group", target); }
-    public static boolean stopGlobal(String target) { return stop("global", target); }
-
-    public static boolean remove(String scope, String target) { return stop(scope, target); }
-    public static boolean remove(String target) { return stop(target); }
-    public static boolean revoke(String scope, String target) { return stop(scope, target); }
-    public static boolean revoke(String target) { return stop(target); }
-    public static boolean disable(String scope, String target) { return stop(scope, target); }
-    public static boolean end(String scope, String target) { return stop(scope, target); }
-
     public static boolean isActive(String scope, String target) {
         Booster b = get(scope, target);
         return b != null && b.isActive();
     }
 
     public static boolean isActive(String target) { return isActive("world", target); }
-    public static boolean has(String scope, String target) { return isActive(scope, target); }
-    public static boolean isRunning(String scope, String target) { return isActive(scope, target); }
-
     public static Booster get(String scope, String target) {
         return ACTIVE.get(key(scope, target));
     }
@@ -222,41 +158,22 @@ public class BoosterManager {
         return out;
     }
 
-    public static List<Booster> list(String scope, String target) {
-        List<Booster> out = new ArrayList<>();
-        for (Booster b : ACTIVE.values()) {
-            if (scope != null && !b.scope().equals(normalizeScope(scope))) continue;
-            if (target != null && !target.equalsIgnoreCase(b.target())) continue;
-            out.add(b);
-        }
-        return out;
-    }
-
-    public static List<Booster> all() { return list(); }
-    public static Collection<Booster> getBoosters() { return list(); }
-    public static Collection<Booster> getActiveBoosters() { return list(); }
-    public static List<Booster> listBoosters() { return list(); }
-    public static List<Booster> listBoosters(String scope) { return list(scope); }
-    public static List<Booster> listActive() { return list(); }
-    public static List<Booster> listExpired() {
-        List<Booster> out = new ArrayList<>();
-        long now = System.currentTimeMillis();
-        for (Booster b : ACTIVE.values()) if (b.isExpiredAt(now)) out.add(b);
-        return out;
-    }
-
     public static void clear() {
         ACTIVE.clear();
         PREVIOUS.clear();
     }
 
-    public static void shutdown() { stopExpiryTask(); clear(); }
+    public static void shutdown() { stopExpiryTask(); clear(); BoosterScheduler.shutdown(); }
 
     public static void startExpiryTask() {
         if (expiryTask != null) return;
         try {
             if (Bukkit.getServer() == null || Alkatraz.getInstance() == null) return;
-            expiryTask = Bukkit.getScheduler().runTaskTimer(Alkatraz.getInstance(), (Runnable) BoosterManager::processExpired, 20L, 20L);
+            BoosterScheduler.loadConfig();
+            expiryTask = Bukkit.getScheduler().runTaskTimer(Alkatraz.getInstance(), () -> {
+                processExpired();
+                BoosterScheduler.tick();
+            }, 20L, 20L);
         } catch (Exception ignored) {
             expiryTask = null;
         }
@@ -297,6 +214,7 @@ public class BoosterManager {
     // Lifecycle hooks
     public static void onReload() {
         processExpired();
+        BoosterScheduler.reload();
         for (Booster b : new ArrayList<>(ACTIVE.values())) {
             applyMultiplier(b.scope(), b.target(), b.multiplier());
         }
@@ -395,28 +313,7 @@ public class BoosterManager {
         }
     }
 
-    // Alias naming variants hidden tests/agents may probe.
-    public static boolean add(String scope, String target, double multiplier) { return start(scope, target, multiplier); }
-    public static boolean addBooster(String scope, String target, double multiplier) { return start(scope, target, multiplier); }
-    public static boolean register(String scope, String target, double multiplier) { return start(scope, target, multiplier); }
-    public static boolean enable(String scope, String target, double multiplier) { return start(scope, target, multiplier); }
-    public static boolean stopBooster(String scope, String target) { return stop(scope, target); }
-    public static boolean removeBooster(String scope, String target) { return stop(scope, target); }
-    public static boolean revokeBooster(String scope, String target) { return stop(scope, target); }
-    public static boolean disableBooster(String scope, String target) { return stop(scope, target); }
-    public static Booster activateBooster(String scope, String target, double multiplier, long durationMillis) {
-        if (!start(scope, target, multiplier, durationMillis)) return null;
-        return get(scope, target);
-    }
-    public static Booster startBooster(String scope, String target, double multiplier) {
-        if (!start(scope, target, multiplier)) return null;
-        return get(scope, target);
-    }
-    public static Booster startBooster(String scope, String target, double multiplier, long durationMillis) {
-        if (!start(scope, target, multiplier, durationMillis)) return null;
-        return get(scope, target);
-    }
-    public static Booster startBooster(String target, double multiplier) { return activateBooster("world", target, multiplier); }
     public static int count() { return ACTIVE.size(); }
+
     public static int count(String scope) { return list(scope).size(); }
 }

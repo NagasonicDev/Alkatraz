@@ -3,6 +3,7 @@ package me.nagasonic.alkatraz.playerdata.profiles.implementation;
 import me.nagasonic.alkatraz.playerdata.SpellHotbarManager;
 import me.nagasonic.alkatraz.api.Element;
 import me.nagasonic.alkatraz.api.playerdata.Profile;
+import me.nagasonic.alkatraz.config.ConfigManager;
 import me.nagasonic.alkatraz.config.FocusConfig;
 import me.nagasonic.alkatraz.progression.AffinityCurveMigrationNotice;
 import me.nagasonic.alkatraz.spells.Spell;
@@ -17,6 +18,9 @@ import org.bukkit.inventory.ItemStack;
 import java.util.*;
 
 public class MagicProfile extends Profile {
+
+    private static final String PROGRESSION_CONFIG = "progression.yml";
+    private static final String MANA_REGEN_PERCENT_PATH = "mana.regeneration_percent";
 
     private transient List<SpellModifier> spellModifiers = new ArrayList<>();
     private transient Map<SpellModifier, String> spellModifierTypes = new HashMap<>();
@@ -126,6 +130,7 @@ public class MagicProfile extends Profile {
         stringSetStat("researchCompleted");
         stringSetStat("researchObjectiveProgress");
         stringSetStat("researchRewardsApplied");
+        stringSetStat("researchRewardVersions");
         stringSetStat("hotbarSpells"); // Format: "slotIndex:spellId"
         stringSetStat("warpPoints");   // Stores warp points (format: "slot:world:x:y:z:yaw:pitch")
 
@@ -272,10 +277,14 @@ public class MagicProfile extends Profile {
     // ============================================
 
     public double getMaxMana() { return getDouble("maxMana"); }
-    public void setMaxMana(double value) { setDouble("maxMana", value); }
+    public void setMaxMana(double value) { setDouble("maxMana", Double.isFinite(value) && value > 0 ? value : 1.0); }
 
     public double getMana() { return getDouble("mana"); }
-    public void setMana(double value) { setDouble("mana", value); }
+    public void setMana(double value) {
+        double sanitized = Double.isFinite(value) ? Math.max(0, value) : 0;
+        double max = getMaxMana();
+        setDouble("mana", max > 0 ? Math.min(sanitized, max) : sanitized);
+    }
 
     public double getManaRegeneration() { return getDouble("manaRegeneration"); }
     public void setManaRegeneration(double value) { setDouble("manaRegeneration", value); }
@@ -663,6 +672,25 @@ public class MagicProfile extends Profile {
         }
     }
 
+    public String getResearchRewardVersion(String researchId) {
+        if (researchId == null) return null;
+        String prefix = researchId.toLowerCase() + "=";
+        for (String entry : getStringSet("researchRewardVersions")) {
+            if (entry.startsWith(prefix)) {
+                return entry.substring(prefix.length());
+            }
+        }
+        return null;
+    }
+
+    public void setResearchRewardVersion(String researchId, String version) {
+        if (researchId == null || researchId.isBlank() || version == null) return;
+        String prefix = researchId.toLowerCase() + "=";
+        String entry = prefix + version;
+        getStringSet("researchRewardVersions").removeIf(e -> e.startsWith(prefix));
+        getStringSet("researchRewardVersions").add(entry);
+    }
+
     public boolean addMagicStat(String stat, double amount, String operation) {
         if (stat == null || stat.isBlank()) return false;
         String mode = operation == null ? "add" : operation.toLowerCase();
@@ -954,10 +982,22 @@ public class MagicProfile extends Profile {
     }
 
     /**
+     * Mana restored in one second for a pool of {@code maxMana} at
+     * {@code percentPerSecond} percent. The rate lives in progression.yml, so a
+     * pool of 10000 recovers 100/s at the default 1% instead of a flat few mana.
+     */
+    public static double manaRegenFor(double maxMana, double percentPerSecond) {
+        if (!Double.isFinite(maxMana) || maxMana <= 0
+                || !Double.isFinite(percentPerSecond) || percentPerSecond <= 0) return 0;
+        return maxMana * percentPerSecond / 100.0;
+    }
+
+    /**
      * Applies one second of mana regeneration for this profile. Invoked once per
      * second by the shared regeneration task in
      * {@link me.nagasonic.alkatraz.playerdata.profiles.ProfileManager} for every
-     * online player.
+     * online player. The percentage of max mana is configurable; the persisted
+     * stat remains a flat additive bonus from equipment.
      */
     public void regenMana(){
         Player player = Bukkit.getPlayer(getOwner());
@@ -965,7 +1005,11 @@ public class MagicProfile extends Profile {
             return;
         }
         if (getMana() >= getMaxMana()) return;
-        StatUtils.addMana(player, getManaRegeneration());
+        double percent = ConfigManager.getConfig(PROGRESSION_CONFIG).get()
+                .getDouble(MANA_REGEN_PERCENT_PATH, 1.0);
+        double amount = manaRegenFor(getMaxMana(), percent) + Math.max(0, getManaRegeneration());
+        if (amount <= 0) return;
+        StatUtils.addMana(player, amount);
     }
 
     // ============================================
