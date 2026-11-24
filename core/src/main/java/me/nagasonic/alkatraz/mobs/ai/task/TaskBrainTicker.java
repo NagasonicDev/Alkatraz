@@ -62,6 +62,7 @@ public final class TaskBrainTicker implements Listener {
         clearAttached();
         Bukkit.getScheduler().cancelTask(taskId);
         taskId = -1;
+        org.bukkit.event.HandlerList.unregisterAll(LISTENER);
     }
 
     /** Attaches an engine to a mob whose brain has a tasks section. Main thread. */

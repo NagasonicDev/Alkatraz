@@ -51,32 +51,14 @@ import java.util.function.Consumer;
 public final class NMS_v1_21_R1 implements NMS {
 
     @Override
-    public void setInvisible(org.bukkit.entity.Entity target, boolean invis) {
-        if (!(target instanceof LivingEntity livingTarget)) return;
-
-        if (invis) {
-            livingTarget.addPotionEffect(new PotionEffect(
-                    PotionEffectType.INVISIBILITY,
-                    Integer.MAX_VALUE, // very long duration
-                    1,
-                    false, // ambient
-                    false, // particles
-                    false  // icon
-            ));
-        } else {
-            livingTarget.removePotionEffect(PotionEffectType.INVISIBILITY);
-        }
-    }
-
-    @Override
     public void setTransparent(org.bukkit.entity.Entity e, Player target, boolean trans) {
         if (!(e instanceof Player entityPlayer)) return;
 
         Scoreboard scoreboard = target.getScoreboard();
-        Team team = scoreboard.getTeam(e.getUniqueId() + "_stealth");
+        Team team = scoreboard.getTeam("s_" + NMS.teamSuffix(e.getUniqueId()));
 
         if (team == null) {
-            team = scoreboard.registerNewTeam(e.getUniqueId() + "_stealth");
+            team = scoreboard.registerNewTeam("s_" + NMS.teamSuffix(e.getUniqueId()));
             team.setCanSeeFriendlyInvisibles(true);
         }
 

@@ -151,7 +151,8 @@ class AiApplierTest {
                     () -> AiApplier.applyGoalBrain(NATIVE_MOB, brain));
 
             assertTrue(ex.getMessage().contains("Unknown goal type"));
-            verify(nmsMock).wipeGoals(NATIVE_MOB);
+            verify(nmsMock, never()).wipeGoals(any());
+            verify(nmsMock, never()).addGoal(any(), any(), anyInt(), anyBoolean());
         }
     }
 

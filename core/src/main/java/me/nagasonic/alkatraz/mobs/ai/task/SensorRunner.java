@@ -47,10 +47,21 @@ public final class SensorRunner {
         }
         nearby.clear();
         nearbyIds.clear();
+        org.bukkit.Location entityLoc = entity.getLocation();
+        double entityX = entityLoc == null ? 0 : entityLoc.getX(),
+                entityY = entityLoc == null ? 0 : entityLoc.getY(),
+                entityZ = entityLoc == null ? 0 : entityLoc.getZ();
+        double radiusSq = (double) radius * radius;
         for (Entity candidate : entity.getNearbyEntities(radius, radius, radius)) {
             if (candidate.equals(entity)) continue;
             if (!(candidate instanceof LivingEntity living)) continue;
             if (playersOnly && !(living instanceof Player)) continue;
+            org.bukkit.Location candidateLoc = candidate.getLocation();
+            if (entityLoc != null && candidateLoc != null) {
+                double dx = candidateLoc.getX() - entityX, dy = candidateLoc.getY() - entityY,
+                        dz = candidateLoc.getZ() - entityZ;
+                if (dx * dx + dy * dy + dz * dz > radiusSq) continue;
+            }
             nearby.add(living);
             nearbyIds.add(living.getUniqueId());
         }

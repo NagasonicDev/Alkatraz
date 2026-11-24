@@ -62,6 +62,6 @@ public final class AiSpecRegistration {
         if (bukkitClass == org.bukkit.entity.Player.class) return net.minecraft.world.entity.player.Player.class;
         if (bukkitClass == org.bukkit.entity.AbstractVillager.class) return net.minecraft.world.entity.npc.AbstractVillager.class;
         if (bukkitClass == org.bukkit.entity.IronGolem.class) return net.minecraft.world.entity.animal.IronGolem.class;
-        return net.minecraft.world.entity.player.Player.class;
+        throw new IllegalArgumentException("Unsupported target class: " + bukkitClass);
     }
 }

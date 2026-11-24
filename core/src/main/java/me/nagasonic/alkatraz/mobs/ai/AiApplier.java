@@ -40,7 +40,7 @@ public final class AiApplier {
         if (nativeMob == null || brain == null) return;
         NMS nms = Alkatraz.getNms();
         if (nms == null) return;
-        nms.wipeGoals(nativeMob);
+        java.util.List<Object> built = new java.util.ArrayList<>();
         for (GoalBrain.Entry entry : brain.entries()) {
             Object goal;
             Object goalOrSpec = entry.goalOrSpec();
@@ -51,7 +51,12 @@ public final class AiApplier {
             } else {
                 throw new IllegalArgumentException("Unknown goal type: " + goalOrSpec.getClass());
             }
-            nms.addGoal(nativeMob, goal, entry.priority(), entry.isTargetGoal());
+            built.add(goal);
+        }
+        nms.wipeGoals(nativeMob);
+        int i = 0;
+        for (GoalBrain.Entry entry : brain.entries()) {
+            nms.addGoal(nativeMob, built.get(i++), entry.priority(), entry.isTargetGoal());
         }
     }
 }

@@ -8,8 +8,11 @@ import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
@@ -17,10 +20,35 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 public interface NMS extends Listener {
-    void setInvisible(org.bukkit.entity.Entity e, boolean invis);
+    /**
+     * Short, collision-resistant team-name suffix derived from all 128 bits of a UUID.
+     * UUID.hashCode() is only 32 bits and collides for realistic player counts.
+     */
+    static String teamSuffix(UUID id) {
+        long mixed = id.getMostSignificantBits() ^ Long.rotateLeft(id.getLeastSignificantBits(), 31);
+        return java.lang.Long.toUnsignedString(mixed, 36);
+    }
+
+    default void setInvisible(org.bukkit.entity.Entity target, boolean invis) {
+        if (!(target instanceof LivingEntity livingTarget)) return;
+
+        if (invis) {
+            livingTarget.addPotionEffect(new PotionEffect(
+                    PotionEffectType.INVISIBILITY,
+                    Integer.MAX_VALUE,
+                    1,
+                    false,
+                    false,
+                    false
+            ));
+        } else {
+            livingTarget.removePotionEffect(PotionEffectType.INVISIBILITY);
+        }
+    }
     void setTransparent(org.bukkit.entity.Entity e, Player target, boolean trans);
     void fakeArmor(HumanEntity e, Player target, org.bukkit.inventory.ItemStack helmet, org.bukkit.inventory.ItemStack chest, org.bukkit.inventory.ItemStack legs, org.bukkit.inventory.ItemStack boots);
     void fakeExp(Player player, float progress, int level, int totalExp);
@@ -169,7 +197,8 @@ public interface NMS extends Listener {
      * than by the number of glowing entities.
      */
     private static String glowTeamName(Player viewer, ChatColor color) {
-        return "ge-" + viewer.getUniqueId() + (color == null ? "" : "-" + color.name());
+        char colorCode = color == null ? 'f' : color.getChar();
+        return "g" + colorCode + teamSuffix(viewer.getUniqueId());
     }
 
     /**

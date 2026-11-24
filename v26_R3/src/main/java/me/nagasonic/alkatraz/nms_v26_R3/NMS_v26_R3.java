@@ -45,32 +45,14 @@ import java.util.*;
 public final class NMS_v26_R3 implements NMS {
 
     @Override
-    public void setInvisible(org.bukkit.entity.Entity target, boolean invis) {
-        if (!(target instanceof LivingEntity livingTarget)) return;
-
-        if (invis) {
-            livingTarget.addPotionEffect(new PotionEffect(
-                    PotionEffectType.INVISIBILITY,
-                    Integer.MAX_VALUE,
-                    1,
-                    false,
-                    false,
-                    false
-            ));
-        } else {
-            livingTarget.removePotionEffect(PotionEffectType.INVISIBILITY);
-        }
-    }
-
-    @Override
     public void setTransparent(org.bukkit.entity.Entity e, Player target, boolean trans) {
         if (!(e instanceof Player entityPlayer)) return;
 
         Scoreboard scoreboard = target.getScoreboard();
-        Team team = scoreboard.getTeam(e.getUniqueId() + "_stealth");
+        Team team = scoreboard.getTeam("s_" + NMS.teamSuffix(e.getUniqueId()));
 
         if (team == null) {
-            team = scoreboard.registerNewTeam(e.getUniqueId() + "_stealth");
+            team = scoreboard.registerNewTeam("s_" + NMS.teamSuffix(e.getUniqueId()));
             team.setCanSeeFriendlyInvisibles(true);
         }
 
@@ -225,6 +207,8 @@ public final class NMS_v26_R3 implements NMS {
         }
     }
 
+    // supportsGrimoireLectern stays false here (NMS default): the fake-lectern block test is 26.1-only;
+    // only the grimoire open is supported, with the 0->1 container guard above copied from 26.1.
     @Override
     public boolean openGrimoireLectern(Player player, org.bukkit.inventory.ItemStack writtenBook, String title,
                                        int startPage, int totalPages, java.util.function.Consumer<Integer> onPageChange) {
@@ -238,6 +222,12 @@ public final class NMS_v26_R3 implements NMS {
             pageData.set(0, startPage);
 
             int containerId = sp.containerMenu.containerId;
+            if (containerId == 0) {
+                containerId = 1;
+            } else {
+                containerId = (containerId + 1) % 100;
+                if (containerId == 0) containerId = 1;
+            }
             final int pages = totalPages;
             final Player bkPlayer = player;
 
@@ -269,6 +259,7 @@ public final class NMS_v26_R3 implements NMS {
             menu.checkReachable = false;
 
             sp.containerMenu = menu;
+            sp.initMenu(menu);
             sp.connection.send(new ClientboundOpenScreenPacket(containerId, MenuType.LECTERN, Component.literal(title)));
             menu.sendAllDataToRemote();
 

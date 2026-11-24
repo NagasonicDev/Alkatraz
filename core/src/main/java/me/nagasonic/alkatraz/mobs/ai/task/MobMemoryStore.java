@@ -30,8 +30,10 @@ import java.util.function.Function;
  */
 public final class MobMemoryStore {
 
-    private final Map<MemoryKey<?>, TimedValue> values = new HashMap<>();
-    private final Set<MemoryKey<?>> registered = new HashSet<>();
+    // ConcurrentHashMap: getters are called from async API threads while the
+    // ticker mutates on the main thread.
+    private final Map<MemoryKey<?>, TimedValue> values = new java.util.concurrent.ConcurrentHashMap<>();
+    private final Set<MemoryKey<?>> registered = java.util.concurrent.ConcurrentHashMap.newKeySet();
 
     private MobMemoryStore() {}
 
