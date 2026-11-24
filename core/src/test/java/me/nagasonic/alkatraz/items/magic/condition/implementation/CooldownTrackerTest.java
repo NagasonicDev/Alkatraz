@@ -60,4 +60,14 @@ class CooldownTrackerTest {
         assertTrue(CooldownTracker.isOnCooldown(ACTOR, ITEM, System.currentTimeMillis()));
         assertFalse(CooldownTracker.isOnCooldown(otherActor, ITEM, System.currentTimeMillis()));
     }
+
+    @Test
+    void pruneExpiredDropsOnlyExpiredEntries() {
+        long now = System.currentTimeMillis();
+        CooldownTracker.markCooldown(ACTOR, ITEM, now - 1000);
+        CooldownTracker.markCooldown(ACTOR, "live-item", now + 5000);
+        CooldownTracker.pruneExpired(now);
+        assertFalse(CooldownTracker.isOnCooldown(ACTOR, ITEM, now));
+        assertTrue(CooldownTracker.isOnCooldown(ACTOR, "live-item", now));
+    }
 }

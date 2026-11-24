@@ -14,6 +14,7 @@ import me.nagasonic.alkatraz.items.magic.recipe.RecipeLoader;
 import me.nagasonic.alkatraz.items.magic.recipe.RecipeRegistry;
 import me.nagasonic.alkatraz.items.magic.recipe.RecipeType;
 import me.nagasonic.alkatraz.util.MaterialCompat;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
@@ -43,9 +44,11 @@ public class RecipeEditorSession {
     private final File file;
     private final YamlConfiguration config;
     private final Map<Integer, ItemStack> dropItems = new HashMap<>();
+    private final UUID owner;
 
     private RecipeEditorSession(Player player, NamespacedKey key) {
         this.key = key;
+        this.owner = player.getUniqueId();
         File file = RecipeRegistry.fileOf(key);
         if (file == null) {
             file = new File(Alkatraz.getInstance().getDataFolder(), "magic/recipes/" + key.getKey() + ".yml");
@@ -78,6 +81,12 @@ public class RecipeEditorSession {
 
     public static void clearAll() {
         sessions.clear();
+    }
+
+    public static void saveAll() {
+        for (RecipeEditorSession session : sessions.values()) {
+            session.save();
+        }
     }
 
     private void materialize(AlkatrazRecipe recipe) {
@@ -184,13 +193,23 @@ public class RecipeEditorSession {
             clearDropItem(slot, configPath);
             return;
         }
+        returnOldStack(dropItems.get(slot));
         dropItems.put(slot, stack.clone());
         config.set(configPath, serializeItem(stack));
     }
 
     public void clearDropItem(int slot, String configPath) {
-        dropItems.remove(slot);
+        returnOldStack(dropItems.remove(slot));
         config.set(configPath, null);
+    }
+
+    private void returnOldStack(ItemStack old) {
+        if (old == null || old.getType().isAir()) return;
+        Player p = Bukkit.getPlayer(owner);
+        if (p == null || !p.isOnline()) return;
+        p.getInventory().addItem(old.clone())
+                .values().forEach(leftover ->
+                        p.getWorld().dropItemNaturally(p.getLocation(), leftover));
     }
 
     public void returnDropItems(Player player) {

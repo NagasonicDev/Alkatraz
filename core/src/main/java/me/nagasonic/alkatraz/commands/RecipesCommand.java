@@ -96,7 +96,7 @@ public class RecipesCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage(lang().get("recipes.commands.usage"));
             return;
         }
-        Player target = Bukkit.getPlayer(args[1]);
+        Player target = Bukkit.getPlayerExact(args[1]);
         if (target == null) {
             sender.sendMessage(lang().get("commands.player_not_found", "name", args[1]));
             return;
@@ -132,7 +132,7 @@ public class RecipesCommand implements CommandExecutor, TabCompleter {
 
     private Player resolveOptionalPlayer(CommandSender sender, String[] args, int argIndex) {
         if (args.length > argIndex) {
-            Player p = Bukkit.getPlayer(args[argIndex]);
+            Player p = Bukkit.getPlayerExact(args[argIndex]);
             if (p == null) {
                 sender.sendMessage(lang().get("commands.player_not_found", "name", args[argIndex]));
             }

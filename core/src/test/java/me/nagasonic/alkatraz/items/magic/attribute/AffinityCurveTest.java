@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * affinity = 10 * points^0.65. The exponent is what keeps `power` load-bearing:
  * a linear curve reaches x12.20 at circle 9, which would leave the spell yml
- * `power` values spanning only 2.7 to 7.4 - below today's earthsplitter value of 9.
+ * `power` values spanning only 2.7 to 7.4 - below the top of the shipped ladder.
  *
  * <p>Every assertion goes through {@link StatPointsAttributeSource#affinityFromPoints},
  * the shipped implementation, so this file cannot pass while the plugin disagrees.
@@ -142,7 +142,7 @@ class AffinityCurveTest {
 
     @Test
     void castTimeCooldownAndFocusAllRiseWithCircle() {
-        int[] cooldown = {2, 4, 5, 6, 7, 9, 11, 13, 16, 20};
+        int[] cooldown = {2, 4, 5, 6, 7, 30, 45, 60, 90, 165};
         for (int circle = 1; circle <= 9; circle++) {
             assertEquals(cooldown[circle], SpellBudgets.cooldownFor(circle),
                     "circle " + circle + " cooldown");

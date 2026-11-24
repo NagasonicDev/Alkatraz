@@ -37,7 +37,7 @@ public class MenuListener implements Listener {
         Menu menu = Menu.getActiveMenu(player);
         if (menu == null) return;
 
-        if (!menu.matches(event.getView().getTitle())) return;
+        if (!menu.matches(event.getView().getTopInventory())) return;
 
         Inventory top = event.getView().getTopInventory();
         int raw = event.getRawSlot();
@@ -101,26 +101,26 @@ public class MenuListener implements Listener {
         Menu menu = Menu.getActiveMenu(player);
         if (menu == null) return;
 
-        if (!menu.matches(event.getView().getTitle())) return;
+        if (!menu.matches(event.getView().getTopInventory())) return;
 
         // Edit menus: a drag that stays inside the player's own inventory is a plain
         // rearrangement and is allowed to proceed. A drag that touches any top (menu)
-        // slot is cancelled and resolved manually by the menu, so items are only ever
-        // placed into declared drop zones (never into border/fill slots).
+        // slot is cancelled: for edit menus it is resolved manually by the menu, for
+        // all other menus it is simply blocked so items can never be dragged into a
+        // menu inventory and discarded on close.
         Inventory top = event.getView().getTopInventory();
-        Set<Integer> dropZones = menu.dropZoneSlots();
-        if (!dropZones.isEmpty()) {
-            boolean touchesTop = false;
-            for (int slot : event.getRawSlots()) {
-                if (slot < top.getSize()) {
-                    touchesTop = true;
-                    break;
-                }
+        boolean touchesTop = false;
+        for (int slot : event.getRawSlots()) {
+            if (slot < top.getSize()) {
+                touchesTop = true;
+                break;
             }
-            if (!touchesTop) {
-                return;
-            }
-            event.setCancelled(true);
+        }
+        if (!touchesTop) {
+            return;
+        }
+        event.setCancelled(true);
+        if (!menu.dropZoneSlots().isEmpty()) {
             menu.onDrag(event);
         }
     }
@@ -130,7 +130,7 @@ public class MenuListener implements Listener {
         if (!(event.getPlayer() instanceof Player player)) return;
 
         Menu menu = Menu.getActiveMenu(player);
-        if (menu != null && menu.matches(event.getView().getTitle())) {
+        if (menu != null && menu.matches(event.getView().getTopInventory())) {
             try {
                 Menu.removeActiveMenu(player);
                 menu.onClose();
@@ -151,6 +151,8 @@ public class MenuListener implements Listener {
         EquipmentMenu.clearPending(event.getPlayer());
         EditorSession.remove(uuid);
         EngravingSession.remove(uuid);
+        RecipeEditorSession recipeSession = RecipeEditorSession.get(uuid);
+        if (recipeSession != null) recipeSession.returnDropItems(event.getPlayer());
         RecipeEditorSession.remove(uuid);
         EditorChatHandler.clear(uuid);
         RecipeChatHandler.clear(uuid);
@@ -165,6 +167,8 @@ public class MenuListener implements Listener {
         EquipmentMenu.clearAllPending();
         EditorSession.clearAll();
         EngravingSession.clearAll();
+        // No online player to return staged items to on disable; at least persist config work.
+        RecipeEditorSession.saveAll();
         RecipeEditorSession.clearAll();
         EditorChatHandler.clearAll();
         RecipeChatHandler.clearAll();

@@ -33,6 +33,7 @@ import me.nagasonic.alkatraz.progression.ProgressionService;
 import me.nagasonic.alkatraz.progression.BoosterManager;
 import me.nagasonic.alkatraz.progression.ProgressionMultiplierService;import me.nagasonic.alkatraz.spells.Spell;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
+import me.nagasonic.alkatraz.spells.util.TeleportSafety;
 import me.nagasonic.alkatraz.spells.effect.ActiveEffect;
 import me.nagasonic.alkatraz.spells.effect.EffectKind;
 import me.nagasonic.alkatraz.spells.effect.EffectRegistry;
@@ -89,6 +90,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
             case "stats" -> handleStats(sender, args);
             case "reload" -> handleReload(sender, args);
             case "castmode", "mode" -> handleCastMode(sender, args);
+            case "teleportconsent", "tpconsent" -> handleTeleportConsent(sender);
             case "summon" -> handleSummon(sender, args);
             case "equipment", "eq" -> handleEquipment(sender, args);
             case "convert" -> handleConvert(sender, args);
@@ -247,7 +249,8 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                 defKey = MagicKeys.alkatraz("wooden_wand");
             }
             MagicItemInstance instance = MagicItemInstance.createDefault(defKey);
-            instance.putCustomData("mana", NBT.get(stack, nbt -> nbt.hasTag("mana") ? nbt.getDouble("mana") : 0.0));
+            double legacyMana = NBT.get(stack, nbt -> nbt.hasTag("mana") ? nbt.getDouble("mana") : 0.0);
+            instance.putCustomData("mana", Double.isFinite(legacyMana) ? Math.max(0, legacyMana) : 0.0);
 
             MagicItemStack.writeInstance(stack, instance);
 
@@ -430,7 +433,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                 p.sendMessage(lang().get("commands.stats_no_permission"));
                 return;
             }
-            Player target = Bukkit.getPlayer(args[1]);
+            Player target = Bukkit.getPlayerExact(args[1]);
             if (target == null) {
                 p.sendMessage(lang().get("commands.player_not_found", "name", args[1]));
                 return;
@@ -468,6 +471,21 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
         // ItemStacks built from it, so rebuilding them any earlier would reuse the old codes.
         TexturePackManager.reload();
         GUIItemRegistry.reload();
+        // Capture per-player spell modifiers before the reload clears them; they
+        // are re-applied after the spell maps are replaced (see the re-apply block).
+        java.util.Map<java.util.UUID, List<MagicProfile.SpellModifier>> snapSpellMods = new java.util.HashMap<>();
+        java.util.Map<MagicProfile.SpellModifier, String> snapSpellModTypes = new java.util.HashMap<>();
+        for (org.bukkit.entity.Player _sp : org.bukkit.Bukkit.getOnlinePlayers()) {
+            MagicProfile _smp = ProfileManager.getProfile(_sp, MagicProfile.class);
+            if (_smp == null) continue;
+            List<MagicProfile.SpellModifier> _smods = _smp.getAllSpellModifiers();
+            if (_smods.isEmpty()) continue;
+            snapSpellMods.put(_sp.getUniqueId(), new ArrayList<>(_smods));
+            for (MagicProfile.SpellModifier _sm : _smods) {
+                String _smt = _smp.getSpellModifierType(_sm);
+                if (_smt != null) snapSpellModTypes.put(_sm, _smt);
+            }
+        }
         // Revoke stale effect/modifier handles before spell definitions are replaced.
         EffectRegistry.clearAll();
         ModifierManager.clear();
@@ -479,15 +497,33 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
             if (_mp != null) _mp.clearAllSpellModifiers();
         }
         SpellRegistry.reload();
+        // Re-apply the spell modifiers captured above: the reload clears them, but
+        // Spell.getModifiedStat reads them off the player profile.
+        for (java.util.Map.Entry<java.util.UUID, List<MagicProfile.SpellModifier>> _e : snapSpellMods.entrySet()) {
+            org.bukkit.entity.Player _rp2 = org.bukkit.Bukkit.getPlayer(_e.getKey());
+            if (_rp2 == null) continue;
+            MagicProfile _rmp = ProfileManager.getProfile(_rp2, MagicProfile.class);
+            if (_rmp == null) continue;
+            for (MagicProfile.SpellModifier _rm : _e.getValue()) {
+                _rmp.setSpellModifier(_rm);
+                String _rmt = snapSpellModTypes.get(_rm);
+                if (_rmt != null) _rmp.setSpellModifierType(_rm, _rmt);
+            }
+        }
         MagicEntities.clearSpellCache();
         me.nagasonic.alkatraz.items.magic.equipment.EquipmentService.invalidateAll();
         ProgressionService.reload();
+        me.nagasonic.alkatraz.progression.research.ResearchService.reload();
+        for (org.bukkit.entity.Player _rp : org.bukkit.Bukkit.getOnlinePlayers()) {
+            me.nagasonic.alkatraz.progression.research.ResearchService.applyCompletedRewards(_rp);
+        }
         me.nagasonic.alkatraz.progression.BoosterManager.onReload();
         MagicEntities.registerProfiles();
         MagicBrainService brainService = MagicBrainService.getInstance();
         if (brainService != null) brainService.reloadBrains();
         MagicItemBootstrap.reload();
-        new PeriodicTriggerListener().start();
+        // Restarted in finally below, not here: an exception above must not leave
+        // periodic triggers permanently stopped. start() cancels the previous task.
         // Spellbook weights are baked into ItemStack NBT at build time, and registerAll()
         // only ran from onEnable, so loot.yml edits did nothing until a restart. Rebuilding
         // here fixes every roll generated from now on. Books already in an inventory or
@@ -505,6 +541,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
         refreshStaticCompletions();
         sender.sendMessage(lang().get("commands.reload_success"));
         } finally {
+            new PeriodicTriggerListener().start();
             me.nagasonic.alkatraz.playerdata.profiles.ProfileManager.endReload();
         }
     }
@@ -552,7 +589,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
     private SummonTarget resolveSummonTarget(CommandSender sender, String[] args, int argIndex) {
         if (args.length > argIndex) {
             String raw = args[argIndex];
-            Player player = Bukkit.getPlayer(raw);
+            Player player = Bukkit.getPlayerExact(raw);
             if (player != null) return new SummonTarget(player.getLocation(), player.getName());
             String[] coords = raw.split(",");
             if (coords.length == 3) {
@@ -598,6 +635,16 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
         castModeProfile.setString("castMode", mode);
         ProfileManager.saveProfile(castModeProfile);
         sender.sendMessage(lang().get("commands.cast_mode_set", "mode", mode));
+    }
+
+    private void handleTeleportConsent(CommandSender sender) {
+        if (!(sender instanceof Player p)) {
+            sender.sendMessage(lang().get("commands.player_only"));
+            return;
+        }
+        boolean enabled = TeleportSafety.toggleTeleportConsent(p);
+        sender.sendMessage(lang().get(enabled ? "spells.teleport_consent.enabled"
+                : "spells.teleport_consent.disabled"));
     }
 
     private void handleProfile(CommandSender sender, String[] args) {
@@ -856,7 +903,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
                         return;
                     }
                 }
-                if (!Double.isFinite(multiplier) || multiplier <= 0) {
+                if (!Double.isFinite(multiplier) || multiplier <= 0 || multiplier > 100) {
                     sender.sendMessage(lang().get("commands.booster_usage"));
                     return;
                 }
@@ -1009,7 +1056,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
         return t.equals("world") || t.equals("worlds") || t.equals("group") || t.equals("groups");
     }
 
-    private Player resolvePlayer(CommandSender sender, String[] args, int argIndex) {        if (args.length > argIndex) {            Player p = Bukkit.getPlayer(args[argIndex]);
+    private Player resolvePlayer(CommandSender sender, String[] args, int argIndex) {        if (args.length > argIndex) {            Player p = Bukkit.getPlayerExact(args[argIndex]);
             if (p == null) {
                 sender.sendMessage(lang().get("commands.player_not_found", "name", args[argIndex]));
             }
@@ -1062,8 +1109,8 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
         if (Permission.hasPermission(sender, Permission.COMMAND_EDITOR)) list.add("editor");
         if (Permission.hasPermission(sender, Permission.COMMAND_MODIFIER)) list.add("modifier");
         if (Permission.hasPermission(sender, Permission.COMMAND_BOOSTER)) list.add("booster");
-        if (Permission.hasPermission(sender, Permission.COMMAND_CONFIG)) {
-            list.add("config");
+        if (Permission.hasPermission(sender, Permission.COMMAND_CONFIG)) list.add("config");
+        if (Permission.hasPermission(sender, Permission.COMMAND_DIAGNOSE)) {
             list.add("diagnostics");
             list.add("diagnose");
             list.add("diag");
@@ -1073,7 +1120,7 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
         list.add("mode");
         list.add("equipment");
         list.add("eq");
-        if (Permission.hasPermission(sender, Permission.COMMAND_RELOAD)) list.add("test");
+        if (Permission.hasPermission(sender, Permission.COMMAND_DEBUG)) list.add("test");
         return list;
     }
 
@@ -1135,7 +1182,9 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
     }
 
     private List<String> tabProfile(CommandSender sender, String[] args) {
-        if (args.length == 2) return playerNames();
+        // Execution allows self without a permission but others only with COMMAND_PROFILE;
+        // completion must not leak online names to senders who could not view them.
+        if (args.length == 2 && Permission.hasPermission(sender, Permission.COMMAND_PROFILE)) return playerNames();
         return List.of();
     }
 

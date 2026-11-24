@@ -12,6 +12,7 @@ import me.nagasonic.alkatraz.gui.implementation.GrimoirePageMenu;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -49,6 +50,10 @@ public class GrimoireComponentHandler implements ComponentHandler {
     }
 
     public static void openLectern(Player player, ItemStack grimoireStack, MagicItemInstance instance, ItemDefinition definition) {
+        if (player.getOpenInventory().getType() == InventoryType.CRAFTING) {
+            new GrimoirePageMenu(player, grimoireStack, instance, definition).open();
+            return;
+        }
         ensurePagesInitialized(instance, definition);
 
         List<String> pages = GrimoirePageMenu.getPagesStatic(instance);

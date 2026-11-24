@@ -185,7 +185,7 @@ public class SpellbookConfig {
      * Highest circle a random ELEMENT spellbook from {@code sourceKey} may contain.
      *
      * <p>An element book with no cap can roll any spell of that element at any circle,
-     * so a blaze's FIRE book could hand over {@code inferno_rite} - circle 9, 600 mana
+     * so a blaze's FIRE book could hand over {@code starfall_cataclysm} - circle 9, 600 mana
      * - off a mob whose own signature drop is {@code fire_blast} at circle 2.
      *
      * <p>The rule applied to every one of the 25 call sites is that the cap equals the

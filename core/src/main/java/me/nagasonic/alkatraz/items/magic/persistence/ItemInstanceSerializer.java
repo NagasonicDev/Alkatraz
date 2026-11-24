@@ -44,6 +44,9 @@ public final class ItemInstanceSerializer {
         if (version <= 0) {
             throw new IllegalStateException("Missing or invalid magic item data-version");
         }
+        if (version > ItemDataVersion.CURRENT) {
+            throw new IllegalStateException("Magic item data-version " + version + " is newer than supported " + ItemDataVersion.CURRENT);
+        }
 
         MagicItemInstance migrated = parseVersion(yaml, version);
         return migrateForward(migrated, version);
@@ -55,7 +58,14 @@ public final class ItemInstanceSerializer {
         }
 
         String rawInstanceId = yaml.getString(ROOT + ".instance-id");
-        UUID instanceId = rawInstanceId != null ? UUID.fromString(rawInstanceId) : null;
+        UUID instanceId = null;
+        if (rawInstanceId != null) {
+            try {
+                instanceId = UUID.fromString(rawInstanceId);
+            } catch (IllegalArgumentException ex) {
+                throw new IllegalStateException("Invalid magic item instance-id", ex);
+            }
+        }
         NamespacedKey definitionKey = MagicKeys.require(yaml.getString(ROOT + ".definition-key"));
         List<NamespacedKey> modifiers = parseKeys(yaml.getStringList(ROOT + ".modifiers"));
         List<Engraving> engravings = parseEngravings(yaml.getMapList(ROOT + ".engravings"));
@@ -84,12 +94,15 @@ public final class ItemInstanceSerializer {
         return list;
     }
 
+    private static final int MAX_ENGRAVINGS = 16;
+
     private static List<Engraving> parseEngravings(List<Map<?, ?>> raw) {
         if (raw == null || raw.isEmpty()) {
             return List.of();
         }
         List<Engraving> engravings = new ArrayList<>();
         for (Map<?, ?> entry : raw) {
+            if (engravings.size() >= MAX_ENGRAVINGS) break;
             Object engravingKeyObj = entry.get("engraving_key");
             Object triggerKeyObj = entry.get("trigger_key");
             if (engravingKeyObj == null || triggerKeyObj == null) continue;

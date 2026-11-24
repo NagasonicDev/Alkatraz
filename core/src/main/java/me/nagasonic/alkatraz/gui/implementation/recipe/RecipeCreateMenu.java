@@ -34,6 +34,7 @@ public class RecipeCreateMenu extends Menu {
     private RecipeType type = RecipeType.SHAPED;
     private ItemStack result;
     private String recipeKey;
+    private boolean resultOwned;
 
     private final AlkatrazRecipe source; // null = create; non-null = duplicate
 
@@ -112,15 +113,19 @@ public class RecipeCreateMenu extends Menu {
             if (action == InventoryAction.PLACE_ONE || action == InventoryAction.PLACE_ALL) {
                 ItemStack cursor = event.getCursor();
                 if (cursor != null && cursor.getType() != Material.AIR) {
+                    returnResultItem(result);
                     result = cursor.clone();
                     result.setAmount(1);
+                    resultOwned = true;
                     ItemStack remaining = cursor.clone();
                     remaining.setAmount(cursor.getAmount() - 1);
                     viewer.setItemOnCursor(remaining.getAmount() > 0 ? remaining : null);
                     refresh();
                 }
             } else if (action == InventoryAction.PICKUP_HALF || action == InventoryAction.COLLECT_TO_CURSOR) {
+                returnResultItem(result);
                 result = null;
+                resultOwned = false;
                 refresh();
             }
             return true;
@@ -195,12 +200,21 @@ public class RecipeCreateMenu extends Menu {
             }
         }
         if (!touchesResult) return;
+        returnResultItem(result);
         result = dragged.clone();
         result.setAmount(1);
+        resultOwned = true;
         inventory.setItem(RESULT_SLOT, result.clone());
         ItemStack remaining = dragged.clone();
         remaining.setAmount(dragged.getAmount() - 1);
         viewer.setItemOnCursor(remaining.getAmount() > 0 ? remaining : null);
+    }
+
+    private void returnResultItem(ItemStack old) {
+        if (old == null || !resultOwned) return;
+        viewer.getInventory().addItem(old.clone())
+                .values().forEach(leftover ->
+                        viewer.getWorld().dropItemNaturally(viewer.getLocation(), leftover));
     }
 
     @Override
@@ -209,11 +223,12 @@ public class RecipeCreateMenu extends Menu {
     }
 
     private void returnResult() {
-        if (result != null && source == null) {
+        if (result != null && resultOwned) {
             viewer.getInventory().addItem(result.clone())
                     .values().forEach(leftover ->
                             viewer.getWorld().dropItemNaturally(viewer.getLocation(), leftover));
             result = null;
+            resultOwned = false;
         }
     }
 
@@ -258,6 +273,7 @@ public class RecipeCreateMenu extends Menu {
         if (source == null) {
             result = null;
         }
+        resultOwned = false;
         RecipeRegistry.reload();
         viewer.playSound(viewer.getLocation(), Sound.BLOCK_ANVIL_USE, 1.0f, 1.0f);
         viewer.sendMessage(lang().get(source != null ? "recipes.duplicated" : "recipes.created", "key", key.toString()));

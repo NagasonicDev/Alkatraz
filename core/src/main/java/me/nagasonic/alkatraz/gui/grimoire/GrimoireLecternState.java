@@ -60,5 +60,4 @@ public class GrimoireLecternState {
     public int getCurrentPage() { return currentPage; }
     public void setCurrentPage(int page) { this.currentPage = page; }
     public String getCastToken() { return castToken; }
-    public void setCastToken(String token) { this.castToken = token; }
 }

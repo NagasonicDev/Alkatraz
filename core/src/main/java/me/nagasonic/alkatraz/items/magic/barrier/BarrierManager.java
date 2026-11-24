@@ -27,8 +27,8 @@ public final class BarrierManager {
         scheduled = true;
         tickTask = Alkatraz.getInstance().getServer().getScheduler().runTaskTimer(Alkatraz.getInstance(), () -> {
             if (SESSIONS.isEmpty()) return;
-            for (Map<String, BarrierSession> byItem : new ArrayList<>(SESSIONS.values())) {
-                for (BarrierSession session : new ArrayList<>(byItem.values())) {
+            for (Map<String, BarrierSession> byItem : SESSIONS.values()) {
+                for (BarrierSession session : byItem.values()) {
                     if (session == null) continue;
                     org.bukkit.entity.Player caster = session.getCasterPlayer();
                     if (session.isDisposed() || caster == null || !caster.isOnline()) {

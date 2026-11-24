@@ -50,9 +50,7 @@ public class ResearchGraphMenu extends Menu {
         }
     }
 
-    private record CachedItem(ItemStack item, int source) {}
-
-    private static final Map<String, CachedItem> NODE_CACHE = new ConcurrentHashMap<>();
+    private static final Map<String, ItemStack> NODE_CACHE = new ConcurrentHashMap<>();
     private static final Map<String, ItemStack> CONNECTOR_CACHE = new ConcurrentHashMap<>();
     private static final int NODE_CACHE_LIMIT = 4096;
     private static int connectorToken = Integer.MIN_VALUE;
@@ -375,9 +373,6 @@ public class ResearchGraphMenu extends Menu {
     }
 
     private ItemStack createNodeItem(ResearchNode node, ResearchState state) {
-        int source = System.identityHashCode(node);
-        CachedItem cached;
-
         Material material = switch (state) {
             case HIDDEN -> Material.RED_DYE;
             case LOCKED -> Material.RED_CONCRETE;
@@ -400,8 +395,8 @@ public class ResearchGraphMenu extends Menu {
         }
         int nodeTexture = TexturePackManager.getResearchNodeCMD(node.getId());
         String cacheKey = node.getId() + "|" + state + "|" + nodeTexture;
-        cached = NODE_CACHE.get(cacheKey);
-        if (cached != null && cached.source() == source) return cached.item();
+        ItemStack cached = NODE_CACHE.get(cacheKey);
+        if (cached != null) return cached;
 
         ItemBuilder builder = ItemBuilder.of(material);
         if (nodeTexture > 0) builder.customModelData(nodeTexture);
@@ -417,7 +412,7 @@ public class ResearchGraphMenu extends Menu {
             var it = NODE_CACHE.keySet().iterator();
             if (it.hasNext()) NODE_CACHE.remove(it.next());
         }
-        NODE_CACHE.put(cacheKey, new CachedItem(item, source));
+        NODE_CACHE.put(cacheKey, item);
         return item;
     }
 

@@ -159,10 +159,10 @@ public abstract class Menu {
     }
 
     /**
-     * Checks if an inventory matches this menu's title
+     * Checks if an inventory is this menu's own inventory (identity, not title).
      */
-    public boolean matches(String inventoryTitle) {
-        return inventoryTitle.equals(title);
+    public boolean matches(Inventory inv) {
+        return inv != null && inv.equals(inventory);
     }
 
     // Helper methods for NBT data storage in items

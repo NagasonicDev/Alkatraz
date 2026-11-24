@@ -7,6 +7,7 @@ import me.nagasonic.alkatraz.playerdata.SpellHotbarManager;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
 import me.nagasonic.alkatraz.spells.Spell;
+import me.nagasonic.alkatraz.spells.vfx.ChannelRegistry;
 import me.nagasonic.alkatraz.util.WandUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -74,7 +75,7 @@ public final class FocusManager implements Listener {
      * No listener anywhere registers for {@link PlayerFocusChangeEvent}, so the
      * dispatch was pure overhead up to 20x/sec. Flip this to true to restore it.
      */
-    private static volatile boolean fireChangeEvent = true;
+    private static volatile boolean fireChangeEvent = false;
 
     static boolean shouldFireChangeEvent() {
         return fireChangeEvent;
@@ -203,7 +204,7 @@ public final class FocusManager implements Listener {
     // Movement penalty (non-recursive, instant restore)
     // ============================
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onMove(PlayerMoveEvent event) {
         if (!focusEnabled) return;
         Player player = event.getPlayer();
@@ -212,6 +213,9 @@ public final class FocusManager implements Listener {
         if (to == null || from.getWorld() != to.getWorld()) return;
 
         UUID uuid = player.getUniqueId();
+        // A circle 6+ wind-up already interrupts the cast on movement. Do not
+        // also drain focus for the same step; the channel rule is the stricter one.
+        if (ChannelRegistry.isChanneling(uuid)) return;
         MagicProfile profile = ProfileManager.getProfile(uuid, MagicProfile.class);
         if (profile == null) return;
 
@@ -245,10 +249,13 @@ public final class FocusManager implements Listener {
     // Damage-based focus loss
     // ============================
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onDamage(EntityDamageEvent event) {
-        if (!FocusConfig.isEnabled()) return;
+        if (!focusEnabled) return;
         if (!(event.getEntity() instanceof Player player)) return;
+        // Same overlap as onMove: the wind-up cancels the cast on any damage,
+        // so the extra focus loss would be a second punishment for one hit.
+        if (ChannelRegistry.isChanneling(player.getUniqueId())) return;
         double damage = event.getFinalDamage();
         if (damage <= 0) return;
         MagicProfile profile = ProfileManager.getProfile(player.getUniqueId(), MagicProfile.class);

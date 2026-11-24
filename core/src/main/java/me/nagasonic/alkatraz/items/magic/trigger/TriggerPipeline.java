@@ -217,11 +217,6 @@ public final class TriggerPipeline {
         MagicItemRegistries.ITEM_DEFINITIONS.get(instance.definitionKey()).ifPresent(definition ->
                 collectFromDefinition(definition, instance, slot, triggerType, resolved));
 
-        for (org.bukkit.NamespacedKey modifierKey : instance.modifiers()) {
-            MagicItemRegistries.ENGRAVING_DEFINITIONS.get(modifierKey).ifPresent(modifier ->
-                    collectFromEngraving(modifier, instance, slot, triggerType, resolved));
-        }
-
         for (Engraving engraving : instance.engravings()) {
             if (engraving.triggerKey().equals(triggerType)) {
                 MagicItemRegistries.ENGRAVING_DEFINITIONS.get(engraving.engravingKey()).ifPresent(engDef -> {
@@ -245,17 +240,6 @@ public final class TriggerPipeline {
                 resolved.add(new ResolvedBinding(binding, instance, slot));
             }
         }
-    }
-
-    private void collectFromEngraving(
-            EngravingDefinition engraving,
-            MagicItemInstance instance,
-            EquipmentSlot slot,
-            org.bukkit.NamespacedKey triggerType,
-            List<ResolvedBinding> resolved
-    ) {
-        // Legacy: old modifiers may have baked-in trigger bindings
-        // New engravings are handled via instance.engravings() loop above
     }
 
     private record ResolvedBinding(TriggerBinding binding, MagicItemInstance instance, EquipmentSlot slot) {

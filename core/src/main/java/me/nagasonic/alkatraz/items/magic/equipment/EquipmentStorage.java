@@ -282,7 +282,7 @@ public final class EquipmentStorage {
     }
 
     private static File getFile(UUID uuid) {
-        return new File(Alkatraz.getInstance().getDataFolder().getParentFile(),
-                "Alkatraz/" + STORAGE_FOLDER + "/" + uuid + "/equipment.yml");
+        return new File(Alkatraz.getInstance().getDataFolder(),
+                STORAGE_FOLDER + "/" + uuid + "/equipment.yml");
     }
 }

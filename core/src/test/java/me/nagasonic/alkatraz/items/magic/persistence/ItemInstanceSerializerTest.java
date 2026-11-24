@@ -12,6 +12,8 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ItemInstanceSerializerTest {
 
@@ -93,5 +95,28 @@ class ItemInstanceSerializerTest {
 
         assertEquals(1, roundTrip.engravings().size());
         assertEquals(MagicKeys.alkatraz("passive"), roundTrip.engravings().get(0).triggerKey());
+    }
+
+    @Test
+    void deserializeRejectsFutureVersion() {
+        String future = "instance:\n  data-version: " + (ItemDataVersion.CURRENT + 1) + "\n"
+                + "  definition-key: alkatraz:magic_stone\n"
+                + "  modifiers: []\n  engravings: []\n";
+        IllegalStateException ex = assertThrows(IllegalStateException.class,
+                () -> ItemInstanceSerializer.deserialize(future));
+        assertTrue(ex.getMessage().contains("newer than supported"));
+    }
+
+    @Test
+    void deserializeCapsEngravings() {
+        StringBuilder payload = new StringBuilder("instance:\n  data-version: " + ItemDataVersion.CURRENT + "\n"
+                + "  definition-key: alkatraz:magic_stone\n"
+                + "  modifiers: []\n  engravings:\n");
+        for (int i = 0; i < 40; i++) {
+            payload.append("  - engraving_key: alkatraz:eng_").append(i)
+                    .append("\n    trigger_key: alkatraz:on_hit\n");
+        }
+        MagicItemInstance roundTrip = ItemInstanceSerializer.deserialize(payload.toString());
+        assertEquals(16, roundTrip.engravings().size());
     }
 }

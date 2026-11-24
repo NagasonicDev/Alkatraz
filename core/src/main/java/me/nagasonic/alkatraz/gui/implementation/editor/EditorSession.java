@@ -25,6 +25,15 @@ public class EditorSession {
         }
         this.defKey = defKey;
         this.file = new File(Alkatraz.getInstance().getDataFolder(), "magic/items/" + defKey + ".yml");
+        try {
+            String base = new File(Alkatraz.getInstance().getDataFolder(), "magic/items")
+                    .getCanonicalPath() + File.separator;
+            if (!this.file.getCanonicalPath().startsWith(base)) {
+                throw new IllegalArgumentException("Item definition key escapes magic/items: " + defKey);
+            }
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Cannot resolve item file for definition key: " + defKey, e);
+        }
         reload();
         sessions.put(player.getUniqueId(), this);
     }

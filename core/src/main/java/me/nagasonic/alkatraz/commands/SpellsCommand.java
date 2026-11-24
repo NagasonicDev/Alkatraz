@@ -23,15 +23,9 @@ public class SpellsCommand implements CommandExecutor {
         }
         Player p = (Player) sender;
         if (args.length == 1) {
-            if (!Permission.hasPermission(p, Permission.COMMAND_SPELLS_OTHER)){
-                p.sendMessage(lang().get("commands.no_permission"));
-                return true;
-            }
-            if (Bukkit.getPlayer(args[0]) == null) {
-                p.sendMessage(lang().get("commands.player_not_found", "name", args[0]));
-                return true;
-            }
-            p.sendMessage(lang().get("commands.no_permission"));
+            // Viewing another player's spells is not supported by SpellsMenu (viewer-only);
+            // keep the permission node documented but do not pretend to open it.
+            p.sendMessage(lang().get("commands.spells_usage"));
             return true;
         } else if (args.length != 0){
             sender.sendMessage(lang().get("commands.spells_usage"));

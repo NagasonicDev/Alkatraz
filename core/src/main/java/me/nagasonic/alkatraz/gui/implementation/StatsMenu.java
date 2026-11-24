@@ -8,6 +8,7 @@ import me.nagasonic.alkatraz.items.magic.attribute.StatPointsAttributeSource;
 import me.nagasonic.alkatraz.lang.LangManager;
 import me.nagasonic.alkatraz.playerdata.profiles.ProfileManager;
 import me.nagasonic.alkatraz.playerdata.profiles.implementation.MagicProfile;
+import me.nagasonic.alkatraz.spells.types.AttackSpell;
 import me.nagasonic.alkatraz.api.Element;
 import me.nagasonic.alkatraz.texturepack.TexturePackManager;
 import me.nagasonic.alkatraz.util.ColorFormat;
@@ -128,10 +129,13 @@ public class StatsMenu extends Menu {
             case DARK -> Material.ECHO_SHARD;
             default -> Material.BARRIER;
         };
+        double affinity = Math.min(profile.getAffinity(element), AttackSpell.MAX_AFFINITY);
         return ItemBuilder.of(material)
                 .name(lang().get("stats.element_" + element.name().toLowerCase()))
-                .lore(lang().get("stats.affinity", "value", String.format("%.1f", profile.getAffinity(element))),
-                      lang().get("stats.resistance", "value", String.format("%.1f", profile.getResistance(element))))
+                .lore(lang().get("stats.affinity", "value", String.format("%.1f", affinity)),
+                      lang().get("stats.resistance", "value", String.format("%.1f", profile.getResistance(element))),
+                      lang().get("stats.affinity_cap_note", "multiplier",
+                          String.format("%.2f", 1.0 + AttackSpell.MAX_AFFINITY / 100.0)))
                 .build();
     }
 
@@ -237,7 +241,13 @@ public class StatsMenu extends Menu {
             return;
         }
 
-        Element element = Element.valueOf(elementName.toUpperCase());
+        Element element;
+        try {
+            element = Element.valueOf(elementName.toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            return;
+        }
+        if (element == Element.NONE) return;
 
         profile.setStatPoints(profile.getStatPoints() - 1);
 

@@ -40,6 +40,20 @@ public final class CooldownTracker {
 
     public static void markCooldown(UUID actorId, String itemKey, long endMillis) {
         COOLDOWN_ENDS.computeIfAbsent(actorId, k -> new ConcurrentHashMap<>()).put(itemKey, endMillis);
+        if (COOLDOWN_ENDS.size() > 1024) {
+            pruneExpired(System.currentTimeMillis());
+        }
+    }
+
+    /** Drops every expired entry across all actors. */
+    public static void pruneExpired(long nowMillis) {
+        for (Map.Entry<UUID, Map<String, Long>> e : COOLDOWN_ENDS.entrySet()) {
+            Map<String, Long> byItem = e.getValue();
+            byItem.values().removeIf(endsAt -> nowMillis >= endsAt);
+            if (byItem.isEmpty()) {
+                COOLDOWN_ENDS.remove(e.getKey(), byItem);
+            }
+        }
     }
 
     public static void clearCooldown(UUID actorId, String itemKey) {

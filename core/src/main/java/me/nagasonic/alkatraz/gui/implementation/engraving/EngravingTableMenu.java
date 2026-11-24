@@ -61,6 +61,12 @@ public class EngravingTableMenu extends Menu {
         return Alkatraz.getLangManager();
     }
 
+    private static int parseMaxEngravings(Object raw) {
+        if (raw == null) return 1;
+        try { return Math.max(0, Integer.parseInt(raw.toString())); }
+        catch (NumberFormatException ex) { return 1; }
+    }
+
     public EngravingTableMenu(Player viewer) {
         super(viewer, ColorFormat.format(lang().get("menu.engraving_table")), 45);
         this.selecting = true;
@@ -73,7 +79,7 @@ public class EngravingTableMenu extends Menu {
         this.targetInstance = instance;
         this.targetDefinition = definition;
         Object raw = definition.staticConfig().get("max_engravings");
-        this.maxEngravings = raw != null ? Integer.parseInt(raw.toString()) : 1;
+        this.maxEngravings = parseMaxEngravings(raw);
         this.selecting = false;
         EngravingSession.set(viewer.getUniqueId(), new EngravingSession(stack, instance, definition));
     }
@@ -239,7 +245,7 @@ public class EngravingTableMenu extends Menu {
         this.targetInstance = inst.get();
         this.targetDefinition = def.get();
         Object raw = def.get().staticConfig().get("max_engravings");
-        this.maxEngravings = raw != null ? Integer.parseInt(raw.toString()) : 1;
+        this.maxEngravings = parseMaxEngravings(raw);
         this.selecting = false;
         EngravingSession.set(viewer.getUniqueId(), new EngravingSession(clicked, inst.get(), def.get()));
 
@@ -326,7 +332,7 @@ public class EngravingTableMenu extends Menu {
 
         int currentEngravings = session.targetInstance().engravings().size();
         Object rawMax = session.targetDefinition().staticConfig().get("max_engravings");
-        int maxEngravings = rawMax != null ? Integer.parseInt(rawMax.toString()) : 1;
+        int maxEngravings = parseMaxEngravings(rawMax);
         if (currentEngravings >= maxEngravings) {
             viewer.sendMessage(ColorFormat.format("&cEngraving slots are full!"));
             viewer.playSound(viewer.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
@@ -342,23 +348,43 @@ public class EngravingTableMenu extends Menu {
             viewer.playSound(viewer.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
             return false;
         }
-        StatUtils.subMana(viewer, manaCost);
 
+        // Verify the target item is still in the player's inventory before spending anything.
+        boolean targetPresent = false;
+        for (ItemStack invItem : viewer.getInventory().getContents()) {
+            if (invItem == session.targetStack()) { targetPresent = true; break; }
+        }
+        if (!targetPresent) {
+            viewer.sendMessage(ColorFormat.format("&cThat item is no longer in your inventory."));
+            return false;
+        }
+
+        // Find the rune before deducting mana, so a missing rune costs nothing.
         NamespacedKey targetKey = session.selectedEngravingKey();
+        int runeSlot = -1;
         if (targetKey != null) {
             for (int i = 0; i <= 35; i++) {
                 ItemStack invItem = viewer.getInventory().getItem(i);
                 if (invItem == null || invItem.getType() == Material.AIR) continue;
                 Optional<NamespacedKey> key = MagicItemStack.readEngravingKey(invItem);
-                if (key.isPresent() && key.get().equals(targetKey)) {
-                    int amount = invItem.getAmount() - 1;
-                    if (amount <= 0) {
-                        viewer.getInventory().setItem(i, null);
-                    } else {
-                        invItem.setAmount(amount);
-                    }
-                    break;
-                }
+                if (key.isPresent() && key.get().equals(targetKey)) { runeSlot = i; break; }
+            }
+        }
+        if (runeSlot < 0) {
+            viewer.sendMessage(ColorFormat.format("&cThat rune is no longer in your inventory."));
+            viewer.playSound(viewer.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
+            return false;
+        }
+
+        StatUtils.subMana(viewer, manaCost);
+
+        {
+            ItemStack invItem = viewer.getInventory().getItem(runeSlot);
+            int amount = invItem.getAmount() - 1;
+            if (amount <= 0) {
+                viewer.getInventory().setItem(runeSlot, null);
+            } else {
+                invItem.setAmount(amount);
             }
         }
 

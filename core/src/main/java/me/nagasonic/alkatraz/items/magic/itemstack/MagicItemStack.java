@@ -125,8 +125,10 @@ public final class MagicItemStack {
         try {
             return Optional.of(ItemInstanceSerializer.deserialize(rawInstance));
         } catch (Exception e) {
+            // Do not fabricate a default instance: that would be written back and wipe
+            // the item's engravings/mana. Treat a corrupt payload as "no instance".
             Alkatraz.getInstance().getLogger().warning("Skipping corrupt magic item instance: " + e.getMessage());
-            return Optional.of(MagicItemInstance.createDefault(read.definitionKey().get()));
+            return Optional.empty();
         }
     }
 

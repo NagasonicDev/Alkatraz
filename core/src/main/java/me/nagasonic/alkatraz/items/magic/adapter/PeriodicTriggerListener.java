@@ -15,7 +15,6 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Fires periodic engraving triggers: {@code on_interval} every second, and
@@ -25,21 +24,11 @@ public final class PeriodicTriggerListener {
 
     private static final long INTERVAL_TICKS = 20L;
 
-    /**
-     * {@link MagicKeys#alkatraz(String)} allocates a new {@link NamespacedKey} on every
-     * call, which this listener would otherwise do once per player per second.
-     */
-    private static final Map<String, NamespacedKey> KEY_CACHE = new ConcurrentHashMap<>();
-
     private static final NamespacedKey ON_INTERVAL = MagicKeys.alkatraz("on_interval");
     private static final NamespacedKey ON_DAY = MagicKeys.alkatraz("on_day");
     private static final NamespacedKey ON_NIGHT = MagicKeys.alkatraz("on_night");
 
     private final WorldTimeTracker timeTracker = new WorldTimeTracker();
-
-    private static String triggerKey(String path) {
-        return KEY_CACHE.computeIfAbsent(path, MagicKeys::alkatraz).getKey();
-    }
 
     private static BukkitTask periodicTask;
 
@@ -70,25 +59,24 @@ public final class PeriodicTriggerListener {
         boolean nightBound = TriggerPipeline.isBound(ON_NIGHT);
         if (!intervalBound && !dayBound && !nightBound) return;
 
-        String interval = triggerKey("on_interval");
         for (World world : Bukkit.getWorlds()) {
             String transition = timeTracker.update(world.getUID(), world.getTime());
             if (transition == null) continue;
-            boolean transitionBound = ON_NIGHT.getKey().equals(transition) ? nightBound : dayBound;
-            if (!transitionBound) continue;
+            boolean isNight = ON_NIGHT.getKey().equals(transition);
+            if (!(isNight ? nightBound : dayBound)) continue;
             Map<String, Object> params = new HashMap<>();
             params.put("world", world.getName());
-            params.put("is_night", transition.equals(triggerKey("on_night")));
+            params.put("is_night", isNight);
             for (Player player : world.getPlayers()) {
                 if (!EquipmentReconcileTask.wearsMagicItem(player)) continue;
-                TriggerDispatch.dispatch(player, transition, params);
+                TriggerDispatch.dispatch(player, isNight ? ON_NIGHT : ON_DAY, params);
             }
         }
 
         if (!intervalBound) return;
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (!EquipmentReconcileTask.wearsMagicItem(player)) continue;
-            TriggerDispatch.dispatch(player, interval);
+            TriggerDispatch.dispatch(player, ON_INTERVAL, Map.of());
         }
     }
 }

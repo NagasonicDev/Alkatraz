@@ -95,9 +95,7 @@ public final class EquipmentReconcileTask implements Runnable, Listener {
             if (previous != null && previous.longValue() != fingerprint) {
                 fingerprints.put(uuid, fingerprint);
                 EquipmentService.invalidate(uuid);
-                if (wearsMagicItem(player)) {
-                    EquipmentService.markMagicEquipped();
-                }
+                EquipmentService.markMagicEquipped();
                 EquipmentStatService.getInstance().syncEquipmentStats(player);
             }
         }

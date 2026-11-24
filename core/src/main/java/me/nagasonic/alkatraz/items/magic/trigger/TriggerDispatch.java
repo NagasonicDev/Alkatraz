@@ -70,6 +70,14 @@ public final class TriggerDispatch {
                 new InternalTriggerEvent(triggerKey, context));
     }
 
+    /** Dispatch a trigger with an already-resolved key, avoiding the string key cache. */
+    public static void dispatch(LivingEntity actor, org.bukkit.NamespacedKey triggerKey,
+                                Map<String, Object> parameters) {
+        if (!TriggerPipeline.isBound(triggerKey)) return;
+        TriggerContext context = new TriggerContext(actor, null, null, null, null, parameters);
+        MagicItemServices.get().dispatchTrigger(new InternalTriggerEvent(triggerKey, context));
+    }
+
     /** Dispatch a trigger scoped to a specific magic item instance with a target. */
     public static void dispatch(LivingEntity actor, LivingEntity target, MagicItemInstance source,
                                 EquipmentSlot slot, String trigger, Map<String, Object> parameters) {

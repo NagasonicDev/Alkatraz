@@ -198,7 +198,7 @@ public final class BarrierSession extends SpellProperties implements DamageableB
 
     @Override
     public void setCastLocation(Location location) {
-        this.castLocation = location;
+        this.castLocation = location == null ? null : location.clone();
         if (location != null) {
             this.anchor = location.clone();
         }
@@ -325,7 +325,7 @@ public final class BarrierSession extends SpellProperties implements DamageableB
         base.setYaw(raw.getYaw());
         base.setPitch(raw.getPitch());
         this.anchor = base;
-        this.castLocation = base;
+        this.castLocation = base.clone();
     }
 
     private boolean stillEquipped() {
