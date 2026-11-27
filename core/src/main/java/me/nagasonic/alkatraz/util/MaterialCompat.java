@@ -17,8 +17,13 @@ public final class MaterialCompat {
 
     public static Material resolve(String name, Material fallback) {
         if (name == null || name.isBlank()) return fallback;
-        return XMaterial.matchXMaterial(name)
+        Material material = XMaterial.matchXMaterial(name)
                 .map(XMaterial::parseMaterial)
-                .orElse(fallback);
+                .orElse(null);
+        // SCUTE was renamed TURTLE_SCUTE in 1.20.5; XSeries does not alias the two.
+        if (material == null && name.equalsIgnoreCase("TURTLE_SCUTE")) {
+            material = XMaterial.SCUTE.parseMaterial();
+        }
+        return material == null ? fallback : material;
     }
 }
