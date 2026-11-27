@@ -500,7 +500,7 @@ public class SpellbookLoot {
             int w46 = (int) (SpellbookConfig.getMobInt("wither", "spellbook_4_6_weight", 80) * m);
             // DEAD until wave 5, same as the dragon's.
             int w79 = (int) (SpellbookConfig.getMobInt("wither", "spellbook_7_9_weight", 20) * m);
-            // NEW. Hollow King's Court raises a shadow domain of spectral knights, which
+            // NEW. Umbral Oblivion raises a shadow domain of spectral knights, which
             // is the wither's whole necromantic theme, and dark's circle-9 capstone has
             // no other mob source.
             int specific = (int) (SpellbookConfig.getMobInt("wither", "specific_spellbook_weight", 25) * m);

@@ -31,7 +31,7 @@ power: 8
 # HOW MANY COMETS STRIKE IN A SINGLE CAST
 hit_count: 3
 
-# BURST - comets strike; safe ascent belongs to Circle 9 Starfall Cataclysm
+# BURST - comets strike; safe ascent belongs to Circle 9 Infernal Sovereignty
 role: 'BURST'
 
 #THE COLOR OF THE SPELL MASTERY BOSSBAR. OPTIONS ARE: RED, BLUE, YELLOW, PINK, PURPLE, WHITE AND GREEN

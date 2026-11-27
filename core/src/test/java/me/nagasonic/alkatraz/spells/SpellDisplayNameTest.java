@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -38,6 +39,12 @@ class SpellDisplayNameTest {
 
     private static final Pattern AMPERSAND_COLOR = Pattern.compile("&[0-9a-fk-orA-FK-ORxX]");
     private static final Pattern HEX_COLOR = Pattern.compile("&?#[0-9a-fA-F]{6}");
+
+    // The six elemental circle-9 capstones keep their ids stable but carry curated display
+    // names, so the id-as-words rule below does not apply to them. world_gate is not one.
+    private static final Set<String> CURATED_NAMES = Set.of(
+            "atlasunbound", "covenantofthefirstdawn", "empyreanpassage", "hollowkingscourt",
+            "leviathanstestament", "starfallcataclysm");
 
     private static List<String> roster;
     private static Map<String, String> messages;
@@ -73,11 +80,29 @@ class SpellDisplayNameTest {
             assertNotNull(name,
                     key + " is missing from english.lang, so Spell.loadCommonConfig leaves the spell "
                             + "nameless in the /spells GUI");
+            if (CURATED_NAMES.contains(id.replace("_", ""))) {
+                continue;
+            }
             assertEquals(nameOf(id), comparable(name),
                     key + " calls itself '" + name + "'. A spell's name is the SPELL's name and must read "
                             + "as the id; the book's own title is spells." + id.replace("_", "") + ".book_name "
                             + "and is a different key. light_bolt carried its book_name here, "
                             + "and some spells carried their Java class name");
+        }
+    }
+
+    /** The capstone exception above is pinned so it cannot hide an accidental rename. */
+    @Test
+    void circleNineCapstonesUseTheirCuratedNames() {
+        Map<String, String> expected = Map.of(
+                "atlasunbound", "&2Primordial Bastion",
+                "covenantofthefirstdawn", "&eEmpyrean Ascendance",
+                "empyreanpassage", "&fCelestial Expanse",
+                "hollowkingscourt", "&5Umbral Oblivion",
+                "leviathanstestament", "&9Abyssal Dominion",
+                "starfallcataclysm", "&cInfernal Sovereignty");
+        for (Map.Entry<String, String> entry : expected.entrySet()) {
+            assertEquals(entry.getValue(), messages.get("spells." + entry.getKey() + ".name"));
         }
     }
 }

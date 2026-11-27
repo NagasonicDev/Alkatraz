@@ -315,7 +315,7 @@ loot:
       spellbook_4_6_weight: 80
       # WAS DEAD, same as the dragon's. Works from wave 5.
       spellbook_7_9_weight: 20
-      # Hollow King's Court raises a shadow domain of spectral knights, which is the
+      # Umbral Oblivion raises a shadow domain of spectral knights, which is the
       # wither's whole necromantic theme, and dark's circle-9 capstone has no other mob source.
       specific_spell: 'hollow_kings_court'
       specific_spellbook_weight: 25
