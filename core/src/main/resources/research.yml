@@ -64,8 +64,8 @@ nodes:
     icon: LAPIS_LAZULI
     research_points_cost: 25
     position:
-      x: 0
-      y: -3
+      x: -3
+      y: 2
     description:
     - Learn to hold power without letting it leak away.
     - Patient casting creates stronger work than haste.
@@ -92,8 +92,8 @@ nodes:
     icon: ENCHANTING_TABLE
     research_points_cost: 25
     position:
-      x: -3
-      y: -2
+      x: -1
+      y: 2
     description:
     - Place symbols in patterns that mana can follow.
     - A good ritual is a map, not a miracle.
@@ -114,18 +114,14 @@ nodes:
     - Opens structured research techniques.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      awakened_focus:
-      - x: -3
-        y: 0
   spellcraft_field_notes:
     display_name: '&aSpellcraft Field Notes'
     category: magic
     icon: WRITABLE_BOOK
     research_points_cost: 25
     position:
-      x: 3
-      y: -2
+      x: 1
+      y: 2
     description:
     - Record how spells behave outside the safety of theory.
     - Useful notes separate study from guesswork.
@@ -146,18 +142,14 @@ nodes:
     - Strengthens all elemental practice.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      awakened_focus:
-      - x: 3
-        y: 0
   disciplined_channel:
     display_name: '&dDisciplined Channel'
     category: magic
     icon: NETHER_STAR
     research_points_cost: 75
     position:
-      x: 0
-      y: 3
+      x: -5
+      y: 4
     description:
     - Bring theory, field notes, and ritual discipline together.
     - The channel becomes reliable enough for greater work.
@@ -187,18 +179,6 @@ nodes:
     - Marks the mage as ready for deeper elemental studies.
     visibility:
       hidden_until_available: true
-    edge_paths:
-      mana_conservation:
-      - x: 1
-        y: 3
-      - x: 1
-        y: -3
-      ritual_geometry:
-      - x: -3
-        y: 3
-      spellcraft_field_notes:
-      - x: 3
-        y: 3
   focus_discipline:
     display_name: '&6Focus Discipline'
     category: magic
@@ -206,7 +186,7 @@ nodes:
     research_points_cost: 25
     position:
       x: 3
-      y: 1
+      y: 2
     description:
     - Sharpen your concentration until spells land where you intend.
     - Precision is the bridge between knowledge and power.
@@ -232,18 +212,14 @@ nodes:
     - Opens the path to applied combat magic.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      awakened_focus:
-      - x: 3
-        y: 0
   ward_craft:
     display_name: '&dWard Craft'
     category: magic
     icon: SHIELD
     research_points_cost: 25
     position:
-      x: -3
-      y: 1
+      x: 5
+      y: 2
     description:
     - Shape mana into invisible barriers that bend and redirect force.
     - A ward is a promise that harm will have to try harder.
@@ -264,18 +240,14 @@ nodes:
     - Opens the path to advanced protective magic.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      awakened_focus:
-      - x: -3
-        y: 0
   mana_reservoir:
     display_name: '&bMana Reservoir'
     category: magic
     icon: LAPIS_BLOCK
     research_points_cost: 50
     position:
-      x: 0
-      y: -6
+      x: -3
+      y: 4
     description:
     - Expand the inner vessel until it holds far more than seems possible.
     - A deep reservoir lets you cast without counting every drop.
@@ -302,18 +274,14 @@ nodes:
     - Unlocks deeper mana studies.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      ritual_geometry:
-      - x: -3
-        y: -6
   spell_resonance:
     display_name: '&eSpell Resonance'
     category: magic
     icon: ECHO_SHARD
     research_points_cost: 60
     position:
-      x: 5
-      y: -3
+      x: 1
+      y: 4
     description:
     - Find the frequency at which spells amplify each other.
     - Resonance turns a whisper into a roar.
@@ -335,18 +303,14 @@ nodes:
     - Unlocks the study of spell combination.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      spellcraft_field_notes:
-      - x: 5
-        y: -2
   combat_casting:
     display_name: '&cCombat Casting'
     category: magic
     icon: IRON_SWORD
     research_points_cost: 60
     position:
-      x: 5
-      y: 3
+      x: 3
+      y: 4
     description:
     - Apply spells under pressure when every second matters.
     - The battlefield is the harshest teacher, but the most honest.
@@ -375,17 +339,13 @@ nodes:
     - Unlocks mastery of magical warfare.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      focus_discipline:
-      - x: 5
-        y: 1
   mana_conduit:
     display_name: '&9Mana Conduit'
     category: magic
     icon: PRISMARINE_CRYSTALS
     research_points_cost: 75
     position:
-      x: 0
+      x: -5
       y: 6
     description:
     - Channel raw mana through your body until it flows without friction.
@@ -413,20 +373,14 @@ nodes:
     - Unlocks the deepest mana channeling.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      disciplined_channel:
-      - x: 1
-        y: 6
-      - x: 1
-        y: 3
   barrier_weave:
     display_name: '&5Barrier Weave'
     category: magic
     icon: IRON_DOOR
     research_points_cost: 50
     position:
-      x: -5
-      y: 3
+      x: 5
+      y: 4
     description:
     - Weave multiple protective wards into a single unbreakable lattice.
     - A strong barrier is not one thick wall, but many thin ones.
@@ -448,23 +402,14 @@ nodes:
     - Unlocks the grand defensive traditions.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      disciplined_channel:
-      - x: -5
-        y: 2
-      - x: 0
-        y: 2
-      ward_craft:
-      - x: -5
-        y: 1
   arcane_theory:
     display_name: '&dArcane Theory'
     category: magic
     icon: BOOK
     research_points_cost: 75
     position:
-      x: -5
-      y: -3
+      x: -1
+      y: 4
     description:
     - Study the underlying mathematics that govern all magic.
     - Theory without practice is empty, but practice without theory is blind.
@@ -493,21 +438,14 @@ nodes:
     - Opens the path to arcane mastery.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      ritual_geometry:
-      - x: -5
-        y: -2
-      ward_craft:
-      - x: -5
-        y: 1
   mana_sovereignty:
     display_name: '&bMana Sovereignty'
     category: magic
     icon: DIAMOND
     research_points_cost: 100
     position:
-      x: 0
-      y: -9
+      x: -3
+      y: 6
     description:
     - Command mana as an extension of your will, without waste or delay.
     - The sovereign does not ask mana to move — it obeys.
@@ -539,20 +477,14 @@ nodes:
     - Achieves the highest level of mana control.
     visibility:
       hidden_until_available: true
-    edge_paths:
-      arcane_theory:
-      - x: -1
-        y: -9
-      - x: -1
-        y: -3
   spell_synthesis:
     display_name: '&aSpell Synthesis'
     category: magic
     icon: END_CRYSTAL
     research_points_cost: 125
     position:
-      x: 8
-      y: -5
+      x: 1
+      y: 6
     description:
     - Combine the principles of resonance and field study into unified expressions.
     - Synthesis turns scattered knowledge into seamless power.
@@ -579,18 +511,14 @@ nodes:
     - Unlocks the synthesis of offensive spellcraft.
     visibility:
       hidden_until_available: true
-    edge_paths:
-      spell_resonance:
-      - x: 7
-        y: -4
   battle_mage:
     display_name: '&cBattle Mage'
     category: magic
     icon: NETHERITE_SWORD
     research_points_cost: 150
     position:
-      x: 8
-      y: 5
+      x: 3
+      y: 6
     description:
     - Become a seamless fusion of martial skill and magical devastation.
     - The battle mage does not choose between sword and spell.
@@ -625,8 +553,8 @@ nodes:
     icon: END_ROD
     research_points_cost: 150
     position:
-      x: 0
-      y: 9
+      x: -5
+      y: 8
     description:
     - Become a living conduit for raw arcane force from the world itself.
     - The nexus draws power from everywhere and sends it where you choose.
@@ -660,20 +588,14 @@ nodes:
     - The pinnacle of arcane understanding.
     visibility:
       hidden_until_available: true
-    edge_paths:
-      combat_casting:
-      - x: 1
-        y: 9
-      - x: 1
-        y: 6
   grand_ward:
     display_name: '&5Grand Ward'
     category: magic
     icon: ENCHANTED_GOLDEN_APPLE
     research_points_cost: 125
     position:
-      x: -8
-      y: 5
+      x: 5
+      y: 6
     description:
     - Construct a defense so thorough that nothing passes without your consent.
     - The grand ward is not a wall — it is a declaration.
@@ -700,20 +622,14 @@ nodes:
     - Mastery of protective magic.
     visibility:
       hidden_until_available: true
-    edge_paths:
-      cinder_ward:
-      - x: -8
-        y: 4
-      - x: -5
-        y: 4
   archmage:
     display_name: '&dArchmage'
     category: magic
     icon: DRAGON_EGG
     research_points_cost: 150
     position:
-      x: -8
-      y: -5
+      x: -1
+      y: 6
     description:
     - Bring all schools of magic together under a single disciplined will.
     - The archmage has nothing left to prove and everything left to create.
@@ -745,13 +661,6 @@ nodes:
     - The ultimate achievement in magical study.
     visibility:
       hidden_until_available: true
-    edge_paths:
-      arcane_theory:
-      - x: -8
-        y: -3
-      barrier_weave:
-      - x: -8
-        y: 3
   fire_spark:
     display_name: '&cKindled Spark'
     category: fire
@@ -793,8 +702,8 @@ nodes:
     icon: FIRE_CHARGE
     research_points_cost: 20
     position:
-      x: 0
-      y: -3
+      x: -3
+      y: 2
     description:
     - Observe how flame behaves when given form and direction.
     - Every fire begins with understanding.
@@ -817,15 +726,13 @@ nodes:
     - Opens advanced fire studies.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      fire_spark:
   heat_siphon:
     display_name: '&6Heat Siphon'
     category: fire
     icon: MAGMA_CREAM
     research_points_cost: 25
     position:
-      x: 3
+      x: -2
       y: 2
     description:
     - Draw residual warmth from your own flames to replenish your reserves.
@@ -849,17 +756,13 @@ nodes:
     - Unlocks efficient fire casting.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      fire_spark:
-      - x: 3
-        y: 0
   smoke_shroud:
     display_name: '&8Smoke Shroud'
     category: fire
     icon: SOUL_CAMPFIRE
     research_points_cost: 20
     position:
-      x: -3
+      x: -1
       y: 2
     description:
     - Wrap yourself in ash and smoke to dull incoming harm.
@@ -883,18 +786,14 @@ nodes:
     - Opens fire defensive studies.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      fire_spark:
-      - x: -3
-        y: 0
   cinder_sigil:
     display_name: '&6Cinder Sigil'
     category: fire
     icon: FLINT_AND_STEEL
     research_points_cost: 25
     position:
-      x: -3
-      y: -1
+      x: 2
+      y: 2
     description:
     - Mark your spells with a sigil that burns brighter on impact.
     - A sigil is a promise of fire to come.
@@ -917,10 +816,6 @@ nodes:
     - Opens fire mastery studies.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      fire_spark:
-      - x: -3
-        y: 0
   water_first_tide:
     display_name: '&9First Tide'
     category: water
@@ -962,8 +857,8 @@ nodes:
     icon: PRISMARINE_SHARD
     research_points_cost: 20
     position:
-      x: 0
-      y: -3
+      x: -3
+      y: 2
     description:
     - Chart the rhythms of tides and currents.
     - Every wave carries knowledge.
@@ -986,15 +881,13 @@ nodes:
     - Deepens understanding of water currents.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      water_first_tide:
   current_sense:
     display_name: '&9Current Sense'
     category: water
     icon: CLOCK
     research_points_cost: 25
     position:
-      x: 3
+      x: -2
       y: 2
     description:
     - Feel the pull of every flowing stream.
@@ -1018,17 +911,13 @@ nodes:
     - Improves mana flow through water attunement.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      water_first_tide:
-      - x: 3
-        y: 0
   frost_ward:
     display_name: '&9Frost Ward'
     category: water
     icon: ICE
     research_points_cost: 20
     position:
-      x: -3
+      x: -1
       y: 2
     description:
     - Cool the blood, shield the spirit.
@@ -1052,18 +941,14 @@ nodes:
     - Hardens resolve against hostile magic.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      water_first_tide:
-      - x: -3
-        y: 0
   depth_mark:
     display_name: '&9Depth Mark'
     category: water
     icon: CONDUIT
     research_points_cost: 25
     position:
-      x: -3
-      y: -1
+      x: 2
+      y: 2
     description:
     - Mark the depth where light fades.
     - True power rests in the dark waters.
@@ -1086,10 +971,6 @@ nodes:
     - Focuses water magic toward specialization.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      water_first_tide:
-      - x: -3
-        y: 0
   earth_stone_memory:
     display_name: '&2Stone Memory'
     category: earth
@@ -1131,8 +1012,8 @@ nodes:
     icon: CRYING_OBSIDIAN
     research_points_cost: 20
     position:
-      x: 0
-      y: -3
+      x: -3
+      y: 2
     description:
     - Feel the tremors deep beneath the surface.
     - Every spell sends ripples through the stone.
@@ -1155,15 +1036,13 @@ nodes:
     - Deepens connection to earth currents.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      earth_stone_memory:
   stonebond_will:
     display_name: '&6Stonebond Will'
     category: earth
     icon: ANVIL
     research_points_cost: 25
     position:
-      x: 3
+      x: -2
       y: 2
     description:
     - Bind stone to purpose until it answers every command.
@@ -1187,17 +1066,13 @@ nodes:
     - Strengthens the caster's bond with earth.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      earth_stone_memory:
-      - x: 3
-        y: 0
   bedrock_ward:
     display_name: '&8Bedrock Ward'
     category: earth
     icon: DEEPSLATE
     research_points_cost: 20
     position:
-      x: -3
+      x: -1
       y: 2
     description:
     - Channel mana into the ground as living armor.
@@ -1221,18 +1096,14 @@ nodes:
     - Provides basic earth shielding.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      earth_stone_memory:
-      - x: -3
-        y: 0
   geode_lore:
     display_name: '&5Geode Lore'
     category: earth
     icon: AMETHYST_SHARD
     research_points_cost: 25
     position:
-      x: -3
-      y: -1
+      x: 2
+      y: 2
     description:
     - Study the crystalline chambers hidden within stone.
     - Geodes hold knowledge older than any library.
@@ -1255,10 +1126,6 @@ nodes:
     - Reveals hidden pathways in earth magic.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      earth_stone_memory:
-      - x: -3
-        y: 0
   air_open_breath:
     display_name: '&fOpen Breath'
     category: air
@@ -1300,8 +1167,8 @@ nodes:
     icon: PHANTOM_MEMBRANE
     research_points_cost: 20
     position:
-      x: 0
-      y: -3
+      x: -3
+      y: 2
     description:
     - Chase the small currents others ignore.
     - Wisps carry the shape of larger storms.
@@ -1324,15 +1191,13 @@ nodes:
     - Deepens connection to air currents.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      air_open_breath:
   static_cast:
     display_name: '&fStatic Cast'
     category: air
     icon: LIGHTNING_ROD
     research_points_cost: 25
     position:
-      x: 3
+      x: -2
       y: 2
     description:
     - Channel the charge between storm clouds into your spells.
@@ -1356,17 +1221,13 @@ nodes:
     - Harnesses the offensive side of wind.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      air_open_breath:
-      - x: 3
-        y: 0
   squall_ward:
     display_name: '&fSquall Ward'
     category: air
     icon: WHITE_WOOL
     research_points_cost: 20
     position:
-      x: -3
+      x: -1
       y: 2
     description:
     - Turn moving air into a protective shell.
@@ -1390,18 +1251,14 @@ nodes:
     - Strengthens air-based defenses.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      air_open_breath:
-      - x: -3
-        y: 0
   wind_theory:
     display_name: '&fWind Theory'
     category: air
     icon: FEATHER
     research_points_cost: 25
     position:
-      x: -3
-      y: -1
+      x: 2
+      y: 2
     description:
     - Study the mathematics of pressure differentials.
     - Wind is energy seeking balance.
@@ -1424,10 +1281,6 @@ nodes:
     - Advances understanding of wind currents.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      air_open_breath:
-      - x: -3
-        y: 0
   light_first_lantern:
     display_name: '&eFirst Lantern'
     category: light
@@ -1469,8 +1322,8 @@ nodes:
     icon: GLOWSTONE_DUST
     research_points_cost: 20
     position:
-      x: 0
-      y: -3
+      x: -3
+      y: 2
     description:
     - Observe how light bends through crystal and memory.
     - Every refraction teaches a new angle of healing.
@@ -1493,15 +1346,13 @@ nodes:
     - Deepens connection to radiant energy.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      light_first_lantern:
   blessed_will:
     display_name: '&eBlessed Will'
     category: light
     icon: CRAFTING_TABLE
     research_points_cost: 25
     position:
-      x: 3
+      x: -2
       y: 2
     description:
     - Shape raw materials with restorative intent.
@@ -1523,17 +1374,13 @@ nodes:
     - Channels light through creation.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      light_first_lantern:
-      - x: 3
-        y: 0
   aegis_light:
     display_name: '&eAegis Light'
     category: light
     icon: SHIELD
     research_points_cost: 20
     position:
-      x: -3
+      x: -1
       y: 2
     description:
     - Weave light into a protective shell around yourself.
@@ -1557,18 +1404,14 @@ nodes:
     - Strengthens light-based defenses.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      light_first_lantern:
-      - x: -3
-        y: 0
   luminarch_theory:
     display_name: '&eLuminarch Theory'
     category: light
     icon: BOOK_AND_QUILL
     research_points_cost: 25
     position:
-      x: -3
-      y: -1
+      x: 2
+      y: 2
     description:
     - Study the architecture of sustained illumination.
     - Light that endures is light that understands itself.
@@ -1591,10 +1434,6 @@ nodes:
     - Advances understanding of radiant energy.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      light_first_lantern:
-      - x: -3
-        y: 0
   dark_quiet_shadow:
     display_name: '&8Quiet Shadow'
     category: dark
@@ -1636,8 +1475,8 @@ nodes:
     icon: ECHO_SHARD
     research_points_cost: 20
     position:
-      x: 0
-      y: -3
+      x: -3
+      y: 2
     description:
     - Peer into the darkness until it peers back.
     - Shadow reveals what light conceals.
@@ -1660,15 +1499,13 @@ nodes:
     - Deepens connection to shadow currents.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      dark_quiet_shadow:
   night_harvest:
     display_name: '&5Night Harvest'
     category: dark
     icon: WITHER_SKELETON_SKULL
     research_points_cost: 25
     position:
-      x: 3
+      x: -2
       y: 2
     description:
     - Reap what the darkness sows in combat.
@@ -1692,17 +1529,13 @@ nodes:
     - Harvests the offensive side of darkness.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      dark_quiet_shadow:
-      - x: 3
-        y: 0
   void_ward:
     display_name: '&5Void Ward'
     category: dark
     icon: SCULK_SENSOR
     research_points_cost: 20
     position:
-      x: -3
+      x: -1
       y: 2
     description:
     - Turn the absence of light into a barrier.
@@ -1726,18 +1559,14 @@ nodes:
     - Strengthens dark-based defenses.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      dark_quiet_shadow:
-      - x: -3
-        y: 0
   entropy_theory:
     display_name: '&5Entropy Theory'
     category: dark
     icon: WITHER_ROSE
     research_points_cost: 25
     position:
-      x: -3
-      y: -1
+      x: 2
+      y: 2
     description:
     - Study the mathematics of decay and dissolution.
     - Darkness is energy seeking equilibrium through destruction.
@@ -1760,10 +1589,6 @@ nodes:
     - Advances understanding of entropic forces.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      dark_quiet_shadow:
-      - x: -3
-        y: 0
   fire_ember_control:
     display_name: '&6Ember Control'
     category: fire
@@ -1771,7 +1596,7 @@ nodes:
     research_points_cost: 40
     position:
       x: 3
-      y: -1
+      y: 2
     description:
     - Keep flame alive without letting it spread.
     - Small fires teach precision better than grand infernos.
@@ -1794,18 +1619,14 @@ nodes:
     - Improves safety around volatile spells.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      fire_spark:
-      - x: 3
-        y: 0
   pyroclasm:
     display_name: '&cPyroclasm'
     category: fire
     icon: FIREWORK_STAR
     research_points_cost: 60
     position:
-      x: 5
-      y: -3
+      x: -4
+      y: 4
     description:
     - Unleash destruction in its purest and most violent form.
     - Pyroclasm leaves nothing but ash and silence.
@@ -1829,19 +1650,14 @@ nodes:
     - Unlocks the path of fire destruction.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      flame_study:
-      ember_control:
-      - x: 5
-        y: -1
   immolation_aura:
     display_name: '&6Immolation Aura'
     category: fire
     icon: NETHER_WART
     research_points_cost: 75
     position:
-      x: 5
-      y: 3
+      x: 4
+      y: 4
     description:
     - Surround yourself in a field of living flame that sears all who approach.
     - The aura does not distinguish between friend and foe.
@@ -1870,21 +1686,14 @@ nodes:
     - Unlocks the aura of the fire walker.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      ember_control:
-      - x: 5
-        y: -1
-      heat_siphon:
-      - x: 5
-        y: 2
   cinder_ward:
     display_name: '&6Cinder Ward'
     category: fire
     icon: SHIELD
     research_points_cost: 50
     position:
-      x: -5
-      y: 3
+      x: 0
+      y: 4
     description:
     - Forge protective barriers from charred and hardened mana.
     - What fire has burned, fire can guard.
@@ -1914,21 +1723,14 @@ nodes:
     - Unlocks the cinder ward technique.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      smoke_shroud:
-      - x: -3
-        y: 0
-      heat_siphon:
-      - x: -5
-        y: 2
   ashen_theory:
     display_name: '&8Ashen Theory'
     category: fire
     icon: WRITABLE_BOOK
     research_points_cost: 60
     position:
-      x: -5
-      y: -3
+      x: 2
+      y: 4
     description:
     - Study the residue left behind by great fires and learn from it.
     - Ash remembers what fire consumes.
@@ -1957,21 +1759,14 @@ nodes:
     - Unlocks deeper fire theory.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      cinder_sigil:
-      - x: -5
-        y: -1
-      smoke_shroud:
-      - x: -5
-        y: 2
   inferno_mastery:
     display_name: '&cInferno Mastery'
     category: fire
     icon: NETHERITE_INGOT
     research_points_cost: 125
     position:
-      x: 0
-      y: -9
+      x: -4
+      y: 6
     description:
     - Command fire at its most primal and devastating level.
     - The inferno answers to no one but its master.
@@ -2000,25 +1795,14 @@ nodes:
     - The pinnacle of offensive fire magic.
     visibility:
       hidden_until_available: true
-    edge_paths:
-      pyroclasm:
-      - x: 1
-        y: -9
-      - x: 1
-        y: -3
-      ashen_theory:
-      - x: -1
-        y: -9
-      - x: -1
-        y: -3
   hellfire_sovereign:
     display_name: '&cHellfire Sovereign'
     category: fire
     icon: NETHER_STAR
     research_points_cost: 150
     position:
-      x: -8
-      y: 5
+      x: 0
+      y: 6
     description:
     - Become the living embodiment of destructive flame.
     - The sovereign does not wield hellfire — they are hellfire.
@@ -2052,13 +1836,6 @@ nodes:
     - Mastery over all forms of fire.
     visibility:
       hidden_until_available: true
-    edge_paths:
-      cinder_ward:
-      - x: -8
-        y: 4
-      - x: -5
-        y: 4
-      immolation_aura:
   water_restorative_current:
     display_name: '&bRestorative Current'
     category: water
@@ -2066,7 +1843,7 @@ nodes:
     research_points_cost: 40
     position:
       x: 3
-      y: -1
+      y: 2
     description:
     - Study the way moving water carries wounds away.
     - Restoration begins with clean motion.
@@ -2089,18 +1866,14 @@ nodes:
     - Improves sustain-focused magic.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      water_first_tide:
-      - x: 3
-        y: 0
   water_depth_oath:
     display_name: '&3Depth Oath'
     category: water
     icon: HEART_OF_THE_SEA
     research_points_cost: 100
     position:
-      x: 8
-      y: 5
+      x: 4
+      y: 6
     description:
     - Swear patience to the deep and learn its pressure.
     - The calm surface hides immense force.
@@ -2125,21 +1898,14 @@ nodes:
     - Completes the Water oath.
     visibility:
       hidden_until_available: true
-    edge_paths:
-      healing_current:
-      - x: 8
-        y: 3
-      pressure_surge:
-      - x: 8
-        y: -3
   pressure_surge:
     display_name: '&9Pressure Surge'
     category: water
     icon: DIAMOND
     research_points_cost: 60
     position:
-      x: 5
-      y: -3
+      x: -4
+      y: 4
     description:
     - Compress water into a force that pierces stone.
     - Depth multiplies power beyond measure.
@@ -2163,18 +1929,13 @@ nodes:
     - Unleashes devastating pressure attacks.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      tidal_studies:
-      water_restorative_current:
-      - x: 5
-        y: -1
   healing_current:
     category: water
     icon: GLISTERING_MELON_SLICE
     research_points_cost: 75
     position:
-      x: 5
-      y: 3
+      x: 4
+      y: 4
     description:
     - Let the river carry away pain and illness.
     - Water heals as easily as it harms.
@@ -2203,21 +1964,14 @@ nodes:
     - Grants restorative power from water mastery.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      water_restorative_current:
-      - x: 5
-        y: -1
-      current_sense:
-      - x: 5
-        y: 2
   glacial_barrier:
     display_name: '&9Glacial Barrier'
     category: water
     icon: BLUE_STAINED_GLASS
     research_points_cost: 50
     position:
-      x: -5
-      y: 3
+      x: 0
+      y: 4
     description:
     - Raise a wall of ice that no blade can pass.
     - The glacier does not retreat.
@@ -2247,21 +2001,14 @@ nodes:
     - Creates powerful ice-based defenses.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      frost_ward:
-      - x: -3
-        y: 0
-      current_sense:
-      - x: -5
-        y: 2
   oceanic_theory:
     display_name: '&9Oceanic Theory'
     category: water
     icon: BOOK
     research_points_cost: 60
     position:
-      x: -5
-      y: -3
+      x: 2
+      y: 4
     description:
     - Study the principles that govern all bodies of water.
     - From droplet to ocean, the rules are one.
@@ -2290,21 +2037,14 @@ nodes:
     - Reveals the hidden mechanics of water magic.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      depth_mark:
-      - x: -5
-        y: -1
-      frost_ward:
-      - x: -5
-        y: 2
   abyssal_mastery:
     display_name: '&3Abyssal Mastery'
     category: water
     icon: NAUTILUS_SHELL
     research_points_cost: 125
     position:
-      x: 0
-      y: -9
+      x: -4
+      y: 6
     description:
     - Command the crushing darkness of the deep ocean.
     - Where no light reaches, water reigns supreme.
@@ -2333,25 +2073,14 @@ nodes:
     - Achieves supreme mastery over deep water forces.
     visibility:
       hidden_until_available: true
-    edge_paths:
-      pressure_surge:
-      - x: 1
-        y: -9
-      - x: 1
-        y: -3
-      oceanic_theory:
-      - x: -1
-        y: -9
-      - x: -1
-        y: -3
   tidal_sovereign:
     display_name: '&9Tidal Sovereign'
     category: water
     icon: TRIDENT
     research_points_cost: 150
     position:
-      x: -8
-      y: 5
+      x: 0
+      y: 6
     description:
     - Rise as master of all tides, currents, and depths.
     - The ocean bows to those who command its full force.
@@ -2385,13 +2114,6 @@ nodes:
     - Becomes the supreme water archmage.
     visibility:
       hidden_until_available: true
-    edge_paths:
-      glacial_barrier:
-      - x: -8
-        y: 4
-      - x: -5
-        y: 4
-      healing_current:
   earth_quarry_signs:
     display_name: '&aQuarry Signs'
     category: earth
@@ -2399,7 +2121,7 @@ nodes:
     research_points_cost: 40
     position:
       x: 3
-      y: -1
+      y: 2
     description:
     - Break stone and read the pressure lines it leaves behind.
     - Every fracture is a sentence.
@@ -2422,18 +2144,14 @@ nodes:
     - Improves defensive Earth work.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      earth_stone_memory:
-      - x: 3
-        y: 0
   earth_bulwark_vow:
     display_name: '&2Bulwark Vow'
     category: earth
     icon: SHIELD
     research_points_cost: 100
     position:
-      x: 8
-      y: 5
+      x: 4
+      y: 6
     description:
     - Hold your ground while mana settles into your bones.
     - The mountain does not need to hurry.
@@ -2463,21 +2181,14 @@ nodes:
     - Completes the Bulwark Vow.
     visibility:
       hidden_until_available: true
-    edge_paths:
-      earthen_fortress:
-      - x: 8
-        y: 3
-      seismic_focus:
-      - x: 8
-        y: -3
   seismic_focus:
     display_name: '&2Seismic Focus'
     category: earth
     icon: POINTED_DRIPSTONE
     research_points_cost: 60
     position:
-      x: 5
-      y: -3
+      x: -4
+      y: 4
     description:
     - Concentrate seismic energy through practiced channels.
     - The earth answers to those who listen with precision.
@@ -2501,19 +2212,14 @@ nodes:
     - Sharpens offensive earth magic.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      tectonic_sense:
-      earth_quarry_signs:
-      - x: 5
-        y: -1
   earthen_fortress:
     display_name: '&2Earthen Fortress'
     category: earth
     icon: DEEPSLATE_BRICKS
     research_points_cost: 75
     position:
-      x: 5
-      y: 3
+      x: 4
+      y: 4
     description:
     - Raise walls of living stone from the ground itself.
     - A fortress caster stands unyielding.
@@ -2543,21 +2249,14 @@ nodes:
     - Masters defensive earth formations.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      earth_quarry_signs:
-      - x: 5
-        y: -1
-      stonebond_will:
-      - x: 5
-        y: 2
   crystal_resonance:
     display_name: '&dCrystal Resonance'
     category: earth
     icon: AMETHYST_BLOCK
     research_points_cost: 50
     position:
-      x: -5
-      y: 3
+      x: 0
+      y: 4
     description:
     - Attune to the harmonic vibrations of buried crystal.
     - Resonance amplifies both ward and spell.
@@ -2586,21 +2285,14 @@ nodes:
     - Deepens defensive earth attunement.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      bedrock_ward:
-      - x: -3
-        y: 0
-      stonebond_will:
-      - x: -5
-        y: 2
   titan_bastion:
     display_name: '&4Titan Bastion'
     category: earth
     icon: CRAFTING_TABLE
     research_points_cost: 60
     position:
-      x: -5
-      y: -3
+      x: 2
+      y: 4
     description:
     - Study the ancient fortifications of titan-kind.
     - Knowledge of structure surpasses raw power.
@@ -2629,21 +2321,14 @@ nodes:
     - Reveals advanced earth theory.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      geode_lore:
-      - x: -5
-        y: -1
-      bedrock_ward:
-      - x: -5
-        y: 2
   earth_sovereign:
     display_name: '&2Earth Sovereign'
     category: earth
     icon: NETHERITE_BLOCK
     research_points_cost: 125
     position:
-      x: 0
-      y: -9
+      x: -4
+      y: 6
     description:
     - Command the deepest currents of the earth.
     - The sovereign shapes reality through stone alone.
@@ -2672,25 +2357,14 @@ nodes:
     - Becomes the supreme earth archmage.
     visibility:
       hidden_until_available: true
-    edge_paths:
-      seismic_focus:
-      - x: 1
-        y: -9
-      - x: 1
-        y: -3
-      titan_bastion:
-      - x: -1
-        y: -9
-      - x: -1
-        y: -3
   mountain_wraith:
     display_name: '&2Mountain Wraith'
     category: earth
     icon: GRINDSTONE
     research_points_cost: 150
     position:
-      x: -8
-      y: 5
+      x: 0
+      y: 6
     description:
     - Become one with the mountain itself.
     - The wraith is never far from stone.
@@ -2724,13 +2398,6 @@ nodes:
     - Becomes a legendary earth guardian.
     visibility:
       hidden_until_available: true
-    edge_paths:
-      crystal_resonance:
-      - x: -8
-        y: 4
-      - x: -5
-        y: 4
-      earthen_fortress:
   air_kinetic_step:
     display_name: '&bKinetic Step'
     category: air
@@ -2738,7 +2405,7 @@ nodes:
     research_points_cost: 40
     position:
       x: 3
-      y: -1
+      y: 2
     description:
     - Study motion until the body wastes less effort.
     - A light step is often better than a hard shield.
@@ -2762,18 +2429,14 @@ nodes:
     - Improves mobility-focused magic.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      air_open_breath:
-      - x: 3
-        y: 0
   air_storm_eye:
     display_name: '&fStorm Eye'
     category: air
     icon: PHANTOM_MEMBRANE
     research_points_cost: 100
     position:
-      x: 8
-      y: 5
+      x: 4
+      y: 6
     description:
     - Stand calmly inside violent motion.
     - Control is proven when the storm bends around you.
@@ -2797,21 +2460,14 @@ nodes:
     - Completes the first Air meditation.
     visibility:
       hidden_until_available: true
-    edge_paths:
-      cyclone_ward:
-      - x: 8
-        y: 3
-      tempest_focus:
-      - x: 8
-        y: -3
   tempest_focus:
     display_name: '&fTempest Focus'
     category: air
     icon: IRON_SWORD
     research_points_cost: 60
     position:
-      x: 5
-      y: -3
+      x: -4
+      y: 4
     description:
     - Channel the storm into a precise killing wind.
     - Sharp air cuts deeper than steel.
@@ -2835,19 +2491,14 @@ nodes:
     - Masters offensive air channeling.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      gale_wisps:
-      air_kinetic_step:
-      - x: 5
-        y: -1
   cyclone_ward:
     display_name: '&fCyclone Ward'
     category: air
     icon: SHIELD
     research_points_cost: 75
     position:
-      x: 5
-      y: 3
+      x: 4
+      y: 4
     description:
     - Wrap the cyclone around yourself as living armor.
     - Wind that shields is wind that understands pressure.
@@ -2877,21 +2528,14 @@ nodes:
     - Combines mobility with defensive wind.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      air_kinetic_step:
-      - x: 5
-        y: -1
-      static_cast:
-      - x: 5
-        y: 2
   skyward_barrier:
     display_name: '&fSkyward Barrier'
     category: air
     icon: BARRIER
     research_points_cost: 50
     position:
-      x: -5
-      y: 3
+      x: 0
+      y: 4
     description:
     - Weave layered air shields from ambient pressure.
     - A barrier born from stillness outlasts one born from fury.
@@ -2920,21 +2564,14 @@ nodes:
     - Advances protective air magic.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      squall_ward:
-      - x: -3
-        y: 0
-      static_cast:
-      - x: -5
-        y: 2
   storm_theory:
     display_name: '&fStorm Theory'
     category: air
     icon: BOOK_AND_QUILL
     research_points_cost: 60
     position:
-      x: -5
-      y: -3
+      x: 2
+      y: 4
     description:
     - Map the full lifecycle of a storm from birth to dissipation.
     - Theory turns raw power into repeatable technique.
@@ -2963,21 +2600,14 @@ nodes:
     - Unlocks advanced storm manipulation.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      wind_theory:
-      - x: -5
-        y: -1
-      squall_ward:
-      - x: -5
-        y: 2
   wind_sovereign:
     display_name: '&fWind Sovereign'
     category: air
     icon: NETHER_STAR
     research_points_cost: 125
     position:
-      x: 0
-      y: -9
+      x: -4
+      y: 6
     description:
     - Command every current from the faintest breeze to the mightiest gale.
     - The sovereign does not fight the wind; the wind fights for them.
@@ -3006,25 +2636,14 @@ nodes:
     - Achieves total mastery over wind currents.
     visibility:
       hidden_until_available: true
-    edge_paths:
-      tempest_focus:
-      - x: 1
-        y: -9
-      - x: 1
-        y: -3
-      storm_theory:
-      - x: -1
-        y: -9
-      - x: -1
-        y: -3
   skyward_phantom:
     display_name: '&fSkyward Phantom'
     category: air
     icon: PHANTOM_MEMBRANE
     research_points_cost: 150
     position:
-      x: -8
-      y: 5
+      x: 0
+      y: 6
     description:
     - Move between the spaces the wind forgets to touch.
     - Phantoms ride currents that mortals cannot perceive.
@@ -3058,13 +2677,6 @@ nodes:
     - Masters the boundary between wind and shadow.
     visibility:
       hidden_until_available: true
-    edge_paths:
-      skyward_barrier:
-      - x: -8
-        y: 4
-      - x: -5
-        y: 4
-      cyclone_ward:
   light_mending_script:
     display_name: '&eMending Script'
     category: light
@@ -3072,7 +2684,7 @@ nodes:
     research_points_cost: 40
     position:
       x: 3
-      y: -1
+      y: 2
     description:
     - Write restorative intent into a repeatable form.
     - The best healing is consistent enough to trust.
@@ -3095,18 +2707,14 @@ nodes:
     - Improves restorative Light work.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      light_first_lantern:
-      - x: 3
-        y: 0
   light_radiant_oath:
     display_name: '&eRadiant Oath'
     category: light
     icon: GLOWSTONE
     research_points_cost: 100
     position:
-      x: 8
-      y: 5
+      x: 4
+      y: 6
     description:
     - Carry enough light that fear has less room to grow.
     - Protection becomes an act of discipline.
@@ -3135,21 +2743,14 @@ nodes:
     - Completes the first Light oath.
     visibility:
       hidden_until_available: true
-    edge_paths:
-      bulwark_light:
-      - x: 8
-        y: 3
-      solar_focus:
-      - x: 8
-        y: -3
   solar_focus:
     display_name: '&eSolar Focus'
     category: light
     icon: FIREWORK_STAR
     research_points_cost: 60
     position:
-      x: 5
-      y: -3
+      x: -4
+      y: 4
     description:
     - Concentrate light into a searing point of restoration.
     - The sun does not choose who it warms, but it can also burn.
@@ -3173,19 +2774,14 @@ nodes:
     - Masters offensive light channeling.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      radiant_study:
-      light_mending_script:
-      - x: 5
-        y: -1
   bulwark_light:
     display_name: '&eBulwark of Light'
     category: light
     icon: GOLDEN_CHESTPLATE
     research_points_cost: 75
     position:
-      x: 5
-      y: 3
+      x: 4
+      y: 4
     description:
     - Wrap yourself in living light that absorbs harm.
     - The strongest armor is the one that heals as it protects.
@@ -3215,21 +2811,14 @@ nodes:
     - Combines protection with radiant power.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      light_mending_script:
-      - x: 5
-        y: -1
-      blessed_will:
-      - x: 5
-        y: 2
   restoration_ward:
     display_name: '&eRestoration Ward'
     category: light
     icon: BEACON
     research_points_cost: 50
     position:
-      x: -5
-      y: 3
+      x: 0
+      y: 4
     description:
     - Weave a persistent field of mending energy.
     - The best ward is one that repairs what it shields.
@@ -3258,21 +2847,14 @@ nodes:
     - Advances restorative light magic.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      aegis_light:
-      - x: -3
-        y: 0
-      blessed_will:
-      - x: -5
-        y: 2
   sanctum_theory:
     display_name: '&eSanctum Theory'
     category: light
     icon: ENCHANTED_BOOK
     research_points_cost: 60
     position:
-      x: -5
-      y: -3
+      x: 2
+      y: 4
     description:
     - Map the complete spectrum of healing frequencies.
     - Theory turns compassion into repeatable technique.
@@ -3301,21 +2883,14 @@ nodes:
     - Unlocks advanced restorative theory.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      luminarch_theory:
-      - x: -5
-        y: -1
-      aegis_light:
-      - x: -5
-        y: 2
   light_sovereign:
     display_name: '&eLight Sovereign'
     category: light
     icon: NETHER_STAR
     research_points_cost: 125
     position:
-      x: 0
-      y: -9
+      x: -4
+      y: 6
     description:
     - Command every frequency of light from the faintest glow to the blinding flare.
     - The sovereign does not merely heal; they redefine what it means to be whole.
@@ -3344,25 +2919,14 @@ nodes:
     - Achieves total mastery over radiant energy.
     visibility:
       hidden_until_available: true
-    edge_paths:
-      solar_focus:
-      - x: 1
-        y: -9
-      - x: 1
-        y: -3
-      sanctum_theory:
-      - x: -1
-        y: -9
-      - x: -1
-        y: -3
   celestial_phantom:
     display_name: '&eCelestial Phantom'
     category: light
     icon: PHANTOM_MEMBRANE
     research_points_cost: 150
     position:
-      x: -8
-      y: 5
+      x: 0
+      y: 6
     description:
     - Move between the spaces where light pools and lingers.
     - Phantoms of the dawn protect what mortals cannot see.
@@ -3396,13 +2960,6 @@ nodes:
     - Masters the boundary between light and shadow.
     visibility:
       hidden_until_available: true
-    edge_paths:
-      restoration_ward:
-      - x: -8
-        y: 4
-      - x: -5
-        y: 4
-      bulwark_light:
   dark_tethered_whisper:
     display_name: '&5Tethered Whisper'
     category: dark
@@ -3410,7 +2967,7 @@ nodes:
     research_points_cost: 40
     position:
       x: 3
-      y: -1
+      y: 2
     description:
     - Bind intention to silence and let the target feel it late.
     - Subtle magic still leaves a mark.
@@ -3433,18 +2990,14 @@ nodes:
     - Improves pressure-focused Dark work.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      dark_quiet_shadow:
-      - x: 3
-        y: 0
   dark_eclipse_compact:
     display_name: '&8Eclipse Compact'
     category: dark
     icon: BLACK_CANDLE
     research_points_cost: 100
     position:
-      x: 8
-      y: 5
+      x: 4
+      y: 6
     description:
     - Accept the cost of hidden power and name it clearly.
     - A compact is strongest when nothing is left implied.
@@ -3473,21 +3026,14 @@ nodes:
     - Completes the first Dark compact.
     visibility:
       hidden_until_available: true
-    edge_paths:
-      void_lash:
-      - x: 8
-        y: 3
-      shadow_focus:
-      - x: 8
-        y: -3
   shadow_focus:
     display_name: '&5Shadow Focus'
     category: dark
     icon: NETHERITE_SWORD
     research_points_cost: 60
     position:
-      x: 5
-      y: -3
+      x: -4
+      y: 4
     description:
     - Compress shadow into a focused instrument of elimination.
     - The dark does not miss; it waits.
@@ -3511,19 +3057,14 @@ nodes:
     - Masters offensive shadow channeling.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      shadow_insight:
-      dark_tethered_whisper:
-      - x: 5
-        y: -1
   void_lash:
     display_name: '&5Void Lash'
     category: dark
     icon: END_ROD
     research_points_cost: 75
     position:
-      x: 5
-      y: 3
+      x: 4
+      y: 4
     description:
     - Crack the void open and let its hunger strike nearby.
     - Close darkness hits harder than distant darkness.
@@ -3553,21 +3094,14 @@ nodes:
     - Combines aggression with void power.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      dark_tethered_whisper:
-      - x: 5
-        y: -1
-      night_harvest:
-      - x: 5
-        y: 2
   abyssal_ward:
     display_name: '&5Abyssal Ward'
     category: dark
     icon: SCULK_CATALYST
     research_points_cost: 50
     position:
-      x: -5
-      y: 3
+      x: 0
+      y: 4
     description:
     - Weave a persistent field of entropic decay.
     - The best ward is one that devours what it touches.
@@ -3596,21 +3130,14 @@ nodes:
     - Advances destructive dark magic.
     visibility:
       hidden_until_available: false
-    edge_paths:
-      void_ward:
-      - x: -3
-        y: 0
-      night_harvest:
-      - x: -5
-        y: 2
   dark_sovereign:
     display_name: '&5Dark Sovereign'
     category: dark
     icon: NETHER_STAR
     research_points_cost: 125
     position:
-      x: 0
-      y: -9
+      x: -4
+      y: 6
     description:
     - Command every shadow from the faintest gloom to the all-consuming void.
     - The sovereign does not merely destroy; they redefine what it means to end.
@@ -3638,20 +3165,14 @@ nodes:
     - Achieves total mastery over shadow currents.
     visibility:
       hidden_until_available: true
-    edge_paths:
-      shadow_focus:
-      - x: 1
-        y: -9
-      - x: 1
-        y: -3
   eclipse_phantom:
     display_name: '&5Eclipse Phantom'
     category: dark
     icon: PHANTOM_MEMBRANE
     research_points_cost: 150
     position:
-      x: -8
-      y: 5
+      x: 0
+      y: 6
     description:
     - Move between the spaces where shadow pools and festers.
     - Phantoms of darkness protect what mortals refuse to see.
@@ -3685,10 +3206,3 @@ nodes:
     - Masters the boundary between void and shadow.
     visibility:
       hidden_until_available: true
-    edge_paths:
-      abyssal_ward:
-      - x: -8
-        y: 4
-      - x: -5
-        y: 4
-      void_lash:

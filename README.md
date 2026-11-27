@@ -25,7 +25,7 @@
 | 🔮 **Magic Circles** | 6 | Circle 0–5 with escalating requirements |
 | ⚔️ **Equipment Slots** | 11 | 6 vanilla + 5 virtual (Body, Ring, Necklace, Bracelet, Pendant) |
 | 📜 **Engravings** | 28 | Trigger-based runes: Offense, Defense, Utility, Mana, Life, Special |
-| 📚 **Research Tree** | 21 nodes | 7 categories: Magic, Fire, Water, Earth, Air, Light, Dark |
+| 📚 **Research Tree** | 95 nodes | 7 categories: Magic, Fire, Water, Earth, Air, Light, Dark |
 | 🧟 **Magic Mobs** | 3 variants | Spell-casting mobs with elemental affinities |
 | 🎒 **Loot Sources** | 6 | Chests, mob drops, fishing, villager trades, structure loot |
 | 📊 **Stats** | 15 | 6 affinities, 6 resistances, spell power, max mana, mana regen |

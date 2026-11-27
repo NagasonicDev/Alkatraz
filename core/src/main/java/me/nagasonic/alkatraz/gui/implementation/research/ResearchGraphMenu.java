@@ -21,14 +21,15 @@ import org.bukkit.inventory.ItemStack;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ResearchGraphMenu extends Menu {
-
-    private enum Direction { N, S, E, W }
 
     private enum PieceType {
         STRAIGHT_H, STRAIGHT_V,
@@ -271,105 +272,81 @@ public class ResearchGraphMenu extends Menu {
         }
     }
 
+    /**
+     * Collects every cell used by an edge first, then picks each connector
+     * texture from the path cells around it: opposite neighbours make a
+     * straight run, perpendicular neighbours make a corner.
+     */
     private void drawEdges() {
         List<ResearchNode> nodes = ResearchService.getNodes(category);
+        Set<Long> nodeCells = new HashSet<>();
+        for (ResearchNode node : nodes) nodeCells.add(cellKey(node.getX(), node.getY()));
+
+        Set<Long> pathCells = new HashSet<>();
+        Map<Long, String> connectorStates = new HashMap<>();
         for (ResearchNode child : nodes) {
             for (String parentId : child.getParents()) {
-                ResearchService.getNode(parentId).ifPresent(parent -> drawEdge(parent, child));
+                ResearchService.getNode(parentId).ifPresent(parent -> {
+                    ResearchState parentState = ResearchService.getState(viewer, parent);
+                    if (parentState == ResearchState.HIDDEN) return;
+
+                    List<int[]> path = new ArrayList<>();
+                    path.add(new int[]{parent.getX(), parent.getY()});
+                    List<int[]> waypoints = child.getEdgePaths() != null
+                            ? child.getEdgePaths().get(parentId) : null;
+                    if (waypoints != null) path.addAll(waypoints);
+                    path.add(new int[]{child.getX(), child.getY()});
+
+                    String stateKey = getStateKey(parentState, ResearchService.getState(viewer, child));
+                    for (int i = 0; i < path.size() - 1; i++) {
+                        addPath(path.get(i), path.get(i + 1), pathCells, connectorStates, nodeCells, stateKey);
+                    }
+                });
             }
         }
-    }
 
-    private void drawEdge(ResearchNode parent, ResearchNode child) {
-        ResearchState parentState = ResearchService.getState(viewer, parent);
-        if (parentState == ResearchState.HIDDEN) return;
+        for (Map.Entry<Long, String> entry : connectorStates.entrySet()) {
+            long cell = entry.getKey();
+            int x = (int) (cell >> 32);
+            int y = (int) cell;
+            int mask = 0;
+            if (pathCells.contains(cellKey(x, y - 1))) mask |= 1;
+            if (pathCells.contains(cellKey(x, y + 1))) mask |= 2;
+            if (pathCells.contains(cellKey(x + 1, y))) mask |= 4;
+            if (pathCells.contains(cellKey(x - 1, y))) mask |= 8;
 
-        List<int[]> waypoints = child.getEdgePaths() != null
-            ? child.getEdgePaths().get(parent.getId()) : null;
-        if (waypoints != null && !waypoints.isEmpty()) {
-            drawEdgeWithWaypoints(parent, child, parentState, waypoints);
-        } else {
-            drawCardinalEdge(parent, child, parentState);
+            PieceType piece = pieceFor(mask);
+            if (piece == null) continue;
+            Optional<Integer> slot = slotFor(x, y);
+            if (slot.isEmpty() || !isBlankSlot(slot.get())) continue;
+            inventory.setItem(slot.get(), createConnectorItem(piece, entry.getValue()));
+            occupied[slot.get()] = true;
         }
     }
 
-    private void drawEdgeWithWaypoints(ResearchNode parent, ResearchNode child, ResearchState parentState, List<int[]> waypoints) {
-        ResearchState childState = ResearchService.getState(viewer, child);
-        String stateKey = getStateKey(parentState, childState);
-
-        int px = parent.getX(), py = parent.getY();
-        int cx = child.getX(), cy = child.getY();
-
-        List<int[]> fullPath = new ArrayList<>();
-        fullPath.add(new int[]{px, py});
-        fullPath.addAll(waypoints);
-        fullPath.add(new int[]{cx, cy});
-
-        for (int i = 0; i < fullPath.size() - 1; i++) {
-            int[] from = fullPath.get(i);
-            int[] to = fullPath.get(i + 1);
-            drawStraightSegment(from[0], from[1], to[0], to[1], stateKey);
+    private static void addPath(int[] from, int[] to, Set<Long> pathCells,
+                                Map<Long, String> connectorStates, Set<Long> nodeCells, String stateKey) {
+        int x = from[0], y = from[1];
+        addCell(x, y, pathCells, connectorStates, nodeCells, stateKey);
+        while (x != to[0]) {
+            x += Integer.signum(to[0] - x);
+            addCell(x, y, pathCells, connectorStates, nodeCells, stateKey);
         }
-
-        for (int i = 1; i < fullPath.size() - 1; i++) {
-            int[] prev = fullPath.get(i - 1);
-            int[] wp = fullPath.get(i);
-            int[] next = fullPath.get(i + 1);
-            Direction in = getDirection(prev[0], prev[1], wp[0], wp[1]);
-            Direction out = getDirection(wp[0], wp[1], next[0], next[1]);
-            placeCornerAt(wp[0], wp[1], in, out, stateKey);
+        while (y != to[1]) {
+            y += Integer.signum(to[1] - y);
+            addCell(x, y, pathCells, connectorStates, nodeCells, stateKey);
         }
     }
 
-    private void drawCardinalEdge(ResearchNode parent, ResearchNode child, ResearchState parentState) {
-        ResearchState childState = ResearchService.getState(viewer, child);
-        String stateKey = getStateKey(parentState, childState);
-
-        int px = parent.getX(), py = parent.getY();
-        int cx = child.getX(), cy = child.getY();
-
-        if (px == cx || py == cy) {
-            drawStraightSegment(px, py, cx, cy, stateKey);
-            return;
-        }
-
-        drawStraightSegment(px, py, cx, py, stateKey);
-        Direction hDir = (cx > px) ? Direction.E : Direction.W;
-        Direction vDir = (cy > py) ? Direction.S : Direction.N;
-        placeCornerAt(cx, py, hDir, vDir, stateKey);
-        drawStraightSegment(cx, py, cx, cy, stateKey);
+    private static void addCell(int x, int y, Set<Long> pathCells,
+                                Map<Long, String> connectorStates, Set<Long> nodeCells, String stateKey) {
+        long key = cellKey(x, y);
+        pathCells.add(key);
+        if (!nodeCells.contains(key)) connectorStates.putIfAbsent(key, stateKey);
     }
 
-    private void drawStraightSegment(int fromX, int fromY, int toX, int toY, String stateKey) {
-        if (fromX == toX && fromY == toY) return;
-
-        Direction dir = getDirection(fromX, fromY, toX, toY);
-        PieceType piece = (dir == Direction.E || dir == Direction.W)
-            ? PieceType.STRAIGHT_H : PieceType.STRAIGHT_V;
-
-        int x = fromX;
-        int y = fromY;
-        while (x != toX || y != toY) {
-            if (x < toX) x++; else if (x > toX) x--;
-            if (y < toY) y++; else if (y > toY) y--;
-
-            slotFor(x, y).ifPresent(slot -> {
-                if (isBlankSlot(slot)) {
-                    inventory.setItem(slot, createConnectorItem(piece, stateKey));
-                    occupied[slot] = true;
-                }
-            });
-        }
-    }
-
-    private void placeCornerAt(int x, int y, Direction in, Direction out, String stateKey) {
-        PieceType piece = getPieceType(in, out);
-        slotFor(x, y).ifPresent(slot -> {
-            if (isBlankSlot(slot)) {
-                inventory.setItem(slot, createConnectorItem(piece, stateKey));
-                occupied[slot] = true;
-            }
-        });
+    private static long cellKey(int x, int y) {
+        return ((long) x << 32) | (y & 0xffffffffL);
     }
 
     private ItemStack createNodeItem(ResearchNode node, ResearchState state) {
@@ -500,36 +477,17 @@ public class ResearchGraphMenu extends Menu {
                 .orElse("general");
     }
 
-    private Direction getDirection(int fromX, int fromY, int toX, int toY) {
-        int dx = Integer.compare(toX, fromX);
-        int dy = Integer.compare(toY, fromY);
-        if (dx == 1) return Direction.E;
-        if (dx == -1) return Direction.W;
-        if (dy == 1) return Direction.S;
-        return Direction.N;
-    }
-
-    private PieceType getPieceType(Direction incoming, Direction outgoing) {
-        if (incoming == outgoing) {
-            return (incoming == Direction.E || incoming == Direction.W)
-                ? PieceType.STRAIGHT_H : PieceType.STRAIGHT_V;
-        }
-        // A turn's texture arms point back toward the previous cell and
-        // forward toward the next cell. Convert movement directions to those
-        // two arms before selecting the named NE/SE/SW/NW model.
-        Direction fromPrevious = switch (incoming) {
-            case N -> Direction.S;
-            case S -> Direction.N;
-            case E -> Direction.W;
-            case W -> Direction.E;
-        };
-        if ((fromPrevious == Direction.N && outgoing == Direction.E)
-                || (fromPrevious == Direction.E && outgoing == Direction.N)) return PieceType.CORNER_NE;
-        if ((fromPrevious == Direction.S && outgoing == Direction.E)
-                || (fromPrevious == Direction.E && outgoing == Direction.S)) return PieceType.CORNER_SE;
-        if ((fromPrevious == Direction.S && outgoing == Direction.W)
-                || (fromPrevious == Direction.W && outgoing == Direction.S)) return PieceType.CORNER_SW;
-        return PieceType.CORNER_NW;
+    private static PieceType pieceFor(int mask) {
+        boolean n = (mask & 1) != 0, s = (mask & 2) != 0, e = (mask & 4) != 0, w = (mask & 8) != 0;
+        if (n && s) return PieceType.STRAIGHT_V;
+        if (e && w) return PieceType.STRAIGHT_H;
+        if (n && e) return PieceType.CORNER_NE;
+        if (e && s) return PieceType.CORNER_SE;
+        if (s && w) return PieceType.CORNER_SW;
+        if (w && n) return PieceType.CORNER_NW;
+        if (n || s) return PieceType.STRAIGHT_V;
+        if (e || w) return PieceType.STRAIGHT_H;
+        return null;
     }
 
     private String getStateKey(ResearchState parentState, ResearchState childState) {
