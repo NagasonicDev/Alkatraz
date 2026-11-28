@@ -42,15 +42,17 @@ class ElementArchetypeTest {
 
     static {
         ALLOWLIST.put(Element.FIRE, EnumSet.of(SpellRole.BURST, SpellRole.DENIAL, SpellRole.TERRAIN,
-                SpellRole.UTILITY));
+                SpellRole.UTILITY, SpellRole.DOMAIN));
         ALLOWLIST.put(Element.WATER, EnumSet.of(SpellRole.SUSTAIN, SpellRole.DENIAL, SpellRole.BURST,
-                SpellRole.UTILITY, SpellRole.TERRAIN));
-        ALLOWLIST.put(Element.EARTH, EnumSet.of(SpellRole.TERRAIN, SpellRole.DENIAL, SpellRole.BURST));
+                SpellRole.UTILITY, SpellRole.TERRAIN, SpellRole.DOMAIN));
+        ALLOWLIST.put(Element.EARTH, EnumSet.of(SpellRole.TERRAIN, SpellRole.DENIAL, SpellRole.BURST,
+                SpellRole.DOMAIN));
         ALLOWLIST.put(Element.AIR, EnumSet.of(SpellRole.UTILITY, SpellRole.DENIAL, SpellRole.BURST,
-                SpellRole.SUSTAIN));
+                SpellRole.SUSTAIN, SpellRole.DOMAIN));
         ALLOWLIST.put(Element.LIGHT, EnumSet.of(SpellRole.UTILITY, SpellRole.BURST, SpellRole.SUSTAIN,
-                SpellRole.DENIAL));
-        ALLOWLIST.put(Element.DARK, EnumSet.of(SpellRole.UTILITY, SpellRole.SUSTAIN, SpellRole.BURST));
+                SpellRole.DENIAL, SpellRole.DOMAIN));
+        ALLOWLIST.put(Element.DARK, EnumSet.of(SpellRole.UTILITY, SpellRole.SUSTAIN, SpellRole.BURST,
+                SpellRole.DOMAIN));
         ALLOWLIST.put(Element.NONE, EnumSet.of(SpellRole.UTILITY, SpellRole.DENIAL));
     }
 

@@ -35,7 +35,7 @@ block_budget: 6400
 material: 'STONE'
 
 # TERRAIN - the terraces shape land but deal no damage, so it carries no power: key.
-role: 'TERRAIN'
+role: 'DOMAIN'
 
 #THE COLOR OF THE SPELL MASTERY BOSSBAR. OPTIONS ARE: RED, BLUE, YELLOW, PINK, PURPLE, WHITE AND GREEN
 mastery_bar_color: 'GREEN'

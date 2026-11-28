@@ -452,10 +452,13 @@ public class AlkatrazCommand implements CommandExecutor, TabCompleter {
         me.nagasonic.alkatraz.playerdata.profiles.ProfileManager.beginReload();
         me.nagasonic.alkatraz.items.magic.adapter.PeriodicTriggerListener.stop();
         try {
+        // Restore every transformed block before configs and spells are replaced.
+        me.nagasonic.alkatraz.spells.domains.DomainManager.getInstance().forceEndAll();
         // Language first: SpellRegistry.reload() re-runs Spell.loadCommonConfig, which is
         // where spell names and descriptions are read. A lang edit must land before that.
         Alkatraz.reloadLangManager();
         new ArrayList<>(ConfigManager.getDefaultConfigs().keySet()).forEach(ConfigManager::reloadConfig);
+        me.nagasonic.alkatraz.spells.domains.DomainManager.getInstance().reloadConfig();
         ConfigManager.reloadConfig("progression.yml");
         ConfigManager.reloadConfig("modifiers.yml");
         me.nagasonic.alkatraz.config.ModifierConfig.reload();

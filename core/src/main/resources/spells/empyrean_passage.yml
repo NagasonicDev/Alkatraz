@@ -32,7 +32,7 @@ length: 96
 allies: 7
 
 # UTILITY - the passage carries the caster and their allies
-role: 'UTILITY'
+role: 'DOMAIN'
 
 #THE COLOR OF THE SPELL MASTERY BOSSBAR. OPTIONS ARE: RED, BLUE, YELLOW, PINK, PURPLE, WHITE AND GREEN
 mastery_bar_color: 'WHITE'

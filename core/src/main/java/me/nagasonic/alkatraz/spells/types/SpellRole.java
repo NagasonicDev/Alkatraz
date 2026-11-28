@@ -21,6 +21,9 @@ public enum SpellRole {
     /** Judged on blocked block-seconds. Incidental damage capped at the same-circle BURST budget. */
     DENIAL,
 
+    /** Judged on domain control: claimed area, pressure and temporary transformation. */
+    DOMAIN,
+
     /** Judged on nothing. No budget. */
     UTILITY;
 

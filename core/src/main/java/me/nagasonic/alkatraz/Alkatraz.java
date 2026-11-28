@@ -62,6 +62,7 @@ import me.nagasonic.alkatraz.progression.research.ResearchService;
 import me.nagasonic.alkatraz.progression.BoosterManager;
 import me.nagasonic.alkatraz.spells.CoreSpellRegistryProvider;
 import me.nagasonic.alkatraz.spells.SpellRegistry;
+import me.nagasonic.alkatraz.spells.domains.DomainManager;
 import me.nagasonic.alkatraz.spells.implementation.SummonCombatGuard;
 import me.nagasonic.alkatraz.playerdata.profiles.CoreProfileProvider;
 import me.nagasonic.alkatraz.spells.components.SpellComponentHandler;
@@ -152,6 +153,7 @@ saveConfig("boosters.yml"); // Save booster definitions
         logVeryHigh("Alkatraz enabling...");
         // Plugin startup logic
         Configs.reload();
+        DomainManager.getInstance().init(this);
         if ((boolean) Configs.CHECK_UPDATES.get()) UpdateChecker.checkUpdate();
         if (!enabled){
             logSevere("This version of Minecraft is not compatible with Alkatraz.");
@@ -295,6 +297,7 @@ registerListener(new ModifierLifecycleListener());
             mp.getMasteryBars().clear();
             mp.getMasteryBarTaskIds().clear();
         }
+        DomainManager.getInstance().shutdown();
         try { Bukkit.getScheduler().cancelTasks(this); } catch (Exception ignored) { }
         if (metrics != null) {
             metrics.shutdown();

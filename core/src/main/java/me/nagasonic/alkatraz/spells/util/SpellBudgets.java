@@ -91,12 +91,12 @@ public final class SpellBudgets {
     private static final Map<Element, Set<SpellRole>> ALLOWED = new EnumMap<>(Element.class);
 
     static {
-        ALLOWED.put(Element.FIRE, EnumSet.of(SpellRole.BURST, SpellRole.DENIAL, SpellRole.TERRAIN, SpellRole.UTILITY));
-        ALLOWED.put(Element.WATER, EnumSet.of(SpellRole.SUSTAIN, SpellRole.DENIAL, SpellRole.BURST, SpellRole.UTILITY, SpellRole.TERRAIN));
-        ALLOWED.put(Element.EARTH, EnumSet.of(SpellRole.TERRAIN, SpellRole.DENIAL, SpellRole.BURST));
-        ALLOWED.put(Element.AIR, EnumSet.of(SpellRole.UTILITY, SpellRole.DENIAL, SpellRole.BURST, SpellRole.SUSTAIN));
-        ALLOWED.put(Element.LIGHT, EnumSet.of(SpellRole.UTILITY, SpellRole.BURST, SpellRole.SUSTAIN, SpellRole.DENIAL));
-        ALLOWED.put(Element.DARK, EnumSet.of(SpellRole.UTILITY, SpellRole.SUSTAIN, SpellRole.BURST));
+        ALLOWED.put(Element.FIRE, EnumSet.of(SpellRole.BURST, SpellRole.DENIAL, SpellRole.TERRAIN, SpellRole.UTILITY, SpellRole.DOMAIN));
+        ALLOWED.put(Element.WATER, EnumSet.of(SpellRole.SUSTAIN, SpellRole.DENIAL, SpellRole.BURST, SpellRole.UTILITY, SpellRole.TERRAIN, SpellRole.DOMAIN));
+        ALLOWED.put(Element.EARTH, EnumSet.of(SpellRole.TERRAIN, SpellRole.DENIAL, SpellRole.BURST, SpellRole.DOMAIN));
+        ALLOWED.put(Element.AIR, EnumSet.of(SpellRole.UTILITY, SpellRole.DENIAL, SpellRole.BURST, SpellRole.SUSTAIN, SpellRole.DOMAIN));
+        ALLOWED.put(Element.LIGHT, EnumSet.of(SpellRole.UTILITY, SpellRole.BURST, SpellRole.SUSTAIN, SpellRole.DENIAL, SpellRole.DOMAIN));
+        ALLOWED.put(Element.DARK, EnumSet.of(SpellRole.UTILITY, SpellRole.SUSTAIN, SpellRole.BURST, SpellRole.DOMAIN));
         ALLOWED.put(Element.NONE, EnumSet.of(SpellRole.UTILITY, SpellRole.DENIAL));
     }
 

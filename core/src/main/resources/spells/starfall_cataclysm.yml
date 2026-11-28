@@ -38,7 +38,7 @@ power: 10
 hit_count: 3
 
 # BURST - the fragments fall, then the storm clears
-role: 'BURST'
+role: 'DOMAIN'
 
 #THE COLOR OF THE SPELL MASTERY BOSSBAR. OPTIONS ARE: RED, BLUE, YELLOW, PINK, PURPLE, WHITE AND GREEN
 mastery_bar_color: 'RED'

@@ -74,7 +74,7 @@ final class BundledSpellRoster {
             String body = new String(listing.readAllBytes(), StandardCharsets.UTF_8);
             for (String line : body.split("\n")) {
                 String name = line.trim();
-                if (name.endsWith(".yml") && !name.endsWith("_options.yml")) {
+                if (isSpellYml(name)) {
                     ids.add(name.substring(0, name.length() - 4));
                 }
             }
@@ -151,7 +151,7 @@ final class BundledSpellRoster {
     }
 
     private static boolean isSpellYml(String name) {
-        return name.endsWith(".yml") && !name.endsWith("_options.yml");
+        return name.endsWith(".yml") && !name.endsWith("_options.yml") && !name.equals("domains.yml");
     }
 
     private static Path resourcesDir() {

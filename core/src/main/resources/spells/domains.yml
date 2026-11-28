@@ -1,0 +1,40 @@
+# Global defaults for 9th-circle elemental domains.
+# All timing values are ticks; radii and budgets are block counts.
+global:
+  max_radius: 32
+  max_tiles: 6400
+  expand_ticks_per_ring: 2
+  hold_ticks: 100
+  recede_ticks_per_ring: 2
+  damage_interval: 20
+  border_band: 3
+  border_factor: 0.4
+  tie_epsilon: 0.35
+  fire_budget: 512
+  fire_spread_chance: 0.04
+
+elements:
+  fire:
+    damage: 3.0
+    pvp_damage_cap: 12.0
+    palette: [NETHERRACK, SOUL_SAND, MAGMA_BLOCK, CRIMSON_NYLIUM, BLACKSTONE]
+  water:
+    damage: 2.0
+    pvp_damage_cap: 6.0
+    palette: [PRISMARINE, SEA_LANTERN, SAND, GRAVEL]
+  earth:
+    damage: 2.5
+    pvp_damage_cap: 8.0
+    palette: [STONE, DIRT, GRASS_BLOCK, COBBLESTONE, MOSS_BLOCK]
+  air:
+    damage: 1.5
+    pvp_damage_cap: 5.0
+    palette: [WHITE_WOOL, QUARTZ_BLOCK, GLASS]
+  dark:
+    damage: 2.5
+    pvp_damage_cap: 8.0
+    palette: [SCULK, DEEPSLATE, SOUL_SOIL, OBSIDIAN]
+  light:
+    damage: 2.0
+    pvp_damage_cap: 6.0
+    palette: [QUARTZ_BLOCK, GLOWSTONE, SEA_LANTERN, WHITE_CONCRETE]
